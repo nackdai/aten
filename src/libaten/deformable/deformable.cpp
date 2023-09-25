@@ -123,20 +123,20 @@ namespace aten
         m_mesh.render(ctxt, m_sklController, &helper);
     }
 
-    void deformable::update(const mat4& mtxL2W)
+    void deformable::update(const mat4& mtx_L2W)
     {
-        m_sklController.buildPose(mtxL2W);
+        m_sklController.buildPose(mtx_L2W);
     }
 
     void deformable::update(
-        const mat4& mtxL2W,
+        const mat4& mtx_L2W,
         real time,
         DeformAnimation* anm)
     {
         if (anm) {
             anm->applyAnimation(&m_sklController, time);
         }
-        m_sklController.buildPose(mtxL2W);
+        m_sklController.buildPose(mtx_L2W);
     }
 
     void deformable::getGeometryData(
@@ -178,12 +178,12 @@ namespace aten
         virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) override final
         {
             AT_ASSERT(isGPUSkinning)
-            func(mtxL2W, mtxPrevL2W, objid, triOffset + globalTriOffset);
+            func(mtx_L2W, mtx_prev_L2W, objid, triOffset + globalTriOffset);
         }
 
         aten::hitable::FuncPreDraw func;
-        aten::mat4 mtxL2W;
-        aten::mat4 mtxPrevL2W;
+        aten::mat4 mtx_L2W;
+        aten::mat4 mtx_prev_L2W;
         int32_t objid;
         uint32_t globalTriOffset;
     };
@@ -191,8 +191,8 @@ namespace aten
     void deformable::render(
         aten::hitable::FuncPreDraw func,
         const context& ctxt,
-        const aten::mat4& mtxL2W,
-        const aten::mat4& mtxPrevL2W,
+        const aten::mat4& mtx_L2W,
+        const aten::mat4& mtx_prev_L2W,
         int32_t parentId,
         uint32_t triOffset)
     {
@@ -201,8 +201,8 @@ namespace aten
         DeformMeshRenderHelperEx helper;
         {
             helper.func = func;
-            helper.mtxL2W = mtxL2W;
-            helper.mtxPrevL2W = mtxPrevL2W;
+            helper.mtx_L2W = mtx_L2W;
+            helper.mtx_prev_L2W = mtx_prev_L2W;
             helper.objid = objid;
             helper.globalTriOffset = triOffset;
         }
@@ -257,24 +257,24 @@ namespace aten
             camparam.znear = real(0.1);
             camparam.zfar = real(10000.0);
 
-            mat4 mtxW2V;
-            mat4 mtxV2C;
+            mat4 mtx_W2V;
+            mat4 mtx_V2C;
 
-            mtxW2V.lookat(
+            mtx_W2V.lookat(
                 camparam.origin,
                 camparam.center,
                 camparam.up);
 
-            mtxV2C.perspective(
+            mtx_V2C.perspective(
                 camparam.znear,
                 camparam.zfar,
                 camparam.vfov,
                 camparam.aspect);
 
-            aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+            aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-            auto hMtxW2C = m_shd.getHandle("mtxW2C");
-            CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtxW2C.a[0]));
+            auto hMtxW2C = m_shd.getHandle("mtx_W2C");
+            CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
             // NOTE
             // グローバルマトリクス計算時にルートに local to world マトリクスは乗算済み.

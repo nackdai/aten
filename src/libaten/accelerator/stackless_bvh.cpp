@@ -74,7 +74,7 @@ namespace aten {
         bvhnode* root,
         bvhnode* parentNode,
         hitable* nestParent,
-        const aten::mat4& mtxL2W,
+        const aten::mat4& mtx_L2W,
         std::vector<StacklessBvhNodeEntry>& listBvhNode,
         std::vector<accelerator*>& listBvh,
         std::map<hitable*, accelerator*>& nestedBvhMap)
@@ -83,7 +83,7 @@ namespace aten {
             root,
             parentNode,
             nestParent,
-            mtxL2W,
+            mtx_L2W,
             listBvhNode,
             listBvh,
             nestedBvhMap,
@@ -119,7 +119,7 @@ namespace aten {
             // Differ set hit/miss index.
 
             auto bbox = node->getBoundingbox();
-            bbox = aten::aabb::transform(bbox, entry.mtxL2W);
+            bbox = aten::aabb::transform(bbox, entry.mtx_L2W);
 
             // Parent id.
             auto parent = node->getParent();
@@ -247,9 +247,9 @@ namespace aten {
                     aten::ray transformedRay;
 
                     if (mtx_id >= 0) {
-                        const auto& mtxW2L = ctxt.GetMatrix(mtx_id);
+                        const auto& mtx_W2L = ctxt.GetMatrix(mtx_id);
 
-                        transformedRay = mtxW2L.applyRay(r);
+                        transformedRay = mtx_W2L.applyRay(r);
                     }
                     else {
                         transformedRay = r;

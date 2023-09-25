@@ -84,26 +84,26 @@ namespace aten
         camparam.znear = real(0.1);
         camparam.zfar = real(10000.0);
 
-        mat4 mtxW2V;
-        mat4 mtxV2C;
+        mat4 mtx_W2V;
+        mat4 mtx_V2C;
 
-        mtxW2V.lookat(
+        mtx_W2V.lookat(
             camparam.origin,
             camparam.center,
             camparam.up);
 
-        mtxV2C.perspective(
+        mtx_V2C.perspective(
             camparam.znear,
             camparam.zfar,
             camparam.vfov,
             camparam.aspect);
 
-        aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+        aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
         m_shader.prepareRender(nullptr, false);
 
-        auto hMtxW2C = m_shader.getHandle("mtxW2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtxW2C.a[0]));
+        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
     }
 
     void RasterizeRenderer::drawSceneForGBuffer(
@@ -123,21 +123,21 @@ namespace aten
         camparam.znear = real(0.1);
         camparam.zfar = real(10000.0);
 
-        mat4 mtxW2V;
-        mat4 mtxV2C;
+        mat4 mtx_W2V;
+        mat4 mtx_V2C;
 
-        mtxW2V.lookat(
+        mtx_W2V.lookat(
             camparam.origin,
             camparam.center,
             camparam.up);
 
-        mtxV2C.perspective(
+        mtx_V2C.perspective(
             camparam.znear,
             camparam.zfar,
             camparam.vfov,
             camparam.aspect);
 
-        aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+        aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
         // TODO
         // For TAA.
@@ -155,18 +155,18 @@ namespace aten
                 smpl.y / m_height,
                 real(0)));
 
-            mtxW2C = mtxOffset * mtxW2C;
+            mtx_W2C = mtxOffset * mtx_W2C;
         }
 
         if (m_mtxPrevW2C.isIdentity())
         {
-            m_mtxPrevW2C = mtxW2C;
+            m_mtxPrevW2C = mtx_W2C;
         }
 
         m_shader.prepareRender(nullptr, false);
 
-        auto hMtxW2C = m_shader.getHandle("mtxW2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtxW2C.a[0]));
+        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
 
         auto hPrevMtxW2C = m_shader.getHandle("mtxPrevW2C");
         CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, (const GLfloat *)&m_mtxPrevW2C.a[0]));
@@ -192,13 +192,13 @@ namespace aten
         ctxt.build();
 
         // For object (which means "not" deformable).
-        scene->render([&](const aten::mat4 &mtxL2W, const aten::mat4 &mtxPrevL2W, int32_t objid, int32_t primid)
+        scene->render([&](const aten::mat4 &mtx_L2W, const aten::mat4 &mtx_prev_L2W, int32_t objid, int32_t primid)
                       {
-            auto hMtxL2W = m_shader.getHandle("mtxL2W");
-            CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxL2W.a[0]));
+            auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+            CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
 
-            auto hPrevMtxL2W = m_shader.getHandle("mtxPrevL2W");
-            CALL_GL_API(::glUniformMatrix4fv(hPrevMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxPrevL2W.a[0]));
+            auto hPrevMtxL2W = m_shader.getHandle("mtx_prev_L2W");
+            CALL_GL_API(::glUniformMatrix4fv(hPrevMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_prev_L2W.a[0]));
 
             auto hObjId = m_shader.getHandle("objid");
             CALL_GL_API(::glUniform1i(hObjId, objid));
@@ -216,19 +216,19 @@ namespace aten
         {
             exShader->prepareRender(nullptr, false);
 
-            hMtxW2C = exShader->getHandle("mtxW2C");
-            CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtxW2C.a[0]));
+            hMtxW2C = exShader->getHandle("mtx_W2C");
+            CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
 
             hPrevMtxW2C = exShader->getHandle("mtxPrevW2C");
             CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, (const GLfloat *)&m_mtxPrevW2C.a[0]));
 
-            scene->render([&](const aten::mat4 &mtxL2W, const aten::mat4 &mtxPrevL2W, int32_t objid, int32_t primid)
+            scene->render([&](const aten::mat4 &mtx_L2W, const aten::mat4 &mtx_prev_L2W, int32_t objid, int32_t primid)
                           {
-                auto hMtxL2W = exShader->getHandle("mtxL2W");
-                CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxL2W.a[0]));
+                auto hMtxL2W = exShader->getHandle("mtx_L2W");
+                CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
 
-                auto hPrevMtxL2W = exShader->getHandle("mtxPrevL2W");
-                CALL_GL_API(::glUniformMatrix4fv(hPrevMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxPrevL2W.a[0]));
+                auto hPrevMtxL2W = exShader->getHandle("mtx_prev_L2W");
+                CALL_GL_API(::glUniformMatrix4fv(hPrevMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_prev_L2W.a[0]));
 
                 auto hObjId = exShader->getHandle("objid");
                 CALL_GL_API(::glUniform1i(hObjId, objid));
@@ -245,7 +245,7 @@ namespace aten
         // Set default frame buffer.
         CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
 
-        m_mtxPrevW2C = mtxW2C;
+        m_mtxPrevW2C = mtx_W2C;
     }
 
     static const vertex boxvtx[] = {
@@ -303,12 +303,12 @@ namespace aten
     {
         prepareForDrawAABB(cam);
 
-        auto hMtxL2W = m_shader.getHandle("mtxL2W");
+        auto hMtxL2W = m_shader.getHandle("mtx_L2W");
 
-        accel->drawAABB([&](const aten::mat4 &mtxL2W)
+        accel->drawAABB([&](const aten::mat4 &mtx_L2W)
                         {
             // Draw.
-            CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxL2W.a[0]));
+            CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
             m_boxvb.draw(aten::Primitive::Lines, 0, 12); },
                         aten::mat4::Identity);
     }
@@ -319,7 +319,7 @@ namespace aten
     {
         prepareForDrawAABB(cam);
 
-        auto hMtxL2W = m_shader.getHandle("mtxL2W");
+        auto hMtxL2W = m_shader.getHandle("mtx_L2W");
 
         aten::mat4 mtxScale;
         mtxScale.asScale(bbox.size());
@@ -327,10 +327,10 @@ namespace aten
         aten::mat4 mtxTrans;
         mtxTrans.asTrans(bbox.minPos());
 
-        aten::mat4 mtxL2W = mtxTrans * mtxScale;
+        aten::mat4 mtx_L2W = mtxTrans * mtxScale;
 
         // Draw.
-        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtxL2W.a[0]));
+        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtx_L2W.a[0]));
         m_boxvb.draw(aten::Primitive::Lines, 0, 12);
     }
 
@@ -354,24 +354,24 @@ namespace aten
         camparam.znear = real(0.1);
         camparam.zfar = real(10000.0);
 
-        mat4 mtxW2V;
-        mat4 mtxV2C;
+        mat4 mtx_W2V;
+        mat4 mtx_V2C;
 
-        mtxW2V.lookat(
+        mtx_W2V.lookat(
             camparam.origin,
             camparam.center,
             camparam.up);
 
-        mtxV2C.perspective(
+        mtx_V2C.perspective(
             camparam.znear,
             camparam.zfar,
             camparam.vfov,
             camparam.aspect);
 
-        aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+        aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-        auto hMtxW2C = m_shader.getHandle("mtxW2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtxW2C.a[0]));
+        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
     }
 
     void RasterizeRenderer::drawObject(
@@ -379,7 +379,7 @@ namespace aten
         const AT_NAME::PolygonObject &obj,
         const camera *cam,
         bool isWireFrame,
-        const mat4 &mtxL2W)
+        const mat4 &mtx_L2W)
     {
         auto camparam = cam->param();
 
@@ -387,30 +387,30 @@ namespace aten
         camparam.znear = real(0.1);
         camparam.zfar = real(10000.0);
 
-        mat4 mtxW2V;
-        mat4 mtxV2C;
+        mat4 mtx_W2V;
+        mat4 mtx_V2C;
 
-        mtxW2V.lookat(
+        mtx_W2V.lookat(
             camparam.origin,
             camparam.center,
             camparam.up);
 
-        mtxV2C.perspective(
+        mtx_V2C.perspective(
             camparam.znear,
             camparam.zfar,
             camparam.vfov,
             camparam.aspect);
 
-        aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+        aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
         m_shader.prepareRender(nullptr, false);
 
         // Not modify local to world matrix...
-        auto hMtxL2W = m_shader.getHandle("mtxL2W");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtxL2W.a[0]));
+        auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtx_L2W.a[0]));
 
-        auto hMtxW2C = m_shader.getHandle("mtxW2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtxW2C.a[0]));
+        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
 
         if (isWireFrame)
         {
@@ -460,7 +460,7 @@ namespace aten
         std::function<void(FuncObjRenderer)> renderFunc,
         const camera *cam,
         bool isWireFrame,
-        const mat4 &mtxL2W /*= mat4::Identity*/)
+        const mat4 &mtx_L2W /*= mat4::Identity*/)
     {
         auto camparam = cam->param();
 
@@ -468,30 +468,30 @@ namespace aten
         camparam.znear = real(0.1);
         camparam.zfar = real(10000.0);
 
-        mat4 mtxW2V;
-        mat4 mtxV2C;
+        mat4 mtx_W2V;
+        mat4 mtx_V2C;
 
-        mtxW2V.lookat(
+        mtx_W2V.lookat(
             camparam.origin,
             camparam.center,
             camparam.up);
 
-        mtxV2C.perspective(
+        mtx_V2C.perspective(
             camparam.znear,
             camparam.zfar,
             camparam.vfov,
             camparam.aspect);
 
-        aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+        aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
         m_shader.prepareRender(nullptr, false);
 
         // Not modify local to world matrix...
-        auto hMtxL2W = m_shader.getHandle("mtxL2W");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtxL2W.a[0]));
+        auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtx_L2W.a[0]));
 
-        auto hMtxW2C = m_shader.getHandle("mtxW2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtxW2C.a[0]));
+        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
 
         if (isWireFrame)
         {
@@ -581,30 +581,30 @@ namespace aten
         camparam.znear = real(0.1);
         camparam.zfar = real(10000.0);
 
-        mat4 mtxW2V;
-        mat4 mtxV2C;
+        mat4 mtx_W2V;
+        mat4 mtx_V2C;
 
-        mtxW2V.lookat(
+        mtx_W2V.lookat(
             camparam.origin,
             camparam.center,
             camparam.up);
 
-        mtxV2C.perspective(
+        mtx_V2C.perspective(
             camparam.znear,
             camparam.zfar,
             camparam.vfov,
             camparam.aspect);
 
-        aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+        aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
         m_shader.prepareRender(nullptr, false);
 
         // Not modify local to world matrix...
-        auto hMtxL2W = m_shader.getHandle("mtxL2W");
+        auto hMtxL2W = m_shader.getHandle("mtx_L2W");
         CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mat4::Identity.a[0]));
 
-        auto hMtxW2C = m_shader.getHandle("mtxW2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtxW2C.a[0]));
+        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
 
         // Set default frame buffer.
         CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
@@ -699,26 +699,26 @@ namespace aten
         camparam.znear = real(0.1);
         camparam.zfar = real(10000.0);
 
-        mat4 mtxW2V;
-        mat4 mtxV2C;
+        mat4 mtx_W2V;
+        mat4 mtx_V2C;
 
-        mtxW2V.lookat(
+        mtx_W2V.lookat(
             camparam.origin,
             camparam.center,
             camparam.up);
 
-        mtxV2C.perspective(
+        mtx_V2C.perspective(
             camparam.znear,
             camparam.zfar,
             camparam.vfov,
             camparam.aspect);
 
-        aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+        aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
         m_shader.prepareRender(nullptr, false);
 
-        auto hMtxW2C = m_shader.getHandle("mtxW2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtxW2C.a[0]));
+        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
 
         // Set default frame buffer.
         CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
@@ -736,10 +736,10 @@ namespace aten
         ctxt.build();
 
         scene->render(
-            [&](const aten::mat4 &mtxL2W, const aten::mat4 &mtxPrevL2W, int32_t objid, int32_t primid)
+            [&](const aten::mat4 &mtx_L2W, const aten::mat4 &mtx_prev_L2W, int32_t objid, int32_t primid)
             {
-                auto hMtxL2W = m_shader.getHandle("mtxL2W");
-                CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtxL2W.a[0]));
+                auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+                CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtx_L2W.a[0]));
             },
             [](const std::shared_ptr<hitable> &target)
             {

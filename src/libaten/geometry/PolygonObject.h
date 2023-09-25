@@ -35,7 +35,7 @@ namespace AT_NAME
             const aten::ObjectParameter& obj,
             const CONTEXT& ctxt,
             const aten::ray& r,
-            const aten::mat4& mtxL2W,
+            const aten::mat4& mtx_L2W,
             aten::hitrecord& rec,
             const aten::Intersection& isect)
         {
@@ -53,8 +53,8 @@ namespace AT_NAME
 
             real scaledLen = 0;
             {
-                auto _p0 = mtxL2W.apply(p0);
-                auto _p1 = mtxL2W.apply(p1);
+                auto _p0 = mtx_L2W.apply(p0);
+                auto _p1 = mtx_L2W.apply(p1);
 
                 scaledLen = length(_p1.v - _p0.v);
             }
@@ -75,8 +75,8 @@ namespace AT_NAME
         virtual void render(
             aten::hitable::FuncPreDraw func,
             const aten::context& ctxt,
-            const aten::mat4& mtxL2W,
-            const aten::mat4& mtxPrevL2W,
+            const aten::mat4& mtx_L2W,
+            const aten::mat4& mtx_prev_L2W,
             int32_t parentId,
             uint32_t triOffset) override final;
 
@@ -86,7 +86,7 @@ namespace AT_NAME
 
         virtual void drawAABB(
             aten::hitable::FuncDrawAABB func,
-            const aten::mat4& mtxL2W) override final;
+            const aten::mat4& mtx_L2W) override final;
 
         bool exportInternalAccelTree(
             const aten::context& ctxt,
@@ -111,7 +111,7 @@ namespace AT_NAME
             aten::SamplePosNormalPdfResult* result,
             const aten::ObjectParameter& param,
             const CONTEXT& ctxt,
-            const aten::mat4& mtxL2W,
+            const aten::mat4& mtx_L2W,
             aten::sampler* sampler)
         {
             auto r = sampler->nextSample();
@@ -130,8 +130,8 @@ namespace AT_NAME
 
             real scaledLen = 0;
             {
-                auto p0 = mtxL2W.apply(v0);
-                auto p1 = mtxL2W.apply(v1);
+                auto p0 = mtx_L2W.apply(v0);
+                auto p1 = mtx_L2W.apply(v1);
 
                 scaledLen = length(p1.v - p0.v);
             }

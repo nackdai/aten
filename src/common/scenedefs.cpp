@@ -133,7 +133,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 #define DEFALT    (1)
 
 #if DEFALT
-    // —Î‹….
+    // ï¿½Î‹ï¿½.
     auto green = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(65, 20, 20),
@@ -148,7 +148,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 #endif
 
 #if DEFALT
-    // ‹¾.
+    // ï¿½ï¿½.
     auto mirror = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(27, 16.5, 47),
@@ -170,7 +170,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
 //#if DEFALT
 #if 0
-    // ƒKƒ‰ƒX.
+    // ï¿½Kï¿½ï¿½ï¿½X.
     auto glass = aten::TransformableFactory::createSphere(
         aten::vec3(77, 16.5, 78),
         16.5,
@@ -192,8 +192,8 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto obj = aten::ObjLoader::load("../../asset/suzanne/suzanne.obj", ctxt);
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
-    aten::mat4 mtxL2W;
-    mtxL2W.asRotateByY(Deg2Rad(-25));
+    aten::mat4 mtx_L2W;
+    mtx_L2W.asRotateByY(Deg2Rad(-25));
 
     aten::mat4 mtxT;
     mtxT.asTrans(aten::vec3(77, 16.5, 78));
@@ -201,9 +201,9 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     aten::mat4 mtxS;
     mtxS.asScale(10);
 
-    mtxL2W = mtxT * mtxL2W * mtxS;
+    mtx_L2W = mtxT * mtx_L2W * mtxS;
 
-    auto glass = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, obj, mtxL2W);
+    auto glass = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, obj, mtx_L2W);
 #endif
 
     scene->add(light);
@@ -374,15 +374,15 @@ void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto obj = aten::ObjLoader::load("../../asset/suzanne/suzanne.obj", ctxt);
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
-    aten::mat4 mtxL2W;
-    mtxL2W.asRotateByZ(Deg2Rad(45));
+    aten::mat4 mtx_L2W;
+    mtx_L2W.asRotateByZ(Deg2Rad(45));
 
     aten::mat4 mm;
     mm.asTrans(aten::vec3(-1, 0, 0));
 
-    mtxL2W = mtxL2W * mm;
+    mtx_L2W = mtx_L2W * mm;
 
-    auto instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, obj, mtxL2W);
+    auto instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, obj, mtx_L2W);
 
     scene->add(instance);
 }
@@ -418,7 +418,7 @@ void PointLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         r,
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
-    // —Î‹….
+    // ï¿½Î‹ï¿½.
     auto green = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(65, 20, 20),
@@ -470,7 +470,7 @@ void DirectionalLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         r,
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
-    // —Î‹….
+    // ï¿½Î‹ï¿½.
     auto green = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(65, 20, 20),
@@ -509,7 +509,7 @@ void SpotLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         r,
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
-    // —Î‹….
+    // ï¿½Î‹ï¿½.
     auto green = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(65, 20, 20),
@@ -795,7 +795,7 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     //auto tex = aten::ImageLoader::load("../../asset/earth.bmp");
 
-    // —Î‹….
+    // ï¿½Î‹ï¿½.
     auto green = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(65, 20, 20),
@@ -803,14 +803,14 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
     //createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(1, 1, 1), tex));
 
-    // ‹¾.
+    // ï¿½ï¿½.
     auto mirror = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(27, 16.5, 47),
         16.5,
         createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.99, 0.99, 0.99)));
 
-    // ƒKƒ‰ƒX.
+    // ï¿½Kï¿½ï¿½ï¿½X.
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(0.99, 0.99, 0.99);
     mtrlParam.standard.ior = 1.5;

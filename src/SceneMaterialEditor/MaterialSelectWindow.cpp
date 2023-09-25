@@ -96,15 +96,15 @@ void MaterialSelectWindow::onRun(aten::window* window)
     static blink<float> s_blinker(0.0f, 1.0f, 0.05f);
     auto t = s_blinker.update();
 
-    aten::mat4 mtxL2W;
-    //mtxL2W.asRotateByX(Deg2Rad(-90));
+    aten::mat4 mtx_L2W;
+    //mtx_L2W.asRotateByX(Deg2Rad(-90));
 
     s_rasterizer.drawObject(
         s_ctxt,
         *s_obj,
         &s_camera,
         false,
-        mtxL2W,
+        mtx_L2W,
         &s_fbo,
         [&](aten::shader& shd, const aten::vec3& color, const aten::texture* albedo, int mtrlid)
     {
@@ -297,7 +297,7 @@ std::shared_ptr<aten::object> loadObj(
     aten::ObjLoader::load(objs, objpath, s_ctxt);
 
     // NOTE
-    // ‚P‚Â‚µ‚©‚ä‚é‚³‚È‚¢.
+    // ï¿½Pï¿½Â‚ï¿½ï¿½ï¿½ï¿½ï¿½é‚³ï¿½È‚ï¿½.
     AT_ASSERT(objs.size() == 1);
 
     return objs[0];

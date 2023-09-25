@@ -117,33 +117,33 @@ void VoxelViewer::draw(
     camparam.znear = real(0.1);
     camparam.zfar = real(10000.0);
 
-    aten::mat4 mtxW2V;
-    aten::mat4 mtxV2C;
+    aten::mat4 mtx_W2V;
+    aten::mat4 mtx_V2C;
 
-    mtxW2V.lookat(
+    mtx_W2V.lookat(
         camparam.origin,
         camparam.center,
         camparam.up);
 
-    mtxV2C.perspective(
+    mtx_V2C.perspective(
         camparam.znear,
         camparam.zfar,
         camparam.vfov,
         camparam.aspect);
 
-    aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+    aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-    auto hMtxW2C = m_shader.getHandle("mtxW2C");
-    CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
+    auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+    CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtx_W2C.a[0]));
 
-    aten::mat4 mtxL2W;
+    aten::mat4 mtx_L2W;
 
-    auto hMtxL2W = m_shader.getHandle("mtxL2W");
+    auto hMtxL2W = m_shader.getHandle("mtx_L2W");
     auto hColor = m_shader.getHandle("color");
     auto hNormal = m_shader.getHandle("normal");
 
     // NOTE
-    // Box‚È‚Ì‚ÅA‚P–Ê“–‚½‚èŽOŠpŒ`‚Q‚Â‚ÅA‚U–Ê.
+    // Boxï¿½È‚Ì‚ÅAï¿½Pï¿½Ê“ï¿½ï¿½ï¿½ï¿½ï¿½Oï¿½pï¿½`ï¿½Qï¿½Â‚ÅAï¿½Uï¿½ï¿½.
     static const int32_t PrimCnt = 2 * 6;
 
     depth = (depth / aten::sbvh::VoxelDepth) * aten::sbvh::VoxelDepth;
@@ -165,7 +165,7 @@ void VoxelViewer::draw(
             mtxScale.asScale(size);
             mtxTrans.asTrans(voxel.boxmin);
 
-            mtxL2W = mtxTrans * mtxScale;
+            mtx_L2W = mtxTrans * mtxScale;
 
             aten::vec3 color(real(0));
 
@@ -175,7 +175,7 @@ void VoxelViewer::draw(
                 color = mtrl->color();
             }
 
-            CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
+            CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtx_L2W.a[0]));
             CALL_GL_API(::glUniform3f(hColor, color.x, color.y, color.z));
 
             // TODO

@@ -61,7 +61,7 @@ namespace AT_NAME
         static AT_DEVICE_API void sample_pos_and_normal(
             aten::SamplePosNormalPdfResult* result,
             const aten::ObjectParameter& param,
-            const aten::mat4& mtxL2W,
+            const aten::mat4& mtx_L2W,
             aten::sampler* sampler);
 
         static AT_DEVICE_API void sample_pos_and_normal(

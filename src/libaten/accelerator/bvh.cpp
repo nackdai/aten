@@ -576,7 +576,7 @@ namespace aten {
 
     void bvh::drawAABB(
         aten::hitable::FuncDrawAABB func,
-        const aten::mat4& mtxL2W)
+        const aten::mat4& mtx_L2W)
     {
         auto node = m_root;
 
@@ -591,7 +591,7 @@ namespace aten {
 
             stackpos -= 1;
 
-            node->drawAABB(func, mtxL2W);
+            node->drawAABB(func, mtx_L2W);
 
             auto left = node->m_left;
             auto right = node->m_right;

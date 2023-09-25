@@ -134,7 +134,7 @@ namespace aten
          */
         virtual void drawAABB(
             aten::hitable::FuncDrawAABB func,
-            const aten::mat4& mtxL2W) override final;
+            const aten::mat4& mtx_L2W) override final;
 
         /**
          * @brief Update the structure tree.

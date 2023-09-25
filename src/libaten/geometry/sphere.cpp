@@ -111,7 +111,7 @@ namespace AT_NAME
     void sphere::sample_pos_and_normal(
         aten::SamplePosNormalPdfResult* result,
         const aten::ObjectParameter& param,
-        const aten::mat4& mtxL2W,
+        const aten::mat4& mtx_L2W,
         aten::sampler* sampler)
     {
         auto r1 = sampler->nextSample();
@@ -140,8 +140,8 @@ namespace AT_NAME
         {
             auto tmp = param.sphere.center + aten::vec3(param.sphere.radius, 0, 0);
 
-            auto center = mtxL2W.apply(param.sphere.center);
-            tmp = mtxL2W.apply(tmp);
+            auto center = mtx_L2W.apply(param.sphere.center);
+            tmp = mtx_L2W.apply(tmp);
 
             auto radius = length(tmp - center);
 

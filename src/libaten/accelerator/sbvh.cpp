@@ -1020,9 +1020,9 @@ namespace aten
                     aten::ray transformedRay;
 
                     if (mtx_id >= 0) {
-                        const auto& mtxW2L = ctxt.GetMatrix(mtx_id);
+                        const auto& mtx_W2L = ctxt.GetMatrix(mtx_id);
 
-                        transformedRay = mtxW2L.applyRay(r);
+                        transformedRay = mtx_W2L.applyRay(r);
                     }
                     else {
                         transformedRay = r;
@@ -1410,11 +1410,11 @@ namespace aten
     static inline void _drawAABB(
         const aten::ThreadedSbvhNode* node,
         aten::hitable::FuncDrawAABB func,
-        const aten::mat4& mtxL2W)
+        const aten::mat4& mtx_L2W)
     {
         aabb box(node->boxmin, node->boxmax);
 
-        auto transofrmedBox = aten::aabb::transform(box, mtxL2W);
+        auto transofrmedBox = aten::aabb::transform(box, mtx_L2W);
 
         aten::mat4 mtxScale;
         mtxScale.asScale(transofrmedBox.size());
@@ -1429,7 +1429,7 @@ namespace aten
 
     void sbvh::drawAABB(
         aten::hitable::FuncDrawAABB func,
-        const aten::mat4& mtxL2W)
+        const aten::mat4& mtx_L2W)
     {
         // TODO
         //int32_t nodeListSize = m_threadedNodes.size();
@@ -1451,7 +1451,7 @@ namespace aten
 
                 stackpos -= 1;
 
-                _drawAABB(node, func, mtxL2W);
+                _drawAABB(node, func, mtx_L2W);
 
                 int32_t hit = (int32_t)node->hit;
                 int32_t miss = (int32_t)node->miss;

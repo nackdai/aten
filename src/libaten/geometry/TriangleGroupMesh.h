@@ -49,8 +49,8 @@ namespace AT_NAME
         void render(
             aten::hitable::FuncPreDraw func,
             const aten::context& ctxt,
-            const aten::mat4& mtxL2W,
-            const aten::mat4& mtxPrevL2W,
+            const aten::mat4& mtx_L2W,
+            const aten::mat4& mtx_prev_L2W,
             int32_t parentId);
 
         void draw(

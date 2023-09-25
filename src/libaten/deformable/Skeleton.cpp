@@ -38,7 +38,7 @@ namespace aten
 
     }
 
-    void SkeletonController::buildPose(const mat4& mtxL2W)
+    void SkeletonController::buildPose(const mat4& mtx_L2W)
     {
         AT_ASSERT(m_skl);
 
@@ -62,7 +62,7 @@ namespace aten
             }
             else {
                 // ルートに対しては、L2Wマトリクスを計算する.
-                mtxJoint = mtxL2W * mtxJoint;
+                mtxJoint = mtx_L2W * mtxJoint;
             }
         }
 

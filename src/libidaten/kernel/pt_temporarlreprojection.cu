@@ -25,19 +25,19 @@ inline __device__ void computePrevPos(
 {
 	// NOTE
 	// Pview = (Xview, Yview, Zview, 1)
-	// mtxV2C = W 0 0  0
+	// mtx_V2C = W 0 0  0
 	//          0 H 0  0
 	//          0 0 A  B
 	//          0 0 -1 0
-	// mtxV2C * Pview = (Xclip, Yclip, Zclip, Wclip) = (Xclip, Yclip, Zclip, Zview)
+	// mtx_V2C * Pview = (Xclip, Yclip, Zclip, Wclip) = (Xclip, Yclip, Zclip, Zview)
 	//  Wclip = Zview = depth
 	// Xscr = Xclip / Wclip = Xclip / Zview = Xclip / depth
 	// Yscr = Yclip / Wclip = Yclip / Zview = Yclip / depth
 	//
 	// Xscr * depth = Xclip
-	// Xview = mtxC2V * Xclip
+	// Xview = mtx_C2V * Xclip
 
-	const aten::mat4 mtxC2V = mtxs[0];
+	const aten::mat4 mtx_C2V = mtxs[0];
 	const aten::mat4 mtxPrevV2C = mtxs[1];
 
 	float2 uv = make_float2(ix + 0.5, iy + 0.5);
@@ -51,7 +51,7 @@ inline __device__ void computePrevPos(
 	pos.y *= centerDepth;
 
 	// Clip-space -> View-space
-	pos = mtxC2V.apply(pos);
+	pos = mtx_C2V.apply(pos);
 	pos.z = -centerDepth;
 	pos.w = 1.0;
 
@@ -412,14 +412,14 @@ namespace idaten
 		// Compute clip-view matrix.
 		if (sample == 0)
 		{
-			m_mtxV2C.perspective(
+			m_mtx_V2C.perspective(
 				m_camParam.znear,
 				m_camParam.zfar,
 				m_camParam.vfov,
 				m_camParam.aspect);
 
-			m_mtxC2V = m_mtxV2C;
-			m_mtxC2V.invert();
+			m_mtx_C2V = m_mtx_V2C;
+			m_mtx_C2V.invert();
 		}
 
 #if 1
@@ -456,7 +456,7 @@ namespace idaten
 				int prev = 1 - cur;
 
 				aten::mat4 mtxs[2] = {
-					m_mtxC2V,
+					m_mtx_C2V,
 					m_mtxPrevV2C,
 				};
 
@@ -534,7 +534,7 @@ namespace idaten
 			int prev = 1 - cur;
 
 			aten::mat4 mtxs[2] = {
-				m_mtxC2V,
+				m_mtx_C2V,
 				m_mtxPrevV2C,
 			};
 
@@ -559,7 +559,7 @@ namespace idaten
 
 		m_curAOV = 1 - m_curAOV;
 
-		m_mtxPrevV2C = m_mtxV2C;
+		m_mtxPrevV2C = m_mtx_V2C;
 
 		m_isFirstRender = false;
 	}

@@ -255,7 +255,7 @@ namespace aten {
          */
         void drawAABB(
             aten::hitable::FuncDrawAABB func,
-            const aten::mat4& mtxL2W) const;
+            const aten::mat4& mtx_L2W) const;
 
     protected:
         std::shared_ptr<bvhnode> m_left;

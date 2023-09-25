@@ -36,10 +36,10 @@ namespace aten
 
         void release();
 
-        void update(const mat4& mtxL2W);
+        void update(const mat4& mtx_L2W);
 
         void update(
-            const mat4& mtxL2W,
+            const mat4& mtx_L2W,
             real time,
             DeformAnimation* anm);
 
@@ -56,8 +56,8 @@ namespace aten
         virtual void render(
             aten::hitable::FuncPreDraw func,
             const context& ctxt,
-            const aten::mat4& mtxL2W,
-            const aten::mat4& mtxPrevL2W,
+            const aten::mat4& mtx_L2W,
+            const aten::mat4& mtx_prev_L2W,
             int32_t parentId,
             uint32_t triOffset) override final;
 

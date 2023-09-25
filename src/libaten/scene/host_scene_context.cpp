@@ -205,19 +205,19 @@ namespace aten
         std::vector<aten::mat4> dst;
         traverseTransformables([&dst](std::shared_ptr<aten::transformable>& t, aten::ObjectType type) {
             if (type == ObjectType::Instance) {
-                aten::mat4 mtxL2W, mtxW2L;
-                t->getMatrices(mtxL2W, mtxW2L);
+                aten::mat4 mtx_L2W, mtx_W2L;
+                t->getMatrices(mtx_L2W, mtx_W2L);
 
                 auto& param = t->getParam();
 
-                if (mtxL2W.isIdentity()) {
+                if (mtx_L2W.isIdentity()) {
                     param.mtx_id = -1;
                 }
                 else {
                     param.mtx_id = (int32_t)(dst.size() / 2);
 
-                    dst.push_back(mtxL2W);
-                    dst.push_back(mtxW2L);
+                    dst.push_back(mtx_L2W);
+                    dst.push_back(mtx_W2L);
                 }
             }
         });

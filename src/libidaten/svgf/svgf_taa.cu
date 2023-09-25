@@ -217,22 +217,22 @@ inline __device__ void computePrevScreenPos(
 	float centerDepth,
 	int width, int height,
 	aten::vec4* prevPos,
-	const aten::mat4 mtxC2V,
+	const aten::mat4 mtx_C2V,
 	const aten::mat4 mtxPrevV2C)
 {
 	// NOTE
 	// Pview = (Xview, Yview, Zview, 1)
-	// mtxV2C = W 0 0  0
+	// mtx_V2C = W 0 0  0
 	//          0 H 0  0
 	//          0 0 A  B
 	//          0 0 -1 0
-	// mtxV2C * Pview = (Xclip, Yclip, Zclip, Wclip) = (Xclip, Yclip, Zclip, Zview)
+	// mtx_V2C * Pview = (Xclip, Yclip, Zclip, Wclip) = (Xclip, Yclip, Zclip, Zview)
 	//  Wclip = Zview = depth
 	// Xscr = Xclip / Wclip = Xclip / Zview = Xclip / depth
 	// Yscr = Yclip / Wclip = Yclip / Zview = Yclip / depth
 	//
 	// Xscr * depth = Xclip
-	// Xview = mtxC2V * Xclip
+	// Xview = mtx_C2V * Xclip
 
 	float2 uv = make_float2(ix + 0.5, iy + 0.5);
 	uv /= make_float2(width - 1, height - 1);	// [0, 1]
@@ -245,7 +245,7 @@ inline __device__ void computePrevScreenPos(
 	pos.y *= centerDepth;
 
 	// Clip-space -> View-space
-	pos = mtxC2V.apply(pos);
+	pos = mtx_C2V.apply(pos);
 	pos.z = -centerDepth;
 	pos.w = 1.0;
 
@@ -262,7 +262,7 @@ __global__ void temporalAA(
 	idaten::SVGFPathTracing::Path* paths,
 	const idaten::SVGFPathTracing::AOV* __restrict__ curAovs,
 	const idaten::SVGFPathTracing::AOV* __restrict__ prevAovs,
-	const aten::mat4 mtxC2V,
+	const aten::mat4 mtx_C2V,
 	const aten::mat4 mtxPrevV2C,
 	float2 jitter,
 	float sinTime,
@@ -293,7 +293,7 @@ __global__ void temporalAA(
 		centerDepth,
 		width, height,
 		&prevPos,
-		mtxC2V, mtxPrevV2C);
+		mtx_C2V, mtxPrevV2C);
 
 	// [0, 1]の範囲内に入っているか.
 	bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
@@ -392,7 +392,7 @@ namespace idaten
 					m_paths.ptr(),
 					curaov.ptr(),
 					prevaov.ptr(),
-					m_mtxC2V,
+					m_mtx_C2V,
 					m_mtxPrevV2C,
 					offset[frame],
 					sintime,
@@ -405,7 +405,7 @@ namespace idaten
 					m_paths.ptr(),
 					curaov.ptr(),
 					prevaov.ptr(),
-					m_mtxC2V,
+					m_mtx_C2V,
 					m_mtxPrevV2C,
 					offset[frame],
 					sintime,

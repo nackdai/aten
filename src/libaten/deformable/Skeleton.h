@@ -64,7 +64,7 @@ namespace aten
         }
 
     public:
-        void buildPose(const mat4& mtxL2W);
+        void buildPose(const mat4& mtx_L2W);
 
         uint32_t getJointNum() const
         {

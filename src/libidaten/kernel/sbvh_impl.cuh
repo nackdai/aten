@@ -133,10 +133,10 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 
             if (attrib.z >= 0) {    // exid
                 if (s->mtx_id >= 0) {
-                    const auto& mtxW2L = ctxt->GetMatrix(s->mtx_id * 2 + 1);
-                    transformedRay.dir = mtxW2L.applyXYZ(r.dir);
+                    const auto& mtx_W2L = ctxt->GetMatrix(s->mtx_id * 2 + 1);
+                    transformedRay.dir = mtx_W2L.applyXYZ(r.dir);
                     transformedRay.dir = normalize(transformedRay.dir);
-                    transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
+                    transformedRay.org = mtx_W2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
                 }
                 else {
                     transformedRay = r;
@@ -268,10 +268,10 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
                                     //if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
                 if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, t)) {
                     if (s->mtx_id >= 0) {
-                        const auto& mtxW2L = ctxt->GetMatrix(s->mtx_id * 2 + 1);
-                        transformedRay.dir = mtxW2L.applyXYZ(r.dir);
+                        const auto& mtx_W2L = ctxt->GetMatrix(s->mtx_id * 2 + 1);
+                        transformedRay.dir = mtx_W2L.applyXYZ(r.dir);
                         transformedRay.dir = normalize(transformedRay.dir);
-                        transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
+                        transformedRay.org = mtx_W2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
                     }
                     else {
                         transformedRay = r;

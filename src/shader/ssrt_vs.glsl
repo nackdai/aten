@@ -10,17 +10,17 @@ out vec3 worldNormal;
 out vec2 vUV;
 out vec4 prevWorldPos;
 
-uniform mat4 mtxL2W;
-uniform mat4 mtxPrevL2W;
+uniform mat4 mtx_L2W;
+uniform mat4 mtx_prev_L2W;
 
 void main()
 {
-    vec4 worldPos = mtxL2W * position;
+    vec4 worldPos = mtx_L2W * position;
     gl_Position = worldPos;
 
-    prevWorldPos = mtxPrevL2W * position;
+    prevWorldPos = mtx_prev_L2W * position;
 
-    worldNormal = normalize(mtxL2W * vec4(normal, 0)).xyz;
+    worldNormal = normalize(mtx_L2W * vec4(normal, 0)).xyz;
 
     vUV = uv.xy;
 }

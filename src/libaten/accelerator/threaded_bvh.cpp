@@ -186,7 +186,7 @@ namespace aten
             // Differ set hit/miss index.
 
             auto bbox = node->getBoundingbox();
-            bbox = aten::aabb::transform(bbox, entry.mtxL2W);
+            bbox = aten::aabb::transform(bbox, entry.mtx_L2W);
 
             auto parent = node->getParent();
             int32_t parentId = parent ? parent->getTraversalOrder() : -1;
@@ -385,9 +385,9 @@ namespace aten
                     aten::ray transformedRay;
 
                     if (mtx_id >= 0) {
-                        const auto& mtxW2L = ctxt.GetMatrix(mtx_id);
+                        const auto& mtx_W2L = ctxt.GetMatrix(mtx_id);
 
-                        transformedRay = mtxW2L.applyRay(r);
+                        transformedRay = mtx_W2L.applyRay(r);
                     }
                     else {
                         transformedRay = r;
@@ -525,7 +525,7 @@ namespace aten
         int32_t order = nodes.size();
         node->setTraversalOrder(order);
 
-        mat4 mtxL2W;
+        mat4 mtx_L2W;
 
         auto item = node->getItem();
         auto idx = ctxt.findTransformableIdxFromPointer(item);
@@ -533,8 +533,8 @@ namespace aten
         if (idx >= 0) {
             auto t = ctxt.getTransformable(idx);
 
-            mat4 mtxW2L;
-            t->getMatrices(mtxL2W, mtxW2L);
+            mat4 mtx_W2L;
+            t->getMatrices(mtx_L2W, mtx_W2L);
 
             if (t->getParam().type == ObjectType::Instance) {
                 // TODO
@@ -566,7 +566,7 @@ namespace aten
             }
         }
 
-        nodes.push_back(ThreadedBvhNodeEntry(node, mtxL2W));
+        nodes.push_back(ThreadedBvhNodeEntry(node, mtx_L2W));
 
         registerBvhNodeToLinearList(ctxt, node->getLeft(), nodes);
         registerBvhNodeToLinearList(ctxt, node->getRight(), nodes);

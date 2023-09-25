@@ -72,13 +72,13 @@ namespace aten {
 
     void bvhnode::drawAABB(
         aten::hitable::FuncDrawAABB func,
-        const aten::mat4& mtxL2W) const
+        const aten::mat4& mtx_L2W) const
     {
         if (m_item && m_item->getHasObject()) {
-            m_item->drawAABB(func, mtxL2W);
+            m_item->drawAABB(func, mtx_L2W);
         }
         else {
-            auto transofrmedBox = aten::aabb::transform(m_aabb, mtxL2W);
+            auto transofrmedBox = aten::aabb::transform(m_aabb, mtx_L2W);
 
             aten::mat4 mtxScale;
             mtxScale.asScale(transofrmedBox.size());

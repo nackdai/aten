@@ -70,13 +70,13 @@ namespace aten {
 
         virtual accelerator* getInternalAccelerator();
 
-        using FuncPreDraw = std::function<void(const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int32_t parentId, int32_t basePrimId)>;
+        using FuncPreDraw = std::function<void(const aten::mat4& mtx_L2W, const aten::mat4& mtx_prev_L2W, int32_t parentId, int32_t basePrimId)>;
 
         virtual void render(
             FuncPreDraw func,
             const context& ctxt,
-            const aten::mat4& mtxL2W,
-            const aten::mat4& mtxPrevL2W,
+            const aten::mat4& mtx_L2W,
+            const aten::mat4& mtx_prev_L2W,
             int32_t parentId,
             uint32_t triOffset)
         {
@@ -88,7 +88,7 @@ namespace aten {
 
         virtual void drawAABB(
             FuncDrawAABB func,
-            const aten::mat4& mtxL2W)
+            const aten::mat4& mtx_L2W)
         {
             // For debug rendering.
             AT_ASSERT(false);

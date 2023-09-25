@@ -99,7 +99,7 @@ namespace idaten
             outputSurf);
 
         {
-            m_mtxPrevW2V = m_mtxW2V;
+            m_mtx_prev_W2V = m_mtx_W2V;
 
             pick(
                 m_pickedInfo.ix, m_pickedInfo.iy,

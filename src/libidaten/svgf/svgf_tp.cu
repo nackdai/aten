@@ -20,22 +20,22 @@ inline __device__ void computePrevScreenPos(
 {
     // NOTE
     // Pview = (Xview, Yview, Zview, 1)
-    // mtxV2C = W 0 0  0
+    // mtx_V2C = W 0 0  0
     //          0 H 0  0
     //          0 0 A  B
     //          0 0 -1 0
-    // mtxV2C * Pview = (Xclip, Yclip, Zclip, Wclip) = (Xclip, Yclip, Zclip, Zview)
+    // mtx_V2C * Pview = (Xclip, Yclip, Zclip, Wclip) = (Xclip, Yclip, Zclip, Zview)
     //  Wclip = Zview = depth
     // Xscr = Xclip / Wclip = Xclip / Zview = Xclip / depth
     // Yscr = Yclip / Wclip = Yclip / Zview = Yclip / depth
     //
     // Xscr * depth = Xclip
-    // Xview = mtxC2V * Xclip
+    // Xview = mtx_C2V * Xclip
 
-    const aten::mat4 mtxC2V = mtxs[0];
-    const aten::mat4 mtxV2W = mtxs[1];
-    const aten::mat4 mtxPrevW2V = mtxs[2];
-    const aten::mat4 mtxV2C = mtxs[3];
+    const aten::mat4 mtx_C2V = mtxs[0];
+    const aten::mat4 mtx_V2W = mtxs[1];
+    const aten::mat4 mtx_prev_W2V = mtxs[2];
+    const aten::mat4 mtx_V2C = mtxs[3];
 
     float2 uv = make_float2(ix + 0.5, iy + 0.5);
     uv /= make_float2(width - 1, height - 1);    // [0, 1]
@@ -48,15 +48,15 @@ inline __device__ void computePrevScreenPos(
     pos.y *= centerDepth;
 
     // Clip-space -> View-space
-    pos = mtxC2V.apply(pos);
+    pos = mtx_C2V.apply(pos);
     pos.z = -centerDepth;
     pos.w = 1.0;
 
-    pos = mtxV2W.apply(pos);
+    pos = mtx_V2W.apply(pos);
 
     // Reproject previous screen position.
-    pos = mtxPrevW2V.apply(pos);
-    *prevPos = mtxV2C.apply(pos);
+    pos = mtx_prev_W2V.apply(pos);
+    *prevPos = mtx_V2C.apply(pos);
     *prevPos /= prevPos->w;
 
     *prevPos = *prevPos * 0.5 + 0.5;    // [-1, 1] -> [0, 1]

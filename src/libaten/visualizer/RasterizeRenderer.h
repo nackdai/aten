@@ -88,7 +88,7 @@ namespace aten {
             const AT_NAME::PolygonObject& obj,
             const camera* cam,
             bool isWireFrame,
-            const mat4& mtxL2W = mat4::Identity);
+            const mat4& mtx_L2W = mat4::Identity);
 
         using FuncObjRenderer = std::function<void(const AT_NAME::PolygonObject&)>;
 
@@ -97,7 +97,7 @@ namespace aten {
             std::function<void(FuncObjRenderer)> renderFunc,
             const camera* cam,
             bool isWireFrame,
-            const mat4& mtxL2W = mat4::Identity);
+            const mat4& mtx_L2W = mat4::Identity);
 
         void initBuffer(
             uint32_t vtxStride,

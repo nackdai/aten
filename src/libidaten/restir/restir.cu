@@ -39,7 +39,7 @@ __global__ void shade(
     idaten::ReSTIRInfo* restir_infos,
     float4* aovNormalDepth,
     float4* aovTexclrMeshid,
-    aten::mat4 mtxW2C,
+    aten::mat4 mtx_W2C,
     int32_t width, int32_t height,
     idaten::Path paths,
     const int32_t* __restrict__ hitindices,
@@ -141,7 +141,7 @@ __global__ void shade(
 
         // World coordinate to Clip coordinate.
         aten::vec4 pos = aten::vec4(rec.p, 1);
-        pos = mtxW2C.apply(pos);
+        pos = mtx_W2C.apply(pos);
 
         aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
         aovTexclrMeshid[_idx] = make_float4(albedo.x, albedo.y, albedo.z, isect.mtrlid);
@@ -428,24 +428,24 @@ namespace idaten
         int32_t sample,
         int32_t bounce, int32_t rrBounce)
     {
-        m_mtxW2V.lookat(
+        m_mtx_W2V.lookat(
             m_cam.origin,
             m_cam.center,
             m_cam.up);
 
-        m_mtxV2C.perspective(
+        m_mtx_V2C.perspective(
             m_cam.znear,
             m_cam.zfar,
             m_cam.vfov,
             m_cam.aspect);
 
-        m_mtxC2V = m_mtxV2C;
-        m_mtxC2V.invert();
+        m_mtx_C2V = m_mtx_V2C;
+        m_mtx_C2V.invert();
 
-        m_mtxV2W = m_mtxW2V;
-        m_mtxV2W.invert();
+        m_mtx_V2W = m_mtx_W2V;
+        m_mtx_V2W.invert();
 
-        aten::mat4 mtxW2C = m_mtxV2C * m_mtxW2V;
+        aten::mat4 mtx_W2C = m_mtx_V2C * m_mtx_W2V;
 
         dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
@@ -457,7 +457,7 @@ namespace idaten
             m_restir_infos.data(),
             aov_.normal_depth().data(),
             aov_.albedo_meshid().data(),
-            mtxW2C,
+            mtx_W2C,
             width, height,
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),

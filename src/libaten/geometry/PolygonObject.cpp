@@ -93,8 +93,8 @@ namespace AT_NAME
     void PolygonObject::render(
         aten::hitable::FuncPreDraw func,
         const context& ctxt,
-        const aten::mat4& mtxL2W,
-        const aten::mat4& mtxPrevL2W,
+        const aten::mat4& mtx_L2W,
+        const aten::mat4& mtx_prev_L2W,
         int32_t parentId,
         uint32_t triOffset)
     {
@@ -104,7 +104,7 @@ namespace AT_NAME
         int32_t objid = (parentId < 0 ? id() : parentId);
 
         for (auto& s : m_shapes) {
-            s->render(func, ctxt, mtxL2W, mtxPrevL2W, objid);
+            s->render(func, ctxt, mtx_L2W, mtx_prev_L2W, objid);
         }
     }
 
@@ -119,9 +119,9 @@ namespace AT_NAME
 
     void PolygonObject::drawAABB(
         aten::hitable::FuncDrawAABB func,
-        const aten::mat4& mtxL2W)
+        const aten::mat4& mtx_L2W)
     {
-        m_accel->drawAABB(func, mtxL2W);
+        m_accel->drawAABB(func, mtx_L2W);
     }
 
     bool PolygonObject::exportInternalAccelTree(

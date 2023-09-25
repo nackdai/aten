@@ -137,8 +137,8 @@ namespace idaten
 	protected:
 		int m_curAOV{ 0 };
 
-		aten::mat4 m_mtxV2C;		// View - Clip.
-		aten::mat4 m_mtxC2V;		// Clip - View.
+		aten::mat4 m_mtx_V2C;		// View - Clip.
+		aten::mat4 m_mtx_C2V;		// Clip - View.
 		aten::mat4 m_mtxPrevV2C;	// View - Clip.
 
 		idaten::TypedCudaMemory<aten::mat4> m_mtxs;

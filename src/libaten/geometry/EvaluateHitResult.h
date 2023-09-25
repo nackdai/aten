@@ -32,9 +32,9 @@ namespace AT_NAME
             const auto& real_obj = obj.object_id >= 0 ? ctxt.GetObject(obj.object_id) : obj;
             const auto mtx_id = obj.object_id >= 0 ? obj.mtx_id : real_obj.mtx_id;
 
-            aten::mat4 mtxL2W;
+            aten::mat4 mtx_L2W;
             if (mtx_id >= 0) {
-                mtxL2W = ctxt.GetMatrix(mtx_id);
+                mtx_L2W = ctxt.GetMatrix(mtx_id);
             }
 
             if (real_obj.type == aten::ObjectType::Polygon) {
@@ -42,7 +42,7 @@ namespace AT_NAME
                     real_obj,
                     ctxt,
                     r,
-                    mtxL2W,
+                    mtx_L2W,
                     rec,
                     isect);
             }
@@ -54,8 +54,8 @@ namespace AT_NAME
             }
 
             // Transform local to world.
-            rec.p = mtxL2W.apply(rec.p);
-            rec.normal = normalize(mtxL2W.applyXYZ(rec.normal));
+            rec.p = mtx_L2W.apply(rec.p);
+            rec.normal = normalize(mtx_L2W.applyXYZ(rec.normal));
 
             rec.isVoxel = false;
         }
@@ -75,9 +75,9 @@ namespace AT_NAME
         const auto& real_obj = obj.object_id >= 0 ? ctxt.GetObject(obj.object_id) : obj;
         const auto mtx_id = obj.object_id >= 0 ? obj.mtx_id : real_obj.mtx_id;
 
-        aten::mat4 mtxL2W;
+        aten::mat4 mtx_L2W;
         if (mtx_id >= 0) {
-            mtxL2W = ctxt.GetMatrix(mtx_id);
+            mtx_L2W = ctxt.GetMatrix(mtx_id);
         }
 
         if (real_obj.type == aten::ObjectType::Polygon) {
@@ -85,11 +85,11 @@ namespace AT_NAME
                 result,
                 real_obj,
                 ctxt,
-                mtxL2W,
+                mtx_L2W,
                 sampler);
         }
         else if (real_obj.type == aten::ObjectType::Sphere) {
-            AT_NAME::sphere::sample_pos_and_normal(result, real_obj, mtxL2W, sampler);
+            AT_NAME::sphere::sample_pos_and_normal(result, real_obj, mtx_L2W, sampler);
         }
         else {
             // TODO

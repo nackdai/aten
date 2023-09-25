@@ -67,7 +67,7 @@ namespace aten
         bvhnode* root,
         bvhnode* parentNode,
         hitable* nestParent,
-        const aten::mat4& mtxL2W,
+        const aten::mat4& mtx_L2W,
         std::vector<BvhNode>& listBvhNode,
         std::vector<accelerator*>& listBvh,
         std::map<hitable*, accelerator*>& nestedBvhMap)
@@ -76,7 +76,7 @@ namespace aten
             root,
             parentNode,
             nestParent,
-            mtxL2W,
+            mtx_L2W,
             listBvhNode,
             listBvh,
             nestedBvhMap,
@@ -167,7 +167,7 @@ namespace aten
         auto nestParent = bvhNode.nestParent;
 
         auto bbox = node->getBoundingbox();
-        bbox = aten::aabb::transform(bbox, bvhNode.mtxL2W);
+        bbox = aten::aabb::transform(bbox, bvhNode.mtx_L2W);
 
 #if 0
         auto parent = node->getParent();
@@ -289,7 +289,7 @@ namespace aten
             const auto node = bvhNode.node;
 
             auto bbox = node->getBoundingbox();
-            bbox = aten::aabb::transform(bbox, bvhNode.mtxL2W);
+            bbox = aten::aabb::transform(bbox, bvhNode.mtx_L2W);
 
             const auto& bmax = bbox.maxPos();
             const auto& bmin = bbox.minPos();
@@ -586,9 +586,9 @@ namespace aten
                     aten::ray transformedRay;
 
                     if (mtx_id >= 0) {
-                        const auto& mtxW2L = m_mtxs[mtx_id * 2 + 1];
+                        const auto& mtx_W2L = m_mtxs[mtx_id * 2 + 1];
 
-                        transformedRay = mtxW2L.applyRay(r);
+                        transformedRay = mtx_W2L.applyRay(r);
                     }
                     else {
                         transformedRay = r;
@@ -646,9 +646,9 @@ namespace aten
                     aten::ray transformedRay;
 
                     if (mtx_id >= 0) {
-                        const auto& mtxW2L = ctxt.GetMatrix(mtx_id);
+                        const auto& mtx_W2L = ctxt.GetMatrix(mtx_id);
 
-                        transformedRay = mtxW2L.applyRay(r);
+                        transformedRay = mtx_W2L.applyRay(r);
                     }
                     else {
                         transformedRay = r;

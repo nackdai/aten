@@ -69,9 +69,9 @@ namespace aten
                     aten::ray transformedRay;
 
                     if (mtxid >= 0) {
-                        const auto& mtxW2L = m_mtxs[mtxid * 2 + 1];
+                        const auto& mtx_W2L = m_mtxs[mtxid * 2 + 1];
 
-                        transformedRay = mtxW2L.applyRay(r);
+                        transformedRay = mtx_W2L.applyRay(r);
                     }
                     else {
                         transformedRay = r;

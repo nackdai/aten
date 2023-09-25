@@ -15,7 +15,7 @@ __global__ void varianceEstimation(
     float4* aovMomentTemporalWeight,
     float4* aovColorVariance,
     float4* aovTexclrMeshid,
-    aten::mat4 mtxC2V,
+    aten::mat4 mtx_C2V,
     int32_t width, int32_t height,
     float cameraDistance)
 {
@@ -148,7 +148,7 @@ namespace idaten
             curaov.get<AOVBuffer::MomentTemporalWeight>().data(),
             curaov.get<AOVBuffer::ColorVariance>().data(),
             curaov.get<AOVBuffer::AlbedoMeshId>().data(),
-            m_mtxC2V,
+            m_mtx_C2V,
             width, height,
             cameraDistance);
 

@@ -16,6 +16,14 @@ EOF
   exit 1
 }
 
+CONTAINER_NAME=""
+kill_container() {
+  local contaner_name="${1}"
+  docker kill "${contaner_name}" >/dev/null 2>&1 || true
+  docker container rm "${contaner_name}" >/dev/null 2>&1 || true
+}
+trap 'kill_container ${CONTAINER_NAME}' EXIT ERR
+
 build_type="Release"
 compute_capability="75"
 docker_image=""
@@ -54,17 +62,25 @@ cmake_cmd="cmake \
   -D CUDA_TARGET_COMPUTE_CAPABILITY=${compute_capability} \
   -G Ninja .."
 
+# Treat last element of docker image name as container name.
+
+# shellcheck disable=SC2206
+parsed_image_name=(${docker_image//\// })
+# shellcheck disable=SC2206
+parsed_image_name=(${parsed_image_name[-1]//:/ })
+CONTAINER_NAME="${parsed_image_name[0]}"
+
 if "${will_export_compile_commands_json}"; then
   # Just generating compile_commands_json. So, docker container should be removed.
-  python3 ./scripts/docker_operator.py -r -i "${docker_image}" -c "mkdir -p build && cd build && ${cmake_cmd}"
+  python3 ./scripts/docker_operator.py -r -i "${docker_image}" -n "${CONTAINER_NAME}" -c "mkdir -p build && cd build && ${cmake_cmd}"
 else
   # In first running, not remove docker container for second running.
-  python3 ./scripts/docker_operator.py -i "${docker_image}" -c "mkdir -p build && cd build && ${cmake_cmd}"
+  python3 ./scripts/docker_operator.py -i "${docker_image}" -n "${CONTAINER_NAME}" -c "mkdir -p build && cd build && ${cmake_cmd}"
 fi
 
 COMPILE_COMMANDS_JSON="compile_commands.json"
 
-# Just exporting compile_commands.json.
+# Just exporting compile_commands.json, so finish here.
 if "${will_export_compile_commands_json}"; then
   if [ -e "${PWD}/build/${COMPILE_COMMANDS_JSON}" ]; then
     mv "${PWD}/build/${COMPILE_COMMANDS_JSON}" "${PWD}/${COMPILE_COMMANDS_JSON}"
@@ -76,4 +92,6 @@ if "${will_export_compile_commands_json}"; then
 fi
 
 # No need to keep docker conainer after running command. So, specify remove option.
-python3 ./scripts/docker_operator.py -r -i "${docker_image}" -c "cd build && ninja -j 4"
+python3 ./scripts/docker_operator.py -r -i "${docker_image}" -n "${CONTAINER_NAME}" -c "cd build && ninja -j 4"
+
+kill_container "${CONTAINER_NAME}"

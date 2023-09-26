@@ -109,7 +109,10 @@ async def run_process(
 
 
 async def run_docker_container(
-    docker_image: str, container_name: str, mode: DockerContainuerRunningMode, exec_command: Optional[str]
+    docker_image: str,
+    container_name: str,
+    mode: DockerContainuerRunningMode,
+    exec_command: Optional[str],
 ) -> Optional[int]:
     """Run docker container.
 
@@ -203,6 +206,7 @@ async def execute_command_in_docker_container(
     )
     return returncode
 
+
 def check_if_container_is_running(container_name: Optional[str]) -> bool:
     """Check if container is running.
 
@@ -216,7 +220,12 @@ def check_if_container_is_running(container_name: Optional[str]) -> bool:
         return False
 
     cmds = [
-        "docker", "container", "inspect", "-f", "\'{{.State.Running}}\'", container_name
+        "docker",
+        "container",
+        "inspect",
+        "-f",
+        "'{{.State.Running}}'",
+        container_name,
     ]
 
     # NOTE:
@@ -232,6 +241,7 @@ def check_if_container_is_running(container_name: Optional[str]) -> bool:
         return True
 
     return False
+
 
 async def kill_docker_container(container_name: str):
     """Kill docker container.
@@ -293,14 +303,14 @@ async def main(container_name: str):
         # Kill container forcibly.
         await kill_docker_container(container_name)
         returncode = await run_docker_container(
-            args.image, container_name, DockerContainuerRunningMode.Enter
+            args.image, container_name, DockerContainuerRunningMode.Enter, None
         )
     else:
         returncode = 0
 
         # If specified container is not running, launch docker image.
         if check_if_container_is_running(container_name):
-            print(f"Container \"{container_name}\" is already running")
+            print(f'Container "{container_name}" is already running')
             if args.command is not None:
                 # Specified container is running. So, run docker exec command.
                 returncode = await execute_command_in_docker_container(
@@ -309,7 +319,10 @@ async def main(container_name: str):
         else:
             # Execute command directily with docker run command.
             returncode = await run_docker_container(
-                args.image, container_name, DockerContainuerRunningMode.Detouch, args.command
+                args.image,
+                container_name,
+                DockerContainuerRunningMode.Detouch,
+                args.command,
             )
 
     if args.remove:

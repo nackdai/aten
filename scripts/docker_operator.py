@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import os
 import socket
+import subprocess
 import sys
 from asyncio.subprocess import Process
 from enum import Enum
@@ -108,7 +109,7 @@ async def run_process(
 
 
 async def run_docker_container(
-    docker_image: str, container_name: str, mode: DockerContainuerRunningMode
+    docker_image: str, container_name: str, mode: DockerContainuerRunningMode, exec_command: Optional[str]
 ) -> Optional[int]:
     """Run docker container.
 
@@ -116,6 +117,7 @@ async def run_docker_container(
         docker_image: Docker image.
         container_name: Docker container name.
         mode: Mode how to run docker container.
+        exec_command: String for command to execute direclty in docker container.
 
     Returns:
         Return code from docker run command as sub process.
@@ -153,7 +155,8 @@ async def run_docker_container(
         container_name,
     ]
 
-    if mode == DockerContainuerRunningMode.Detouch:
+    # If command to execute is specified, to display log, container should not be launched as detouch.
+    if mode == DockerContainuerRunningMode.Detouch and exec_command is None:
         args.append("-d")
 
     args.append(docker_image)
@@ -162,6 +165,10 @@ async def run_docker_container(
         args.append("bash")
         stdout_type = None
         stderr_type = None
+    elif exec_command is not None:
+        args.append("bash")
+        args.append("-c")
+        args.append(f"{exec_command}")
 
     returncode = await run_process("docker", args, stdout_type, stderr_type)
     return returncode
@@ -196,6 +203,35 @@ async def execute_command_in_docker_container(
     )
     return returncode
 
+def check_if_container_is_running(container_name: Optional[str]) -> bool:
+    """Check if container is running.
+
+    Args:
+        container_name: Container name to execute command.
+
+    Returns:
+        If container is running, returns True. Otherwise, returns False.
+    """
+    if container_name is None:
+        return False
+
+    cmds = [
+        "docker", "container", "inspect", "-f", "\'{{.State.Running}}\'", container_name
+    ]
+
+    # NOTE:
+    # In order to get stdout direclty, use subprocess directly.
+    proc = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result = proc.stdout.read().decode()
+    proc.communicate()
+
+    if proc.returncode != 0:
+        return False
+
+    if "true" in result:
+        return True
+
+    return False
 
 async def kill_docker_container(container_name: str):
     """Kill docker container.
@@ -219,9 +255,7 @@ async def main(container_name: str):
     # e.g.
     # python3 ./scripts/docker_operator.py -i ghcr.io/nackdai/aten/aten_dev:latest -c "pre-commit run -a" -r
     parser = argparse.ArgumentParser(description="Run clang-tidy")
-    parser.add_argument(
-        "-i", "--image", type=str, help="docker image", required=True, default=None
-    )
+    parser.add_argument("-i", "--image", type=str, help="docker image", default=None)
     parser.add_argument("-n", "--name", type=str, help="container name", default=None)
     parser.add_argument(
         "-e",
@@ -253,22 +287,29 @@ async def main(container_name: str):
         if len(elements) == 2:
             container_name = elements[-2]
 
-    if args.remove:
-        await kill_docker_container(container_name)
-
     returncode = 0
 
     if args.enter:
+        # Kill container forcibly.
+        await kill_docker_container(container_name)
         returncode = await run_docker_container(
             args.image, container_name, DockerContainuerRunningMode.Enter
         )
     else:
-        returncode = await run_docker_container(
-            args.image, container_name, DockerContainuerRunningMode.Detouch
-        )
-        if returncode is not None and returncode == 0:
-            returncode = await execute_command_in_docker_container(
-                container_name, args.command
+        returncode = 0
+
+        # If specified container is not running, launch docker image.
+        if check_if_container_is_running(container_name):
+            print(f"Container \"{container_name}\" is already running")
+            if args.command is not None:
+                # Specified container is running. So, run docker exec command.
+                returncode = await execute_command_in_docker_container(
+                    container_name, args.command
+                )
+        else:
+            # Execute command directily with docker run command.
+            returncode = await run_docker_container(
+                args.image, container_name, DockerContainuerRunningMode.Detouch, args.command
             )
 
     if args.remove:

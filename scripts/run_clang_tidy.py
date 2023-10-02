@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import pty
 import re
 import subprocess
 import sys
@@ -44,15 +43,16 @@ def is_target_file(file: str, target_files: List(str)) -> bool:
     return True if len(file_in) > 0 else False
 
 
-def exec_clang_tidy(
-    file: str, header_filter: str, will_fix: bool, will_use_subprocee=True
-):
+def exec_clang_tidy(file: str, header_filter: str, will_fix: bool) -> int:
     """Execute clang_tidy.
 
     Args:
         file: File for clagn_tidy.
         compile_options: Compile option list.
         header_filter: Header filter to be passed to clang_tidy "--header-filter" option.
+
+    Returns:
+        If clang-tidy exits properly, returns 0. Otherwise, returns non 0.
     """
     clang_tidy_cmd = ["clang-tidy-12", file]
 
@@ -62,20 +62,17 @@ def exec_clang_tidy(
     if header_filter:
         clang_tidy_cmd.append(f"--header-filter={header_filter}")
 
-    if will_use_subprocee:
-        proc = subprocess.Popen(
-            clang_tidy_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
+    proc = subprocess.Popen(
+        clang_tidy_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
 
-        # NOTE
-        # https://stackoverflow.com/questions/53196795/why-are-python-3-line-breaks-n-not-working-with-print-and-subprocess-popen-stdo
-        print(proc.stdout.read().decode())
+    # NOTE
+    # https://stackoverflow.com/questions/53196795/why-are-python-3-line-breaks-n-not-working-with-print-and-subprocess-popen-stdo
+    print(proc.stdout.read().decode())
 
-        proc.communicate()
-    else:
-        # NOTE
-        # https://stackoverflow.com/questions/21442360/issuing-commands-to-psuedo-shells-pty
-        pty.spawn(clang_tidy_cmd)
+    proc.communicate()
+
+    return proc.returncode
 
 
 def exec_clang_tidy_by_compile_commands_json(
@@ -83,6 +80,7 @@ def exec_clang_tidy_by_compile_commands_json(
     ignore_words: str,
     header_filter: str,
     will_fix: bool,
+    fail_fast: bool,
     target_files: List[str],
 ):
     """Execute clang_tidy based on compile_commands.json file.
@@ -91,6 +89,8 @@ def exec_clang_tidy_by_compile_commands_json(
         compile_commands_json: Path to compile_commands.json file.
         ignore_word_list: Word list to be ignored.
         header_filter: Header filter to be passed to clang_tidy "--header-filter" option.
+        will_fix: If the error happens, the error is fixed.
+        fail_fast: If the error happens, stop and fail immediately.
         target_file: Target file. If this is specified, execute clang_tidy for only target file.
     """
     with open(compile_commands_json, mode="r") as f:
@@ -108,7 +108,9 @@ def exec_clang_tidy_by_compile_commands_json(
             is_target = is_target_file(file, target_files)
 
             if is_target:
-                exec_clang_tidy(file, header_filter, will_fix)
+                result = exec_clang_tidy(file, header_filter, will_fix)
+                if result != 0 and fail_fast:
+                    return
 
 
 def main():
@@ -136,6 +138,7 @@ def main():
         default=[],
     )
     parser.add_argument("-f", "--fix", action="store_true", help="", default=False)
+    parser.add_argument("--fail_fast", action="store_true", help="", default=False)
     args = parser.parse_args()
 
     # Compile ignore words.
@@ -159,6 +162,7 @@ def main():
             ignore_words=ignore_words,
             header_filter=args.header_filter,
             will_fix=args.fix,
+            fail_fast=args.fail_fast,
             target_files=args.target_files,
         )
     except KeyboardInterrupt:

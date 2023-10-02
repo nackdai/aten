@@ -11,7 +11,8 @@ Options:
   -h <header_filter>   : Header filter. If nothing is specified, "src" is specified.
   -g <commit> <commit> : Specify git diff files as clang-tidy target files.
   -f                   : Fix code.
-ex) $0 -d aten_dev:latest -g -h ${PWD}/src
+  --fail_fast          : If the error happens, stop immediately
+ex) $0 -d aten_dev:latest -g -h ${PWD}/src -fail_fast
 EOF
   exit 1
 }
@@ -23,15 +24,27 @@ kill_container() {
   docker container rm "${contaner_name}" >/dev/null 2>&1 || true
 }
 
-trap 'kill_container ${CONTAINER_NAME}' EXIT ERR
+#trap 'kill_container ${CONTAINER_NAME}' EXIT ERR
 
 docker_image=""
 header_filter="${PWD}/src"
 will_fix=false
+fail_fast=false
 declare -a git_diff_commits=()
 
-while getopts "d:h:gf" opt; do
+# NOTE:
+# Long option
+# https://qiita.com/akameco/items/0e932d8ec372b87ccb34
+
+while getopts "d:h:gf-:" opt; do
   case "${opt}" in
+    -)
+      case "${OPTARG}" in
+        fail_fast)
+          fail_fast=true
+          ;;
+      esac
+      ;;
     d)
       docker_image="${OPTARG}"
       ;;
@@ -105,6 +118,11 @@ if "${will_fix}"; then
   fix_option="-f"
 fi
 
+fail_fast_option=""
+if "${fail_fast}"; then
+  fail_fast_option="--fail_fast"
+fi
+
 # Treat last element of docker image name as container name.
 
 # shellcheck disable=SC2206
@@ -117,5 +135,13 @@ CONTAINER_NAME="${parsed_image_name[0]}"
 # It seems that python3 ./scripts/run_clang_tidy.py via docker exec can't work in python subprocess.
 # So, run docker exec separately here.
 python3 ./scripts/docker_operator.py -i "${docker_image}" -n "${CONTAINER_NAME}"
-docker exec "${CONTAINER_NAME}" bash -c "python3 ./scripts/run_clang_tidy.py -i ${IGNORE_WORDS[*]} --header_filter ${header_filter} ${fix_option} ${target_files[*]}"
+
+docker exec "${CONTAINER_NAME}" bash -c \
+  "python3 ./scripts/run_clang_tidy.py \
+    -i ${IGNORE_WORDS[*]} \
+    --header_filter ${header_filter} \
+    ${fix_option} \
+    ${fail_fast_option} \
+    ${target_files[*]}"
+
 kill_container "${CONTAINER_NAME}"

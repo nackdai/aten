@@ -12,7 +12,7 @@ Options:
   -g <commit> <commit> : Specify git diff files as clang-tidy target files.
   -f                   : Fix code.
   --fail_fast          : If the error happens, stop immediately
-ex) $0 -d aten_dev:latest -g -h ${PWD}/src -fail_fast
+ex) $0 -d aten_dev:latest -g -h ${PWD}/src --fail_fast
 EOF
   exit 1
 }

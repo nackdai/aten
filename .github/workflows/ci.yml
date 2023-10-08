@@ -39,7 +39,7 @@ jobs:
           echo "diff_files=${diff_files[@]}" >> $GITHUB_OUTPUT
 
       - name: Check diff files
-        if: contains(steps.getfile.outputs.diff_files, 'env/') == false
+        if: contains(steps.getfile.outputs.diff_files, 'docker/') == false
         run: |
           echo "Nothing to build docker image"
           exit 0
@@ -54,7 +54,7 @@ jobs:
       - name: Check docker image build time
         run: |
           docker pull ghcr.io/${{ github.repository }}/aten
-          file_change_date=$(TZ=UTC git log -1 --pretty="format:%cd" --date=format-local:"%Y%m%d%H%M%S" ./env/)
+          file_change_date=$(TZ=UTC git log -1 --pretty="format:%cd" --date=format-local:"%Y%m%d%H%M%S" ./docker/)
           image_build_date=$(docker inspect -f '{{ .Created }}' ghcr.io/${{ github.repository }}/aten | xargs -i date --utc --date="{}" +"%Y%m%d%H%M%S")
           echo "File [${file_change_date}] DockerImage [${image_build_date}]"
           if [[ "${file_change_date}" < "${image_build_date}" ]]; then
@@ -66,7 +66,7 @@ jobs:
       - name: Build images
         id: build_image
         run: |
-          ./env/build_docker_Image.sh -b ./env/ -p "ghcr.io/${{ github.repository }}/"
+          ./docker/build_docker_Image.sh -b ./docker/ -p "ghcr.io/${{ github.repository }}/"
 
       - name: Push images
         run: |

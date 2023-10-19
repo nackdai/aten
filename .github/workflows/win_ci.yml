@@ -1,0 +1,73 @@
+name: CI on winwows
+
+on:
+  push:
+    branches:
+      - '*'
+
+env:
+  CUDA_PATH: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.7
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci_on_windows:
+    name: ci on windows
+    # NOTE:
+    # https://stackoverflow.com/questions/71288257/visual-studio-16-2019-stopped-working-with-github-actions
+    # In order to use Visual Studio 16 2019, runner has to be windows-2019.
+    # After windows-2019, Visual Studio 16 2019 is deprecated.
+
+    # NOTE:
+    # https://github.blog/changelog/2019-10-17-github-actions-default-shell-on-windows-runners-is-changing-to-powershell/
+    # Default shell is PowerShell.
+
+    # NOTE:
+    # https://github.com/actions/runner-images/blob/main/images/win/Windows2019-Readme.md
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.3.1
+        with:
+          vs-version: 16.11
+          msbuild-architecture: x64
+
+      - name: Install CUDA
+        run: |
+          powershell -NoProfile -ExecutionPolicy Unrestricted .\scripts\install_cuda.ps1
+          if ($LastExitCode -ne 0) { exit 1 }
+
+      # NOTE:
+      # - In GHA windows runner, Visual Studio is Enterprise.
+      # - To set enviroment var:
+      #   - no quotes
+      #   - $env:GITHUB_ENV
+      #     - https://stackoverflow.com/questions/66733076/github-actions-set-environment-variable-for-windows-build-with-powershell
+      - name: Setup CUDA
+        shell: pwsh
+        run: |
+          echo "CUDA_PATH_V11_7=${{ env.CUDA_PATH }}" >> $env:GITHUB_ENV
+          Copy-Item -Path "${{ env.CUDA_PATH }}\extras\visual_studio_integration\MSBuildExtensions\*.*" -Destination "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Microsoft\VC\v160\BuildCustomizations" -Recurse
+
+      # NOTE:
+      # In GHA windows runner, Visual Studio is Enterprise.
+      - name: Build 3rdparty
+        run: |
+          cd 3rdparty
+          .\Build3rdParty.bat Release Enterprise
+
+      - name: Build
+        env:
+          TARGET: Build
+          CONFIG: Release
+          PLATFORM: x64
+        run: |
+          msbuild .\vs2019\libaten.vcxproj /t:${{ env.TARGET }} /p:Configuration=${{ env.CONFIG }} /p:Platform=${{ env.PLATFORM }}
+          msbuild .\vs2019\libidaten.vcxproj /t:${{ env.TARGET }} /p:Configuration=${{ env.CONFIG }} /p:Platform=${{ env.PLATFORM }}

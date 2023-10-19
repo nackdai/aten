@@ -6,11 +6,9 @@ set BASEDIR=%~dp0
 
 cd /d %BASEDIR%
 
-call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsMSBuildCmd.bat"
-
 set TARGET=Build
-set CONFIG=%1
 
+set CONFIG=%1
 if not defined CONFIG (
     set CONFIG=Debug
 )
@@ -19,6 +17,17 @@ set PLATFORM=x64
 
 set VS="Visual Studio 16 2019"
 
+rem Path to vs tools depends on which version is installed. e.g. "BuildTools", "Community".
+set VS_TARGET=%2
+if not defined VS_TARGET (
+    set VS_TARGET=Community
+)
+
+rem Check if path to msbuild. If no, run vs tool bat file.
+where msbuild
+if not %errorlevel%==0 (
+    call "C:\Program Files (x86)\Microsoft Visual Studio\2019\%VS_TARGET%\Common7\Tools\VsMSBuildCmd.bat"
+)
 
 rem glfw =============================
 
@@ -101,16 +110,6 @@ if not exist %BUILD_DIR%\googletest-distribution.sln (
 )
 
 MSBuild %BUILD_DIR%\googletest-distribution.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
-
-rem makeitso =========================
-
-rem set BUILD_DIR=makeitso
-
-rem %MSBUILD% %BUILD_DIR%\MakeItSoLib\MakeItSoLib.csproj /t:%TARGET% /p:Configuration=Release /p:Platform=x86 || goto error
-rem %MSBUILD% %BUILD_DIR%\SolutionParser_VS2015\SolutionParser_VS2015.csproj /t:%TARGET% /p:Configuration=Release /p:Platform=x86 || goto error
-rem %MSBUILD% %BUILD_DIR%\MakeItSo\MakeItSo.csproj /t:%TARGET% /p:Configuration=Release /p:Platform=x86 || goto error
-
-rem end ==============================
 
 rem Copy files for Profile configuration ==============================
 if %CONFIG% == Release (

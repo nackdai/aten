@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef __NVCC__
-#pragma diag_suppress = esa_on_defaulted_function_ignored
+#pragma nv_diag_suppress = esa_on_defaulted_function_ignored
 #endif
 
 #include "glm/glm.hpp"
@@ -379,5 +379,5 @@ namespace aten {
 }
 
 #ifdef __NVCC__
-#pragma diag_default = esa_on_defaulted_function_ignored
+#pragma nv_diag_default = esa_on_defaulted_function_ignored
 #endif

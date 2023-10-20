@@ -88,27 +88,28 @@ git submodule update --init --recursive
 ### Windows
 
 1. Install `CUDA 11.7` and depended NVIDIA driver
-1. Run `aten/3rdparty/Build3rdParty.bat <Debug|Release>`
+1. Run `aten/3rdparty/Build3rdParty.bat <BuildConfiguration> <VisualStudio edition>`
+    * The first argument can accept `Debug`, `Release` etc.
+    * The second argument can accept `Community`, `Enterprise`, `BuildTools` etc.
+    * Default is `Release` and `Communitiy`
 1. Launch `aten/vs2019/aten.sln`
 1. Build porjects with `x64` (not support `x86`)
 
-I confirmed with Visual Studio 2019 on Windows10.
-
-Supoort just only `CUDA 11.7.0`.
+The confirmed environment is `Visual Studio 2019` on `Windows10`.
 
 ### Linux
 
-1. Install `CUDA 11.2.2` and depended NVIDIA driver
+1. Install `CUDA 11.7` and depended NVIDIA driver
 1. Install applications (You can find what you need in `env/aten/Dockerfile`)
     1. Install `cmake` `3.21.3` or later
-    1. Install `clang 9.0.0`
+    1. Install `clang 12`
     1. Install `ninja-build`
 1. `cd aten/build`
 1. `cp ../scripts/RunCMake.sh ./`
 1. `./RunCMake.sh <Build Type> <Compute Capability>`
 1. Run make `ninja`
 
-I confirmed on 20.04 LTS.
+The confirmed environment is `Ubuntu 20.04`.
 
 #### What is RunCMake.sh
 
@@ -134,8 +135,6 @@ If you don't specify `Comnpute Capability`, while configuring `CMakeLists.txt`,
 `get_cuda_sm.sh` run and `Comnpute Capability` is specified.
 
 ### Docker (on Linux)
-
-**Docker version is 20.10.9**
 
 You can build and run executable aten application on Docker container.
 
@@ -164,9 +163,7 @@ cp ../scripts/RunCMake.sh .
 ninja
 ```
 
-##### docker-compose
-
-**docker-compose version is v2.0.1**
+### docker-compose
 
 1. Install `Docker` and `docker-compose`
 2. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
@@ -227,10 +224,32 @@ And, run docker container via docker-compose like below:
 docker-compose -f .devcontainer/docker-compose.yml run aten
 ```
 
+#### Pull pre built docker image
+
+If you need the pre-built docker image, you can pull the docker image like the following:
+
+```shell
+docker pull ghcr.io/nackdai/aten/aten:latest
+```
+
 ## For VSCode development
 
 You can open this project on VSCode devcontainer.
-If you face on devcontainer build failure, it might be due to docker-compose version. In that case, please update docker-compose.
+If you face on devcontainer build failure, it might be due to docker-compose version. In that case, please update docker-compose.s
+
+## Helper script
+
+There is a script to help building libraries and executables. The script fully depends on docker and it works on only Linux.
+
+```shell
+./scripts/build.sh -b <build_config> -c <compute_capability -d <docker_iamge>
+```
+
+For example:
+
+```shell
+./scripts/build.sh -b Release -c 75 -d aten:latest
+```
 
 ## Gallery
 

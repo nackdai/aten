@@ -137,8 +137,15 @@ def main():
         help="Specific target file to run clang-tidy",
         default=[],
     )
-    parser.add_argument("-f", "--fix", action="store_true", help="Fix code", default=False)
-    parser.add_argument("--fail_fast", action="store_true", help="If error hapens, fails immediately", default=False)
+    parser.add_argument(
+        "-f", "--fix", action="store_true", help="Fix code", default=False
+    )
+    parser.add_argument(
+        "--fail_fast",
+        action="store_true",
+        help="If error hapens, fails immediately",
+        default=False,
+    )
     args = parser.parse_args()
 
     # Compile ignore words.

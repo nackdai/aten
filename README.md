@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD024 MD029 MD033 -->
 # aten
 
 ![CI](https://github.com/nackdai/aten/workflows/CI/badge.svg)
@@ -79,7 +80,7 @@ with dynamic direct lighting](https://research.nvidia.com/sites/default/files/pu
 ### Prepearing
 
 You also should get submodules in `3rdparty` directory.
-To do that, follow as below:
+To do that, follow like the following:
 
 ```shell
 git submodule update --init --recursive
@@ -89,9 +90,9 @@ git submodule update --init --recursive
 
 1. Install `CUDA 11.7` and depended NVIDIA driver
 1. Run `aten/3rdparty/Build3rdParty.bat <BuildConfiguration> <VisualStudio edition>`
-    * The first argument can accept `Debug`, `Release` etc.
-    * The second argument can accept `Community`, `Enterprise`, `BuildTools` etc.
-    * Default is `Release` and `Communitiy`
+    - The first argument can accept `Debug`, `Release` etc.
+    - The second argument can accept `Community`, `Enterprise`, `BuildTools` etc.
+    - Default is `Release` and `Communitiy`
 1. Launch `aten/vs2019/aten.sln`
 1. Build porjects with `x64` (not support `x86`)
 
@@ -117,14 +118,14 @@ The confirmed environment is `Ubuntu 20.04`.
 It is located in `scripts` directory. If you would like to use it.
 Copy it to the build directory you want.
 
-It needs 2 arguments as below:
+It needs 2 arguments like the followings:
 
 1. Build Type: `Debug` or `Release`
 1. Compute Capability: It depends on your GPU. But, you need to specify it
 without `.`. For example, if `Comnpute Capability` is `7.5`, please specify
 like `75`.
 
-Example to run `RunCMake.sh` is below:
+Example to run `RunCMake.sh` is the following:
 
 ```shell
 ./RunCMake.sh Release 75
@@ -202,13 +203,18 @@ Please find execution files and run them. You can find them in the directories
 in the directory which you built the applications. And the directories have
 same name as execution file.
 
-### Docker (on Linux)
+### <a name="RunOnDocker">Docker</a>
 
-If you would like to run built applications in docker, you need to ensure that
-your host can accept X forwarded connections
-`xhost +local:<Docker container name>`.
+This section works for ony Linux.
 
-And, run docker container like below:
+If you would like to run built applications in docker, you need to ensure that your host can accept
+X forwarded connections:
+
+```shell
+xhost +local:<Docker container name>`
+```
+
+And, run docker container like the following:
 
 ```shell
 docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <Image Name>:latest bash
@@ -216,9 +222,10 @@ docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtim
 
 #### docker-compose
 
-You also need to ensure your host as [Run on Docker](#Run-on-Docker).
+You also need to ensure your host accept X forwared connections.
+See [Docker in How to run](#RunOnDocker)
 
-And, run docker container via docker-compose like below:
+And, run docker container via docker-compose like the following:
 
 ```shell
 docker-compose -f .devcontainer/docker-compose.yml run aten
@@ -235,11 +242,13 @@ docker pull ghcr.io/nackdai/aten/aten:latest
 ## For VSCode development
 
 You can open this project on VSCode devcontainer.
-If you face on devcontainer build failure, it might be due to docker-compose version. In that case, please update docker-compose.s
+If you face on devcontainer build failure, it might be due to docker-compose version. In that case,
+please update docker-compose.s
 
 ## Helper script
 
-There is a script to help building libraries and executables. The script fully depends on docker and it works on only Linux.
+There is a script to help building libraries and executables. The script fully depends on docker
+and it works on only Linux.
 
 ```shell
 ./scripts/build.sh -b <build_config> -c <compute_capability -d <docker_iamge>

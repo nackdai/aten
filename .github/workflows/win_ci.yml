@@ -1,9 +1,19 @@
 name: CI on winwows
 
 on:
-  push:
+  pull_request:
     branches:
       - '*'
+    paths:
+      - 'src/**'
+      - 'vs2019/**'
+      - '3rdparty/**'
+      - 'scripts\install_cuda.ps1'
+      - '.github\workflows\win_ci.yml'
+  # NOTE: In order to reduce the number of running workflow on windows runner, suppress the following code.
+  # push:
+  #   branches:
+  #     - 'main'
 
 env:
   CUDA_PATH: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.7

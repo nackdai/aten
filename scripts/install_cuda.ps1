@@ -7,8 +7,8 @@
 # powershell -NoProfile -ExecutionPolicy Unrestricted .\install_cuda.ps1 -no_download
 
 param (
-    [switch]$no_download,   # Flag if script doesn't download.
-    [switch]$no_copy        # Flag if script doesn't copy.
+    [switch]$no_download,   # Flag if script doesn't download packages.
+    [switch]$no_copy        # Flag if script doesn't copy packages.
 )
 
 [string] $script:CUDA_VERSION = "11.7"

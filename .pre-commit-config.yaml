@@ -21,6 +21,12 @@ repos:
       - id: shellcheck
         args: [-e, SC2230]
 
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.10.0
+    hooks:
+      - id: markdownlint-cli2
+        args: [--fix]
+
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.10
     hooks:

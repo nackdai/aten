@@ -7,6 +7,7 @@
 
 #ifndef __AT_CUDA__
 #define AT_VIRTUAL(f)                   virtual f
+#define AT_VIRTUAL_OVERRIDE(f)          virtual f override
 #define AT_VIRTUAL_OVERRIDE_FINAL(f)    virtual f override final
 #define AT_INHERIT(c)    : public c
 #endif

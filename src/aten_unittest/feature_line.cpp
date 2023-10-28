@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "aten.h"
-#include "renderer/feature_line.h"
+#include "renderer/npr/feature_line.h"
 
 TEST(feature_line_test, GenerateDisc)
 {

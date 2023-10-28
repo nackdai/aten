@@ -29,14 +29,14 @@ namespace aten {
             m_scramble = scramble;
         }
 
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API real nextSample())
+        AT_VIRTUAL_OVERRIDE(AT_DEVICE_API real nextSample())
         {
             vec2 r = sample2D();
             m_dimension++;
             return r.x;
         }
 
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API vec2 nextSample2D())
+        AT_VIRTUAL_OVERRIDE(AT_DEVICE_API vec2 nextSample2D())
         {
             vec2 r = sample2D();
             m_dimension++;

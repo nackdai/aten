@@ -39,6 +39,7 @@
 #include "misc/timer.h"
 #include "misc/omputil.h"
 #include "misc/value.h"
+#include "misc/span.h"
 #include "misc/stream.h"
 #include "misc/thread.h"
 #include "misc/key.h"

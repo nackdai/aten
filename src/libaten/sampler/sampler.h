@@ -4,10 +4,12 @@
 
 #undef AT_VIRTUAL
 #undef AT_VIRTUAL_OVERRIDE_FINAL
+#undef AT_VIRTUAL_OVERRIDE
 #undef AT_INHERIT
 
 #define AT_VIRTUAL(f)                   f
 #define AT_VIRTUAL_OVERRIDE_FINAL(f)    f
+#define AT_VIRTUAL_OVERRIDE(f)          f
 #define AT_INHERIT(c)
 #endif
 

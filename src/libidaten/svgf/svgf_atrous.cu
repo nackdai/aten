@@ -56,7 +56,7 @@ inline __device__ float gaussFilter3x3(
 __global__ void atrousFilter(
     bool isFirstIter, bool isFinalIter,
     cudaSurfaceObject_t dst,
-    float4* tmpBuffer,
+    float4* temporary_color_buffer,
     const float4* __restrict__ aovNormalDepth,
     const float4* __restrict__ aovTexclrMeshid,
     const float4* __restrict__ aovColorVariance,
@@ -220,8 +220,8 @@ __global__ void atrousFilter(
     nextClrVarBuffer[idx] = make_float4(sumC.x, sumC.y, sumC.z, sumV);
 
     if (isFirstIter) {
-        // Store color temporary.
-        tmpBuffer[idx] = sumC;
+        // Store color temporarily.
+        temporary_color_buffer[idx] = sumC;
     }
 
     if (isFinalIter) {
@@ -236,7 +236,7 @@ __global__ void atrousFilter(
     }
 }
 
-__global__ void copyFromBufferToAov(
+__global__ void CopyFromTeporaryColorBufferToAov(
     const float4* __restrict__ src,
     float4* aovColorVariance,
     int32_t width, int32_t height)
@@ -300,7 +300,7 @@ namespace idaten
         atrousFilter << <grid, block, 0, m_stream >> > (
             isFirstIter, isFinalIter,
             outputSurf,
-            m_tmpBuf.data(),
+            temporary_color_buffer_.data(),
             curaov.get<AOVBuffer::NormalDepth>().data(),
             curaov.get<AOVBuffer::AlbedoMeshId>().data(),
             curaov.get<AOVBuffer::ColorVariance>().data(),
@@ -323,8 +323,8 @@ namespace idaten
         auto& curaov = aov_[curaov_idx];
 
         // Copy color from temporary buffer to AOV buffer for next temporal reprojection.
-        copyFromBufferToAov << <grid, block, 0, m_stream >> > (
-            m_tmpBuf.data(),
+        CopyFromTeporaryColorBufferToAov << <grid, block, 0, m_stream >> > (
+            temporary_color_buffer_.data(),
             curaov.get<AOVBuffer::ColorVariance>().data(),
             width, height);
         checkCudaKernel(copyFromBufferToAov);

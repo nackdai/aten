@@ -469,9 +469,6 @@
     <CudaCompile Include="..\src\libaten\geometry\sphere.cpp">
       <Filter>aten\geometry</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\svgf\svgf_tile.cu">
-      <Filter>svgf</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\LBVHBuilder.cu">
       <Filter>kernel\accelerator</Filter>
     </CudaCompile>

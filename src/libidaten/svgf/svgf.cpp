@@ -54,7 +54,7 @@ namespace idaten
             m_atrousClrVar[i].resize(width * height);
         }
 
-        m_tmpBuf.resize(width * height);
+        temporary_color_buffer_.resize(width * height);
     }
 
     void SVGFPathTracing::setGBuffer(
@@ -188,12 +188,7 @@ namespace idaten
             onDisplayAOV(outputSurf, width, height);
         }
         else {
-            if (isFirstFrame()) {
-                onGather(outputSurf, width, height, maxSamples);
-            }
-            else {
-                onCopyBufferForTile(width, height);
-            }
+            onGather(outputSurf, width, height, maxSamples);
         }
     }
 

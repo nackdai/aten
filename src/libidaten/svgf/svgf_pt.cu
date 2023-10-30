@@ -88,7 +88,7 @@ namespace svgf {
             auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
             AT_NAME::FillBasicAOVs(
-                aovNormalDepth[idx], orienting_normal, rec, mtxW2C,
+                aovNormalDepth[idx], orienting_normal, rec, mtx_W2C,
                 aovTexclrMeshid[idx], texcolor, isect);
             aovTexclrMeshid[idx].w = isect.mtrlid;
 
@@ -104,7 +104,7 @@ namespace svgf {
             // TODO
             // No good idea to compute reflected depth.
             AT_NAME::FillBasicAOVs(
-                aovNormalDepth[idx], orienting_normal, rec, mtxW2C,
+                aovNormalDepth[idx], orienting_normal, rec, mtx_W2C,
                 aovTexclrMeshid[idx], texcolor, isect);
             aovTexclrMeshid[idx].w = isect.mtrlid;
 
@@ -184,13 +184,14 @@ namespace svgf {
         shadowRays[idx] = shShadowRays[threadIdx.x];
     }
 
+    template <bool IsFirstFrameExecution>
     __global__ void gather(
         cudaSurfaceObject_t dst,
-        float4* aovColorVariance,
-        float4* aovMomentTemporalWeight,
+        int32_t width, int32_t height,
         const idaten::Path paths,
-        float4* contribs,
-        int32_t width, int32_t height)
+        float4* temporary_color_buffer,
+        float4* aovColorVariance = nullptr,
+        float4* aovMomentTemporalWeight = nullptr)
     {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -202,42 +203,32 @@ namespace svgf {
         auto idx = getIdx(ix, iy, width);
 
         float4 c = paths.contrib[idx].v;
-        int32_t sample = c.w;
 
-        float3 contrib = make_float3(c.x, c.y, c.z) / sample;
-        //contrib.w = sample;
+        if constexpr (IsFirstFrameExecution) {
+            int32_t sample = c.w;
 
-        float lum = AT_NAME::color::luminance(contrib.x, contrib.y, contrib.z);
+            float3 contrib = make_float3(c.x, c.y, c.z) / sample;
+            //contrib.w = sample;
 
-        aovMomentTemporalWeight[idx].x += lum * lum;
-        aovMomentTemporalWeight[idx].y += lum;
-        aovMomentTemporalWeight[idx].z += 1;
+            float lum = AT_NAME::color::luminance(contrib.x, contrib.y, contrib.z);
 
-        aovColorVariance[idx] = make_float4(contrib.x, contrib.y, contrib.z, aovColorVariance[idx].w);
+            aovMomentTemporalWeight[idx].x += lum * lum;
+            aovMomentTemporalWeight[idx].y += lum;
+            aovMomentTemporalWeight[idx].z += 1;
 
-        contribs[idx] = c;
+            aovColorVariance[idx] = make_float4(contrib.x, contrib.y, contrib.z, aovColorVariance[idx].w);
 
-#if 0
-        auto n = aovs[idx].moments.w;
-
-        auto m = aovs[idx].moments / n;
-
-        auto var = m.x - m.y * m.y;
-
-        surf2Dwrite(
-            make_float4(var, var, var, 1),
-            dst,
-            ix * sizeof(float4), iy,
-            cudaBoundaryModeTrap);
-#else
-        if (dst) {
-            surf2Dwrite(
-                make_float4(contrib, 0),
-                dst,
-                ix * sizeof(float4), iy,
-                cudaBoundaryModeTrap);
+            if (dst) {
+                surf2Dwrite(
+                    make_float4(contrib, 0),
+                    dst,
+                    ix * sizeof(float4), iy,
+                    cudaBoundaryModeTrap);
+            }
         }
-#endif
+
+        // In order not to chnage the values in paths for the next step, keep color in another buffer.
+        temporary_color_buffer[idx] = c;
     }
 }
 
@@ -326,13 +317,22 @@ namespace idaten
         int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
 
-        svgf::gather << <grid, block, 0, m_stream >> > (
-            outputSurf,
-            curaov.get<AOVBuffer::ColorVariance>().data(),
-            curaov.get<AOVBuffer::MomentTemporalWeight>().data(),
-            path_host_->paths,
-            m_tmpBuf.data(),
-            width, height);
+        if (isFirstFrame() || m_mode == Mode::PT) {
+            svgf::gather<true> << <grid, block, 0, m_stream >> > (
+                outputSurf,
+                width, height,
+                path_host_->paths,
+                temporary_color_buffer_.data(),
+                curaov.get<AOVBuffer::ColorVariance>().data(),
+                curaov.get<AOVBuffer::MomentTemporalWeight>().data());
+        }
+        else {
+            svgf::gather<false> << <grid, block, 0, m_stream >> > (
+                outputSurf,
+                width, height,
+                path_host_->paths,
+                temporary_color_buffer_.data());
+        }
 
         checkCudaKernel(gather);
     }

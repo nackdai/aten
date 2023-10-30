@@ -24,7 +24,8 @@ static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static std::shared_ptr<aten::envmap> g_bg;
 static std::shared_ptr<aten::texture> g_envmap;
 
-static aten::PathTracing g_tracer;
+//static aten::PathTracing g_tracer;
+static aten::SVGFRenderer g_tracer;
 
 static std::shared_ptr<aten::visualizer> g_visualizer;
 

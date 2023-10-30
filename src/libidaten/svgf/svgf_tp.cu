@@ -438,7 +438,7 @@ namespace idaten
         //temporalReprojection << <1, 1 >> > (
             m_nmlThresholdTF,
             m_depthThresholdTF,
-            m_tmpBuf.data(),
+            temporary_color_buffer_.data(),
             m_cam,
             curaov.get<AOVBuffer::NormalDepth>().data(),
             curaov.get<AOVBuffer::AlbedoMeshId>().data(),

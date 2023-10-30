@@ -279,8 +279,7 @@ namespace kernel {
             real b = data.w;
             real c = 1 - a - b;
 
-            // �d�S���W�n(barycentric coordinates).
-            // v0�.
+            // barycentric coordinates.
             // p = (1 - a - b)*v0 + a*v1 + b*v2
             auto p = c * p0 + a * p1 + b * p2;
             aten::vec4 vp(p.x, p.y, p.z, 1.0f);
@@ -322,8 +321,8 @@ namespace kernel {
             bounce,
             aten::vec3(1),
             paths,
-            aovNormalDepth,
-            aovAlbedoMeshid);
+            aten::span<std::remove_pointer_t<decltype(aovNormalDepth)>>(aovNormalDepth, width * height),
+            aten::span<std::remove_pointer_t<decltype(aovAlbedoMeshid)>>(aovAlbedoMeshid, width * height));
     }
 
     __global__ void shadeMissWithEnvmap(
@@ -358,8 +357,8 @@ namespace kernel {
             envmap_multiplyer,
             ctxt, camera,
             paths, rays[idx],
-            aovNormalDepth,
-            aovAlbedoMeshid);
+            aten::span<std::remove_pointer_t<decltype(aovNormalDepth)>>(aovNormalDepth, width * height),
+            aten::span<std::remove_pointer_t<decltype(aovAlbedoMeshid)>>(aovAlbedoMeshid, width * height));
     }
 }
 }

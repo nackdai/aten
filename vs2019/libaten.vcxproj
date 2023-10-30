@@ -359,6 +359,7 @@
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pt_params.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf.h" />
+    <ClInclude Include="..\src\libaten\renderer\svgf\svgf_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf_types.h" />
     <ClInclude Include="..\src\libaten\sampler\bluenoiseSampler.h" />
     <ClInclude Include="..\src\libaten\sampler\cmj.h" />

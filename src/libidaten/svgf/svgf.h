@@ -226,8 +226,6 @@ namespace idaten
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height);
 
-        void onCopyBufferForTile(int32_t width, int32_t height);
-
         void pick(
             int32_t ix, int32_t iy,
             int32_t width, int32_t height);
@@ -280,7 +278,7 @@ namespace idaten
         // For A-trous wavelet.
         idaten::TypedCudaMemory<float4> m_atrousClrVar[2];
 
-        idaten::TypedCudaMemory<float4> m_tmpBuf;
+        idaten::TypedCudaMemory<float4> temporary_color_buffer_;
 
         // G-Buffer rendered by OpenGL.
         idaten::CudaGLSurface m_gbuffer;

@@ -7,6 +7,7 @@
 #include "light/light_impl.h"
 #include "math/ray.h"
 #include "material/material.h"
+#include "misc/type_traits.h"
 #include "renderer/aov.h"
 #include "scene/scene.h"
 
@@ -80,14 +81,48 @@ namespace AT_NAME
             }
         }
 
+        // NOTE:
+        // If template type A doesn't have the member variable "w", we can deal with it as vector 3 type.
+        // Otherwise, we can deal with it as vector 4 type.
+
+        template <typename T>
+        using HasMemberWOp = decltype(std::declval<T>().w);
+
         template <typename A, typename B>
-        inline AT_DEVICE_MTRL_API void CopyVec3(A& dst, const B& src)
+        inline AT_DEVICE_MTRL_API auto CopyVec(A& dst, const B& src)
+            -> std::enable_if_t<!aten::is_detected<HasMemberWOp, A>::value, void>
         {
             if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec3>) {
                 dst = src;
             }
             else {
                 dst = make_float3(src.x, src.y, src.z);
+            }
+        }
+
+        template <typename A, typename B>
+        inline AT_DEVICE_MTRL_API auto CopyVec(A& dst, const B& src)
+            -> std::enable_if_t<aten::is_detected<HasMemberWOp, A>::value, void>
+        {
+            if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec4>) {
+                dst = src;
+            }
+            else {
+                dst = make_float4(src.x, src.y, src.z, src.w);
+            }
+        }
+
+        template <typename A>
+        inline AT_DEVICE_MTRL_API void MakeVec4(A& dst, real x, real y, real z, real w)
+        {
+            if constexpr (std::is_same_v<A, aten::vec4>) {
+                dst.x = x;
+                dst.y = y;
+                dst.z = z;
+                dst.w = w;
+            }
+            else {
+                dst = make_float4(x, y, z, w);
             }
         }
     }

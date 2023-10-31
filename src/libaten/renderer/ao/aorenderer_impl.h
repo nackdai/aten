@@ -91,7 +91,7 @@ namespace AT_NAME
         }
 
         ao_color /= ao_num_rays;
-        _detail::CopyVec3(paths.contrib[idx].contrib, ao_color);
+        _detail::CopyVec(paths.contrib[idx].contrib, ao_color);
     }
 
     inline AT_DEVICE_MTRL_API void ShadeMissAO(
@@ -104,7 +104,7 @@ namespace AT_NAME
                 paths.attrib[idx].isKill = true;
             }
 
-            _detail::CopyVec3(paths.contrib[idx].contrib, aten::vec3(1));
+            _detail::CopyVec(paths.contrib[idx].contrib, aten::vec3(1));
 
             paths.attrib[idx].isTerminate = true;
         }

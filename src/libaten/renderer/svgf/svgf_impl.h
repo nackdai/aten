@@ -5,8 +5,8 @@
 #include "misc/span.h"
 #include "renderer/pathtracing/pathtracing_impl.h"
 
-namespace AT_NAME
-{
+namespace AT_NAME {
+namespace svgf {
     namespace _detail
     {
         template <bool NeedCheckSingularMtrlBounce>
@@ -59,4 +59,37 @@ namespace AT_NAME
 
         return false;
     }
-}
+
+    template <bool IsFirstFrameExecution, typename AOV_BUFFER_TYPE = aten::vec4>
+    inline AT_DEVICE_MTRL_API AOV_BUFFER_TYPE PrepareForDenoise(
+        const int32_t idx,
+        const AT_NAME::Path& paths,
+        aten::span<AOV_BUFFER_TYPE> temporary_color_buffer,
+        aten::span<AOV_BUFFER_TYPE> aov_color_variance = nullptr,
+        aten::span<AOV_BUFFER_TYPE> aov_moment_temporalweight = nullptr)
+    {
+        const auto& c = paths.contrib[idx].v;
+
+        AOV_BUFFER_TYPE contrib;
+        AT_NAME::_detail::CopyVec(contrib, c);
+        contrib /= c.w; // w is number of sample.
+
+        if constexpr (IsFirstFrameExecution) {
+            float lum = AT_NAME::color::luminance(contrib.x, contrib.y, contrib.z);
+
+            aov_moment_temporalweight[idx].x += lum * lum;
+            aov_moment_temporalweight[idx].y += lum;
+            aov_moment_temporalweight[idx].z += 1;
+
+            AT_NAME::_detail::MakeVec4(
+                aov_color_variance[idx],
+                contrib.x, contrib.y, contrib.z, aov_color_variance[idx].w);
+        }
+
+        // In order not to chnage the values in paths for the next step, keep color in another buffer.
+        temporary_color_buffer[idx] = c;
+
+        return contrib;
+    }
+}   // namespace svgf
+}   // namespace AT_NAME

@@ -14,8 +14,9 @@
 
 #include "aten4idaten.h"
 #include "renderer/pathtracing/pathtracing_impl.h"
+#include "renderer/svgf/svgf_impl.h"
 
-namespace svgf {
+namespace svgf_kernel {
     __global__ void shade(
         float4* aovNormalDepth,
         float4* aovTexclrMeshid,
@@ -190,8 +191,8 @@ namespace svgf {
         int32_t width, int32_t height,
         const idaten::Path paths,
         float4* temporary_color_buffer,
-        float4* aovColorVariance = nullptr,
-        float4* aovMomentTemporalWeight = nullptr)
+        float4* aov_color_variance = nullptr,
+        float4* aov_moment_temporalweight = nullptr)
     {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -202,33 +203,26 @@ namespace svgf {
 
         auto idx = getIdx(ix, iy, width);
 
-        float4 c = paths.contrib[idx].v;
+        const size_t size = static_cast<size_t>(width * height);
+        using BufferType = std::remove_pointer_t<decltype(aov_color_variance)>;
 
-        if constexpr (IsFirstFrameExecution) {
-            int32_t sample = c.w;
+        auto contrib = AT_NAME::svgf::PrepareForDenoise<IsFirstFrameExecution, BufferType>(
+            idx,
+            paths,
+            aten::span<BufferType>(temporary_color_buffer, size),
+            aten::span<BufferType>(aov_color_variance, size),
+            aten::span<BufferType>(aov_moment_temporalweight, size));
 
-            float3 contrib = make_float3(c.x, c.y, c.z) / sample;
-            //contrib.w = sample;
-
-            float lum = AT_NAME::color::luminance(contrib.x, contrib.y, contrib.z);
-
-            aovMomentTemporalWeight[idx].x += lum * lum;
-            aovMomentTemporalWeight[idx].y += lum;
-            aovMomentTemporalWeight[idx].z += 1;
-
-            aovColorVariance[idx] = make_float4(contrib.x, contrib.y, contrib.z, aovColorVariance[idx].w);
-
+        if (IsFirstFrameExecution) {
             if (dst) {
+                contrib.w = 0;
                 surf2Dwrite(
-                    make_float4(contrib, 0),
+                    contrib,
                     dst,
                     ix * sizeof(float4), iy,
                     cudaBoundaryModeTrap);
             }
         }
-
-        // In order not to chnage the values in paths for the next step, keep color in another buffer.
-        temporary_color_buffer[idx] = c;
     }
 }
 
@@ -283,7 +277,7 @@ namespace idaten
         int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
 
-        svgf::shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
+        svgf_kernel::shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             curaov.get<AOVBuffer::NormalDepth>().data(),
             curaov.get<AOVBuffer::AlbedoMeshId>().data(),
             mtx_W2C,
@@ -318,7 +312,7 @@ namespace idaten
         auto& curaov = aov_[curaov_idx];
 
         if (isFirstFrame() || m_mode == Mode::PT) {
-            svgf::gather<true> << <grid, block, 0, m_stream >> > (
+            svgf_kernel::gather<true> << <grid, block, 0, m_stream >> > (
                 outputSurf,
                 width, height,
                 path_host_->paths,
@@ -327,7 +321,7 @@ namespace idaten
                 curaov.get<AOVBuffer::MomentTemporalWeight>().data());
         }
         else {
-            svgf::gather<false> << <grid, block, 0, m_stream >> > (
+            svgf_kernel::gather<false> << <grid, block, 0, m_stream >> > (
                 outputSurf,
                 width, height,
                 path_host_->paths,

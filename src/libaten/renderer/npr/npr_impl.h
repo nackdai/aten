@@ -51,7 +51,7 @@ namespace AT_NAME
         const auto weight = _detail::ComputeBalanceHeuristic(pdfb, pdf_feature_line);
         const auto contrib = paths.throughput[idx].throughput * weight * line_color;
 
-        _detail::CopyVec3(paths.contrib[idx].contrib, contrib);
+        _detail::CopyVec(paths.contrib[idx].contrib, contrib);
 
         // Line is treated as light. So, query path need to be killed and termnated not to bounce anymore.
         paths.attrib[idx].isKill = true;

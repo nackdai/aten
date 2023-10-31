@@ -24,7 +24,7 @@ namespace AT_NAME
         AT_DEVICE_API SVGFAovMode(int32_t type) : AT_NAME::AOVType(static_cast<Type>(type)) {}
     };
 
-    struct SVGFAovBuffer : public AT_NAME::AOVBufferType {
+    struct SVGFAovBufferType : public AT_NAME::AOVBufferType {
         enum Type {
             ColorVariance = AT_NAME::AOVBufferType::BeginOfInheritType,
             MomentTemporalWeight,
@@ -33,9 +33,9 @@ namespace AT_NAME
 
         static constexpr size_t Num = static_cast<size_t>(Type::end_of_AOVBuffer) + 1;
 
-        AT_DEVICE_API SVGFAovBuffer() = default;
-        AT_DEVICE_API ~SVGFAovBuffer() = default;
-        AT_DEVICE_API SVGFAovBuffer(int32_t type) : AT_NAME::AOVBufferType(static_cast<Type>(type)) {}
+        AT_DEVICE_API SVGFAovBufferType() = default;
+        AT_DEVICE_API ~SVGFAovBufferType() = default;
+        AT_DEVICE_API SVGFAovBufferType(int32_t type) : AT_NAME::AOVBufferType(static_cast<Type>(type)) {}
     };
 
     struct SVGFMtxPack {
@@ -64,10 +64,13 @@ namespace AT_NAME
 
     template <typename BufferContainer>
     struct SVGFParams {
+        using buffer_container_type = BufferContainer;
+        using buffer_value_type = typename buffer_container_type::value_type;
+
         // Current AOV buffer position.
         int32_t cur_aov_pos{ 0 };
 
-        using AOVHostBuffer = AT_NAME::AOVHostBuffer<BufferContainer, SVGFAovBuffer::Num>;
+        using AOVHostBuffer = AT_NAME::AOVHostBuffer<BufferContainer, SVGFAovBufferType::Num>;
         std::array<AOVHostBuffer, 2> aovs;  // AOV buffer. Current frame and previous frame.
 
         AOVHostBuffer& GetCurAovBuffer()
@@ -80,7 +83,7 @@ namespace AT_NAME
             cur_aov_pos = 1 - cur_aov_pos;
         }
 
-        void InitAovBuffer(int32_t width, int32_t height)
+        void InitBuffers(int32_t width, int32_t height)
         {
             for (auto& aov : aovs) {
                 aov.traverse(
@@ -91,12 +94,14 @@ namespace AT_NAME
                         }
                     });
             }
+
+            temporary_color_buffer.resize(width * height);
         }
 
         // For A-trous wavelet.
         std::array<BufferContainer, 2> atrous_clr_variance;
 
-        BufferContainer tmp_buf;
+        BufferContainer temporary_color_buffer;
 
         int32_t atrous_iter_cnt{ 5 };
 

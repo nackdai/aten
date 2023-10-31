@@ -140,7 +140,7 @@ namespace aten
             return;
         }
 
-        AT_NAME::FillAOVs<true, true, true>(
+        AT_NAME::svgf::FillAOVs<true, true, true>(
             idx, bounce,
             paths, rec, isect,
             mtxs.GetW2C(),
@@ -231,7 +231,7 @@ namespace aten
         }
         path_host_.init(width, height);
 
-        params_.InitAovBuffer(width, height);
+        params_.InitBuffers(width, height);
         params_.mtxs.Reset(camera.param());
 
         for (auto& attrib : path_host_.attrib) {
@@ -303,6 +303,23 @@ namespace aten
                         if (isInvalidColor(path_host_.paths.contrib[idx].contrib)) {
                             AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);
                             continue;
+                        }
+
+                        auto& aov = params_.GetCurAovBuffer();
+
+                        if (get_frame_count() == 0) {
+                            AT_NAME::svgf::PrepareForDenoise<true>(
+                                idx,
+                                path_host_.paths,
+                                aten::span<decltype(params_)::buffer_value_type>(params_.temporary_color_buffer),
+                                aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>(),
+                                aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>());
+                        }
+                        else {
+                            AT_NAME::svgf::PrepareForDenoise<false>(
+                                idx,
+                                path_host_.paths,
+                                aten::span<decltype(params_)::buffer_value_type>(params_.temporary_color_buffer));
                         }
 
                         auto c = path_host_.paths.contrib[idx].contrib;

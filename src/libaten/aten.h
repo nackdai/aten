@@ -36,14 +36,15 @@
 #include "math/aabb.h"
 
 #include "misc/color.h"
-#include "misc/timer.h"
+#include "misc/key.h"
 #include "misc/omputil.h"
-#include "misc/value.h"
 #include "misc/span.h"
 #include "misc/stream.h"
 #include "misc/thread.h"
-#include "misc/key.h"
 #include "misc/timeline.h"
+#include "misc/timer.h"
+#include "misc/type_traits.h"
+#include "misc/value.h"
 
 #include "light/light.h"
 #include "light/pointlight.h"

@@ -547,6 +547,9 @@
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf_impl.h">
       <Filter>renderer\svgf</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\misc\type_traits.h">
+      <Filter>misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

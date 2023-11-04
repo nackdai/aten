@@ -243,11 +243,12 @@ int32_t main(int32_t argc, char *argv[])
         5.0,   // lens radius
         28.0); // W scale
 #else
-    g_camera.init(
+    g_camera.Initalize(
         lookfrom,
         lookat,
         aten::vec3(0, 1, 0),
         fov,
+        real(0.1), real(10000.0),
         WIDTH, HEIGHT);
 #endif
 

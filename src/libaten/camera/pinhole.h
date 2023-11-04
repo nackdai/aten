@@ -26,6 +26,14 @@ namespace AT_NAME
             real vfov, // vertical fov.
             int32_t width, int32_t height);
 
+        void Initalize(
+            const aten::vec3& origin,
+            const aten::vec3& lookat,
+            const aten::vec3& up,
+            real vfov,
+            real z_near, real z_far,
+            int32_t width, int32_t height);
+
         /**
          * @brief Update transformed camera parmaters.
          */

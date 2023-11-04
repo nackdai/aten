@@ -68,19 +68,35 @@ namespace AT_NAME
         using buffer_value_type = typename buffer_container_type::value_type;
 
         // Current AOV buffer position.
-        int32_t cur_aov_pos{ 0 };
+        int32_t curr_aov_pos{ 0 };
 
         using AOVHostBuffer = AT_NAME::AOVHostBuffer<BufferContainer, SVGFAovBufferType::Num>;
         std::array<AOVHostBuffer, 2> aovs;  // AOV buffer. Current frame and previous frame.
 
-        AOVHostBuffer& GetCurAovBuffer()
+        AOVHostBuffer& GetCurrAovBuffer()
         {
-            return aovs[cur_aov_pos];
+            return aovs[curr_aov_pos];
+        }
+
+        AOVHostBuffer& GetPrevAovBuffer()
+        {
+            const auto prev_aov_pos = GetPrevAocPos();
+            return aovs[prev_aov_pos];
         }
 
         void UpdateCurAovBufferPos()
         {
-            cur_aov_pos = 1 - cur_aov_pos;
+            curr_aov_pos = 1 - curr_aov_pos;
+        }
+
+        int32_t GetCurrAovPos() const
+        {
+            return curr_aov_pos;
+        }
+
+        int32_t GetPrevAocPos() const
+        {
+            return 1 - curr_aov_pos;
         }
 
         void InitBuffers(int32_t width, int32_t height)
@@ -102,6 +118,8 @@ namespace AT_NAME
         std::array<BufferContainer, 2> atrous_clr_variance;
 
         BufferContainer temporary_color_buffer;
+
+        BufferContainer motion_depth_buffer;
 
         int32_t atrous_iter_cnt{ 5 };
 

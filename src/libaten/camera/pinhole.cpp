@@ -39,6 +39,23 @@ namespace AT_NAME {
         m_param.height = height;
     }
 
+    void PinholeCamera::Initalize(
+        const aten::vec3& origin,
+        const aten::vec3& lookat,
+        const aten::vec3& up,
+        real vfov,
+        real z_near, real z_far,
+        int32_t width, int32_t height)
+    {
+        init(
+            origin, lookat, up,
+            vfov,
+            width, height);
+
+        m_param.znear = z_near;
+        m_param.zfar = z_far;
+    }
+
     void PinholeCamera::update()
     {
         init(

@@ -112,17 +112,25 @@ namespace AT_NAME
             }
         }
 
-        template <typename A>
-        inline AT_DEVICE_MTRL_API void MakeVec4(A& dst, real x, real y, real z, real w)
+        template <typename T = _detail::v3>
+        inline AT_DEVICE_MTRL_API T MakeVec3(real x, real y, real z)
         {
-            if constexpr (std::is_same_v<A, aten::vec4>) {
-                dst.x = x;
-                dst.y = y;
-                dst.z = z;
-                dst.w = w;
+            if constexpr (std::is_same_v<T, aten::vec3>) {
+                return { x, y, z };
             }
             else {
-                dst = make_float4(x, y, z, w);
+                return make_float3(x, y, z);
+            }
+        }
+
+        template <typename T = _detail::v4>
+        inline AT_DEVICE_MTRL_API T MakeVec4(real x, real y, real z, real w)
+        {
+            if constexpr (std::is_same_v<T, aten::vec4>) {
+                return { x, y, z, w };
+            }
+            else {
+                return make_float4(x, y, z, w);
             }
         }
     }

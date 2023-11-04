@@ -36,7 +36,7 @@ namespace aten
             if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
                 path_host_.paths.attrib[idx].isHit = true;
 
-                auto& aov = params_.GetCurAovBuffer();
+                auto& aov = params_.GetCurrAovBuffer();
                 Shade(
                     idx,
                     path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
@@ -52,7 +52,7 @@ namespace aten
             }
             else {
                 auto ibl = scene->getIBL();
-                auto& aov = params_.GetCurAovBuffer();
+                auto& aov = params_.GetCurrAovBuffer();
                 if (ibl) {
                     ShadeMissWithEnvmap(
                         idx,
@@ -305,7 +305,7 @@ namespace aten
                             continue;
                         }
 
-                        auto& aov = params_.GetCurAovBuffer();
+                        auto& aov = params_.GetCurrAovBuffer();
 
                         if (get_frame_count() == 0) {
                             AT_NAME::svgf::PrepareForDenoise<true>(
@@ -321,6 +321,24 @@ namespace aten
                                 path_host_.paths,
                                 aten::span<decltype(params_)::buffer_value_type>(params_.temporary_color_buffer));
                         }
+
+                        auto& curr_aov = params_.GetCurrAovBuffer();
+                        auto& prev_aov = params_.GetPrevAovBuffer();
+
+                        auto teporal_projected_clr = AT_NAME::svgf::TemporalReprojection(
+                            x, y, width, height,
+                            0.98f, 0.05f,
+                            aten::span<std::remove_pointer_t<decltype(path_host_.paths.contrib)>>(path_host_.paths.contrib, width * height),
+                            camera->param(),
+                            curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::NormalDepth>(),
+                            curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::AlbedoMeshId>(),
+                            curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>(),
+                            curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>(),
+                            prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::NormalDepth>(),
+                            prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::AlbedoMeshId>(),
+                            prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>(),
+                            prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>(),
+                            params_.motion_depth_buffer);
 
                         auto c = path_host_.paths.contrib[idx].contrib;
 

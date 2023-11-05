@@ -206,5 +206,12 @@ namespace AT_NAME {
                 param.vfov,
                 param.aspect);
         }
+
+        static real ComputeScreenDistance(
+            const aten::CameraParameter& param,
+            const int32_t height)
+        {
+            return height / (2.0f * aten::tan(0.5f * param.vfov));
+        }
     };
 }

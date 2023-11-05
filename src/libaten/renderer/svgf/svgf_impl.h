@@ -187,7 +187,7 @@ namespace svgf {
     }
 
     template <typename BufferForMotionDepth>
-    inline float AT_DEVICE_MTRL_API TemporalReprojection(
+    inline AT_DEVICE_MTRL_API float TemporalReprojection(
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
         const float threshold_normal,
@@ -272,6 +272,113 @@ namespace svgf {
         curr_aov_color_variance[idx].z = curr_color.z;
 
         return weight;
+    }
+
+    inline AT_DEVICE_MTRL_API AT_NAME::_detail::v4 EstimateVariance(
+        const int32_t ix, const int32_t iy,
+        const int32_t width, const int32_t height,
+        const aten::mat4& mtx_C2V,
+        const float camera_distance,
+        const aten::span<AT_NAME::_detail::v4>& aov_normal_depth,
+        aten::span<AT_NAME::_detail::v4>& aov_texclr_meshid,
+        aten::span<AT_NAME::_detail::v4>& aov_color_variance,
+        aten::span<AT_NAME::_detail::v4>& aov_moment_temporalweight)
+    {
+        const int32_t idx = _detail::GetIdx(ix, iy, width);
+
+        auto normal_depth = aov_normal_depth[idx];
+        auto texclr_meshid = aov_texclr_meshid[idx];
+        auto moment_temporalweight = aov_moment_temporalweight[idx];
+
+        const auto center_color = aov_color_variance[idx];
+
+        const float center_depth = aov_normal_depth[idx].w;
+        const int32_t center_meshid = static_cast<int32_t>(texclr_meshid.w);
+
+        if (center_meshid < 0) {
+            // Thie pixle can be treated as the background.
+            // The variance is also treated as zero.
+            aov_moment_temporalweight[idx].x = 0;
+            aov_moment_temporalweight[idx].y = 0;
+            aov_moment_temporalweight[idx].z = 1;
+
+            return AT_NAME::_detail::MakeVec4(0, 0, 0, 0);
+        }
+
+        const float pixel_distance_ratio = (center_depth / camera_distance) * height;
+
+        auto center_moment = AT_NAME::_detail::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z);
+
+        int32_t frame = static_cast<int32_t>(center_moment.z);
+
+        center_moment /= center_moment.z;
+
+        float variance = 0.0f;
+        auto color = center_color;
+
+        if (frame < 4) {
+            // 積算フレーム数が４未満 or Disoccludedされている.
+            // 7x7birateral filterで輝度を計算.
+            // Accumulated farme is less than 4 or the pixel is disoccluded.
+            // Compute the luminance by 7x7birateral filter.
+
+            auto center_normal = AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z);
+
+            auto moment_sum = AT_NAME::_detail::MakeVec3(center_moment.x, center_moment.y, center_moment.z);
+            float weight = 1.0f;
+
+            float radius = frame > 1 ? 2 : 3;
+
+            for (int32_t v = -radius; v <= radius; v++)
+            {
+                for (int32_t u = -radius; u <= radius; u++)
+                {
+                    if (u != 0 || v != 0) {
+                        int32_t xx = clamp(ix + u, 0, width - 1);
+                        int32_t yy = clamp(iy + v, 0, height - 1);
+
+                        int32_t sample_idx = _detail::GetIdx(xx, yy, width);
+                        normal_depth = aov_normal_depth[sample_idx];
+                        texclr_meshid = aov_texclr_meshid[sample_idx];
+                        moment_temporalweight = aov_moment_temporalweight[sample_idx];
+
+                        const auto sample_nml = AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z);
+                        const float sample_depth = normal_depth.w;
+                        const int32_t sample_meshid = static_cast<int32_t>(texclr_meshid.w);
+                        const auto sample_color = aov_color_variance[sample_idx];
+
+                        auto moment = AT_NAME::_detail::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z);
+                        moment /= moment.z;
+
+                        const auto uv_length = aten::sqrt(u * u + v * v);
+
+                        const float Wz = aten::abs(sample_depth - center_depth) / (pixel_distance_ratio * uv_length + 1e-2);
+                        const float Wn = aten::pow(aten::cmpMax(0.0f, dot(sample_nml, center_normal)), 128.0f);
+
+                        const float Wm = center_meshid == sample_meshid ? 1.0f : 0.0f;
+
+                        const float W = exp(-Wz) * Wn * Wm;
+
+                        moment_sum += moment * W;
+                        color += sample_color * W;
+                        weight += W;
+                    }
+                }
+            }
+
+            moment_sum /= weight;
+            color /= weight;
+
+            variance = 1.0f + 3.0f * (1.0f - frame / 4.0f) * aten::cmpMax(0.0f, moment_sum.y - moment_sum.x * moment_sum.x);
+        }
+        else {
+            variance = aten::cmpMax(0.0f, center_moment.x - center_moment.y * center_moment.y);
+        }
+
+        color.w = variance;
+        aov_color_variance[idx] = color;
+
+        return AT_NAME::_detail::MakeVec4(variance, variance, variance, 1);
     }
 }   // namespace svgf
 }   // namespace AT_NAME

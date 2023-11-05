@@ -15,6 +15,11 @@
 __global__ void computeTemporalReuse(
     idaten::Path paths,
     idaten::context ctxt,
+    const aten::ObjectParameter* __restrict__ shapes,
+    const aten::MaterialParameter* __restrict__ mtrls,
+    const aten::LightParameter* __restrict__ lights,
+    const aten::TriangleParameter* __restrict__ prims,
+    const aten::mat4* __restrict__ matrices,
     const float4* __restrict__ aovTexclrMeshid,
     idaten::Reservoir* reservoirs,
     const idaten::Reservoir* __restrict__ prev_reservoirs,
@@ -34,6 +39,12 @@ __global__ void computeTemporalReuse(
     if (paths.attrib[idx].isTerminate) {
         return;
     }
+
+    ctxt.shapes = shapes;
+    ctxt.mtrls = mtrls;
+    ctxt.lights = lights;
+    ctxt.prims = prims;
+    ctxt.matrices = matrices;
 
     const auto& self_info = infos[idx];
     aten::MaterialParameter mtrl;
@@ -171,6 +182,11 @@ __global__ void computeTemporalReuse(
 __global__ void computeSpatialReuse(
     idaten::Path paths,
     idaten::context ctxt,
+    const aten::ObjectParameter* __restrict__ shapes,
+    const aten::MaterialParameter* __restrict__ mtrls,
+    const aten::LightParameter* __restrict__ lights,
+    const aten::TriangleParameter* __restrict__ prims,
+    const aten::mat4* __restrict__ matrices,
     const float4* __restrict__ aovTexclrMeshid,
     const idaten::Reservoir* __restrict__ reservoirs,
     idaten::Reservoir* dst_reservoirs,
@@ -189,6 +205,12 @@ __global__ void computeSpatialReuse(
     if (paths.attrib[idx].isTerminate) {
         return;
     }
+
+    ctxt.shapes = shapes;
+    ctxt.mtrls = mtrls;
+    ctxt.lights = lights;
+    ctxt.prims = prims;
+    ctxt.matrices = matrices;
 
     const auto& self_info = infos[idx];
     aten::MaterialParameter mtrl;
@@ -377,6 +399,11 @@ namespace idaten {
                     computeTemporalReuse << <grid, block, 0, m_stream >> > (
                         path_host_->paths,
                         ctxt_host_.ctxt,
+                        ctxt_host_.shapeparam.data(),
+                        ctxt_host_.mtrlparam.data(),
+                        ctxt_host_.lightparam.data(),
+                        ctxt_host_.primparams.data(),
+                        ctxt_host_.mtxparams.data(),
                         aov_.albedo_meshid().data(),
                         m_reservoirs[cur_idx].data(),
                         m_reservoirs[prev_idx].data(),
@@ -393,6 +420,11 @@ namespace idaten {
                 computeSpatialReuse << <grid, block, 0, m_stream >> > (
                     path_host_->paths,
                     ctxt_host_.ctxt,
+                    ctxt_host_.shapeparam.data(),
+                    ctxt_host_.mtrlparam.data(),
+                    ctxt_host_.lightparam.data(),
+                    ctxt_host_.primparams.data(),
+                    ctxt_host_.mtxparams.data(),
                     aov_.albedo_meshid().data(),
                     m_reservoirs[cur_idx].data(),
                     m_reservoirs[dst_idx].data(),

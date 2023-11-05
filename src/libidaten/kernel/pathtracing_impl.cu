@@ -20,6 +20,11 @@ namespace pt {
         float4* aovAlbedoMeshId,
         int32_t width, int32_t height,
         idaten::context ctxt,
+        const aten::ObjectParameter* __restrict__ shapes,
+        const aten::MaterialParameter* __restrict__ mtrls,
+        const aten::LightParameter* __restrict__ lights,
+        const aten::TriangleParameter* __restrict__ prims,
+        const aten::mat4* __restrict__ matrices,
         idaten::Path paths,
         const int32_t* __restrict__ hitindices,
         int32_t* hitnum,
@@ -43,6 +48,12 @@ namespace pt {
             paths.attrib[idx].isTerminate = true;
             return;
         }
+
+        ctxt.shapes = shapes;
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.matrices = matrices;
 
         __shared__ idaten::ShadowRay shShadowRays[64];
         __shared__ aten::MaterialParameter shMtrls[64];
@@ -202,6 +213,11 @@ namespace pt {
     __global__ void hitShadowRay(
         int32_t bounce,
         idaten::context ctxt,
+        const aten::ObjectParameter* __restrict__ shapes,
+        const aten::MaterialParameter* __restrict__ mtrls,
+        const aten::LightParameter* __restrict__ lights,
+        const aten::TriangleParameter* __restrict__ prims,
+        const aten::mat4* __restrict__ matrices,
         idaten::Path paths,
         int32_t* hitindices,
         int32_t* hitnum,
@@ -214,6 +230,12 @@ namespace pt {
         }
 
         idx = hitindices[idx];
+
+        ctxt.shapes = shapes;
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.matrices = matrices;
 
         AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays);
     }
@@ -290,6 +312,11 @@ namespace idaten
             aov_.albedo_meshid().data(),
             width, height,
             ctxt_host_.ctxt,
+            ctxt_host_.shapeparam.data(),
+            ctxt_host_.mtrlparam.data(),
+            ctxt_host_.lightparam.data(),
+            ctxt_host_.primparams.data(),
+            ctxt_host_.mtxparams.data(),
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
             m_isects.data(),
@@ -317,6 +344,11 @@ namespace idaten
         pt::hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             bounce,
             ctxt_host_.ctxt,
+            ctxt_host_.shapeparam.data(),
+            ctxt_host_.mtrlparam.data(),
+            ctxt_host_.lightparam.data(),
+            ctxt_host_.primparams.data(),
+            ctxt_host_.mtxparams.data(),
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
             m_shadowRays.data());

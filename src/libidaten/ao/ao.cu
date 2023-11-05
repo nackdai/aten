@@ -42,6 +42,11 @@ namespace ao {
         aten::ray* rays,
         int32_t bounce, int32_t rrBounce,
         idaten::context ctxt,
+        const aten::ObjectParameter* __restrict__ shapes,
+        const aten::MaterialParameter* __restrict__ mtrls,
+        const aten::LightParameter* __restrict__ lights,
+        const aten::TriangleParameter* __restrict__ prims,
+        const aten::mat4* __restrict__ matrices,
         const uint32_t* random)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -51,6 +56,12 @@ namespace ao {
         }
 
         idx = hitindices[idx];
+
+        ctxt.shapes = shapes;
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.matrices = matrices;
 
         const auto& ray = rays[idx];
 
@@ -105,6 +116,11 @@ namespace idaten {
             m_rays.data(),
             bounce, rrBounce,
             ctxt_host_.ctxt,
+            ctxt_host_.shapeparam.data(),
+            ctxt_host_.mtrlparam.data(),
+            ctxt_host_.lightparam.data(),
+            ctxt_host_.primparams.data(),
+            ctxt_host_.mtxparams.data(),
             m_random.data());
 
         checkCudaKernel(shade);

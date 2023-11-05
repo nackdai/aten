@@ -22,7 +22,12 @@ __global__ void fillAOV(
     const float4* __restrict__ aovTexclrMeshid,
     cudaSurfaceObject_t motionDetphBuffer,
     const aten::CameraParameter camera,
-    idaten::context ctxt)
+    idaten::context ctxt,
+    const aten::ObjectParameter* __restrict__ shapes,
+    const aten::MaterialParameter* __restrict__ mtrls,
+    const aten::LightParameter* __restrict__ lights,
+    const aten::TriangleParameter* __restrict__ prims,
+    const aten::mat4* __restrict__ matrices)
 {
     auto ix = blockIdx.x * blockDim.x + threadIdx.x;
     auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -45,6 +50,12 @@ __global__ void fillAOV(
     };
 
     const auto idx = getIdx(ix, iy, width);
+
+    ctxt.shapes = shapes;
+    ctxt.mtrls = mtrls;
+    ctxt.lights = lights;
+    ctxt.prims = prims;
+    ctxt.matrices = matrices;
 
     float s = (ix + 0.5f) / (float)(width);
     float t = (iy + 0.5f) / (float)(height);
@@ -118,8 +129,19 @@ __global__ void pickPixel(
     const idaten::Path paths,
     const float4* __restrict__ aovNormalDepth,
     const float4* __restrict__ aovTexclrMeshid,
-    idaten::context ctxt)
+    idaten::context ctxt,
+    const aten::ObjectParameter* __restrict__ shapes,
+    const aten::MaterialParameter* __restrict__ mtrls,
+    const aten::LightParameter* __restrict__ lights,
+    const aten::TriangleParameter* __restrict__ prims,
+    const aten::mat4* __restrict__ matrices)
 {
+    ctxt.shapes = shapes;
+    ctxt.mtrls = mtrls;
+    ctxt.lights = lights;
+    ctxt.prims = prims;
+    ctxt.matrices = matrices;
+
     iy = height - 1 - iy;
 
     float s = (ix + 0.5f) / (float)(camera.width);
@@ -177,7 +199,12 @@ namespace idaten
             curaov.get<AOVBuffer::AlbedoMeshId>().data(),
             gbuffer,
             m_cam,
-            ctxt_host_.ctxt);
+            ctxt_host_.ctxt,
+            ctxt_host_.shapeparam.data(),
+            ctxt_host_.mtrlparam.data(),
+            ctxt_host_.lightparam.data(),
+            ctxt_host_.primparams.data(),
+            ctxt_host_.mtxparams.data());
     }
 
     void SVGFPathTracing::pick(
@@ -198,7 +225,12 @@ namespace idaten
                 path_host_->paths,
                 curaov.get<AOVBuffer::NormalDepth>().data(),
                 curaov.get<AOVBuffer::AlbedoMeshId>().data(),
-                ctxt_host_.ctxt);
+                ctxt_host_.ctxt,
+                ctxt_host_.shapeparam.data(),
+                ctxt_host_.mtrlparam.data(),
+                ctxt_host_.lightparam.data(),
+                ctxt_host_.primparams.data(),
+                ctxt_host_.mtxparams.data());
 
             m_pick.readFromDeviceToHostByNum(&m_pickedInfo);
 

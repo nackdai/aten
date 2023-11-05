@@ -52,7 +52,12 @@ namespace npr_pt {
         const aten::CameraParameter camera,
         const aten::Intersection* __restrict__ isects,
         const aten::ray* __restrict__ rays,
-        idaten::context ctxt)
+        idaten::context ctxt,
+        const aten::ObjectParameter* __restrict__ shapes,
+        const aten::MaterialParameter* __restrict__ mtrls,
+        const aten::LightParameter* __restrict__ lights,
+        const aten::TriangleParameter* __restrict__ prims,
+        const aten::mat4* __restrict__ matrices)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -66,6 +71,12 @@ namespace npr_pt {
             paths.attrib[idx].isTerminate = true;
             return;
         }
+
+        ctxt.shapes = shapes;
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.matrices = matrices;
 
         aten::hitrecord hrec_query;
 
@@ -179,7 +190,12 @@ namespace npr_pt {
         const aten::CameraParameter camera,
         const aten::Intersection* __restrict__ isects,
         const aten::ray* __restrict__ rays,
-        idaten::context ctxt)
+        idaten::context ctxt,
+        const aten::ObjectParameter* __restrict__ shapes,
+        const aten::MaterialParameter* __restrict__ mtrls,
+        const aten::LightParameter* __restrict__ lights,
+        const aten::TriangleParameter* __restrict__ prims,
+        const aten::mat4* __restrict__ matrices)
     {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -193,6 +209,12 @@ namespace npr_pt {
         if (paths.attrib[idx].isTerminate || paths.attrib[idx].isHit) {
             return;
         }
+
+        ctxt.shapes = shapes;
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.matrices = matrices;
 
         // Query ray doesn't hit anything, but evaluate a possibility that sample ray might hit something.
 
@@ -309,7 +331,12 @@ namespace idaten {
                 m_cam,
                 m_isects.data(),
                 m_rays.data(),
-                ctxt_host_.ctxt);
+                ctxt_host_.ctxt,
+                ctxt_host_.shapeparam.data(),
+                ctxt_host_.mtrlparam.data(),
+                ctxt_host_.lightparam.data(),
+                ctxt_host_.primparams.data(),
+                ctxt_host_.mtxparams.data());
             checkCudaKernel(shadeSampleRay);
         }
 
@@ -352,7 +379,12 @@ namespace idaten {
                 m_cam,
                 m_isects.data(),
                 m_rays.data(),
-                ctxt_host_.ctxt);
+                ctxt_host_.ctxt,
+                ctxt_host_.shapeparam.data(),
+                ctxt_host_.mtrlparam.data(),
+                ctxt_host_.lightparam.data(),
+                ctxt_host_.primparams.data(),
+                ctxt_host_.mtxparams.data());
             checkCudaKernel(shadeMissSampleRay);
         }
 

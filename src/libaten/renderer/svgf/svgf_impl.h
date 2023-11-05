@@ -201,7 +201,7 @@ namespace svgf {
         const aten::span<AT_NAME::_detail::v4>& prev_aov_normal_depth,
         const aten::span<AT_NAME::_detail::v4>& prev_aov_texclr_meshid,
         const aten::span<AT_NAME::_detail::v4>& prev_aov_color_variance,
-        BufferForMotionDepth motion_detph_buffer)
+        BufferForMotionDepth& motion_detph_buffer)
     {
         const auto idx = _detail::GetIdx(ix, iy, width);
 
@@ -215,7 +215,7 @@ namespace svgf {
                 int32_t yy = clamp(iy + y, 0, static_cast<int32_t>(height - 1));
 
                 AT_NAME::_detail::v4 motion_depth;
-                if constexpr (std::is_class_v<decltype(motion_detph_buffer)>) {
+                if constexpr (std::is_class_v<std::remove_reference_t<decltype(motion_detph_buffer)>>) {
                     motion_depth = motion_detph_buffer[idx];
                 }
                 else {
@@ -272,63 +272,6 @@ namespace svgf {
         curr_aov_color_variance[idx].z = curr_color.z;
 
         return weight;
-    }
-
-    template <typename BufferForMotionDepth>
-    inline AT_NAME::_detail::v4 AT_DEVICE_MTRL_API TemporalReprojection(
-        const int32_t ix, const int32_t iy,
-        const int32_t width, const int32_t height,
-        const float threshold_normal,
-        const float threshold_depth,
-        const aten::span<AT_NAME::_detail::v4> contribs,
-        const aten::CameraParameter& camera,
-        aten::span<AT_NAME::_detail::v4> curr_aov_normal_depth,
-        aten::span<AT_NAME::_detail::v4> curr_aov_texclr_meshid,
-        aten::span<AT_NAME::_detail::v4> curr_aov_color_variance,
-        aten::span<AT_NAME::_detail::v4> curr_aov_moment_temporalweight,
-        const aten::span<AT_NAME::_detail::v4> prev_aov_normal_depth,
-        const aten::span<AT_NAME::_detail::v4> prev_aov_texclr_meshid,
-        const aten::span<AT_NAME::_detail::v4> prev_aov_color_variance,
-        const aten::span<AT_NAME::_detail::v4> prev_aov_moment_temporalweight,
-        BufferForMotionDepth motion_detph_buffer)
-    {
-        const auto idx = _detail::GetIdx(ix, iy, width);
-
-        auto extracted_center_pixel = ExtractCenterPixel(
-            idx,
-            contribs,
-            curr_aov_normal_depth,
-            curr_aov_texclr_meshid);
-
-        const auto center_meshid = aten::get<2>(extracted_center_pixel);
-        auto curr_color = aten::get<3>(extracted_center_pixel);
-
-        auto back_ground_pixel_clr = CheckIfPixelIsBackground(
-            idx, curr_color, center_meshid,
-            curr_aov_color_variance, curr_aov_moment_temporalweight);
-        if (back_ground_pixel_clr) {
-            return back_ground_pixel_clr.value();
-        }
-
-        const auto center_normal = aten::get<0>(extracted_center_pixel);
-        const float center_depth = aten::get<1>(extracted_center_pixel);
-
-        auto weight = TemporalReprojection(
-            ix, iy, width, height,
-            threshold_normal, threshold_depth,
-            center_normal, center_depth, center_meshid,
-            curr_color,
-            curr_aov_color_variance, curr_aov_moment_temporalweight,
-            prev_aov_normal_depth, prev_aov_texclr_meshid, prev_aov_color_variance,
-            motion_detph_buffer);
-
-        AccumulateMoments(
-            idx, weight,
-            curr_aov_color_variance,
-            curr_aov_moment_temporalweight,
-            prev_aov_moment_temporalweight);
-
-        return curr_color;
     }
 }   // namespace svgf
 }   // namespace AT_NAME

@@ -31,6 +31,11 @@ namespace svgf_kernel {
         int32_t frame,
         int32_t bounce, int32_t rrBounce,
         idaten::context ctxt,
+        const aten::ObjectParameter* __restrict__ shapes,
+        const aten::MaterialParameter* __restrict__ mtrls,
+        const aten::LightParameter* __restrict__ lights,
+        const aten::TriangleParameter* __restrict__ prims,
+        const aten::mat4* __restrict__ matrices,
         uint32_t* random,
         idaten::ShadowRay* shadowRays)
     {
@@ -39,6 +44,12 @@ namespace svgf_kernel {
         if (idx >= *hitnum) {
             return;
         }
+
+        ctxt.shapes = shapes;
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.matrices = matrices;
 
         idx = hitindices[idx];
 
@@ -290,6 +301,11 @@ namespace idaten
             m_frame,
             bounce, rrBounce,
             ctxt_host_.ctxt,
+            ctxt_host_.shapeparam.data(),
+            ctxt_host_.mtrlparam.data(),
+            ctxt_host_.lightparam.data(),
+            ctxt_host_.primparams.data(),
+            ctxt_host_.mtxparams.data(),
             m_random.data(),
             m_shadowRays.data());
 

@@ -10,17 +10,22 @@
 #include "math/mat4.h"
 
 namespace idaten {
-    struct context {
-        const aten::ObjectParameter* __restrict__ shapes{ nullptr };
+    // NOTE:
+    // https://forums.developer.nvidia.com/t/restrict-seems-to-be-ignored-for-base-pointers-in-structs-having-base-pointers-with-restrict-as-kernel-arguments-directly-works-as-expected/154020/12
+    // __restrict__ hint doesn't work within a struct as a kernel argument.
+    // It works as a kernel argument.
 
-        const aten::MaterialParameter* __restrict__ mtrls{ nullptr };
+    struct context {
+        const aten::ObjectParameter* shapes{ nullptr };
+
+        const aten::MaterialParameter* mtrls{ nullptr };
 
         int32_t lightnum{ 0 };
-        const aten::LightParameter* __restrict__ lights{ nullptr };
+        const aten::LightParameter* lights{ nullptr };
 
-        const aten::TriangleParameter* __restrict__ prims{ nullptr };
+        const aten::TriangleParameter* prims{ nullptr };
 
-        const aten::mat4* __restrict__ matrices{ nullptr };
+        const aten::mat4* matrices{ nullptr };
 
         cudaTextureObject_t vtxPos{ 0 };
         cudaTextureObject_t vtxNml{ 0 };
@@ -125,12 +130,7 @@ namespace idaten {
         void BindToDeviceContext()
         {
             if (!ctxt.shapes) {
-                ctxt.shapes = shapeparam.data();
-                ctxt.mtrls = mtrlparam.data();
                 ctxt.lightnum = lightparam.num();
-                ctxt.lights = lightparam.data();
-                ctxt.prims = primparams.data();
-                ctxt.matrices = mtxparams.data();
 
                 std::vector<cudaTextureObject_t> tmp_node;
                 for (auto& node : nodeparam) {

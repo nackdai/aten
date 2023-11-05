@@ -50,6 +50,11 @@ __global__ void shade(
     int32_t frame,
     int32_t bounce, int32_t rrBounce,
     idaten::context ctxt,
+    const aten::ObjectParameter* __restrict__ shapes,
+    const aten::MaterialParameter* __restrict__ mtrls,
+    const aten::LightParameter* __restrict__ lights,
+    const aten::TriangleParameter* __restrict__ prims,
+    const aten::mat4* __restrict__ matrices,
     uint32_t* random,
     idaten::ShadowRay* shadowRays)
 {
@@ -60,6 +65,12 @@ __global__ void shade(
     }
 
     idx = hitindices[idx];
+
+    ctxt.shapes = shapes;
+    ctxt.mtrls = mtrls;
+    ctxt.lights = lights;
+    ctxt.prims = prims;
+    ctxt.matrices = matrices;
 
     __shared__ aten::MaterialParameter shMtrls[64];
 
@@ -277,13 +288,24 @@ __global__ void hitShadowRay(
     int32_t* hitnum,
     idaten::Reservoir* reservoirs,
     const idaten::ShadowRay* __restrict__ shadowRays,
-    idaten::context ctxt)
+    idaten::context ctxt,
+    const aten::ObjectParameter* __restrict__ shapes,
+    const aten::MaterialParameter* __restrict__ mtrls,
+    const aten::LightParameter* __restrict__ lights,
+    const aten::TriangleParameter* __restrict__ prims,
+    const aten::mat4* __restrict__ matrices)
 {
     int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (idx >= *hitnum) {
         return;
     }
+
+    ctxt.shapes = shapes;
+    ctxt.mtrls = mtrls;
+    ctxt.lights = lights;
+    ctxt.prims = prims;
+    ctxt.matrices = matrices;
 
     idx = hitindices[idx];
 
@@ -467,6 +489,11 @@ namespace idaten
             m_frame,
             bounce, rrBounce,
             ctxt_host_.ctxt,
+            ctxt_host_.shapeparam.data(),
+            ctxt_host_.mtrlparam.data(),
+            ctxt_host_.lightparam.data(),
+            ctxt_host_.primparams.data(),
+            ctxt_host_.mtxparams.data(),
             m_random.data(),
             m_shadowRays.data());
 
@@ -492,7 +519,12 @@ namespace idaten
             m_hitidx.data(), hitcount.data(),
             m_reservoirs[m_curReservoirPos].data(),
             m_shadowRays.data(),
-            ctxt_host_.ctxt);
+            ctxt_host_.ctxt,
+            ctxt_host_.shapeparam.data(),
+            ctxt_host_.mtrlparam.data(),
+            ctxt_host_.lightparam.data(),
+            ctxt_host_.primparams.data(),
+            ctxt_host_.mtxparams.data());
 
         checkCudaKernel(hitShadowRay);
 

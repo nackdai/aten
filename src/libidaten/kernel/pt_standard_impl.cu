@@ -56,6 +56,11 @@ namespace kernel {
 
     __global__ void hitTest(
         idaten::context ctxt,
+        const aten::ObjectParameter* __restrict__ shapes,
+        const aten::MaterialParameter* __restrict__ mtrls,
+        const aten::LightParameter* __restrict__ lights,
+        const aten::TriangleParameter* __restrict__ prims,
+        const aten::mat4* __restrict__ matrices,
         idaten::Path paths,
         aten::Intersection* isects,
         aten::ray* rays,
@@ -127,10 +132,6 @@ namespace kernel {
                 t_max = hitDistLimit;
             }
 
-            // TODO
-            // �ߋ�����Voxel�ɂ���ƕi����������.
-            // �����������I�u�W�F�N�g�Ԃ��Ƃ��ꂪ�N����₷��.
-            //bool enableLod = (bounce >= 2);
             bool enableLod = false;
             int32_t depth = 9;
 
@@ -178,6 +179,12 @@ namespace kernel {
             return;
         }
 
+        ctxt.shapes = shapes;
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.matrices = matrices;
+
         aten::Intersection isect;
 
         float t_max = AT_MATH_INF;
@@ -218,7 +225,12 @@ namespace kernel {
 
     __global__ void hitTestPrimaryRayInScreenSpace(
         cudaSurfaceObject_t gbuffer,
-        const idaten::context ctxt,
+        idaten::context ctxt,
+        const aten::ObjectParameter* __restrict__ shapes,
+        const aten::MaterialParameter* __restrict__ mtrls,
+        const aten::LightParameter* __restrict__ lights,
+        const aten::TriangleParameter* __restrict__ prims,
+        const aten::mat4* __restrict__ matrices,
         idaten::Path paths,
         aten::Intersection* isects,
         int32_t* hitbools,
@@ -241,6 +253,12 @@ namespace kernel {
         if (paths.attrib[idx].isTerminate) {
             return;
         }
+
+        ctxt.shapes = shapes;
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.matrices = matrices;
 
         // Sample data from texture.
         float4 data;
@@ -428,6 +446,11 @@ namespace idaten
         kernel::hitTest << <grid, block >> > (
 #endif
             ctxt_host_.ctxt,
+            ctxt_host_.shapeparam.data(),
+            ctxt_host_.mtrlparam.data(),
+            ctxt_host_.lightparam.data(),
+            ctxt_host_.primparams.data(),
+            ctxt_host_.mtxparams.data(),
             path_host_->paths,
             m_isects.data(),
             m_rays.data(),
@@ -457,6 +480,11 @@ namespace idaten
         kernel::hitTestPrimaryRayInScreenSpace << <grid, block >> > (
             binded_gbuffer,
             ctxt_host_.ctxt,
+            ctxt_host_.shapeparam.data(),
+            ctxt_host_.mtrlparam.data(),
+            ctxt_host_.lightparam.data(),
+            ctxt_host_.primparams.data(),
+            ctxt_host_.mtxparams.data(),
             path_host_->paths,
             m_isects.data(),
             m_hitbools.data(),

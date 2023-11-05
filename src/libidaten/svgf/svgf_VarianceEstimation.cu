@@ -29,7 +29,7 @@ __global__ void varianceEstimation(
 
     const size_t size = width * height;
 
-    auto aov_normal_depth{ aten::span<float4>(const_cast<float4*>(aovNormalDepth), size) };
+    auto aov_normal_depth{ aten::const_span<float4>(aovNormalDepth, size) };
     auto aov_texclr_meshid{ aten::span<float4>(aovTexclrMeshid, size) };
     auto aov_color_variance{ aten::span<float4>(aovColorVariance, size) };
     auto aov_moment_temporalweight{ aten::span<float4>(aovMomentTemporalWeight, size) };

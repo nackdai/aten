@@ -5,6 +5,7 @@
 #include "material/material.h"
 #include "math/mat4.h"
 #include "misc/span.h"
+#include "misc/const_span.h"
 #include "misc/tuple.h"
 #include "renderer/pathtracing/pathtracing_impl.h"
 #include "renderer/pathtracing/pt_params.h"
@@ -102,9 +103,9 @@ namespace svgf {
 
     inline AT_DEVICE_MTRL_API aten::tuple<AT_NAME::_detail::v3, real, int32_t, AT_NAME::_detail::v4> ExtractCenterPixel(
         int32_t idx,
-        const aten::span<AT_NAME::_detail::v4>& contribs,
-        const aten::span<AT_NAME::_detail::v4>& curr_aov_normal_depth,
-        const aten::span<AT_NAME::_detail::v4>& curr_aov_texclr_meshid)
+        const aten::const_span<AT_NAME::_detail::v4>& contribs,
+        aten::span<AT_NAME::_detail::v4>& curr_aov_normal_depth,
+        aten::span<AT_NAME::_detail::v4>& curr_aov_texclr_meshid)
     {
         auto nml_depth = curr_aov_normal_depth[idx];
         auto texclr_meshid = curr_aov_texclr_meshid[idx];
@@ -145,9 +146,9 @@ namespace svgf {
     inline AT_DEVICE_MTRL_API void AccumulateMoments(
         const int32_t idx,
         const float weight,
-        const aten::span<AT_NAME::_detail::v4>& curr_aov_color_variance,
+        aten::span<AT_NAME::_detail::v4>& curr_aov_color_variance,
         aten::span<AT_NAME::_detail::v4>& curr_aov_moment_temporalweight,
-        const aten::span<AT_NAME::_detail::v4>& prev_aov_moment_temporalweight)
+        const aten::const_span<AT_NAME::_detail::v4>& prev_aov_moment_temporalweight)
     {
         const auto& color_variance = curr_aov_color_variance[idx];
         auto curr_color = AT_NAME::_detail::MakeVec3(color_variance.x, color_variance.y, color_variance.z);
@@ -198,9 +199,9 @@ namespace svgf {
         AT_NAME::_detail::v4& curr_color,
         aten::span<AT_NAME::_detail::v4>& curr_aov_color_variance,
         aten::span<AT_NAME::_detail::v4>& curr_aov_moment_temporalweight,
-        const aten::span<AT_NAME::_detail::v4>& prev_aov_normal_depth,
-        const aten::span<AT_NAME::_detail::v4>& prev_aov_texclr_meshid,
-        const aten::span<AT_NAME::_detail::v4>& prev_aov_color_variance,
+        const aten::const_span<AT_NAME::_detail::v4>& prev_aov_normal_depth,
+        const aten::const_span<AT_NAME::_detail::v4>& prev_aov_texclr_meshid,
+        const aten::const_span<AT_NAME::_detail::v4>& prev_aov_color_variance,
         BufferForMotionDepth& motion_detph_buffer)
     {
         const auto idx = _detail::GetIdx(ix, iy, width);
@@ -279,7 +280,7 @@ namespace svgf {
         const int32_t width, const int32_t height,
         const aten::mat4& mtx_C2V,
         const float camera_distance,
-        const aten::span<AT_NAME::_detail::v4>& aov_normal_depth,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_normal_depth,
         aten::span<AT_NAME::_detail::v4>& aov_texclr_meshid,
         aten::span<AT_NAME::_detail::v4>& aov_color_variance,
         aten::span<AT_NAME::_detail::v4>& aov_moment_temporalweight)
@@ -327,7 +328,7 @@ namespace svgf {
             auto moment_sum = AT_NAME::_detail::MakeVec3(center_moment.x, center_moment.y, center_moment.z);
             float weight = 1.0f;
 
-            float radius = frame > 1 ? 2 : 3;
+            int32_t radius = frame > 1 ? 2 : 3;
 
             for (int32_t v = -radius; v <= radius; v++)
             {
@@ -350,9 +351,9 @@ namespace svgf {
                         auto moment = AT_NAME::_detail::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z);
                         moment /= moment.z;
 
-                        const auto uv_length = aten::sqrt(u * u + v * v);
+                        const auto uv_length = aten::sqrt(static_cast<real>(u * u + v * v));
 
-                        const float Wz = aten::abs(sample_depth - center_depth) / (pixel_distance_ratio * uv_length + 1e-2);
+                        const float Wz = aten::abs(sample_depth - center_depth) / (pixel_distance_ratio * uv_length + 1e-2f);
                         const float Wn = aten::pow(aten::cmpMax(0.0f, dot(sample_nml, center_normal)), 128.0f);
 
                         const float Wm = center_meshid == sample_meshid ? 1.0f : 0.0f;

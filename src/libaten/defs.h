@@ -63,7 +63,7 @@ namespace aten {
 #include "idaten_namespace.h"
 
 #define AT_DEVICE_API        __host__ __device__
-#define AT_DEVICE_MTRL_API    __device__
+#define AT_DEVICE_MTRL_API   __device__
 #else
 #include "aten_namespace.h"
 

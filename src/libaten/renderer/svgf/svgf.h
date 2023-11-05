@@ -52,6 +52,15 @@ namespace aten
             aten::span<aten::vec4>& aov_normal_depth,
             aten::span<aten::vec4>& aov_albedo_meshid);
 
+        static aten::vec4 TemporalReprojection(
+            const int32_t ix, const int32_t iy,
+            const int32_t width, const int32_t height,
+            const float threshold_normal,
+            const float threshold_depth,
+            const AT_NAME::Path& paths,
+            const aten::CameraParameter& camera,
+            AT_NAME::SVGFParams<std::vector<aten::vec4>>& svgf_param);
+
     private:
         PathHost path_host_;
         std::vector<aten::ray> rays_;

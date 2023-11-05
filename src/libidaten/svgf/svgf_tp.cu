@@ -8,6 +8,8 @@
 #include "cuda/cudamemory.h"
 
 #include "aten4idaten.h"
+#include "renderer/pathtracing/pathtracing_impl.h"
+#include "renderer/svgf/svgf_impl.h"
 
 //#define ENABLE_MEDIAN_FILTER
 
@@ -92,9 +94,9 @@ inline __device__ float4 sampleBilinear(
 }
 
 __global__ void temporalReprojection(
-    const float nThreshold,
-    const float zThreshold,
-    const float4* __restrict__ contribs,
+    const float threshold_normal,
+    const float threshold_depth,
+    const float4* __restrict__ contributes,
     const aten::CameraParameter camera,
     float4* curAovNormalDepth,
     float4* curAovTexclrMeshid,
@@ -104,7 +106,7 @@ __global__ void temporalReprojection(
     const float4* __restrict__ prevAovTexclrMeshid,
     const float4* __restrict__ prevAovColorVariance,
     const float4* __restrict__ prevAovMomentTemporalWeight,
-    cudaSurfaceObject_t motionDetphBuffer,
+    cudaSurfaceObject_t motion_detph_buffer,
     cudaSurfaceObject_t dst,
     int32_t width, int32_t height)
 {
@@ -117,138 +119,57 @@ __global__ void temporalReprojection(
 
     const auto idx = getIdx(ix, iy, width);
 
-    auto nmlDepth = curAovNormalDepth[idx];
-    auto texclrMeshId = curAovTexclrMeshid[idx];
+    auto contribs{ aten::span<float4>(const_cast<float4*>(contributes), width * height) };
+    auto curr_aov_normal_depth{ aten::span<float4>(curAovNormalDepth, width * height) };
+    auto curr_aov_texclr_meshid{ aten::span<float4>(curAovTexclrMeshid, width * height) };
+    auto curr_aov_color_variance{ aten::span<float4>(curAovColorVariance, width * height) };
+    auto curr_aov_moment_temporalweight{ aten::span<float4>(curAovMomentTemporalWeight, width * height) };
+    auto prev_aov_normal_depth{ aten::span<float4>(const_cast<float4*>(prevAovNormalDepth), width * height) };
+    auto prev_aov_texclr_meshid{ aten::span<float4>(const_cast<float4*>(prevAovTexclrMeshid), width * height) };
+    auto prev_aov_color_variance{ aten::span<float4>(const_cast<float4*>(prevAovColorVariance), width * height) };
+    auto prev_aov_moment_temporalweight{ aten::span<float4>(const_cast<float4*>(prevAovMomentTemporalWeight), width * height) };
 
-    const float centerDepth = nmlDepth.w;
-    const int32_t centerMeshId = (int32_t)texclrMeshId.w;
+    auto extracted_center_pixel = AT_NAME::svgf::ExtractCenterPixel(
+        idx,
+        contribs,
+        curr_aov_normal_depth,
+        curr_aov_texclr_meshid);
 
-    // 今回のフレームのピクセルカラー.
-    auto contrib = contribs[idx];
-    float4 curColor = make_float4(contrib.x, contrib.y, contrib.z, 1.0f) / contrib.w;
-    //curColor.w = 1;
+    const auto center_meshid = aten::get<2>(extracted_center_pixel);
+    auto curr_color = aten::get<3>(extracted_center_pixel);
 
-    if (centerMeshId < 0) {
-        // 背景なので、そのまま出力して終わり.
+    auto back_ground_pixel_clr = AT_NAME::svgf::CheckIfPixelIsBackground(
+        idx, curr_color, center_meshid,
+        curr_aov_color_variance, curr_aov_moment_temporalweight);
+    if (back_ground_pixel_clr) {
         surf2Dwrite(
-            curColor,
+            back_ground_pixel_clr.value(),
             dst,
             ix * sizeof(float4), iy,
             cudaBoundaryModeTrap);
-
-        curAovColorVariance[idx] = curColor;
-        curAovMomentTemporalWeight[idx] = make_float4(1, 1, 1, curAovMomentTemporalWeight[idx].w);
-
         return;
     }
 
-    float3 centerNormal = make_float3(nmlDepth.x, nmlDepth.y, nmlDepth.z);
+    const auto center_normal = aten::get<0>(extracted_center_pixel);
+    const float center_depth = aten::get<1>(extracted_center_pixel);
 
-    float4 sum = make_float4(0);
-    float weight = 0.0f;
+    auto weight = AT_NAME::svgf::TemporalReprojection(
+        ix, iy, width, height,
+        threshold_normal, threshold_depth,
+        center_normal, center_depth, center_meshid,
+        curr_color,
+        curr_aov_color_variance, curr_aov_moment_temporalweight,
+        prev_aov_normal_depth, prev_aov_texclr_meshid, prev_aov_color_variance,
+        motion_detph_buffer);
 
-    aten::vec4 centerPrevPos;
-
-#pragma unroll
-    for (int32_t y = -1; y <= 1; y++) {
-        for (int32_t x = -1; x <= 1; x++) {
-            int32_t xx = clamp(ix + x, 0, static_cast<int32_t>(width - 1));
-            int32_t yy = clamp(iy + y, 0, static_cast<int32_t>(height - 1));
-
-            float4 motionDepth;
-            surf2Dread(&motionDepth, motionDetphBuffer, ix * sizeof(float4), iy);
-
-            // 前のフレームのスクリーン座標.
-            int32_t px = (int32_t)(xx + motionDepth.x * width);
-            int32_t py = (int32_t)(yy + motionDepth.y * height);
-
-            px = clamp(px, 0, static_cast<int32_t>(width - 1));
-            py = clamp(py, 0, static_cast<int32_t>(height - 1));
-
-            int32_t pidx = getIdx(px, py, width);
-
-            nmlDepth = prevAovNormalDepth[pidx];
-            texclrMeshId = prevAovTexclrMeshid[pidx];
-
-            const float prevDepth = nmlDepth.w;
-            const int32_t prevMeshId = (int32_t)texclrMeshId.w;
-            float3 prevNormal = make_float3(nmlDepth.x, nmlDepth.y, nmlDepth.z);
-
-            // TODO
-            // 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
-
-            float Wz = clamp((zThreshold - abs(1 - centerDepth / prevDepth)) / zThreshold, 0.0f, 1.0f);
-            float Wn = clamp((dot(centerNormal, prevNormal) - nThreshold) / (1.0f - nThreshold), 0.0f, 1.0f);
-            float Wm = centerMeshId == prevMeshId ? 1.0f : 0.0f;
-
-            // 前のフレームのピクセルカラーを取得.
-            float4 prev = prevAovColorVariance[pidx];
-            //float4 prev = sampleBilinear(prevAovColorVariance, prevPos.x, prevPos.y, width, height);
-
-            float W = Wz * Wn * Wm;
-            sum += prev * W;
-            weight += W;
-        }
-    }
-
-    if (weight > 0.0f) {
-        sum /= weight;
-        weight /= 9;
-#if 0
-        auto w = min(0.8f, weight);
-        curColor = (1.0f - w) * curColor + w * sum;
-#elif 1
-        curColor = 0.2 * curColor + 0.8 * sum;
-#else
-        curColor = (1.0f - weight) * curColor + weight * sum;
-#endif
-    }
-
-    curAovMomentTemporalWeight[idx].w = weight;
-
-#ifdef ENABLE_MEDIAN_FILTER
-    curAovColorVariance[idx].x = curColor.x;
-    curAovColorVariance[idx].y = curColor.y;
-    curAovColorVariance[idx].z = curColor.z;
-#else
-    curAovColorVariance[idx].x = curColor.x;
-    curAovColorVariance[idx].y = curColor.y;
-    curAovColorVariance[idx].z = curColor.z;
-
-    // TODO
-    // 現フレームと過去フレームが同率で加算されるため、どちらかに強い影響がでると影響が弱まるまでに非常に時間がかかる.
-    // ex)
-    // f0 = 100, f1 = 0, f2 = 0
-    // avg = (f0 + f1 + f2) / 3 = 33.3 <- 非常に大きい値が残り続ける.
-
-    // accumulate moments.
-    {
-        float lum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);
-        float3 centerMoment = make_float3(lum * lum, lum, 0);
-
-        // 積算フレーム数のリセット.
-        int32_t frame = 1;
-
-        if (weight > 0.0f) {
-            auto momentTemporalWeight = prevAovMomentTemporalWeight[idx];;
-            float3 prevMoment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
-
-            // 積算フレーム数を１増やす.
-            frame = (int32_t)prevMoment.z + 1;
-
-            centerMoment += prevMoment;
-        }
-
-        centerMoment.z = frame;
-
-        curAovMomentTemporalWeight[idx].x = centerMoment.x;
-        curAovMomentTemporalWeight[idx].y = centerMoment.y;
-        curAovMomentTemporalWeight[idx].z = centerMoment.z;
-    }
-#endif
+    AT_NAME::svgf::AccumulateMoments(
+        idx, weight,
+        curr_aov_color_variance,
+        curr_aov_moment_temporalweight,
+        prev_aov_moment_temporalweight);
 
     surf2Dwrite(
-        curColor,
+        curr_color,
         dst,
         ix * sizeof(float4), iy,
         cudaBoundaryModeTrap);

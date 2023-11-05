@@ -208,6 +208,67 @@ namespace aten
             paths, rays);
     }
 
+    aten::vec4 SVGFRenderer::TemporalReprojection(
+        const int32_t ix, const int32_t iy,
+        const int32_t width, const int32_t height,
+        const float threshold_normal,
+        const float threshold_depth,
+        const AT_NAME::Path& paths,
+        const aten::CameraParameter& camera,
+        AT_NAME::SVGFParams<std::vector<aten::vec4>>& svgf_param)
+    {
+        auto& curr_aov = svgf_param.GetCurrAovBuffer();
+        auto& prev_aov = svgf_param.GetPrevAovBuffer();
+
+        aten::span<aten::vec4> contribs(reinterpret_cast<aten::vec4*>(paths.contrib), width * height);
+        auto curr_aov_normal_depth{ curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::NormalDepth>() };
+        auto curr_aov_texclr_meshid{ curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::AlbedoMeshId>() };
+        auto curr_aov_color_variance{ curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>() };
+        auto curr_aov_moment_temporalweight{ curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>() };
+        auto prev_aov_normal_depth{ prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::NormalDepth>() };
+        auto prev_aov_texclr_meshid{ prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::AlbedoMeshId>() };
+        auto prev_aov_color_variance{ prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>() };
+        auto prev_aov_moment_temporalweight{ prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>() };
+
+        const auto idx = ix * iy * width;
+
+        auto extracted_center_pixel = AT_NAME::svgf::ExtractCenterPixel(
+            idx,
+            contribs,
+            curr_aov_normal_depth,
+            curr_aov_texclr_meshid);
+
+        const auto center_meshid = aten::get<2>(extracted_center_pixel);
+        auto curr_color = aten::get<3>(extracted_center_pixel);
+
+        auto back_ground_pixel_clr = AT_NAME::svgf::CheckIfPixelIsBackground(
+            idx, curr_color, center_meshid,
+            curr_aov_color_variance, curr_aov_moment_temporalweight);
+        if (back_ground_pixel_clr) {
+            return back_ground_pixel_clr.value();
+        }
+
+        const auto center_normal = aten::get<0>(extracted_center_pixel);
+        const float center_depth = aten::get<1>(extracted_center_pixel);
+
+        auto weight = AT_NAME::svgf::TemporalReprojection(
+            ix, iy, width, height,
+            threshold_normal, threshold_depth,
+            center_normal, center_depth, center_meshid,
+            curr_color,
+            curr_aov_color_variance, curr_aov_moment_temporalweight,
+            prev_aov_normal_depth, prev_aov_texclr_meshid, prev_aov_color_variance,
+            svgf_param.motion_depth_buffer);
+
+        AT_NAME::svgf::AccumulateMoments(
+            idx, weight,
+            curr_aov_color_variance,
+            curr_aov_moment_temporalweight,
+            prev_aov_moment_temporalweight);
+
+        return curr_color;
+    }
+
     void SVGFRenderer::Initialize(
         const Destination& dst,
         const camera& camera)
@@ -322,23 +383,12 @@ namespace aten
                                 aten::span<decltype(params_)::buffer_value_type>(params_.temporary_color_buffer));
                         }
 
-                        auto& curr_aov = params_.GetCurrAovBuffer();
-                        auto& prev_aov = params_.GetPrevAovBuffer();
-
-                        auto teporal_projected_clr = AT_NAME::svgf::TemporalReprojection(
+                        auto teporal_projected_clr = TemporalReprojection(
                             x, y, width, height,
                             0.98f, 0.05f,
-                            aten::span<std::remove_pointer_t<decltype(path_host_.paths.contrib)>>(path_host_.paths.contrib, width * height),
+                            path_host_.paths,
                             camera->param(),
-                            curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::NormalDepth>(),
-                            curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::AlbedoMeshId>(),
-                            curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>(),
-                            curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>(),
-                            prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::NormalDepth>(),
-                            prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::AlbedoMeshId>(),
-                            prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>(),
-                            prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>(),
-                            params_.motion_depth_buffer);
+                            params_);
 
                         auto c = path_host_.paths.contrib[idx].contrib;
 

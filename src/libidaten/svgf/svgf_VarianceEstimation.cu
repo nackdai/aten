@@ -8,6 +8,7 @@
 #include "cuda/cudamemory.h"
 
 #include "aten4idaten.h"
+#include "renderer/svgf/svgf_impl.h"
 
 __global__ void varianceEstimation(
     cudaSurfaceObject_t dst,
@@ -26,100 +27,23 @@ __global__ void varianceEstimation(
         return;
     }
 
-    const int32_t idx = getIdx(ix, iy, width);
+    const size_t size = width * height;
 
-    auto normalDepth = aovNormalDepth[idx];
-    auto texclrMeshid = aovTexclrMeshid[idx];
-    auto momentTemporalWeight = aovMomentTemporalWeight[idx];
-    auto centerColor = aovColorVariance[idx];
+    auto aov_normal_depth{ aten::span<float4>(const_cast<float4*>(aovNormalDepth), size) };
+    auto aov_texclr_meshid{ aten::span<float4>(aovTexclrMeshid, size) };
+    auto aov_color_variance{ aten::span<float4>(aovColorVariance, size) };
+    auto aov_moment_temporalweight{ aten::span<float4>(aovMomentTemporalWeight, size) };
 
-    float centerDepth = aovNormalDepth[idx].w;
-    int32_t centerMeshId = (int32_t)texclrMeshid.w;
-
-    if (centerMeshId < 0) {
-        // 背景なので、分散はゼロ.
-        aovMomentTemporalWeight[idx].x = 0;
-        aovMomentTemporalWeight[idx].y = 0;
-        aovMomentTemporalWeight[idx].z = 1;
-
-        surf2Dwrite(
-            make_float4(0),
-            dst,
-            ix * sizeof(float4), iy,
-            cudaBoundaryModeTrap);
-    }
-
-    float pixelDistanceRatio = (centerDepth / cameraDistance) * height;
-
-    float3 centerMoment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
-
-    int32_t frame = (int32_t)centerMoment.z;
-
-    centerMoment /= centerMoment.z;
-
-    float var = 0.0f;
-    float4 color = centerColor;
-
-    if (frame < 4) {
-        // 積算フレーム数が４未満 or Disoccludedされている.
-        // 7x7birateral filterで輝度を計算.
-
-        float3 centerNormal = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
-
-        float3 momentSum = make_float3(centerMoment.x, centerMoment.y, centerMoment.z);
-        float weight = 1.0f;
-
-        float radius = frame > 1 ? 2 : 3;
-
-        for (int32_t v = -radius; v <= radius; v++)
-        {
-            for (int32_t u = -radius; u <= radius; u++)
-            {
-                if (u != 0 || v != 0) {
-                    int32_t xx = clamp(ix + u, 0, width - 1);
-                    int32_t yy = clamp(iy + v, 0, height - 1);
-
-                    int32_t pidx = getIdx(xx, yy, width);
-                    normalDepth = aovNormalDepth[pidx];
-                    texclrMeshid = aovTexclrMeshid[pidx];
-                    momentTemporalWeight = aovMomentTemporalWeight[pidx];
-
-                    float3 sampleNml = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
-                    float sampleDepth = normalDepth.w;
-                    int32_t sampleMeshId = (int32_t)texclrMeshid.w;
-                    auto sampleColor = aovColorVariance[pidx];
-
-                    float3 moment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
-                    moment /= moment.z;
-
-                    float Wz = aten::abs(sampleDepth - centerDepth) / (pixelDistanceRatio * length(make_float2(u, v)) + 1e-2);
-                    float Wn = aten::pow(aten::cmpMax(0.0f, dot(sampleNml, centerNormal)), 128.0f);
-
-                    float Wm = centerMeshId == sampleMeshId ? 1.0f : 0.0f;
-
-                    float W = exp(-Wz) * Wn * Wm;
-
-                    momentSum += moment * W;
-                    color += sampleColor * W;
-                    weight += W;
-                }
-            }
-        }
-
-        momentSum /= weight;
-        color /= weight;
-
-        var = 1.0f + 3.0f * (1.0f - frame / 4.0f) * max(0.0, momentSum.y - momentSum.x * momentSum.x);
-    }
-    else {
-        var = max(0.0f, centerMoment.x - centerMoment.y * centerMoment.y);
-    }
-
-    color.w = var;
-    aovColorVariance[idx] = color;
+    auto result = AT_NAME::svgf::EstimateVariance(
+        ix, iy, width, height,
+        mtx_C2V, cameraDistance,
+        aov_normal_depth,
+        aov_texclr_meshid,
+        aov_color_variance,
+        aov_moment_temporalweight);
 
     surf2Dwrite(
-        make_float4(var, var, var, 1),
+        result,
         dst,
         ix * sizeof(float4), iy,
         cudaBoundaryModeTrap);
@@ -136,13 +60,12 @@ namespace idaten
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
-        float cameraDistance = height / (2.0f * aten::tan(0.5f * m_cam.vfov));
+        float cameraDistance = AT_NAME::camera::ComputeScreenDistance(m_cam, height);
 
         int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
 
         varianceEstimation << <grid, block, 0, m_stream >> > (
-        //varianceEstimation << <1, 1 >> > (
             outputSurf,
             curaov.get<AOVBuffer::NormalDepth>().data(),
             curaov.get<AOVBuffer::MomentTemporalWeight>().data(),

@@ -8,7 +8,6 @@
 #include "cuda/cudamemory.h"
 
 #include "aten4idaten.h"
-#include "renderer/pathtracing/pathtracing_impl.h"
 #include "renderer/svgf/svgf_impl.h"
 
 //#define ENABLE_MEDIAN_FILTER
@@ -119,15 +118,17 @@ __global__ void temporalReprojection(
 
     const auto idx = getIdx(ix, iy, width);
 
-    auto contribs{ aten::span<float4>(const_cast<float4*>(contributes), width * height) };
-    auto curr_aov_normal_depth{ aten::span<float4>(curAovNormalDepth, width * height) };
-    auto curr_aov_texclr_meshid{ aten::span<float4>(curAovTexclrMeshid, width * height) };
-    auto curr_aov_color_variance{ aten::span<float4>(curAovColorVariance, width * height) };
-    auto curr_aov_moment_temporalweight{ aten::span<float4>(curAovMomentTemporalWeight, width * height) };
-    auto prev_aov_normal_depth{ aten::span<float4>(const_cast<float4*>(prevAovNormalDepth), width * height) };
-    auto prev_aov_texclr_meshid{ aten::span<float4>(const_cast<float4*>(prevAovTexclrMeshid), width * height) };
-    auto prev_aov_color_variance{ aten::span<float4>(const_cast<float4*>(prevAovColorVariance), width * height) };
-    auto prev_aov_moment_temporalweight{ aten::span<float4>(const_cast<float4*>(prevAovMomentTemporalWeight), width * height) };
+    const size_t size = width * height;
+
+    auto contribs{ aten::span<float4>(const_cast<float4*>(contributes), size) };
+    auto curr_aov_normal_depth{ aten::span<float4>(curAovNormalDepth, size) };
+    auto curr_aov_texclr_meshid{ aten::span<float4>(curAovTexclrMeshid, size) };
+    auto curr_aov_color_variance{ aten::span<float4>(curAovColorVariance, size) };
+    auto curr_aov_moment_temporalweight{ aten::span<float4>(curAovMomentTemporalWeight, size) };
+    auto prev_aov_normal_depth{ aten::span<float4>(const_cast<float4*>(prevAovNormalDepth), size) };
+    auto prev_aov_texclr_meshid{ aten::span<float4>(const_cast<float4*>(prevAovTexclrMeshid), size) };
+    auto prev_aov_color_variance{ aten::span<float4>(const_cast<float4*>(prevAovColorVariance), size) };
+    auto prev_aov_moment_temporalweight{ aten::span<float4>(const_cast<float4*>(prevAovMomentTemporalWeight), size) };
 
     auto extracted_center_pixel = AT_NAME::svgf::ExtractCenterPixel(
         idx,

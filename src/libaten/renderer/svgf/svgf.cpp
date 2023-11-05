@@ -269,6 +269,29 @@ namespace aten
         return curr_color;
     }
 
+    aten::vec4 SVGFRenderer::EstimateVariance(
+        const int32_t ix, const int32_t iy,
+        const int32_t width, const int32_t height,
+        const float camera_distance,
+        AT_NAME::SVGFParams<std::vector<aten::vec4>>& svgf_param)
+    {
+        auto& curr_aov = svgf_param.GetCurrAovBuffer();
+
+        auto aov_normal_depth{ curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::NormalDepth>() };
+        auto aov_texclr_meshid{ curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::AlbedoMeshId>() };
+        auto aov_color_variance{ curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>() };
+        auto aov_moment_temporalweight{ curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>() };
+
+        return AT_NAME::svgf::EstimateVariance(
+            ix, iy, width, height,
+            svgf_param.mtxs.mtx_C2V,
+            camera_distance,
+            aov_normal_depth,
+            aov_texclr_meshid,
+            aov_color_variance,
+            aov_moment_temporalweight);
+    }
+
     void SVGFRenderer::Initialize(
         const Destination& dst,
         const camera& camera)
@@ -388,6 +411,12 @@ namespace aten
                             0.98f, 0.05f,
                             path_host_.paths,
                             camera->param(),
+                            params_);
+
+                        auto camera_distance = AT_NAME::camera::ComputeScreenDistance(camera->param(), height);
+                        auto variance = EstimateVariance(
+                            x, y, width, height,
+                            camera_distance,
                             params_);
 
                         auto c = path_host_.paths.contrib[idx].contrib;

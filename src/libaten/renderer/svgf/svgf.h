@@ -61,6 +61,12 @@ namespace aten
             const aten::CameraParameter& camera,
             AT_NAME::SVGFParams<std::vector<aten::vec4>>& svgf_param);
 
+        static aten::vec4 EstimateVariance(
+            const int32_t ix, const int32_t iy,
+            const int32_t width, const int32_t height,
+            const float camera_distance,
+            AT_NAME::SVGFParams<std::vector<aten::vec4>>& svgf_param);
+
     private:
         PathHost path_host_;
         std::vector<aten::ray> rays_;

@@ -381,5 +381,225 @@ namespace svgf {
 
         return AT_NAME::_detail::MakeVec4(variance, variance, variance, 1);
     }
+
+    inline AT_DEVICE_MTRL_API float ExecGaussFilter3x3(
+        int32_t ix, int32_t iy,
+        int32_t w, int32_t h,
+        const aten::const_span<AT_NAME::_detail::v4>& color_variance_buffer)
+    {
+        static constexpr float kernel_array[] = {
+            1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
+            1.0 / 8.0,  1.0 / 4.0, 1.0 / 8.0,
+            1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
+        };
+        static constexpr aten::const_span<float> kernel(kernel_array);
+
+        static constexpr int32_t offsetx_array[] = {
+            -1, 0, 1,
+            -1, 0, 1,
+            -1, 0, 1,
+        };
+        static constexpr aten::const_span<int32_t> offsetx(offsetx_array);
+
+        static constexpr int32_t offsety_array[] = {
+            -1, -1, -1,
+            0, 0, 0,
+            1, 1, 1,
+        };
+        static constexpr aten::const_span<int32_t> offsety(offsety_array);
+
+        float sum = 0;
+
+        int32_t pos = 0;
+
+#pragma unroll
+        for (int32_t i = 0; i < 9; i++) {
+            int32_t xx = clamp(ix + offsetx[i], 0, w - 1);
+            int32_t yy = clamp(iy + offsety[i], 0, h - 1);
+
+            int32_t idx = _detail::GetIdx(xx, yy, w);
+
+            float tmp = color_variance_buffer[idx].w;
+
+            sum += kernel[pos] * tmp;
+
+            pos++;
+        }
+
+        return sum;
+    }
+
+    inline AT_DEVICE_MTRL_API std::optional<AT_NAME::_detail::v4> ExecAtrousFilter(
+        const int32_t ix, const int32_t iy,
+        const int32_t width, const int32_t height,
+        bool is_first_iter, bool is_final_iter,
+        aten::span< AT_NAME::_detail::v4>& temporary_color_buffer,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_normal_depth,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_color_variance,
+        const aten::const_span<AT_NAME::_detail::v4>& color_variance_buffer,
+        aten::span< AT_NAME::_detail::v4>& next_color_variance_buffer,
+        const int32_t step_scale,
+        const float camera_distance)
+    {
+        const int32_t idx = _detail::GetIdx(ix, iy, width);
+
+        auto normal_depth = aov_normal_depth[idx];
+        auto texclr_meshid = aov_texclr_meshid[idx];
+
+        const auto center_normal = AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z);
+        const auto center_depth = normal_depth.w;
+        const int32_t center_meshid = static_cast<int32_t>(texclr_meshid.w);
+
+        AT_NAME::_detail::v4 center_color;
+
+        if (is_first_iter) {
+            center_color = aov_color_variance[idx];
+        }
+        else {
+            center_color = color_variance_buffer[idx];
+        }
+
+        if (center_meshid < 0) {
+            // If mesh id is negative, the pixel is the background.
+            // So, just output the background pixel.
+            next_color_variance_buffer[idx] = AT_NAME::_detail::MakeVec4(center_color.x, center_color.y, center_color.z, 0.0f);
+
+            if (is_final_iter) {
+                // In the finaly iteration, apply albedo.
+                center_color *= texclr_meshid;
+                return center_color;
+            }
+
+            return std::nullopt;
+        }
+
+        float center_luminance = AT_NAME::color::luminance(center_color.x, center_color.y, center_color.z);
+
+        // 3x3 Gauss filter.
+        float gauss_filtered_variance;
+
+        if (is_first_iter) {
+            gauss_filtered_variance = ExecGaussFilter3x3(ix, iy, width, height, aov_color_variance);
+        }
+        else {
+            gauss_filtered_variance = ExecGaussFilter3x3(ix, iy, width, height, color_variance_buffer);
+        }
+
+        float sqrt_gauss_filtered_variance = sqrt(gauss_filtered_variance);
+
+        static constexpr float sigmaZ = 1.0f;
+        static constexpr float sigmaN = 128.0f;
+        static constexpr float sigmaL = 4.0f;
+
+        static constexpr float h_array[] = {
+            2.0 / 3.0,  2.0 / 3.0,  2.0 / 3.0,  2.0 / 3.0,
+            1.0 / 6.0,  1.0 / 6.0,  1.0 / 6.0,  1.0 / 6.0,
+            4.0 / 9.0,  4.0 / 9.0,  4.0 / 9.0,  4.0 / 9.0,
+            1.0 / 9.0,  1.0 / 9.0,  1.0 / 9.0,  1.0 / 9.0,
+            1.0 / 9.0,  1.0 / 9.0,  1.0 / 9.0,  1.0 / 9.0,
+            1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0,
+        };
+        static constexpr aten::const_span<float> h(h_array);
+
+        static constexpr int32_t offsetx_array[] = {
+            1,  0, -1, 0,
+            2,  0, -2, 0,
+            1, -1, -1, 1,
+            1, -1, -1, 1,
+            2, -2, -2, 2,
+            2, -2, -2, 2,
+        };
+        static constexpr aten::const_span<int32_t> offsetx(offsetx_array);
+
+        static constexpr int32_t offsety_array[] = {
+            0, 1,  0, -1,
+            0, 2,  0, -2,
+            1, 1, -1, -1,
+            2, 2, -2, -2,
+            1, 1, -1, -1,
+            2, 2, -2, -2,
+        };
+        static constexpr aten::const_span<int32_t> offsety(offsety_array);
+
+        auto sumC = center_color;
+        auto sumV = center_color.w;
+        auto weight = 1.0f;
+
+        int32_t pos = 0;
+
+        const auto pixel_distance_ratio = (center_depth / camera_distance) * height;
+
+#pragma unroll
+        for (int32_t i = 0; i < 24; i++)
+        {
+            int32_t scaled_offset_x = offsetx[i] * step_scale;
+            int32_t scaled_offset_y = offsety[i] * step_scale;
+
+            int32_t xx = clamp(ix + scaled_offset_x, 0, width - 1);
+            int32_t yy = clamp(iy + scaled_offset_y, 0, height - 1);
+
+            const auto u_length = aten::sqrt(scaled_offset_x * scaled_offset_x + scaled_offset_y * scaled_offset_y);
+
+            const int32_t qidx = _detail::GetIdx(xx, yy, width);
+
+            normal_depth = aov_normal_depth[qidx];
+            texclr_meshid = aov_texclr_meshid[qidx];
+
+            const auto normal = AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z);
+
+            const auto depth = normal_depth.w;
+            const int32_t meshid = static_cast<int32_t>(texclr_meshid.w);
+
+            AT_NAME::_detail::v4 color;
+            float variance;
+
+            if (is_first_iter) {
+                color = aov_color_variance[qidx];
+                variance = color.w;
+            }
+            else {
+                color = color_variance_buffer[qidx];
+                variance = color.w;
+            }
+
+            float lum = AT_NAME::color::luminance(color.x, color.y, color.z);
+
+            float Wz = 3.0f * fabs(center_depth - depth) / (pixel_distance_ratio * u_length + 0.000001f);
+
+            float Wn = powf(aten::cmpMax(0.0f, dot(center_normal, normal)), sigmaN);
+
+            float Wl = aten::cmpMin(expf(-fabs(center_luminance - lum) / (sigmaL * sqrt_gauss_filtered_variance + 0.000001f)), 1.0f);
+
+            float Wm = meshid == center_meshid ? 1.0f : 0.0f;
+
+            float W = expf(-Wl * Wl - Wz) * Wn * Wm * h[i];
+
+            sumC += W * color;
+            sumV += W * W * variance;
+
+            weight += W;
+
+            pos++;
+        }
+
+        sumC /= weight;
+        sumV /= (weight * weight);
+
+        next_color_variance_buffer[idx] = AT_NAME::_detail::v4(sumC.x, sumC.y, sumC.z, sumV);
+
+        if (is_first_iter) {
+            // Store color temporarily.
+            temporary_color_buffer[idx] = sumC;
+        }
+
+        if (is_final_iter) {
+            // In the finaly iteration, apply albedo.
+            texclr_meshid = aov_texclr_meshid[idx];
+            sumC *= texclr_meshid;
+            return sumC;
+        }
+        return std::nullopt;
+    }
 }   // namespace svgf
 }   // namespace AT_NAME

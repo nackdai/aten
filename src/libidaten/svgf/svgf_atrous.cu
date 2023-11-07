@@ -9,50 +9,6 @@
 
 #include "aten4idaten.h"
 
-inline __device__ float gaussFilter3x3(
-    int32_t ix, int32_t iy,
-    int32_t w, int32_t h,
-    const float4* __restrict__ var)
-{
-    static const float kernel[] = {
-        1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
-        1.0 / 8.0,  1.0 / 4.0, 1.0 / 8.0,
-        1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
-    };
-
-    static const int32_t offsetx[] = {
-        -1, 0, 1,
-        -1, 0, 1,
-        -1, 0, 1,
-    };
-
-    static const int32_t offsety[] = {
-        -1, -1, -1,
-        0, 0, 0,
-        1, 1, 1,
-    };
-
-    float sum = 0;
-
-    int32_t pos = 0;
-
-#pragma unroll
-    for (int32_t i = 0; i < 9; i++) {
-        int32_t xx = clamp(ix + offsetx[i], 0, w - 1);
-        int32_t yy = clamp(iy + offsety[i], 0, h - 1);
-
-        int32_t idx = getIdx(xx, yy, w);
-
-        float tmp = var[idx].w;
-
-        sum += kernel[pos] * tmp;
-
-        pos++;
-    }
-
-    return sum;
-}
-
 __global__ void atrousFilter(
     bool isFirstIter, bool isFinalIter,
     cudaSurfaceObject_t dst,

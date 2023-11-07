@@ -101,14 +101,15 @@ namespace svgf {
         return contrib;
     }
 
+    template <bool WillDevideColorByW = true, typename Span_v4>
     inline AT_DEVICE_MTRL_API aten::tuple<AT_NAME::_detail::v3, real, int32_t, AT_NAME::_detail::v4> ExtractCenterPixel(
         int32_t idx,
         const aten::const_span<AT_NAME::_detail::v4>& contribs,
-        aten::span<AT_NAME::_detail::v4>& curr_aov_normal_depth,
-        aten::span<AT_NAME::_detail::v4>& curr_aov_texclr_meshid)
+        Span_v4& curr_aov_normal_depth,
+        Span_v4& curr_aov_texclr_meshid)
     {
-        auto nml_depth = curr_aov_normal_depth[idx];
-        auto texclr_meshid = curr_aov_texclr_meshid[idx];
+        const auto& nml_depth = curr_aov_normal_depth[idx];
+        const auto& texclr_meshid = curr_aov_texclr_meshid[idx];
 
         const float center_depth = nml_depth.w;
         const int32_t center_meshid = static_cast<int32_t>(texclr_meshid.w);
@@ -116,15 +117,17 @@ namespace svgf {
         // Pixel color of this frame.
         const auto& contrib = contribs[idx];
 
-        auto curr_color = AT_NAME::_detail::MakeVec4<AT_NAME::_detail::v4>(contrib.x, contrib.y, contrib.z, 1.0f);
-        curr_color /= contrib.w;
+        auto curr_color{ AT_NAME::_detail::MakeVec4<AT_NAME::_detail::v4>(contrib.x, contrib.y, contrib.z, 1.0f) };
+        if constexpr (WillDevideColorByW) {
+            curr_color /= contrib.w;
+        }
 
         auto center_normal = AT_NAME::_detail::MakeVec3(nml_depth.x, nml_depth.y, nml_depth.z);
 
         return aten::make_tuple(center_normal, center_depth, center_meshid, curr_color);
     }
 
-    inline AT_DEVICE_MTRL_API std::optional<AT_NAME::_detail::v4> CheckIfPixelIsBackground(
+    inline AT_DEVICE_MTRL_API std::optional<AT_NAME::_detail::v4> CheckIfBackgroundPixel(
         const int32_t idx,
         const AT_NAME::_detail::v4& curr_color,
         const int32_t center_meshid,
@@ -238,7 +241,7 @@ namespace svgf {
 
                 const float prev_depth = nml_depth.w;
                 const int32_t prev_meshid = (int32_t)texclr_meshid.w;
-                auto prev_normal = AT_NAME::_detail::MakeVec3(nml_depth.x, nml_depth.y, nml_depth.z);
+                const auto prev_normal{ AT_NAME::_detail::MakeVec3(nml_depth.x, nml_depth.y, nml_depth.z) };
 
                 // TODO
                 // 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
@@ -287,11 +290,11 @@ namespace svgf {
     {
         const int32_t idx = _detail::GetIdx(ix, iy, width);
 
-        auto normal_depth = aov_normal_depth[idx];
-        auto texclr_meshid = aov_texclr_meshid[idx];
-        auto moment_temporalweight = aov_moment_temporalweight[idx];
+        const auto& normal_depth = aov_normal_depth[idx];
+        const auto& texclr_meshid = aov_texclr_meshid[idx];
+        const auto& moment_temporalweight = aov_moment_temporalweight[idx];
 
-        const auto center_color = aov_color_variance[idx];
+        const auto& center_color = aov_color_variance[idx];
 
         const float center_depth = aov_normal_depth[idx].w;
         const int32_t center_meshid = static_cast<int32_t>(texclr_meshid.w);
@@ -308,7 +311,7 @@ namespace svgf {
 
         const float pixel_distance_ratio = (center_depth / camera_distance) * height;
 
-        auto center_moment = AT_NAME::_detail::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z);
+        auto center_moment{ AT_NAME::_detail::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z) };
 
         int32_t frame = static_cast<int32_t>(center_moment.z);
 
@@ -323,9 +326,9 @@ namespace svgf {
             // Accumulated farme is less than 4 or the pixel is disoccluded.
             // Compute the luminance by 7x7birateral filter.
 
-            auto center_normal = AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z);
+            auto center_normal{ AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z) };
 
-            auto moment_sum = AT_NAME::_detail::MakeVec3(center_moment.x, center_moment.y, center_moment.z);
+            auto moment_sum{ AT_NAME::_detail::MakeVec3(center_moment.x, center_moment.y, center_moment.z) };
             float weight = 1.0f;
 
             int32_t radius = frame > 1 ? 2 : 3;
@@ -339,16 +342,16 @@ namespace svgf {
                         int32_t yy = clamp(iy + v, 0, height - 1);
 
                         int32_t sample_idx = _detail::GetIdx(xx, yy, width);
-                        normal_depth = aov_normal_depth[sample_idx];
-                        texclr_meshid = aov_texclr_meshid[sample_idx];
-                        moment_temporalweight = aov_moment_temporalweight[sample_idx];
+                        const auto& normal_depth = aov_normal_depth[sample_idx];
+                        const auto& texclr_meshid = aov_texclr_meshid[sample_idx];
+                        const auto& moment_temporalweight = aov_moment_temporalweight[sample_idx];
 
-                        const auto sample_nml = AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z);
+                        const auto sample_nml{ AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z) };
                         const float sample_depth = normal_depth.w;
                         const int32_t sample_meshid = static_cast<int32_t>(texclr_meshid.w);
-                        const auto sample_color = aov_color_variance[sample_idx];
+                        const auto& sample_color = aov_color_variance[sample_idx];
 
-                        auto moment = AT_NAME::_detail::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z);
+                        auto moment{ AT_NAME::_detail::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z) };
                         moment /= moment.z;
 
                         const auto uv_length = aten::sqrt(static_cast<real>(u * u + v * v));
@@ -429,53 +432,13 @@ namespace svgf {
         return sum;
     }
 
-    inline AT_DEVICE_MTRL_API std::optional<AT_NAME::_detail::v4> ExecAtrousFilter(
+    inline AT_DEVICE_MTRL_API real ComputeGaussFiltereredVariance(
+        const bool is_first_iter,
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
-        bool is_first_iter, bool is_final_iter,
-        aten::span< AT_NAME::_detail::v4>& temporary_color_buffer,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_normal_depth,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
         const aten::const_span<AT_NAME::_detail::v4>& aov_color_variance,
-        const aten::const_span<AT_NAME::_detail::v4>& color_variance_buffer,
-        aten::span< AT_NAME::_detail::v4>& next_color_variance_buffer,
-        const int32_t step_scale,
-        const float camera_distance)
+        const aten::const_span<AT_NAME::_detail::v4>& color_variance_buffer)
     {
-        const int32_t idx = _detail::GetIdx(ix, iy, width);
-
-        auto normal_depth = aov_normal_depth[idx];
-        auto texclr_meshid = aov_texclr_meshid[idx];
-
-        const auto center_normal = AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z);
-        const auto center_depth = normal_depth.w;
-        const int32_t center_meshid = static_cast<int32_t>(texclr_meshid.w);
-
-        AT_NAME::_detail::v4 center_color;
-
-        if (is_first_iter) {
-            center_color = aov_color_variance[idx];
-        }
-        else {
-            center_color = color_variance_buffer[idx];
-        }
-
-        if (center_meshid < 0) {
-            // If mesh id is negative, the pixel is the background.
-            // So, just output the background pixel.
-            next_color_variance_buffer[idx] = AT_NAME::_detail::MakeVec4(center_color.x, center_color.y, center_color.z, 0.0f);
-
-            if (is_final_iter) {
-                // In the finaly iteration, apply albedo.
-                center_color *= texclr_meshid;
-                return center_color;
-            }
-
-            return std::nullopt;
-        }
-
-        float center_luminance = AT_NAME::color::luminance(center_color.x, center_color.y, center_color.z);
-
         // 3x3 Gauss filter.
         float gauss_filtered_variance;
 
@@ -486,8 +449,55 @@ namespace svgf {
             gauss_filtered_variance = ExecGaussFilter3x3(ix, iy, width, height, color_variance_buffer);
         }
 
-        float sqrt_gauss_filtered_variance = sqrt(gauss_filtered_variance);
+        return gauss_filtered_variance;
+    }
 
+    inline AT_DEVICE_MTRL_API std::optional<std::optional<AT_NAME::_detail::v4>> CheckIfBackgroundPixelForAtrous(
+        const bool is_final_iter,
+        const int32_t idx,
+        const int32_t center_meshid,
+        const AT_NAME::_detail::v4& center_color,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
+        aten::span< AT_NAME::_detail::v4>& next_color_variance_buffer)
+    {
+        std::optional<AT_NAME::_detail::v4> result;
+
+        if (center_meshid < 0) {
+            // If mesh id is negative, the pixel is the background.
+            // So, just output the background pixel.
+            next_color_variance_buffer[idx] = AT_NAME::_detail::MakeVec4(center_color.x, center_color.y, center_color.z, 0.0f);
+
+            if (is_final_iter) {
+                // In the finaly iteration, apply albedo.
+                auto texclr_meshid{ aov_texclr_meshid[idx] };
+                // NOTE:
+                // center_color is constant. So, multiply to texclr_meshid, and return it as the albedo applied color.
+                texclr_meshid *= center_color;
+                result = std::make_optional(texclr_meshid);
+            }
+
+            return result;
+        }
+
+        return std::nullopt;
+    }
+
+    inline AT_DEVICE_MTRL_API AT_NAME::_detail::v4 ExecAtrousWaveletFilter(
+        bool is_first_iter, bool is_final_iter,
+        const int32_t ix, const int32_t iy,
+        const int32_t width, const int32_t height,
+        float gauss_filtered_variance,
+        const AT_NAME::_detail::v3& center_normal,
+        const float center_depth,
+        const int32_t center_meshid,
+        const AT_NAME::_detail::v4& center_color,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_normal_depth,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_color_variance,
+        const aten::const_span<AT_NAME::_detail::v4>& color_variance_buffer,
+        const int32_t step_scale,
+        const float camera_distance)
+    {
         static constexpr float sigmaZ = 1.0f;
         static constexpr float sigmaN = 128.0f;
         static constexpr float sigmaL = 4.0f;
@@ -522,6 +532,11 @@ namespace svgf {
         };
         static constexpr aten::const_span<int32_t> offsety(offsety_array);
 
+        const int32_t idx = _detail::GetIdx(ix, iy, width);
+
+        float sqrt_gauss_filtered_variance = sqrt(gauss_filtered_variance);
+
+        auto center_luminance = AT_NAME::color::luminance(center_color.x, center_color.y, center_color.z);
         auto sumC = center_color;
         auto sumV = center_color.w;
         auto weight = 1.0f;
@@ -543,25 +558,16 @@ namespace svgf {
 
             const int32_t qidx = _detail::GetIdx(xx, yy, width);
 
-            normal_depth = aov_normal_depth[qidx];
-            texclr_meshid = aov_texclr_meshid[qidx];
+            const auto& normal_depth = aov_normal_depth[qidx];
+            const auto& texclr_meshid = aov_texclr_meshid[qidx];
 
-            const auto normal = AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z);
+            const auto normal{ AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z) };
 
             const auto depth = normal_depth.w;
             const int32_t meshid = static_cast<int32_t>(texclr_meshid.w);
 
-            AT_NAME::_detail::v4 color;
-            float variance;
-
-            if (is_first_iter) {
-                color = aov_color_variance[qidx];
-                variance = color.w;
-            }
-            else {
-                color = color_variance_buffer[qidx];
-                variance = color.w;
-            }
+            const auto& color = is_first_iter ? aov_color_variance[qidx] : color_variance_buffer[qidx];
+            const auto variance = color.w;
 
             float lum = AT_NAME::color::luminance(color.x, color.y, color.z);
 
@@ -586,18 +592,34 @@ namespace svgf {
         sumC /= weight;
         sumV /= (weight * weight);
 
-        next_color_variance_buffer[idx] = AT_NAME::_detail::v4(sumC.x, sumC.y, sumC.z, sumV);
+        return AT_NAME::_detail::MakeVec4(sumC.x, sumC.y, sumC.z, sumV);
+    }
+
+    inline AT_DEVICE_MTRL_API std::optional<AT_NAME::_detail::v4> PostProcessForAtrousFilter(
+        bool is_first_iter, bool is_final_iter,
+        const int32_t idx,
+        const AT_NAME::_detail::v4& filtered_color_variance,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
+        aten::span< AT_NAME::_detail::v4>& temporary_color_buffer,
+        aten::span< AT_NAME::_detail::v4>& next_color_variance_buffer)
+    {
+        next_color_variance_buffer[idx] = filtered_color_variance;
 
         if (is_first_iter) {
             // Store color temporarily.
-            temporary_color_buffer[idx] = sumC;
+            temporary_color_buffer[idx].x = filtered_color_variance.x;
+            temporary_color_buffer[idx].y = filtered_color_variance.y;
+            temporary_color_buffer[idx].z = filtered_color_variance.z;
         }
 
         if (is_final_iter) {
             // In the finaly iteration, apply albedo.
-            texclr_meshid = aov_texclr_meshid[idx];
-            sumC *= texclr_meshid;
-            return sumC;
+            auto texclr_meshid{ aov_texclr_meshid[idx] };
+
+            // NOTE:
+            // filtered_color_variance is constant. So, multiply to texclr_meshid, and return it as the albedo applied color.
+            texclr_meshid *= filtered_color_variance;
+            return texclr_meshid;
         }
         return std::nullopt;
     }

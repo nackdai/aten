@@ -136,10 +136,10 @@ __global__ void temporalReprojection(
         curr_aov_normal_depth,
         curr_aov_texclr_meshid);
 
-    const auto center_meshid = aten::get<2>(extracted_center_pixel);
-    auto curr_color = aten::get<3>(extracted_center_pixel);
+    const auto center_meshid{ aten::get<2>(extracted_center_pixel) };
+    auto curr_color{ aten::get<3>(extracted_center_pixel) };
 
-    auto back_ground_pixel_clr = AT_NAME::svgf::CheckIfPixelIsBackground(
+    auto back_ground_pixel_clr = AT_NAME::svgf::CheckIfBackgroundPixel(
         idx, curr_color, center_meshid,
         curr_aov_color_variance, curr_aov_moment_temporalweight);
     if (back_ground_pixel_clr) {
@@ -151,8 +151,8 @@ __global__ void temporalReprojection(
         return;
     }
 
-    const auto center_normal = aten::get<0>(extracted_center_pixel);
-    const float center_depth = aten::get<1>(extracted_center_pixel);
+    const auto center_normal{ aten::get<0>(extracted_center_pixel) };
+    const float center_depth{ aten::get<1>(extracted_center_pixel) };
 
     auto weight = AT_NAME::svgf::TemporalReprojection(
         ix, iy, width, height,

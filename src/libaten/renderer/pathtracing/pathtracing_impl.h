@@ -296,13 +296,13 @@ namespace AT_NAME
         {
             auto cosShadow = dot(hit_nml, dirToLight);
 
-            real pdfb = AT_NAME::material::samplePDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v);
-            auto bsdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, external_albedo, pre_sampled_r);
+            real pdfb{ AT_NAME::material::samplePDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v) };
+            auto bsdf{ AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, external_albedo, pre_sampled_r) };
 
             bsdf *= throughtput.throughput;
 
             // Get light color.
-            auto emit = sampleres.finalColor;
+            auto emit{ sampleres.finalColor };
 
             if (light.attrib.isInfinite || light.attrib.isSingular) {
                 if (pdfLight > real(0) && cosShadow >= 0) {
@@ -458,7 +458,7 @@ namespace AT_NAME
             }
         }
 
-        auto contrib = path_throughput.throughput * weight * static_cast<aten::vec3>(hit_target_mtrl.baseColor);
+        auto contrib{ path_throughput.throughput * weight * static_cast<aten::vec3>(hit_target_mtrl.baseColor) };
         _detail::AddVec3(path_contrib.contrib, contrib);
 
         // When ray hit the light, tracing will finish.
@@ -544,9 +544,9 @@ namespace AT_NAME
         // Get normal to add ray offset.
         // In refraction material case, new ray direction might be computed with inverted normal.
         // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
-        auto rayBasedNormal = (!is_backfacing && mtrl.attrib.isTranslucent)
+        auto rayBasedNormal{ (!is_backfacing && mtrl.attrib.isTranslucent)
             ? -normal
-            : normal;
+            : normal };
 
         auto c = dot(rayBasedNormal, static_cast<aten::vec3>(nextDir));
 

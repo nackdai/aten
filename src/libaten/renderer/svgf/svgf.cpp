@@ -241,7 +241,7 @@ namespace aten
         const auto center_meshid = aten::get<2>(extracted_center_pixel);
         auto curr_color = aten::get<3>(extracted_center_pixel);
 
-        auto back_ground_pixel_clr = AT_NAME::svgf::CheckIfPixelIsBackground(
+        auto back_ground_pixel_clr = AT_NAME::svgf::CheckIfBackgroundPixel(
             idx, curr_color, center_meshid,
             curr_aov_color_variance, curr_aov_moment_temporalweight);
         if (back_ground_pixel_clr) {

@@ -278,6 +278,41 @@ namespace svgf {
         return weight;
     }
 
+    inline AT_DEVICE_MTRL_API std::optional<float> PropagateTemporalWeight(
+        const int32_t ix, const int32_t iy,
+        const int32_t width, const int32_t height,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_moment_temporalweight)
+    {
+        const auto idx = _detail::GetIdx(ix, iy, width);
+
+        const int32_t center_meshId = static_cast<int32_t>(aov_texclr_meshid[idx].w);
+
+        if (center_meshId < 0) {
+            // This pixel is background, so nothing is done.
+            return std::nullopt;
+        }
+
+        float temporal_weight = aov_moment_temporalweight[idx].w;
+
+        for (int32_t y = -1; y <= 1; y++) {
+            for (int32_t x = -1; x <= 1; x++) {
+                int32_t xx = ix + x;
+                int32_t yy = iy + y;
+
+                if ((0 <= xx) && (xx < width)
+                    && (0 <= yy) && (yy < height))
+                {
+                    int32_t pidx = _detail::GetIdx(xx, yy, width);
+                    float w = aov_moment_temporalweight[pidx].w;
+                    temporal_weight = aten::cmpMin(temporal_weight, w);
+                }
+            }
+        }
+
+        return temporal_weight;
+    }
+
     inline AT_DEVICE_MTRL_API AT_NAME::_detail::v4 EstimateVariance(
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
@@ -622,6 +657,29 @@ namespace svgf {
             return texclr_meshid;
         }
         return std::nullopt;
+    }
+
+    template <int32_t CopyElementNumPerItem>
+    inline AT_DEVICE_MTRL_API constexpr void CopyVectorBuffer(
+        const int32_t idx,
+        const aten::const_span<AT_NAME::_detail::v4>& src,
+        aten::span<AT_NAME::_detail::v4>& dst)
+    {
+        const auto& src_v = src[idx];
+        auto& dst_v = dst[idx];
+
+        constexpr auto num = CopyElementNumPerItem > 4 ? 4 : CopyElementNumPerItem;
+
+        switch (num) {
+        case 1:
+            dst_v.x = src_v.x;
+        case 2:
+            dst_v.y = src_v.y;
+        case 3:
+            dst_v.z = src_v.z;
+        case 4:
+            dst_v.w = src_v.w;
+        }
     }
 }   // namespace svgf
 }   // namespace AT_NAME

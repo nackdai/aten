@@ -106,7 +106,7 @@ __global__ void atrousFilter(
 }
 
 __global__ void CopyFromTeporaryColorBufferToAov(
-    const float4* __restrict__ src,
+    const float4* __restrict__ src_buffer,
     float4* aovColorVariance,
     int32_t width, int32_t height)
 {
@@ -119,11 +119,12 @@ __global__ void CopyFromTeporaryColorBufferToAov(
 
     const int32_t idx = getIdx(ix, iy, width);
 
-    float4 s = src[idx];
+    const auto size = width * height;
 
-    aovColorVariance[idx].x = s.x;
-    aovColorVariance[idx].y = s.y;
-    aovColorVariance[idx].z = s.z;
+    auto src{ aten::const_span<float4>(src_buffer, size) };
+    auto dst{ aten::span<float4>(aovColorVariance, size) };
+
+    AT_NAME::svgf::CopyVectorBuffer<3>(idx, src, dst);
 }
 
 namespace idaten

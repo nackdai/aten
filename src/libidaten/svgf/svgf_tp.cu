@@ -10,8 +10,6 @@
 #include "aten4idaten.h"
 #include "renderer/svgf/svgf_impl.h"
 
-//#define ENABLE_MEDIAN_FILTER
-
 inline __device__ void computePrevScreenPos(
     int32_t ix, int32_t iy,
     float centerDepth,
@@ -61,35 +59,6 @@ inline __device__ void computePrevScreenPos(
     *prevPos /= prevPos->w;
 
     *prevPos = *prevPos * 0.5 + 0.5;    // [-1, 1] -> [0, 1]
-}
-
-inline __device__ int32_t getLinearIdx(int32_t x, int32_t y, int32_t w, int32_t h)
-{
-    int32_t max_buffer_size = w * h;
-    return clamp(y * w + x, 0, max_buffer_size - 1);
-}
-
-// Bilinear sampler
-inline __device__ float4 sampleBilinear(
-    const float4* buffer,
-    float uvx, float uvy,
-    int32_t w, int32_t h)
-{
-    float2 uv = make_float2(uvx, uvy) * make_float2(w, h) - make_float2(0.5f, 0.5f);
-
-    int32_t x = floor(uv.x);
-    int32_t y = floor(uv.y);
-
-    float2 uv_ratio = uv - make_float2(x, y);
-    float2 uv_inv = make_float2(1.f, 1.f) - uv_ratio;
-
-    int32_t x1 = clamp(x + 1, 0, w - 1);
-    int32_t y1 = clamp(y + 1, 0, h - 1);
-
-    float4 r = (buffer[getLinearIdx(x, y, w, h)] * uv_inv.x + buffer[getLinearIdx(x1, y, w, h)] * uv_ratio.x) * uv_inv.y +
-        (buffer[getLinearIdx(x, y1, w, h)] * uv_inv.x + buffer[getLinearIdx(x1, y1, w, h)] * uv_ratio.x) * uv_ratio.y;
-
-    return r;
 }
 
 __global__ void temporalReprojection(
@@ -176,7 +145,7 @@ __global__ void temporalReprojection(
         cudaBoundaryModeTrap);
 }
 
-__global__ void dilateWeight(
+__global__ void PropagateTemporalWeight(
     float4* aovMomentTemporalWeight,
     const float4* __restrict__ aovTexclrMeshid,
     int32_t width, int32_t height)
@@ -190,150 +159,19 @@ __global__ void dilateWeight(
 
     auto idx = getIdx(ix, iy, width);
 
-    const int32_t centerMeshId = (int32_t)aovTexclrMeshid[idx].w;
+    const size_t size = width * height;
 
-    if (centerMeshId < 0) {
-        // This pixel is background, so nothing is done.
-        return;
+    auto aov_texclr_meshid{ aten::const_span<float4>(aovTexclrMeshid, size) };
+    auto aov_moment_temporalweight{ aten::const_span<float4>(aovMomentTemporalWeight, size) };
+
+    auto weight = AT_NAME::svgf::PropagateTemporalWeight(
+        ix, iy, width, height,
+        aov_texclr_meshid,
+        aov_moment_temporalweight);
+
+    if (weight) {
+        aovMomentTemporalWeight[idx].w = weight.value();
     }
-
-    float temporalWeight = aovMomentTemporalWeight[idx].w;
-
-    for (int32_t y = -1; y <= 1; y++) {
-        for (int32_t x = -1; x <= 1; x++) {
-            int32_t xx = ix + x;
-            int32_t yy = iy + y;
-
-            if ((0 <= xx) && (xx < width)
-                && (0 <= yy) && (yy < height))
-            {
-                int32_t pidx = getIdx(xx, yy, width);
-                float w = aovMomentTemporalWeight[pidx].w;
-                temporalWeight = min(temporalWeight, w);
-            }
-        }
-    }
-
-    aovMomentTemporalWeight[idx].w = temporalWeight;
-}
-
-inline __device__ float3 min(float3 a, float3 b)
-{
-    return make_float3(
-        min(a.x, b.x),
-        min(a.y, b.y),
-        min(a.z, b.z));
-}
-
-inline __device__ float3 max(float3 a, float3 b)
-{
-    return make_float3(
-        max(a.x, b.x),
-        max(a.y, b.y),
-        max(a.z, b.z));
-}
-
-// Macro for sorting.
-#define s2(a, b)                temp = a; a = min(a, b); b = max(temp, b);
-#define mn3(a, b, c)            s2(a, b); s2(a, c);
-#define mx3(a, b, c)            s2(b, c); s2(a, c);
-
-#define mnmx3(a, b, c)            mx3(a, b, c); s2(a, b);                                   // 3 exchanges
-#define mnmx4(a, b, c, d)        s2(a, b); s2(c, d); s2(a, c); s2(b, d);                   // 4 exchanges
-#define mnmx5(a, b, c, d, e)    s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
-#define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges
-
-inline __device__ float3 medianFilter(
-    int32_t ix, int32_t iy,
-    const float4* src,
-    int32_t width, int32_t height)
-{
-    float3 v[9];
-
-    int32_t pos = 0;
-
-    for (int32_t y = -1; y <= 1; y++) {
-        for (int32_t x = -1; x <= 1; x++) {
-            int32_t xx = clamp(ix + x, 0, static_cast<int32_t>(width - 1));
-            int32_t yy = clamp(iy + y, 0, static_cast<int32_t>(height - 1));
-
-            int32_t pidx = getIdx(xx, yy, width);
-
-            auto s = src[pidx];
-            v[pos] = make_float3(s.x, s.y, s.z);
-
-            pos++;
-        }
-    }
-
-    // Sort
-    float3 temp;
-    mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
-    mnmx5(v[1], v[2], v[3], v[4], v[6]);
-    mnmx4(v[2], v[3], v[4], v[7]);
-    mnmx3(v[3], v[4], v[8]);
-
-    return v[4];
-}
-
-__global__ void medianFilter(
-    cudaSurfaceObject_t dst,
-    float4* curAovColorVariance,
-    float4* curAovMomentTemporalWeight,
-    const float4* __restrict__ curAovTexclrMeshid,
-    const float4* __restrict__ prevAovMomentTemporalWeight,
-    int32_t width, int32_t height)
-{
-    int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if (ix >= width || iy >= height) {
-        return;
-    }
-
-    auto idx = getIdx(ix, iy, width);
-
-    const int32_t centerMeshId = curAovTexclrMeshid[idx].w;
-
-    if (centerMeshId < 0) {
-        // This pixel is background, so nothing is done.
-        return;
-    }
-
-    auto curColor = medianFilter(ix, iy, curAovColorVariance, width, height);
-
-    curAovColorVariance[idx].x = curColor.x;
-    curAovColorVariance[idx].y = curColor.y;
-    curAovColorVariance[idx].z = curColor.z;
-
-    // accumulate moments.
-    {
-        float lum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);
-        float3 centerMoment = make_float3(lum * lum, lum, 0);
-
-        // 積算フレーム数のリセット.
-        int32_t frame = 1;
-
-        auto momentTemporalWeight = prevAovMomentTemporalWeight[idx];;
-        float3 prevMoment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
-
-        // 積算フレーム数を１増やす.
-        frame = (int32_t)prevMoment.z + 1;
-
-        centerMoment += prevMoment;
-
-        centerMoment.z = frame;
-
-        curAovMomentTemporalWeight[idx].x = centerMoment.x;
-        curAovMomentTemporalWeight[idx].y = centerMoment.y;
-        curAovMomentTemporalWeight[idx].z = centerMoment.z;
-    }
-
-    surf2Dwrite(
-        make_float4(curColor, 0),
-        dst,
-        ix * sizeof(float4), iy,
-        cudaBoundaryModeTrap);
 }
 
 namespace idaten
@@ -376,19 +214,7 @@ namespace idaten
 
         checkCudaKernel(temporalReprojection);
 
-#ifdef ENABLE_MEDIAN_FILTER
-        medianFilter << <grid, block, 0, m_stream >> > (
-            outputSurf,
-            m_aovColorVariance[curaov].data(),
-            m_aovMomentTemporalWeight[curaov].data(),
-            m_aovTexclrMeshid[curaov].data(),
-            m_aovMomentTemporalWeight[prevaov].data(),
-            width, height);
-
-        checkCudaKernel(medianFilter);
-#endif
-
-        dilateWeight << <grid, block, 0, m_stream >> > (
+        PropagateTemporalWeight << <grid, block, 0, m_stream >> > (
             curaov.get<AOVBuffer::MomentTemporalWeight>().data(),
             curaov.get<AOVBuffer::AlbedoMeshId>().data(),
             width, height);

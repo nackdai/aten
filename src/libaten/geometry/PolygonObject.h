@@ -43,9 +43,9 @@ namespace AT_NAME
 
             AT_NAME::triangle::evalHitResult(ctxt, faceParam, &rec, faceParam, &isect);
 
-            auto p0 = ctxt.GetPositionAsVec4(faceParam.idx[0]);
-            auto p1 = ctxt.GetPositionAsVec4(faceParam.idx[1]);
-            auto p2 = ctxt.GetPositionAsVec4(faceParam.idx[2]);
+            auto p0{ ctxt.GetPositionAsVec4(faceParam.idx[0]) };
+            auto p1{ ctxt.GetPositionAsVec4(faceParam.idx[1]) };
+            auto p2{ ctxt.GetPositionAsVec4(faceParam.idx[2]) };
 
             p0.w = p1.w = p2.w = real(1);
 
@@ -120,9 +120,9 @@ namespace AT_NAME
 
             const auto& tri_param = ctxt.GetTriangle(tri_idx);
 
-            auto v0 = ctxt.GetPositionAsVec4(tri_param.idx[0]);
-            auto v1 = ctxt.GetPositionAsVec4(tri_param.idx[1]);
-            auto v2 = ctxt.GetPositionAsVec4(tri_param.idx[2]);
+            auto v0{ ctxt.GetPositionAsVec4(tri_param.idx[0]) };
+            auto v1{ ctxt.GetPositionAsVec4(tri_param.idx[1]) };
+            auto v2{ ctxt.GetPositionAsVec4(tri_param.idx[2]) };
 
             v0.w = v1.w = v2.w = real(1);
 

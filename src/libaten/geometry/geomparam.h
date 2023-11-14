@@ -8,33 +8,39 @@
 
 namespace aten
 {
+    /**
+     * @brief Object type.
+     */
     enum class ObjectType : int32_t {
-        Polygon,    ///< Polygon.
+        Polygons,   ///< Polygons.
         Instance,   ///< Instance. Not used in GPU.
         Sphere,     ///< Sphere.
         GeometryTypeMax,
     };
 
+    /**
+     * @brief Parameter for object.
+     */
     struct ObjectParameter {
         ObjectType type{ ObjectType::GeometryTypeMax };
 
         /**
-        * @brief Area of object
-        *
-        * - Polygon: Area of all triangles in this object.
-        * - Instance: Not used.
-        * - Sphere: Area of sphere.
-        **/
+         * @brief Area of object
+         *
+         * - Polygons: Area of all triangles in this object.
+         * - Instance: Not used.
+         * - Sphere: Area of sphere.
+         */
         real area{ real(0) };
 
         /**
-        * @brief Own index.
-        *
-        * Meaning of this variable is changed based on geometry type.
-        * - Polygon: Own index.
-        * - Instance: Index of actual object which instance refers.
-        * - Sphere: Not used.
-        **/
+         * @brief Own index.
+         *
+         * Meaning of this variable is changed based on geometry type.
+         * - Polygons: Own index.
+         * - Instance: Index of actual object which instance refers.
+         * - Sphere: Not used.
+         */
         int32_t object_id{ -1 };
 
         int32_t mtx_id{ -1 };       ///< Index of matrix to apply to object.
@@ -55,6 +61,9 @@ namespace aten
     };
     AT_STATICASSERT((sizeof(ObjectParameter) % 16) == 0);
 
+    /**
+     * @brief Parameter for per triangle.
+     */
     struct TriangleParameter {
         union {
             aten::vec4 v0;
@@ -67,7 +76,7 @@ namespace aten
         union {
             aten::vec4 v1;
             struct{
-                int32_t needNormal; ///< Flag to decribe if normal needs to be computed online.
+                int32_t needNormal; ///< Flag to describe if normal needs to be computed online.
                 int32_t mtrlid;     ///< Material id.
                 int32_t mesh_id;    ///< Mesh id. (Mesh = Triangle group to have same material).
                 real padding;

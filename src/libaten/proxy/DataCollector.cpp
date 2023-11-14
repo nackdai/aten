@@ -32,7 +32,7 @@ namespace aten {
 
                 shapeparams.push_back(param);
             }
-            else if (type == ObjectType::Polygon) {
+            else if (type == ObjectType::Polygons) {
                 auto param = s->getParam();
 
                 param.object_id = s->id();
@@ -71,7 +71,7 @@ namespace aten {
         int32_t triangleCount = 0;
 
         ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::ObjectType type) {
-            if (type == ObjectType::Polygon) {
+            if (type == ObjectType::Polygons) {
                 triangles.push_back(std::vector<aten::TriangleParameter>());
                 auto pos = triangles.size() - 1;
 

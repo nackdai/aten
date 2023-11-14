@@ -248,7 +248,7 @@ namespace aten
 
         for (const auto& t : m_transformables) {
             auto type = t->getType();
-            if (type == aten::ObjectType::Polygon) {
+            if (type == aten::ObjectType::Polygons) {
                 order++;
             }
 

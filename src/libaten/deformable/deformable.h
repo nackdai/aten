@@ -24,7 +24,7 @@ namespace aten
 
     public:
         deformable()
-            : transformable(aten::ObjectType::Polygon)
+            : transformable(aten::ObjectType::Polygons)
         {}
 
         ~deformable() = default;

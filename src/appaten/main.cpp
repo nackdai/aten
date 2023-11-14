@@ -5,7 +5,7 @@
 
 static int32_t WIDTH = 512;
 static int32_t HEIGHT = 512;
-static const char *TITLE = "app";
+static const char* TITLE = "app";
 
 // #define ENABLE_EVERY_FRAME_SC
 // #define ENABLE_DOF
@@ -76,7 +76,7 @@ void update()
     }
 }
 
-void display(aten::window *wnd)
+void display(aten::window* wnd)
 {
     // update();
 
@@ -142,12 +142,12 @@ void display(aten::window *wnd)
     g_frameNo++;
 }
 
-int32_t main(int32_t argc, char *argv[])
+int32_t main(int32_t argc, char* argv[])
 {
     aten::initSampler(WIDTH, HEIGHT, 0, true);
 
 #if 0
-    aten::MicrofacetBlinn blinn(aten:: vec3(1, 1, 1), 1, 1.5);
+    aten::MicrofacetBlinn blinn(aten::vec3(1, 1, 1), 1, 1.5);
     aten::vec3 normal(0, 1, 0);
     aten::vec3 in(1, -1, 0);
     in.normalize();

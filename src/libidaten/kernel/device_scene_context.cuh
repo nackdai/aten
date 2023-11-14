@@ -46,13 +46,13 @@ namespace idaten {
 
         __device__ const aten::vec4 GetPositionAsVec4(uint32_t idx) const noexcept
         {
-            auto v = GetPosition(idx);
+            auto v{ GetPosition(idx) };
             return aten::vec4(v.x, v.y, v.z, v.w);
         }
 
         __device__ const aten::vec4 GetPositionAsVec3(uint32_t idx) const noexcept
         {
-            auto v = GetPosition(idx);
+            auto v{ GetPosition(idx) };
             return aten::vec3(v.x, v.y, v.z);
         }
 
@@ -67,13 +67,13 @@ namespace idaten {
 
         __device__ const aten::vec4 GetNormalAsVec4(uint32_t idx) const noexcept
         {
-            auto v = GetNormal(idx);
+            auto v{ GetNormal(idx) };
             return aten::vec4(v.x, v.y, v.z, v.w);
         }
 
         __device__ const aten::vec4 GetNormalAsVec3(uint32_t idx) const noexcept
         {
-            auto v = GetNormal(idx);
+            auto v{ GetNormal(idx) };
             return aten::vec3(v.x, v.y, v.z);
         }
 

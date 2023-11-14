@@ -738,11 +738,15 @@ int32_t main()
         auto& vtxPos = g_tracer.getCudaTextureResourceForVtxPos();
 
         // TODO
-        // �����AGPUBvh �� SBVH ���Ƃ����ꍇ.
-        // �����Ŏ擾����m�[�h�z��� SBVH �̃m�[�h�ł���AThreadedSbvhNode �ƂȂ�.
-        // �������ALBVHBuilder::build �œn�����Ƃ��ł���̂́AThreadBVH �̃m�[�h�ł��� ThreadedBvhNode �ł���.
-        // ���̂��߁A����AThreadedBvhNode �ɖ������L���X�g���Ă���.
-        // �����ƃX�}�[�g�ȕ��@���l������.
+        // もし、GPUBvh が SBVH だとした場合.
+        // ここで取得するノード配列は SBVH のノードである、ThreadedSbvhNode となる.
+        // しかし、LBVHBuilder::build で渡すことができるのは、ThreadBVH のノードである ThreadedBvhNode である.
+        // そのため、現状、ThreadedBvhNode に無理やりキャストしている.
+        // もっとスマートな方法を考えたい.
+        // If GPUBvh is SBVH, what we can retrieve the array of ThreadedSbvhNode as SBVH node type.
+        // But, what we can pass to LBVHBuilder::build is ThreadedBvhNode of ThreadBVH's node.
+        // So, we need to reinterpret cast ThreadedSbvhNode to ThreadedBvhNode.
+        // It's not safe and we neeed to consider the safer way.
 
         auto& cpunodes = g_scene.getAccel()->getNodes();
 

@@ -37,7 +37,7 @@ namespace AT_NAME
                 mtx_L2W = ctxt.GetMatrix(mtx_id);
             }
 
-            if (real_obj.type == aten::ObjectType::Polygon) {
+            if (real_obj.type == aten::ObjectType::Polygons) {
                 AT_NAME::PolygonObject::evaluate_hit_result(
                     real_obj,
                     ctxt,
@@ -80,7 +80,7 @@ namespace AT_NAME
             mtx_L2W = ctxt.GetMatrix(mtx_id);
         }
 
-        if (real_obj.type == aten::ObjectType::Polygon) {
+        if (real_obj.type == aten::ObjectType::Polygons) {
             AT_NAME::PolygonObject::sample_pos_and_normal(
                 result,
                 real_obj,

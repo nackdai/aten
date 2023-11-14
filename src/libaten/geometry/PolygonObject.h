@@ -19,7 +19,7 @@ namespace AT_NAME
 
     public:
         PolygonObject()
-            : transformable(aten::ObjectType::Polygon)
+            : transformable(aten::ObjectType::Polygons)
         {}
 
         virtual ~PolygonObject() = default;

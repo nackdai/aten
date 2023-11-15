@@ -309,16 +309,16 @@ namespace aten
         /**
          * @biref Do the binned sah split actually with the result of findSpatialSplit.
          * より詳細分割テストに基づいて実際に分割する.
-         * @param [in, out] node The node which we want to split.
-         * @param [in] splitPlane Position of the axis along which the split will run.
-         * @param [in] axis Axis (xyz) along which the split will run.
-         * @param [in] splitCost Cost to split.
-         * @param [in] leftCount Count of triangles in the left child nodes.
-         * @param [in] rightCount Count of triangles in the right child nodes.
-         * @param [out] leftBB AABB of the potential left child nodes.
-         * @param [out] rightBB AABB of the potential right child nodes.
-         * @param [out] leftList Triangle indices list for the left children.
-         * @param [out] rightList Triangle indices list for the right children.
+         * @param[in, out] node The node which we want to split.
+         * @param[in] splitPlane Position of the axis along which the split will run.
+         * @param[in] axis Axis (xyz) along which the split will run.
+         * @param[in] splitCost Cost to split.
+         * @param[in] leftCount Count of triangles in the left child nodes.
+         * @param[in] rightCount Count of triangles in the right child nodes.
+         * @param[out] leftBB AABB of the potential left child nodes.
+         * @param[out] rightBB AABB of the potential right child nodes.
+         * @param[out] leftList Triangle indices list for the left children.
+         * @param[out] rightList Triangle indices list for the right children.
          */
         void spatialSort(
             SBVHNode& node,

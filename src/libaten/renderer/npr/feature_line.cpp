@@ -3,7 +3,7 @@
 
 namespace aten
 {
-    aten::vec3 FeatureLine::renderFeatureLine(
+    aten::vec3 FeatureLine::RenderFeatureLine(
         const aten::vec3& color,
         int32_t x, int32_t y,
         int32_t width, int32_t height,

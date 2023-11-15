@@ -18,6 +18,19 @@
 
 namespace AT_NAME
 {
+    /**
+     * @brief Shade Ambient Occlusion.
+     * @param[in] idx Inded to the shading pixel.
+     * @param[in] frame Frame count.
+     * @param[in] rnd Seed for random.
+     * @param[in] ao_num_rays Number of ray to shade AO.
+     * @param[in] ao_radius Radius of the sphere to shader AO.
+     * @param[in,out] paths Information of paths.
+     * @param[in] ctxt Scene context.
+     * @param[in] ray Query ray.
+     * @param[in] isect Scene intersection information.
+     * @param[in,out] scene Scene instance. Only for running on host.
+     */
     template <typename SCENE = void>
     inline AT_DEVICE_MTRL_API void ShandeAO(
         int32_t idx,
@@ -94,6 +107,12 @@ namespace AT_NAME
         _detail::CopyVec(paths.contrib[idx].contrib, ao_color);
     }
 
+    /**
+     * @breif Shade Ambient Occulusion, if hit test is missed.
+     * @param[in] idx Index to the shading pixel.
+     * @param[in] is_first_bounce Specify if this function is called for the first bounce.
+     * @param[in,out] paths Information of paths.
+     */
     inline AT_DEVICE_MTRL_API void ShadeMissAO(
         int32_t idx,
         bool is_first_bounce,

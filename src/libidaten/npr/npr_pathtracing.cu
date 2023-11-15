@@ -14,13 +14,13 @@
 #include "renderer/npr/npr_impl.h"
 
 namespace npr_pt {
-    __global__ void generateSampleRay(
+    __global__ void GenerateSampleRay(
         idaten::NPRPathTracing::SampleRayInfo* sample_ray_infos,
         idaten::Path paths,
         const aten::ray* __restrict__ rays,
         const int32_t* __restrict__ hitindices,
         int32_t* hitnum,
-        real FeatureLineWidth,
+        real feature_line_width,
         real pixel_width)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -34,15 +34,15 @@ namespace npr_pt {
         auto& sample_ray_info = sample_ray_infos[idx];
         const auto& ray = rays[idx];
 
-        AT_NAME::GenerateSampleRayPerQueryRay<idaten::NPRPathTracing::SampleRayNum>(
+        AT_NAME::GenerateSampleRayAndDiscPerQueryRay<idaten::NPRPathTracing::SampleRayNum>(
             sample_ray_info.descs, sample_ray_info.disc,
             ray, paths.sampler[idx],
-            FeatureLineWidth, pixel_width);
+            feature_line_width, pixel_width);
     }
 
     __global__ void shadeSampleRay(
         aten::vec3 line_color,  // TODO
-        real FeatureLineWidth,
+        real feature_line_width,
         real pixel_width,
         idaten::NPRPathTracing::SampleRayInfo* sample_ray_infos,
         int32_t depth,
@@ -90,15 +90,19 @@ namespace npr_pt {
         constexpr auto SampleRayNum = aten::array_size<decltype(idaten::NPRPathTracing::SampleRayInfo::descs)>::size;
 
         // TODO: These value should be configurable.
-        constexpr real ThresholdAlbedo = 0.1f;
-        constexpr real ThresholdNormal = 0.1f;
+        constexpr real albedo_threshold = 0.1f;
+        constexpr real normal_threshold = 0.1f;
 
         auto& sample_ray_info = sample_ray_infos[idx];
         auto& sample_ray_descs = sample_ray_info.descs;
         auto& disc = sample_ray_info.disc;
 
-        auto closest_sample_ray_distance = std::numeric_limits<real>::max();
-        bool is_found_closest_sample_ray_hit = false;
+        // Current closest distance to feature line point.
+        auto closest_feature_line_point_distance = std::numeric_limits<real>::max();
+
+        // Whether the feature line point has been found.
+        bool is_found_feature_line_point = false;
+
         real hit_point_distance = 0;
 
         const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
@@ -112,7 +116,7 @@ namespace npr_pt {
         hit_point_distance = length(hrec_query.p - disc.center);
 
         const auto prev_disc = disc;
-        disc = AT_NAME::FeatureLine::computeNextDisc(
+        disc = AT_NAME::FeatureLine::ComputeDiscAtQueryRayHitPoint(
             hrec_query.p,
             query_ray.dir,
             prev_disc.radius,
@@ -137,26 +141,26 @@ namespace npr_pt {
             auto is_hit = intersectClosest(&ctxt, sample_ray, &isect_sample_ray);
             if (is_hit) {
                 // Query ray hits and then sample ray hits.
-                aten::tie(is_found_closest_sample_ray_hit, closest_sample_ray_distance) = AT_NAME::EvaluateQueryAndSampleRayHit(
+                aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::EvaluateQueryAndSampleRayHit(
                     sample_ray_descs[i],
                     ctxt, cam_org,
                     query_ray, hrec_query, distance_query_ray_hit,
                     isect_sample_ray,
                     disc,
-                    is_found_closest_sample_ray_hit,
-                    closest_sample_ray_distance,
-                    FeatureLineWidth, pixel_width,
-                    ThresholdAlbedo, ThresholdNormal);
+                    is_found_feature_line_point,
+                    closest_feature_line_point_distance,
+                    feature_line_width, pixel_width,
+                    albedo_threshold, normal_threshold);
             }
             else {
                 // Query ray hits but sample ray doesn't hit anything.
-                aten::tie(is_found_closest_sample_ray_hit, closest_sample_ray_distance) = AT_NAME::EvaluateQueryRayHitButSampleRayNotHit(
+                aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::EvaluateQueryRayHitButSampleRayNotHit(
                     sample_ray_descs[i],
                     query_ray, hrec_query, distance_query_ray_hit,
                     sample_ray, disc,
-                    is_found_closest_sample_ray_hit,
-                    closest_sample_ray_distance,
-                    FeatureLineWidth, pixel_width);
+                    is_found_feature_line_point,
+                    closest_feature_line_point_distance,
+                    feature_line_width, pixel_width);
             }
 
             const auto mtrl = ctxt.GetMaterial(hrec_query.mtrlid);
@@ -169,9 +173,9 @@ namespace npr_pt {
             }
         }
 
-        if (is_found_closest_sample_ray_hit) {
+        if (is_found_feature_line_point) {
             AT_NAME::ComputeFeatureLineContribution<SampleRayNum>(
-                closest_sample_ray_distance, paths, idx, line_color);
+                closest_feature_line_point_distance, paths, idx, line_color);
         }
 
         disc.accumulated_distance += hit_point_distance;
@@ -180,7 +184,7 @@ namespace npr_pt {
     __global__ void shadeMissSampleRay(
         int32_t width, int32_t height,
         aten::vec3 line_color,  // TODO
-        real FeatureLineWidth,
+        real feature_line_width,
         real pixel_width,
         idaten::NPRPathTracing::SampleRayInfo* sample_ray_infos,
         int32_t depth,
@@ -228,15 +232,15 @@ namespace npr_pt {
         constexpr auto SampleRayNum = aten::array_size<decltype(idaten::NPRPathTracing::SampleRayInfo::descs)>::size;
 
         // TODO: These value should be configurable.
-        constexpr real ThresholdAlbedo = 0.1f;
-        constexpr real ThresholdNormal = 0.1f;
+        constexpr real albedo_threshold = 0.1f;
+        constexpr real normal_threshold = 0.1f;
 
         auto& sample_ray_info = sample_ray_infos[idx];
         auto& sample_ray_descs = sample_ray_info.descs;
         auto& disc = sample_ray_info.disc;
 
-        auto closest_sample_ray_distance = std::numeric_limits<real>::max();
-        bool is_found_closest_sample_ray_hit = false;
+        auto closest_feature_line_point_distance = std::numeric_limits<real>::max();
+        bool is_found_feature_line_point = false;
         real hit_point_distance = 0;
 
         // NOTE:
@@ -245,7 +249,7 @@ namespace npr_pt {
         // So, previous disc is not necessary.
 
         AT_NAME::FeatureLine::Disc prev_disc;
-        hit_point_distance = ComputeNextDiscByDummyQueryRayHit(depth, hit_point_distance, query_ray, prev_disc, disc);
+        hit_point_distance = CreateNextDiscByDummyQueryRayHitPoint(depth, hit_point_distance, query_ray, prev_disc, disc);
 
         for (size_t i = 0; i < SampleRayNum; i++) {
             if (sample_ray_descs[i].is_terminated) {
@@ -265,13 +269,13 @@ namespace npr_pt {
             auto is_hit = intersectClosest(&ctxt, sample_ray, &isect_sample_ray);
             if (is_hit) {
                 // Query ray doesn't hit, but sample ray hits.
-                aten::tie(is_found_closest_sample_ray_hit, closest_sample_ray_distance) = AT_NAME::EvaluateQueryRayNotHitButSampleRayHit(
+                aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::EvaluateQueryRayNotHitButSampleRayHit(
                     ctxt, query_ray,
                     isect_sample_ray,
                     disc,
-                    is_found_closest_sample_ray_hit,
-                    closest_sample_ray_distance,
-                    FeatureLineWidth, pixel_width);
+                    is_found_feature_line_point,
+                    closest_feature_line_point_distance,
+                    feature_line_width, pixel_width);
             }
             else {
                 // Sample ray doesn't hit anything. It means sample ray causes hit miss.
@@ -281,9 +285,9 @@ namespace npr_pt {
             }
         }
 
-        if (is_found_closest_sample_ray_hit) {
+        if (is_found_feature_line_point) {
             AT_NAME::ComputeFeatureLineContribution<SampleRayNum>(
-                closest_sample_ray_distance, paths, idx, line_color);
+                closest_feature_line_point_distance, paths, idx, line_color);
         }
     }
 }
@@ -308,7 +312,7 @@ namespace idaten {
             const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_cam, 1);
 
             if (bounce == 0) {
-                npr_pt::generateSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
+                npr_pt::GenerateSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
                     sample_ray_infos_.data(),
                     path_host_->paths,
                     m_rays.data(),
@@ -316,7 +320,7 @@ namespace idaten {
                     hitcount.data(),
                     feature_line_width_,
                     pixel_width);
-                checkCudaKernel(generateSampleRay);
+                checkCudaKernel(GenerateSampleRay);
             }
 
             npr_pt::shadeSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (

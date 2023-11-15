@@ -153,8 +153,8 @@ namespace idaten
         uint32_t idxNum,
         const aten::GeomMultiVertexBuffer* vb)
     {
-        m_vertices.resize(vtxNum);
-        m_vertices.writeFromHostToDeviceByNum(vertices, vtxNum);
+        vertices_.resize(vtxNum);
+        vertices_.writeFromHostToDeviceByNum(vertices, vtxNum);
 
         m_indices.resize(idxNum);
         m_indices.writeFromHostToDeviceByNum(indices, idxNum);
@@ -184,11 +184,11 @@ namespace idaten
         uint32_t triNum,
         const aten::GeomMultiVertexBuffer* vb)
     {
-        m_vertices.resize(vtxNum);
-        m_vertices.writeFromHostToDeviceByNum(vertices, vtxNum);
+        vertices_.resize(vtxNum);
+        vertices_.writeFromHostToDeviceByNum(vertices, vtxNum);
 
-        m_triangles.resize(triNum);
-        m_triangles.writeFromHostToDeviceByNum(tris, triNum);
+        triangles_.resize(triNum);
+        triangles_.writeFromHostToDeviceByNum(tris, triNum);
 
         if (vb) {
             auto handles = vb->getVBOHandles();
@@ -215,13 +215,13 @@ namespace idaten
         const aten::mat4* matrices,
         uint32_t mtxNum)
     {
-        if (m_matrices.bytes() == 0) {
-            m_matrices.resize(mtxNum);
+        if (matrices_.bytes() == 0) {
+            matrices_.resize(mtxNum);
         }
 
-        AT_ASSERT(m_matrices.num() >= mtxNum);
+        AT_ASSERT(matrices_.num() >= mtxNum);
 
-        m_matrices.writeFromHostToDeviceByNum(matrices, mtxNum);
+        matrices_.writeFromHostToDeviceByNum(matrices, mtxNum);
     }
 
     void Skinning::compute(
@@ -258,9 +258,9 @@ namespace idaten
 
         // Skinning.
         {
-            auto willComputeWithTriangles = m_triangles.num() > 0;
+            auto willComputeWithTriangles = triangles_.num() > 0;
 
-            const auto vtxNum = m_vertices.num();
+            const auto vtxNum = vertices_.num();
 
             dim3 block(512);
             dim3 grid((vtxNum + block.x - 1) / block.x);
@@ -269,19 +269,19 @@ namespace idaten
                 computeSkinning << <grid, block >> > (
                     isRestart,
                     vtxNum,
-                    m_vertices.data(),
-                    m_matrices.data(),
+                    vertices_.data(),
+                    matrices_.data(),
                     dstPos, dstNml, dstPrev);
 
                 checkCudaKernel(computeSkinningWithTriangles);
 
-                const auto triNum = m_triangles.num();
+                const auto triNum = triangles_.num();
 
                 grid = dim3((triNum + block.x - 1) / block.x);
 
                 setTriangleParam << <grid, block >> > (
                     triNum,
-                    m_triangles.data(),
+                    triangles_.data(),
                     indexOffset,
                     dstPos);
 
@@ -291,8 +291,8 @@ namespace idaten
                 computeSkinning << <grid, block >> > (
                     isRestart,
                     vtxNum,
-                    m_vertices.data(),
-                    m_matrices.data(),
+                    vertices_.data(),
+                    matrices_.data(),
                     dstPos, dstNml, dstPrev);
 
                 checkCudaKernel(computeSkinning);
@@ -302,7 +302,7 @@ namespace idaten
         // Get min/max.
         {
             auto src = dstPos;
-            auto num = m_vertices.num();
+            auto num = vertices_.num();
 
             dim3 block(BLOCK_SIZE);
             dim3 grid((num + block.x - 1) / block.x);

@@ -10,7 +10,7 @@ namespace aten {
     {
         shader::prepareRender(pixels, revert);
 
-        float resolution[4] = { m_width, m_height, 0.0f, 0.0f };
+        float resolution[4] = { width_, height_, 0.0f, 0.0f };
         auto hRes = getHandle("u_resolution");
         if (hRes >= 0) {
             CALL_GL_API(::glUniform4fv(hRes, 1, resolution));

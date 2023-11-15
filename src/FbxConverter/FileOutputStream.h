@@ -130,7 +130,7 @@ public:
         return ret;
     }
 
-    bool isValid()
+    bool IsValid()
     {
         return (m_File != NULL);
     }

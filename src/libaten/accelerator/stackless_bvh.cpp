@@ -150,12 +150,12 @@ namespace aten {
                 hitable* item = node->getItem();
 
                 // 自分自身のIDを取得.
-                stacklessBvhNode.object_id = (float)ctxt.findTransformableIdxFromPointer(item);
+                stacklessBvhNode.object_id = (float)ctxt.FindTransformableIdxFromPointer(item);
 
                 // もしなかったら、ネストしているので親のIDを取得.
                 if (stacklessBvhNode.object_id < 0) {
                     if (nestParent) {
-                        stacklessBvhNode.object_id = (float)ctxt.findTransformableIdxFromPointer(nestParent);
+                        stacklessBvhNode.object_id = (float)ctxt.FindTransformableIdxFromPointer(nestParent);
                     }
                 }
 
@@ -166,11 +166,11 @@ namespace aten {
                     item = const_cast<hitable*>(internalObj);
                 }
 
-                stacklessBvhNode.meshid = (float)item->mesh_id();
+                stacklessBvhNode.meshid = (float)item->GetMeshId();
 
                 if (isPrimitiveLeaf) {
                     // Leaves of this tree are primitive.
-                    stacklessBvhNode.primid = (float)ctxt.findTriIdxFromPointer(item);
+                    stacklessBvhNode.primid = (float)ctxt.FindTriangleIdxFromPointer(item);
                     stacklessBvhNode.exid = -1.0f;
                 }
                 else {
@@ -236,11 +236,11 @@ namespace aten {
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
-                auto s = ctxt.getTransformable((int32_t)node->object_id);
+                auto s = ctxt.GetTransformable((int32_t)node->object_id);
 
                 if (node->exid >= 0) {
                     // Traverse external linear bvh list.
-                    const auto& param = s->getParam();
+                    const auto& param = s->GetParam();
 
                     int32_t mtx_id = param.mtx_id;
 
@@ -265,7 +265,7 @@ namespace aten {
                 }
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
-                    auto prim = ctxt.getTriangle((int32_t)node->primid);
+                    auto prim = ctxt.GetTriangleInstance((int32_t)node->primid);
                     isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
                     if (isHit) {
                         isectTmp.objid = s->id();

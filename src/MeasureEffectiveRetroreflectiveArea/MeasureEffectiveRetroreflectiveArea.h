@@ -27,14 +27,14 @@ public:
 
 private:
     aten::shader m_shader;
-    aten::GeomVertexBuffer m_vb;
+    aten::GeomVertexBuffer vertex_buffer_;
     aten::GeomIndexBuffer m_ib;
 
     aten::GeomVertexBuffer m_vb_pts;
     aten::GeomIndexBuffer m_ib_pts;
 
-    int32_t m_width{ 0 };
-    int32_t m_height{ 0 };
+    int32_t width_{ 0 };
+    int32_t height_{ 0 };
 
     std::vector<aten::vec4> ray_orgs_;
 

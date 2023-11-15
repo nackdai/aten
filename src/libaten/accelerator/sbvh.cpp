@@ -24,7 +24,7 @@ namespace aten
             aten::vmax(box0.minPos(), box1.minPos()),
             aten::vmin(box0.maxPos(), box1.maxPos()));
 
-        if (delta.isValid()) {
+        if (delta.IsValid()) {
             overlap = delta.computeSurfaceArea();
             return true;
         }
@@ -110,7 +110,7 @@ namespace aten
 
             for (uint32_t i = 0; i < num; i++) {
                 auto tri = (triangle*)list[i];
-                m_offsetTriIdx = std::min<uint32_t>(m_offsetTriIdx, tri->getId());
+                m_offsetTriIdx = std::min<uint32_t>(m_offsetTriIdx, tri->GetId());
             }
 
             // Offset triangle index.
@@ -205,9 +205,9 @@ namespace aten
 
         for (uint32_t i = 0; i < tris.size(); i++) {
             m_refs[i].triid = i;
-            m_refs[i].bbox = tris[i]->computeAABB(ctxt);
+            m_refs[i].bbox = tris[i]->ComputeAABB(ctxt);
 
-            m_offsetTriIdx = std::min<int32_t>(m_offsetTriIdx, tris[i]->getId());
+            m_offsetTriIdx = std::min<int32_t>(m_offsetTriIdx, tris[i]->GetId());
 
             rootBox.expand(m_refs[i].bbox);
         }
@@ -1009,11 +1009,11 @@ namespace aten
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
-                auto s = ctxt.getTransformable((int32_t)node->object_id);
+                auto s = ctxt.GetTransformable((int32_t)node->object_id);
 
                 if (node->exid >= 0) {
                     // Traverse external linear bvh list.
-                    const auto& param = s->getParam();
+                    const auto& param = s->GetParam();
 
                     int32_t mtx_id = param.mtx_id;
 
@@ -1044,7 +1044,7 @@ namespace aten
                 }
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
-                    auto prim = ctxt.getTriangle((int32_t)node->primid);
+                    auto prim = ctxt.GetTriangleInstance((int32_t)node->primid);
                     isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
                     if (isHit) {
                         isectTmp.objid = s->id();
@@ -1107,11 +1107,11 @@ namespace aten
                 Intersection isectTmp;
 
 #if (SBVH_TRIANGLE_NUM == 1)
-                auto prim = ctxt.getTriangle((int32_t)node->triid);
+                auto prim = ctxt.GetTriangleInstance((int32_t)node->triid);
                 isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
 
                 if (isHit) {
-                    const auto& primParam = prim->getParam();
+                    const auto& primParam = prim->GetParam();
                     isectTmp.meshid = primParam.mesh_id;
                 }
 #else
@@ -1244,7 +1244,7 @@ namespace aten
             for (auto it : m_treelets) {
                 const auto& treelet = it.second;
                 if (treelet.mtrlid >= 0) {
-                    const auto& mtrl = ctxt.getMaterial(treelet.mtrlid);
+                    const auto& mtrl = ctxt.GetMaterialInstance(treelet.mtrlid);
                     AT_ASSERT(mtrl);
 
                     mtrlMap.insert(std::make_pair(treelet.mtrlid, mtrl->nameString()));
@@ -1386,7 +1386,7 @@ namespace aten
 
                         // Find material index by name.
                         const auto& name = found->second;
-                        int32_t mtrlid = ctxt.findMaterialIdxByName(name.c_str());
+                        int32_t mtrlid = ctxt.FindMaterialIdxByName(name.c_str());
                         AT_ASSERT(mtrlid >= 0);
 
                         // Replace current material index.

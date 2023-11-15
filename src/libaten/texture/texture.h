@@ -33,10 +33,10 @@ namespace aten
             u -= floor(u);
             v -= floor(v);
 
-            uint32_t x = (uint32_t)(aten::cmpMin(u, real(1)) * (m_width - 1));
-            uint32_t y = (uint32_t)(aten::cmpMin(v, real(1)) * (m_height - 1));
+            uint32_t x = (uint32_t)(aten::cmpMin(u, real(1)) * (width_ - 1));
+            uint32_t y = (uint32_t)(aten::cmpMin(v, real(1)) * (height_ - 1));
 
-            uint32_t pos = y * m_width + x;
+            uint32_t pos = y * width_ + x;
 
             const auto clr = m_colors[pos];
 
@@ -64,11 +64,11 @@ namespace aten
 
         real& operator()(uint32_t x, uint32_t y, uint32_t c)
         {
-            x = std::min(x, m_width - 1);
-            y = std::min(y, m_height - 1);
+            x = std::min(x, width_ - 1);
+            y = std::min(y, height_ - 1);
             c = std::min(c, m_channels - 1);
 
-            uint32_t pos = ((m_height - 1) - y) * m_width + x;
+            uint32_t pos = ((height_ - 1) - y) * width_ + x;
 
             return m_colors[pos][c];
         }
@@ -80,12 +80,12 @@ namespace aten
 
         uint32_t width() const
         {
-            return m_width;
+            return width_;
         }
 
         uint32_t height() const
         {
-            return m_height;
+            return height_;
         }
 
         uint32_t channels() const
@@ -139,8 +139,8 @@ namespace aten
     private:
         int32_t m_id{ -1 };
 
-        uint32_t m_width{ 0 };
-        uint32_t m_height{ 0 };
+        uint32_t width_{ 0 };
+        uint32_t height_{ 0 };
         uint32_t m_channels{ 0 };
 
         uint32_t m_size{ 0 };

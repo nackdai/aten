@@ -12,9 +12,9 @@ namespace aten
         std::string_view finalVsPath,
         std::string_view finalFsPath)
     {
-        m_normal = ctxt.createTexture(width, height, 4, {});
-        m_pos = ctxt.createTexture(width, height, 4, {});
-        m_albedo = ctxt.createTexture(width, height, 4, {});
+        m_normal = ctxt.CreateTexture(width, height, 4, {});
+        m_pos = ctxt.CreateTexture(width, height, 4, {});
+        m_albedo = ctxt.CreateTexture(width, height, 4, {});
 
         m_normal->initAsGLTexture();
         m_pos->initAsGLTexture();
@@ -58,11 +58,11 @@ namespace aten
         // Bind source tex handle.
         if (m_idx == 0)
         {
-            GLuint srcTexHandle = m_body->getVisualizer()->getTexHandle();
+            GLuint srcTexHandle = m_body->getVisualizer()->GetGLTextureHandle();
             auto prevPass = m_body->getPrevPass();
             if (prevPass)
             {
-                srcTexHandle = prevPass->getFbo().getTexHandle();
+                srcTexHandle = prevPass->getFbo().GetGLTextureHandle();
             }
 
             texture::bindAsGLTexture(srcTexHandle, 0, this);
@@ -70,7 +70,7 @@ namespace aten
         else
         {
             auto prevPass = getPrevPass();
-            auto texHandle = prevPass->getFbo().getTexHandle();
+            auto texHandle = prevPass->getFbo().GetGLTextureHandle();
 
             texture::bindAsGLTexture(texHandle, 0, this);
         }
@@ -99,13 +99,13 @@ namespace aten
         shader::prepareRender(pixels, revert);
 
         // coarse.
-        auto tex = m_body->m_pass[ITER - 1].getFbo().getTexHandle(0);
+        auto tex = m_body->m_pass[ITER - 1].getFbo().GetGLTextureHandle(0);
         texture::bindAsGLTexture(tex, 0, this);
 
 #if 0
         // detail.
         for (int32_t i = 0; i < ITER; i++) {
-            auto detailTex = m_body->m_pass[i].getFbo().getTexHandle(1);
+            auto detailTex = m_body->m_pass[i].getFbo().GetGLTextureHandle(1);
             texture::bindAsGLTexture(tex, i + 1, this);
         }
 #else

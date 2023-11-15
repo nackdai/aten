@@ -10,9 +10,9 @@ namespace aten
 
     void Film::init(int32_t w, int32_t h)
     {
-        m_width = w;
-        m_height = h;
-        m_image.resize(m_width * m_height);
+        width_ = w;
+        height_ = h;
+        m_image.resize(width_ * height_);
     }
 
     void Film::clear()
@@ -32,10 +32,10 @@ namespace aten
 
     void Film::put(int32_t x, int32_t y, const vec4& v)
     {
-        x = aten::clamp<int32_t>(x, 0, m_width - 1);
-        y = aten::clamp<int32_t>(y, 0, m_height - 1);
+        x = aten::clamp<int32_t>(x, 0, width_ - 1);
+        y = aten::clamp<int32_t>(y, 0, height_ - 1);
 
-        auto pos = y * m_width + x;
+        auto pos = y * width_ + x;
         put(pos, v);
     }
 
@@ -51,7 +51,7 @@ namespace aten
 
     const vec4& Film::at(int32_t x, int32_t y) const
     {
-        auto pos = y * m_width + x;
+        auto pos = y * width_ + x;
         return m_image[pos];
     }
 

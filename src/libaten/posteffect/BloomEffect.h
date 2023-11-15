@@ -39,11 +39,11 @@ namespace aten {
 
         virtual uint32_t getOutWidth() const override final
         {
-            return m_passFinal.getFbo().getWidth();
+            return m_passFinal.getFbo().GetWidth();
         }
         virtual uint32_t getOutHeight() const override final
         {
-            return m_passFinal.getFbo().getHeight();
+            return m_passFinal.getFbo().GetHeight();
         }
 
         virtual FBO& getFbo() override final

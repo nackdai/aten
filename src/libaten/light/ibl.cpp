@@ -12,8 +12,8 @@ namespace AT_NAME {
         auto envmap = getEnvMap();
         AT_ASSERT(envmap);
 
-        auto width = envmap->getTexture()->width();
-        auto height = envmap->getTexture()->height();
+        auto width = envmap->GtTexture()->width();
+        auto height = envmap->GtTexture()->height();
 
         m_avgIllum = 0;
 
@@ -218,8 +218,8 @@ namespace AT_NAME {
         int32_t y = samplePdfAndCdf(r1, m_cdfV, pdfV, cdfV);
         int32_t x = samplePdfAndCdf(r2, m_cdfU[y], pdfU, cdfU);
 
-        auto width = envmap->getTexture()->width();
-        auto height = envmap->getTexture()->height();
+        auto width = envmap->GtTexture()->width();
+        auto height = envmap->GtTexture()->height();
 
         real u = (real)(x + 0.5) / width;
         real v = (real)(y + 0.5) / height;
@@ -247,8 +247,8 @@ namespace AT_NAME {
         r1 = r1 * 2 - 1;
         r2 = r2 * 2 - 1;
 
-        auto width = envmap->getTexture()->width();
-        auto height = envmap->getTexture()->height();
+        auto width = envmap->GtTexture()->width();
+        auto height = envmap->GtTexture()->height();
 
         r1 = r1 * radius / (real)width;
         r2 = r2 * radius / (real)height;

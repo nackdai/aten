@@ -233,7 +233,7 @@ namespace aten {
         // 入力テクスチャのサイズはスクリーンと同じ...
         auto hTexel = getHandle("texel");
         if (hTexel >= 0) {
-            CALL_GL_API(glUniform2f(hTexel, 1.0f / m_width, 1.0f / m_height));
+            CALL_GL_API(glUniform2f(hTexel, 1.0f / width_, 1.0f / height_));
         }
     }
 }

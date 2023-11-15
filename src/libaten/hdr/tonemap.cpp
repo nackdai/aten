@@ -148,7 +148,7 @@ namespace aten
     {
         Blitter::prepareRender(pixels, revert);
 
-        auto result = TonemapPreProc::computeAvgAndMaxLum(m_width, m_height, (const vec4*)pixels);
+        auto result = TonemapPreProc::computeAvgAndMaxLum(width_, height_, (const vec4*)pixels);
 
         auto lum = std::get<0>(result);
         auto maxlum = std::get<1>(result);

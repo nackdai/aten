@@ -19,7 +19,7 @@ namespace AT_NAME
             m_accel = aten::accelerator::createAccelerator();
         }
 
-        m_param.triangle_id = m_shapes[0]->triangles_[0]->getId();
+        m_param.triangle_id = m_shapes[0]->triangles_[0]->GetId();
 
         m_param.area = 0;
         uint32_t triangles = 0;
@@ -59,7 +59,7 @@ namespace AT_NAME
             return;
         }
 
-        m_param.triangle_id = m_shapes[0]->triangles_[0]->getId();
+        m_param.triangle_id = m_shapes[0]->triangles_[0]->GetId();
 
         m_param.area = 0;
         uint32_t triangles = 0;
@@ -82,7 +82,7 @@ namespace AT_NAME
         bool isHit = m_accel->hit(ctxt, r, t_min, t_max, false, isect);
 
         if (isHit) {
-            auto f = ctxt.getTriangle(isect.objid);
+            auto f = ctxt.GetTriangleInstance(isect.objid);
 
             // 自身のIDを返す.
             isect.objid = id();
@@ -154,12 +154,12 @@ namespace AT_NAME
     void PolygonObject::collectTriangles(std::vector<aten::TriangleParameter>& triangles) const
     {
         for (const auto& triangle_group_mesh : m_shapes) {
-            const auto& tris = triangle_group_mesh->tris();
+            const auto& tris = triangle_group_mesh->GetTriangleList();
 
             triangles.reserve(tris.size());
 
             for (const auto tri : tris) {
-                triangles.push_back(tri->getParam());
+                triangles.push_back(tri->GetParam());
             }
         }
     }

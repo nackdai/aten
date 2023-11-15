@@ -259,12 +259,12 @@ namespace aten
             hitable* item = node->getItem();
 
             // 自分自身のIDを取得.
-            qbvhNode.object_id = (float)ctxt.findTransformableIdxFromPointer(item);
+            qbvhNode.object_id = (float)ctxt.FindTransformableIdxFromPointer(item);
 
             // もしなかったら、ネストしているので親のIDを取得.
             if (qbvhNode.object_id < 0) {
                 if (nestParent) {
-                    qbvhNode.object_id = (float)ctxt.findTransformableIdxFromPointer(nestParent);
+                    qbvhNode.object_id = (float)ctxt.FindTransformableIdxFromPointer(nestParent);
                 }
             }
 
@@ -275,11 +275,11 @@ namespace aten
                 item = const_cast<hitable*>(internalObj);
             }
 
-            qbvhNode.meshid = (float)item->mesh_id();
+            qbvhNode.meshid = (float)item->GetMeshId();
 
             if (isPrimitiveLeaf) {
                 // Leaves of this tree are primitive.
-                qbvhNode.primid = (float)ctxt.findTriIdxFromPointer(item);
+                qbvhNode.primid = (float)ctxt.FindTriangleIdxFromPointer(item);
                 qbvhNode.exid = -1.0f;
             }
             else {
@@ -531,11 +531,11 @@ namespace aten
 
                 bool isHit = false;
 
-                auto s = ctxt.getTransformable((int32_t)pnode->object_id);
+                auto s = ctxt.GetTransformable((int32_t)pnode->object_id);
 
                 if (pnode->exid >= 0) {
                     // Traverse external StacklessQbvh.
-                    const auto& param = s->getParam();
+                    const auto& param = s->GetParam();
 
                     int32_t mtx_id = param.mtx_id;
 
@@ -559,7 +559,7 @@ namespace aten
                         isectTmp);
                 }
                 else if (pnode->primid >= 0) {
-                    auto f = ctxt.getTriangle((int32_t)pnode->primid);
+                    auto f = ctxt.GetTriangleInstance((int32_t)pnode->primid);
                     isHit = f->hit(ctxt, r, t_min, t_max, isectTmp);
 
                     if (isHit) {

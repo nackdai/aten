@@ -104,7 +104,7 @@ namespace aten
                 xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
             }
 
-            auto mtrl = aten::material::createMaterialWithMaterialParameter(
+            auto mtrl = aten::material::CreateMaterialWithMaterialParameter(
                 info.param,
                 nullptr, nullptr, nullptr);
 

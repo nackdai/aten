@@ -97,7 +97,7 @@ int32_t main(int32_t argc, char* argv[])
     const auto& meshes = obj->getShapes();
 
     for (const auto mesh : meshes) {
-        auto mtrl = mesh->getMaterial();
+        auto mtrl = mesh->GetMaterial();
 
         std::string mtrlName(mtrl->name());
 
@@ -127,10 +127,10 @@ int32_t main(int32_t argc, char* argv[])
         std::vector<int32_t> tmpIndices(shapes.size());
 
         for (auto shape : shapes) {
-            const auto& tris = shape->tris();
+            const auto& tris = shape->GetTriangleList();
 
             for (auto tri : tris) {
-                const auto& triParam = tri->getParam();
+                const auto& triParam = tri->GetParam();
 
                 for (int32_t i = 0; i < 3; i++) {
                     auto idx = triParam.idx[i];
@@ -146,7 +146,7 @@ int32_t main(int32_t argc, char* argv[])
 
         // Gather vertices.
         for (auto idx : tmpIndices) {
-            const auto v = ctxt.getVertex(idx);
+            const auto v = ctxt.GetVertex(idx);
 
             int32_t newIdx = vertices.size();
             vertices.push_back(v);
@@ -161,10 +161,10 @@ int32_t main(int32_t argc, char* argv[])
     {
         for (int32_t s = 0; s < shapes.size(); s++) {
             auto shape = shapes[s];
-            const auto& tris = shape->tris();
+            const auto& tris = shape->GetTriangleList();
 
             for (auto tri : tris) {
-                const auto& triParam = tri->getParam();
+                const auto& triParam = tri->GetParam();
 
                 for (int32_t i = 0; i < 3; i++) {
                     auto idx = triParam.idx[i];

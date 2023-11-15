@@ -90,8 +90,8 @@ namespace aten {
         m_program = createProgram(vs, fs);
         AT_VRETURN(m_program != 0, false);
 
-        m_width = width;
-        m_height = height;
+        width_ = width;
+        height_ = height;
 
         return true;
     }
@@ -114,8 +114,8 @@ namespace aten {
         m_program = createProgram(vs, fs, gs);
         AT_VRETURN(m_program != 0, false);
 
-        m_width = width;
-        m_height = height;
+        width_ = width;
+        height_ = height;
 
         return true;
     }

@@ -8,11 +8,6 @@
 
 namespace AT_NAME
 {
-    TriangleGroupMesh::~TriangleGroupMesh()
-    {
-        triangles_.clear();
-    }
-
     float TriangleGroupMesh::build(const context &ctxt)
     {
         aten::vec3 boxmin(AT_MATH_INF, AT_MATH_INF, AT_MATH_INF);
@@ -20,14 +15,14 @@ namespace AT_NAME
 
         float area = 0;
 
-        int32_t mtrlid = getMaterial()->id();
+        int32_t mtrlid = GetMaterial()->id();
         int32_t geomid = get_mesh_id();
 
         for (const auto f : triangles_)
         {
             f->build(ctxt, mtrlid, geomid);
 
-            const auto &faceParam = f->getParam();
+            const auto &faceParam = f->GetParam();
             area += faceParam.area;
 
             const auto &faabb = f->getBoundingbox();
@@ -46,22 +41,22 @@ namespace AT_NAME
 
             for (const auto f : triangles_)
             {
-                const auto &faceParam = f->getParam();
+                const auto &faceParam = f->GetParam();
 
                 idx.push_back(faceParam.idx[0]);
                 idx.push_back(faceParam.idx[1]);
                 idx.push_back(faceParam.idx[2]);
             }
 
-            m_ib.init((uint32_t)idx.size(), &idx[0]);
+            index_buffer_.init((uint32_t)idx.size(), &idx[0]);
         }
 
         return area;
     }
 
-    void TriangleGroupMesh::addFace(const std::shared_ptr<triangle> &f)
+    void TriangleGroupMesh::AddFace(const std::shared_ptr<triangle> &f)
     {
-        const auto &faceParam = f->getParam();
+        const auto &faceParam = f->GetParam();
 
         int32_t idx0 = faceParam.idx[0];
         int32_t idx1 = faceParam.idx[1];
@@ -69,7 +64,7 @@ namespace AT_NAME
 
         triangles_.push_back(f);
 
-        m_baseTriIdx = std::min(f->getId(), m_baseTriIdx);
+        base_triangle_idx_ = std::min(f->GetId(), base_triangle_idx_);
     }
 
     void TriangleGroupMesh::render(
@@ -81,14 +76,14 @@ namespace AT_NAME
     {
         if (func)
         {
-            func(mtx_L2W, mtx_prev_L2W, parentId, m_baseTriIdx);
+            func(mtx_L2W, mtx_prev_L2W, parentId, base_triangle_idx_);
         }
 
-        const auto &vb = ctxt.getVB();
+        const auto &vb = ctxt.GetVertexBuffer();
 
         auto triNum = (uint32_t)triangles_.size();
 
-        m_ib.draw(vb, aten::Primitive::Triangles, 0, triNum);
+        index_buffer_.draw(vb, aten::Primitive::Triangles, 0, triNum);
     }
 
     void TriangleGroupMesh::draw(
@@ -97,20 +92,20 @@ namespace AT_NAME
     {
         if (func)
         {
-            int32_t albedoTexId = m_mtrl ? m_mtrl->param().albedoMap : -1;
-            const auto albedo = albedoTexId >= 0 ? ctxt.getTexture(albedoTexId) : nullptr;
+            int32_t albedoTexId = mtrl_ ? mtrl_->param().albedoMap : -1;
+            const auto albedo = albedoTexId >= 0 ? ctxt.GtTexture(albedoTexId) : nullptr;
 
-            auto color = m_mtrl ? m_mtrl->param().baseColor : vec4(1);
+            auto color = mtrl_ ? mtrl_->param().baseColor : vec4(1);
 
-            auto mtrlid = m_mtrl ? m_mtrl->id() : -1;
+            auto mtrlid = mtrl_ ? mtrl_->id() : -1;
 
             func(color, albedo.get(), mtrlid);
         }
 
-        const auto &vb = ctxt.getVB();
+        const auto &vb = ctxt.GetVertexBuffer();
 
         auto triNum = (uint32_t)triangles_.size();
 
-        m_ib.draw(vb, aten::Primitive::Triangles, 0, triNum);
+        index_buffer_.draw(vb, aten::Primitive::Triangles, 0, triNum);
     }
 }

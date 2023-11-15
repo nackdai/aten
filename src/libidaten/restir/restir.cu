@@ -367,7 +367,7 @@ __global__ void computeShadowRayContribution(
 
     if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
     {
-        if (reservoir.isValid()) {
+        if (reservoir.IsValid()) {
             const auto& orienting_normal = restir_info.nml;
 
             const auto& albedo_meshid = aovTexclrMeshid[idx];

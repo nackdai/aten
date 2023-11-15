@@ -34,7 +34,7 @@ namespace aten {
             return m_program;
         }
 
-        bool isValid() const
+        bool IsValid() const
         {
             return (m_program > 0);
         }
@@ -49,7 +49,7 @@ namespace aten {
 
     protected:
         uint32_t m_program{ 0 };
-        uint32_t m_width{ 0 };
-        uint32_t m_height{ 0 };
+        uint32_t width_{ 0 };
+        uint32_t height_{ 0 };
     };
 }

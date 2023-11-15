@@ -7,71 +7,127 @@
 #include "visualizer/pixelformat.h"
 
 namespace aten {
+    /**
+     * @brief Frame Buffer Object.
+     */
     class FBO {
     public:
-        FBO() {}
-        virtual ~FBO() {}
+        FBO() = default;
+        ~FBO() = default;
+
+        FBO(const FBO&) = delete;
+        FBO(FBO&&) = delete;
+        FBO& operator=(const FBO&) = delete;
+        FBO& operator=(FBO&&) = delete;
 
     public:
+        /**
+         * @brief Initialize FBO.
+         * @param width Width of frame buffer.
+         * @param height Height of frame buffer.
+         * @param fmt Pixel format of frame buffer.
+         * @param need_depth If FBO needs to have the depth buffer, true should be sepecified.
+         * @return If initializeing is done properly, returns true. Otherwise, returns false.
+         */
         bool init(
             int32_t width,
             int32_t height,
             PixelFormat fmt,
-            bool needDepth = false);
+            bool need_depth = false);
 
-        bool isValid() const
+        /**
+         * @brief Get if FBO is valid.
+         * @return If FBO is valid, returns true. Otherwise, returns false.
+         */
+        bool IsValid() const noexcept
         {
-            return (m_fbo > 0);
+            return (fbo_ > 0);
         }
 
-        void bindAsTexture(uint32_t idx = 0);
+        /**
+         * @brief Bind FBO as the texture.
+         * @param idx Index to which FBO should be binded.
+         */
+        void BindAsTexture(uint32_t idx = 0);
 
-        void bindFBO(bool needDepth = false);
+        /**
+         * @brief Bind FBO for ready to be rendered.
+         * @param need_depth If this is true, depth buffer is also binded.
+         */
+        void BindFBO(bool need_depth = false);
 
-        uint32_t getWidth() const
+        /**
+         * @brief Get width of frame buffer.
+         * @return Width of frame buffer.
+         */
+        int32_t GetWidth() const noexcept
         {
-            return m_width;
+            return width_;
         }
 
-        uint32_t getHeight() const
+        /**
+         * @brief Get height of frame buffer.
+         * @return Height of frame buffer.
+         */
+        int32_t GetHeight() const noexcept
         {
-            return m_height;
+            return height_;
         }
 
-        uint32_t getTexHandle(uint32_t idx = 0) const
+        /**
+         * @brief Get OpenGL texture handle which is binded with FBO.
+         * @param idx Index to texture handle.
+         * @return OpenGL texture handle.
+         */
+        uint32_t GetGLTextureHandle(uint32_t idx = 0) const
         {
-            return m_tex[idx];
+            return texture_handles_[idx];
         }
 
-        uint32_t getHandle() const
+        /**
+         * @brief Get OpenGL frame buffer handle.
+         * @return OpenGL frame buffe handle.
+         */
+        uint32_t GetGLHandle() const
         {
-            return m_fbo;
+            return fbo_;
         }
 
         void asMulti(uint32_t num);
 
-        void SaveToBuffer(std::vector<uint8_t>& dst, int32_t target_idx = 0);
+        /**
+         * @brief Save the content of the frame buffer.
+         * @param dst Destination to save the content of the frame buffer.
+         * @param target_idx Index of the frame buffer to be saved.
+         */
+        void SaveToBuffer(std::vector<uint8_t>& dst, int32_t target_idx = 0) const;
 
-        using FuncPrepareFbo = std::function<void(const uint32_t*, int32_t, std::vector<uint32_t>&)>;
-        void setPrepareFboFunction(FuncPrepareFbo func)
+        using FuncBindFbo = std::function<void(const std::vector<uint32_t>&, std::vector<uint32_t>&)>;
+
+        /**
+         * @brief Set an user defined function to bind FBO.
+         * @param func User defined function to bind FBO.
+         */
+        void SetBindFboFunction(FuncBindFbo func)
         {
-            m_func = func;
+            func_bind_fbo_ = func;
         }
 
     protected:
-        uint32_t m_fbo{ 0 };
+        uint32_t fbo_{ 0 };
 
-        int32_t m_num{ 1 };
-        std::vector<uint32_t> m_tex;
+        uint32_t m_num{ 1 };
 
-        std::vector<uint32_t> m_comps;
+        std::vector<uint32_t> texture_handles_;
 
-        FuncPrepareFbo m_func{ nullptr };
+        std::vector<uint32_t> target_buffer_attachment_list_;
 
-        uint32_t m_depth{ 0 };
+        FuncBindFbo func_bind_fbo_{ nullptr };
 
-        PixelFormat m_fmt{ PixelFormat::rgba8 };
-        uint32_t m_width{ 0 };
-        uint32_t m_height{ 0 };
+        uint32_t depth_buffer_handle_{ 0 };
+
+        PixelFormat pixel_fmt_{ PixelFormat::rgba8 };
+        uint32_t width_{ 0 };
+        uint32_t height_{ 0 };
     };
 }

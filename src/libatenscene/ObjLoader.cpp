@@ -120,7 +120,7 @@ namespace aten
                 obj->setName(shape.name.c_str());
             }
 
-            auto curVtxPos = ctxt.getVertexNum();
+            auto curVtxPos = ctxt.GetVertexNum();
 
             vec3 pmin = vec3(AT_MATH_INF);
             vec3 pmax = vec3(-AT_MATH_INF);
@@ -200,7 +200,7 @@ namespace aten
                     vtx.uv.z = real(-1);
                 }
 
-                ctxt.addVertex(vtx);
+                ctxt.AddVertex(vtx);
 
                 // To compute bouding box, store min/max position.
                 pmin = vec3(
@@ -236,7 +236,7 @@ namespace aten
                 if (m < 0 && !dst_shape) {
                     // If a material doesn't exist.
                     dst_shape = std::make_shared<aten::TriangleGroupMesh>();
-                    dst_shape->setMaterial(AssetManager::getMtrlByIdx(0));
+                    dst_shape->SetMaterial(AssetManager::getMtrlByIdx(0));
                 }
                 else if (prev_mtrl_idx != m) {
                     // If different material appear.
@@ -244,7 +244,7 @@ namespace aten
                     if (dst_shape) {
                         // If the shape already exist.
 
-                        auto mtrl = dst_shape->getMaterial();
+                        auto mtrl = dst_shape->GetMaterial();
 
                         if (mtrl->param().type == aten::MaterialType::Emissive) {
                             // Export the object which has an emissive material as the emissive object.
@@ -279,14 +279,14 @@ namespace aten
                                     aten::vec3(mtrl.diffuse[0], mtrl.diffuse[1], mtrl.diffuse[2]),
                                     mtrl.diffuse_texname,
                                     mtrl.bump_texname));
-                            dst_shape->setMaterial(new_mtrl);
+                            dst_shape->SetMaterial(new_mtrl);
                         }
                         else {
-                            dst_shape->setMaterial(aten_mtrl);
+                            dst_shape->SetMaterial(aten_mtrl);
                         }
                     }
 
-                    if (!dst_shape->getMaterial()) {
+                    if (!dst_shape->GetMaterial()) {
                         // If the shape doesn't have a material until here, set dummy material....
 
                         // Only lambertian.
@@ -341,7 +341,7 @@ namespace aten
                             mtrlParam.type = aten::MaterialType::Lambert;
                             mtrlParam.baseColor = diffuse;
 
-                            mtrl = ctxt.createMaterialWithMaterialParameter(
+                            mtrl = ctxt.CreateMaterialWithMaterialParameter(
                                 mtrlParam,
                                 albedoMap,
                                 normalMap,
@@ -350,7 +350,7 @@ namespace aten
 
                         mtrl->setName(objmtrl.name.c_str());
 
-                        dst_shape->setMaterial(mtrl);
+                        dst_shape->SetMaterial(mtrl);
 
                         AssetManager::registerMtrl(mtrl->name(), mtrl);
                     }
@@ -358,9 +358,9 @@ namespace aten
 
                 auto& face_param = face_parameters[i];
 
-                const auto& v0 = ctxt.getVertex(face_param.idx[0]);
-                const auto& v1 = ctxt.getVertex(face_param.idx[1]);
-                const auto& v2 = ctxt.getVertex(face_param.idx[2]);
+                const auto& v0 = ctxt.GetVertex(face_param.idx[0]);
+                const auto& v1 = ctxt.GetVertex(face_param.idx[1]);
+                const auto& v2 = ctxt.GetVertex(face_param.idx[2]);
 
                 if (v0.uv.z == real(1)
                     || v1.uv.z == real(1)
@@ -369,17 +369,17 @@ namespace aten
                     face_param.needNormal = 1;
                 }
 
-                face_param.mtrlid = dst_shape->getMaterial()->id();
+                face_param.mtrlid = dst_shape->GetMaterial()->id();
                 face_param.mesh_id = dst_shape->get_mesh_id();
 
-                auto f = ctxt.createTriangle(face_param);
+                auto f = ctxt.CreateTriangle(face_param);
 
-                dst_shape->addFace(f);
+                dst_shape->AddFace(f);
             }
 
             // Register the shape to the object.
             {
-                const auto& mtrl = dst_shape->getMaterial();
+                const auto& mtrl = dst_shape->GetMaterial();
 
                 if (willSeparate) {
                     // Split the object for each shape.
@@ -420,7 +420,7 @@ namespace aten
             objs.push_back(std::move(obj));
         }
 
-        auto vtxNum = ctxt.getVertexNum();
+        auto vtxNum = ctxt.GetVertexNum();
 
         AT_PRINTF("(%s)\n", path.data());
         AT_PRINTF("    %d[vertices]\n", vtxNum);

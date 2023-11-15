@@ -96,8 +96,8 @@ void onRun(aten::window* window)
             aten::vec4(0, 0.5f, 1.0f, 1.0f),
             1.0f,
             0);
-        g_fbo->bindAsTexture();
-        g_visualizer->renderGLTexture(g_fbo->getTexHandle(), g_camera.needRevert());
+        g_fbo->BindAsTexture();
+        g_visualizer->renderGLTexture(g_fbo->GetGLTextureHandle(), g_camera.needRevert());
     }
 
     if (g_willTakeScreenShot)
@@ -233,7 +233,7 @@ void loadObj(
         param.type = aten::MaterialType::Lambert;
         param.baseColor = aten::vec3(0.4, 0.4, 0.4);;
 
-        auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
+        auto mtrl = g_ctxt.CreateMaterialWithMaterialParameter(
             param,
             nullptr, nullptr, nullptr);
         aten::AssetManager::registerMtrl("m1", mtrl);
@@ -300,7 +300,7 @@ int32_t main(int32_t argc, char* argv[])
 
     g_objenable.resize(g_objs.size(), true);
 
-    g_ctxt.initAllTexAsGLTexture();
+    g_ctxt.InitAllTextureAsGLTexture();
 
     for (auto& obj : g_objs) {
         obj->buildForRasterizeRendering(g_ctxt);
@@ -325,10 +325,10 @@ int32_t main(int32_t argc, char* argv[])
         g_visualizer->addPostProc(g_magnifier.get());
     }
 
-    auto texNum = g_ctxt.getTextureNum();
+    auto texNum = g_ctxt.GetTextureNum();
 
     for (int32_t i = 0; i < texNum; i++) {
-        auto tex = g_ctxt.getTexture(i);
+        auto tex = g_ctxt.GtTexture(i);
         tex->initAsGLTexture();
     }
 

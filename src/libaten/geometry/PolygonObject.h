@@ -12,8 +12,8 @@
 namespace AT_NAME
 {
     /**
-    * @brief Object is polygons to have the multiple materials.
-    **/
+     * @brief Object is polygons to have the multiple materials.
+     */
     class PolygonObject : public aten::transformable {
         friend class TransformableFactory;
 
@@ -41,7 +41,7 @@ namespace AT_NAME
         {
             const auto& faceParam = ctxt.GetTriangle(isect.triangle_id);
 
-            AT_NAME::triangle::evalHitResult(ctxt, faceParam, &rec, faceParam, &isect);
+            AT_NAME::triangle::EvaluateHitResult(ctxt, faceParam, &rec, faceParam, &isect);
 
             auto p0{ ctxt.GetPositionAsVec4(faceParam.idx[0]) };
             auto p1{ ctxt.GetPositionAsVec4(faceParam.idx[1]) };
@@ -107,7 +107,7 @@ namespace AT_NAME
         void build(const aten::context& ctxt);
 
         template <typename CONTEXT>
-        static AT_DEVICE_API void sample_pos_and_normal(
+        static AT_DEVICE_API void SamplePosAndNormal(
             aten::SamplePosNormalPdfResult* result,
             const aten::ObjectParameter& param,
             const CONTEXT& ctxt,
@@ -141,7 +141,7 @@ namespace AT_NAME
 
             auto area = param.area * ratio;
 
-            AT_NAME::triangle::sample_pos_and_normal(
+            AT_NAME::triangle::SamplePosAndNormal(
                 ctxt,
                 tri_param,
                 result, sampler);

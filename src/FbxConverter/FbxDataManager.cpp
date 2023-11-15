@@ -136,7 +136,7 @@ void FbxDataManager::close()
 
 void FbxDataManager::loadMesh()
 {
-    if (IsValid() && m_vertices.size() == 0) {
+    if (IsValid() && vertices_.size() == 0) {
         gatherFaces();
 
         gatherVertices();
@@ -145,7 +145,7 @@ void FbxDataManager::loadMesh()
 
 void FbxDataManager::loadMaterial()
 {
-    if (IsValid() && m_materials.size() == 0) {
+    if (IsValid() && materials_.size() == 0) {
         // シーンに含まれるメッシュの解析
         auto meshCount = m_scene->GetMemberCount<FbxMesh>();
 
@@ -174,10 +174,10 @@ void FbxDataManager::loadMaterial()
                     // マテリアル本体を取得.
                     auto material = m_scene->GetMaterial(materialIdx);
 
-                    auto itMtrl = std::find(m_materials.begin(), m_materials.end(), material);
-                    if (itMtrl == m_materials.end())
+                    auto itMtrl = std::find(materials_.begin(), materials_.end(), material);
+                    if (itMtrl == materials_.end())
                     {
-                        m_materials.push_back(material);
+                        materials_.push_back(material);
                     }
                 }
             }
@@ -186,10 +186,10 @@ void FbxDataManager::loadMaterial()
 
                 auto material = fbxMesh->GetNode()->GetMaterial(0);
 
-                auto itMtrl = std::find(m_materials.begin(), m_materials.end(), material);
-                if (itMtrl == m_materials.end())
+                auto itMtrl = std::find(materials_.begin(), materials_.end(), material);
+                if (itMtrl == materials_.end())
                 {
-                    m_materials.push_back(material);
+                    materials_.push_back(material);
                 }
             }
         }
@@ -297,13 +297,13 @@ const MeshSubset& FbxDataManager::getMesh(uint32_t idx) const
 
 uint32_t FbxDataManager::getVtxNum() const
 {
-    uint32_t ret = (uint32_t)m_vertices.size();
+    uint32_t ret = (uint32_t)vertices_.size();
     return ret;
 }
 
-const VertexData& FbxDataManager::getVertex(uint32_t idx) const
+const VertexData& FbxDataManager::GetVertex(uint32_t idx) const
 {
-    return m_vertices[idx];
+    return vertices_[idx];
 }
 
 uint32_t FbxDataManager::getNodeNum() const
@@ -358,7 +358,7 @@ void FbxDataManager::getSkinData(
     std::vector<float>& weight,
     std::vector<uint32_t>& joint) const
 {
-    const auto& vtx = m_vertices[idx];
+    const auto& vtx = vertices_[idx];
 
     std::copy(vtx.weight.begin(), vtx.weight.end(), std::back_inserter(weight));
     std::copy(vtx.joint.begin(), vtx.joint.end(), std::back_inserter(joint));
@@ -366,13 +366,13 @@ void FbxDataManager::getSkinData(
 
 uint32_t FbxDataManager::getMaterialNum() const
 {
-    return  (uint32_t)m_materials.size();
+    return  (uint32_t)materials_.size();
 }
 
-FbxSurfaceMaterial* FbxDataManager::getMaterial(uint32_t idx)
+FbxSurfaceMaterial* FbxDataManager::GetMaterial(uint32_t idx)
 {
-    AT_ASSERT(idx <  (uint32_t)m_materials.size());
-    return m_materials[idx];
+    AT_ASSERT(idx <  (uint32_t)materials_.size());
+    return materials_[idx];
 }
 
 // ノードを集める.
@@ -441,7 +441,7 @@ void FbxDataManager::gatherClusters()
     }
 }
 
-fbxsdk::FbxSurfaceMaterial* FbxDataManager::getMaterial(FbxMesh* fbxMesh, uint32_t index)
+fbxsdk::FbxSurfaceMaterial* FbxDataManager::GetMaterial(FbxMesh* fbxMesh, uint32_t index)
 {
     fbxsdk::FbxSurfaceMaterial* material = nullptr;
 
@@ -507,15 +507,15 @@ void FbxDataManager::gatherFaces()
             }
 
             // マテリアル本体を取得.
-            auto material = m_scene->getMaterial(materialIdx);
+            auto material = m_scene->GetMaterial(materialIdx);
 #else
-            auto material = getMaterial(fbxMesh, i);
+            auto material = GetMaterial(fbxMesh, i);
 #endif
 
-            auto itMtrl = std::find(m_materials.begin(), m_materials.end(), material);
-            if (itMtrl == m_materials.end())
+            auto itMtrl = std::find(materials_.begin(), materials_.end(), material);
+            if (itMtrl == materials_.end())
             {
-                m_materials.push_back(material);
+                materials_.push_back(material);
             }
 
             // 登録済みメッシュを探す.
@@ -635,20 +635,20 @@ void FbxDataManager::gatherVertices()
             }
 
             // 同じデータの頂点の有無を確認.
-            auto it = std::find(m_vertices.begin(), m_vertices.end(), vtx);
+            auto it = std::find(vertices_.begin(), vertices_.end(), vtx);
 
-            if (it == m_vertices.end())
+            if (it == vertices_.end())
             {
                 // 未登録.
 
                 IndexData newIdx(
-                    (uint32_t)m_vertices.size(),
+                    (uint32_t)vertices_.size(),
                     0,  // もう使わない.
                     mesh.fbxMesh,
                     mesh.mtrl);
 
                 indices.push_back(newIdx);
-                m_vertices.push_back(vtx);
+                vertices_.push_back(vtx);
 
                 mesh.vtxNum++;
             }
@@ -656,7 +656,7 @@ void FbxDataManager::gatherVertices()
             {
                 // すでにあったので、どの頂点インデックスか取得.
                 IndexData newIdx(
-                    (uint32_t)std::distance(m_vertices.begin(), it),
+                    (uint32_t)std::distance(vertices_.begin(), it),
                     0,  // もう使わない.
                     mesh.fbxMesh,
                     mesh.mtrl);
@@ -724,9 +724,9 @@ void FbxDataManager::gatherPos(std::map<FbxMesh*, std::vector<PosData>>& posList
                 }
 
                 // マテリアル本体を取得.
-                auto material = m_scene->getMaterial(materialIdx);
+                auto material = m_scene->GetMaterial(materialIdx);
 #else
-                auto material = getMaterial(fbxMesh, p);
+                auto material = GetMaterial(fbxMesh, p);
 #endif
 
                 uint32_t idx = fbxMesh->GetPolygonVertex(p, i);
@@ -789,9 +789,9 @@ void FbxDataManager::gatherUV(std::map<FbxMesh*, std::vector<UVData>>& uvList)
                 }
 
                 // マテリアル本体を取得.
-                auto material = m_scene->getMaterial(materialIdx);
+                auto material = m_scene->GetMaterial(materialIdx);
 #else
-                auto material = getMaterial(fbxMesh, p);
+                auto material = GetMaterial(fbxMesh, p);
 #endif
 
                 int32_t lUVIndex = layerUV->GetIndexArray().GetAt(UVIndex);
@@ -858,9 +858,9 @@ void FbxDataManager::gatherNormal(std::map<FbxMesh*, std::vector<NormalData>>& n
                     }
 
                     // マテリアル本体を取得.
-                    auto material = m_scene->getMaterial(materialIdx);
+                    auto material = m_scene->GetMaterial(materialIdx);
 #else
-                    auto material = getMaterial(fbxMesh, p);
+                    auto material = GetMaterial(fbxMesh, p);
 #endif
 
                     int32_t lNmlIndex = (referenceMode == FbxGeometryElement::eIndexToDirect
@@ -892,7 +892,7 @@ void FbxDataManager::gatherNormal(std::map<FbxMesh*, std::vector<NormalData>>& n
 
             for (const auto& idx : indices)
             {
-                auto material = getMaterial(fbxMesh, idx.polygonIdxInMesh);
+                auto material = GetMaterial(fbxMesh, idx.polygonIdxInMesh);
 
                 int32_t lNmlIndex = (referenceMode == FbxGeometryElement::eIndexToDirect
                     ? layerNml->GetIndexArray().GetAt(idx.idxInMesh)
@@ -965,9 +965,9 @@ void FbxDataManager::gatherColor(std::map<FbxMesh*, std::vector<ColorData>>& clr
                 }
 
                 // マテリアル本体を取得.
-                auto material = m_scene->getMaterial(materialIdx);
+                auto material = m_scene->GetMaterial(materialIdx);
 #else
-                auto material = getMaterial(fbxMesh, p);
+                auto material = GetMaterial(fbxMesh, p);
 #endif
 
                 int32_t lNmlIndex = layerClr->GetIndexArray().GetAt(idxClr);

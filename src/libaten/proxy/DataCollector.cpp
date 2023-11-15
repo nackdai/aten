@@ -14,26 +14,26 @@ namespace aten {
         std::vector<aten::vertex>& vtxparams,
         std::vector<aten::mat4>& mtxs)
     {
-        mtxs = ctxt.PickNonIndentityMatricesAndUpdateMtxidxOfInstance();
+        mtxs = ctxt.PickNonIdentityMatricesAndUpdateMatrixIdxInTransformable();
 
         // Not guarantee order of the object which the instance has.
-        ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::ObjectType type) {
+        ctxt.TraverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::ObjectType type) {
             if (type == ObjectType::Instance) {
-                auto param = s->getParam();
+                auto param = s->GetParam();
                 auto obj = s->getHasObject();
 
-                auto idx = ctxt.findTransformableIdxFromPointer(obj);
+                auto idx = ctxt.FindTransformableIdxFromPointer(obj);
 
                 // Specify the index of the object which the instance has.
                 param.object_id = idx;
 
                 // TODO
-                param.area = ((aten::PolygonObject*)obj)->getParam().area;
+                param.area = ((aten::PolygonObject*)obj)->GetParam().area;
 
                 shapeparams.push_back(param);
             }
             else if (type == ObjectType::Polygons) {
-                auto param = s->getParam();
+                auto param = s->GetParam();
 
                 param.object_id = s->id();
 
@@ -43,24 +43,24 @@ namespace aten {
             {
                 // TODO
                 AT_ASSERT(false);
-                auto param = s->getParam();
+                auto param = s->GetParam();
                 param.sphere.mtrl_id = -1;
                 shapeparams.push_back(param);
             }
         });
 
-        const auto lightNum = ctxt.get_light_num();
+        const auto lightNum = ctxt.GetLightNum();
 
         for (uint32_t i = 0; i < lightNum; i++) {
             const auto& param = ctxt.GetLight(i);
             lightparams.push_back(param);
         }
 
-        ctxt.copyMaterialParameters(mtrlparms);
+        ctxt.CopyMaterialParameters(mtrlparms);
 
-        ctxt.copyPrimitiveParameters(primparams);
+        ctxt.CopyTriangleParameters(primparams);
 
-        ctxt.copyVertices(vtxparams);
+        ctxt.CopyVertices(vtxparams);
     }
 
     void DataCollector::collectTriangles(
@@ -70,7 +70,7 @@ namespace aten {
     {
         int32_t triangleCount = 0;
 
-        ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::ObjectType type) {
+        ctxt.TraverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::ObjectType type) {
             if (type == ObjectType::Polygons) {
                 triangles.push_back(std::vector<aten::TriangleParameter>());
                 auto pos = triangles.size() - 1;

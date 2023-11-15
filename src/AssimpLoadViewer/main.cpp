@@ -187,7 +187,7 @@ std::shared_ptr<aten::PolygonObject> loadObj(
         param.type = aten::MaterialType::Lambert;
         param.baseColor = aten::vec3(1, 1, 1);;
 
-        auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
+        auto mtrl = g_ctxt.CreateMaterialWithMaterialParameter(
             param,
             nullptr, nullptr, nullptr);
         aten::AssetManager::registerMtrl("dummy", mtrl);
@@ -216,7 +216,7 @@ std::shared_ptr<aten::PolygonObject> loadObj(
                     ? nullptr
                     : aten::ImageLoader::load(pathname + nml, ctxt);
 
-                mtrl = ctxt.createMaterialWithMaterialParameter(
+                mtrl = ctxt.CreateMaterialWithMaterialParameter(
                     mtrl_param,
                     albedo_map.get(),
                     nml_map.get(),
@@ -294,7 +294,7 @@ int32_t main(int32_t argc, char* argv[])
 
     g_obj = loadObj("box.fbx", nullptr);
 
-    g_ctxt.initAllTexAsGLTexture();
+    g_ctxt.InitAllTextureAsGLTexture();
 
     g_obj->buildForRasterizeRendering(g_ctxt);
 
@@ -303,10 +303,10 @@ int32_t main(int32_t argc, char* argv[])
         "../shader/drawobj_vs.glsl",
         "../shader/drawobj_fs.glsl");
 
-    auto texNum = g_ctxt.getTextureNum();
+    auto texNum = g_ctxt.GetTextureNum();
 
     for (int32_t i = 0; i < texNum; i++) {
-        auto tex = g_ctxt.getTexture(i);
+        auto tex = g_ctxt.GtTexture(i);
         tex->initAsGLTexture();
     }
 

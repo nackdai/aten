@@ -52,7 +52,7 @@ namespace AT_NAME {
 
                 // TODO
                 // Remove light, before adding.
-                ctxt.add_light(light);
+                ctxt.AddLight(light);
             }
         }
 

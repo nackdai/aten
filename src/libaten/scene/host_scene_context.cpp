@@ -11,65 +11,65 @@ namespace aten
 
     const aten::ObjectParameter& context::GetObject(uint32_t idx) const noexcept
     {
-        return getTransformable(idx)->getParam();
+        return GetTransformable(idx)->GetParam();
     }
 
     const aten::TriangleParameter& context::GetTriangle(uint32_t idx) const noexcept
     {
-        return m_triangles[idx]->getParam();
+        return triangles_[idx]->GetParam();
     }
 
     const aten::LightParameter& context::GetLight(uint32_t idx) const noexcept
     {
-        return m_lights[idx]->param();
+        return lights_[idx]->param();
     }
 
     void context::build()
     {
-        if (!m_vertices.empty()
-            && !m_vb.isInitialized())
+        if (!vertices_.empty()
+            && !vertex_buffer_.isInitialized())
         {
-            m_vb.init(
+            vertex_buffer_.init(
                 sizeof(vertex),
-                static_cast<uint32_t>(m_vertices.size()),
+                static_cast<uint32_t>(vertices_.size()),
                 0,
-                &m_vertices[0]);
+                &vertices_[0]);
         }
     }
 
-    std::shared_ptr<AT_NAME::material> context::createMaterial(
+    std::shared_ptr<AT_NAME::material> context::CreateMaterial(
         aten::MaterialType type,
         aten::Values& value)
     {
-        auto mtrl = material::createMaterial(type, value);
+        auto mtrl = material::CreateMaterial(type, value);
         AT_ASSERT(mtrl);
 
         if (mtrl) {
-            addMaterial(mtrl);
+            AddMaterial(mtrl);
         }
 
         return mtrl;
     }
 
-    std::shared_ptr<AT_NAME::material> context::createMaterialWithDefaultValue(aten::MaterialType type)
+    std::shared_ptr<AT_NAME::material> context::CreateMaterialWithDefaultValue(aten::MaterialType type)
     {
-        auto mtrl = material::createMaterialWithDefaultValue(type);
+        auto mtrl = material::CreateMaterialWithDefaultValue(type);
         AT_ASSERT(mtrl);
 
         if (mtrl) {
-            addMaterial(mtrl);
+            AddMaterial(mtrl);
         }
 
         return mtrl;
     }
 
-    std::shared_ptr<AT_NAME::material> context::createMaterialWithMaterialParameter(
+    std::shared_ptr<AT_NAME::material> context::CreateMaterialWithMaterialParameter(
         const aten::MaterialParameter& param,
         aten::texture* albedoMap,
         aten::texture* normalMap,
         aten::texture* roughnessMap)
     {
-        auto mtrl = material::createMaterialWithMaterialParameter(
+        auto mtrl = material::CreateMaterialWithMaterialParameter(
             param,
             albedoMap,
             normalMap,
@@ -77,36 +77,36 @@ namespace aten
         AT_ASSERT(mtrl);
 
         if (mtrl) {
-            addMaterial(mtrl);
+            AddMaterial(mtrl);
         }
 
         return mtrl;
     }
 
-    void context::deleteAllMaterialsAndClearList()
+    void context::DeleteAllMaterialsAndClearList()
     {
-        m_materials.clear();
+        materials_.clear();
     }
 
-    void context::copyMaterialParameters(std::vector<MaterialParameter>& dst) const
+    void context::CopyMaterialParameters(std::vector<MaterialParameter>& dst) const
     {
-        for (const auto& mtrl : m_materials) {
+        for (const auto& mtrl : materials_) {
             dst.push_back(mtrl->param());
         }
     }
 
-    std::shared_ptr<const AT_NAME::material> context::findMaterialByName(const char* name) const
+    std::shared_ptr<const AT_NAME::material> context::FindMaterialByName(std::string_view name) const
     {
         std::string strname(name);
 
         auto found = std::find_if(
-            m_materials.begin(), m_materials.end(),
+            materials_.begin(), materials_.end(),
             [&](const std::shared_ptr<AT_NAME::material> mtrl) {
                 return mtrl->nameString() == strname;
             }
         );
 
-        if (found != m_materials.end()) {
+        if (found != materials_.end()) {
             const auto& mtrl = *found;
             return mtrl;
         }
@@ -114,101 +114,101 @@ namespace aten
         return nullptr;
     }
 
-    int32_t context::findMaterialIdxByName(const char* name) const
+    int32_t context::FindMaterialIdxByName(std::string_view name) const
     {
-        auto mtrl = findMaterialByName(name);
+        auto mtrl = FindMaterialByName(name);
         if (mtrl) {
             return mtrl->id();
         }
         return -1;
     }
 
-    std::shared_ptr<AT_NAME::triangle> context::createTriangle(const aten::TriangleParameter& param)
+    std::shared_ptr<AT_NAME::triangle> context::CreateTriangle(const aten::TriangleParameter& param)
     {
         auto f = AT_NAME::triangle::create(*this, param);
         AT_ASSERT(f);
 
         if (f) {
-            addTriangle(f);
+            AddTriangle(f);
         }
 
         return f;
     }
 
-    void context::addTriangle(const std::shared_ptr<AT_NAME::triangle>& tri)
+    void context::AddTriangle(const std::shared_ptr<AT_NAME::triangle>& tri)
     {
         AT_ASSERT(tri);
-        m_triangles.push_back(tri);
-        tri->updateIndex(m_triangles.size() - 1);
+        triangles_.push_back(tri);
+        tri->updateIndex(triangles_.size() - 1);
     }
 
-    uint32_t context::getTriangleNum() const
+    uint32_t context::GetTriangleNum() const
     {
-        return static_cast<uint32_t>(m_triangles.size());
+        return static_cast<uint32_t>(triangles_.size());
     }
 
-    std::shared_ptr<const AT_NAME::triangle> context::getTriangle(int32_t idx) const
+    std::shared_ptr<const AT_NAME::triangle> context::GetTriangleInstance(int32_t idx) const
     {
-        AT_ASSERT(0 <= idx && idx < m_triangles.size());
-        return m_triangles[idx];
+        AT_ASSERT(0 <= idx && idx < triangles_.size());
+        return triangles_[idx];
     }
 
-    void context::copyPrimitiveParameters(std::vector<aten::TriangleParameter>& dst) const
+    void context::CopyTriangleParameters(std::vector<aten::TriangleParameter>& dst) const
     {
-        for (const auto& tri : m_triangles) {
-            dst.push_back(tri->getParam());
+        for (const auto& tri : triangles_) {
+            dst.push_back(tri->GetParam());
         }
     }
 
-    int32_t context::findTriIdxFromPointer(const void* p) const
+    int32_t context::FindTriangleIdxFromPointer(const void* p) const
     {
         auto found = std::find_if(
-            m_triangles.begin(), m_triangles.end(),
+            triangles_.begin(), triangles_.end(),
             [&](const std::shared_ptr<AT_NAME::triangle> triangle) {
             return triangle.get() == p;
         });
 
         int32_t id = -1;
 
-        if (found != m_triangles.end()) {
+        if (found != triangles_.end()) {
             const auto& tri = *found;
-            id = tri->getId();
+            id = tri->GetId();
         }
 
         return id;
     }
 
-    void context::addTransformable(const std::shared_ptr<transformable>& t)
+    void context::AddTransformable(const std::shared_ptr<transformable>& t)
     {
         AT_ASSERT(t);
-        m_transformables.push_back(t);
-        t->updateIndex(m_transformables.size() - 1);
+        transformables_.push_back(t);
+        t->updateIndex(transformables_.size() - 1);
     }
 
-    std::shared_ptr<const aten::transformable> context::getTransformable(int32_t idx) const
+    std::shared_ptr<const aten::transformable> context::GetTransformable(int32_t idx) const
     {
-        AT_ASSERT(0 <= idx && idx < m_transformables.size());
-        return m_transformables[idx];
+        AT_ASSERT(0 <= idx && idx < transformables_.size());
+        return transformables_[idx];
     }
 
-    void context::traverseTransformables(
+    void context::TraverseTransformables(
         std::function<void(std::shared_ptr<aten::transformable>&, aten::ObjectType)> func) const
     {
-        for (auto& t : m_transformables) {
+        for (auto& t : transformables_) {
             auto type = t->getType();
             func(t, type);
         }
     }
 
-    std::vector<aten::mat4> context::PickNonIndentityMatricesAndUpdateMtxidxOfInstance() const
+    std::vector<aten::mat4> context::PickNonIdentityMatricesAndUpdateMatrixIdxInTransformable() const
     {
         std::vector<aten::mat4> dst;
-        traverseTransformables([&dst](std::shared_ptr<aten::transformable>& t, aten::ObjectType type) {
+        TraverseTransformables([&dst](std::shared_ptr<aten::transformable>& t, aten::ObjectType type) {
             if (type == ObjectType::Instance) {
                 aten::mat4 mtx_L2W, mtx_W2L;
                 t->getMatrices(mtx_L2W, mtx_W2L);
 
-                auto& param = t->getParam();
+                auto& param = t->GetParam();
 
                 if (mtx_L2W.isIdentity()) {
                     param.mtx_id = -1;
@@ -224,17 +224,17 @@ namespace aten
         return dst;
     }
 
-    int32_t context::findTransformableIdxFromPointer(const void* p) const
+    int32_t context::FindTransformableIdxFromPointer(const void* p) const
     {
         auto found = std::find_if(
-            m_transformables.begin(), m_transformables.end(),
+            transformables_.begin(), transformables_.end(),
             [&](const std::shared_ptr<aten::transformable>& t) {
             return t.get() == p;
         });
 
         int32_t id = -1;
 
-        if (found != m_transformables.end()) {
+        if (found != transformables_.end()) {
             const auto& t = *found;
             id = t->id();
         }
@@ -242,11 +242,11 @@ namespace aten
         return id;
     }
 
-    int32_t context::findPolygonalTransformableOrderFromPointer(const void* p) const
+    int32_t context::FindPolygonalTransformableOrderFromPointer(const void* p) const
     {
         int32_t order = -1;
 
-        for (const auto& t : m_transformables) {
+        for (const auto& t : transformables_) {
             auto type = t->getType();
             if (type == aten::ObjectType::Polygons) {
                 order++;
@@ -262,7 +262,7 @@ namespace aten
         return order;
     }
 
-    std::shared_ptr<texture> context::createTexture(
+    std::shared_ptr<texture> context::CreateTexture(
         int32_t width, int32_t height,
         uint32_t channels,
         std::string_view name)
@@ -270,51 +270,51 @@ namespace aten
         auto ret = texture::create(width, height, channels, name);
         AT_ASSERT(ret);
 
-        addTexture(ret);
+        AddTexture(ret);
 
         return ret;
     }
 
-    int32_t context::getTextureNum() const
+    int32_t context::GetTextureNum() const
     {
-        return m_textures.size();
+        return textures_.size();
     }
 
-    std::shared_ptr<texture> context::getTexture(int32_t idx) const
+    std::shared_ptr<texture> context::GtTexture(int32_t idx) const
     {
-        AT_ASSERT(0 <= idx && idx < getTextureNum());
-        return m_textures[idx];
+        AT_ASSERT(0 <= idx && idx < GetTextureNum());
+        return textures_[idx];
     }
 
-    void context::addTexture(const std::shared_ptr<texture>& tex)
+    void context::AddTexture(const std::shared_ptr<texture>& tex)
     {
         AT_ASSERT(tex);
-        m_textures.push_back(tex);
-        tex->updateIndex(m_textures.size() - 1);
+        textures_.push_back(tex);
+        tex->updateIndex(textures_.size() - 1);
     }
 
-    void context::initAllTexAsGLTexture()
+    void context::InitAllTextureAsGLTexture()
     {
-        auto num = getTextureNum();
+        auto num = GetTextureNum();
 
         for (int32_t i = 0; i < num; i++) {
-            auto tex = m_textures[i];
+            auto tex = textures_[i];
             tex->initAsGLTexture();
         }
     }
 
-    void context::add_light(std::shared_ptr<Light> light)
+    void context::AddLight(std::shared_ptr<Light> light)
     {
-        m_lights.emplace_back(light);
+        lights_.emplace_back(light);
     }
 
-    std::shared_ptr<Light> context::get_light(uint32_t idx) const
+    std::shared_ptr<Light> context::GetLightInstance(uint32_t idx) const
     {
-        return m_lights[idx];
+        return lights_[idx];
     }
 
-    size_t context::get_light_num() const
+    size_t context::GetLightNum() const
     {
-        return m_lights.size();
+        return lights_.size();
     }
 }

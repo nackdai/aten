@@ -63,7 +63,7 @@ __global__ void computeTemporalReuse(
 
     auto& comibined_reservoir = reservoirs[idx];
 
-    float selected_target_density = comibined_reservoir.isValid()
+    float selected_target_density = comibined_reservoir.IsValid()
         ? comibined_reservoir.target_density_
         : 0.0f;
 
@@ -90,7 +90,7 @@ __global__ void computeTemporalReuse(
 
         auto m = std::min(neighbor_reservoir.m_, maxM);
 
-        if (neighbor_reservoir.isValid()) {
+        if (neighbor_reservoir.IsValid()) {
             const auto& neighbor_info = infos[neighbor_idx];
 
             const auto& neighbor_normal = neighbor_info.nml;
@@ -245,7 +245,7 @@ __global__ void computeSpatialReuse(
 
     float selected_target_density = 0.0f;
 
-    if (reservoir.isValid()) {
+    if (reservoir.IsValid()) {
         comibined_reservoir = reservoir;
         selected_target_density = reservoir.target_density_;
     }
@@ -265,7 +265,7 @@ __global__ void computeSpatialReuse(
             auto neighbor_idx = getIdx(xx, yy, width);
             const auto& neighbor_reservoir = reservoirs[neighbor_idx];
 
-            if (neighbor_reservoir.isValid()) {
+            if (neighbor_reservoir.IsValid()) {
                 const auto& neighbor_info = infos[neighbor_idx];
 
                 const auto& neighbor_normal = neighbor_info.nml;

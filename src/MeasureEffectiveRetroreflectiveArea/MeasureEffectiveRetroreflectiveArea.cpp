@@ -33,11 +33,11 @@ bool MeasureEffectiveRetroreflectiveArea::init(
         aten::VertexAttrib{ GL_FLOAT, 3, sizeof(GLfloat), 0 },
     };
 
-    m_width = width;
-    m_height = height;
+    width_ = width;
+    height_ = height;
 
     // vertex buffer.
-    m_vb.init(
+    vertex_buffer_.init(
         sizeof(aten::vec4),
         TriangleVtxs.size(),
         0,
@@ -235,10 +235,10 @@ void MeasureEffectiveRetroreflectiveArea::draw(
     CALL_GL_API(::glUniform3f(hNormal, 1.0f, 0.0f, 0.0f));
 
     CALL_GL_API(::glUniform3f(hColor, 1.0f, 0.0f, 0.0f));
-    m_ib.draw(m_vb, aten::Primitive::Triangles, 0, 1);
+    m_ib.draw(vertex_buffer_, aten::Primitive::Triangles, 0, 1);
 
     CALL_GL_API(::glUniform3f(hColor, 0.0f, 1.0f, 0.0f));
-    m_ib.draw(m_vb, aten::Primitive::Triangles, 3, 1);
+    m_ib.draw(vertex_buffer_, aten::Primitive::Triangles, 3, 1);
 
     CALL_GL_API(::glUniform3f(hColor, 0.0f, 0.0f, 0.0f));
     //m_ib_pts.draw(m_vb_pts, aten::Primitive::Points, 0, ray_orgs_.size());

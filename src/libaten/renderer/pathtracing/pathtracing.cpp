@@ -533,7 +533,7 @@ namespace aten
 
 #if 0
                     if (hrec.mtrlid >= 0) {
-                        const auto mtrl = ctxt.getMaterial(hrec.mtrlid);
+                        const auto mtrl = ctxt.GetMaterial(hrec.mtrlid);
                         if (mtrl && mtrl->isNPR()) {
                             col = FeatureLine::renderFeatureLine(
                                 col,

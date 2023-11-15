@@ -29,7 +29,7 @@ namespace AT_NAME {
         // TODO
         if (texid >= 0) {
             const auto ctxt = aten::context::getPinnedContext();
-            auto tex = ctxt->getTexture(texid);
+            auto tex = ctxt->GtTexture(texid);
             if (tex) {
                 ret = tex->at(u, v);
             }

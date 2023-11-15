@@ -12,7 +12,7 @@
     }
 
 namespace aten {
-    inline void getGLPixelFormat(
+    inline void GetGLPixelFormat(
         PixelFormat fmt,
         GLenum& glfmt,
         GLenum& gltype,

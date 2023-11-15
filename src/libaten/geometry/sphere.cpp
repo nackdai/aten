@@ -90,7 +90,7 @@ namespace AT_NAME
         return true;
     }
 
-    void sphere::evalHitResult(
+    void sphere::EvaluateHitResult(
         const aten::ObjectParameter* param,
         const aten::ray& r,
         aten::hitrecord* rec,
@@ -108,7 +108,7 @@ namespace AT_NAME
         getUV(rec->u, rec->v, rec->normal);
     }
 
-    void sphere::sample_pos_and_normal(
+    void sphere::SamplePosAndNormal(
         aten::SamplePosNormalPdfResult* result,
         const aten::ObjectParameter& param,
         const aten::mat4& mtx_L2W,

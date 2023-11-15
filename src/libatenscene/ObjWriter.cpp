@@ -236,21 +236,21 @@ namespace aten {
 
             size_t tri_num = 0;
             for (const auto& s : shapes) {
-                const auto& tris = s->tris();
+                const auto& tris = s->GetTriangleList();
                 tri_num += tris.size();
             }
             export_face_vtx.reserve(tri_num);
 
             for (const auto& s : shapes) {
-                const auto& tris = s->tris();
+                const auto& tris = s->GetTriangleList();
 
                 for (const auto& t : tris) {
-                    const auto& tri_param = t->getParam();
+                    const auto& tri_param = t->GetParam();
 
                     ObjFace triangle;
 
                     for (int32_t i = 0; i < 3; i++) {
-                        const auto& v = ctxt.getVertex(tri_param.idx[i]);
+                        const auto& v = ctxt.GetVertex(tri_param.idx[i]);
 
                         triangle.vtx[i].pos = writeVertexPosition(fp, v) ? vtx_idx : -1;
                         triangle.vtx[i].nml = writeVertexNormal(fp, v) ? vtx_idx : -1;
@@ -276,10 +276,10 @@ namespace aten {
             size_t tri_pos = 0;
 
             for (const auto& s : shapes) {
-                auto mtrl_name = s->getMaterial()->name();
+                auto mtrl_name = s->GetMaterial()->name();
                 fprintf(fp, "usemtl %s\n", mtrl_name);
 
-                const auto& tris = s->tris();
+                const auto& tris = s->GetTriangleList();
 
                 for (size_t i = 0; i < tris.size(); i++) {
                     const auto& triangle = export_face_vtx[tri_pos];
@@ -318,13 +318,13 @@ namespace aten {
             fprintf(fp, "illum 2\n");
 
             if (param.albedoMap >= 0) {
-                auto albedo = ctxt.getTexture(param.albedoMap);
+                auto albedo = ctxt.GtTexture(param.albedoMap);
                 fprintf(fp, "map_Ka %s\n", albedo->name());
                 fprintf(fp, "map_Kd %s\n", albedo->name());
             }
 
             if (param.normalMap >= 0) {
-                auto normal = ctxt.getTexture(param.normalMap);
+                auto normal = ctxt.GtTexture(param.normalMap);
                 fprintf(fp, "map_bump %s\n", normal->name());
                 fprintf(fp, "bump %s\n", normal->name());
             }

@@ -23,7 +23,7 @@ namespace AT_NAME
 
         virtual aten::vec3 sample(real u, real v) const override final;
 
-        const std::shared_ptr<aten::texture>& getTexture() const
+        const std::shared_ptr<aten::texture>& GtTexture() const
         {
             return m_envmap;
         }

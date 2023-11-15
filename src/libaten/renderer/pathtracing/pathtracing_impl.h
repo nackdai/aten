@@ -371,7 +371,7 @@ namespace AT_NAME
         const auto distToLight = shadowRay.distToLight;
 
         const auto& light = ctxt.GetLight(targetLightId);
-        const auto lightobj = (light.objid >= 0 ? &ctxt.GetObject(static_cast<uint32_t>(light.objid)) : nullptr);
+        const auto lightobj = (light.IsValidLightObjectId() ? &ctxt.GetObject(static_cast<uint32_t>(light.objid)) : nullptr);
 
         real distHitObjToRayOrg = AT_MATH_INF;
 

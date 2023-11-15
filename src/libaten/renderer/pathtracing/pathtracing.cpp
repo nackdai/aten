@@ -64,7 +64,7 @@ namespace aten
                         ix, iy,
                         width, height,
                         depth,
-                        ibl->param().envmapidx,
+                        ibl->param().GetLightEnvmapId(),
                         ibl->getAvgIlluminace(),
                         real(1),
                         ctxt, camera,

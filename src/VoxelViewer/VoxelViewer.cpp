@@ -63,15 +63,15 @@ bool VoxelViewer::init(
     std::string_view pathVS,
     std::string_view pathFS)
 {
-    m_width = width;
-    m_height = height;
+    width_ = width;
+    height_ = height;
 
     static const aten::VertexAttrib attribs[] = {
         { GL_FLOAT, 3, sizeof(GLfloat), 0 },
     };
 
     // vertex buffer.
-    m_vb.init(
+    vertex_buffer_.init(
         sizeof(aten::vec4),
         AT_COUNTOF(VoxelVtxs),
         0,
@@ -169,7 +169,7 @@ void VoxelViewer::draw(
 
             aten::vec3 color(real(0));
 
-            const auto mtrl = ctxt.getMaterial(voxel.mtrlid);
+            const auto mtrl = ctxt.GetMaterialInstance(voxel.mtrlid);
 
             if (mtrl) {
                 color = mtrl->color();
@@ -182,10 +182,10 @@ void VoxelViewer::draw(
             CALL_GL_API(::glUniform3f(hNormal, 1.0f, 0.0f, 0.0f));
 
             if (isWireframe) {
-                m_ibForWireframe.draw(m_vb, aten::Primitive::Lines, 0, 12);
+                m_ibForWireframe.draw(vertex_buffer_, aten::Primitive::Lines, 0, 12);
             }
             else {
-                m_ib.draw(m_vb, aten::Primitive::Triangles, 0, PrimCnt);
+                m_ib.draw(vertex_buffer_, aten::Primitive::Triangles, 0, PrimCnt);
             }
         }
     }

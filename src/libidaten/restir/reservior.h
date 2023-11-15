@@ -24,7 +24,7 @@ namespace idaten {
             target_density_ = 0.0f;
         }
 
-        __host__ __device__ bool isValid() const
+        __host__ __device__ bool IsValid() const
         {
             return light_idx_ >= 0;
         }

@@ -8,7 +8,7 @@ namespace aten {
     {
         shader::prepareRender(pixels, revert);
 
-        GLfloat invScreen[4] = { 1.0f / m_width, 1.0f / m_height, 0.0f, 0.0f };
+        GLfloat invScreen[4] = { 1.0f / width_, 1.0f / height_, 0.0f, 0.0f };
         auto hInvScreen = getHandle("invScreen");
         if (hInvScreen >= 0) {
             CALL_GL_API(::glUniform4fv(hInvScreen, 1, invScreen));

@@ -58,7 +58,7 @@ namespace aten {
         }
 
     private:
-        void prepareFbo(const uint32_t* tex, int32_t num, std::vector<uint32_t>& comps);
+        void prepareFbo(const std::vector<uint32_t>& tex, std::vector<uint32_t>& comps);
 
         class TAAPass : public visualizer::PostProc {
         public:

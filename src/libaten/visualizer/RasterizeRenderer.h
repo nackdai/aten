@@ -59,7 +59,7 @@ namespace aten {
         void release()
         {
             m_boxvb.clear();
-            m_vb.clear();
+            vertex_buffer_.clear();
             m_ib.clear();
         }
 
@@ -139,11 +139,11 @@ namespace aten {
 
         mat4 m_mtxPrevW2C;
 
-        int32_t m_width{ 0 };
-        int32_t m_height{ 0 };
+        int32_t width_{ 0 };
+        int32_t height_{ 0 };
 
         bool m_isInitBuffer{ false };
-        GeomVertexBuffer m_vb;
+        GeomVertexBuffer vertex_buffer_;
         std::vector<GeomIndexBuffer> m_ib;
     };
 }

@@ -21,7 +21,7 @@ std::shared_ptr<aten::DeformAnimation> getDeformAnm()
     return s_deformAnm;
 }
 
-static std::shared_ptr<aten::material> createMaterial(
+static std::shared_ptr<aten::material> CreateMaterial(
     aten::context& ctxt,
     aten::MaterialType type,
     const aten::vec3& albedo,
@@ -32,7 +32,7 @@ static std::shared_ptr<aten::material> createMaterial(
     param.type = type;
     param.baseColor = albedo;
 
-    auto mtrl = ctxt.createMaterialWithMaterialParameter(
+    auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
         param,
         albedoMap,
         normalMap,
@@ -41,7 +41,7 @@ static std::shared_ptr<aten::material> createMaterial(
     return mtrl;
 }
 
-static std::shared_ptr<aten::material> createMaterial(
+static std::shared_ptr<aten::material> CreateMaterial(
     aten::context& ctxt,
     aten::MaterialType type,
     const aten::vec3& albedo)
@@ -50,7 +50,7 @@ static std::shared_ptr<aten::material> createMaterial(
     param.type = type;
     param.baseColor = albedo;
 
-    return ctxt.createMaterialWithMaterialParameter(
+    return ctxt.CreateMaterialWithMaterialParameter(
         param,
         nullptr, nullptr, nullptr);
 }
@@ -63,7 +63,7 @@ static std::shared_ptr<aten::material> createMaterialWithParamter(
     aten::MaterialParameter mtrl_param = param;
     mtrl_param.type = type;
 
-    return ctxt.createMaterialWithMaterialParameter(
+    return ctxt.CreateMaterialWithMaterialParameter(
         mtrl_param,
         nullptr, nullptr, nullptr);
 }
@@ -79,7 +79,7 @@ static std::shared_ptr<aten::material> createMaterialWithParamter(
     aten::MaterialParameter mtrl_param = param;
     mtrl_param.type = type;
 
-    return ctxt.createMaterialWithMaterialParameter(
+    return ctxt.CreateMaterialWithMaterialParameter(
         mtrl_param,
         albedoMap,
         normalMap,
@@ -88,7 +88,7 @@ static std::shared_ptr<aten::material> createMaterialWithParamter(
 
 void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 36, 36));
+    auto emit = CreateMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 36, 36));
 
     auto light = aten::TransformableFactory::createSphere(
         ctxt,
@@ -102,31 +102,31 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
         ctxt,
         aten::vec3(r + 1, 40.8, 81.6),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75f, 0.25f, 0.25f)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75f, 0.25f, 0.25f)));
 
     auto right = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(-r + 99, 40.8, 81.6),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.25, 0.75)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.25, 0.75)));
 
     auto wall = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(50, 40.8, r),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     auto floor = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(50, r, 81.6),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     auto ceil = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(50, -r + 81.6, 81.6),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     //auto tex = aten::ImageLoader::load("../../asset/earth.bmp");
 
@@ -138,8 +138,8 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
         ctxt,
         aten::vec3(65, 20, 20),
         20,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
-        //createMaterial(ctxt, aten::vec3(1, 1, 1), tex));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
+        //CreateMaterial(ctxt, aten::vec3(1, 1, 1), tex));
 #else
     auto green = aten::TransformableFactory::createSphere(
         aten::vec3(65, 20, 20),
@@ -153,10 +153,10 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
         ctxt,
         aten::vec3(27, 16.5, 47),
         16.5,
-        createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.99, 0.99, 0.99)));
+        CreateMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.99, 0.99, 0.99)));
 #else
     auto spec = new aten::MicrofacetBlinn(aten::vec3(1, 1, 1), 200, 0.8);
-    auto diff = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.0, 0.7, 0.0));
+    auto diff = CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.0, 0.7, 0.0));
 
     auto layer = new aten::LayeredBSDF();
     layer->add(spec);
@@ -183,11 +183,11 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 #else
     aten::AssetManager::registerMtrl(
         "m1",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.2, 0.2, 0.7)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.2, 0.2, 0.7)));
 
     aten::AssetManager::registerMtrl(
         "Material.001",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.2, 0.2, 0.7)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.2, 0.2, 0.7)));
 
     auto obj = aten::ObjLoader::load("../../asset/suzanne/suzanne.obj", ctxt);
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
@@ -224,7 +224,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto l = std::make_shared<aten::AreaLight>(glass, emit->color());
 #endif
 
-    ctxt.add_light(l);
+    ctxt.AddLight(l);
 }
 
 void CornellBoxScene::getCameraPosAndAt(
@@ -245,7 +245,7 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
         ctxt,
         aten::vec3(0, -1000, 0),
         1000,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.8, 0.8)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.8, 0.8)));
     scene->add(s);
 
     aten::MaterialParameter mtrlParam;
@@ -267,7 +267,7 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
                         ctxt,
                         center,
                         0.2,
-                        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48())));
+                        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48())));
                 }
                 else if (choose_mtrl < 0.95) {
                     // specular
@@ -275,7 +275,7 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
                         ctxt,
                         center,
                         0.2,
-                        createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()))));
+                        CreateMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()))));
                 }
                 else {
                     // glass
@@ -299,10 +299,10 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
     s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(0, 1, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
     scene->add(s);
 
-    s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-4, 1, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.4, 0.2, 0.1)));
+    s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-4, 1, 0), 1.0, CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.4, 0.2, 0.1)));
     scene->add(s);
 
-    s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(4, 1, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.7, 0.6, 0.5)));
+    s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(4, 1, 0), 1.0, CreateMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.7, 0.6, 0.5)));
     scene->add(s);
 }
 
@@ -340,7 +340,7 @@ void MtrlTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto s_beckman = aten::TransformableFactory::createSphere(ctxt, aten::vec3(+1, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Beckman, mtrlParam));
     scene->add(s_beckman);
 
-    auto s_glass = aten::TransformableFactory::createSphere(ctxt, aten::vec3(+3, 0, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.7, 0.6, 0.5)));
+    auto s_glass = aten::TransformableFactory::createSphere(ctxt, aten::vec3(+3, 0, 0), 1.0, CreateMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.7, 0.6, 0.5)));
     scene->add(s_glass);
 }
 
@@ -402,7 +402,7 @@ void ObjectScene::getCameraPosAndAt(
 
 void PointLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36.0, 36.0, 36.0));
+    auto emit = CreateMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36.0, 36.0, 36.0));
 
     auto light = aten::TransformableFactory::createSphere(
         ctxt,
@@ -416,14 +416,14 @@ void PointLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         ctxt,
         aten::vec3(0, -r, 0),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     // �΋�.
     auto green = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(65, 20, 20),
         20,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
 
     //scene->add(light);
     scene->add(floor);
@@ -437,7 +437,7 @@ void PointLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         real(0));
     //aten::Light* l = new aten::AreaLight(light, emit->color());
 
-    ctxt.add_light(l);
+    ctxt.AddLight(l);
 }
 
 void PointLightScene::getCameraPosAndAt(
@@ -454,7 +454,7 @@ void PointLightScene::getCameraPosAndAt(
 
 void DirectionalLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36.0, 36.0, 36.0));
+    auto emit = CreateMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36.0, 36.0, 36.0));
 
     auto light = aten::TransformableFactory::createSphere(
         ctxt,
@@ -468,14 +468,14 @@ void DirectionalLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         ctxt,
         aten::vec3(0, -r, 0),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     // �΋�.
     auto green = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(65, 20, 20),
         20,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
 
     //scene->add(light);
     scene->add(floor);
@@ -484,7 +484,7 @@ void DirectionalLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto l = std::make_shared<aten::DirectionalLight>(aten::vec3(1, -1, 1), aten::vec3(36.0, 36.0, 36.0));
     //aten::Light* l = new aten::AreaLight(light, emit->color());
 
-    ctxt.add_light(l);
+    ctxt.AddLight(l);
 }
 
 void DirectionalLightScene::getCameraPosAndAt(
@@ -507,20 +507,20 @@ void SpotLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         ctxt,
         aten::vec3(0, -r, 0),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     // �΋�.
     auto green = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(65, 20, 20),
         20,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
 
     auto red = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(25, 20, 20),
         20,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.25, 0.25)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.25, 0.25)));
 
     //scene->add(light);
     scene->add(floor);
@@ -537,7 +537,7 @@ void SpotLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         real(1));
     //aten::Light* l = new aten::AreaLight(light, emit->color());
 
-    ctxt.add_light(l);
+    ctxt.AddLight(l);
 }
 
 void SpotLightScene::getCameraPosAndAt(
@@ -558,7 +558,7 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         ctxt,
         aten::vec3(0, -1000, 0),
         1000,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.8, 0.8)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.8, 0.8)));
     scene->add(s);
 
     aten::MaterialParameter mtrlParam;
@@ -581,7 +581,7 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
                         ctxt,
                         center,
                         0.2,
-                        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48())));
+                        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48())));
                 }
                 else if (choose_mtrl < 0.95) {
                     // specular
@@ -589,7 +589,7 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
                         ctxt,
                         center,
                         0.2,
-                        createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()))));
+                        CreateMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()))));
                 }
                 else {
                     // glass
@@ -610,10 +610,10 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(0, 1, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
     scene->add(s);
 
-    s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-4, 1, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.2, 0.1)));
+    s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-4, 1, 0), 1.0, CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.2, 0.1)));
     scene->add(s);
 
-    s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(4, 1, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.7, 0.6, 0.5)));
+    s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(4, 1, 0), 1.0, CreateMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.7, 0.6, 0.5)));
     scene->add(s);
 
     auto dir = std::make_shared<aten::DirectionalLight>(aten::vec3(-1, -1, -1), aten::vec3(0.5, 0.5, 0.5));
@@ -631,9 +631,9 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         real(Deg2Rad(60)),
         real(1));
 
-    ctxt.add_light(dir);
-    ctxt.add_light(spot);
-    ctxt.add_light(point);
+    ctxt.AddLight(dir);
+    ctxt.AddLight(spot);
+    ctxt.AddLight(point);
 }
 
 void ManyLightScene::getCameraPosAndAt(
@@ -708,7 +708,7 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
     mtrlParam.standard.roughness = 0.2;
     mtrlParam.standard.ior = 0.2;
 
-    auto lambert = createMaterial(
+    auto lambert = CreateMaterial(
         ctxt, aten::MaterialType::Lambert, clr,
         albedo.get(), nml.get());
 
@@ -719,7 +719,7 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
         lambert);
     scene->add(s_lambert);
 
-    auto specular = createMaterial(
+    auto specular = CreateMaterial(
         ctxt, aten::MaterialType::Specular, clr,
         nullptr, nml_2.get());
 
@@ -753,7 +753,7 @@ void TexturesScene::getCameraPosAndAt(
 
 void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(64.0, 64.0, 64.0));
+    auto emit = CreateMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(64.0, 64.0, 64.0));
 
     auto light = aten::TransformableFactory::createSphere(
         ctxt,
@@ -767,31 +767,31 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         ctxt,
         aten::vec3(r + 1, 40.8, 81.6),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75f, 0.25f, 0.25f)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75f, 0.25f, 0.25f)));
 
     auto right = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(-r + 99, 40.8, 81.6),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.25, 0.75)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.25, 0.75)));
 
     auto wall = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(50, 40.8, r),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     auto floor = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(50, r, 81.6),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     auto ceil = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(50, -r + 81.6, 81.6),
         r,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     //auto tex = aten::ImageLoader::load("../../asset/earth.bmp");
 
@@ -800,15 +800,15 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         ctxt,
         aten::vec3(65, 20, 20),
         20,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
-    //createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(1, 1, 1), tex));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
+    //CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(1, 1, 1), tex));
 
     // ��.
     auto mirror = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(27, 16.5, 47),
         16.5,
-        createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.99, 0.99, 0.99)));
+        CreateMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.99, 0.99, 0.99)));
 
     // �K���X.
     aten::MaterialParameter mtrlParam;
@@ -835,7 +835,7 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     auto l = std::make_shared<aten::AreaLight>(light, emit->color());
 
-    ctxt.add_light(l);
+    ctxt.AddLight(l);
 #endif
 }
 
@@ -866,13 +866,13 @@ void DisneyMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     }
 
     {
-        auto m = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.82, 0.67, 0.16));
+        auto m = CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.82, 0.67, 0.16));
         auto s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-3, 0, 0), 1.0, m);
         scene->add(s);
     }
 
     aten::Light* dir = new aten::DirectionalLight(aten::vec3(-1, -1, -1), aten::vec3(0.5, 0.5, 0.5));
-    //ctxt.add_light(dir);
+    //ctxt.AddLight(dir);
 
 #if 0
     {
@@ -918,7 +918,7 @@ void DisneyMaterialTestScene::getCameraPosAndAt(
 
 void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 33, 24));
+    auto emit = CreateMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 33, 24));
     aten::AssetManager::registerMtrl(
         "light",
         emit);
@@ -960,7 +960,7 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
                     return mtrl;
                 }
                 else {
-                    auto mtrl = createMaterial(ctxt, type, mtrl_clr);
+                    auto mtrl = CreateMaterial(ctxt, type, mtrl_clr);
                     mtrl->setName(name.data());
                     aten::AssetManager::registerMtrl(name, mtrl);
                     return mtrl;
@@ -979,7 +979,7 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     g_movableObj = light;
 
     auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor);
-    ctxt.add_light(areaLight);
+    ctxt.AddLight(areaLight);
 
     for (int32_t i = 1; i < objs.size(); i++) {
         auto box = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[i], aten::mat4::Identity);
@@ -1015,7 +1015,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
                     ? nullptr
                     : aten::ImageLoader::load("../../asset/sponza/" + nml, ctxt);
 
-                auto mtrl = createMaterial(ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
+                auto mtrl = CreateMaterial(ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
                 mtrl->setName(name.data());
                 aten::AssetManager::registerMtrl(name, mtrl);
                 return mtrl;
@@ -1027,7 +1027,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
 #if 1
     {
-        int32_t offsetTriIdx = ctxt.getTriangleNum();
+        int32_t offsetTriIdx = ctxt.GetTriangleNum();
 
         objs.clear();
         aten::ObjLoader::load(objs, "../../asset/sponza/sponza_lod.obj", ctxt);
@@ -1124,27 +1124,27 @@ void DeformInBoxScene::makeScene(
 {
 #if 1
     {
-        auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 33, 24));
+        auto emit = CreateMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 33, 24));
         aten::AssetManager::registerMtrl(
             "light",
             emit);
 
         aten::AssetManager::registerMtrl(
             "backWall",
-            createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
+            CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
         aten::AssetManager::registerMtrl(
             "ceiling",
-            createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
+            CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
         aten::AssetManager::registerMtrl(
             "floor",
-            createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
+            CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
         aten::AssetManager::registerMtrl(
             "leftWall",
-            createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.504000, 0.052000, 0.040000)));
+            CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.504000, 0.052000, 0.040000)));
 
         aten::AssetManager::registerMtrl(
             "rightWall",
-            createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.112000, 0.360000, 0.072800)));
+            CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.112000, 0.360000, 0.072800)));
 
         std::vector<std::shared_ptr<aten::PolygonObject>> objs;
 
@@ -1159,7 +1159,7 @@ void DeformInBoxScene::makeScene(
         scene->add(light);
 
         auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor);
-        ctxt.add_light(areaLight);
+        ctxt.AddLight(areaLight);
 
         auto box = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[1], aten::mat4::Identity);
         scene->add(box);
@@ -1199,7 +1199,7 @@ void DeformInBoxScene::getCameraPosAndAt(
 
 void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto back = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000));
+    auto back = CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000));
     back->param().baseColor.a = 0.0f;
     aten::AssetManager::registerMtrl(
         "backWall",
@@ -1207,31 +1207,31 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
 
     aten::AssetManager::registerMtrl(
         "ceiling",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
 
     aten::AssetManager::registerMtrl(
         "floor",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
 
-    auto left = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.504000, 0.052000, 0.040000));
+    auto left = CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.504000, 0.052000, 0.040000));
     left->param().baseColor.a = 0.5f;
     aten::AssetManager::registerMtrl(
         "leftWall",
         left);
 
-    auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 33, 24));
+    auto emit = CreateMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 33, 24));
     aten::AssetManager::registerMtrl(
         "light",
         emit);
 
     aten::AssetManager::registerMtrl(
         "rightWall",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.112000, 0.360000, 0.072800)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.112000, 0.360000, 0.072800)));
     aten::AssetManager::registerMtrl(
         "shortBox",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
+        CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
 
-    auto tall = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.0000, 0.000, 1.0000));
+    auto tall = CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.0000, 0.000, 1.0000));
     tall->param().baseColor.a = 0.25f;
     aten::AssetManager::registerMtrl(
         "tallBox",
@@ -1251,7 +1251,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
     g_movableObj = light;
 
     auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor);
-    ctxt.add_light(areaLight);
+    ctxt.AddLight(areaLight);
 
     for (int32_t i = 1; i < objs.size(); i++) {
         auto box = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[i], aten::mat4::Identity);
@@ -1287,7 +1287,7 @@ void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
                     ? nullptr
                     : aten::ImageLoader::load("../../asset/models/sponza/" + nml, ctxt);
 
-                auto mtrl = createMaterial(ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
+                auto mtrl = CreateMaterial(ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
                 mtrl->setName(name.data());
                 aten::AssetManager::registerMtrl(name, mtrl);
                 return mtrl;
@@ -1353,7 +1353,7 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
                     real(0.1),
                     real(0));
 
-                ctxt.add_light(l);
+                ctxt.AddLight(l);
 
                 pos.x += step_v.x;
                 num++;
@@ -1370,7 +1370,7 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
         real(0.1),
         real(0));
 
-    ctxt.add_light(l);
+    ctxt.AddLight(l);
 }
 
 void ManyLightCryteckSponzaScene::getCameraPosAndAt(

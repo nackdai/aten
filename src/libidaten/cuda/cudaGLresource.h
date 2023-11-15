@@ -65,7 +65,7 @@ namespace idaten
     public:
         void init(GLuint gltex, CudaGLRscRegisterType type);
 
-        bool isValid() const
+        bool IsValid() const
         {
             return (m_gltex > 0);
         }
@@ -99,7 +99,7 @@ namespace idaten
     public:
         void init(GLuint glbuffer, CudaGLRscRegisterType type);
 
-        bool isValid() const
+        bool IsValid() const
         {
             return (m_glbuffer > 0);
         }

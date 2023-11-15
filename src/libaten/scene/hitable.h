@@ -63,7 +63,7 @@ namespace aten {
             return (getHasObject() != nullptr);
         }
 
-        virtual int32_t mesh_id() const
+        virtual int32_t GetMeshId() const
         {
             return -1;
         }

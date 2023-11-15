@@ -14,7 +14,7 @@ namespace aten
         return m_fmt;
     }
 
-    static GLuint createTexture(int32_t width, int32_t height, PixelFormat fmt)
+    static GLuint CreateTexture(int32_t width, int32_t height, PixelFormat fmt)
     {
         GLuint tex = 0;
 
@@ -27,7 +27,7 @@ namespace aten
         GLenum pixeltype = 0;
         GLenum pixelinternal = 0;
 
-        getGLPixelFormat(
+        GetGLPixelFormat(
             fmt,
             pixelfmt, pixeltype, pixelinternal);
 
@@ -52,7 +52,7 @@ namespace aten
         return tex;
     }
 
-    uint32_t visualizer::getTexHandle()
+    uint32_t visualizer::GetGLTextureHandle()
     {
         return m_tex;
     }
@@ -61,11 +61,11 @@ namespace aten
     {
         auto ret = std::make_shared<visualizer>();
 
-        ret->m_tex = createTexture(width, height, ret->m_fmt);
+        ret->m_tex = CreateTexture(width, height, ret->m_fmt);
         AT_VRETURN(ret->m_tex != 0, nullptr);
 
-        ret->m_width = width;
-        ret->m_height = height;
+        ret->width_ = width;
+        ret->height_ = height;
 
         return ret;
     }
@@ -90,7 +90,7 @@ namespace aten
             auto& fbo = prevPostproc->getFbo();
 
             // Create FBO.
-            AT_VRETURN(fbo.init(m_width, m_height, outFmt), false);
+            AT_VRETURN(fbo.init(width_, height_, outFmt), false);
         }
 
         postproc->setVisualizer(this);
@@ -111,11 +111,11 @@ namespace aten
             for (int32_t i = 0; i < m_preprocs.size(); i++) {
                 auto& buf = m_preprocBuffer[bufpos];
                 if (buf.empty()) {
-                    buf.resize(m_width * m_height);
+                    buf.resize(width_ * height_);
                 }
                 dst = &buf[0];
 
-                (*m_preprocs[i])(src, m_width, m_height, dst);
+                (*m_preprocs[i])(src, width_, height_, dst);
 
                 src = dst;
                 bufpos = 1 - bufpos;
@@ -132,7 +132,7 @@ namespace aten
         // If type is double, convert double/rgb to float/rgba.
         // If type is float, convert rgb to rgba.
         if (m_tmp.empty()) {
-            m_tmp.resize(m_width * m_height);
+            m_tmp.resize(width_ * height_);
         }
 
         const vec4* src = (const vec4*)textureimage;
@@ -140,9 +140,9 @@ namespace aten
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-        for (int32_t y = 0; y < m_height; y++) {
-            for (int32_t x = 0; x < m_width; x++) {
-                int32_t pos = y * m_width + x;
+        for (int32_t y = 0; y < height_; y++) {
+            for (int32_t x = 0; x < width_; x++) {
+                int32_t pos = y * width_ + x;
 
                 auto& s = src[pos];
                 auto& d = m_tmp[pos];
@@ -177,7 +177,7 @@ namespace aten
         GLenum pixeltype = 0;
         GLenum pixelinternal = 0;
 
-        getGLPixelFormat(
+        GetGLPixelFormat(
             m_fmt,
             pixelfmt, pixeltype, pixelinternal);
 
@@ -185,7 +185,7 @@ namespace aten
             GL_TEXTURE_2D,
             0,
             0, 0,
-            m_width, m_height,
+            width_, height_,
             pixelfmt,
             pixeltype,
             textureimage));
@@ -203,7 +203,7 @@ namespace aten
                 CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
 
                 // Set FBO as source texture.
-                fbo.bindAsTexture();
+                fbo.BindAsTexture();
             }
 
             postproc->prepareRender(prevPostproc, pixels, willRevert);
@@ -212,9 +212,9 @@ namespace aten
             // 最初の１回だけ反転すればいいので.
             willRevert = false;
 
-            if (fbo.isValid()) {
+            if (fbo.IsValid()) {
                 // Set FBO.
-                fbo.bindFBO();
+                fbo.BindFBO();
             }
             else {
                 // Set default frame buffer.
@@ -261,7 +261,7 @@ namespace aten
                 CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
 
                 // Set FBO as source texture.
-                fbo.bindAsTexture();
+                fbo.BindAsTexture();
             }
 
             postproc->prepareRender(prevPostproc, nullptr, willRevert);
@@ -270,9 +270,9 @@ namespace aten
             // 最初の１回だけ反転すればいいので.
             willRevert = false;
 
-            if (fbo.isValid()) {
+            if (fbo.IsValid()) {
                 // Set FBO.
-                fbo.bindFBO();
+                fbo.BindFBO();
             }
             else {
                 // Set default frame buffer.
@@ -293,7 +293,7 @@ namespace aten
         GLenum pixeltype = 0;
         GLenum pixelinternal = 0;
 
-        getGLPixelFormat(
+        GetGLPixelFormat(
             m_fmt,
             pixelfmt, pixeltype, pixelinternal);
 
@@ -323,7 +323,7 @@ namespace aten
 
     void visualizer::takeScreenshot(std::string_view filename)
     {
-        takeScreenshot(filename, m_width, m_height);
+        takeScreenshot(filename, width_, height_);
     }
 
     void visualizer::takeScreenshot(std::string_view filename, int32_t width, int32_t height)

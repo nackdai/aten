@@ -181,7 +181,7 @@ public:
 
     uint32_t getVtxNum() const;
 
-    const VertexData& getVertex(uint32_t idx) const;
+    const VertexData& GetVertex(uint32_t idx) const;
 
     uint32_t getNodeNum() const;
 
@@ -198,7 +198,7 @@ public:
         std::vector<uint32_t>& joint) const;
 
     uint32_t getMaterialNum() const;
-    FbxSurfaceMaterial* getMaterial(uint32_t idx);
+    FbxSurfaceMaterial* GetMaterial(uint32_t idx);
 
     int32_t getAnmStartFrame() const { return m_AnmStartFrame; }
     int32_t getAnmStopFrame() const { return m_AnmStopFrame; }
@@ -228,7 +228,7 @@ private:
 
     void gatherSkin(std::vector<SkinData>& skinList);
 
-    fbxsdk::FbxSurfaceMaterial* getMaterial(FbxMesh* fbxMesh, uint32_t index);
+    fbxsdk::FbxSurfaceMaterial* GetMaterial(FbxMesh* fbxMesh, uint32_t index);
 
 private:
     FbxManager* m_manager{ nullptr };
@@ -242,9 +242,9 @@ private:
     std::vector<MeshSubset> m_meshes;
 
     std::map<FbxMesh*, std::vector<IndexData>> m_indices;
-    std::vector<VertexData> m_vertices;
+    std::vector<VertexData> vertices_;
 
-    std::vector<fbxsdk::FbxSurfaceMaterial*> m_materials;
+    std::vector<fbxsdk::FbxSurfaceMaterial*> materials_;
 
     int32_t m_AnmStartFrame;
     int32_t m_AnmStopFrame;

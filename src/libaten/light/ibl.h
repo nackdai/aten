@@ -32,7 +32,7 @@ namespace AT_NAME {
         {
             if (m_envmap != envmap) {
                 m_envmap = envmap;
-                m_param.envmapidx = envmap->getTexture()->id();
+                m_param.envmapidx = envmap->GtTexture()->id();
 
                 preCompute();
             }

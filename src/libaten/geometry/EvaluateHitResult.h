@@ -47,7 +47,7 @@ namespace AT_NAME
                     isect);
             }
             else if (real_obj.type == aten::ObjectType::Sphere) {
-                AT_NAME::sphere::evalHitResult(&real_obj, r, &rec, &isect);
+                AT_NAME::sphere::EvaluateHitResult(&real_obj, r, &rec, &isect);
             }
             else {
                 // TODO
@@ -65,7 +65,7 @@ namespace AT_NAME
     }
 
     template <typename CONTEXT>
-    inline AT_DEVICE_API void sample_pos_and_normal(
+    inline AT_DEVICE_API void SamplePosAndNormal(
         aten::SamplePosNormalPdfResult* result,
         const aten::ObjectParameter& obj,
         const CONTEXT& ctxt,
@@ -81,7 +81,7 @@ namespace AT_NAME
         }
 
         if (real_obj.type == aten::ObjectType::Polygons) {
-            AT_NAME::PolygonObject::sample_pos_and_normal(
+            AT_NAME::PolygonObject::SamplePosAndNormal(
                 result,
                 real_obj,
                 ctxt,
@@ -89,7 +89,7 @@ namespace AT_NAME
                 sampler);
         }
         else if (real_obj.type == aten::ObjectType::Sphere) {
-            AT_NAME::sphere::sample_pos_and_normal(result, real_obj, mtx_L2W, sampler);
+            AT_NAME::sphere::SamplePosAndNormal(result, real_obj, mtx_L2W, sampler);
         }
         else {
             // TODO

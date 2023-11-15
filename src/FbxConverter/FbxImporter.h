@@ -55,7 +55,7 @@ namespace aten
         uint32_t getVtxFmt();
 
         // 指定された頂点における指定フォーマットのデータを取得.
-        bool getVertex(
+        bool GetVertex(
             uint32_t nIdx,
             aten::vec4& vec,
             aten::MeshVertexFormat type);
@@ -152,7 +152,7 @@ namespace aten
 
         uint32_t getMaterialNum();
 
-        bool getMaterial(
+        bool GetMaterial(
             uint32_t nMtrlIdx,
             MaterialInfo& mtrl);
 

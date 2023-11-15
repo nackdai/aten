@@ -245,12 +245,12 @@ namespace aten
         return ret;
     }
 
-    bool FbxImporter::getVertex(
+    bool FbxImporter::GetVertex(
         uint32_t nIdx,
         aten::vec4& vec,
         aten::MeshVertexFormat type)
     {
-        const VertexData& vtx = m_dataMgr->getVertex(nIdx);
+        const VertexData& vtx = m_dataMgr->GetVertex(nIdx);
 
         auto mesh = m_dataMgr->getMesh(0).fbxMesh;
 
@@ -964,11 +964,11 @@ namespace aten
         }
     }
 
-    bool FbxImporter::getMaterial(
+    bool FbxImporter::GetMaterial(
         uint32_t nMtrlIdx,
         MaterialInfo& mtrl)
     {
-        auto* fbxMtrl = m_dataMgr->getMaterial(nMtrlIdx);
+        auto* fbxMtrl = m_dataMgr->GetMaterial(nMtrlIdx);
 
         mtrl.name = fbxMtrl->GetName();
 
@@ -993,7 +993,7 @@ namespace aten
         std::vector<MaterialTex>& mtrlTex,
         std::vector<MaterialParam>& mtrlParam)
     {
-        auto* fbxMtrl = m_dataMgr->getMaterial(nMtrlIdx);
+        auto* fbxMtrl = m_dataMgr->GetMaterial(nMtrlIdx);
 
         std::vector<MaterialTex> texList;
 
@@ -1069,7 +1069,7 @@ namespace aten
         // NOTE
         // http://www.programmershare.com/3142984/
 
-        auto* fbxMtrl = m_dataMgr->getMaterial(nMtrlIdx);
+        auto* fbxMtrl = m_dataMgr->GetMaterial(nMtrlIdx);
 
         // TODO
         // cgfx.

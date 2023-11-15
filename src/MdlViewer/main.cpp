@@ -314,10 +314,10 @@ int32_t main(int32_t argc, char* argv[])
         return 0;
     }
 
-    auto texNum = g_ctxt.getTextureNum();
+    auto texNum = g_ctxt.GetTextureNum();
 
     for (int32_t i = 0; i < texNum; i++) {
-        auto tex = g_ctxt.getTexture(i);
+        auto tex = g_ctxt.GtTexture(i);
         tex->initAsGLTexture();
     }
 

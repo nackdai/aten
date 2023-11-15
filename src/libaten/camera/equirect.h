@@ -27,15 +27,15 @@ namespace aten {
 
             // 値を保持.
             m_at = lookat;
-            m_width = (real)width;
-            m_height = (real)height;
+            width_ = (real)width;
+            height_ = (real)height;
         }
 
         virtual void update() override final
         {
             init(
                 m_origin, m_at, m_up,
-                (uint32_t)m_width, (uint32_t)m_height);
+                (uint32_t)width_, (uint32_t)height_);
         }
 
         virtual CameraSampleResult sample(
@@ -76,7 +76,7 @@ namespace aten {
         vec3 m_up;
 
         vec3 m_at;
-        real m_width;
-        real m_height;
+        real width_;
+        real height_;
     };
 }

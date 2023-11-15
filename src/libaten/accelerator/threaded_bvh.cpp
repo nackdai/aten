@@ -196,7 +196,7 @@ namespace aten
                 hitable* item = node->getItem();
 
                 // 自分自身のIDを取得.
-                gpunode.object_id = (float)ctxt.findTransformableIdxFromPointer(item);
+                gpunode.object_id = (float)ctxt.FindTransformableIdxFromPointer(item);
 
                 // インスタンスの実体を取得.
                 auto internalObj = item->getHasObject();
@@ -205,11 +205,11 @@ namespace aten
                     item = const_cast<hitable*>(internalObj);
                 }
 
-                gpunode.meshid = (float)item->mesh_id();
+                gpunode.meshid = (float)item->GetMeshId();
 
                 if (isPrimitiveLeaf) {
                     // Leaves of this tree are primitive.
-                    gpunode.primid = (float)ctxt.findTriIdxFromPointer(item);
+                    gpunode.primid = (float)ctxt.FindTriangleIdxFromPointer(item);
                     gpunode.exid = -1.0f;
                 }
                 else {
@@ -374,11 +374,11 @@ namespace aten
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
-                auto s = node->object_id >= 0 ? ctxt.getTransformable((int32_t)node->object_id) : nullptr;
+                auto s = node->object_id >= 0 ? ctxt.GetTransformable((int32_t)node->object_id) : nullptr;
 
                 if (node->exid >= 0) {
                     // Traverse external linear bvh list.
-                    const auto& param = s->getParam();
+                    const auto& param = s->GetParam();
 
                     int32_t mtx_id = param.mtx_id;
 
@@ -411,7 +411,7 @@ namespace aten
                 }
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
-                    auto prim = ctxt.getTriangle((int32_t)node->primid);
+                    auto prim = ctxt.GetTriangleInstance((int32_t)node->primid);
                     isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
                     if (isHit) {
                         // Set dummy to return if ray hit.
@@ -478,7 +478,7 @@ namespace aten
                 hitable* item = node->getItem();
 
                 // 自分自身のIDを取得.
-                gpunode.object_id = (float)ctxt.findTransformableIdxFromPointer(item);
+                gpunode.object_id = (float)ctxt.FindTransformableIdxFromPointer(item);
                 AT_ASSERT(gpunode.object_id >= 0);
 
                 // インスタンスの実体を取得.
@@ -488,7 +488,7 @@ namespace aten
                     item = const_cast<hitable*>(internalObj);
                 }
 
-                gpunode.meshid = (float)item->mesh_id();
+                gpunode.meshid = (float)item->GetMeshId();
 
                 int32_t exid = node->getExternalId();
                 int32_t subexid = node->getSubExternalId();
@@ -528,23 +528,23 @@ namespace aten
         mat4 mtx_L2W;
 
         auto item = node->getItem();
-        auto idx = ctxt.findTransformableIdxFromPointer(item);
+        auto idx = ctxt.FindTransformableIdxFromPointer(item);
 
         if (idx >= 0) {
-            auto t = ctxt.getTransformable(idx);
+            auto t = ctxt.GetTransformable(idx);
 
             mat4 mtx_W2L;
             t->getMatrices(mtx_L2W, mtx_W2L);
 
-            if (t->getParam().type == ObjectType::Instance) {
+            if (t->GetParam().type == ObjectType::Instance) {
                 // TODO
                 auto obj = const_cast<hitable*>(t->getHasObject());
                 auto subobj = const_cast<hitable*>(t->getHasSecondObject());
 
                 // NOTE
                 // 0 is for top layer, so need to add 1.
-                int32_t exid = ctxt.findPolygonalTransformableOrderFromPointer(obj) + 1;
-                int32_t subexid = subobj ? ctxt.findPolygonalTransformableOrderFromPointer(subobj) + 1 : -1;
+                int32_t exid = ctxt.FindPolygonalTransformableOrderFromPointer(obj) + 1;
+                int32_t subexid = subobj ? ctxt.FindPolygonalTransformableOrderFromPointer(subobj) + 1 : -1;
 
                 node->setExternalId(exid);
                 node->setSubExternalId(subexid);

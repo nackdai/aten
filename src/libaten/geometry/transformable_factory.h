@@ -14,8 +14,10 @@ namespace aten
         TransformableFactory() = delete;
         ~TransformableFactory() = delete;
 
-        TransformableFactory(const TransformableFactory& rhs) = delete;
-        const TransformableFactory& operator=(const TransformableFactory& rhs) = delete;
+        TransformableFactory(const TransformableFactory&) = delete;
+        TransformableFactory(TransformableFactory&&) = delete;
+        TransformableFactory& operator=(const TransformableFactory&) = delete;
+        TransformableFactory& operator=(TransformableFactory&&) = delete;
 
     public:
         static std::shared_ptr<sphere> createSphere(
@@ -27,7 +29,7 @@ namespace aten
             auto ret = std::make_shared<AT_NAME::sphere>(center, radius, mtrl);
             AT_ASSERT(ret);
 
-            ctxt.addTransformable(ret);
+            ctxt.AddTransformable(ret);
 
             return ret;
         }
@@ -37,7 +39,7 @@ namespace aten
             auto ret = std::make_shared<AT_NAME::PolygonObject>();
             AT_ASSERT(ret);
 
-            ctxt.addTransformable(ret);
+            ctxt.AddTransformable(ret);
 
             return ret;
         }
@@ -50,7 +52,7 @@ namespace aten
             auto ret = std::make_shared<instance<T>>(obj, ctxt);
             AT_ASSERT(ret);
 
-            ctxt.addTransformable(ret);
+            ctxt.AddTransformable(ret);
 
             return ret;
         }
@@ -64,7 +66,7 @@ namespace aten
             auto ret = std::make_shared<instance<T>>(obj, ctxt, mtx_L2W);
             AT_ASSERT(ret);
 
-            ctxt.addTransformable(ret);
+            ctxt.AddTransformable(ret);
 
             return ret;
         }
@@ -80,7 +82,7 @@ namespace aten
             auto ret = std::make_shared<instance<T>>(obj, ctxt, trans, rot, scale);
             AT_ASSERT(ret);
 
-            ctxt.addTransformable(ret);
+            ctxt.AddTransformable(ret);
 
             return ret;
         }
@@ -90,7 +92,7 @@ namespace aten
             auto ret = std::make_shared<deformable>();
             AT_ASSERT(ret);
 
-            ctxt.addTransformable(ret);
+            ctxt.AddTransformable(ret);
 
             return ret;
         }

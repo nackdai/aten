@@ -14,14 +14,14 @@ namespace aten {
                 prevPass = m_passes[i - 1];
 
                 // Set FBO as source texture.
-                prevPass->getFbo().bindAsTexture();
+                prevPass->getFbo().BindAsTexture();
             }
 
             pass->prepareRender(prevPass, pixels, revert);
 
-            if (pass->getFbo().isValid()) {
+            if (pass->getFbo().IsValid()) {
                 // Set FBO.
-                pass->getFbo().bindFBO();
+                pass->getFbo().BindFBO();
             }
             else {
                 // Set default frame buffer.

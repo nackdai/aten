@@ -50,20 +50,20 @@ namespace aten {
 
             virtual uint32_t getOutWidth() const
             {
-                return m_width;
+                return width_;
             }
             virtual uint32_t getOutHeight() const
             {
-                return m_height;
+                return height_;
             }
 
             virtual FBO& getFbo()
             {
-                return m_fbo;
+                return fbo_;
             }
             const FBO& getFbo() const
             {
-                return m_fbo;
+                return fbo_;
             }
 
             PostProc* getPrevPass()
@@ -91,7 +91,7 @@ namespace aten {
                 return m_visualizer;
             }
 
-            FBO m_fbo;
+            FBO fbo_;
             PostProc* m_prevPass{ nullptr };
             aten::visualizer* m_visualizer{ nullptr };
         };
@@ -99,7 +99,7 @@ namespace aten {
     public:
         PixelFormat getPixelFormat();
 
-        uint32_t getTexHandle();
+        uint32_t GetGLTextureHandle();
         static std::shared_ptr<visualizer> init(int32_t width, int32_t height);
 
         void addPreProc(PreProc* preproc);
@@ -130,8 +130,8 @@ namespace aten {
     private:
         uint32_t m_tex{ 0 };
 
-        int32_t m_width{ 0 };
-        int32_t m_height{ 0 };
+        int32_t width_{ 0 };
+        int32_t height_{ 0 };
 
         std::vector<TColor<float, 4>> m_tmp;
 

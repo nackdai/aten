@@ -29,7 +29,7 @@ namespace aten {
 
         float srcTexel[2] = { 1.0f / m_srcWidth, 1.0f / m_srcHeight };
 
-        float dstTexel[2] = { 1.0f / m_width, 1.0f / m_height };
+        float dstTexel[2] = { 1.0f / width_, 1.0f / height_ };
 
         CALL_GL_API(glUniform2f(
             getHandle("srcTexel"),
@@ -63,10 +63,10 @@ namespace aten {
 
         // Source tex handle.
         {
-            GLuint srcTexHandle = m_body->getVisualizer()->getTexHandle();
+            GLuint srcTexHandle = m_body->getVisualizer()->GetGLTextureHandle();
             auto prevEffectPass = m_body->getPrevPass();
             if (prevEffectPass) {
-                srcTexHandle = prevEffectPass->getFbo().getTexHandle();
+                srcTexHandle = prevEffectPass->getFbo().GetGLTextureHandle();
             }
 
             // Bind texture.
@@ -84,7 +84,7 @@ namespace aten {
         // Bloomed tex handle.
         {
             auto prevPass = getPrevPass();
-            auto texHandle = prevPass->getFbo().getTexHandle();
+            auto texHandle = prevPass->getFbo().GetGLTextureHandle();
 
             // Bind texture.
             CALL_GL_API(glActiveTexture(GL_TEXTURE1));
@@ -101,7 +101,7 @@ namespace aten {
         CALL_GL_API(glUniform1i(getHandle("image"), 0));
         CALL_GL_API(glUniform1i(getHandle("bloomtex"), 1));
 
-        float texel[2] = { 1.0f / m_width, 1.0f / m_height };
+        float texel[2] = { 1.0f / width_, 1.0f / height_ };
 
         CALL_GL_API(glUniform2f(
             getHandle("texel"),

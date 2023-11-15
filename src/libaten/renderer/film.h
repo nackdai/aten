@@ -45,18 +45,18 @@ namespace aten
 
         uint32_t width() const
         {
-            return m_width;
+            return width_;
         }
 
         uint32_t height() const
         {
-            return m_height;
+            return height_;
         }
 
     protected:
         std::vector<vec4> m_image;
-        int32_t m_width{ 0 };
-        int32_t m_height{ 0 };
+        int32_t width_{ 0 };
+        int32_t height_{ 0 };
     };
 
     class FilmProgressive : public Film {

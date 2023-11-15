@@ -220,8 +220,8 @@ namespace aten
 
                     auto f = triangle::faces()[(int32_t)qbvhNode.primidx[i]];
 
-                    const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
-                    const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
+                    const auto& v0 = aten::VertexManager::GetVertex(f->param.idx[0]);
+                    const auto& v1 = aten::VertexManager::GetVertex(f->param.idx[1]);
 
                     auto e1 = v1.pos - v0.pos;
 
@@ -244,12 +244,12 @@ namespace aten
             hitable* item = node->getItem();
 
             // 自分自身のIDを取得.
-            qbvhNode.object_id = (float)ctxt.findTransformableIdxFromPointer(item);
+            qbvhNode.object_id = (float)ctxt.FindTransformableIdxFromPointer(item);
 
             // もしなかったら、ネストしているので親のIDを取得.
             if (qbvhNode.object_id < 0) {
                 if (nestParent) {
-                    qbvhNode.object_id = (float)ctxt.findTransformableIdxFromPointer(nestParent);
+                    qbvhNode.object_id = (float)ctxt.FindTransformableIdxFromPointer(nestParent);
                 }
             }
 
@@ -260,11 +260,11 @@ namespace aten
                 item = const_cast<hitable*>(internalObj);
             }
 
-            qbvhNode.meshid = (float)item->mesh_id();
+            qbvhNode.meshid = (float)item->GetMeshId();
 
             if (isPrimitiveLeaf) {
                 // Leaves of this tree are primitive.
-                qbvhNode.primid = (float)ctxt.findTriIdxFromPointer(item);
+                qbvhNode.primid = (float)ctxt.FindTriangleIdxFromPointer(item);
                 qbvhNode.exid = -1.0f;
             }
             else {
@@ -451,11 +451,11 @@ namespace aten
         aten::vec4 v2z;
 
         for (int32_t i = 0; i < qnode.numChildren; i++) {
-            const auto& f = ctxt.getTriangle((int32_t)primidx[i]);
+            const auto& f = ctxt.GetTriangleInstance((int32_t)primidx[i]);
 
-            const auto& faceParam = f->getParam();
+            const auto& faceParam = f->GetParam();
 
-            const auto& v2 = ctxt.getVertex(faceParam.idx[2]);
+            const auto& v2 = ctxt.GetVertex(faceParam.idx[2]);
 
             v2x[i] = v2.pos.x;
             v2y[i] = v2.pos.y;
@@ -579,7 +579,7 @@ namespace aten
                 if (pnode->exid >= 0) {
                     // Traverse external qbvh.
                     auto s = shapes[(int32_t)pnode->object_id];
-                    const auto& param = s->getParam();
+                    const auto& param = s->GetParam();
 
                     int32_t mtx_id = param.mtx_id;
 
@@ -635,11 +635,11 @@ namespace aten
                     }
                 }
 #else
-                const auto& s = ctxt.getTransformable((int32_t)pnode->object_id);
+                const auto& s = ctxt.GetTransformable((int32_t)pnode->object_id);
 
                 if (pnode->exid >= 0) {
                     // Traverse external qbvh.
-                    const auto& param = s->getParam();
+                    const auto& param = s->GetParam();
 
                     int32_t mtx_id = param.mtx_id;
 
@@ -663,7 +663,7 @@ namespace aten
                         isectTmp);
                 }
                 else if (pnode->primid >= 0) {
-                    auto f = ctxt.getTriangle((int32_t)pnode->primid);
+                    auto f = ctxt.GetTriangleInstance((int32_t)pnode->primid);
                     isHit = f->hit(ctxt, r, t_min, t_max, isectTmp);
 
                     if (isHit) {

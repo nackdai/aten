@@ -226,7 +226,7 @@ namespace aten {
             return m_min.x == AT_MATH_INF;
         }
 
-        bool isValid() const
+        bool IsValid() const
         {
             return (aten::cmpGEQ(m_min, m_max) & 0x07) == 0;
         }

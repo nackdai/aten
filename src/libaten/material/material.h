@@ -312,7 +312,7 @@ namespace aten
         void editTex(std::string_view name, int32_t texid)
         {
             if (texid >= 0) {
-                /*auto tex = aten::texture::getTexture(texid);
+                /*auto tex = aten::texture::GtTexture(texid);
                 if (tex) {
                     edit(name, tex->name());
                 }*/
@@ -393,13 +393,13 @@ namespace AT_NAME
             aten::Values& val);
 
     public:
-        static std::shared_ptr<material> createMaterial(
+        static std::shared_ptr<material> CreateMaterial(
             aten::MaterialType type,
             aten::Values& value);
 
-        static std::shared_ptr<material> createMaterialWithDefaultValue(aten::MaterialType type);
+        static std::shared_ptr<material> CreateMaterialWithDefaultValue(aten::MaterialType type);
 
-        static std::shared_ptr<material> createMaterialWithMaterialParameter(
+        static std::shared_ptr<material> CreateMaterialWithMaterialParameter(
             const aten::MaterialParameter& param,
             aten::texture* albedoMap,
             aten::texture* normalMap,

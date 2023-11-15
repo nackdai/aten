@@ -18,8 +18,8 @@ namespace aten
         // For MRT.
         m_taa.getFbo().asMulti(3);
 
-        auto func = std::bind(&TAA::prepareFbo, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-        m_taa.getFbo().setPrepareFboFunction(func);
+        auto func = std::bind(&TAA::prepareFbo, this, std::placeholders::_1, std::placeholders::_2);
+        m_taa.getFbo().SetBindFboFunction(func);
 
         m_final.init(width, height, finalVsPath, finalFsPath);
         m_final.m_body = this;
@@ -30,8 +30,10 @@ namespace aten
         return true;
     }
 
-    void TAA::prepareFbo(const uint32_t* tex, int32_t num, std::vector<uint32_t>& comps)
+    void TAA::prepareFbo(const std::vector<uint32_t>& tex, std::vector<uint32_t>& comps)
     {
+        AT_ASSERT(tex.size() == 2);
+
         if (comps.empty()) {
             comps.resize(2);
         }
@@ -65,12 +67,12 @@ namespace aten
     {
         shader::prepareRender(pixels, revert);
 
-        GLuint srcTexHandle = m_body->getVisualizer()->getTexHandle();
+        GLuint srcTexHandle = m_body->getVisualizer()->GetGLTextureHandle();
         texture::bindAsGLTexture(srcTexHandle, 0, this);
 
         int32_t cur = m_body->m_idx;
 
-        auto texAcc = getFbo().getTexHandle(cur);
+        auto texAcc = getFbo().GetGLTextureHandle(cur);
         texture::bindAsGLTexture(texAcc, 1, this);
 
         texture::bindAsGLTexture(m_body->m_motionDepthBuffer, 2, this);
@@ -92,7 +94,7 @@ namespace aten
 
         auto prevPass = this->getPrevPass();
 
-        auto tex = prevPass->getFbo().getTexHandle(2);
+        auto tex = prevPass->getFbo().GetGLTextureHandle(2);
 
         texture::bindAsGLTexture(tex, 0, this);
 

@@ -1,5 +1,4 @@
 #include "GeometryChunk.h"
-#include "NvTriStrip.h"
 
 #include "misc/color.h"
 
@@ -605,7 +604,7 @@ bool GeometryChunkExporter::computeVtxNormal(
     for (uint32_t i = 0; i < 3; i++) {
         uint32_t nVtxIdx = sTri.vtx[i];
 
-        bool result = pImporter->getVertex(
+        bool result = pImporter->GetVertex(
             nVtxIdx,
             vecPos[i],
             aten::MeshVertexFormat::Position);
@@ -650,21 +649,21 @@ bool GeometryChunkExporter::computeVtxTangent(
         uint32_t nVtxIdx = sTri.vtx[i];
 
         // Get position.
-        bool result = pImporter->getVertex(
+        bool result = pImporter->GetVertex(
             nVtxIdx,
             vecPos[i],
             aten::MeshVertexFormat::Position);
         AT_VRETURN_FALSE(result);
 
         // Get texture coordinate.
-        result = pImporter->getVertex(
+        result = pImporter->GetVertex(
             nVtxIdx,
             vecUV[i],
             aten::MeshVertexFormat::UV);
         AT_VRETURN_FALSE(result);
 
         // Get normal.
-        result = pImporter->getVertex(
+        result = pImporter->GetVertex(
             nVtxIdx,
             vecNml[i],
             aten::MeshVertexFormat::Normal);
@@ -880,7 +879,7 @@ bool GeometryChunkExporter::exportVertices(
                 aten::vec4 vec;
 
                 // 指定された頂点における指定フォーマットのデータを取得.
-                bool bIsExist = pImporter->getVertex(
+                bool bIsExist = pImporter->GetVertex(
                     nVtxIdx,
                     vec,
                     (aten::MeshVertexFormat)nVtxFmt);
@@ -1039,7 +1038,7 @@ void GeometryChunkExporter::getMinMaxPos(
             aten::vec4 vec;
 
             // Get vertex's position.
-            bool bIsExist = pImporter->getVertex(
+            bool bIsExist = pImporter->GetVertex(
                 sTri.vtx[n],
                 vec,
                 aten::MeshVertexFormat::Position);

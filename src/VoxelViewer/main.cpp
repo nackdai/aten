@@ -243,7 +243,7 @@ void loadObj(const Options& opt)
     mtrlParam.standard.ior = 0.2;
     mtrlParam.standard.roughness = 0.2;
 
-    auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
+    auto mtrl = g_ctxt.CreateMaterialWithMaterialParameter(
         mtrlParam,
         nullptr, nullptr, nullptr);
 
@@ -299,7 +299,7 @@ int32_t main(int32_t argc, char* argv[])
 
     loadObj(g_opt);
 
-    g_ctxt.initAllTexAsGLTexture();
+    g_ctxt.InitAllTextureAsGLTexture();
 
     // TODO
     aten::vec3 pos(0, 1, 3);

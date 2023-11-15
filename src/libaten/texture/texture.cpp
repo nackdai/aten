@@ -36,8 +36,8 @@ namespace aten
     void texture::init(int32_t width, int32_t height, uint32_t channels)
     {
         if (m_colors.empty()) {
-            m_width = width;
-            m_height = height;
+            width_ = width;
+            height_ = height;
             m_channels = channels;
 
             m_size = height * width;
@@ -49,8 +49,8 @@ namespace aten
     bool texture::initAsGLTexture()
     {
         if (m_gltex == 0) {
-            AT_VRETURN(m_width > 0, false);
-            AT_VRETURN(m_height > 0, false);
+            AT_VRETURN(width_ > 0, false);
+            AT_VRETURN(height_ > 0, false);
             AT_VRETURN(m_colors.size() > 0, false);
 
             CALL_GL_API(::glGenTextures(1, &m_gltex));
@@ -62,7 +62,7 @@ namespace aten
                 GL_TEXTURE_2D,
                 0,
                 GL_RGBA32F,
-                m_width, m_height,
+                width_, height_,
                 0,
                 GL_RGBA,
                 GL_FLOAT,
@@ -82,11 +82,11 @@ namespace aten
 
     bool texture::initAsGLTexture(int32_t width, int32_t height)
     {
-        m_width = width;
-        m_height = height;
+        width_ = width;
+        height_ = height;
 
-        AT_VRETURN(m_width > 0, false);
-        AT_VRETURN(m_height > 0, false);
+        AT_VRETURN(width_ > 0, false);
+        AT_VRETURN(height_ > 0, false);
 
         CALL_GL_API(::glGenTextures(1, &m_gltex));
         AT_VRETURN(m_gltex > 0, false);
@@ -97,7 +97,7 @@ namespace aten
             GL_TEXTURE_2D,
             0,
             GL_RGBA32F,
-            m_width, m_height,
+            width_, height_,
             0,
             GL_RGBA,
             GL_FLOAT,
@@ -180,13 +180,13 @@ namespace aten
         std::vector<vec4>& dst) const
     {
         if (m_gltex > 0) {
-            width = m_width;
-            height = m_height;
+            width = width_;
+            height = height_;
             channel = m_channels;
 
-            dst.resize(m_width * m_height);
+            dst.resize(width_ * height_);
 
-            int32_t bufsize = m_width * m_height * sizeof(float) * 4;
+            int32_t bufsize = width_ * height_ * sizeof(float) * 4;
 
             CALL_GL_API(::glGetTextureImage(
                 m_gltex,
@@ -200,16 +200,16 @@ namespace aten
 
     bool texture::merge(const texture& rhs)
     {
-        AT_VRETURN(m_width == rhs.m_width, false);
-        AT_VRETURN(m_height == rhs.m_height, false);
+        AT_VRETURN(width_ == rhs.width_, false);
+        AT_VRETURN(height_ == rhs.height_, false);
         AT_VRETURN(m_colors.size() == rhs.m_colors.size(), false);
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-        for (int32_t y = 0; y < m_height; y++) {
-            for (int32_t x = 0; x < m_width; x++) {
-                int32_t idx = y * m_width + x;
+        for (int32_t y = 0; y < height_; y++) {
+            for (int32_t x = 0; x < width_; x++) {
+                int32_t idx = y * width_ + x;
 
                 m_colors[idx] += rhs.m_colors[idx];
             }
@@ -222,25 +222,25 @@ namespace aten
     {
         using ScreenShotImageType = TColor<uint8_t, 3>;
 
-        std::vector<ScreenShotImageType> dst(m_width * m_height);
+        std::vector<ScreenShotImageType> dst(width_ * height_);
 
         constexpr int32_t bpp = ScreenShotImageType::BPP;
-        const int32_t pitch = m_width * bpp;
+        const int32_t pitch = width_ * bpp;
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-        for (int32_t y = 0; y < m_height; y++) {
-            for (int32_t x = 0; x < m_width; x++) {
-                int32_t yy = m_height - 1 - y;
+        for (int32_t y = 0; y < height_; y++) {
+            for (int32_t x = 0; x < width_; x++) {
+                int32_t yy = height_ - 1 - y;
 
-                dst[yy * m_width + x].r() = (uint8_t)aten::clamp(m_colors[y * m_width + x].x * real(255), real(0), real(255));
-                dst[yy * m_width + x].g() = (uint8_t)aten::clamp(m_colors[y * m_width + x].y * real(255), real(0), real(255));
-                dst[yy * m_width + x].b() = (uint8_t)aten::clamp(m_colors[y * m_width + x].z * real(255), real(0), real(255));
+                dst[yy * width_ + x].r() = (uint8_t)aten::clamp(m_colors[y * width_ + x].x * real(255), real(0), real(255));
+                dst[yy * width_ + x].g() = (uint8_t)aten::clamp(m_colors[y * width_ + x].y * real(255), real(0), real(255));
+                dst[yy * width_ + x].b() = (uint8_t)aten::clamp(m_colors[y * width_ + x].z * real(255), real(0), real(255));
             }
         }
 
-        auto ret = ::stbi_write_png(filename.c_str(), m_width, m_height, bpp, &dst[0], pitch);
+        auto ret = ::stbi_write_png(filename.c_str(), width_, height_, bpp, &dst[0], pitch);
         AT_ASSERT(ret > 0);
 
         return (ret > 0);

@@ -56,8 +56,8 @@ namespace aten {
     };
 
     /**
-    * @brief Result for sampled triangle.
-    **/
+     * @brief Result for sampled triangle.
+     */
     struct SamplePosNormalPdfResult {
         aten::vec3 pos; ///< Sampled position.
         aten::vec3 nml; ///< Normal at sampled position.

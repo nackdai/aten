@@ -28,12 +28,12 @@ namespace aten
             return m_param.type;
         }
 
-        const ObjectParameter& getParam() const
+        const ObjectParameter& GetParam() const
         {
             return m_param;
         }
 
-        ObjectParameter& getParam()
+        ObjectParameter& GetParam()
         {
             return m_param;
         }

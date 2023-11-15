@@ -78,7 +78,7 @@ int32_t main(int32_t argc, char* argv[])
     mtrlParam.type = aten::MaterialType::Emissive;
     mtrlParam.baseColor = aten::vec3(1);
 
-    auto emit = ctxt.createMaterialWithMaterialParameter(
+    auto emit = ctxt.CreateMaterialWithMaterialParameter(
         mtrlParam,
         nullptr, nullptr, nullptr);
     aten::AssetManager::registerMtrl("light", emit);

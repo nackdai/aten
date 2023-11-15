@@ -39,7 +39,7 @@ namespace aten
         return std::string();
     }
 
-    const std::string createMaterial(
+    const std::string CreateMaterial(
         context& ctxt,
         const aiMaterial* assimp_mtrl,
         AssimpImporter::FuncCreateMaterial func_create_mtrl)
@@ -105,7 +105,7 @@ namespace aten
         auto normal_tex_name(std::move(getTextureName(aiTextureType::aiTextureType_NORMALS, assimp_mtrl)));
 
 #if 0
-        auto mtrl = MaterialFactory::createMaterialWithMaterialParameter(
+        auto mtrl = MaterialFactory::CreateMaterialWithMaterialParameter(
             mtrl_param,
             nullptr, nullptr, nullptr);
 
@@ -178,7 +178,7 @@ namespace aten
                     return false;
                 }
 
-                const auto vtx_idx_offset = ctxt.getVertexNum();
+                const auto vtx_idx_offset = ctxt.GetVertexNum();
 
                 aten::vec3 aabb_min(AT_MATH_INF);
                 aten::vec3 aabb_max(-AT_MATH_INF);
@@ -211,7 +211,7 @@ namespace aten
                         vtx.uv.z = real(-1);
                     }
 
-                    ctxt.addVertex(vtx);
+                    ctxt.AddVertex(vtx);
 
                     // To compute bouding box, store min/max position.
                     aabb_min = vec3(
@@ -234,7 +234,7 @@ namespace aten
                     return false;
                 };
 
-                shape->setMaterial(mtrl);
+                shape->SetMaterial(mtrl);
 
                 for (uint32_t f_idx = 0; f_idx < assimp_mesh->mNumFaces; f_idx++) {
                     const auto& assimp_face = assimp_mesh->mFaces[f_idx];
@@ -251,9 +251,9 @@ namespace aten
                     face_param.idx[1] = static_cast<uint32_t>(assimp_mesh->mFaces[f_idx].mIndices[1]) + vtx_idx_offset;
                     face_param.idx[2] = static_cast<uint32_t>(assimp_mesh->mFaces[f_idx].mIndices[2]) + vtx_idx_offset;
 
-                    const auto& v0 = ctxt.getVertex(face_param.idx[0]);
-                    const auto& v1 = ctxt.getVertex(face_param.idx[1]);
-                    const auto& v2 = ctxt.getVertex(face_param.idx[2]);
+                    const auto& v0 = ctxt.GetVertex(face_param.idx[0]);
+                    const auto& v1 = ctxt.GetVertex(face_param.idx[1]);
+                    const auto& v2 = ctxt.GetVertex(face_param.idx[2]);
 
                     if (v0.uv.z == real(1)
                         || v1.uv.z == real(1)
@@ -262,12 +262,12 @@ namespace aten
                         face_param.needNormal = 1;
                     }
 
-                    face_param.mtrlid = shape->getMaterial()->id();
+                    face_param.mtrlid = shape->GetMaterial()->id();
                     face_param.mesh_id = shape->get_mesh_id();
 
-                    auto f = ctxt.createTriangle(face_param);
+                    auto f = ctxt.CreateTriangle(face_param);
 
-                    shape->addFace(f);
+                    shape->AddFace(f);
                 }
 
                 if (mtrl->param().type == aten::MaterialType::Emissive) {
@@ -328,7 +328,7 @@ namespace aten
 
         for (uint32_t i = 0; i < assimp_scene->mNumMaterials; i++) {
             const auto assimp_mtrl = assimp_scene->mMaterials[i];
-            auto mtrl_name = createMaterial(ctxt, assimp_mtrl, func_create_mtrl);
+            auto mtrl_name = CreateMaterial(ctxt, assimp_mtrl, func_create_mtrl);
             if (!mtrl_name.empty()) {
                 mtrl_list_.push_back(std::move(mtrl_name));
             }

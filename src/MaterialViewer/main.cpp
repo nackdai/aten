@@ -75,7 +75,7 @@ void makeScene(aten::scene* scene)
     mtrlParam.type = aten::MaterialType::Lambert;
     mtrlParam.baseColor = aten::vec3(0.580000, 0.580000, 0.580000);
 
-    auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
+    auto mtrl = g_ctxt.CreateMaterialWithMaterialParameter(
         mtrlParam,
         nullptr, nullptr, nullptr);
 
@@ -89,12 +89,12 @@ void makeScene(aten::scene* scene)
     //g_albedoMap = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");
     //g_normalMap = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
 
-    obj->getShapes()[0]->getMaterial()->setTextures(g_albedoMap, g_normalMap, nullptr);
+    obj->getShapes()[0]->GetMaterial()->setTextures(g_albedoMap, g_normalMap, nullptr);
 }
 
-std::shared_ptr<aten::material> createMaterial(aten::MaterialType type)
+std::shared_ptr<aten::material> CreateMaterial(aten::MaterialType type)
 {
-    auto mtrl = g_ctxt.createMaterialWithDefaultValue(type);
+    auto mtrl = g_ctxt.CreateMaterialWithDefaultValue(type);
 
     if (mtrl) {
         mtrl->setTextures(
@@ -175,7 +175,7 @@ void updateLightParameter()
 {
     std::vector<aten::LightParameter> lightparams;
 
-    auto lightNum = g_ctxt.get_light_num();
+    auto lightNum = g_ctxt.GetLightNum();
 
     for (uint32_t i = 0; i < lightNum; i++) {
         const auto& param = g_ctxt.GetLight(i);
@@ -260,7 +260,7 @@ void onRun(aten::window* window)
             g_tracer.reset();
         }
 
-        auto mtrl = g_ctxt.getMaterial(0);
+        auto mtrl = g_ctxt.GetMaterialInstance(0);
         bool needUpdateMtrl = false;
 
         constexpr char* mtrl_types[] = {
@@ -281,8 +281,8 @@ void onRun(aten::window* window)
         };
         int32_t mtrlType = (int32_t)mtrl->param().type;
         if (ImGui::Combo("mode", &mtrlType, mtrl_types, AT_COUNTOF(mtrl_types))) {
-            g_ctxt.deleteAllMaterialsAndClearList();
-            mtrl = createMaterial((aten::MaterialType)mtrlType);
+            g_ctxt.DeleteAllMaterialsAndClearList();
+            mtrl = CreateMaterial((aten::MaterialType)mtrlType);
             needUpdateMtrl = true;
         }
 
@@ -528,7 +528,7 @@ int32_t main()
             real(0),
             real(0.1),
             real(0));
-        g_ctxt.add_light(g_scene_light.point_light);
+        g_ctxt.AddLight(g_scene_light.point_light);
     }
 
     std::vector<aten::ObjectParameter> shapeparams;
@@ -551,10 +551,10 @@ int32_t main()
 
     std::vector<idaten::TextureResource> tex;
     {
-        auto texNum = g_ctxt.getTextureNum();
+        auto texNum = g_ctxt.GetTextureNum();
 
         for (int32_t i = 0; i < texNum; i++) {
-            auto t = g_ctxt.getTexture(i);
+            auto t = g_ctxt.GtTexture(i);
             tex.push_back(
                 idaten::TextureResource(t->colors(), t->width(), t->height()));
         }
@@ -567,7 +567,7 @@ int32_t main()
     camparam.zfar = real(10000.0);
 
     g_tracer.update(
-        g_visualizer->getTexHandle(),
+        g_visualizer->GetGLTextureHandle(),
         WIDTH, HEIGHT,
         camparam,
         shapeparams,

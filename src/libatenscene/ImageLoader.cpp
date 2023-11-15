@@ -105,7 +105,7 @@ namespace aten {
         if (stbi_is_hdr(fullpath.c_str())) {
             auto src = stbi_loadf(fullpath.c_str(), &width, &height, &channels, 0);
             if (src) {
-                tex = ctxt.createTexture(width, height, channels, texname.c_str());
+                tex = ctxt.CreateTexture(width, height, channels, texname.c_str());
                 real norm = real(1);
                 read<float>(src, tex.get(), width, height, channels, norm);
 
@@ -123,7 +123,7 @@ namespace aten {
             }
 
             if (src) {
-                tex = ctxt.createTexture(width, height, channels, texname.c_str());
+                tex = ctxt.CreateTexture(width, height, channels, texname.c_str());
 
                 if (fmt == ImgFormat::Fmt8Bit) {
                     real norm = real(1) / real(255);

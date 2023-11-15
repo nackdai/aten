@@ -43,8 +43,8 @@ namespace aten
     {
         if (fbo)
         {
-            AT_ASSERT(fbo->isValid());
-            fbo->bindFBO();
+            AT_ASSERT(fbo->IsValid());
+            fbo->BindFBO();
         }
         else
         {
@@ -58,8 +58,8 @@ namespace aten
         std::string_view pathVS,
         std::string_view pathFS)
     {
-        m_width = width;
-        m_height = height;
+        width_ = width;
+        height_ = height;
 
         return m_shader.init(width, height, pathVS, pathFS);
     }
@@ -70,8 +70,8 @@ namespace aten
         std::string_view pathGS,
         std::string_view pathFS)
     {
-        m_width = width;
-        m_height = height;
+        width_ = width;
+        height_ = height;
 
         return m_shader.init(width, height, pathVS, pathGS, pathFS);
     }
@@ -151,8 +151,8 @@ namespace aten
 
             aten::mat4 mtxOffset;
             mtxOffset.asTrans(aten::vec3(
-                smpl.x / m_width,
-                smpl.y / m_height,
+                smpl.x / width_,
+                smpl.y / height_,
                 real(0)));
 
             mtx_W2C = mtxOffset * mtx_W2C;
@@ -171,8 +171,8 @@ namespace aten
         auto hPrevMtxW2C = m_shader.getHandle("mtxPrevW2C");
         CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, (const GLfloat *)&m_mtxPrevW2C.a[0]));
 
-        AT_ASSERT(fbo.isValid());
-        fbo.bindFBO(true);
+        AT_ASSERT(fbo.IsValid());
+        fbo.BindFBO(true);
 
         {
             CALL_GL_API(::glEnable(GL_DEPTH_TEST));
@@ -181,8 +181,8 @@ namespace aten
 
         // Clear buffer
         float clr[] = {-1.0f, -1.0f, -1.0f, -1.0f};
-        CALL_GL_API(glClearNamedFramebufferfv(fbo.getHandle(), GL_COLOR, 0, clr));
-        CALL_GL_API(glClearNamedFramebufferfv(fbo.getHandle(), GL_COLOR, 1, clr));
+        CALL_GL_API(glClearNamedFramebufferfv(fbo.GetGLHandle(), GL_COLOR, 0, clr));
+        CALL_GL_API(glClearNamedFramebufferfv(fbo.GetGLHandle(), GL_COLOR, 1, clr));
 
         aten::vec4 tmp_clear_color;
         clearBuffer(
@@ -546,7 +546,7 @@ namespace aten
     {
         if (!m_isInitBuffer)
         {
-            m_vb.init(
+            vertex_buffer_.init(
                 sizeof(vertex),
                 vtxNum,
                 0,
@@ -623,7 +623,7 @@ namespace aten
 
         if (!m_isInitBuffer)
         {
-            m_vb.init(
+            vertex_buffer_.init(
                 sizeof(vertex),
                 vtxs.size(),
                 0,
@@ -646,7 +646,7 @@ namespace aten
             // TODO
             // 最初に最大数バッファをアロケートしておかないといけない...
 
-            m_vb.update(vtxs.size(), &vtxs[0]);
+            vertex_buffer_.update(vtxs.size(), &vtxs[0]);
 
             for (int32_t i = 0; i < idxs.size(); i++)
             {
@@ -668,7 +668,7 @@ namespace aten
                 auto m = mtrls[i];
 
                 int32_t albedoTexId = m ? m->param().albedoMap : -1;
-                const auto &albedo = albedoTexId >= 0 ? ctxt.getTexture(albedoTexId) : nullptr;
+                const auto &albedo = albedoTexId >= 0 ? ctxt.GtTexture(albedoTexId) : nullptr;
 
                 if (albedo)
                 {
@@ -680,7 +680,7 @@ namespace aten
                     CALL_GL_API(::glUniform1i(hHasAlbedo, false));
                 }
 
-                m_ib[i].draw(m_vb, aten::Primitive::Triangles, 0, triNum);
+                m_ib[i].draw(vertex_buffer_, aten::Primitive::Triangles, 0, triNum);
             }
         }
 

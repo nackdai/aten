@@ -49,17 +49,17 @@ namespace idaten
 
         TypedCudaMemory<aten::TriangleParameter>& getTriangles()
         {
-            return m_triangles;
+            return triangles_;
         }
 
         void setVtxOffset(int32_t offset);
 
     private:
-        TypedCudaMemory<aten::SkinningVertex> m_vertices;
+        TypedCudaMemory<aten::SkinningVertex> vertices_;
         TypedCudaMemory<uint32_t> m_indices;
-        TypedCudaMemory<aten::mat4> m_matrices;
+        TypedCudaMemory<aten::mat4> matrices_;
 
-        TypedCudaMemory<aten::TriangleParameter> m_triangles;
+        TypedCudaMemory<aten::TriangleParameter> triangles_;
 
         TypedCudaMemory<aten::vec4> m_dstPos;
         TypedCudaMemory<aten::vec4> m_dstNml;

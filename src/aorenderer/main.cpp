@@ -314,11 +314,11 @@ int32_t main()
 
         std::vector<idaten::TextureResource> tex;
         {
-            auto texNum = g_ctxt.getTextureNum();
+            auto texNum = g_ctxt.GetTextureNum();
 
             for (int32_t i = 0; i < texNum; i++)
             {
-                auto t = g_ctxt.getTexture(i);
+                auto t = g_ctxt.GtTexture(i);
                 tex.push_back(
                     idaten::TextureResource(t->colors(), t->width(), t->height()));
             }
@@ -329,7 +329,7 @@ int32_t main()
         camparam.zfar = real(10000.0);
 
         g_tracer.update(
-            g_visualizer->getTexHandle(),
+            g_visualizer->GetGLTextureHandle(),
             WIDTH, HEIGHT,
             camparam,
             shapeparams,

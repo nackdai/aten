@@ -58,7 +58,7 @@ namespace aten
 
         uint32_t primNum = m_desc.numIdx / 3;
 
-        m_ib.draw(*m_vb, aten::Primitive::Triangles, 0, primNum);
+        m_ib.draw(*vertex_buffer_, aten::Primitive::Triangles, 0, primNum);
     }
 
     void DeformPrimitives::getIndices(std::vector<uint32_t>& indices) const

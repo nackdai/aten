@@ -260,7 +260,7 @@ namespace AT_NAME
     {
         shadow_ray.isActive = false;
 
-        const auto lightnum = static_cast<int32_t>(ctxt.get_light_num());
+        const auto lightnum = static_cast<int32_t>(ctxt.GetLightNum());
 
         if (lightnum <= 0 || mtrl.attrib.isSingular || mtrl.attrib.isTranslucent) {
             return;

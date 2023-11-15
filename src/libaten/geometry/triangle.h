@@ -14,14 +14,19 @@
 namespace AT_NAME
 {
     /**
-    * @brief Triangle.
-    **/
+     * @brief Triangle.
+     */
     class triangle : public aten::hitable {
         friend class context;
 
     public:
         triangle() = default;
         virtual ~triangle() = default;
+
+        triangle(const triangle&) = delete;
+        triangle(triangle&&) = delete;
+        triangle& operator=(const triangle&) = delete;
+        triangle& operator=(triangle&&) = delete;
 
         virtual bool hit(
             const aten::context& ctxt,
@@ -59,7 +64,7 @@ namespace AT_NAME
         }
 
         template <typename CONTEXT>
-        static AT_DEVICE_API void evalHitResult(
+        static AT_DEVICE_API void EvaluateHitResult(
             const CONTEXT& ctxt,
             const aten::TriangleParameter& tri,
             aten::hitrecord* rec,
@@ -113,7 +118,7 @@ namespace AT_NAME
         }
 
         template <typename CONTEXT>
-        static AT_DEVICE_API void sample_pos_and_normal(
+        static AT_DEVICE_API void SamplePosAndNormal(
             const CONTEXT& ctxt,
             const aten::TriangleParameter& tri,
             aten::SamplePosNormalPdfResult* result,
@@ -154,21 +159,21 @@ namespace AT_NAME
             result->b = b;
         }
 
-        virtual int32_t mesh_id() const override;
+        virtual int32_t GetMeshId() const override;
 
         void build(
             const aten::context& ctxt,
             int32_t mtrlid,
             int32_t geomid);
 
-        aten::aabb computeAABB(const aten::context& ctxt) const;
+        aten::aabb ComputeAABB(const aten::context& ctxt) const;
 
-        const aten::TriangleParameter& getParam() const
+        const aten::TriangleParameter& GetParam() const
         {
             return param_;
         }
 
-        int32_t getId() const
+        int32_t GetId() const
         {
             return m_id;
         }

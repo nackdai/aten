@@ -51,9 +51,9 @@ namespace AT_NAME
         int32_t mtrlid,
         int32_t geomid)
     {
-        const auto& v0 = ctxt.getVertex(param_.idx[0]);
-        const auto& v1 = ctxt.getVertex(param_.idx[1]);
-        const auto& v2 = ctxt.getVertex(param_.idx[2]);
+        const auto& v0 = ctxt.GetVertex(param_.idx[0]);
+        const auto& v1 = ctxt.GetVertex(param_.idx[1]);
+        const auto& v2 = ctxt.GetVertex(param_.idx[2]);
 
         aten::vec3 vmax = aten::vec3(
             std::max(v0.pos.x, std::max(v1.pos.x, v2.pos.x)),
@@ -76,16 +76,16 @@ namespace AT_NAME
         param_.mesh_id = geomid;
     }
 
-    int32_t triangle::mesh_id() const
+    int32_t triangle::GetMeshId() const
     {
         return param_.mesh_id;
     }
 
-    aabb triangle::computeAABB(const context& ctxt) const
+    aabb triangle::ComputeAABB(const context& ctxt) const
     {
-        const auto& v0 = ctxt.getVertex(param_.idx[0]);
-        const auto& v1 = ctxt.getVertex(param_.idx[1]);
-        const auto& v2 = ctxt.getVertex(param_.idx[2]);
+        const auto& v0 = ctxt.GetVertex(param_.idx[0]);
+        const auto& v1 = ctxt.GetVertex(param_.idx[1]);
+        const auto& v2 = ctxt.GetVertex(param_.idx[2]);
 
         auto vmin = aten::vmin(aten::vmin(v0.pos, v1.pos), v2.pos);
         auto vmax = aten::vmax(aten::vmax(v0.pos, v1.pos), v2.pos);

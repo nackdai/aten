@@ -572,7 +572,7 @@ int32_t main()
         aten::PixelFormat::rgba32f,
         true);
 
-    g_taa.setMotionDepthBufferHandle(g_fbo.getTexHandle(1));
+    g_taa.setMotionDepthBufferHandle(g_fbo.GetGLTextureHandle(1));
 #endif
 
     aten::vec3 pos, at;
@@ -619,7 +619,7 @@ int32_t main()
         std::vector<aten::SkinningVertex> vtx;
         std::vector<uint32_t> idx;
 
-        int32_t vtxIdOffset = g_ctxt.getVertexNum();
+        int32_t vtxIdOffset = g_ctxt.GetVertexNum();
 
         mdl->getGeometryData(g_ctxt, vtx, idx, deformTris);
 
@@ -664,10 +664,10 @@ int32_t main()
 
         std::vector<idaten::TextureResource> tex;
         {
-            auto texNum = g_ctxt.getTextureNum();
+            auto texNum = g_ctxt.GetTextureNum();
 
             for (int32_t i = 0; i < texNum; i++) {
-                auto t = g_ctxt.getTexture(i);
+                auto t = g_ctxt.GtTexture(i);
                 tex.push_back(
                     idaten::TextureResource(t->colors(), t->width(), t->height()));
             }
@@ -686,7 +686,7 @@ int32_t main()
         camparam.zfar = real(10000.0);
 
         g_tracer.update(
-            g_visualizer->getTexHandle(),
+            g_visualizer->GetGLTextureHandle(),
             WIDTH, HEIGHT,
             camparam,
             shapeparams,
@@ -709,8 +709,8 @@ int32_t main()
         g_tracer.setHitDistanceLimit(d * 0.25f);
 
         g_tracer.setGBuffer(
-            g_fbo.getTexHandle(0),
-            g_fbo.getTexHandle(1));
+            g_fbo.GetGLTextureHandle(0),
+            g_fbo.GetGLTextureHandle(1));
 #endif
     }
 

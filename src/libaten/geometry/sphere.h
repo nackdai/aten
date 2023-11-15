@@ -42,7 +42,7 @@ namespace AT_NAME
             real t_min, real t_max,
             aten::Intersection* isect);
 
-        static AT_DEVICE_API void evalHitResult(
+        static AT_DEVICE_API void EvaluateHitResult(
             const aten::ObjectParameter* param,
             const aten::ray& r,
             aten::hitrecord* rec,
@@ -58,18 +58,18 @@ namespace AT_NAME
             return m_param.sphere.radius;
         }
 
-        static AT_DEVICE_API void sample_pos_and_normal(
+        static AT_DEVICE_API void SamplePosAndNormal(
             aten::SamplePosNormalPdfResult* result,
             const aten::ObjectParameter& param,
             const aten::mat4& mtx_L2W,
             aten::sampler* sampler);
 
-        static AT_DEVICE_API void sample_pos_and_normal(
+        static AT_DEVICE_API void SamplePosAndNormal(
             aten::SamplePosNormalPdfResult* result,
             const aten::ObjectParameter& param,
             aten::sampler* sampler)
         {
-            sample_pos_and_normal(result, param, aten::mat4(), sampler);
+            SamplePosAndNormal(result, param, aten::mat4(), sampler);
         }
 
     private:

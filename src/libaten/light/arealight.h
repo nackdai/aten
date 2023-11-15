@@ -67,7 +67,7 @@ namespace AT_NAME {
             if (sampler) {
                 aten::SamplePosNormalPdfResult result;
 
-                AT_NAME::sample_pos_and_normal(&result, obj, ctxt, sampler);
+                AT_NAME::SamplePosAndNormal(&result, obj, ctxt, sampler);
 
                 auto pos = result.pos;
                 auto dir = pos - org;

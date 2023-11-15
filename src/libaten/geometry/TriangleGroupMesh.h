@@ -1,6 +1,6 @@
 #pragma once
 
-#include <atomic>
+#include <vector>
 
 #include "types.h"
 #include "material/material.h"
@@ -14,37 +14,61 @@ namespace AT_NAME
     using FuncObjectMeshDraw = std::function<void(const aten::vec3&, const aten::texture*, int32_t)>;
 
     /**
-    * @brief Triangle group to have the same material.
-    **/
+     * @brief Triangle group to have the same material.
+     */
     class TriangleGroupMesh : public aten::NoHitableMesh {
         friend class PolygonObject;
 
     public:
         TriangleGroupMesh() = default;
-        virtual ~TriangleGroupMesh();
+        virtual ~TriangleGroupMesh()
+        {
+            triangles_.clear();
+        }
+
+        TriangleGroupMesh(const TriangleGroupMesh&) = delete;
+        TriangleGroupMesh(TriangleGroupMesh&&) = delete;
+        TriangleGroupMesh& operator=(const TriangleGroupMesh&) = delete;
+        TriangleGroupMesh& operator=(TriangleGroupMesh&&) = delete;
 
         /**
-        * @brief Build TriangleGroupMesh.
-        *
-        * @return Area of this mesh.
-        **/
+         * @brief Build TriangleGroupMesh.
+         * @param ctxt Instance of scene context.
+         * @return Area of this mesh.
+         */
         float build(const aten::context& ctxt);
 
-        void setMaterial(const std::shared_ptr<material>& mtrl)
+        /**
+         * @breif Set a material for the traiangle group.
+         * @param mtrl Material to be specified for the triangle group.
+         */
+        void SetMaterial(const std::shared_ptr<material>& mtrl)
         {
-            m_mtrl = mtrl;
+            mtrl_ = mtrl;
         }
 
-        const std::shared_ptr<material>& getMaterial() const
+        /**
+         * @brief Get a material of the triangle group.
+         * @return Material of the triangle group as const reference.
+         */
+        const std::shared_ptr<material>& GetMaterial() const
         {
-            return m_mtrl;
-        }
-        std::shared_ptr<material> getMaterial()
-        {
-            return m_mtrl;
+            return mtrl_;
         }
 
-        void addFace(const std::shared_ptr<triangle>& f);
+        /**
+         * @brief Get a material of the triangle group.
+         * @return Material of the triangle group.
+         */
+        std::shared_ptr<material> GetMaterial()
+        {
+            return mtrl_;
+        }
+
+        /**
+         * @brief Add a triangle.
+         */
+        void AddFace(const std::shared_ptr<triangle>& f);
 
         void render(
             aten::hitable::FuncPreDraw func,
@@ -57,7 +81,11 @@ namespace AT_NAME
             AT_NAME::FuncObjectMeshDraw func,
             const aten::context& ctxt);
 
-        const std::vector<std::shared_ptr<triangle>>& tris() const
+        /**
+         * @brief Get all triangles in the triangle group as list.
+         * @return Triangle list in the triangle group.
+         */
+        const std::vector<std::shared_ptr<triangle>>& GetTriangleList() const
         {
             return triangles_;
         }
@@ -65,11 +93,11 @@ namespace AT_NAME
         aten::aabb m_aabb;
 
     private:
-        std::shared_ptr<material> m_mtrl;
+        std::shared_ptr<material> mtrl_;
         std::vector<std::shared_ptr<triangle>> triangles_;
 
-        aten::GeomIndexBuffer m_ib;
+        aten::GeomIndexBuffer index_buffer_;
 
-        int32_t m_baseTriIdx{ INT32_MAX };
+        int32_t base_triangle_idx_{ INT32_MAX };
     };
 }

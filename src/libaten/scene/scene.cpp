@@ -12,12 +12,12 @@ namespace aten {
         real& selectPdf,
         LightSampleResult& sampleRes)
     {
-        auto num = ctxt.get_light_num();
+        auto num = ctxt.GetLightNum();
 
         if (num > 0) {
             auto r = sampler->nextSample();
             uint32_t idx = (uint32_t)aten::clamp<real>(r * num, 0, num - 1);
-            const auto light = ctxt.get_light(idx);
+            const auto light = ctxt.GetLightInstance(idx);
 
             const auto& light_param = light->param();
 
@@ -79,7 +79,7 @@ namespace aten {
 
         static constexpr auto MaxLightCount = 32U;
 
-        const auto max_light_num = static_cast<decltype(MaxLightCount)>(ctxt.get_light_num());
+        const auto max_light_num = static_cast<decltype(MaxLightCount)>(ctxt.GetLightNum());
         const auto light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
 
         Reservoir reservoir;
@@ -93,7 +93,7 @@ namespace aten {
             const auto r_light = sampler->nextSample();
             const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
 
-            const auto light = ctxt.get_light(light_pos);
+            const auto light = ctxt.GetLightInstance(light_pos);
             const auto& light_param = light->param();
 
             aten::LightSampleResult lightsample;
@@ -160,7 +160,7 @@ namespace aten {
         selectPdf = reservoir.pdf_;
         sampleRes = reservoir.light_sample_;
 
-        return ctxt.get_light(reservoir.light_idx_);
+        return ctxt.GetLightInstance(reservoir.light_idx_);
     }
 
     void scene::render(

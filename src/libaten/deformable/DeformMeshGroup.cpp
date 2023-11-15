@@ -37,7 +37,7 @@ namespace aten
                     std::copy(
                         buf.begin(),
                         buf.end(),
-                        std::back_inserter(m_vertices));
+                        std::back_inserter(vertices_));
                 }
                 else {
                     m_vbs[i].initNoVAO(
@@ -53,17 +53,17 @@ namespace aten
         {
             m_meshs.resize(m_desc.numMeshSet);
 
-            m_triangles = 0;
+            triangles_ = 0;
 
             for (uint32_t i = 0; i < m_desc.numMeshSet; i++) {
                 AT_VRETURN_FALSE(m_meshs[i].read(stream, isGPUSkinning));
 
                 for (auto& prim : m_meshs[i].m_prims) {
-                    prim.setTriOffset(m_triangles);
+                    prim.setTriOffset(triangles_);
 
                     AT_ASSERT(prim.m_desc.numIdx % 3 == 0);
                     auto triNum = prim.m_desc.numIdx / 3;
-                    m_triangles += triNum;
+                    triangles_ += triNum;
                 }
             }
         }
@@ -130,14 +130,14 @@ namespace aten
     {
         // TODO
         // 頂点フォーマット固定...
-        AT_ASSERT(sizeof(uint8_t) * m_vertices.size() == sizeof(SkinningVertex) * m_vtxTotalNum);
+        AT_ASSERT(sizeof(uint8_t) * vertices_.size() == sizeof(SkinningVertex) * m_vtxTotalNum);
 
         // Vertex.
         {
             vtx.resize(m_vtxTotalNum);
 
             auto size = m_vtxTotalNum * sizeof(SkinningVertex);
-            memcpy(&vtx[0], &m_vertices[0], size);
+            memcpy(&vtx[0], &vertices_[0], size);
         }
 
         // Index.
@@ -145,7 +145,7 @@ namespace aten
         {
             const auto& mtrlDesc = m_meshs[i].getDesc().mtrl;
 
-            int32_t mtrlId = ctxt.findMaterialIdxByName(mtrlDesc.name);
+            int32_t mtrlId = ctxt.FindMaterialIdxByName(mtrlDesc.name);
 
             int32_t geomId = m_meshs[i].get_mesh_id();
 

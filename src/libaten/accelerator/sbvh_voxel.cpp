@@ -113,8 +113,8 @@ namespace aten
             std::map<int32_t, real> mtrlMap;
 
             for (const auto tid : treelet.tris) {
-                const auto tri = ctxt.getTriangle(tid);
-                const auto& triparam = tri->getParam();
+                const auto tri = ctxt.GetTriangleInstance(tid);
+                const auto& triparam = tri->GetParam();
 
                 auto found = mtrlMap.find(triparam.mtrlid);
 

@@ -54,12 +54,12 @@ namespace aten
 
         void setVB(GeomVertexBuffer* vb)
         {
-            m_vb = vb;
+            vertex_buffer_ = vb;
         }
 
         void setVB(GeomMultiVertexBuffer* vb)
         {
-            m_vb = vb;
+            vertex_buffer_ = vb;
         }
 
         void getIndices(std::vector<uint32_t>& indices) const;
@@ -78,7 +78,7 @@ namespace aten
 
         std::vector<uint32_t> m_indices;
 
-        GeomVertexBuffer* m_vb{ nullptr };
+        GeomVertexBuffer* vertex_buffer_{ nullptr };
         GeomIndexBuffer m_ib;
 
         uint32_t m_triOffset{ 0 };

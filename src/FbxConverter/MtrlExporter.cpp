@@ -26,7 +26,7 @@ bool MtrlExporter::exportMaterial(
     for (uint32_t i = 0; i < mtrlNum; i++) {
         MaterialInfo mtrl;
 
-        if (pImporter->getMaterial(i, mtrl)) {
+        if (pImporter->GetMaterial(i, mtrl)) {
             auto xmlMtrlElement = xmlDoc.NewElement("material");
 
             {

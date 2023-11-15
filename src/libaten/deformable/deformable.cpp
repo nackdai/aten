@@ -79,12 +79,12 @@ namespace aten
 
         virtual void applyMaterial(const context& ctxt, const MeshMaterial& mtrlDesc) override final
         {
-            const auto mtrl = ctxt.findMaterialByName(mtrlDesc.name);
+            const auto mtrl = ctxt.FindMaterialByName(mtrlDesc.name);
 
             if (mtrl) {
                 const auto& mtrlParam = mtrl->param();
 
-                auto albedo = ctxt.getTexture(mtrlParam.albedoMap);
+                auto albedo = ctxt.GtTexture(mtrlParam.albedoMap);
                 if (albedo) {
                     albedo->initAsGLTexture();
                     albedo->bindAsGLTexture(0, m_shd);

@@ -32,8 +32,6 @@ namespace aten
 
     void TAA::prepareFbo(const std::vector<uint32_t>& tex, std::vector<uint32_t>& comps)
     {
-        AT_ASSERT(tex.size() == 2);
-
         if (comps.empty()) {
             comps.resize(2);
         }

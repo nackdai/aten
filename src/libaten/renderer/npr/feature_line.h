@@ -26,6 +26,7 @@ namespace AT_NAME
     public:
         /**
          * @brief Image based feature line rendering.
+         *
          * From "Ray Tracing NPR-Style Feature Lines":
          * http://www.sci.utah.edu/publications/choudhury09/NPR-lines.NPAR09.pdf
          */
@@ -56,6 +57,7 @@ namespace AT_NAME
 
         /**
          * @brief Generate disc based on camera pos.
+         *
          * @note Generate disc at distance 1 from camera. Radius is that line width based screen multiplies with pixel width at distance 1 from camera.
          * @param[in] query_ray Query ray from camera.
          * @param[in] line_width Line width based on screen space.
@@ -90,6 +92,7 @@ namespace AT_NAME
 
         /**
          * @brief Compute disc at query ray hit point.
+         *
          * @param[in] query_ray_hit_pos Hit point of query ray.
          * @param[in] query_ray_dir Direction of query ray.
          * @param[in] previous_disc_radius Radius of previous disc.
@@ -142,6 +145,7 @@ namespace AT_NAME
 
         /**
          * @brief Store the sample ray in sample ray description.
+         *
          * @param[out] desc Ray description to store sample ray.
          * @param[in] ray Ray to be stored.
          */
@@ -157,6 +161,7 @@ namespace AT_NAME
 
         /**
          * @brief Extract the stored ray from sample ray description.
+         *
          * @param[in] desc Sample ray description to store ray.
          * @return Stored ray.
          */
@@ -170,6 +175,7 @@ namespace AT_NAME
 
         /**
          * @brief Generate sample ray.
+         *
          * @param[out] sample_ray_desc Description to keep how to generate sample ray.
          * @param[in] sampler Sampler to get random value.
          * @param[in] query_ray Query ray.
@@ -204,6 +210,7 @@ namespace AT_NAME
 
         /**
          * @brief Compute next sample ray.
+         *
          * @param[in] sample_ray_desc Description of sample ray.
          * @param[in] prev_disc Previous disc at hit point of query ray.
          * @param[in] next_disc Next disc at hit point of query ray.
@@ -253,6 +260,7 @@ namespace AT_NAME
 
         /**
          * @brief Compute hit position by ray on disc.
+         *
          * @param[in] u U on disc coordinate.
          * @param[in] v V on disc coordinate.
          * @param[in] disc Disc which ray aims to hit.
@@ -287,6 +295,7 @@ namespace AT_NAME
 
         /**
          * @brief Compute plane from hit record.
+         *
          * @param[in] hrec Hit record to compute plane.
          * @return Computed plane as vec4 <Normal of plane, D>.
          */
@@ -305,6 +314,7 @@ namespace AT_NAME
 
         /**
          * @brief Compute ray hit position on plane.
+         *
          * @param[in] plane Plane as vec4 <Normal of plane, D>.
          * @param[in] ray Ray.
          * @return First variable is flag to describe if ray hits to plane. Second one is hit position on plane.
@@ -351,6 +361,7 @@ namespace AT_NAME
 
         /**
          * @brief Projected the specified point on the ray.
+         *
          * @param[in] point Point to be projected on the ray.
          * @param[in] ray Ray which point is projected on.
          * @param[out] hit_point Storage to set projected point on ray. If this value is null, point can't be stored.
@@ -389,6 +400,7 @@ namespace AT_NAME
 
         /**
          * @brief Compute distance between projected point on the ray and origin of the ray.
+         *
          * @param[in] point Point to be projected on the ray.
          * @param[in] ray Ray which point is projected on.
          * @return Distance between projected point on the ray and origin of the ray.
@@ -405,6 +417,7 @@ namespace AT_NAME
 
         /**
          * @brief Evaluate feature line metrics.
+         *
          * @param[in] p Start point of query ray.
          * @param[in] scale_factor Scale factor for depth threshold.
          * @param[in] hrec_query Hit record of query ray.
@@ -451,6 +464,7 @@ namespace AT_NAME
 
         /**
          * @brief Evaluate feature line metric for mesh id.
+         *
          * @param[in] mesh_id_query Mesh id at end point of query ray.
          * @param[in] hrec_sample Mesh id at sample ray hit point.
          * @return If metric is valid, return true. Otherwise, return false.
@@ -465,6 +479,7 @@ namespace AT_NAME
 
         /**
          * @brief Evaluate feature line metric for albedo.
+         *
          * @param[in] threshold_albedo Threshold for albedo.
          * @param[in] albedo_q Albedo at end point of query ray.
          * @param[in] albedo_s Albedo at sample ray hit point.
@@ -483,6 +498,7 @@ namespace AT_NAME
 
         /**
          * @brief Evaluate feature line metric for normal.
+         *
          * @param[in] threshold_normal Threshold for normal.
          * @param[in] normal_query Albedo at end point of query ray.
          * @param[in] normal_sample Albedo at sample ray hit point.
@@ -499,6 +515,7 @@ namespace AT_NAME
 
         /**
          * @brief Evaluate feature line metric for depth.
+         *
          * @param[in] p Start point of query ray.
          * @param[in] scale_factor Scale factor for depth threshold.
          * @param[in] hrec_query Hit record of query ray.
@@ -526,6 +543,7 @@ namespace AT_NAME
 
         /**
          * @brief Compute threshold for depth.
+         *
          * @param[in] p Start point of query ray.
          * @param[in] scale_factor Scale factor for depth threshold.
          * @param[in] hrec_query Hit record of query ray.
@@ -574,6 +592,7 @@ namespace AT_NAME
 
         /**
          * @brief Check if feature line width in 3D is valid based on line width in 2D.
+         *
          * @param[in] screen_line_width Line width in screen space (2D).
          * @param[in] query_ray Query ray.
          * @param[in] sample_hit_point Hit point of sample ray.

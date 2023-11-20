@@ -33,6 +33,7 @@ namespace AT_NAME
 
         /**
          * @brief Build TriangleGroupMesh.
+         *
          * @param ctxt Instance of scene context.
          * @return Area of this mesh.
          */
@@ -40,6 +41,7 @@ namespace AT_NAME
 
         /**
          * @breif Set a material for the traiangle group.
+         *
          * @param mtrl Material to be specified for the triangle group.
          */
         void SetMaterial(const std::shared_ptr<material>& mtrl)
@@ -49,6 +51,7 @@ namespace AT_NAME
 
         /**
          * @brief Get a material of the triangle group.
+         *
          * @return Material of the triangle group as const reference.
          */
         const std::shared_ptr<material>& GetMaterial() const
@@ -58,6 +61,7 @@ namespace AT_NAME
 
         /**
          * @brief Get a material of the triangle group.
+         *
          * @return Material of the triangle group.
          */
         std::shared_ptr<material> GetMaterial()
@@ -83,6 +87,7 @@ namespace AT_NAME
 
         /**
          * @brief Get all triangles in the triangle group as list.
+         *
          * @return Triangle list in the triangle group.
          */
         const std::vector<std::shared_ptr<triangle>>& GetTriangleList() const

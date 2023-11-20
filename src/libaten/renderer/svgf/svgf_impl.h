@@ -35,6 +35,7 @@ namespace svgf {
 
     /**
      * @brief Fill AOV buffers.
+     *
      * @tparam NeedCheckSingularMtrlBounce Whether the case that the material is singular is checked.
      * @tparam NeedOverrideMeshIdByMtrlId Whether the mesh id is overwritten by the material id in AOV buffer.
      * @tparam IsExternalAlbedo Whether albedo map texture id in the material parameter is reset with -1.
@@ -88,6 +89,7 @@ namespace svgf {
 
     /**
      * @brief Prepare to execute denoise.
+     *
      * @tparam IsFirstFrameExecution Whether this API is executed in the first frame count.
      * @param[in] idx Index to the pixel.
      * @param[in] paths Information of paths.
@@ -131,6 +133,7 @@ namespace svgf {
 
     /**
      * @brief Extract center pixel data from AOB buffers.
+     *
      * @tparam WillDivideContribByW Whether contribution value will be divided bt its w element value.
      * @tparam Span_v4 Type to specify span type which contains 4 elements vector type. This is for accepting both const span type or non-const span type.
      * @param idx Index to the pixel.
@@ -167,6 +170,7 @@ namespace svgf {
 
     /**
      * @brief Update AOV buffer if the pixle is background.
+     *
      * @param[in] idx Index to the pixel.
      * @param[in] color Pixel color.
      * @param[in] center_meshid Mesh id at the pixel.
@@ -195,6 +199,7 @@ namespace svgf {
 
     /**
      * @brief Accumulate moments.
+     *
      * @param[in] idx Index to the pixel.
      * @param[in] weight Weight which is computed in temporal reprojection.
      * @param[in] curr_aov_color_variance AOV buffer to store contribution and variance for current frame.
@@ -247,6 +252,7 @@ namespace svgf {
 
     /**
      * @brief Compute temporal reprojection.
+     *
      * @tparam BufferForMotionDepth Type of motion depth buffer.
      * @param[in] ix X position to the pixel in the screen coordinate.
      * @param[in] iy Y position to the pixel in the screen coordinate.
@@ -358,6 +364,7 @@ namespace svgf {
 
     /**
      * @brief Recompute temporal weight from the 3x3 surrounding pixels.
+     *
      * @param[in] ix X position to the pixel in the screen coordinate.
      * @param[in] iy Y position to the pixel in the screen coordinate.
      * @param[in] width Screen width.
@@ -403,6 +410,7 @@ namespace svgf {
 
     /**
      * @brief Estimate variance.
+     *
      * @param[in] ix X position to the pixel in the screen coordinate.
      * @param[in] iy Y position to the pixel in the screen coordinate.
      * @param[in] width Screen width.
@@ -525,6 +533,7 @@ namespace svgf {
 
     /**
      * @brief Execute 3x3 gaussian filter for one element of vecto4 value.
+     *
      * @tparam[in] MemberVar Pointer to member variable in vector4 type.
      * @param[in] ix X position to the pixel in the screen coordinate.
      * @param[in] iy Y position to the pixel in the screen coordinate.
@@ -585,6 +594,7 @@ namespace svgf {
 
     /**
      * @brief Check the pixel is background for A-trous filter.
+     *
      * @param[in] is_final_iter Whether this API is called as the final iteration of A-trous filter.
      * @param[in] idx Index to the pixel.
      * @param[in] center_color Color of the filtering center pixel.
@@ -629,6 +639,7 @@ namespace svgf {
 
     /**
      * @brief Execute A-trous wavelet filter.
+     *
      * @param[in] is_first_iter Whether this API is called as the 1st A-trous wavelt filter iteration.
      * @param[in] ix X position to the pixel in the screen coordinate.
      * @param[in] iy Y position to the pixel in the screen coordinate.
@@ -762,6 +773,7 @@ namespace svgf {
 
     /**
      * @brief Execute post process per A-trous wavelet filter iteration.
+     *
      * @param[in] is_first_iter Whether this API is called as the 1st A-trous wavelt filter iteration.
      * @param[in] is_final_iter Whether this API is called as the final A-trous wavelt filter iteration.
      * @param[in] idx Index to the pixel.
@@ -804,6 +816,7 @@ namespace svgf {
 
     /**
      * @brief Copy vector type value with specified number of its elements.
+     *
      * @tparam CopyElementNumPerItem Number of elements to be copied.
      * @param idx Index to be copied in the buffer.
      * @param src Source buffer.

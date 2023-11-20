@@ -39,6 +39,7 @@ namespace aten
 
         /**
          * @brief Get the vertex position by index.
+         *
          * @note w specifies u of uv cooridnate of the vertex.
          * @param idx Index to the vertex position.
          * @return Position of the vertex
@@ -51,6 +52,7 @@ namespace aten
 
         /**
          * @brief Get the vertex position by index as aten::vec4 explicitly.
+         *
          * @param idx Index to the vertex position.
          * @return Position of the vertex as aten::vec4.
          */
@@ -61,6 +63,7 @@ namespace aten
 
         /**
          * @brief Get the vertex position by index as aten::vec3 explicitly.
+         *
          * @param idx Index to the vertex position.
          * @return Position of the vertex as aten::vec3.
          */
@@ -72,6 +75,7 @@ namespace aten
 
         /**
          * @brief Get the vertex normal by index.
+         *
          * @note w specifies v of uv cooridnate of the vertex.
          * @param idx Index to the vertex normal.
          * @return Normal of the vertex
@@ -85,6 +89,7 @@ namespace aten
 
         /**
          * @brief Get the vertex normal by index as aten::vec4 explicitly.
+         *
          * @param idx Index to the vertex normal.
          * @return Normal of the vertex as aten::vec4.
          */
@@ -95,6 +100,7 @@ namespace aten
 
         /**
          * @brief Get the vertex normal by index as aten::vec3 explicitly.
+         *
          * @param idx Index to the vertex normal.
          * @return Normal of the vertex as aten::vec3.
          */
@@ -106,6 +112,7 @@ namespace aten
 
         /**
          * @brief Get the object parameter by index.
+         *
          * @param idx Index to the object parameter.
          * @return Object parameter.
          */
@@ -113,6 +120,7 @@ namespace aten
 
         /**
          * @brief Get the material parameter by index.
+         *
          * @param idx Index to the material parameter.
          * @return Material parameter.
          */
@@ -123,6 +131,7 @@ namespace aten
 
         /**
          * @brief Get the triangle parameter by index.
+         *
          * @param idx Index to the triangle parameter.
          * @return Triangle parameter.
          */
@@ -137,6 +146,7 @@ namespace aten
 
         /**
          * @brief Get the matrix by index.
+         *
          * @param idx Index to the matrix.
          * @return Matrix.
          */
@@ -147,6 +157,7 @@ namespace aten
 
         /**
          * @brief Add a vertex information in the scene.
+         *
          * @param vtx Vertex to be added.
          */
         void AddVertex(const aten::vertex& vtx)
@@ -156,6 +167,7 @@ namespace aten
 
         /**
          * @brief Get the vertex by index.
+         *
          * @return Vertex.
          */
         const aten::vertex& GetVertex(int32_t idx) const
@@ -165,6 +177,7 @@ namespace aten
 
         /**
          * @brief Get the number of the registered vertices.
+         *
          * @return Number of the registered vertices.
          */
         uint32_t GetVertexNum() const
@@ -187,6 +200,7 @@ namespace aten
 
         /**
          * @brief Get the vertex buffer of the scene.
+         *
          * @return Vertex buffer for the scene.
          */
         const aten::GeomVertexBuffer& GetVertexBuffer() const
@@ -202,6 +216,7 @@ namespace aten
 
         /**
          * @brief Create a material and then add it to the scene context.
+         *
          * @param type Material type.
          * @param value Parameter value for the material.
          * @return Created material.
@@ -212,6 +227,7 @@ namespace aten
 
         /**
          * @brief Create a material with the default parameter value and then add it to the scene context.
+         *
          * @param type Material type.
          * @return Created material.
          */
@@ -220,6 +236,7 @@ namespace aten
 
         /**
          * @brief Create a material with the default parameter value and then add it to the scene context.
+         *
          * @param param Material parameter.
          * @param albedoMap Albedo map texture.
          * @param normalMap Normal map texture.
@@ -234,6 +251,7 @@ namespace aten
 
         /**
          * @brief Add a material to the scene.
+         *
          * @param mtrl The material to be added.
          */
         void AddMaterial(std::shared_ptr<AT_NAME::material> mtrl)
@@ -245,6 +263,7 @@ namespace aten
 
         /**
          * @brief Get the actual material instance by index.
+         *
          * @param idx Index to the actual material instance.
          * @return Actual material instance.
          */
@@ -261,12 +280,14 @@ namespace aten
 
         /**
          * @brief Copy the registered materials' paramters to the specified list.
+         *
          * @param dst Destination to copy registered materials' paramters.
          */
         void CopyMaterialParameters(std::vector<MaterialParameter>& dst) const;
 
         /**
          * @brief Find the material instance by name.
+         *
          * @param name Name of the material instance.
          * @return If the material instance is found, return it. Otherwise, returns nullptr.
          */
@@ -274,6 +295,7 @@ namespace aten
 
         /**
          * @brief Find the index to the material instance by name.
+         *
          * @param name Name of the material instance.
          * @return If the material instance is found, return the index to it. Otherwise, returns -1.
          */
@@ -281,6 +303,7 @@ namespace aten
 
         /**
          * @brief Create a triangle instance.
+         *
          * @param param Triangle parameter to create a triangle instance.
          * @return Created triangle instance.
          */
@@ -288,18 +311,21 @@ namespace aten
 
         /**
          * @brief Add a triangle instance to the scene.
+         *
          * @param tri Triangle instance to be added.
          */
         void AddTriangle(const std::shared_ptr<AT_NAME::triangle>& tri);
 
         /**
          * @brief Get the number of all registered triangles in the scene.
+         *
          * @return Number of all registered triangles
          */
         uint32_t GetTriangleNum() const;
 
         /**
          * @brief Get the actual triangle instance by index.
+         *
          * @param idx Index to the the actual triangle instance.
          * @return Triangle instance.
          */
@@ -307,12 +333,14 @@ namespace aten
 
         /**
          * @brief Copy the registered triangles' paramters to the specified list.
+         *
          * @param dst Destination to copy registered triangles' paramters.
          */
         void CopyTriangleParameters(std::vector<aten::TriangleParameter>& dst) const;
 
         /**
          * @brief Check if the specified pointer is the registered triangle intance, and returns the index to it.
+         *
          * @param p Pointer to be searched within the triangle instance list.
          * @return If the pointer is found as the registered triangle intance, returns the index to it. Otherwise, returns -1.
          */
@@ -320,12 +348,14 @@ namespace aten
 
         /**
          * @brief Add a transformable instance.
+         *
          * @param t Transformable instance to be added.
          */
         void AddTransformable(const std::shared_ptr<transformable>& t);
 
         /**
          * @brief Get the transformable instance by index.
+         *
          * @brief idx Index to the transformable instance
          * @return If the transformable instance is found, returns it. Otherwise, returns nullptr.
          */
@@ -333,6 +363,7 @@ namespace aten
 
         /**
          * @brief Traverse all registered transformable and execute the specified function for each transformable.
+         *
          * @param func Function to be executed for each transformable.
          */
         void TraverseTransformables(
@@ -340,12 +371,14 @@ namespace aten
 
         /**
          * @brief Pick non identity matrices and update matrix index as -1 in transformable.
+         *
          * @return List to store all non identity matrices in the scene.
          */
         std::vector<aten::mat4> PickNonIdentityMatricesAndUpdateMatrixIdxInTransformable() const;
 
         /**
          * @brief Check if the specified pointer is the registered transformable intance, and returns the index to it.
+         *
          * @param p Pointer to be searched within the transformable instance list.
          * @return If the pointer is found as the registered transformable intance, returns the index to it. Otherwise, returns -1.
          */
@@ -354,6 +387,7 @@ namespace aten
         /**
          * @brief Check if the specified pointer is the registered transformable intance which is for polygon mesh object,
          *        and returns the order of only registered transformable intances which is for polygon mesh object.
+         *
          * @param p Pointer to be searched within the transformable instance list.
          * @return If the  transformable intance which is for polygon mesh objec is found, returns its order. Otherwise, return -1
          */
@@ -361,6 +395,7 @@ namespace aten
 
         /**
          * @brief Create a texture instance which is the empty and then add it to the scene context.
+         *
          * @param width Width of the image data.
          * @param height Height of the image data.
          * @param channels Number of color channels.
@@ -374,12 +409,14 @@ namespace aten
 
         /**
          * @brief Get the number of all registered texture instances.
+         *
          * @return Number of all registered texture instances.
          */
         int32_t GetTextureNum() const;
 
         /**
          * @brief Get the texture instance by index.
+         *
          * @param idx Index to the texture instance.
          * @return If the texture instance is found, returns it. Otherwise, returns nullptr.
          */
@@ -387,6 +424,7 @@ namespace aten
 
         /**
          * @brief Add a texture instance.
+         *
          * @param tex Texture instance to be added.
          */
         void AddTexture(const std::shared_ptr<texture>& tex);
@@ -415,6 +453,7 @@ namespace aten
 
         /**
          * @brief Create an empty matrix and then add it to the scene context.
+         *
          * @return Tuple to store the index to the created matrix and the created matrix instance.
          */
         std::tuple<uint32_t, std::shared_ptr<aten::mat4>> CreateMatrix()
@@ -427,12 +466,14 @@ namespace aten
 
         /**
          * @brief Add a light intance to the scene.
+         *
          * @param ligh Light instance to be added.
          */
         void AddLight(std::shared_ptr<AT_NAME::Light> light);
 
         /**
          * @brief Get the actual light instance by index.
+         *
          * @param idx Index to the light instance.
          * @return If the light instance is found, returns it. Otherwise, returns nullptr.
          */
@@ -440,6 +481,7 @@ namespace aten
 
         /**
          * @brief Get the number of all registered light instances.
+         *
          * @return Number of all registered light instances.
          */
         size_t GetLightNum() const;

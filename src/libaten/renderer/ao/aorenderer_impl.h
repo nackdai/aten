@@ -20,6 +20,7 @@ namespace AT_NAME
 {
     /**
      * @brief Shade Ambient Occlusion.
+     *
      * @param[in] idx Inded to the shading pixel.
      * @param[in] frame Frame count.
      * @param[in] rnd Seed for random.
@@ -109,6 +110,7 @@ namespace AT_NAME
 
     /**
      * @breif Shade Ambient Occulusion, if hit test is missed.
+     *
      * @param[in] idx Index to the shading pixel.
      * @param[in] is_first_bounce Specify if this function is called for the first bounce.
      * @param[in,out] paths Information of paths.

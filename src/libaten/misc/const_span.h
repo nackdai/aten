@@ -4,6 +4,7 @@
 #include <type_traits>
 
 #include "defs.h"
+#include "misc/span.h"
 
 namespace aten {
     template <class ElementType>
@@ -36,6 +37,8 @@ namespace aten {
         constexpr const_span(const Container & cont) : const_span(cont.data(), cont.size()) {}
 
         constexpr const_span(const const_span& other) noexcept : const_span(other.data_, other.size_) {}
+
+        constexpr const_span(span<ElementType>& other) noexcept : const_span(other.data(), other.size()) {}
 
         ~const_span() noexcept = default;
 

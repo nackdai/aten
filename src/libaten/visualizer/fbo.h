@@ -23,6 +23,7 @@ namespace aten {
     public:
         /**
          * @brief Initialize FBO.
+         *
          * @param width Width of frame buffer.
          * @param height Height of frame buffer.
          * @param fmt Pixel format of frame buffer.
@@ -37,6 +38,7 @@ namespace aten {
 
         /**
          * @brief Get if FBO is valid.
+         *
          * @return If FBO is valid, returns true. Otherwise, returns false.
          */
         bool IsValid() const noexcept
@@ -46,18 +48,21 @@ namespace aten {
 
         /**
          * @brief Bind FBO as the texture.
+         *
          * @param idx Index to which FBO should be binded.
          */
         void BindAsTexture(uint32_t idx = 0);
 
         /**
          * @brief Bind FBO for ready to be rendered.
+         *
          * @param need_depth If this is true, depth buffer is also binded.
          */
         void BindFBO(bool need_depth = false);
 
         /**
          * @brief Get width of frame buffer.
+         *
          * @return Width of frame buffer.
          */
         int32_t GetWidth() const noexcept
@@ -67,6 +72,7 @@ namespace aten {
 
         /**
          * @brief Get height of frame buffer.
+         *
          * @return Height of frame buffer.
          */
         int32_t GetHeight() const noexcept
@@ -76,6 +82,7 @@ namespace aten {
 
         /**
          * @brief Get OpenGL texture handle which is binded with FBO.
+         *
          * @param idx Index to texture handle.
          * @return OpenGL texture handle.
          */
@@ -86,6 +93,7 @@ namespace aten {
 
         /**
          * @brief Get OpenGL frame buffer handle.
+         *
          * @return OpenGL frame buffe handle.
          */
         uint32_t GetGLHandle() const
@@ -97,6 +105,7 @@ namespace aten {
 
         /**
          * @brief Save the content of the frame buffer.
+         *
          * @param dst Destination to save the content of the frame buffer.
          * @param target_idx Index of the frame buffer to be saved.
          */
@@ -106,6 +115,7 @@ namespace aten {
 
         /**
          * @brief Set an user defined function to bind FBO.
+         *
          * @param func User defined function to bind FBO.
          */
         void SetBindFboFunction(FuncBindFbo func)

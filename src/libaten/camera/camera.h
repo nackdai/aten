@@ -40,13 +40,13 @@ namespace AT_NAME {
      * @brief Result to sample camera.
      */
     struct CameraSampleResult {
-        aten::ray r;    ///< Ray from the position on the image sensor to the position on the lens.
-        aten::vec3 posOnImageSensor;    ///< Position on the image sensor.
-        aten::vec3 posOnLens;            ///< Position on the lens.
-        aten::vec3 nmlOnLens;            ///< Normal at the position on the lens.
-        aten::vec3 posOnObjectplane;    ///< Position on the obhect plane.
-        real pdfOnImageSensor{ real(1) };    ///< PDF to sample the image sensor.
-        real pdfOnLens{ real(1) };            ///< PDF to sample the image lens.
+        aten::ray r;                        ///< Ray from the position on the image sensor to the position on the lens.
+        aten::vec3 posOnImageSensor;        ///< Position on the image sensor.
+        aten::vec3 posOnLens;               ///< Position on the lens.
+        aten::vec3 nmlOnLens;               ///< Normal at the position on the lens.
+        aten::vec3 posOnObjectplane;        ///< Position on the obhect plane.
+        real pdfOnImageSensor{ real(1) };   ///< PDF to sample the image sensor.
+        real pdfOnLens{ real(1) };          ///< PDF to sample the image lens.
     };
 
     /**

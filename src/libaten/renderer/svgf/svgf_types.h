@@ -7,6 +7,9 @@
 
 namespace AT_NAME
 {
+    /**
+     * @brief Enum for SVGF AOV display modes inherit from the normal AOV display modes.
+     */
     struct SVGFAovMode : public AT_NAME::AOVType {
         enum Type {
             ObjId = AT_NAME::AOVType::MeshId,
@@ -24,11 +27,14 @@ namespace AT_NAME
         AT_DEVICE_API SVGFAovMode(int32_t type) : AT_NAME::AOVType(static_cast<Type>(type)) {}
     };
 
+    /**
+     * @brief Enum for SVGF AOV buffer types inherit from the normal AOV buffer types.
+     */
     struct SVGFAovBufferType : public AT_NAME::AOVBufferType {
         enum Type {
-            ColorVariance = AT_NAME::AOVBufferType::BeginOfInheritType,
-            MomentTemporalWeight,
-            end_of_AOVBuffer = MomentTemporalWeight,
+            ColorVariance = AT_NAME::AOVBufferType::BeginOfInheritType, ///< Color and variance.
+            MomentTemporalWeight,                                       ///< Moments and temporal weight.
+            end_of_AOVBuffer = MomentTemporalWeight,                    ///< End of type.
         };
 
         static constexpr size_t Num = static_cast<size_t>(Type::end_of_AOVBuffer) + 1;

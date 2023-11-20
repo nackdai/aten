@@ -18,6 +18,7 @@ namespace AT_NAME
 {
     /**
      * @brief Generate sample rays per a query ray.
+     *
      * @tparam SampleRayNum Nubmer of sample rays per a query ray.
      * @param[out] sample_ray_descs Descriptions of sample ray per a query ray.
      * @param[out] disc Disc at query ray hit point.
@@ -48,6 +49,7 @@ namespace AT_NAME
 
     /**
      * @brief Compute the contribution by the feature line.
+     *
      * @tparam SampleRayNum Nubmer of sample rays per a query ray.
      * @param[in] closest_feature_line_point_distance TODO
      * @param[in,out] paths Information of paths.
@@ -77,6 +79,7 @@ namespace AT_NAME
 
     /**
      * @brief Get a sample ray.
+     *
      * @param[in] depth Depth of bounce.
      * @param[in,out] sample_ray_desc Sample ray description.
      * @param[in] prev_disc Disc at the previous hit point by the query ray.
@@ -108,6 +111,7 @@ namespace AT_NAME
 
     /**
      * @brief Evaluate the case which both query ray and sample ray hit.
+     *
      * @param[in,out] sample_ray_desc Sample ray description.
      * @param[in] ctxt Scene context.
      * @param[in] cam_org Camera's origin position.
@@ -207,6 +211,7 @@ namespace AT_NAME
 
     /**
      * @brief Evaluate the case which the query ray hits but the sample ray doesn't hit.
+     *
      * @param[in,out] sample_ray_desc Sample ray description.
      * @param[in] query_ray Query ray.
      * @param[in] hrec_query Hit record by the query ray.
@@ -284,6 +289,7 @@ namespace AT_NAME
 
     /**
      * @brief Create next disc forcibly by dummy query ray hit point.
+     *
      * @param[in] Count of bounce.
      * @param[in] hit_point_distance Previous distance between hit point and query ray origin.
      * @param[in] query_ray Query ray.
@@ -320,6 +326,7 @@ namespace AT_NAME
 
     /**
      * @brief Evaluate the case which the query ray doesn't hit but the sample ray hits.
+     *
      * @param[in] ctxt Scene context.
      * @param[in] query_ray Query ray.
      * @param[in] isect_sample_ray Intersection data by the sample ray.

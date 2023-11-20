@@ -44,20 +44,32 @@ namespace AT_NAME
         AT_DEVICE_API SVGFAovBufferType(int32_t type) : AT_NAME::AOVBufferType(static_cast<Type>(type)) {}
     };
 
+    /**
+     * @brief Matrices for SVGF.
+     */
     struct SVGFMtxPack {
-        aten::mat4 mtx_W2V;        // World - View.
-        aten::mat4 mtx_V2C;        // View - Clip.
-        aten::mat4 mtx_C2V;        // Clip - View.
+        aten::mat4 mtx_W2V;         ///< Matrix to convert from World coordinate to View cooridnate.
+        aten::mat4 mtx_V2C;         ///< Matrix to convert from View coordinate to Clip cooridnate.
+        aten::mat4 mtx_C2V;         ///< Matrix to convert from Clip coordinate to View cooridnate.
 
-        // View - World.
-        aten::mat4 mtx_V2W;
-        aten::mat4 mtx_PrevW2V;
+        aten::mat4 mtx_V2W;         ///< Matrix to convert from View coordinate to World cooridnate.
+        aten::mat4 mtx_PrevW2V;     ///< Matrix to convert from World coordinate to View cooridnate in the previous frame.
 
+        /**
+         * @param Get a matrix to convert from World coordinate to Clip cooridnate.
+         *
+         * @return Matrix to convert from World coordinate to Clip cooridnate.
+         */
         aten::mat4 GetW2C() const
         {
             return mtx_W2V * mtx_V2C;
         }
 
+        /**
+         * @brief Reset the matrices with the specified camera parameter.
+         *
+         * @param[in] camera Camera parameter to reset the matrices.
+         */
         void Reset(const aten::CameraParameter& camera)
         {
             mtx_PrevW2V = mtx_W2V;
@@ -68,43 +80,89 @@ namespace AT_NAME
         }
     };
 
-    template <typename BufferContainer>
+    /**
+     * @brief SVGF parameters to be managed in host.
+     *
+     * @tparam BufferContainer Buffer container type in host.
+     * @tparam BufferContainerForMotionDepth Buffer container type spectialized for motion depth buffer.
+     */
+    template <typename BufferContainer, typename BufferContainerForMotionDepth>
     struct SVGFParams {
         using buffer_container_type = BufferContainer;
         using buffer_value_type = typename buffer_container_type::value_type;
 
-        // Current AOV buffer position.
-        int32_t curr_aov_pos{ 0 };
+        int32_t curr_aov_pos{ 0 };  ///< Current AOV buffer position.
 
         using AOVHostBuffer = AT_NAME::AOVHostBuffer<BufferContainer, SVGFAovBufferType::Num>;
-        std::array<AOVHostBuffer, 2> aovs;  // AOV buffer. Current frame and previous frame.
+        std::array<AOVHostBuffer, 2> aovs;  ///< Array of AOV buffer to store current frame one and previous frame one.
 
+        /** Buffer to store color and various for ping-pong A-trous wavelet filter interations. */
+        std::array<BufferContainer, 2> atrous_clr_variance;
+
+        /** Buffer to store the midstream fitered color temporary. */
+        BufferContainer temporary_color_buffer;
+
+        BufferContainerForMotionDepth motion_depth_buffer;  ///< Buffer to store motion and depth.
+
+        int32_t atrous_iter_cnt{ 5 };   ///< Count of A-trous wavelet filter iterations.
+
+        SVGFMtxPack mtxs;   ///< Matrices for SVGF.
+
+        /**
+         * @brief Get AOV buffer of the current frame
+         *
+         * @return AOV buffer of the current frame
+         */
         AOVHostBuffer& GetCurrAovBuffer()
         {
             return aovs[curr_aov_pos];
         }
 
+        /**
+         * @brief Get AOV buffer of the previous frame
+         *
+         * @return AOV buffer of the previous frame
+         */
         AOVHostBuffer& GetPrevAovBuffer()
         {
             const auto prev_aov_pos = GetPrevAocPos();
             return aovs[prev_aov_pos];
         }
 
-        void UpdateCurAovBufferPos()
+        /**
+         * @brief Update current AOV buffer position.
+         */
+        void UpdateCurrAovBufferPos()
         {
             curr_aov_pos = 1 - curr_aov_pos;
         }
 
+        /**
+         * @brief Get current AOV buffer position.
+         *
+         * @return Current AOV buffer position.
+         */
         int32_t GetCurrAovPos() const
         {
             return curr_aov_pos;
         }
 
+        /**
+         * @brief Get previous AOV buffer position.
+         *
+         * @return Previous AOV buffer position.
+         */
         int32_t GetPrevAocPos() const
         {
             return 1 - curr_aov_pos;
         }
 
+        /**
+         * @brief Initialize buffers.
+         *
+         * @param[in] width Screen width.
+         * @param[in] height Screen height.
+         */
         void InitBuffers(int32_t width, int32_t height)
         {
             for (auto& aov : aovs) {
@@ -119,16 +177,5 @@ namespace AT_NAME
 
             temporary_color_buffer.resize(width * height);
         }
-
-        // For A-trous wavelet.
-        std::array<BufferContainer, 2> atrous_clr_variance;
-
-        BufferContainer temporary_color_buffer;
-
-        BufferContainer motion_depth_buffer;
-
-        int32_t atrous_iter_cnt{ 5 };
-
-        SVGFMtxPack mtxs;
     };
 }

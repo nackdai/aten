@@ -7,14 +7,20 @@
 #include "misc/span.h"
 
 namespace AT_NAME {
+    /**
+     * @brief Inheritable basic AOV buffer types.
+     */
     struct AOVBufferType {
         enum Type {
-            NormalDepth,
-            AlbedoMeshId,
-            end_of_AOVBufferType = AlbedoMeshId,
+            NormalDepth,    ///< Normal and depth.
+            AlbedoMeshId,   ///< Albedo and mesh id.
+            end_of_AOVBufferType = AlbedoMeshId,    ///< End of types.
         } type_{ Type::NormalDepth };
 
+        /** Number of the basic AOV buffer types. */
         static constexpr int32_t NumBasicAovBuffer = static_cast<int32_t>(Type::end_of_AOVBufferType + 1);
+
+        /** Enumuration value to begin in the inherited enumuration. */
         static constexpr int32_t BeginOfInheritType = static_cast<int32_t>(Type::end_of_AOVBufferType + 1);
 
         AT_DEVICE_API AOVBufferType() = default;
@@ -31,13 +37,16 @@ namespace AT_NAME {
         }
     };
 
+    /**
+     * @brief Inheritable basic AOV types.
+     */
     struct AOVType {
         enum Type {
-            Normal,
-            Depth,
-            Albedo,
-            MeshId,
-            end_of_AOVType = MeshId,
+            Normal, ///< Normal.
+            Depth,  ///< Depth.
+            Albedo, ///< Albedo.
+            MeshId, ///< Mesh id.
+            end_of_AOVType = MeshId,    ///< End of types.
         } type_{ Type::Normal };
 
         static constexpr int32_t BeginOfInheritType = static_cast<int32_t>(Type::end_of_AOVType + 1);
@@ -59,6 +68,12 @@ namespace AT_NAME {
 
 namespace AT_NAME
 {
+    /**
+     * @brief AOV buffer in host.
+     *
+     * @tparam BUFFER_TYPE Container type for AOV buffer.
+     * @tparam N Number of the managed AOV buffers.
+     */
     template <typename BUFFER_TYPE, size_t N>
     class AOVHostBuffer {
     public:
@@ -67,6 +82,8 @@ namespace AT_NAME
         using buffer_type = BUFFER_TYPE;
         using buffer_value_type = typename BUFFER_TYPE::value_type;
         using buffer_type_as_span = aten::span<buffer_value_type>;
+
+        /** Whether enough number of the managed AOV buffers is specified to store the buffer for albedo and mesh id. */
         static constexpr auto IsEnoughBufferSizeForAlbedoMeshId = (N > AT_NAME::AOVBufferType::AlbedoMeshId);
         static constexpr auto NumAOV = N;
 

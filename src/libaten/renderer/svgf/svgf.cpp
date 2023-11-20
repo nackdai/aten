@@ -241,7 +241,7 @@ namespace aten
         const auto center_meshid = aten::get<2>(extracted_center_pixel);
         auto curr_color = aten::get<3>(extracted_center_pixel);
 
-        auto back_ground_pixel_clr = AT_NAME::svgf::CheckIfBackgroundPixel(
+        auto back_ground_pixel_clr = AT_NAME::svgf::UpdateAOVIfBackgroundPixel(
             idx, curr_color, center_meshid,
             curr_aov_color_variance, curr_aov_moment_temporalweight);
         if (back_ground_pixel_clr) {
@@ -251,7 +251,9 @@ namespace aten
         const auto center_normal = aten::get<0>(extracted_center_pixel);
         const float center_depth = aten::get<1>(extracted_center_pixel);
 
-        auto weight = AT_NAME::svgf::TemporalReprojection(
+        float weight = 0;
+
+        aten::tie(weight, curr_color) = AT_NAME::svgf::TemporalReprojection(
             ix, iy, width, height,
             threshold_normal, threshold_depth,
             center_normal, center_depth, center_meshid,

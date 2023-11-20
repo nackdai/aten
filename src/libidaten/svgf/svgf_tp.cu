@@ -108,7 +108,7 @@ __global__ void temporalReprojection(
     const auto center_meshid{ aten::get<2>(extracted_center_pixel) };
     auto curr_color{ aten::get<3>(extracted_center_pixel) };
 
-    auto back_ground_pixel_clr = AT_NAME::svgf::CheckIfBackgroundPixel(
+    auto back_ground_pixel_clr = AT_NAME::svgf::UpdateAOVIfBackgroundPixel(
         idx, curr_color, center_meshid,
         curr_aov_color_variance, curr_aov_moment_temporalweight);
     if (back_ground_pixel_clr) {
@@ -123,7 +123,9 @@ __global__ void temporalReprojection(
     const auto center_normal{ aten::get<0>(extracted_center_pixel) };
     const float center_depth{ aten::get<1>(extracted_center_pixel) };
 
-    auto weight = AT_NAME::svgf::TemporalReprojection(
+    float weight = 0;
+
+    aten::tie(weight, curr_color) = AT_NAME::svgf::TemporalReprojection(
         ix, iy, width, height,
         threshold_normal, threshold_depth,
         center_normal, center_depth, center_meshid,
@@ -134,7 +136,7 @@ __global__ void temporalReprojection(
 
     AT_NAME::svgf::AccumulateMoments(
         idx, weight,
-        curr_aov_color_variance,
+        aten::const_span<float4>(curr_aov_color_variance),
         curr_aov_moment_temporalweight,
         prev_aov_moment_temporalweight);
 
@@ -145,7 +147,7 @@ __global__ void temporalReprojection(
         cudaBoundaryModeTrap);
 }
 
-__global__ void PropagateTemporalWeight(
+__global__ void RecomputeTemporalWeightFromSurroundingPixels(
     float4* aovMomentTemporalWeight,
     const float4* __restrict__ aovTexclrMeshid,
     int32_t width, int32_t height)
@@ -164,7 +166,7 @@ __global__ void PropagateTemporalWeight(
     auto aov_texclr_meshid{ aten::const_span<float4>(aovTexclrMeshid, size) };
     auto aov_moment_temporalweight{ aten::const_span<float4>(aovMomentTemporalWeight, size) };
 
-    auto weight = AT_NAME::svgf::PropagateTemporalWeight(
+    auto weight = AT_NAME::svgf::RecomputeTemporalWeightFromSurroundingPixels(
         ix, iy, width, height,
         aov_texclr_meshid,
         aov_moment_temporalweight);
@@ -214,7 +216,7 @@ namespace idaten
 
         checkCudaKernel(temporalReprojection);
 
-        PropagateTemporalWeight << <grid, block, 0, m_stream >> > (
+        RecomputeTemporalWeightFromSurroundingPixels << <grid, block, 0, m_stream >> > (
             curaov.get<AOVBuffer::MomentTemporalWeight>().data(),
             curaov.get<AOVBuffer::AlbedoMeshId>().data(),
             width, height);

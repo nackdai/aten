@@ -33,6 +33,22 @@ namespace svgf {
         }
     }
 
+    /**
+     * @brief Fill AOV buffers.
+     * @tparam NeedCheckSingularMtrlBounce Whether the case that the material is singular is checked.
+     * @tparam NeedOverrideMeshIdByMtrlId Whether the mesh id is overwritten by the material id in AOV buffer.
+     * @tparam IsExternalAlbedo Whether albedo map texture id in the material parameter is reset with -1.
+     * @param[in] idx Index to the pixel.
+     * @param[in] bounce Count of bounce.
+     * @param[in] paths Information of paths.
+     * @param[in] isect Scene intersection information.
+     * @param[in] mtxW2C Matrix to compute from world cooridnate to clip coordinate.
+     * @param[in] normal Normal to be stored as AOV.
+     * @param[in,out] mtrl Material parameter at hit point. If IsExternalAlbedo is true, mtrl.albedoMap is reset with -1.
+     * @param[out] aov_normal_depth Destination buffer to store normal and depth.
+     * @param[out] aov_texclr_meshid Destination buffer to store albedo color and mesh id.
+     * @return If AOV is filled in this API, returns true. Otherwise, returns false.
+     */
     template <bool NeedCheckSingularMtrlBounce, bool NeedOverrideMeshIdByMtrlId, bool IsExternalAlbedo>
     inline AT_DEVICE_MTRL_API bool FillAOVs(
         const int32_t idx,
@@ -70,6 +86,16 @@ namespace svgf {
         return false;
     }
 
+    /**
+     * @brief Prepare to execute denoise.
+     * @tparam IsFirstFrameExecution Whether this API is executed in the first frame count.
+     * @param[in] idx Index to the pixel.
+     * @param[in] paths Information of paths.
+     * @param[out] temporary_color_buffer Destination buffer to store the processed color.
+     * @param[out] aov_color_variance Destination buffer to store contribution and variance. If IsFirstFrameExecution is false, this buffer isn't used.
+     * @param[out] aov_moment_temporalweight Destination buffer to store moment of color luminance and temporal weight. If IsFirstFrameExecution is false, this buffer isn't used.
+     * @return Contribution as RGB.
+     */
     template <bool IsFirstFrameExecution>
     inline AT_DEVICE_MTRL_API AT_NAME::_detail::v4 PrepareForDenoise(
         const int32_t idx,
@@ -89,27 +115,39 @@ namespace svgf {
 
             aov_moment_temporalweight[idx].x += lum * lum;
             aov_moment_temporalweight[idx].y += lum;
-            aov_moment_temporalweight[idx].z += 1;
+            aov_moment_temporalweight[idx].z += 1;  // frame count,
 
             aov_color_variance[idx] = AT_NAME::_detail::MakeVec4(
                 contrib.x, contrib.y, contrib.z, aov_color_variance[idx].w);
         }
 
-        // In order not to chnage the values in paths for the next step, keep color in another buffer.
+        // NOTE:
+        // Path.contrib just store the path tracing contribution. It doesn't store the filtered color.
+        // Therefore, we have another buffer to store the fitered color. It's temporary_color_buffer in this API.
         temporary_color_buffer[idx] = c;
 
         return contrib;
     }
 
-    template <bool WillDevideColorByW = true, typename Span_v4>
+    /**
+     * @brief Extract center pixel data from AOB buffers.
+     * @tparam WillDivideContribByW Whether contribution value will be divided bt its w element value.
+     * @tparam Span_v4 Type to specify span type which contains 4 elements vector type. This is for accepting both const span type or non-const span type.
+     * @param idx Index to the pixel.
+     * @param[in] contribs Buffer of contribution.
+     * @param[in] aov_normal_depth AOV buffer to store normal and depth.
+     * @param[in] aov_texclr_meshid AOV buffer to store albedo color and mesh id.
+     * @return Tuple for the excracted center pixle data, normal, depth, mesh id, contribution.
+     */
+    template <bool WillDivideContribByW = true, typename Span_v4>
     inline AT_DEVICE_MTRL_API aten::tuple<AT_NAME::_detail::v3, real, int32_t, AT_NAME::_detail::v4> ExtractCenterPixel(
         int32_t idx,
         const aten::const_span<AT_NAME::_detail::v4>& contribs,
-        Span_v4& curr_aov_normal_depth,
-        Span_v4& curr_aov_texclr_meshid)
+        Span_v4& aov_normal_depth,
+        Span_v4& aov_texclr_meshid)
     {
-        const auto& nml_depth = curr_aov_normal_depth[idx];
-        const auto& texclr_meshid = curr_aov_texclr_meshid[idx];
+        const auto& nml_depth = aov_normal_depth[idx];
+        const auto& texclr_meshid = aov_texclr_meshid[idx];
 
         const float center_depth = nml_depth.w;
         const int32_t center_meshid = static_cast<int32_t>(texclr_meshid.w);
@@ -118,7 +156,7 @@ namespace svgf {
         const auto& contrib = contribs[idx];
 
         auto curr_color{ AT_NAME::_detail::MakeVec4<AT_NAME::_detail::v4>(contrib.x, contrib.y, contrib.z, 1.0f) };
-        if constexpr (WillDevideColorByW) {
+        if constexpr (WillDivideContribByW) {
             curr_color /= contrib.w;
         }
 
@@ -127,29 +165,46 @@ namespace svgf {
         return aten::make_tuple(center_normal, center_depth, center_meshid, curr_color);
     }
 
-    inline AT_DEVICE_MTRL_API std::optional<AT_NAME::_detail::v4> CheckIfBackgroundPixel(
+    /**
+     * @brief Update AOV buffer if the pixle is background.
+     * @param[in] idx Index to the pixel.
+     * @param[in] color Pixel color.
+     * @param[in] center_meshid Mesh id at the pixel.
+     * @param[out] aov_color_variance Destination buffer to store contribution and variance. If the pixle is background, only contribution is updated with color.
+     * @param[out] aov_moment_temporalweight Destination buffer to store moment of color luminance and temporal weight. If the pixle is background, only moments is updated with 1.
+     * @return If the pixel is background, returns the color in the arguments directly. Otherwise, returns nullopt.
+     */
+    inline AT_DEVICE_MTRL_API std::optional<AT_NAME::_detail::v4> UpdateAOVIfBackgroundPixel(
         const int32_t idx,
-        const AT_NAME::_detail::v4& curr_color,
+        const AT_NAME::_detail::v4& color,
         const int32_t center_meshid,
-        aten::span<AT_NAME::_detail::v4>& curr_aov_color_variance,
-        aten::span<AT_NAME::_detail::v4>& curr_aov_moment_temporalweight)
+        aten::span<AT_NAME::_detail::v4>& aov_color_variance,
+        aten::span<AT_NAME::_detail::v4>& aov_moment_temporalweight)
     {
         if (center_meshid < 0) {
             // This case can be treated as background.
-            curr_aov_color_variance[idx] = curr_color;
+            aov_color_variance[idx] = color;
 
-            curr_aov_moment_temporalweight[idx] = AT_NAME::_detail::MakeVec4(1, 1, 1, curr_aov_moment_temporalweight[idx].w);
+            aov_moment_temporalweight[idx] = AT_NAME::_detail::MakeVec4(1, 1, 1, aov_moment_temporalweight[idx].w);
 
-            return curr_color;
+            return color;
         }
 
         return std::nullopt;
     }
 
+    /**
+     * @brief Accumulate moments.
+     * @param[in] idx Index to the pixel.
+     * @param[in] weight Weight which is computed in temporal reprojection.
+     * @param[in] curr_aov_color_variance AOV buffer to store contribution and variance for current frame.
+     * @param[out] curr_aov_moment_temporalweight AOV buffer to store moments and temporal weight for current frame.
+     * @param[in] prev_aov_moment_temporalweight AOV buffer to store moments and temporal weight for previous frame.
+     */
     inline AT_DEVICE_MTRL_API void AccumulateMoments(
         const int32_t idx,
         const float weight,
-        aten::span<AT_NAME::_detail::v4>& curr_aov_color_variance,
+        const aten::const_span<AT_NAME::_detail::v4>& curr_aov_color_variance,
         aten::span<AT_NAME::_detail::v4>& curr_aov_moment_temporalweight,
         const aten::const_span<AT_NAME::_detail::v4>& prev_aov_moment_temporalweight)
     {
@@ -162,7 +217,7 @@ namespace svgf {
         // So, if either is significantly larger than the others, it might takes a very long time to attenuate its effect.
         // ex)
         // f0 = 100, f1 = 0, f2 = 0
-        // avg = (f0 + f1 + f2) / 3 = 33.3 <- 非常に大きい値が残り続ける.
+        // avg = (f0 + f1 + f2) / 3 = 33.3 <- 非常に大きい値が残り続ける. The effect of the large value continues to be remaining.
 
         // accumulate moments.
         float lum = AT_NAME::color::luminance(curr_color.x, curr_color.y, curr_color.z);
@@ -177,7 +232,7 @@ namespace svgf {
             auto prev_moment = AT_NAME::_detail::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z);
 
             // 積算フレーム数を１増やす.
-            // Advance the accumurate frame count.
+            // Advance the frame count to accumulate.
             frame = static_cast<int32_t>(prev_moment.z + 1);
 
             center_moment += prev_moment;
@@ -190,8 +245,29 @@ namespace svgf {
         curr_aov_moment_temporalweight[idx].z = center_moment.z;
     }
 
+    /**
+     * @brief Compute temporal reprojection.
+     * @tparam BufferForMotionDepth Type of motion depth buffer.
+     * @param[in] ix X position to the pixel in the screen coordinate.
+     * @param[in] iy Y position to the pixel in the screen coordinate.
+     * @param[in] width Screen width.
+     * @param[in] height Screen height.
+     * @param[in] threshold_normal Threhold to accept the different for the inner product of normals.
+     * @param[in] threshold_depth Threhold to accept the different for depth values.
+     * @param[in] center_normal Normal at the center pixel. The center pixel locates at (ix, iy).
+     * @param[in] center_depth Depth at the center pixel. The center pixel locates at (ix, iy).
+     * @param[in] center_meshid Mesh id at the center pixel. The center pixel locates at (ix, iy).
+     * @param[in] center_color Color at the center pixel.
+     * @param[out] curr_aov_color_variance AOV buffer to store contribution and variance for current frame.
+     * @param[out] curr_aov_moment_temporalweight AOV buffer to store moments and temporal weight for current frame.
+     * @param[in] prev_aov_normal_depth AOV buffer to store normal and depth for previous frame.
+     * @param[in] prev_aov_texclr_meshid AOV buffer to store albedo color and mesh id for previous frame.
+     * @param[in] prev_aov_color_variance AOV buffer to store contribution and variance for previous frame.
+     * @param[in] motion_detph_buffer Motion depth buffer.
+     * @return Tuple for weight to merge the colors and the reporjected color.
+     */
     template <typename BufferForMotionDepth>
-    inline AT_DEVICE_MTRL_API float TemporalReprojection(
+    inline AT_DEVICE_MTRL_API aten::tuple<float, AT_NAME::_detail::v4> TemporalReprojection(
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
         const float threshold_normal,
@@ -199,7 +275,7 @@ namespace svgf {
         const AT_NAME::_detail::v3& center_normal,
         const float center_depth,
         const int32_t center_meshid,
-        AT_NAME::_detail::v4& curr_color,
+        const AT_NAME::_detail::v4& center_color,
         aten::span<AT_NAME::_detail::v4>& curr_aov_color_variance,
         aten::span<AT_NAME::_detail::v4>& curr_aov_moment_temporalweight,
         const aten::const_span<AT_NAME::_detail::v4>& prev_aov_normal_depth,
@@ -211,6 +287,7 @@ namespace svgf {
 
         auto sum = AT_NAME::_detail::MakeVec4(0, 0, 0, 0);
         float weight = 0.0f;
+        auto curr_color{ center_color };
 
 #pragma unroll
         for (int32_t y = -1; y <= 1; y++) {
@@ -246,7 +323,8 @@ namespace svgf {
                 // TODO
                 // 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
                 // Even if the picked pixels are on the same mesh, the radiance of each pixel might be very different.
-                // The countermeaure for such kind of the situation might necessary.
+                // For example, a pixel is affected by a light but others are not.
+                // The countermeaure for such kind of the situation might be necessary.
 
                 float Wz = clamp((threshold_depth - abs(1 - center_depth / prev_depth)) / threshold_depth, 0.0f, 1.0f);
                 float Wn = clamp((dot(center_normal, prev_normal) - threshold_normal) / (1.0f - threshold_normal), 0.0f, 1.0f);
@@ -275,10 +353,20 @@ namespace svgf {
         curr_aov_color_variance[idx].y = curr_color.y;
         curr_aov_color_variance[idx].z = curr_color.z;
 
-        return weight;
+        return aten::make_tuple(weight, curr_color);
     }
 
-    inline AT_DEVICE_MTRL_API std::optional<float> PropagateTemporalWeight(
+    /**
+     * @brief Recompute temporal weight from the 3x3 surrounding pixels.
+     * @param[in] ix X position to the pixel in the screen coordinate.
+     * @param[in] iy Y position to the pixel in the screen coordinate.
+     * @param[in] width Screen width.
+     * @param[in] height Screen height.
+     * @param[in] aov_texclr_meshid AOV buffer to store albedo color and mesh id,
+     * @param[in] ov_moment_temporalweight AOV buffer to store moments and temporal weight.
+     * @return Temporal weight which is affected with the propagation from the surrounding pixels. If the center pixle is background, returns nullopt.
+     */
+    inline AT_DEVICE_MTRL_API std::optional<float> RecomputeTemporalWeightFromSurroundingPixels(
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
         const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
@@ -313,13 +401,26 @@ namespace svgf {
         return temporal_weight;
     }
 
+    /**
+     * @brief Estimate variance.
+     * @param[in] ix X position to the pixel in the screen coordinate.
+     * @param[in] iy Y position to the pixel in the screen coordinate.
+     * @param[in] width Screen width.
+     * @param[in] height Screen height.
+     * @param[in] mtx_C2V Matrix to tranfrom from clip coordinate to view coordinate.
+     * @param[in] aov_normal_depth AOV buffer to store normal and depth.
+     * @param[in] aov_texclr_meshid AOV buffer to store albedo color and mesh id.
+     * @param[in,out] aov_color_variance AOV buffer to store contribution and variance.
+     * @param[in,out] aov_moment_temporalweight AOV buffer to store moments and temporal weight.
+     * @return Estivated variance. If the pixel is background, returns zero vector.
+     */
     inline AT_DEVICE_MTRL_API AT_NAME::_detail::v4 EstimateVariance(
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
         const aten::mat4& mtx_C2V,
         const float camera_distance,
         const aten::const_span<AT_NAME::_detail::v4>& aov_normal_depth,
-        aten::span<AT_NAME::_detail::v4>& aov_texclr_meshid,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
         aten::span<AT_NAME::_detail::v4>& aov_color_variance,
         aten::span<AT_NAME::_detail::v4>& aov_moment_temporalweight)
     {
@@ -357,9 +458,11 @@ namespace svgf {
 
         if (frame < 4) {
             // 積算フレーム数が４未満 or Disoccludedされている.
-            // 7x7birateral filterで輝度を計算.
-            // Accumulated farme is less than 4 or the pixel is disoccluded.
-            // Compute the luminance by 7x7birateral filter.
+            // 7x7 birateral filterで輝度を計算.
+            // If the accumulated frame count is less than 4 or the pixel is disoccluded,
+            // compute the luminance by 7x7 birateral filter.
+            // If the pixel is disoccluded, the frame count is reset as 1.
+            // So, just checking whether the frame count is less than 4 satisfies the both condition.
 
             auto center_normal{ AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z) };
 
@@ -420,10 +523,21 @@ namespace svgf {
         return AT_NAME::_detail::MakeVec4(variance, variance, variance, 1);
     }
 
-    inline AT_DEVICE_MTRL_API float ExecGaussFilter3x3(
+    /**
+     * @brief Execute 3x3 gaussian filter for one element of vecto4 value.
+     * @tparam[in] MemberVar Pointer to member variable in vector4 type.
+     * @param[in] ix X position to the pixel in the screen coordinate.
+     * @param[in] iy Y position to the pixel in the screen coordinate.
+     * @param[in] width Screen width.
+     * @param[in] height Screen height.
+     * @param[in] buffer Buffer to store vector 4 value.
+     * @return 3x3 gaussian filtered value.
+     */
+    template <typename float AT_NAME::_detail::v4::* MemberVar>
+    inline AT_DEVICE_MTRL_API float Exec3x3GaussFilter(
         int32_t ix, int32_t iy,
-        int32_t w, int32_t h,
-        const aten::const_span<AT_NAME::_detail::v4>& color_variance_buffer)
+        int32_t width, int32_t height,
+        const aten::const_span<AT_NAME::_detail::v4>& buffer)
     {
         static constexpr float kernel_array[] = {
             1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
@@ -452,12 +566,14 @@ namespace svgf {
 
 #pragma unroll
         for (int32_t i = 0; i < 9; i++) {
-            int32_t xx = clamp(ix + offsetx[i], 0, w - 1);
-            int32_t yy = clamp(iy + offsety[i], 0, h - 1);
+            int32_t xx = clamp(ix + offsetx[i], 0, width - 1);
+            int32_t yy = clamp(iy + offsety[i], 0, height - 1);
 
-            int32_t idx = _detail::GetIdx(xx, yy, w);
+            int32_t idx = _detail::GetIdx(xx, yy, width);
 
-            float tmp = color_variance_buffer[idx].w;
+            // NOTE:
+            // https://stackoverflow.com/questions/58111915/access-member-variables-using-templates
+            float tmp = buffer[idx].*MemberVar;
 
             sum += kernel[pos] * tmp;
 
@@ -467,43 +583,37 @@ namespace svgf {
         return sum;
     }
 
-    inline AT_DEVICE_MTRL_API real ComputeGaussFiltereredVariance(
-        const bool is_first_iter,
-        const int32_t ix, const int32_t iy,
-        const int32_t width, const int32_t height,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_color_variance,
-        const aten::const_span<AT_NAME::_detail::v4>& color_variance_buffer)
-    {
-        // 3x3 Gauss filter.
-        float gauss_filtered_variance;
-
-        if (is_first_iter) {
-            gauss_filtered_variance = ExecGaussFilter3x3(ix, iy, width, height, aov_color_variance);
-        }
-        else {
-            gauss_filtered_variance = ExecGaussFilter3x3(ix, iy, width, height, color_variance_buffer);
-        }
-
-        return gauss_filtered_variance;
-    }
-
+    /**
+     * @brief Check the pixel is background for A-trous filter.
+     * @param[in] is_final_iter Whether this API is called as the final iteration of A-trous filter.
+     * @param[in] idx Index to the pixel.
+     * @param[in] center_color Color of the filtering center pixel.
+     * @param[in] aov_texclr_meshid AOV buffer to store albedo color and mesh id.
+     * @param[out] color_variance_buffer Buffer to store contribute and variance.
+     * @param If the pixel is background and this API is called as the final iteration, returns the computed pixel color.
+     *        If the pixel is background but this API is not calles as the final iteration, returns the valid optiaonal but no value.
+     *        If the pixel is not background, returns nullopt.
+     */
     inline AT_DEVICE_MTRL_API std::optional<std::optional<AT_NAME::_detail::v4>> CheckIfBackgroundPixelForAtrous(
         const bool is_final_iter,
         const int32_t idx,
-        const int32_t center_meshid,
         const AT_NAME::_detail::v4& center_color,
         const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
-        aten::span< AT_NAME::_detail::v4>& next_color_variance_buffer)
+        aten::span< AT_NAME::_detail::v4>& color_variance_buffer)
     {
         std::optional<AT_NAME::_detail::v4> result;
+
+        const auto center_meshid = aov_texclr_meshid[idx].w;
 
         if (center_meshid < 0) {
             // If mesh id is negative, the pixel is the background.
             // So, just output the background pixel.
-            next_color_variance_buffer[idx] = AT_NAME::_detail::MakeVec4(center_color.x, center_color.y, center_color.z, 0.0f);
+            color_variance_buffer[idx] = AT_NAME::_detail::MakeVec4(center_color.x, center_color.y, center_color.z, 0.0f);
 
+            // TODO:
+            // Is the following necessary?
             if (is_final_iter) {
-                // In the finaly iteration, apply albedo.
+                // In the final iteration, apply albedo.
                 auto texclr_meshid{ aov_texclr_meshid[idx] };
                 // NOTE:
                 // center_color is constant. So, multiply to texclr_meshid, and return it as the albedo applied color.
@@ -517,8 +627,28 @@ namespace svgf {
         return std::nullopt;
     }
 
+    /**
+     * @brief Execute A-trous wavelet filter.
+     * @param[in] is_first_iter Whether this API is called as the 1st A-trous wavelt filter iteration.
+     * @param[in] ix X position to the pixel in the screen coordinate.
+     * @param[in] iy Y position to the pixel in the screen coordinate.
+     * @param[in] width Screen width.
+     * @param[in] height Screen height.
+     * @param[in] gauss_filtered_variance Gaussian filtered variance.
+     * @param[in] center_normal Normal of the filtering center pixel.
+     * @param[in] center_depth Depth of the filtering center pixel.
+     * @param[in] center_meshid Mesh id of the filtering center pixel.
+     * @param[in] center_color Color of the filtering center pixel.
+     * @param[in] aov_normal_depth AOV buffer to store normal and depth.
+     * @param[in] aov_texclr_meshid AOV buffer to store albedo color and mesh id.
+     * @param[in] aov_color_variance AOV buffer to store contribution and variance.
+     * @param[in] aov_moment_temporalweight AOV buffer to store moments and temporal weight.
+     * @param[in] step_scale Scale for A-trous wavelet filter step.
+     * @param[in] camera_distance Distance from camera origin to the screen.
+     * @return A-trous wavelet filtered color.
+     */
     inline AT_DEVICE_MTRL_API AT_NAME::_detail::v4 ExecAtrousWaveletFilter(
-        bool is_first_iter, bool is_final_iter,
+        bool is_first_iter,
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
         float gauss_filtered_variance,
@@ -630,6 +760,18 @@ namespace svgf {
         return AT_NAME::_detail::MakeVec4(sumC.x, sumC.y, sumC.z, sumV);
     }
 
+    /**
+     * @brief Execute post process per A-trous wavelet filter iteration.
+     * @param[in] is_first_iter Whether this API is called as the 1st A-trous wavelt filter iteration.
+     * @param[in] is_final_iter Whether this API is called as the final A-trous wavelt filter iteration.
+     * @param[in] idx Index to the pixel.
+     * @param[in] filtered_color_variance A-trous wavlet filtered color and variance.
+     * @param[in] aov_texclr_meshid AOV buffer to store albedo color and mesh id. This is used only for the final iteration.
+     * @param[out] temporary_color_buffer Buffer to store the result of the 1st A-trous wavelt filter iteration.
+     * @param[out] temporary_color_buffer Buffer to store the filtered_color_variance as the 1st A-trous wavelt filter iteration.
+     * @param[out] next_color_variance_buffer Buffer to store the filtered_color_variance for the next A-trous wavelt filter iteration.
+     * @return If is_final_iter is true, returns the albedo multiplied color as the SVGF result for displaying. Otherwise, returns nullopt.
+     */
     inline AT_DEVICE_MTRL_API std::optional<AT_NAME::_detail::v4> PostProcessForAtrousFilter(
         bool is_first_iter, bool is_final_iter,
         const int32_t idx,
@@ -641,7 +783,8 @@ namespace svgf {
         next_color_variance_buffer[idx] = filtered_color_variance;
 
         if (is_first_iter) {
-            // Store color temporarily.
+            // NOTE:
+            // Store the 1st filter iteration color.
             temporary_color_buffer[idx].x = filtered_color_variance.x;
             temporary_color_buffer[idx].y = filtered_color_variance.y;
             temporary_color_buffer[idx].z = filtered_color_variance.z;
@@ -659,6 +802,13 @@ namespace svgf {
         return std::nullopt;
     }
 
+    /**
+     * @brief Copy vector type value with specified number of its elements.
+     * @tparam CopyElementNumPerItem Number of elements to be copied.
+     * @param idx Index to be copied in the buffer.
+     * @param src Source buffer.
+     * @param dst Destination buffer to store the copied value from the source buffer.
+     */
     template <int32_t CopyElementNumPerItem>
     inline AT_DEVICE_MTRL_API constexpr void CopyVectorBuffer(
         const int32_t idx,

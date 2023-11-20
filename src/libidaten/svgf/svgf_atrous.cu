@@ -55,8 +55,8 @@ __global__ void atrousFilter(
     auto center_color{ aten::get<3>(extracted_center_pixel) };
 
     auto back_ground_pixel_clr = AT_NAME::svgf::CheckIfBackgroundPixelForAtrous(
-        idx, isFinalIter,
-        center_meshid, center_color,
+        isFinalIter, idx,
+        center_color,
         aov_texclr_meshid, next_color_variance_buffer);
     if (back_ground_pixel_clr) {
         if (back_ground_pixel_clr.value()) {
@@ -72,15 +72,13 @@ __global__ void atrousFilter(
     }
 
     // 3x3 Gauss filter.
-    auto gauss_filtered_variance = AT_NAME::svgf::ComputeGaussFiltereredVariance(
-        isFirstIter,
+    auto gauss_filtered_variance = AT_NAME::svgf::Exec3x3GaussFilter<&float4::w>(
         ix, iy, width, height,
-        aov_color_variance,
-        color_variance_buffer);
+        isFirstIter ? aov_color_variance : color_variance_buffer);
 
     auto filtered_color_variance{
         AT_NAME::svgf::ExecAtrousWaveletFilter(
-            isFirstIter, isFinalIter,
+            isFirstIter,
             ix, iy, width, height,
             gauss_filtered_variance,
             center_normal, center_depth, center_meshid, center_color,

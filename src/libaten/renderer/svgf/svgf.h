@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "camera/camera.h"
 #include "misc/span.h"
 #include "renderer/pathtracing/pt_params.h"
@@ -65,6 +67,18 @@ namespace aten
             const int32_t ix, const int32_t iy,
             const int32_t width, const int32_t height,
             const float camera_distance,
+            AT_NAME::SVGFParams<std::vector<aten::vec4>>& svgf_param);
+
+        static std::optional<aten::vec4> AtrousFilter(
+            const int32_t filter_iter_count,
+            const int32_t idx,
+            const int32_t ix, const int32_t iy,
+            const int32_t width, const int32_t height,
+            const float camera_distance,
+            AT_NAME::SVGFParams<std::vector<aten::vec4>>& svgf_param);
+
+        static void CopyFromTeporaryColorBufferToAov(
+            const int32_t idx,
             AT_NAME::SVGFParams<std::vector<aten::vec4>>& svgf_param);
 
     private:

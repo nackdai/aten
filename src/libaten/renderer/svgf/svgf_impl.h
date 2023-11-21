@@ -679,14 +679,19 @@ namespace svgf {
         static constexpr float sigmaL = 4.0f;
 
         static constexpr float h_array[] = {
-            2.0 / 3.0,  2.0 / 3.0,  2.0 / 3.0,  2.0 / 3.0,
-            1.0 / 6.0,  1.0 / 6.0,  1.0 / 6.0,  1.0 / 6.0,
-            4.0 / 9.0,  4.0 / 9.0,  4.0 / 9.0,  4.0 / 9.0,
-            1.0 / 9.0,  1.0 / 9.0,  1.0 / 9.0,  1.0 / 9.0,
-            1.0 / 9.0,  1.0 / 9.0,  1.0 / 9.0,  1.0 / 9.0,
-            1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0,
+            2.0f / 3.0f,  2.0f / 3.0f,  2.0f / 3.0f,  2.0f / 3.0f,
+            1.0f / 6.0f,  1.0f / 6.0f,  1.0f / 6.0f,  1.0f / 6.0f,
+            4.0f / 9.0f,  4.0f / 9.0f,  4.0f / 9.0f,  4.0f / 9.0f,
+            1.0f / 9.0f,  1.0f / 9.0f,  1.0f / 9.0f,  1.0f / 9.0f,
+            1.0f / 9.0f,  1.0f / 9.0f,  1.0f / 9.0f,  1.0f / 9.0f,
+            1.0f / 36.0f, 1.0f / 36.0f, 1.0f / 36.0f, 1.0f / 36.0f,
         };
-        static constexpr aten::const_span<float> h(h_array);
+        // NOTE:
+        // std::declval<decltype(h_array)>() -> Make value of const float [24]
+        // std::declval<decltype(h_array)>()[0] -> One value in const float [24]
+        // decltype(std::declval<decltype(h_array)>()[0]) -> Type of the value in const float [24] -> const float&
+        using element_of_h_array = std::remove_const_t<std::remove_reference_t<decltype(std::declval<decltype(h_array)>()[0])>>;
+        static constexpr aten::const_span<element_of_h_array> h(h_array);
 
         static constexpr int32_t offsetx_array[] = {
             1,  0, -1, 0,
@@ -696,7 +701,8 @@ namespace svgf {
             2, -2, -2, 2,
             2, -2, -2, 2,
         };
-        static constexpr aten::const_span<int32_t> offsetx(offsetx_array);
+        using element_of_offsetx_array = std::remove_const_t<std::remove_reference_t<decltype(std::declval<decltype(offsetx_array)>()[0])>>;
+        static constexpr aten::const_span<element_of_offsetx_array> offsetx(offsetx_array);
 
         static constexpr int32_t offsety_array[] = {
             0, 1,  0, -1,
@@ -706,7 +712,8 @@ namespace svgf {
             1, 1, -1, -1,
             2, 2, -2, -2,
         };
-        static constexpr aten::const_span<int32_t> offsety(offsety_array);
+        using element_of_offsety_array = std::remove_const_t<std::remove_reference_t<decltype(std::declval<decltype(offsety_array)>()[0])>>;
+        static constexpr aten::const_span<element_of_offsety_array> offsety(offsety_array);
 
         const int32_t step_scale = 1 << filter_iter_count;
 
@@ -732,7 +739,7 @@ namespace svgf {
             int32_t xx = clamp(ix + scaled_offset_x, 0, width - 1);
             int32_t yy = clamp(iy + scaled_offset_y, 0, height - 1);
 
-            const auto u_length = aten::sqrt(scaled_offset_x * scaled_offset_x + scaled_offset_y * scaled_offset_y);
+            const auto u_length = aten::sqrt(static_cast<real>(scaled_offset_x * scaled_offset_x + scaled_offset_y * scaled_offset_y));
 
             const int32_t qidx = _detail::GetIdx(xx, yy, width);
 

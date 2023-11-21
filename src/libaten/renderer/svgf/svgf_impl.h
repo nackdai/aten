@@ -654,7 +654,7 @@ namespace svgf {
      * @param[in] aov_texclr_meshid AOV buffer to store albedo color and mesh id.
      * @param[in] aov_color_variance AOV buffer to store contribution and variance.
      * @param[in] aov_moment_temporalweight AOV buffer to store moments and temporal weight.
-     * @param[in] step_scale Scale for A-trous wavelet filter step.
+     * @param[in] filter_iter_count Current A-trous wavelet filter iterantion count.
      * @param[in] camera_distance Distance from camera origin to the screen.
      * @return A-trous wavelet filtered color.
      */
@@ -671,7 +671,7 @@ namespace svgf {
         const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
         const aten::const_span<AT_NAME::_detail::v4>& aov_color_variance,
         const aten::const_span<AT_NAME::_detail::v4>& color_variance_buffer,
-        const int32_t step_scale,
+        const int32_t filter_iter_count,
         const float camera_distance)
     {
         static constexpr float sigmaZ = 1.0f;
@@ -707,6 +707,8 @@ namespace svgf {
             2, 2, -2, -2,
         };
         static constexpr aten::const_span<int32_t> offsety(offsety_array);
+
+        const int32_t step_scale = 1 << filter_iter_count;
 
         const int32_t idx = _detail::GetIdx(ix, iy, width);
 

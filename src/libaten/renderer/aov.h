@@ -5,6 +5,7 @@
 #include "defs.h"
 #include "math/vec4.h"
 #include "misc/span.h"
+#include "misc/const_span.h"
 
 namespace AT_NAME {
     /**
@@ -82,6 +83,7 @@ namespace AT_NAME
         using buffer_type = BUFFER_TYPE;
         using buffer_value_type = typename BUFFER_TYPE::value_type;
         using buffer_type_as_span = aten::span<buffer_value_type>;
+        using buffer_type_as_const_span = aten::const_span<buffer_value_type>;
 
         /** Whether enough number of the managed AOV buffers is specified to store the buffer for albedo and mesh id. */
         static constexpr auto IsEnoughBufferSizeForAlbedoMeshId = (N > AT_NAME::AOVBufferType::AlbedoMeshId);
@@ -107,6 +109,13 @@ namespace AT_NAME
         {
             auto& aov = get<M>();
             return buffer_type_as_span(aov.data(), aov.size());
+        }
+
+        template <int32_t M>
+        buffer_type_as_const_span GetAsConstSpan()
+        {
+            auto& aov = get<M>();
+            return buffer_type_as_const_span(aov.data(), aov.size());
         }
 
         buffer_type& normal_depth()

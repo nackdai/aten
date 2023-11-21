@@ -20,7 +20,7 @@ __global__ void atrousFilter(
     const float4* __restrict__ aovMomentTemporalWeight,
     const float4* __restrict__ clrVarBuffer,
     float4* nextClrVarBuffer,
-    int32_t stepScale,
+    int32_t filter_iter_count,
     int32_t width, int32_t height,
     float cameraDistance)
 {
@@ -84,7 +84,7 @@ __global__ void atrousFilter(
             center_normal, center_depth, center_meshid, center_color,
             aov_normal_depth, aov_texclr_meshid, aov_color_variance,
             color_variance_buffer,
-            stepScale, cameraDistance)
+            filter_iter_count, cameraDistance)
     };
 
     auto post_process_result = AT_NAME::svgf::PostProcessForAtrousFilter(
@@ -133,15 +133,14 @@ namespace idaten
     {
         for (int32_t i = 0; i < params_.atrous_iter_cnt; i++) {
             onAtrousFilterIter(
-                i, params_.atrous_iter_cnt,
+                i,
                 outputSurf,
                 width, height);
         }
     }
 
     void SVGFPathTracing::onAtrousFilterIter(
-        uint32_t iterCnt,
-        uint32_t maxIterCnt,
+        uint32_t filter_iter_count,
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height)
     {
@@ -152,16 +151,14 @@ namespace idaten
 
         auto& curaov = params_.GetCurrAovBuffer();
 
-        auto atrous_clr_variance_buffers = params_.GetAtrousColorVariance(iterCnt);
+        auto atrous_clr_variance_buffers = params_.GetAtrousColorVariance(filter_iter_count);
         auto& curr_atrous_clr_variance = aten::get<0>(atrous_clr_variance_buffers);
         auto& next_atrous_clr_variance = aten::get<1>(atrous_clr_variance_buffers);
 
-        bool isFirstIter = (iterCnt == 0);
-        bool isFinalIter = (iterCnt == maxIterCnt - 1);
+        bool isFirstIter = (filter_iter_count == 0);
+        bool isFinalIter = (filter_iter_count == params_.atrous_iter_cnt - 1);
 
-        float cameraDistance = height / (2.0f * aten::tan(0.5f * m_cam.vfov));
-
-        int32_t stepScale = 1 << iterCnt;
+        auto camera_distance = AT_NAME::camera::ComputeScreenDistance(m_cam, height);
 
         atrousFilter << <grid, block, 0, m_stream >> > (
             isFirstIter, isFinalIter,
@@ -173,9 +170,9 @@ namespace idaten
             curaov.get<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>().data(),
             curr_atrous_clr_variance.data(),
             next_atrous_clr_variance.data(),
-            stepScale,
+            filter_iter_count,
             width, height,
-            cameraDistance);
+            camera_distance);
         checkCudaKernel(atrousFilter);
     }
 

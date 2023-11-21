@@ -199,8 +199,7 @@ namespace idaten
             int32_t width, int32_t height);
 
         void onAtrousFilterIter(
-            uint32_t iterCnt,
-            uint32_t maxIterCnt,
+            uint32_t filter_iter_count,
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height);
 

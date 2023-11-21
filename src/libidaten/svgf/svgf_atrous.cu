@@ -22,7 +22,7 @@ __global__ void atrousFilter(
     float4* nextClrVarBuffer,
     int32_t filter_iter_count,
     int32_t width, int32_t height,
-    float cameraDistance)
+    float camera_distance)
 {
     int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
     int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -84,7 +84,7 @@ __global__ void atrousFilter(
             center_normal, center_depth, center_meshid, center_color,
             aov_normal_depth, aov_texclr_meshid, aov_color_variance,
             color_variance_buffer,
-            filter_iter_count, cameraDistance)
+            filter_iter_count, camera_distance)
     };
 
     auto post_process_result = AT_NAME::svgf::PostProcessForAtrousFilter(

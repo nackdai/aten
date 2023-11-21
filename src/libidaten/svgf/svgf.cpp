@@ -46,15 +46,7 @@ namespace idaten
 
         initSamplerParameter(width, height);
 
-        for (int32_t i = 0; i < 2; i++) {
-            aov_[i].traverse([&width, &height](auto& buffer) { buffer.resize(width * height); });
-        }
-
-        for (int32_t i = 0; i < AT_COUNTOF(m_atrousClrVar); i++) {
-            m_atrousClrVar[i].resize(width * height);
-        }
-
-        temporary_color_buffer_.resize(width * height);
+        params_.InitBuffers(width, height);
     }
 
     void SVGFPathTracing::setGBuffer(
@@ -62,7 +54,7 @@ namespace idaten
         GLuint gltexMotionDepthbuffer)
     {
         m_gbuffer.init(gltexGbuffer, idaten::CudaGLRscRegisterType::ReadOnly);
-        m_motionDepthBuffer.init(gltexMotionDepthbuffer, idaten::CudaGLRscRegisterType::ReadOnly);
+        params_.motion_depth_buffer.init(gltexMotionDepthbuffer, idaten::CudaGLRscRegisterType::ReadOnly);
     }
 
     static bool doneSetStackSize = false;
@@ -100,6 +92,8 @@ namespace idaten
             width * height,
             1024);
 
+        params_.mtxs.Reset(m_cam);
+
         clearPath();
 
         onRender(
@@ -117,8 +111,6 @@ namespace idaten
         }
 
         {
-            m_mtx_prev_W2V = m_mtx_W2V;
-
             pick(
                 m_pickedInfo.ix, m_pickedInfo.iy,
                 width, height);
@@ -126,7 +118,7 @@ namespace idaten
             //checkCudaErrors(cudaDeviceSynchronize());
 
             // Toggle aov buffer pos.
-            m_curAOVPos = 1 - m_curAOVPos;
+            params_.UpdateCurrAovBufferPos();
 
             m_frame++;
         }

@@ -187,29 +187,26 @@ namespace idaten
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
-        int32_t curaov_idx = getCurAovs();
-        auto& curaov = aov_[curaov_idx];
+        auto& curaov = params_.GetCurrAovBuffer();
+        auto& prevaov = params_.GetPrevAovBuffer();
 
-        int32_t prevaov_idx = getPrevAovs();
-        auto& prevaov = aov_[prevaov_idx];
-
-        CudaGLResourceMapper<decltype(m_motionDepthBuffer)> rscmap(m_motionDepthBuffer);
-        auto motionDepthBuffer = m_motionDepthBuffer.bind();
+        CudaGLResourceMapper<decltype(params_.motion_depth_buffer)> rscmap(params_.motion_depth_buffer);
+        auto motionDepthBuffer = params_.motion_depth_buffer.bind();
 
         temporalReprojection << <grid, block, 0, m_stream >> > (
         //temporalReprojection << <1, 1 >> > (
             m_nmlThresholdTF,
             m_depthThresholdTF,
-            temporary_color_buffer_.data(),
+            params_.temporary_color_buffer.data(),
             m_cam,
-            curaov.get<AOVBuffer::NormalDepth>().data(),
-            curaov.get<AOVBuffer::AlbedoMeshId>().data(),
-            curaov.get<AOVBuffer::ColorVariance>().data(),
-            curaov.get<AOVBuffer::MomentTemporalWeight>().data(),
-            prevaov.get<AOVBuffer::NormalDepth>().data(),
-            prevaov.get<AOVBuffer::AlbedoMeshId>().data(),
-            prevaov.get<AOVBuffer::ColorVariance>().data(),
-            prevaov.get<AOVBuffer::MomentTemporalWeight>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::NormalDepth>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::AlbedoMeshId>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::ColorVariance>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>().data(),
+            prevaov.get<AT_NAME::SVGFAovBufferType::NormalDepth>().data(),
+            prevaov.get<AT_NAME::SVGFAovBufferType::AlbedoMeshId>().data(),
+            prevaov.get<AT_NAME::SVGFAovBufferType::ColorVariance>().data(),
+            prevaov.get<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>().data(),
             motionDepthBuffer,
             outputSurf,
             width, height);
@@ -217,8 +214,8 @@ namespace idaten
         checkCudaKernel(temporalReprojection);
 
         RecomputeTemporalWeightFromSurroundingPixels << <grid, block, 0, m_stream >> > (
-            curaov.get<AOVBuffer::MomentTemporalWeight>().data(),
-            curaov.get<AOVBuffer::AlbedoMeshId>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::AlbedoMeshId>().data(),
             width, height);
         checkCudaKernel(dilateWeight);
     }

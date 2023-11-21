@@ -261,36 +261,18 @@ namespace idaten
         int32_t sample,
         int32_t bounce, int32_t rrBounce)
     {
-        m_mtx_W2V.lookat(
-            m_cam.origin,
-            m_cam.center,
-            m_cam.up);
-
-        m_mtx_V2C.perspective(
-            m_cam.znear,
-            m_cam.zfar,
-            m_cam.vfov,
-            m_cam.aspect);
-
-        m_mtx_C2V = m_mtx_V2C;
-        m_mtx_C2V.invert();
-
-        m_mtx_V2W = m_mtx_W2V;
-        m_mtx_V2W.invert();
-
-        aten::mat4 mtx_W2C = m_mtx_V2C * m_mtx_W2V;
+        auto mtx_W2C = params_.mtxs.GetW2C();
 
         dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 
         auto& hitcount = m_compaction.getCount();
 
-        int32_t curaov_idx = getCurAovs();
-        auto& curaov = aov_[curaov_idx];
+        auto& curaov = params_.GetCurrAovBuffer();
 
         svgf_kernel::shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            curaov.get<AOVBuffer::NormalDepth>().data(),
-            curaov.get<AOVBuffer::AlbedoMeshId>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::NormalDepth>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::AlbedoMeshId>().data(),
             mtx_W2C,
             width, height,
             path_host_->paths,
@@ -324,24 +306,23 @@ namespace idaten
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
-        int32_t curaov_idx = getCurAovs();
-        auto& curaov = aov_[curaov_idx];
+        auto& curaov = params_.GetCurrAovBuffer();
 
         if (isFirstFrame() || m_mode == Mode::PT) {
             svgf_kernel::gather<true> << <grid, block, 0, m_stream >> > (
                 outputSurf,
                 width, height,
                 path_host_->paths,
-                temporary_color_buffer_.data(),
-                curaov.get<AOVBuffer::ColorVariance>().data(),
-                curaov.get<AOVBuffer::MomentTemporalWeight>().data());
+                params_.temporary_color_buffer.data(),
+                curaov.get<AT_NAME::SVGFAovBufferType::ColorVariance>().data(),
+                curaov.get<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>().data());
         }
         else {
             svgf_kernel::gather<false> << <grid, block, 0, m_stream >> > (
                 outputSurf,
                 width, height,
                 path_host_->paths,
-                temporary_color_buffer_.data());
+                params_.temporary_color_buffer.data());
         }
 
         checkCudaKernel(gather);

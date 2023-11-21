@@ -131,11 +131,9 @@ namespace idaten
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height)
     {
-        m_atrousMaxIterCnt = aten::clamp(m_atrousMaxIterCnt, 0U, 5U);
-
-        for (int32_t i = 0; i < m_atrousMaxIterCnt; i++) {
+        for (int32_t i = 0; i < params_.atrous_iter_cnt; i++) {
             onAtrousFilterIter(
-                i, m_atrousMaxIterCnt,
+                i, params_.atrous_iter_cnt,
                 outputSurf,
                 width, height);
         }
@@ -152,14 +150,14 @@ namespace idaten
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
-        int32_t curaov_idx = getCurAovs();
-        auto& curaov = aov_[curaov_idx];
+        auto& curaov = params_.GetCurrAovBuffer();
 
-        int32_t cur = iterCnt & 0x01;
-        int32_t next = 1 - cur;
+        auto atrous_clr_variance_buffers = params_.GetAtrousColorVariance(iterCnt);
+        auto& curr_atrous_clr_variance = aten::get<0>(atrous_clr_variance_buffers);
+        auto& next_atrous_clr_variance = aten::get<1>(atrous_clr_variance_buffers);
 
-        bool isFirstIter = iterCnt == 0 ? true : false;
-        bool isFinalIter = iterCnt == maxIterCnt - 1 ? true : false;
+        bool isFirstIter = (iterCnt == 0);
+        bool isFinalIter = (iterCnt == maxIterCnt - 1);
 
         float cameraDistance = height / (2.0f * aten::tan(0.5f * m_cam.vfov));
 
@@ -168,12 +166,13 @@ namespace idaten
         atrousFilter << <grid, block, 0, m_stream >> > (
             isFirstIter, isFinalIter,
             outputSurf,
-            temporary_color_buffer_.data(),
-            curaov.get<AOVBuffer::NormalDepth>().data(),
-            curaov.get<AOVBuffer::AlbedoMeshId>().data(),
-            curaov.get<AOVBuffer::ColorVariance>().data(),
-            curaov.get<AOVBuffer::MomentTemporalWeight>().data(),
-            m_atrousClrVar[cur].data(), m_atrousClrVar[next].data(),
+            params_.temporary_color_buffer.data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::NormalDepth>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::AlbedoMeshId>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::ColorVariance>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>().data(),
+            curr_atrous_clr_variance.data(),
+            next_atrous_clr_variance.data(),
             stepScale,
             width, height,
             cameraDistance);
@@ -187,13 +186,12 @@ namespace idaten
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
-        int32_t curaov_idx = getCurAovs();
-        auto& curaov = aov_[curaov_idx];
+        auto& curaov = params_.GetCurrAovBuffer();
 
         // Copy color from temporary buffer to AOV buffer for next temporal reprojection.
         CopyFromTeporaryColorBufferToAov << <grid, block, 0, m_stream >> > (
-            temporary_color_buffer_.data(),
-            curaov.get<AOVBuffer::ColorVariance>().data(),
+            params_.temporary_color_buffer.data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::ColorVariance>().data(),
             width, height);
         checkCudaKernel(copyFromBufferToAov);
     }

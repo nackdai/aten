@@ -6,6 +6,8 @@
 #include "kernel/pathtracing.h"
 #include "sampler/sampler.h"
 
+#include "renderer/svgf/svgf_types.h"
+
 namespace idaten
 {
     class SVGFPathTracing : public PathTracingImplBase {
@@ -16,23 +18,6 @@ namespace idaten
             PT,     // Path Tracing.
             VAR,    // Variance (For debug).
             AOVar,  // Arbitrary Output Variables.
-        };
-
-        struct AOVMode : public AT_NAME::AOVType {
-            enum Type {
-                ObjId = AT_NAME::AOVType::MeshId,
-                TexColor = AT_NAME::AOVType::Albedo,
-                WireFrame = AT_NAME::AOVType::BeginOfInheritType,
-                BaryCentric,
-                Motion,
-                end_of_AOVMode = Motion,
-            };
-
-            static constexpr size_t Num = static_cast<size_t>(Type::end_of_AOVMode) + 1;
-
-            AT_DEVICE_API AOVMode() : AT_NAME::AOVType(AT_NAME::AOVType::Normal) {}
-            AT_DEVICE_API ~AOVMode() = default;
-            AT_DEVICE_API AOVMode(int32_t type) : AT_NAME::AOVType(static_cast<Type>(type)) {}
         };
 
         struct PickedInfo {
@@ -89,11 +74,11 @@ namespace idaten
             }
         }
 
-        AOVMode getAOVMode() const
+        AT_NAME::SVGFAovMode getAOVMode() const
         {
             return m_aovMode;
         }
-        void setAOVMode(AOVMode mode)
+        void setAOVMode(AT_NAME::SVGFAovMode mode)
         {
             m_aovMode = mode;
         }
@@ -101,7 +86,7 @@ namespace idaten
         virtual void reset() override final
         {
             StandardPT::reset();
-            m_curAOVPos = 0;
+            params_.curr_aov_pos = 0;
         }
 
         void willPickPixel(int32_t ix, int32_t iy)
@@ -153,11 +138,11 @@ namespace idaten
 
         uint32_t getAtrousIterCount() const
         {
-            return m_atrousMaxIterCnt;
+            return params_.atrous_iter_cnt;
         }
         void setAtrousIterCount(uint32_t c)
         {
-            m_atrousMaxIterCnt = aten::clamp(c, 0U, 5U);
+            params_.atrous_iter_cnt = aten::clamp(c, 0U, 5U);
         }
 
     protected:
@@ -181,14 +166,13 @@ namespace idaten
             int32_t offsetX = -1,
             int32_t offsetY = -1)
         {
-            int32_t curaov_idx = getCurAovs();
-            auto& curaov = aov_[curaov_idx];
+            auto& curaov = params_.GetCurrAovBuffer();
 
             StandardPT::missShade(
                 width, height,
                 bounce,
-                curaov.get<AOVBuffer::NormalDepth>(),
-                curaov.get<AOVBuffer::AlbedoMeshId>());
+                curaov.get<AT_NAME::SVGFAovBufferType::NormalDepth>(),
+                curaov.get<AT_NAME::SVGFAovBufferType::AlbedoMeshId>());
         }
 
         void onShade(
@@ -230,15 +214,6 @@ namespace idaten
             int32_t ix, int32_t iy,
             int32_t width, int32_t height);
 
-        int32_t getCurAovs()
-        {
-            return m_curAOVPos;
-        }
-        int32_t getPrevAovs()
-        {
-            return 1 - m_curAOVPos;
-        }
-
         bool isFirstFrame() const
         {
             return (m_frame == 1);
@@ -247,44 +222,10 @@ namespace idaten
         void setStream(cudaStream_t stream);
 
     protected:
-        // Current AOV buffer position.
-        int32_t m_curAOVPos{ 0 };
-
-        struct AOVBuffer : public AT_NAME::AOVBufferType {
-            enum Type {
-                ColorVariance = AT_NAME::AOVBufferType::BeginOfInheritType,
-                MomentTemporalWeight,
-                end_of_AOVBuffer = MomentTemporalWeight,
-            };
-
-            static constexpr size_t Num = static_cast<size_t>(Type::end_of_AOVBuffer) + 1;
-
-            AT_DEVICE_API AOVBuffer() = default;
-            AT_DEVICE_API ~AOVBuffer() = default;
-            AT_DEVICE_API AOVBuffer(int32_t type) : AT_NAME::AOVBufferType(static_cast<Type>(type)) {}
-        };
-
-        using AOVHostBuffer = AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, AOVBuffer::Num>;
-        std::array<AOVHostBuffer, 2> aov_;  // AOV buffer. Current frame and previous frame.
-
-        aten::mat4 m_mtx_W2V;        // World - View.
-        aten::mat4 m_mtx_V2C;        // View - Clip.
-        aten::mat4 m_mtx_C2V;        // Clip - View.
-
-        // View - World.
-        aten::mat4 m_mtx_V2W;
-        aten::mat4 m_mtx_prev_W2V;
-
-        // For A-trous wavelet.
-        idaten::TypedCudaMemory<float4> m_atrousClrVar[2];
-
-        idaten::TypedCudaMemory<float4> temporary_color_buffer_;
+        AT_NAME::SVGFParams<idaten::TypedCudaMemory<float4>, idaten::CudaGLSurface> params_;
 
         // G-Buffer rendered by OpenGL.
         idaten::CudaGLSurface m_gbuffer;
-        idaten::CudaGLSurface m_motionDepthBuffer;
-
-        uint32_t m_atrousMaxIterCnt{ 5 };
 
         idaten::TypedCudaMemory<PickedInfo> m_pick;
 
@@ -292,7 +233,7 @@ namespace idaten
         PickedInfo m_pickedInfo;
 
         Mode m_mode{ Mode::SVGF };
-        AOVMode m_aovMode{ AOVMode::WireFrame };
+        AT_NAME::SVGFAovMode m_aovMode{ AT_NAME::SVGFAovMode::WireFrame };
 
         float m_depthThresholdTF{ 0.05f };
         float m_nmlThresholdTF{ 0.98f };

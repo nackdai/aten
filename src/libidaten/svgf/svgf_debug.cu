@@ -16,7 +16,7 @@
 
 __global__ void fillAOV(
     cudaSurfaceObject_t dst,
-    idaten::SVGFPathTracing::AOVMode mode,
+    AT_NAME::SVGFAovMode mode,
     int32_t width, int32_t height,
     const float4* __restrict__ aovNormalDepth,
     const float4* __restrict__ aovTexclrMeshid,
@@ -68,25 +68,25 @@ __global__ void fillAOV(
 
     float4 clr = make_float4(1);
 
-    if (mode == idaten::SVGFPathTracing::AOVMode::Normal) {
+    if (mode == AT_NAME::SVGFAovMode::Normal) {
         auto n = aovNormalDepth[idx] * 0.5f + 0.5f;
         clr = make_float4(n.x, n.y, n.z, 1);
     }
-    else if (mode == idaten::SVGFPathTracing::AOVMode::Depth) {
+    else if (mode == AT_NAME::SVGFAovMode::Depth) {
         // TODO
     }
-    else if (mode == idaten::SVGFPathTracing::AOVMode::TexColor) {
+    else if (mode == AT_NAME::SVGFAovMode::TexColor) {
         clr = aovTexclrMeshid[idx];
     }
-    else if (mode == idaten::SVGFPathTracing::AOVMode::WireFrame) {
+    else if (mode == AT_NAME::SVGFAovMode::WireFrame) {
         bool isHitEdge = (isect.a < 1e-2) || (isect.b < 1e-2) || (1 - isect.a - isect.b < 1e-2);
         clr = isHitEdge ? make_float4(0) : make_float4(1);
     }
-    else if (mode == idaten::SVGFPathTracing::AOVMode::BaryCentric) {
+    else if (mode == AT_NAME::SVGFAovMode::BaryCentric) {
         auto c = 1 - isect.a - isect.b;
         clr = make_float4(isect.a, isect.b, c, 1);
     }
-    else if (mode == idaten::SVGFPathTracing::AOVMode::Motion) {
+    else if (mode == AT_NAME::SVGFAovMode::Motion) {
         float4 data;
         surf2Dread(&data, motionDetphBuffer, ix * sizeof(float4), iy);
 
@@ -96,7 +96,7 @@ __global__ void fillAOV(
 
         clr = make_float4(motionX, motionY, 0, 1);
     }
-    else if (mode == idaten::SVGFPathTracing::AOVMode::ObjId) {
+    else if (mode == AT_NAME::SVGFAovMode::ObjId) {
 #if 0
         int32_t objid = isect.meshid;
 #else
@@ -185,18 +185,17 @@ namespace idaten
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
-        int32_t curaov_idx = getCurAovs();
-        auto& curaov = aov_[curaov_idx];
+        auto& curaov = params_.GetCurrAovBuffer();
 
-        CudaGLResourceMapper<decltype(m_motionDepthBuffer)> rscmap(m_motionDepthBuffer);
-        auto gbuffer = m_motionDepthBuffer.bind();
+        CudaGLResourceMapper<decltype(params_.motion_depth_buffer)> rscmap(params_.motion_depth_buffer);
+        auto gbuffer = params_.motion_depth_buffer.bind();
 
         fillAOV << <grid, block >> > (
             outputSurf,
             m_aovMode,
             width, height,
-            curaov.get<AOVBuffer::NormalDepth>().data(),
-            curaov.get<AOVBuffer::AlbedoMeshId>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::NormalDepth>().data(),
+            curaov.get<AT_NAME::SVGFAovBufferType::AlbedoMeshId>().data(),
             gbuffer,
             m_cam,
             ctxt_host_.ctxt,
@@ -214,8 +213,7 @@ namespace idaten
         if (m_willPicklPixel) {
             m_pick.resize(1);
 
-            int32_t curaov_idx = getCurAovs();
-            auto& curaov = aov_[curaov_idx];
+            auto& curaov = params_.GetCurrAovBuffer();
 
             pickPixel << <1, 1 >> > (
                 m_pick.data(),
@@ -223,8 +221,8 @@ namespace idaten
                 width, height,
                 m_cam,
                 path_host_->paths,
-                curaov.get<AOVBuffer::NormalDepth>().data(),
-                curaov.get<AOVBuffer::AlbedoMeshId>().data(),
+                curaov.get<AT_NAME::SVGFAovBufferType::NormalDepth>().data(),
+                curaov.get<AT_NAME::SVGFAovBufferType::AlbedoMeshId>().data(),
                 ctxt_host_.ctxt,
                 ctxt_host_.shapeparam.data(),
                 ctxt_host_.mtrlparam.data(),

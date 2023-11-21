@@ -2,8 +2,8 @@
 
 #include "camera/camera.h"
 #include "math/mat4.h"
+#include "misc/tuple.h"
 #include "renderer/aov.h"
-
 
 namespace AT_NAME
 {
@@ -75,8 +75,12 @@ namespace AT_NAME
             mtx_PrevW2V = mtx_W2V;
 
             camera::ComputeCameraMatrices(camera, mtx_W2V, mtx_V2C);
-            mtx_C2V = mtx_V2C * mtx_W2V;
-            mtx_V2W = mtx_W2V.invert();
+
+            mtx_C2V = mtx_V2C;
+            mtx_C2V.invert();
+
+            mtx_V2W = mtx_W2V;
+            mtx_V2W.invert();
         }
     };
 
@@ -86,7 +90,7 @@ namespace AT_NAME
      * @tparam BufferContainer Buffer container type in host.
      * @tparam BufferContainerForMotionDepth Buffer container type spectialized for motion depth buffer.
      */
-    template <typename BufferContainer, typename BufferContainerForMotionDepth>
+    template <typename BufferContainer, typename BufferContainerForMotionDepth = typename BufferContainer>
     struct SVGFParams {
         using buffer_container_type = BufferContainer;
         using buffer_value_type = typename buffer_container_type::value_type;
@@ -175,7 +179,28 @@ namespace AT_NAME
                     });
             }
 
+            for (auto& atrous_clr_var_buffer : atrous_clr_variance) {
+                atrous_clr_var_buffer.resize(width * height);
+            }
+
             temporary_color_buffer.resize(width * height);
+        }
+
+        /**
+         * @brief Get buffers to store color and variance for A-trous wavelet filter.
+         *
+         * @param[in] iteration_count Current A-trous wavelet filter iterantion count.
+         * @return Tuple for buffer of the current iteration and buffer of the next iteration.
+         *         Index 0 in tuple is the buffer of the current iteration.
+         *         Index 1 in tuple is the buffer of the next iteration.
+         */
+        auto GetAtrousColorVariance(int32_t iteration_count)
+        {
+            // https://www.fluentcpp.com/2020/10/16/tie-make_tuple-forward_as_tuple-how-to-build-a-tuple-in-cpp/
+            int32_t curr = iteration_count & 0x01;
+            int32_t next = 1 - curr;
+            //return aten::forward_as_tuple(atrous_clr_variance[curr], atrous_clr_variance[next]);
+            return aten::tie(atrous_clr_variance[curr], atrous_clr_variance[next]);
         }
     };
 }

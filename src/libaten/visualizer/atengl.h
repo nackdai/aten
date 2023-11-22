@@ -42,12 +42,4 @@ namespace aten {
         glfmt = glpixelfmt[idx];
         gltype = glpixeltype[idx];
     }
-
-    inline int32_t GetBytesPerPxiel(PixelFormat fmt)
-    {
-        constexpr int32_t bpp[] = {
-            4, 16, 8,
-        };
-        return bpp[static_cast<size_t>(fmt)];
-    }
 }

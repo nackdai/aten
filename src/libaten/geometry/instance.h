@@ -11,7 +11,7 @@
 
 namespace aten
 {
-    template <typename OBJ>
+    template <class OBJ>
     class instance : public transformable {
         friend class TransformableFactory;
 

@@ -5,7 +5,7 @@
 
 namespace idaten {
     namespace cuda {
-        template< typename T >
+        template< class T >
         void check(T result, char const *const func, const char *const file, int32_t const line)
         {
             if (result)

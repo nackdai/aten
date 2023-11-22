@@ -13,7 +13,7 @@
 // http://research.nvidia.com/sites/default/files/publications/karras2012hpg_paper.pdf
 
 #if 0
-template <typename T>
+template <class T>
 __forceinline__ __device__ int32_t computeLongestCommonPrefix(
     const T* sortedKeys,
     uint32_t numOfElems,
@@ -69,7 +69,7 @@ __forceinline__ __device__ int32_t computeLongestCommonPrefix(
     return ret;
 }
 
-template <typename T>
+template <class T>
 __global__ void buildTree(
     uint32_t numOfElems,
     const T* __restrict__ sortedKeys,
@@ -544,7 +544,7 @@ __device__ inline void computeBoundingBox(
     aabbMax->z = max(bboxMax_0.z, bboxMax_1.z);
 }
 
-template <typename T>
+template <class T>
 __global__ void computeBoudingBox(
     int32_t numberOfTris,
     const idaten::LBVHBuilder::LBVHNode* __restrict__ src,
@@ -716,7 +716,7 @@ namespace idaten
         }
     }
 
-    template <typename T>
+    template <class T>
     void LBVHBuilder::onBuild(
         idaten::CudaTextureResource& dst,
         TypedCudaMemory<aten::TriangleParameter>& triangles,

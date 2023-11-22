@@ -327,7 +327,7 @@ namespace aten {
         return res.f;
     }
 
-    template <typename T>
+    template <class T>
     inline AT_DEVICE_API T vmax(const T& a, const T& b)
     {
         return T(aten::cmpMax(a.x, b.x), aten::cmpMax(a.y, b.y), aten::cmpMax(a.z, b.z), aten::cmpMax(a.w, b.w));
@@ -347,7 +347,7 @@ namespace aten {
     }
 #endif
 
-    template <typename T>
+    template <class T>
     inline AT_DEVICE_API T vmin(const T& a, const T& b)
     {
         return T(aten::cmpMin(a.x, b.x), aten::cmpMin(a.y, b.y), aten::cmpMin(a.z, b.z), aten::cmpMin(a.w, b.w));

@@ -57,7 +57,7 @@ namespace aten
         }
 
     private:
-        template <typename T>
+        template <class T>
         auto updateIndex(T id)
             -> std::enable_if_t<(std::is_signed<T>::value && !std::is_floating_point<T>::value) || std::is_same<T, std::size_t>::value, void>
         {

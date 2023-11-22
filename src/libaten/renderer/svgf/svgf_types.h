@@ -90,7 +90,7 @@ namespace AT_NAME
      * @tparam BufferContainer Buffer container type in host.
      * @tparam BufferContainerForMotionDepth Buffer container type spectialized for motion depth buffer.
      */
-    template <typename BufferContainer, typename BufferContainerForMotionDepth = typename BufferContainer>
+    template <class BufferContainer, class BufferContainerForMotionDepth = BufferContainer>
     struct SVGFParams {
         using buffer_container_type = BufferContainer;
         using buffer_value_type = typename buffer_container_type::value_type;

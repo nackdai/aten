@@ -9,7 +9,7 @@
 #define AT_COLOR_NORMALIZE(c)    ((c) / real(255))
 
 namespace AT_NAME {
-    template <typename _T, int32_t N>
+    template <class _T, int32_t N>
     struct TColor {
         std::array<_T, N> c;
 
@@ -28,7 +28,7 @@ namespace AT_NAME {
         static constexpr size_t BPP = sizeof(_T) * N;
     };
 
-    template <typename _T>
+    template <class _T>
     struct TColor<_T, 4> {
         std::array<_T, 4> c;
 

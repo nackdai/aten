@@ -13,20 +13,20 @@
 
 namespace aten {
 #ifdef __CUDACC__
-    template <typename... _Types>
+    template <class... _Types>
     using tuple = cuda::std::tuple<_Types...>;
 
-    template <typename... _Types>
+    template <class... _Types>
     __host__ __device__ decltype(auto) make_tuple(_Types... args) {
         return cuda::std::make_tuple<_Types...>(std::forward<_Types>(args)...);
     }
 
-    template <std::size_t N, typename _Type>
+    template <std::size_t N, class _Type>
     constexpr __host__ __device__ decltype(auto) get(_Type&& arg) {
         return cuda::std::get<N>(std::forward<decltype(arg)>(arg));
     }
 
-    template <typename... Args>
+    template <class... Args>
     constexpr __host__ __device__ decltype(auto) tie(Args&&... args) {
         return cuda::std::tie(std::forward<Args>(args)...);
     };
@@ -37,20 +37,20 @@ namespace aten {
 
     }
 #else
-    template <typename... _Types>
+    template <class... _Types>
     using tuple = std::tuple<_Types...>;
 
-    template <typename... _Types>
+    template <class... _Types>
     decltype(auto) make_tuple(_Types... args) {
         return std::make_tuple<_Types...>(std::forward<_Types>(args)...);
     }
 
-    template <std::size_t N, typename _Type>
+    template <std::size_t N, class _Type>
     constexpr decltype(auto) get(_Type&& arg) {
         return std::get<N>(std::forward<decltype(arg)>(arg));
     }
 
-    template <typename... Args>
+    template <class... Args>
     constexpr decltype(auto) tie(Args&&... args) {
         return std::tie(std::forward<Args>(args)...);
     };

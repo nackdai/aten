@@ -192,7 +192,7 @@ namespace aten {
         return (isect.objid >= 0);
     }
 
-    template<typename T>
+    template<class T>
     static void pop_front(std::vector<T>& vec)
     {
         AT_ASSERT(!vec.empty());

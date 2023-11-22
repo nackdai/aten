@@ -109,7 +109,7 @@ namespace aten {
         return AT_MATH_FUNC2(::pow, f, v);
     }
 
-    template <typename T>
+    template <class T>
     inline AT_DEVICE_API T abs(T f)
     {
         return static_cast<T>(abs<real>(static_cast<real>(f)));
@@ -135,7 +135,7 @@ namespace aten {
         return AT_MATH_FUNC(::ceil, f);
     }
 
-    template <typename T>
+    template <class T>
     inline AT_DEVICE_API void swapVal(T& a, T& b)
     {
         T tmp = a;
@@ -144,8 +144,8 @@ namespace aten {
     }
 
 #ifdef __CUDACC__
-    template <typename T>
-    inline AT_DEVICE_API auto cmpMax(T a, T b) -> typename std::enable_if_t<std::is_fundamental_v<T>, T>
+    template <class T>
+    inline AT_DEVICE_API auto cmpMax(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
     {
         return (a > b ? a : b);
     }
@@ -162,16 +162,16 @@ namespace aten {
         return max(a, b);
     }
 #else
-    template <typename T>
-    inline AT_DEVICE_API auto cmpMax(T a, T b) -> typename std::enable_if_t<std::is_fundamental_v<T>, T>
+    template <class T>
+    inline AT_DEVICE_API auto cmpMax(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
     {
         return std::max<T>(a, b);
     }
 #endif
 
 #ifdef __CUDACC__
-    template <typename T>
-    inline AT_DEVICE_API auto cmpMin(T a, T b) -> typename std::enable_if_t<std::is_fundamental_v<T>, T>
+    template <class T>
+    inline AT_DEVICE_API auto cmpMin(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
     {
         return (a < b ? a : b);
     }
@@ -188,14 +188,14 @@ namespace aten {
         return min(a, b);
     }
 #else
-    template <typename T>
-    inline AT_DEVICE_API auto cmpMin(T a, T b) -> typename std::enable_if_t<std::is_fundamental_v<T>, T>
+    template <class T>
+    inline AT_DEVICE_API auto cmpMin(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
     {
         return std::min<T>(a, b);
     }
 #endif
 
-    template <typename _T>
+    template <class _T>
     inline AT_DEVICE_API _T clamp(_T f, _T a, _T b)
     {
         return cmpMin(cmpMax(f, a), b);
@@ -307,7 +307,7 @@ namespace aten {
     }
 #endif
 
-    template <typename TYPE>
+    template <class TYPE>
     inline AT_DEVICE_API TYPE mix(const TYPE& x, const TYPE& y, real a)
     {
         // Linear interpolation.

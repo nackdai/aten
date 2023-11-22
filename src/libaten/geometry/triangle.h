@@ -34,7 +34,7 @@ namespace AT_NAME
             real t_min, real t_max,
             aten::Intersection& isect) const override;
 
-        template <typename CONTEXT>
+        template <class CONTEXT>
         static AT_DEVICE_API bool hit(
             const aten::TriangleParameter& param,
             const CONTEXT& ctxt,
@@ -63,7 +63,7 @@ namespace AT_NAME
             return isHit;
         }
 
-        template <typename CONTEXT>
+        template <class CONTEXT>
         static AT_DEVICE_API void EvaluateHitResult(
             const CONTEXT& ctxt,
             const aten::TriangleParameter& tri,
@@ -117,7 +117,7 @@ namespace AT_NAME
             rec->area = param.area;
         }
 
-        template <typename CONTEXT>
+        template <class CONTEXT>
         static AT_DEVICE_API void SamplePosAndNormal(
             const CONTEXT& ctxt,
             const aten::TriangleParameter& tri,
@@ -183,7 +183,7 @@ namespace AT_NAME
             const aten::context& ctxt,
             const aten::TriangleParameter& param);
 
-        template <typename T>
+        template <class T>
         auto updateIndex(T id)
             -> std::enable_if_t<(std::is_signed<T>::value && !std::is_floating_point<T>::value) || std::is_same<T, std::size_t>::value, void>
         {

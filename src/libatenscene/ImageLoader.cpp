@@ -33,7 +33,7 @@ namespace aten {
         return load(filename, path, ctxt, fmt);
     }
 
-    template <typename TYPE>
+    template <class TYPE>
     static void read(
         TYPE* src,
         texture* tex,

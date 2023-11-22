@@ -75,13 +75,13 @@ namespace AT_NAME
      * @tparam BUFFER_TYPE Container type for AOV buffer.
      * @tparam N Number of the managed AOV buffers.
      */
-    template <typename BUFFER_TYPE, size_t N>
+    template <class BUFFER_TYPE, size_t N>
     class AOVHostBuffer {
     public:
         static_assert(N > 0, "Empty buffer is not allowed");
 
         using buffer_type = BUFFER_TYPE;
-        using buffer_value_type = typename BUFFER_TYPE::value_type;
+        using buffer_value_type = class BUFFER_TYPE::value_type;
         using buffer_type_as_span = aten::span<buffer_value_type>;
         using buffer_type_as_const_span = aten::const_span<buffer_value_type>;
 
@@ -154,7 +154,7 @@ namespace AT_NAME
         std::array<buffer_type, N> aovs_;
     };
 
-    template <typename BUFFER_VALUE_TYPE, typename TNormal, typename TAlbedo>
+    template <class BUFFER_VALUE_TYPE, class TNormal, class TAlbedo>
     inline AT_DEVICE_API void FillBasicAOVs(
         BUFFER_VALUE_TYPE& aovNormalDepth,
         const TNormal& normal,
@@ -179,7 +179,7 @@ namespace AT_NAME
         aovAlbedoMeshId.w = static_cast<real>(isect.meshid);
     }
 
-    template <typename BUFFER_VALUE_TYPE, typename TBg>
+    template <class BUFFER_VALUE_TYPE, class TBg>
     inline AT_DEVICE_API void FillBasicAOVsIfHitMiss(
         BUFFER_VALUE_TYPE& aovNormalDepth,
         BUFFER_VALUE_TYPE& aovAlbedoMeshId,
@@ -196,7 +196,7 @@ namespace AT_NAME
         aovAlbedoMeshId.w = -1;
     }
 
-    template <typename BUFFER_VALUE_TYPE>
+    template <class BUFFER_VALUE_TYPE>
     inline AT_DEVICE_API void FillBaryCentricAOV(
         BUFFER_VALUE_TYPE& aovBuffer,
         const aten::Intersection& isect)
@@ -206,7 +206,7 @@ namespace AT_NAME
         aovBuffer.z = real(1) - isect.a - isect.b;
     }
 
-    template <typename BUFFER_VALUE_TYPE>
+    template <class BUFFER_VALUE_TYPE>
     inline AT_DEVICE_API void FillBaryCentricAOVIfHitMiss(BUFFER_VALUE_TYPE& aovBuffer)
     {
         aovBuffer.x = real(0);

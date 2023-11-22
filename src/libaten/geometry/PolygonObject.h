@@ -30,7 +30,7 @@ namespace AT_NAME
             real t_min, real t_max,
             aten::Intersection& isect) const override final;
 
-        template <typename CONTEXT>
+        template <class CONTEXT>
         static AT_DEVICE_API void evaluate_hit_result(
             const aten::ObjectParameter& obj,
             const CONTEXT& ctxt,
@@ -106,7 +106,7 @@ namespace AT_NAME
 
         void build(const aten::context& ctxt);
 
-        template <typename CONTEXT>
+        template <class CONTEXT>
         static AT_DEVICE_API void SamplePosAndNormal(
             aten::SamplePosNormalPdfResult* result,
             const aten::ObjectParameter& param,

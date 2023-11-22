@@ -30,7 +30,7 @@ namespace aten {
     class accelerator : public hitable {
         friend class PolygonObject;
         friend class deformable;
-        template<typename ACCEL> friend class AcceleratedScene;
+        template<class ACCEL> friend class AcceleratedScene;
 
     protected:
         accelerator(AccelType type) : accel_type_{ type } {}

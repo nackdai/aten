@@ -56,7 +56,7 @@ namespace aten {
                 t_result);
         }
 
-        template <typename T>
+        template <class T>
         static AT_DEVICE_API bool hit(
             const ray& r,
             const T& _min, const T& _max,
@@ -83,7 +83,7 @@ namespace aten {
             return t0 <= t1;
         }
 
-        template <typename T>
+        template <class T>
         static AT_DEVICE_API bool hit(
             const ray& r,
             const T& _min, const T& _max,

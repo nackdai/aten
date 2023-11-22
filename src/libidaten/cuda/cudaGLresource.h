@@ -119,7 +119,7 @@ namespace idaten
 
     //////////////////////////////////////////////////////////////////////////
 
-    template <typename GLRSC>
+    template <class GLRSC>
     class CudaGLResourceMapper {
     public:
         CudaGLResourceMapper(GLRSC& rsc) : m_rsc(rsc)

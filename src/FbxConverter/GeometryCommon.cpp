@@ -54,7 +54,7 @@ void TriangleParam::eraseJoint(uint32_t idx)
 
 ///////////////////////////////////////
 
-template <typename _T>
+template <class _T>
 static void eraseItem(
     std::vector<_T>& tvList,
     size_t pos)

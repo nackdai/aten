@@ -68,7 +68,7 @@ namespace aten {
     //  - clearcoat [float]
     //  - clearcoatGloss [float]
 
-    template <typename TYPE>
+    template <class TYPE>
     aten::PolymorphicValue getValue(picojson::value& v)
     {
         AT_ASSERT(false);
@@ -125,7 +125,7 @@ namespace aten {
 
     using GetValueFromFile = std::function<aten::PolymorphicValue(picojson::value&)>;
 #else
-    template <typename TYPE>
+    template <class TYPE>
     aten::PolymorphicValue getValue(const tinyxml2::XMLElement* e, aten::context& ctxt)
     {
         AT_ASSERT(false);

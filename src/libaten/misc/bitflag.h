@@ -9,7 +9,7 @@
 
 namespace aten
 {
-    template <typename _T>
+    template <class _T>
     class BitFlag {
     public:
         BitFlag() {}

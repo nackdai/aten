@@ -42,7 +42,7 @@ namespace aten {
     /**
      * @brief Convert the tree to the linear list.
      */
-    template <typename _T>
+    template <class _T>
     void registerBvhNodeToLinearListRecursively(
         aten::bvhnode* root,
         aten::bvhnode* parentNode,

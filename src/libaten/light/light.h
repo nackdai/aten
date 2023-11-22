@@ -22,7 +22,7 @@ namespace AT_NAME
         virtual ~Light() {}
 
     public:
-        template <typename CONTEXT>
+        template <class CONTEXT>
         static AT_DEVICE_MTRL_API void sample(
             aten::LightSampleResult& result,
             const aten::LightParameter& param,

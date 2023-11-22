@@ -77,7 +77,7 @@ namespace aten {
         "Object",
     };
 
-    template <typename T>
+    template <class T>
     static bool registerAsset(
         std::string_view name,
         const std::shared_ptr<T> asset,

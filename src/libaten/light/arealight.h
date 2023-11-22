@@ -44,7 +44,7 @@ namespace AT_NAME {
             result->finalColor = param->le;
         }
 
-        template <typename CONTEXT>
+        template <class CONTEXT>
         static AT_DEVICE_API void sample(
             aten::LightSampleResult& result,
             const aten::LightParameter& param,

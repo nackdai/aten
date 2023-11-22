@@ -69,7 +69,7 @@ namespace AT_NAME {
             const aten::vec3& nml,
             aten::sampler* sampler) const;
 
-        template <typename CONTEXT>
+        template <class CONTEXT>
         static AT_DEVICE_MTRL_API void sample(
             aten::LightSampleResult& result,
             const aten::LightParameter& param,

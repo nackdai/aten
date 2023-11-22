@@ -7,7 +7,7 @@
 
 namespace AT_NAME
 {
-    template <typename CONTEXT>
+    template <class CONTEXT>
     inline AT_DEVICE_API void evaluate_hit_result(
         aten::hitrecord& rec,
         const aten::ObjectParameter& obj,
@@ -64,7 +64,7 @@ namespace AT_NAME
         rec.meshid = isect.meshid;
     }
 
-    template <typename CONTEXT>
+    template <class CONTEXT>
     inline AT_DEVICE_API void SamplePosAndNormal(
         aten::SamplePosNormalPdfResult* result,
         const aten::ObjectParameter& obj,

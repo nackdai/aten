@@ -44,7 +44,7 @@ namespace aten
             return ret;
         }
 
-        template <typename T>
+        template <class T>
         static std::shared_ptr<instance<T>> createInstance(
             context& ctxt,
             const std::shared_ptr<T>& obj)
@@ -57,7 +57,7 @@ namespace aten
             return ret;
         }
 
-        template <typename T>
+        template <class T>
         static std::shared_ptr<instance<T>> createInstance(
             context& ctxt,
             const std::shared_ptr<T>& obj,
@@ -71,7 +71,7 @@ namespace aten
             return ret;
         }
 
-        template <typename T>
+        template <class T>
         static std::shared_ptr<instance<T>> createInstance(
             context& ctxt,
             const std::shared_ptr<T>& obj,

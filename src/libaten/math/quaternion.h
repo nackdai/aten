@@ -5,7 +5,7 @@
 
 namespace aten
 {
-    template <typename FType>
+    template <class FType>
     class quaternion {
     public:
         union {
@@ -444,21 +444,21 @@ namespace aten
         }
     };
 
-    template <typename FType>
+    template <class FType>
     inline quaternion<FType> operator+(const quaternion<FType>& v1, const quaternion<FType>& v2)
     {
         quaternion<FType> ret(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z, v1.w + v2.w);
         return ret;
     }
 
-    template <typename FType>
+    template <class FType>
     inline quaternion<FType> operator-(const quaternion<FType>& v1, const quaternion<FType>& v2)
     {
         quaternion<FType> ret(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, v1.w - v2.w);
         return ret;
     }
 
-    template <typename FType>
+    template <class FType>
     inline quaternion<FType> operator*(const quaternion<FType>& v1, const quaternion<FType>& v2)
     {
         quaternion<FType> dst;
@@ -472,21 +472,21 @@ namespace aten
         return dst;
     }
 
-    template <typename FType>
+    template <class FType>
     inline quaternion<FType> operator*(const quaternion<FType>& v, real t)
     {
         quaternion<FType> ret(t * v.x, t * v.y, t * v.z, t * v.w);
         return ret;
     }
 
-    template <typename FType>
+    template <class FType>
     inline quaternion<FType> operator*(real t, const quaternion<FType>& v)
     {
         quaternion<FType> ret(t * v.x, t * v.y, t * v.z, t * v.w);
         return ret;
     }
 
-    template <typename FType>
+    template <class FType>
     inline quaternion<FType> operator/(const quaternion<FType>& v, real t)
     {
         quaternion<FType> ret(v.x / t, v.y / t, v.z / t, v.w / t);

@@ -112,7 +112,7 @@ namespace aten {
          */
         void SaveToBuffer(void* dst, int32_t target_idx) const;
 
-        template <typename ElementType>
+        template <class ElementType>
         bool SaveToBuffer(aten::span<ElementType>& dst, int32_t target_idx) const
         {
             const auto bpp = GetBytesPerPxiel(pixel_fmt_);

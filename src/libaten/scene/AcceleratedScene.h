@@ -12,7 +12,7 @@
 #include "scene/scene.h"
 
 namespace aten {
-    template <typename ACCEL>
+    template <class ACCEL>
     class AcceleratedScene : public scene {
     public:
         AcceleratedScene()

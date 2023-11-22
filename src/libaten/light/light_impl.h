@@ -9,7 +9,7 @@
 
 namespace AT_NAME
 {
-    template <typename CONTEXT>
+    template <class CONTEXT>
     inline AT_DEVICE_MTRL_API void Light::sample(
         aten::LightSampleResult& result,
         const aten::LightParameter& param,

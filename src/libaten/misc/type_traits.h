@@ -46,5 +46,5 @@ namespace aten {
     // detector<void, Op, Args...> seems to specify the primary template.
     // But, even though the primary template is specified, the specialization is deducted firstly.
     template<template<class...>class Op, class ...Args>
-    using is_detected = typename _detail::detector<void, Op, Args...>;
+    using is_detected = _detail::detector<void, Op, Args...>;
 }

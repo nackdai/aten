@@ -32,7 +32,7 @@ namespace AT_NAME
      * @param[in] isect Scene intersection information.
      * @param[in,out] scene Scene instance. Only for running on host.
      */
-    template <typename SCENE = void>
+    template <class SCENE = void>
     inline AT_DEVICE_MTRL_API void ShandeAO(
         int32_t idx,
         uint32_t frame, uint32_t rnd,

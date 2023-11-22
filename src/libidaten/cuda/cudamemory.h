@@ -53,7 +53,7 @@ namespace idaten {
         uint32_t m_bytes{ 0 };
     };
 
-    template <typename _T>
+    template <class _T>
     class TypedCudaMemory : public CudaMemory {
     public:
         TypedCudaMemory() {}

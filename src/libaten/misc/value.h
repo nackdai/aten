@@ -8,8 +8,8 @@
 #include "types.h"
 #include "math/vec3.h"
 
-template<typename T> struct is_shared_ptr : std::false_type {};
-template<typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
+template<class T> struct is_shared_ptr : std::false_type {};
+template<class T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
 
 namespace aten {
     class PolymorphicValue {
@@ -33,7 +33,7 @@ namespace aten {
         {
             *this = v;
         }
-        template <typename T>
+        template <class T>
         PolymorphicValue(const std::shared_ptr<T> _p)
         {
             *this = _p;
@@ -73,7 +73,7 @@ namespace aten {
             val_ = v;
             return *this;
         }
-        template <typename T>
+        template <class T>
         PolymorphicValue& operator=(const std::shared_ptr<T> _p)
         {
             type_hash_ = typeid(T).hash_code();
@@ -81,7 +81,7 @@ namespace aten {
             return *this;
         }
 
-        template <typename T>
+        template <class T>
         operator T() const
         {
             assert(std::holds_alternative<T>(val_));
@@ -91,21 +91,21 @@ namespace aten {
         {
             return static_cast<vec3>(this->operator vec4());
         }
-        template <typename T>
+        template <class T>
         operator const std::shared_ptr<T>&() const
         {
             assert(type_hash_ > 0 && type_hash_ == typeid(T).hash_code());
             return std::reinterpret_pointer_cast<T>(std::get<std::shared_ptr<void>>(val_));
         }
 
-        template <typename T>
+        template <class T>
         auto getAs() const -> std::enable_if_t<is_shared_ptr<T>::value, T>
         {
-            assert(type_hash_ > 0 && type_hash_ == typeid(typename T::element_type).hash_code());
-            return std::reinterpret_pointer_cast<typename T::element_type>(std::get<std::shared_ptr<void>>(val_));
+            assert(type_hash_ > 0 && type_hash_ == typeid(class T::element_type).hash_code());
+            return std::reinterpret_pointer_cast<T::element_type>(std::get<std::shared_ptr<void>>(val_));
         }
 
-        template <typename T>
+        template <class T>
         auto getAs() const -> std::enable_if_t<!is_shared_ptr<T>::value, T>
         {
             //return static_cast<T>(*this);
@@ -143,7 +143,7 @@ namespace aten {
             this->insert(std::pair<std::string, PolymorphicValue>(name, val));
         }
 
-        template <typename TYPE>
+        template <class TYPE>
         TYPE get(std::string s, const TYPE& defaultValue) const
         {
             auto it = find(s);
@@ -155,7 +155,7 @@ namespace aten {
             return defaultValue;
         }
 
-        template <typename TYPE>
+        template <class TYPE>
         std::shared_ptr<TYPE> get(std::string s) const
         {
             auto it = find(s);

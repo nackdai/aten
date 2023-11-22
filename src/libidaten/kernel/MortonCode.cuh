@@ -96,7 +96,7 @@ __forceinline__ __device__ __host__ uint64_t computeMortonCode(float x, float y,
     return ret;
 }
 
-template <typename T>
+template <class T>
 __forceinline__ __device__ T onComputeMortonCode(
     int32_t a0, int32_t a1, int32_t a2,
     const aten::vec3& vmin,
@@ -139,7 +139,7 @@ __forceinline__ __device__ uint64_t onComputeExtendedMortonCode(
     return code;
 }
 
-template <typename T, typename M>
+template <class T, class M>
 __global__ void genMortonCode(
     int32_t a0, int32_t a1, int32_t a2,
     int32_t numberOfTris,

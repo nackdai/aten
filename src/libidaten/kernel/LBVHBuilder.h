@@ -53,7 +53,7 @@ namespace idaten
         void init(uint32_t maxNum);
 
     private:
-        template <typename T>
+        template <class T>
         void onBuild(
             idaten::CudaTextureResource& dst,
             TypedCudaMemory<aten::TriangleParameter>& triangles,

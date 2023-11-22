@@ -25,7 +25,7 @@ namespace idaten
         m_32bit = false;
     }
 
-    template <typename T>
+    template <class T>
     static void radixSort(
         uint32_t num,
         TypedCudaMemory<T>& keys,

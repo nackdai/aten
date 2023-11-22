@@ -142,7 +142,7 @@ namespace svgf {
      * @param[in] aov_texclr_meshid AOV buffer to store albedo color and mesh id.
      * @return Tuple for the excracted center pixle data, normal, depth, mesh id, contribution.
      */
-    template <bool WillDivideContribByW = true, typename Span_v4>
+    template <bool WillDivideContribByW = true, class Span_v4>
     inline AT_DEVICE_MTRL_API aten::tuple<AT_NAME::_detail::v3, real, int32_t, AT_NAME::_detail::v4> ExtractCenterPixel(
         int32_t idx,
         const aten::const_span<AT_NAME::_detail::v4>& contribs,
@@ -272,7 +272,7 @@ namespace svgf {
      * @param[in] motion_detph_buffer Motion depth buffer.
      * @return Tuple for weight to merge the colors and the reporjected color.
      */
-    template <typename BufferForMotionDepth>
+    template <class BufferForMotionDepth>
     inline AT_DEVICE_MTRL_API aten::tuple<float, AT_NAME::_detail::v4> TemporalReprojection(
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,

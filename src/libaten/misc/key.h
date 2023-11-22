@@ -30,7 +30,7 @@ namespace aten {
         }
 
     private:
-        template <typename _T>
+        template <class _T>
         static _T genValue(std::string_view str)
         {
             if (str.empty()) {
@@ -51,7 +51,7 @@ namespace aten {
             return ret;
         }
 
-        template <typename _T, typename _U>
+        template <class _T, class _U>
         static _T genValue(_U* p, uint32_t num)
         {
             if (p == nullptr) {

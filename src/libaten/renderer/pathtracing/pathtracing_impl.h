@@ -70,7 +70,7 @@ namespace AT_NAME
     }
 
     namespace _detail {
-        template <typename A, typename B>
+        template <class A, class B>
         inline AT_DEVICE_MTRL_API void AddVec3(A& dst, const B& add)
         {
             if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec3>) {
@@ -85,10 +85,10 @@ namespace AT_NAME
         // If template type A doesn't have the member variable "w", we can deal with it as vector 3 type.
         // Otherwise, we can deal with it as vector 4 type.
 
-        template <typename T>
+        template <class T>
         using HasMemberWOp = decltype(std::declval<T>().w);
 
-        template <typename A, typename B>
+        template <class A, class B>
         inline AT_DEVICE_MTRL_API auto CopyVec(A& dst, const B& src)
             -> std::enable_if_t<!aten::is_detected<HasMemberWOp, A>::value, void>
         {
@@ -100,7 +100,7 @@ namespace AT_NAME
             }
         }
 
-        template <typename A, typename B>
+        template <class A, class B>
         inline AT_DEVICE_MTRL_API auto CopyVec(A& dst, const B& src)
             -> std::enable_if_t<aten::is_detected<HasMemberWOp, A>::value, void>
         {
@@ -112,7 +112,7 @@ namespace AT_NAME
             }
         }
 
-        template <typename T = _detail::v3>
+        template <class T = _detail::v3>
         inline AT_DEVICE_MTRL_API T MakeVec3(real x, real y, real z)
         {
             if constexpr (std::is_same_v<T, aten::vec3>) {
@@ -123,7 +123,7 @@ namespace AT_NAME
             }
         }
 
-        template <typename T = _detail::v4>
+        template <class T = _detail::v4>
         inline AT_DEVICE_MTRL_API T MakeVec4(real x, real y, real z, real w)
         {
             if constexpr (std::is_same_v<T, aten::vec4>) {
@@ -135,7 +135,7 @@ namespace AT_NAME
         }
     }
 
-    template <typename AOV_BUFFER_TYPE = aten::vec4>
+    template <class AOV_BUFFER_TYPE = aten::vec4>
     inline AT_DEVICE_MTRL_API void ShadeMiss(
         int32_t idx,
         int32_t bounce,
@@ -164,7 +164,7 @@ namespace AT_NAME
         }
     }
 
-    template <typename AOV_BUFFER_TYPE = aten::vec4>
+    template <class AOV_BUFFER_TYPE = aten::vec4>
     inline AT_DEVICE_MTRL_API void ShadeMissWithEnvmap(
         int32_t idx,
         int32_t ix, int32_t iy,
@@ -342,7 +342,7 @@ namespace AT_NAME
         shadow_ray.isActive = isShadowRayActive;
     }
 
-    template <typename SCENE = void>
+    template <class SCENE = void>
     inline AT_DEVICE_MTRL_API bool HitShadowRay(
         int32_t idx,
         int32_t bounce,
@@ -567,7 +567,7 @@ namespace AT_NAME
         rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
     }
 
-    template <typename SCENE = void, bool ENABLE_ALPHA_TRANLUCENT=false>
+    template <class SCENE = void, bool ENABLE_ALPHA_TRANLUCENT=false>
     inline AT_DEVICE_MTRL_API void ShadePathTracing(
         int32_t idx,
         const AT_NAME::context& ctxt,

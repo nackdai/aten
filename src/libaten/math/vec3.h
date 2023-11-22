@@ -337,7 +337,7 @@ namespace aten {
         return b0 || b1 || b2;
     }
 
-    template <typename T>
+    template <class T>
     inline AT_DEVICE_API float max_from_vec3(const T& v)
     {
         return std::max(std::max(v.x, v.y), v.z);
@@ -351,7 +351,7 @@ namespace aten {
     }
 #endif
 
-    template <typename T>
+    template <class T>
     inline AT_DEVICE_API float min_from_vec3(const T& v)
     {
         return std::min(std::min(v.x, v.y), v.z);

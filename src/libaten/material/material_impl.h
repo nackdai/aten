@@ -380,16 +380,16 @@ namespace AT_NAME
     }
 
     namespace detail {
-        template <typename T, typename HasVariable = void>
+        template <class T, class HasVariable = void>
         struct has_texture_variable : public std::false_type {};
 
-        template <typename T>
+        template <class T>
         struct has_texture_variable<
             T,
             std::void_t<decltype(T::textures)>> : public std::true_type {};
     }
 
-    template <typename CONTEXT>
+    template <class CONTEXT>
     inline AT_DEVICE_MTRL_API bool FillMaterial(
         aten::MaterialParameter& dst_mtrl,
         const CONTEXT& ctxt,

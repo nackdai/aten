@@ -32,7 +32,10 @@ static std::shared_ptr<aten::visualizer> g_visualizer;
 static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
 // static aten::Film g_buffer(WIDTH, HEIGHT);
 
+static aten::FBO g_fbo;
+
 static aten::RasterizeRenderer g_rasterizerAABB;
+static aten::RasterizeRenderer g_rasterizer;
 
 static bool isExportedHdr = false;
 
@@ -92,6 +95,17 @@ void display(aten::window* wnd)
         dst.buffer = &g_buffer;
     }
 
+    if (std::is_same_v<decltype(g_tracer), aten::SVGFRenderer>) {
+        g_rasterizer.drawSceneForGBuffer(
+            g_tracer.get_frame_count(),
+            g_ctxt,
+            &g_scene,
+            &g_camera,
+            g_fbo);
+
+        g_tracer.SetMotionDepthBuffer(g_fbo, 1);
+    }
+
     aten::timer timer;
     timer.begin();
 
@@ -146,25 +160,6 @@ int32_t main(int32_t argc, char* argv[])
 {
     aten::initSampler(WIDTH, HEIGHT, 0, true);
 
-#if 0
-    aten::MicrofacetBlinn blinn(aten::vec3(1, 1, 1), 1, 1.5);
-    aten::vec3 normal(0, 1, 0);
-    aten::vec3 in(1, -1, 0);
-    in.normalize();
-
-    aten::XorShift rnd(0);
-    aten::UniformDistributionSampler sampler(&rnd);
-
-    auto ddd = Rad2Deg(acos(dot(normal, -in)));
-    AT_PRINTF("in : %f\n", ddd);
-
-    for (int32_t i = 0; i < 100; i++) {
-        auto wo = blinn.sampleDirection(in, normal, &sampler);
-        auto xxx = Rad2Deg(acos(dot(normal, wo)));
-        AT_PRINTF("out : %f\n", xxx);
-    }
-#endif
-
     aten::timer::init();
     aten::OMPUtil::setThreadNum(g_threadnum);
 
@@ -215,16 +210,25 @@ int32_t main(int32_t argc, char* argv[])
         "../shader/fullscreen_vs.glsl",
         "../shader/gamma_fs.glsl");
 
-    // aten::visualizer::addPostProc(&bishd);
-    // aten::visualizer::addPostProc(&blitter);
     g_visualizer->addPostProc(&gamma);
-    // aten::visualizer::addPostProc(&tonemap);
-    // aten::visualizer::addPostProc(&bloom);
 
+    g_rasterizer.init(
+        WIDTH, HEIGHT,
+        "../shader/ssrt_vs.glsl",
+        "../shader/ssrt_gs.glsl",
+        "../shader/ssrt_fs.glsl");
     g_rasterizerAABB.init(
         WIDTH, HEIGHT,
         "../shader/simple3d_vs.glsl",
         "../shader/simple3d_fs.glsl");
+
+    if (std::is_same_v<decltype(g_tracer), aten::SVGFRenderer>) {
+        g_fbo.asMulti(2);
+        g_fbo.init(
+            WIDTH, HEIGHT,
+            aten::PixelFormat::rgba32f,
+            true);
+    }
 
     aten::vec3 lookfrom;
     aten::vec3 lookat;
@@ -255,16 +259,14 @@ int32_t main(int32_t argc, char* argv[])
     Scene::makeScene(g_ctxt, &g_scene);
 
     g_scene.build(g_ctxt);
-    // g_scene.getAccel()->computeVoxelLodErrorMetric(HEIGHT, fov, 4);
-
-    // g_tracer.setVirtualLight(g_camera.getPos(), g_camera.getDir(), aten::vec3(36.0, 36.0, 36.0)* 2);
 
     g_envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
-    // g_envmap = aten::ImageLoader::load("../../asset/envmap/harbor.hdr");
+
     g_bg = std::make_shared<aten::envmap>();
     g_bg->init(g_envmap);
 
     auto ibl = std::make_shared<aten::ImageBasedLight>(g_bg);
+
     // NOTE
     // BDPT doesn't support IBL yet.
     g_scene.addImageBasedLight(g_ctxt, ibl);
@@ -289,13 +291,11 @@ int32_t main(int32_t argc, char* argv[])
     }
 #endif
 
-    // g_tracer.setBG(&g_staticbg);
-
-    // aten::NonLocalMeanFilter filter;
-    // aten::BilateralFilter filter;
-    // aten::visualizer::addPreProc(&filter);
-
     aten::window::run();
+
+    g_rasterizer.release();
+    g_rasterizerAABB.release();
+    g_ctxt.release();
 
     aten::window::terminate();
 }

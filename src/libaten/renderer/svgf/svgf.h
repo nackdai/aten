@@ -8,6 +8,7 @@
 #include "renderer/renderer.h"
 #include "renderer/svgf/svgf_types.h"
 #include "scene/scene.h"
+#include "visualizer/fbo.h"
 
 namespace aten
 {
@@ -26,6 +27,8 @@ namespace aten
             Destination& dst,
             scene* scene,
             camera* camera) override;
+
+        virtual void SetMotionDepthBuffer(aten::FBO& fbo, int32_t idx) override;
 
     private:
         void Initialize(

@@ -230,7 +230,7 @@ namespace aten
         auto prev_aov_color_variance{ prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>() };
         auto prev_aov_moment_temporalweight{ prev_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>() };
 
-        const auto idx = ix * iy * width;
+        const auto idx = ix + iy * width;
 
         auto extracted_center_pixel = AT_NAME::svgf::ExtractCenterPixel(
             idx,
@@ -418,6 +418,15 @@ namespace aten
         }
     }
 
+    void SVGFRenderer::SetMotionDepthBuffer(aten::FBO& fbo, int32_t idx)
+    {
+        const auto width = fbo.GetWidth();
+        const auto height = fbo.GetHeight();
+        params_.motion_depth_buffer.resize(width * height);
+
+        fbo.SaveToBuffer(aten::span<decltype(params_.motion_depth_buffer)::value_type>(params_.motion_depth_buffer), 1);
+    }
+
     void SVGFRenderer::onRender(
         const context& ctxt,
         Destination& dst,
@@ -501,12 +510,14 @@ namespace aten
                                 aten::span<decltype(params_)::buffer_value_type>(params_.temporary_color_buffer));
                         }
 
-                        auto teporal_projected_clr = TemporalReprojection(
-                            x, y, width, height,
-                            0.98f, 0.05f,
-                            path_host_.paths,
-                            camera->param(),
-                            params_);
+                        if (get_frame_count() > 0) {
+                            auto teporal_projected_clr = TemporalReprojection(
+                                x, y, width, height,
+                                0.98f, 0.05f,
+                                path_host_.paths,
+                                camera->param(),
+                                params_);
+                        }
 
                         auto camera_distance = AT_NAME::camera::ComputeScreenDistance(camera->param(), height);
                         auto variance = EstimateVariance(
@@ -528,9 +539,7 @@ namespace aten
 
                         CopyFromTeporaryColorBufferToAov(idx, params_);
 
-                        auto c = path_host_.paths.contrib[idx].contrib;
-
-                        col += c;
+                        col += static_cast<aten::vec3>(filtered_color.value());
                         cnt++;
 
                         if (path_host_.paths.attrib[idx].isTerminate) {
@@ -538,7 +547,7 @@ namespace aten
                         }
                     }
 
-                    col /= (real)cnt;
+                    col /= static_cast<real>(cnt);
 
                     dst.buffer->put(x, y, vec4(col, 1));
                 }

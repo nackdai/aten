@@ -11,6 +11,8 @@
 
 namespace aten
 {
+    class FBO;
+
     struct Destination {
         int32_t width{ 0 };
         int32_t height{ 0 };
@@ -52,6 +54,11 @@ namespace aten
         inline uint32_t get_frame_count() const noexcept
         {
             return frame_count_;
+        }
+
+        virtual void SetMotionDepthBuffer(aten::FBO& fbo, int32_t idx)
+        {
+            // Nothing is done.
         }
 
     protected:

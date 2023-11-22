@@ -120,7 +120,7 @@ static int32_t g_cntScreenShot = 0;
 static int32_t g_maxSamples = 1;
 static int32_t g_maxBounce = 5;
 static int32_t g_curMode = (int32_t)idaten::SVGFPathTracing::Mode::SVGF;
-static int32_t g_curAOVMode = (int32_t)idaten::SVGFPathTracing::AOVMode::WireFrame;
+static int32_t g_curAOVMode = (int32_t)aten::SVGFAovMode::WireFrame;
 static bool g_showAABB = false;
 
 static bool g_pickPixel = false;
@@ -325,7 +325,7 @@ void onRun(aten::window* window)
             static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion", "ObjId" };
 
             if (ImGui::Combo("aov", &g_curAOVMode, aovitems, AT_COUNTOF(aovitems))) {
-                g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
+                g_tracer.setAOVMode((aten::SVGFAovMode)g_curAOVMode);
             }
         }
         else if (g_curMode == idaten::SVGFPathTracing::Mode::SVGF) {
@@ -770,7 +770,7 @@ int32_t main()
 
 #ifdef ENABLE_SVGF
     g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
-    g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
+    g_tracer.setAOVMode((aten::SVGFAovMode)g_curAOVMode);
     //g_tracer.setCanSSRTHitTest(false);
 #endif
 

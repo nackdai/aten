@@ -4,6 +4,7 @@
 #include <functional>
 
 #include "types.h"
+#include "misc/span.h"
 #include "visualizer/pixelformat.h"
 
 namespace aten {
@@ -109,7 +110,21 @@ namespace aten {
          * @param dst Destination to save the content of the frame buffer.
          * @param target_idx Index of the frame buffer to be saved.
          */
-        void SaveToBuffer(std::vector<uint8_t>& dst, int32_t target_idx = 0) const;
+        void SaveToBuffer(void* dst, int32_t target_idx) const;
+
+        template <typename ElementType>
+        bool SaveToBuffer(aten::span<ElementType>& dst, int32_t target_idx) const
+        {
+            const auto bpp = GetBytesPerPxiel(pixel_fmt_);
+            const auto bytes = width_ * height_ * bpp;
+            AT_ASSERT(dst.size_bytes() == bytes);
+
+            if (dst.size_bytes() == bytes) {
+                SaveToBuffer(dst.data(), target_idx);
+                return true;
+            }
+            return false;
+        }
 
         using FuncBindFbo = std::function<void(const std::vector<uint32_t>&, std::vector<uint32_t>&)>;
 

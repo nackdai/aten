@@ -131,11 +131,8 @@ namespace aten {
         m_num = num;
     }
 
-    void FBO::SaveToBuffer(std::vector<uint8_t>& dst, int32_t target_idx/*= 0*/) const
+    void FBO::SaveToBuffer(void* dst, int32_t target_idx/*= 0*/) const
     {
-        const auto bpp = GetBytesPerPxiel(pixel_fmt_);
-        dst.resize(width_ * height_ * bpp);
-
         CALL_GL_API(::glBindFramebuffer(GL_FRAMEBUFFER, fbo_));
         CALL_GL_API(::glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_handles_[target_idx], 0));
 
@@ -148,6 +145,9 @@ namespace aten {
             pixelfmt, pixeltype, pixelinternal);
 
         CALL_GL_API(::glReadBuffer(target_buffer_attachment_list_[target_idx]));
-        CALL_GL_API(::glReadPixels(0, 0, width_, height_, pixelfmt, pixeltype, dst.data()));
+        CALL_GL_API(::glReadPixels(0, 0, width_, height_, pixelfmt, pixeltype, dst));
+
+        // Reset to default frame buffer.
+        CALL_GL_API(::glBindFramebuffer(GL_FRAMEBUFFER, 0));
     }
 }

@@ -304,6 +304,12 @@
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_impl.h">
       <Filter>kernel\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\svgf\svgf_impl.h">
+      <Filter>svgf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\svgf\svgf_types.h">
+      <Filter>svgf</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

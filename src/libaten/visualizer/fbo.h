@@ -141,7 +141,7 @@ namespace aten {
     protected:
         uint32_t fbo_{ 0 };
 
-        uint32_t m_num{ 1 };
+        int32_t m_num{ 1 };
 
         std::vector<uint32_t> texture_handles_;
 

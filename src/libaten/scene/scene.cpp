@@ -15,8 +15,8 @@ namespace aten {
         auto num = ctxt.GetLightNum();
 
         if (num > 0) {
-            auto r = sampler->nextSample();
-            uint32_t idx = (uint32_t)aten::clamp<real>(r * num, 0, num - 1);
+            const auto r = sampler->nextSample();
+            const auto idx = static_cast<int32_t>(aten::clamp<real>(r * num, 0, num - 1));
             const auto light = ctxt.GetLightInstance(idx);
 
             const auto& light_param = light->param();

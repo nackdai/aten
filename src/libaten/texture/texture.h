@@ -17,16 +17,16 @@ namespace aten
 
     public:
         texture() = default;
-        texture(int32_t width, int32_t height, uint32_t channels, std::string_view name);
+        texture(int32_t width, int32_t height, int32_t channels, std::string_view name);
 
         ~texture();
 
     private:
         static std::shared_ptr<texture> create(
-            int32_t width, int32_t height, uint32_t channels, std::string_view name);
+            int32_t width, int32_t height, int32_t channels, std::string_view name);
 
     public:
-        void init(int32_t width, int32_t height, uint32_t channels);
+        void init(int32_t width, int32_t height, int32_t channels);
 
         vec4 at(real u, real v) const
         {
@@ -62,13 +62,13 @@ namespace aten
             return ret;
         }
 
-        real& operator()(uint32_t x, uint32_t y, uint32_t c)
+        real& operator()(int32_t x, int32_t y, int32_t c)
         {
             x = std::min(x, width_ - 1);
             y = std::min(y, height_ - 1);
             c = std::min(c, m_channels - 1);
 
-            uint32_t pos = ((height_ - 1) - y) * width_ + x;
+            auto pos = ((height_ - 1) - y) * width_ + x;
 
             return m_colors[pos][c];
         }
@@ -78,22 +78,22 @@ namespace aten
             return &m_colors[0];
         }
 
-        uint32_t width() const
+        auto width() const
         {
             return width_;
         }
 
-        uint32_t height() const
+        auto height() const
         {
             return height_;
         }
 
-        uint32_t channels() const
+        auto channels() const
         {
             return m_channels;
         }
 
-        int32_t id() const
+        auto id() const
         {
             return m_id;
         }
@@ -139,11 +139,11 @@ namespace aten
     private:
         int32_t m_id{ -1 };
 
-        uint32_t width_{ 0 };
-        uint32_t height_{ 0 };
-        uint32_t m_channels{ 0 };
+        int32_t width_{ 0 };
+        int32_t height_{ 0 };
+        int32_t m_channels{ 0 };
 
-        uint32_t m_size{ 0 };
+        int32_t m_size{ 0 };
 
         std::vector<vec4> m_colors;
 

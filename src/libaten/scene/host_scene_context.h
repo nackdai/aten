@@ -412,7 +412,10 @@ namespace aten
          *
          * @return Number of all registered texture instances.
          */
-        int32_t GetTextureNum() const;
+        auto GetTextureNum() const
+        {
+            return textures_.size();
+        }
 
         /**
          * @brief Get the texture instance by index.

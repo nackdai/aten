@@ -78,7 +78,7 @@ namespace aten {
                 s->collectTriangles(triangles[pos]);
 
                 triIdOffsets.push_back(triangleCount);
-                triangleCount += triangles[pos].size();
+                triangleCount += static_cast<int32_t>(triangles[pos].size());
             }
         });
     }

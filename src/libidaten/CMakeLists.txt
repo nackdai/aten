@@ -119,6 +119,8 @@ cuda_add_library(
   ../libaten/renderer/npr/npr_impl.h
   ../libaten/renderer/pathtracing/pathtracing_impl.h
   ../libaten/renderer/pathtracing/pt_params.h
+  ../libaten/renderer/svgf/svgf_impl.h
+  ../libaten/renderer/svgf/svgf_types.h
   ../libaten/sampler/cmj.h
   ../libaten/sampler/sampler.h
   ../libaten/sampler/sobol.cpp
@@ -206,7 +208,6 @@ cuda_add_library(
   svgf/svgf_atrous.cu
   svgf/svgf_debug.cu
   svgf/svgf_pt.cu
-  svgf/svgf_tile.cu
   svgf/svgf_tp.cu)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)

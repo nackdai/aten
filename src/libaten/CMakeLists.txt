@@ -159,10 +159,12 @@ add_library(
   misc/bitflag.h
   misc/color.cpp
   misc/color.h
+  misc/const_span.h
   misc/key.h
   misc/misc.h
   misc/omputil.cpp
   misc/omputil.h
+  misc/span.h
   misc/stream.h
   misc/thread.cpp
   misc/thread.h
@@ -170,6 +172,7 @@ add_library(
   misc/timeline.h
   misc/timer.h
   misc/tuple.h
+  misc/type_traits.h
   misc/value.h
   os/linux/misc/timer_linux.cpp
   os/linux/system_linux.cpp
@@ -195,6 +198,10 @@ add_library(
   renderer/pathtracing/pathtracing_impl.h
   renderer/pathtracing/pt_params.h
   renderer/renderer.h
+  renderer/svgf/svgf.cpp
+  renderer/svgf/svgf.h
+  renderer/svgf/svgf_impl.h
+  renderer/svgf/svgf_types.h
   sampler/bluenoiseSampler.h
   sampler/cmj.h
   sampler/halton.cpp

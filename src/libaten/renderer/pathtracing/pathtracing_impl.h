@@ -15,6 +15,7 @@
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "kernel/device_scene_context.cuh"
+#include "kernel/accelerator.cuh"
 #else
 #include "scene/host_scene_context.h"
 #endif
@@ -23,6 +24,11 @@
 
 namespace AT_NAME
 {
+#ifndef __CUDACC__
+    inline aten::vec3 make_float3(float x, float y, float z) { return {x, y, z}; }
+    inline aten::vec4 make_float4(float x, float y, float z, float w) { return {x, y, z, w}; }
+#endif
+
     inline AT_DEVICE_MTRL_API void GeneratePath(
         aten::ray& generated_ray,
         int32_t idx,

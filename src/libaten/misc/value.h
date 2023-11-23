@@ -102,7 +102,7 @@ namespace aten {
         auto getAs() const -> std::enable_if_t<is_shared_ptr<T>::value, T>
         {
             assert(type_hash_ > 0 && type_hash_ == typeid(class T::element_type).hash_code());
-            return std::reinterpret_pointer_cast<T::element_type>(std::get<std::shared_ptr<void>>(val_));
+            return std::reinterpret_pointer_cast<typename T::element_type>(std::get<std::shared_ptr<void>>(val_));
         }
 
         template <class T>

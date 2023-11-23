@@ -113,8 +113,6 @@ namespace aten
 
         bool isBackfacing = dot(rec.normal, -ray.dir) < real(0);
 
-        // �����ʒu�̖@��.
-        // ���̂���̃��C�̓��o���l��.
         vec3 orienting_normal = rec.normal;
 
         aten::MaterialParameter mtrl;
@@ -345,7 +343,7 @@ namespace aten
         }
 
         // 3x3 Gauss filter.
-        auto gauss_filtered_variance = AT_NAME::svgf::Exec3x3GaussFilter<decltype(&aten::vec4::w)>(
+        auto gauss_filtered_variance = AT_NAME::svgf::Exec3x3GaussFilter(
             ix, iy, width, height,
             isFirstIter ? aov_color_variance : color_variance_buffer,
             &aten::vec4::w);
@@ -411,6 +409,7 @@ namespace aten
             shadow_rays_.resize(width * height);
         }
         path_host_.init(width, height);
+        path_host_.Clear(GetFrameCount());
 
         params_.InitBuffers(width, height);
         params_.mtxs.Reset(camera.param());
@@ -457,9 +456,6 @@ namespace aten
 #endif
             for (int32_t y = 0; y < height; y++) {
                 for (int32_t x = 0; x < width; x++) {
-                    vec3 col = vec3(0);
-                    uint32_t cnt = 0;
-
 #ifdef RELEASE_DEBUG
                     if (x == BREAK_X && y == BREAK_Y) {
                         DEBUG_BREAK();
@@ -479,7 +475,7 @@ namespace aten
                             rays_[idx],
                             idx,
                             x, y,
-                            i, get_frame_count(),
+                            i, GetFrameCount(),
                             path_host_.paths,
                             camsample,
                             rnd);
@@ -496,65 +492,79 @@ namespace aten
                             continue;
                         }
 
-                        auto& aov = params_.GetCurrAovBuffer();
-
-                        if (get_frame_count() == 0) {
-                            AT_NAME::svgf::PrepareForDenoise<true>(
-                                idx,
-                                path_host_.paths,
-                                aten::span<decltype(params_)::buffer_value_type>(params_.temporary_color_buffer),
-                                aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>(),
-                                aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>());
-                        }
-                        else {
-                            AT_NAME::svgf::PrepareForDenoise<false>(
-                                idx,
-                                path_host_.paths,
-                                aten::span<decltype(params_)::buffer_value_type>(params_.temporary_color_buffer));
-                        }
-
-                        if (get_frame_count() > 0) {
-                            auto teporal_projected_clr = TemporalReprojection(
-                                x, y, width, height,
-                                0.98f, 0.05f,
-                                path_host_.paths,
-                                camera->param(),
-                                params_);
-                        }
-
-                        auto camera_distance = AT_NAME::camera::ComputeScreenDistance(camera->param(), height);
-                        auto variance = EstimateVariance(
-                            x, y, width, height,
-                            camera_distance,
-                            params_);
-
-                        std::optional<aten::vec4> filtered_color;
-                        for (int32_t i = 0; i < params_.atrous_iter_cnt; i++) {
-                            filtered_color = AtrousFilter(
-                                i,
-                                idx, x, y, width, height,
-                                camera_distance,
-                                params_);
-                            if (filtered_color) {
-                                break;
-                            }
-                        }
-
-                        CopyFromTeporaryColorBufferToAov(idx, params_);
-
-                        col += static_cast<aten::vec3>(filtered_color.value());
-                        cnt++;
-
                         if (path_host_.paths.attrib[idx].isTerminate) {
                             break;
                         }
                     }
 
-                    col /= static_cast<real>(cnt);
+                    auto& aov = params_.GetCurrAovBuffer();
 
+                    if (GetFrameCount() == 0) {
+                        AT_NAME::svgf::PrepareForDenoise<true>(
+                            idx,
+                            path_host_.paths,
+                            aten::span<decltype(params_)::buffer_value_type>(params_.temporary_color_buffer),
+                            aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>(),
+                            aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>());
+                    }
+                    else {
+                        AT_NAME::svgf::PrepareForDenoise<false>(
+                            idx,
+                            path_host_.paths,
+                            aten::span<decltype(params_)::buffer_value_type>(params_.temporary_color_buffer));
+                    }
+                }
+            }
+
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+#ifdef RELEASE_DEBUG
+                    if (x == BREAK_X && y == BREAK_Y) {
+                        DEBUG_BREAK();
+                    }
+#endif
+                    int32_t idx = y * width + x;
+
+                    aten::vec4 teporal_projected_clr;
+                    if (GetFrameCount() > 0) {
+                         teporal_projected_clr = TemporalReprojection(
+                            x, y, width, height,
+                            0.98f, 0.05f,
+                            path_host_.paths,
+                            camera->param(),
+                            params_);
+                    }
+#if 0
+                    auto camera_distance = AT_NAME::camera::ComputeScreenDistance(camera->param(), height);
+                    auto variance = EstimateVariance(
+                        x, y, width, height,
+                        camera_distance,
+                        params_);
+
+                    std::optional<aten::vec4> filtered_color;
+                    for (int32_t i = 0; i < params_.atrous_iter_cnt; i++) {
+                        filtered_color = AtrousFilter(
+                            i,
+                            idx, x, y, width, height,
+                            camera_distance,
+                            params_);
+                        if (filtered_color) {
+                            break;
+                        }
+                    }
+
+                    CopyFromTeporaryColorBufferToAov(idx, params_);
+#endif
+                    auto col = static_cast<aten::vec3>(teporal_projected_clr);
                     dst.buffer->put(x, y, vec4(col, 1));
                 }
             }
         }
+
+        // Toggle aov buffer pos.
+        params_.UpdateCurrAovBufferPos();
     }
 }

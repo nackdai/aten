@@ -1,8 +1,8 @@
 #include "renderer/npr/feature_line.h"
 #include "geometry/EvaluateHitResult.h"
 
-namespace aten
-{
+namespace aten {
+namespace npr {
     aten::vec3 FeatureLine::RenderFeatureLine(
         const aten::vec3& color,
         int32_t x, int32_t y,
@@ -62,4 +62,5 @@ namespace aten
         const auto result = color * (real(1) - edge_strengh);
         return result;
     }
+}
 }

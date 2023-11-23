@@ -16,8 +16,8 @@
 #include "scene/host_scene_context.h"
 #endif
 
-namespace AT_NAME
-{
+namespace AT_NAME {
+namespace ao {
     /**
      * @brief Shade Ambient Occlusion.
      *
@@ -130,4 +130,5 @@ namespace AT_NAME
             paths.attrib[idx].isTerminate = true;
         }
     }
+}
 }

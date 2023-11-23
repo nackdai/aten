@@ -10,8 +10,8 @@
 #include "misc/tuple.h"
 #include "sampler/sampler.h"
 
-namespace AT_NAME
-{
+namespace AT_NAME {
+namespace npr {
     class FeatureLine
     {
     private:
@@ -626,4 +626,5 @@ namespace AT_NAME
             return is_in_line_width;
         }
     };
+}
 }

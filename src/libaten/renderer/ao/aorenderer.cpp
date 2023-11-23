@@ -31,7 +31,7 @@ namespace aten
             if (scene->hit(ctxt, inRay, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
                 path_host_.paths.attrib[idx].isHit = true;
 
-                AT_NAME::ShandeAO(
+                AT_NAME::ao::ShandeAO(
                     idx,
                     get_frame_count(), rnd,
                     m_numAORays, m_AORadius,
@@ -39,7 +39,7 @@ namespace aten
             }
             else {
                 bool is_first_bounce = (depth == 0);
-                AT_NAME::ShadeMissAO(
+                AT_NAME::ao::ShadeMissAO(
                     idx,
                     is_first_bounce,
                     path_host_.paths);

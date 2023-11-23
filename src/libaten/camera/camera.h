@@ -192,8 +192,8 @@ namespace AT_NAME {
 
         static void ComputeCameraMatrices(
             const aten::CameraParameter& param,
-            aten::mat4 mtx_W2V,
-            aten::mat4 mtx_V2C)
+            aten::mat4& mtx_W2V,
+            aten::mat4& mtx_V2C)
         {
             mtx_W2V.lookat(
                 param.origin,

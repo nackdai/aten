@@ -13,7 +13,7 @@
 #include "renderer/pathtracing/pt_params.h"
 #include "renderer/npr/npr_impl.h"
 
-namespace npr_pt {
+namespace npr_kernel {
     __global__ void GenerateSampleRay(
         idaten::NPRPathTracing::SampleRayInfo* sample_ray_infos,
         idaten::Path paths,
@@ -34,7 +34,7 @@ namespace npr_pt {
         auto& sample_ray_info = sample_ray_infos[idx];
         const auto& ray = rays[idx];
 
-        AT_NAME::GenerateSampleRayAndDiscPerQueryRay<idaten::NPRPathTracing::SampleRayNum>(
+        AT_NAME::npr::GenerateSampleRayAndDiscPerQueryRay<idaten::NPRPathTracing::SampleRayNum>(
             sample_ray_info.descs, sample_ray_info.disc,
             ray, paths.sampler[idx],
             feature_line_width, pixel_width);
@@ -116,7 +116,7 @@ namespace npr_pt {
         hit_point_distance = length(hrec_query.p - disc.center);
 
         const auto prev_disc = disc;
-        disc = AT_NAME::FeatureLine::ComputeDiscAtQueryRayHitPoint(
+        disc = AT_NAME::npr::FeatureLine::ComputeDiscAtQueryRayHitPoint(
             hrec_query.p,
             query_ray.dir,
             prev_disc.radius,
@@ -128,7 +128,7 @@ namespace npr_pt {
                 continue;
             }
 
-            auto sample_ray = AT_NAME::GetSampleRay(
+            auto sample_ray = AT_NAME::npr::GetSampleRay(
                 depth,
                 sample_ray_descs[i],
                 prev_disc, disc);
@@ -141,7 +141,7 @@ namespace npr_pt {
             auto is_hit = intersectClosest(&ctxt, sample_ray, &isect_sample_ray);
             if (is_hit) {
                 // Query ray hits and then sample ray hits.
-                aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::EvaluateQueryAndSampleRayHit(
+                aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::npr::EvaluateQueryAndSampleRayHit(
                     sample_ray_descs[i],
                     ctxt, cam_org,
                     query_ray, hrec_query, distance_query_ray_hit,
@@ -154,7 +154,7 @@ namespace npr_pt {
             }
             else {
                 // Query ray hits but sample ray doesn't hit anything.
-                aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::EvaluateQueryRayHitButSampleRayNotHit(
+                aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::npr::EvaluateQueryRayHitButSampleRayNotHit(
                     sample_ray_descs[i],
                     query_ray, hrec_query, distance_query_ray_hit,
                     sample_ray, disc,
@@ -174,7 +174,7 @@ namespace npr_pt {
         }
 
         if (is_found_feature_line_point) {
-            AT_NAME::ComputeFeatureLineContribution<SampleRayNum>(
+            AT_NAME::npr::ComputeFeatureLineContribution<SampleRayNum>(
                 closest_feature_line_point_distance, paths, idx, line_color);
         }
 
@@ -248,7 +248,7 @@ namespace npr_pt {
         // In first bounce, initial point is camera original.
         // So, previous disc is not necessary.
 
-        AT_NAME::FeatureLine::Disc prev_disc;
+        AT_NAME::npr::FeatureLine::Disc prev_disc;
         hit_point_distance = CreateNextDiscByDummyQueryRayHitPoint(depth, hit_point_distance, query_ray, prev_disc, disc);
 
         for (size_t i = 0; i < SampleRayNum; i++) {
@@ -256,7 +256,7 @@ namespace npr_pt {
                 continue;
             }
 
-            auto sample_ray = AT_NAME::GetSampleRay(
+            auto sample_ray = AT_NAME::npr::GetSampleRay(
                 depth,
                 sample_ray_descs[i],
                 prev_disc, disc);
@@ -269,7 +269,7 @@ namespace npr_pt {
             auto is_hit = intersectClosest(&ctxt, sample_ray, &isect_sample_ray);
             if (is_hit) {
                 // Query ray doesn't hit, but sample ray hits.
-                aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::EvaluateQueryRayNotHitButSampleRayHit(
+                aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::npr::EvaluateQueryRayNotHitButSampleRayHit(
                     ctxt, query_ray,
                     isect_sample_ray,
                     disc,
@@ -286,7 +286,7 @@ namespace npr_pt {
         }
 
         if (is_found_feature_line_point) {
-            AT_NAME::ComputeFeatureLineContribution<SampleRayNum>(
+            AT_NAME::npr::ComputeFeatureLineContribution<SampleRayNum>(
                 closest_feature_line_point_distance, paths, idx, line_color);
         }
     }
@@ -312,7 +312,7 @@ namespace idaten {
             const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_cam, 1);
 
             if (bounce == 0) {
-                npr_pt::GenerateSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
+                npr_kernel::GenerateSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
                     sample_ray_infos_.data(),
                     path_host_->paths,
                     m_rays.data(),
@@ -323,7 +323,7 @@ namespace idaten {
                 checkCudaKernel(GenerateSampleRay);
             }
 
-            npr_pt::shadeSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
+            npr_kernel::shadeSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
                 aten::vec3(0, 1, 0),
                 feature_line_width_,
                 pixel_width,
@@ -370,7 +370,7 @@ namespace idaten {
             const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_cam, 1);
 
             // Sample ray hit miss never happen at 1st bounce.
-            npr_pt::shadeMissSampleRay << <grid, block, 0, m_stream >> > (
+            npr_kernel::shadeMissSampleRay << <grid, block, 0, m_stream >> > (
                 width, height,
                 aten::vec3(0, 1, 0),
                 feature_line_width_,

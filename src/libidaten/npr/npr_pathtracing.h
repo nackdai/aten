@@ -12,8 +12,8 @@ namespace idaten
         static constexpr size_t SampleRayNum = 8;
 
         struct SampleRayInfo {
-            std::array<AT_NAME::FeatureLine::SampleRayDesc, SampleRayNum> descs;
-            AT_NAME::FeatureLine::Disc disc;
+            std::array<AT_NAME::npr::FeatureLine::SampleRayDesc, SampleRayNum> descs;
+            AT_NAME::npr::FeatureLine::Disc disc;
         };
 
         bool isEnableFatureLine() const

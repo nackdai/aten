@@ -11,7 +11,7 @@
 #include "aten4idaten.h"
 #include "renderer/ao/aorenderer_impl.h"
 
-namespace ao {
+namespace ao_kernel {
     __global__ void shadeMissAO(
         bool is_first_bounce,
         int32_t width, int32_t height,
@@ -26,7 +26,7 @@ namespace ao {
 
         const auto idx = getIdx(ix, iy, width);
 
-        AT_NAME::ShadeMissAO(
+        AT_NAME::ao::ShadeMissAO(
             idx,
             is_first_bounce,
             paths);
@@ -69,7 +69,7 @@ namespace ao {
 
         const auto& isect = isects[idx];
 
-        AT_NAME::ShandeAO(
+        AT_NAME::ao::ShandeAO(
             idx,
             frame, rnd,
             ao_num_rays, ao_radius,
@@ -89,7 +89,7 @@ namespace idaten {
 
         bool isFirstBounce = bounce == 0;
 
-        ao::shadeMissAO << <grid, block >> > (
+        ao_kernel::shadeMissAO << <grid, block >> > (
             isFirstBounce,
             width, height,
             path_host_->paths);
@@ -106,7 +106,7 @@ namespace idaten {
 
         auto& hitcount = m_compaction.getCount();
 
-        ao::shadeAO << <blockPerGrid, threadPerBlock >> > (
+        ao_kernel::shadeAO << <blockPerGrid, threadPerBlock >> > (
             //shade<true> << <1, 1 >> > (
             m_ao_num_rays, m_ao_radius,
             m_frame,

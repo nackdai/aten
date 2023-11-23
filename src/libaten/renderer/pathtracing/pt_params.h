@@ -124,6 +124,39 @@ namespace AT_NAME {
             return false;
         }
 
+        void Clear(int32_t frame_cnt, std::function<void(void*, int32_t, size_t)> clear)
+        {
+            clear(throughput.data(), 0, sizeof(decltype(throughput)::value_type) * throughput.size());
+            clear(contrib.data(), 0, sizeof(decltype(contrib)::value_type) * contrib.size());
+            clear(attrib.data(), 0, sizeof(decltype(attrib)::value_type) * attrib.size());
+
+            // NOTE:
+            // sampler should be kept parmanetly whilre rendering.
+            // For CUDA, the container for sampler is not normal std continer.
+            // And, the sampler element's constructor is not called.
+            // It means initialization doesn't happen and the value of variales are undefined.
+            // So, we need to clear by filling with zero. But, it should be done once at the first frame.
+            // The following has to be executed for only CUDA.
+            if constexpr (!std::is_same_v<decltype(sampler), std::vector<aten::sampler>>) {
+                if (frame_cnt == 0) {
+                    clear(sampler.data(), 0, sizeof(decltype(sampler)::value_type) * sampler.size());
+                }
+            }
+        }
+
+        template <class ClearFunc, typename ExtraArgToClearFunc = void>
+        void Clear(int32_t frame_cnt, ClearFunc clear, ExtraArgToClearFunc extra_arg)
+        {
+            Clear(
+                frame_cnt,
+                [clear, extra_arg](void* dst, int32_t val, size_t size) { clear(dst, val, size, extra_arg); });
+        }
+
+        void Clear(int32_t frame_cnt)
+        {
+            Clear(frame_cnt, memset);
+        }
+
 #ifdef __AT_CUDA__
         idaten::TypedCudaMemory<PathThroughput> throughput;
         idaten::TypedCudaMemory<PathContrib> contrib;

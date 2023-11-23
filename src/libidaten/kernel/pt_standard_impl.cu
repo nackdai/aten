@@ -397,13 +397,7 @@ namespace idaten
 
     void StandardPT::clearPath()
     {
-        cudaMemsetAsync(path_host_->throughput.data(), 0, path_host_->throughput.bytes(), m_stream);
-        cudaMemsetAsync(path_host_->contrib.data(), 0, path_host_->contrib.bytes(), m_stream);
-        cudaMemsetAsync(path_host_->attrib.data(), 0, path_host_->attrib.bytes(), m_stream);
-
-        if (m_frame == 0) {
-            cudaMemsetAsync(path_host_->sampler.data(), 0, path_host_->sampler.bytes(), m_stream);
-        }
+        path_host_->Clear(m_frame, cudaMemsetAsync, m_stream);
     }
 
     void StandardPT::generatePath(

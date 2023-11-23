@@ -542,11 +542,12 @@ namespace svgf {
      * @param[in] buffer Buffer to store vector 4 value.
      * @return 3x3 gaussian filtered value.
      */
-    template <typename float AT_NAME::_detail::v4::* MemberVar>
+    template <class MemberVar>
     inline AT_DEVICE_MTRL_API float Exec3x3GaussFilter(
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,
-        const aten::const_span<AT_NAME::_detail::v4>& buffer)
+        const aten::const_span<AT_NAME::_detail::v4>& buffer,
+        MemberVar member_var)
     {
         static constexpr float kernel_array[] = {
             1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
@@ -582,7 +583,7 @@ namespace svgf {
 
             // NOTE:
             // https://stackoverflow.com/questions/58111915/access-member-variables-using-templates
-            float tmp = buffer[idx].*MemberVar;
+            float tmp = buffer[idx].*member_var;
 
             sum += kernel[pos] * tmp;
 

@@ -72,9 +72,10 @@ __global__ void atrousFilter(
     }
 
     // 3x3 Gauss filter.
-    auto gauss_filtered_variance = AT_NAME::svgf::Exec3x3GaussFilter<&float4::w>(
+    auto gauss_filtered_variance = AT_NAME::svgf::Exec3x3GaussFilter(
         ix, iy, width, height,
-        isFirstIter ? aov_color_variance : color_variance_buffer);
+        isFirstIter ? aov_color_variance : color_variance_buffer,
+        &float4::w);
 
     auto filtered_color_variance{
         AT_NAME::svgf::ExecAtrousWaveletFilter(

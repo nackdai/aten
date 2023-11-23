@@ -37,13 +37,14 @@ namespace aten
                 path_host_.paths.attrib[idx].isHit = true;
 
                 auto& aov = params_.GetCurrAovBuffer();
+                auto aov_normal_depth = aov.GetNormalDepthAsSpan();
+                auto aov_albedo_meshid = aov.GetAlbedoMeshIdAsSpan();
                 Shade(
                     idx,
                     path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
                     isect, scene, russian_roulette_depth_, depth,
                     params_.mtxs,
-                    aov.GetNormalDepthAsSpan(),
-                    aov.GetAlbedoMeshIdAsSpan());
+                    aov_normal_depth, aov_albedo_meshid);
 
                 std::ignore = AT_NAME::HitShadowRay(
                     idx, depth, ctxt, path_host_.paths, shadow_rays_.data(), scene);
@@ -112,8 +113,8 @@ namespace aten
 
         bool isBackfacing = dot(rec.normal, -ray.dir) < real(0);
 
-        // Œð·ˆÊ’u‚Ì–@ü.
-        // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ðl—¶.
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½Ì–@ï¿½ï¿½.
+        // ï¿½ï¿½ï¿½Ì‚ï¿½ï¿½ï¿½Ìƒï¿½ï¿½Cï¿½Ì“ï¿½ï¿½oï¿½ï¿½ï¿½lï¿½ï¿½.
         vec3 orienting_normal = rec.normal;
 
         aten::MaterialParameter mtrl;
@@ -344,9 +345,10 @@ namespace aten
         }
 
         // 3x3 Gauss filter.
-        auto gauss_filtered_variance = AT_NAME::svgf::Exec3x3GaussFilter<&aten::vec4::w>(
+        auto gauss_filtered_variance = AT_NAME::svgf::Exec3x3GaussFilter<decltype(&aten::vec4::w)>(
             ix, iy, width, height,
-            isFirstIter ? aov_color_variance : color_variance_buffer);
+            isFirstIter ? aov_color_variance : color_variance_buffer,
+            &aten::vec4::w);
 
         auto filtered_color_variance{
             AT_NAME::svgf::ExecAtrousWaveletFilter(
@@ -424,7 +426,8 @@ namespace aten
         const auto height = fbo.GetHeight();
         params_.motion_depth_buffer.resize(width * height);
 
-        fbo.SaveToBuffer(aten::span<decltype(params_.motion_depth_buffer)::value_type>(params_.motion_depth_buffer), 1);
+        aten::span<decltype(params_.motion_depth_buffer)::value_type> motion_depth_buffer(params_.motion_depth_buffer);
+        fbo.SaveToBuffer(motion_depth_buffer, 1);
     }
 
     void SVGFRenderer::onRender(

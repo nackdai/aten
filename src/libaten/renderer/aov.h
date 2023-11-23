@@ -81,7 +81,7 @@ namespace AT_NAME
         static_assert(N > 0, "Empty buffer is not allowed");
 
         using buffer_type = BUFFER_TYPE;
-        using buffer_value_type = class BUFFER_TYPE::value_type;
+        using buffer_value_type = typename BUFFER_TYPE::value_type;
         using buffer_type_as_span = aten::span<buffer_value_type>;
         using buffer_type_as_const_span = aten::const_span<buffer_value_type>;
 

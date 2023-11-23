@@ -51,7 +51,7 @@ namespace aten
             (void)e;
         }
 
-        inline uint32_t get_frame_count() const noexcept
+        inline uint32_t GetFrameCount() const noexcept
         {
             return frame_count_;
         }

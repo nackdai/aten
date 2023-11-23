@@ -452,6 +452,7 @@ namespace aten
             shadow_rays_.resize(width * height);
         }
         path_host_.init(width, height);
+        path_host_.Clear(GetFrameCount());
 
         for (auto& attrib : path_host_.attrib) {
             attrib.isKill = false;
@@ -496,7 +497,7 @@ namespace aten
                             rays_[idx],
                             idx,
                             x, y,
-                            i, get_frame_count(),
+                            i, GetFrameCount(),
                             path_host_.paths,
                             camsample,
                             rnd);

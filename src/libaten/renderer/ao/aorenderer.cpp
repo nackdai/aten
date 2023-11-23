@@ -33,7 +33,7 @@ namespace aten
 
                 AT_NAME::ao::ShandeAO(
                     idx,
-                    get_frame_count(), rnd,
+                    GetFrameCount(), rnd,
                     m_numAORays, m_AORadius,
                     path_host_.paths, ctxt, inRay, isect, scene);
             }
@@ -108,7 +108,7 @@ namespace aten
                             ray,
                             idx,
                             x, y,
-                            i, get_frame_count(),
+                            i, GetFrameCount(),
                             path_host_.paths,
                             camsample,
                             rnd);

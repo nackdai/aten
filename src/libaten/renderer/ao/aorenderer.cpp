@@ -25,7 +25,7 @@ namespace aten
     {
         Intersection isect;
 
-        uint32_t depth = 0;
+        int32_t depth = 0;
 
         while (depth < max_depth_) {
             if (scene->hit(ctxt, inRay, AT_MATH_EPSILON, AT_MATH_INF, isect)) {

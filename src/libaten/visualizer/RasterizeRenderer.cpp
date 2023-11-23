@@ -625,17 +625,17 @@ namespace aten
         {
             vertex_buffer_.init(
                 sizeof(vertex),
-                vtxs.size(),
+                static_cast<uint32_t>(vtxs.size()),
                 0,
-                &vtxs[0]);
+                vtxs.data());
 
             m_ib.resize(idxs.size());
 
-            for (int32_t i = 0; i < idxs.size(); i++)
+            for (size_t i = 0; i < idxs.size(); i++)
             {
                 if (!idxs[i].empty())
                 {
-                    m_ib[i].init((uint32_t)idxs[i].size(), &idxs[i][0]);
+                    m_ib[i].init(static_cast<uint32_t>(idxs[i].size()), idxs[i].data());
                 }
             }
 
@@ -646,13 +646,13 @@ namespace aten
             // TODO
             // 最初に最大数バッファをアロケートしておかないといけない...
 
-            vertex_buffer_.update(vtxs.size(), &vtxs[0]);
+            vertex_buffer_.update(vtxs.size(), vtxs.data());
 
-            for (int32_t i = 0; i < idxs.size(); i++)
+            for (size_t i = 0; i < idxs.size(); i++)
             {
                 if (!idxs[i].empty())
                 {
-                    m_ib[i].update((uint32_t)idxs[i].size(), &idxs[i][0]);
+                    m_ib[i].update(static_cast<uint32_t>(idxs[i].size()), idxs[i].data());
                 }
             }
         }
@@ -661,7 +661,7 @@ namespace aten
 
         for (int32_t i = 0; i < m_ib.size(); i++)
         {
-            auto triNum = (uint32_t)idxs[i].size() / 3;
+            auto triNum = static_cast<int32_t>(idxs[i].size() / 3);
 
             if (triNum > 0)
             {

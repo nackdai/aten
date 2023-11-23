@@ -24,8 +24,8 @@ namespace AT_NAME {
         /** Enumuration value to begin in the inherited enumuration. */
         static constexpr int32_t BeginOfInheritType = static_cast<int32_t>(Type::end_of_AOVBufferType + 1);
 
-        AT_DEVICE_API AOVBufferType() = default;
-        AT_DEVICE_API ~AOVBufferType() = default;
+        AOVBufferType() = default;
+        ~AOVBufferType() = default;
         AT_DEVICE_API AOVBufferType(int32_t type) : type_(static_cast<Type>(type)) {}
 
         AT_DEVICE_API Type type() const { return type_; }
@@ -52,8 +52,8 @@ namespace AT_NAME {
 
         static constexpr int32_t BeginOfInheritType = static_cast<int32_t>(Type::end_of_AOVType + 1);
 
-        AT_DEVICE_API AOVType() = default;
-        AT_DEVICE_API ~AOVType() = default;
+        AOVType() = default;
+        ~AOVType() = default;
         AT_DEVICE_API AOVType(int32_t type) : type_(static_cast<Type>(type)) {}
 
         AT_DEVICE_API Type type() const { return type_; }

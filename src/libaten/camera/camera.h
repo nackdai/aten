@@ -163,7 +163,7 @@ namespace AT_NAME {
         virtual const aten::CameraParameter& param() const
         {
             AT_ASSERT(false);
-            static const aten::CameraParameter tmp;
+            static const aten::CameraParameter tmp{};
             return tmp;
         }
 

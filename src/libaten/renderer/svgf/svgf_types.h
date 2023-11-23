@@ -23,7 +23,7 @@ namespace AT_NAME
         static constexpr size_t Num = static_cast<size_t>(Type::end_of_AOVMode) + 1;
 
         AT_DEVICE_API SVGFAovMode() : AT_NAME::AOVType(AT_NAME::AOVType::Normal) {}
-        AT_DEVICE_API ~SVGFAovMode() = default;
+        ~SVGFAovMode() = default;
         AT_DEVICE_API SVGFAovMode(int32_t type) : AT_NAME::AOVType(static_cast<Type>(type)) {}
     };
 
@@ -39,8 +39,8 @@ namespace AT_NAME
 
         static constexpr size_t Num = static_cast<size_t>(Type::end_of_AOVBuffer) + 1;
 
-        AT_DEVICE_API SVGFAovBufferType() = default;
-        AT_DEVICE_API ~SVGFAovBufferType() = default;
+        SVGFAovBufferType() = default;
+        ~SVGFAovBufferType() = default;
         AT_DEVICE_API SVGFAovBufferType(int32_t type) : AT_NAME::AOVBufferType(static_cast<Type>(type)) {}
     };
 

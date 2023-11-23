@@ -945,8 +945,6 @@ namespace idaten
         }
         std::vector<aten::ThreadedBvhNode> tmp1(nodes.num());
         nodes.readFromDeviceToHostByNum(&tmp1[0], 0);
-
-        int32_t xx = 0;
 #else
         std::vector<LBVHNode> tmp(m_nodesLbvh.maxNum());
         m_nodesLbvh.read(&tmp[0], 0);

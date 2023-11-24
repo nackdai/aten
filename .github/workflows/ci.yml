@@ -21,30 +21,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build_docker:
-    name: build_docker
+  checck_diff:
+    name: checck_diff
     runs-on: ubuntu-20.04
+    outputs:
+      sbould_build_image: ${{ steps.check_diff_File.outputs.sbould_build_image }}
     if: github.ref != 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Get diff files
-        id: getfile
+      - name: Check diff files
+        id: check_diff_File
         run: |
           git fetch origin main
           files=$(git diff origin/main HEAD --name-only 2>/dev/null)
           diff_files=($(echo ${files}))
           echo "${diff_files[@]}"
-          echo "diff_files=${diff_files[@]}" >> $GITHUB_OUTPUT
+          if [[ "${diff_files[@]}" == *"docker/"* ]]; then
+            echo "sbould_build_image=true" >> $GITHUB_OUTPUT
+          else
+            echo "sbould_build_image=false" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Check diff files
-        if: contains(steps.getfile.outputs.diff_files, 'docker/') == false
-        run: |
-          echo "Nothing to build docker image"
-          exit 0
+  build_docker:
+    name: build_docker
+    runs-on: ubuntu-20.04
+    needs: checck_diff
+    if: contains(needs.checck_diff.outputs.sbould_build_image, 'true')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Login to GitHub Container Registry
+        id: login
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -52,6 +62,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check docker image build time
+        id: check_image_time
+        continue-on-error: true
         run: |
           docker pull ghcr.io/${{ github.repository }}/aten
           file_change_date=$(TZ=UTC git log -1 --pretty="format:%cd" --date=format-local:"%Y%m%d%H%M%S" ./docker/)
@@ -59,16 +71,18 @@ jobs:
           echo "File [${file_change_date}] DockerImage [${image_build_date}]"
           if [[ "${file_change_date}" < "${image_build_date}" ]]; then
             echo "Docker images are already latest"
-            exit 0
+            exit 1
           fi
 
       # Run the following step if Dockerfile is modified.
       - name: Build images
         id: build_image
+        if: ${{ steps.check_image_time.outcome == 'success' }}
         run: |
           ./docker/build_docker_Image.sh -b ./docker/ -p "ghcr.io/${{ github.repository }}/"
 
       - name: Push images
+        if: ${{ steps.build_image.outcome == 'success' }}
         run: |
           docker push ghcr.io/${{ github.repository }}/aten:latest
           docker push ghcr.io/${{ github.repository }}/aten_dev:latest
@@ -79,6 +93,7 @@ jobs:
     name: ci
     runs-on: ubuntu-20.04
     needs: build_docker
+    if: ${{ ! failure() }}
     container:
       image: ghcr.io/${{ github.repository }}/aten_dev:latest
       credentials:

@@ -3,7 +3,7 @@ name: CI on winwows
 on:
   pull_request:
     branches:
-      - '*'
+      - 'main'
     paths:
       - 'src/**'
       - 'vs2019/**'

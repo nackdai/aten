@@ -24,7 +24,9 @@ out vec4 curCSPos;
 flat out ivec2 ids;
 
 // TODO
-// �p�X�g�����̌v�Z���@�ƍ����悤�ɏ��Ԃ�Ή������Ă���̂Ŕėp���Ɋւ��Ă͗v����.
+// パストレ内の計算方法と合うように順番を対応させているので汎用性に関しては要検討.
+// The order of triangle vertices is fit into path tracing caclculation.
+// Need to consider about versatility for the order.
 
 // For computing bary centric.
 const vec3 weight[3] = {

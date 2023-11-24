@@ -62,7 +62,7 @@ namespace AT_NAME
          */
         aten::mat4 GetW2C() const
         {
-            return mtx_W2V * mtx_V2C;
+            return mtx_V2C * mtx_W2V;
         }
 
         /**

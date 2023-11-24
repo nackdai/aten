@@ -24,13 +24,13 @@ static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static std::shared_ptr<aten::envmap> g_bg;
 static std::shared_ptr<aten::texture> g_envmap;
 
-static aten::PathTracing g_tracer;
-//static aten::SVGFRenderer g_tracer;
+//static aten::PathTracing g_tracer;
+static aten::SVGFRenderer g_tracer;
 
 static std::shared_ptr<aten::visualizer> g_visualizer;
 
-static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
-// static aten::Film g_buffer(WIDTH, HEIGHT);
+//static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
+ static aten::Film g_buffer(WIDTH, HEIGHT);
 
 static aten::FBO g_fbo;
 
@@ -97,7 +97,7 @@ void display(aten::window* wnd)
 
     if (std::is_same_v<decltype(g_tracer), aten::SVGFRenderer>) {
         g_rasterizer.drawSceneForGBuffer(
-            g_tracer.get_frame_count(),
+            g_tracer.GetFrameCount(),
             g_ctxt,
             &g_scene,
             &g_camera,

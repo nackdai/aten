@@ -528,16 +528,16 @@ namespace aten
 #endif
                     int32_t idx = y * width + x;
 
-                    aten::vec4 teporal_projected_clr;
+                    aten::vec4 temporal_projected_clr;
                     if (GetFrameCount() > 0) {
-                         teporal_projected_clr = TemporalReprojection(
+                        temporal_projected_clr = TemporalReprojection(
                             x, y, width, height,
                             0.98f, 0.05f,
                             path_host_.paths,
                             camera->param(),
                             params_);
                     }
-#if 0
+#if 1
                     auto camera_distance = AT_NAME::camera::ComputeScreenDistance(camera->param(), height);
                     auto variance = EstimateVariance(
                         x, y, width, height,
@@ -558,7 +558,7 @@ namespace aten
 
                     CopyFromTeporaryColorBufferToAov(idx, params_);
 #endif
-                    auto col = static_cast<aten::vec3>(teporal_projected_clr);
+                    auto col = static_cast<aten::vec3>(filtered_color.value());
                     dst.buffer->put(x, y, vec4(col, 1));
                 }
             }

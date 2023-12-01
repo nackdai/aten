@@ -342,11 +342,11 @@ int32_t main(int32_t argc, char* argv[])
         onMouseWheel,
         onKey);
 
-    //loadObj("../../asset/models/sponza/sponza.obj", nullptr, g_objs);
-    loadObj("../../asset/bunny/bunny.obj", nullptr, g_objs);
-    //loadObj("../../asset/dragon/dragon.obj", nullptr, g_objs);
-    //loadObj("../../asset/models/plane/plane.obj", nullptr, g_objs);
-    //loadObj("../../asset/cornellbox/orig.obj", nullptr, g_objs);
+    //loadObj("../../asset/models/sponza/sponza.obj", "", g_objs);
+    loadObj("../../asset/bunny/bunny.obj", "", g_objs);
+    //loadObj("../../asset/dragon/dragon.obj", "", g_objs);
+    //loadObj("../../asset/models/plane/plane.obj", "", g_objs);
+    //loadObj("../../asset/cornellbox/orig.obj", "", g_objs);
 
     g_objenable.resize(g_objs.size(), true);
 

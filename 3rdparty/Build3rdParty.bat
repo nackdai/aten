@@ -127,5 +127,4 @@ exit /b 0
 :error
 cd /d %CURDIR%
 echo "Error====="
-pause
 exit /b 1

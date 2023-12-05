@@ -209,7 +209,7 @@ namespace aten {
         return ret;
     }
 #else
-    using vec3 = glm::vec3;
+    using vec3 = glm::highp_vec3;
 #endif
 #endif
 

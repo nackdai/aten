@@ -302,7 +302,7 @@ namespace AT_NAME
         {
             auto cosShadow = dot(hit_nml, dirToLight);
 
-            real pdfb{ AT_NAME::material::samplePDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v) };
+            real path_pdf{ AT_NAME::material::samplePDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v) };
             auto bsdf{ AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, external_albedo, pre_sampled_r) };
 
             bsdf *= throughtput.throughput;
@@ -310,38 +310,32 @@ namespace AT_NAME
             // Get light color.
             auto emit{ sampleres.finalColor };
 
-            if (light.attrib.isInfinite || light.attrib.isSingular) {
-                if (pdfLight > real(0) && cosShadow >= 0) {
-                    auto misW = light.attrib.isSingular
-                        ? 1.0f
-                        : _detail::ComputeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
-                    shadow_ray.lightcontrib =
-                        (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+            auto cosLight = dot(nmlLight, -dirToLight);
 
-                    isShadowRayActive = true;
-                }
-            }
-            else {
-                auto cosLight = dot(nmlLight, -dirToLight);
+            auto dist2 = aten::squared_length(sampleres.dir);
+            dist2 = (light.attrib.isInfinite || light.attrib.isSingular) ? real{ 1 } : dist2;
 
-                if (cosShadow >= 0 && cosLight >= 0) {
-                    auto dist2 = aten::squared_length(sampleres.dir);
-                    auto G = cosShadow * cosLight / dist2;
+            if (cosShadow >= 0 && cosLight >= 0
+                && dist2 > 0
+                && path_pdf > real(0) && pdfLight > real(0))
+            {
+                // Convert path PDF to NEE PDF.
+                // i.e. Convert solid angld PDF to area PDF.
+                path_pdf = path_pdf * cosLight / dist2;
 
-                    if (pdfb > real(0) && pdfLight > real(0)) {
-                        // Convert pdf from steradian to area.
-                        // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
-                        // p31 - p35
-                        pdfb = pdfb * cosLight / dist2;
+                auto misW = light.attrib.isSingular
+                    ? 1.0f
+                    : _detail::ComputeBalanceHeuristic(pdfLight * lightSelectPdf, path_pdf);
 
-                        auto misW = _detail::ComputeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
+                const auto G = cosShadow * cosLight / dist2;
 
-                        shadow_ray.lightcontrib =
-                            (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+                // NOTE:
+                // 3point rendering equation.
+                // Compute as area PDF.
+                shadow_ray.lightcontrib =
+                    (misW * bsdf * emit * G / pdfLight) / lightSelectPdf;
 
-                        isShadowRayActive = true;
-                    }
-                }
+                isShadowRayActive = true;
             }
         }
 
@@ -448,23 +442,26 @@ namespace AT_NAME
 
         float weight = 1.0f;
 
-        if (bounce > 0 && !path_attrib.isSingular) {
+        if (bounce > 0) {
             auto cosLight = dot(hit_nml, -ray.dir);
             auto dist2 = aten::squared_length(hit_pos - ray.org);
 
             if (cosLight >= 0) {
                 auto pdfLight = 1 / hit_area;
 
-                // Convert pdf area to sradian.
-                // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
-                // p31 - p35
+                // Convert NEE PDF to path tracing PDF.
+                // i.e. Convert area PDF to solid angle PDF.
                 pdfLight = pdfLight * dist2 / cosLight;
 
-                weight = path_throughput.pdfb / (pdfLight + path_throughput.pdfb);
+                weight = _detail::ComputeBalanceHeuristic(path_throughput.pdfb, pdfLight);
             }
         }
 
-        auto contrib{ path_throughput.throughput * weight * static_cast<aten::vec3>(hit_target_mtrl.baseColor) };
+        // NOTE:
+        // In the previous bounce, (bsdf * consine / path_pdf) has been computed and multiplied to path_throughput.throughput.
+        // Therefore, no need to compute it again here.
+
+        auto contrib{ path_throughput.throughput * weight * static_cast<aten::vec3>(hit_target_mtrl.baseColor)};
         _detail::AddVec3(path_contrib.contrib, contrib);
 
         // When ray hit the light, tracing will finish.

@@ -57,9 +57,9 @@ namespace AT_NAME {
             result->pos = param->pos;
             result->nml = normalize(-result->dir);
 
-            // æ¸›è¡°çŽ‡.
+            // Œ¸Š—¦.
             // http://ogldev.atspace.co.uk/www/tutorial20/tutorial20.html
-            // ä¸Šè¨˜ã«ã‚ˆã‚‹ã¨ã€L = Le / dist2 ã§æ­£ã—ã„ãŒã€3Dã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ã‚¹ã§ã¯è¦‹ãŸç›®çš„ã«ã‚ã¾ã‚Šã‚ˆã‚ã—ããªã„ã®ã§ã€æ¸›è¡°çŽ‡ã‚’ä½¿ã£ã¦è¨ˆç®—ã™ã‚‹.
+            // ã‹L‚É‚æ‚é‚ÆAL = Le / dist2 ‚Å³‚µ‚¢‚ªA3DƒOƒ‰ƒtƒBƒbƒNƒX‚Å‚ÍŒ©‚½–Ú“I‚É‚ ‚Ü‚è‚æ‚ë‚µ‚­‚È‚¢‚Ì‚ÅAŒ¸Š—¦‚ðŽg‚Á‚ÄŒvŽZ‚·‚é.
             real attn = param->constAttn + param->linearAttn * dist + param->expAttn * dist2;
 
             // TODO

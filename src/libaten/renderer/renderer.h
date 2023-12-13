@@ -76,11 +76,6 @@ namespace aten
             return vec3();
         }
 
-        bool hasBG() const
-        {
-            return (m_bg != nullptr);
-        }
-
         background* bg()
         {
             return m_bg;

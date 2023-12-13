@@ -74,7 +74,7 @@ namespace aten
                     ShadeMiss(
                         idx,
                         depth,
-                        bg()->sample(rays_[idx]),
+                        sampleBG(rays_[idx], m_bg),
                         path_host_.paths);
                 }
 

@@ -131,10 +131,10 @@ namespace AT_NAME {
             clear(attrib.data(), 0, sizeof(decltype(attrib)::value_type) * attrib.size());
 
             // NOTE:
-            // sampler should be kept parmanetly whilre rendering.
-            // For CUDA, the container for sampler is not normal std continer.
+            // sampler should be kept parmanetly while rendering.
+            // For CUDA, the container for sampler is not the normal std container.
             // And, the sampler element's constructor is not called.
-            // It means initialization doesn't happen and the value of variales are undefined.
+            // It means initialization doesn't happen and the value of variables are undefined.
             // So, we need to clear by filling with zero. But, it should be done once at the first frame.
             // The following has to be executed for only CUDA.
             if constexpr (!std::is_same_v<decltype(sampler), std::vector<aten::sampler>>) {

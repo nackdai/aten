@@ -14,7 +14,8 @@
 
 #include "../common/scenedefs.h"
 
-#define ENABLE_ENVMAP
+// NOTE:
+// Not work with environment map.
 
 static int32_t WIDTH = 1280;
 static int32_t HEIGHT = 720;
@@ -475,15 +476,6 @@ int32_t main()
     Scene::makeScene(g_ctxt, &g_scene);
     g_scene.build(g_ctxt);
 
-#ifdef ENABLE_ENVMAP
-    auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
-    auto bg = std::make_shared<aten::envmap>();
-    bg->init(envmap);
-    auto ibl = std::make_shared<aten::ImageBasedLight>(bg);
-
-    g_scene.addImageBasedLight(g_ctxt, ibl);
-#endif
-
     {
         auto aabb = g_scene.getAccel()->getBoundingbox();
         auto d = aabb.getDiagonalLenght();
@@ -519,16 +511,6 @@ int32_t main()
             }
         }
 
-#ifdef ENABLE_ENVMAP
-        for (auto &l : lightparams)
-        {
-            if (l.type == aten::LightType::IBL)
-            {
-                l.envmapidx = envmap->id();
-            }
-        }
-#endif
-
         auto camparam = g_camera.param();
         camparam.znear = real(0.1);
         camparam.zfar = real(10000.0);
@@ -545,11 +527,7 @@ int32_t main()
             vtxparams, 0,
             mtxs,
             tex,
-#ifdef ENABLE_ENVMAP
-            idaten::EnvmapResource(envmap->id(), ibl->getAvgIlluminace(), real(1)));
-#else
             idaten::EnvmapResource());
-#endif
 
         g_tracer.setGBuffer(
             g_fbo.GetGLTextureHandle(0),

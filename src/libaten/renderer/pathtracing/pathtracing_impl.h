@@ -348,7 +348,7 @@ namespace AT_NAME
         int32_t bounce,
         const AT_NAME::context& ctxt,
         AT_NAME::Path paths,
-        const AT_NAME::ShadowRay* shadow_rays,
+        const AT_NAME::ShadowRay& shadow_ray,
         SCENE* scene = nullptr)
     {
         if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
@@ -356,9 +356,7 @@ namespace AT_NAME
             return false;
         }
 
-        const auto& shadowRay = shadow_rays[idx];
-
-        if (!shadowRay.isActive) {
+        if (!shadow_ray.isActive) {
             return false;
         }
 
@@ -367,8 +365,8 @@ namespace AT_NAME
 
         aten::hitrecord tmpRec;
 
-        const auto targetLightId = shadowRay.targetLightId;
-        const auto distToLight = shadowRay.distToLight;
+        const auto targetLightId = shadow_ray.targetLightId;
+        const auto distToLight = shadow_ray.distToLight;
 
         const auto& light = ctxt.GetLight(targetLightId);
         const auto lightobj = (light.IsValidLightObjectId() ? &ctxt.GetObject(static_cast<uint32_t>(light.objid)) : nullptr);
@@ -383,7 +381,7 @@ namespace AT_NAME
 
         bool isHit = false;
 
-        aten::ray r(shadowRay.rayorg, shadowRay.raydir);
+        aten::ray r(shadow_ray.rayorg, shadow_ray.raydir);
 
         if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
             // NOTE:
@@ -414,7 +412,7 @@ namespace AT_NAME
             hitobj);
 
         if (isHit) {
-            _detail::AddVec3(paths.contrib[idx].contrib, shadowRay.lightcontrib);
+            _detail::AddVec3(paths.contrib[idx].contrib, shadow_ray.lightcontrib);
         }
 
         return isHit;

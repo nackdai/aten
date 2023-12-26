@@ -337,7 +337,7 @@ namespace kernel {
         AT_NAME::ShadeMiss(
             idx,
             bounce,
-            aten::vec3(1),
+            aten::vec3(0),
             paths,
             aten::span<std::remove_pointer_t<decltype(aovNormalDepth)>>(aovNormalDepth, width * height),
             aten::span<std::remove_pointer_t<decltype(aovAlbedoMeshid)>>(aovAlbedoMeshid, width * height));

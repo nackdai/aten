@@ -55,8 +55,7 @@ __global__ void shade(
     const aten::LightParameter* __restrict__ lights,
     const aten::TriangleParameter* __restrict__ prims,
     const aten::mat4* __restrict__ matrices,
-    uint32_t* random,
-    idaten::ShadowRay* shadowRays)
+    uint32_t* random)
 {
     int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -127,8 +126,6 @@ __global__ void shade(
         orienting_normal = -orienting_normal;
     }
 
-    shadowRays[idx].isActive = false;
-
     auto& restir_info = restir_infos[idx];
     {
         restir_info.clear();
@@ -176,7 +173,7 @@ __global__ void shade(
     {
         auto& reservoir = reservoirs[idx];
 
-        auto lightidx = sampleLightWithReservoirRIP(
+        sampleLightWithReservoirRIP(
             reservoir,
             shMtrls[threadIdx.x],
             &ctxt,
@@ -185,51 +182,6 @@ __global__ void shade(
             rec.u, rec.v, albedo,
             &paths.sampler[idx],
             bounce);
-
-        if (lightidx >= 0) {
-            const auto& light = ctxt.lights[lightidx];
-
-            const auto& posLight = reservoir.light_sample_.pos;
-            const auto& nmlLight = reservoir.light_sample_.nml;
-
-            auto lightSelectPdf = reservoir.pdf_;
-
-            auto dirToLight = normalize(reservoir.light_sample_.dir);
-            auto distToLight = length(posLight - rec.p);
-
-            aten::Intersection isectTmp;
-
-            auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
-            auto tmp = rec.p + dirToLight - shadowRayOrg;
-            auto shadowRayDir = normalize(tmp);
-
-            bool isShadowRayActive = false;
-
-            shadowRays[idx].rayorg = shadowRayOrg;
-            shadowRays[idx].raydir = shadowRayDir;
-            shadowRays[idx].targetLightId = lightidx;
-            shadowRays[idx].distToLight = distToLight;
-            shadowRays[idx].lightcontrib = aten::vec3(0);
-            {
-                auto cosShadow = dot(orienting_normal, dirToLight);
-                cosShadow = aten::abs(cosShadow);
-
-                if (light.attrib.isInfinite || light.attrib.isSingular) {
-                    if (cosShadow >= 0) {
-                        isShadowRayActive = true;
-                    }
-                }
-                else {
-                    auto cosLight = dot(nmlLight, -dirToLight);
-
-                    if (cosShadow >= 0 && cosLight >= 0) {
-                        isShadowRayActive = true;
-                    }
-                }
-
-                shadowRays[idx].isActive = isShadowRayActive;
-            }
-        }
     }
 
     const auto russianProb = AT_NAME::ComputeRussianProbability(
@@ -287,7 +239,8 @@ __global__ void hitShadowRay(
     int32_t* hitindices,
     int32_t* hitnum,
     idaten::Reservoir* reservoirs,
-    const idaten::ShadowRay* __restrict__ shadowRays,
+    const idaten::ReSTIRInfo* __restrict__ restir_infos,
+    idaten::ShadowRay* shadowRays,
     idaten::context ctxt,
     const aten::ObjectParameter* __restrict__ shapes,
     const aten::MaterialParameter* __restrict__ mtrls,
@@ -309,7 +262,24 @@ __global__ void hitShadowRay(
 
     idx = hitindices[idx];
 
-    auto isHit = AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays);
+    bool isHit = false;
+
+    const auto& reservoir = reservoirs[idx];
+
+    if (reservoir.IsValid()) {
+        const auto& restir_info = restir_infos[idx];
+
+        shadowRays[idx].rayorg = restir_info.p + AT_MATH_EPSILON * restir_info.nml;
+        shadowRays[idx].raydir = reservoir.light_sample_.pos - shadowRays[idx].rayorg;
+        shadowRays[idx].targetLightId = reservoir.light_idx_;
+        shadowRays[idx].isActive = true;
+
+        auto dist = length(shadowRays[idx].raydir);;
+        shadowRays[idx].distToLight = dist;
+        shadowRays[idx].raydir /= dist;
+
+        isHit = AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays[idx]);
+    }
 
     if (!isHit) {
         reservoirs[idx].w_sum_ = 0.0f;
@@ -494,8 +464,7 @@ namespace idaten
             ctxt_host_.lightparam.data(),
             ctxt_host_.primparams.data(),
             ctxt_host_.mtxparams.data(),
-            m_random.data(),
-            m_shadowRays.data());
+            m_random.data());
 
         checkCudaKernel(shade);
 
@@ -518,6 +487,7 @@ namespace idaten
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
             m_reservoirs[m_curReservoirPos].data(),
+            m_restir_infos.data(),
             m_shadowRays.data(),
             ctxt_host_.ctxt,
             ctxt_host_.shapeparam.data(),

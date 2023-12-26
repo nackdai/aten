@@ -52,7 +52,7 @@ namespace aten
                     isect, scene, m_rrDepth, depth);
 
                 std::ignore = AT_NAME::HitShadowRay(
-                    idx, depth, ctxt, path_host_.paths, shadow_rays_.data(), scene);
+                    idx, depth, ctxt, path_host_.paths, shadow_rays_[idx], scene);
 
                 willContinue = !path_host_.paths.attrib[idx].isTerminate;
             }
@@ -213,7 +213,7 @@ namespace aten
                         idx, paths, ctxt, rays, shadow_rays,
                         isect, scene, rrDepth, depth);
                     AT_NAME::HitShadowRay(
-                        idx, depth, ctxt, paths, shadow_rays, scene);
+                        idx, depth, ctxt, paths, shadow_rays[idx], scene);
                 }
             }
             else {

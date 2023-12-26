@@ -47,7 +47,7 @@ namespace aten
                     aov_normal_depth, aov_albedo_meshid);
 
                 std::ignore = AT_NAME::HitShadowRay(
-                    idx, depth, ctxt, path_host_.paths, shadow_rays_.data(), scene);
+                    idx, depth, ctxt, path_host_.paths, shadow_rays_[idx], scene);
 
                 willContinue = !path_host_.paths.attrib[idx].isTerminate;
             }

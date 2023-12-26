@@ -237,7 +237,7 @@ namespace pt {
         ctxt.prims = prims;
         ctxt.matrices = matrices;
 
-        AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays);
+        AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays[idx]);
     }
 
     __global__ void gather(

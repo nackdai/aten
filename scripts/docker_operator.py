@@ -10,6 +10,11 @@ from asyncio.subprocess import Process
 from enum import Enum
 from typing import List, Optional
 
+# NOTE:
+# Why not use docker sdk is that the container does not become interactive within the python terminal.
+# In order to interact the container, use subprocess.
+# https://github.com/docker/docker-py/issues/390#issuecomment-333431415
+
 
 class ProcessRunner:
     """Class to run sub process."""
@@ -70,7 +75,7 @@ class ProcessRunner:
         return self._proc.returncode
 
 
-class DockerContainuerRunningMode(Enum):
+class ContainerRunningMode(Enum):
     """Mode how to run docker container."""
 
     Detouch = 1
@@ -111,7 +116,7 @@ async def run_process(
 async def run_docker_container(
     docker_image: str,
     container_name: str,
-    mode: DockerContainuerRunningMode,
+    mode: ContainerRunningMode,
     exec_command: Optional[str],
 ) -> Optional[int]:
     """Run docker container.
@@ -159,12 +164,12 @@ async def run_docker_container(
     ]
 
     # If command to execute is specified, to display log, container should not be launched as detouch.
-    if mode == DockerContainuerRunningMode.Detouch and exec_command is None:
+    if mode == ContainerRunningMode.Detouch and exec_command is None:
         args.append("-d")
 
     args.append(docker_image)
 
-    if mode == DockerContainuerRunningMode.Enter:
+    if mode == ContainerRunningMode.Enter:
         args.append("bash")
         stdout_type = None
         stderr_type = None
@@ -303,7 +308,7 @@ async def main(container_name: str):
         # Kill container forcibly.
         await kill_docker_container(container_name)
         returncode = await run_docker_container(
-            args.image, container_name, DockerContainuerRunningMode.Enter, None
+            args.image, container_name, ContainerRunningMode.Enter, None
         )
     else:
         returncode = 0
@@ -321,7 +326,7 @@ async def main(container_name: str):
             returncode = await run_docker_container(
                 args.image,
                 container_name,
-                DockerContainuerRunningMode.Detouch,
+                ContainerRunningMode.Detouch,
                 args.command,
             )
 

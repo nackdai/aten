@@ -320,7 +320,7 @@ namespace AT_NAME
                 && path_pdf > real(0) && pdfLight > real(0))
             {
                 // Convert path PDF to NEE PDF.
-                // i.e. Convert solid angld PDF to area PDF.
+                // i.e. Convert solid angle PDF to area PDF.
                 path_pdf = path_pdf * cosLight / dist2;
 
                 auto misW = light.attrib.isSingular
@@ -456,7 +456,7 @@ namespace AT_NAME
         }
 
         // NOTE:
-        // In the previous bounce, (bsdf * consine / path_pdf) has been computed and multiplied to path_throughput.throughput.
+        // In the previous bounce, (bsdf * cos / path_pdf) has been computed and multiplied to path_throughput.throughput.
         // Therefore, no need to compute it again here.
 
         auto contrib{ path_throughput.throughput * weight * static_cast<aten::vec3>(hit_target_mtrl.baseColor)};

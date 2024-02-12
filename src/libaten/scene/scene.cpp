@@ -33,7 +33,6 @@ namespace aten {
 
     struct Reservoir {
         float w_sum_{ 0.0f };
-        float sample_weight_{ 0.0f };
         uint32_t m_{ 0 };
         int32_t light_idx_{ 0 };
         float pdf_{ 0.0f };
@@ -43,7 +42,6 @@ namespace aten {
         void clear()
         {
             w_sum_ = 0.0f;
-            sample_weight_ = 0.0f;
             m_ = 0;
             light_idx_ = -1;
             pdf_ = 0.0f;
@@ -59,7 +57,6 @@ namespace aten {
             if (is_accepted) {
                 light_sample_ = light_sample;
                 light_idx_ = new_target_idx;
-                sample_weight_ = weight;
             }
             m_++;
             return is_accepted;

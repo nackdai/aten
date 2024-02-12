@@ -7,7 +7,6 @@
 namespace idaten {
     struct Reservoir {
         float w_sum_{ 0.0f };
-        float sample_weight_{ 0.0f };
         uint32_t m_{ 0 };
         int32_t light_idx_{ 0 };
         float pdf_{ 0.0f };
@@ -17,7 +16,6 @@ namespace idaten {
         __host__ __device__ void clear()
         {
             w_sum_ = 0.0f;
-            sample_weight_ = 0.0f;
             m_ = 0;
             light_idx_ = -1;
             pdf_ = 0.0f;
@@ -38,7 +36,6 @@ namespace idaten {
             if (is_accepted) {
                 light_sample_ = light_sample;
                 light_idx_ = new_target_idx;
-                sample_weight_ = weight;
             }
             m_ += m;
             return is_accepted;

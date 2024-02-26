@@ -154,9 +154,9 @@ TEST(feature_line_test, GenerateSampleRay)
     public:
         TestSampler() = default;
         virtual ~TestSampler() = default;
-        virtual AT_DEVICE_API real nextSample() override final { return real(0); }
+        virtual AT_HOST_DEVICE_API real nextSample() override final { return real(0); }
 
-        virtual AT_DEVICE_API aten::vec2 nextSample2D() override final
+        virtual AT_HOST_DEVICE_API aten::vec2 nextSample2D() override final
         {
             return aten::vec2(sampler_r0, sampler_r1);
         }

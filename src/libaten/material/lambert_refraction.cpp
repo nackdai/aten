@@ -5,7 +5,7 @@
 
 namespace AT_NAME
 {
-        AT_DEVICE_MTRL_API real LambertRefraction::pdf(
+        AT_DEVICE_API real LambertRefraction::pdf(
             const aten::vec3& normal,
             const aten::vec3& wo)
         {
@@ -17,7 +17,7 @@ namespace AT_NAME
             return ret;
         }
 
-        AT_DEVICE_MTRL_API aten::vec3 LambertRefraction::sampleDirection(
+        AT_DEVICE_API aten::vec3 LambertRefraction::sampleDirection(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -51,7 +51,7 @@ namespace AT_NAME
             return dir;
         }
 
-        AT_DEVICE_MTRL_API aten::vec3 LambertRefraction::bsdf(
+        AT_DEVICE_API aten::vec3 LambertRefraction::bsdf(
             const aten::MaterialParameter* param,
             real u, real v)
         {
@@ -65,7 +65,7 @@ namespace AT_NAME
             return ret;
         }
 
-        AT_DEVICE_MTRL_API aten::vec3 LambertRefraction::bsdf(
+        AT_DEVICE_API aten::vec3 LambertRefraction::bsdf(
             const aten::MaterialParameter* param,
             const aten::vec3& externalAlbedo)
         {
@@ -76,7 +76,7 @@ namespace AT_NAME
             return ret;
         }
 
-        AT_DEVICE_MTRL_API void LambertRefraction::sample(
+        AT_DEVICE_API void LambertRefraction::sample(
             AT_NAME::MaterialSampling* result,
             const aten::MaterialParameter* param,
             const aten::vec3& normal,

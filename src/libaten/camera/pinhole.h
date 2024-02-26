@@ -49,7 +49,7 @@ namespace AT_NAME
         /**
          * @brief Sample camera.
          */
-        static AT_DEVICE_API void sample(
+        static AT_HOST_DEVICE_API void sample(
             CameraSampleResult *result,
             const aten::CameraParameter *param,
             real s, real t);

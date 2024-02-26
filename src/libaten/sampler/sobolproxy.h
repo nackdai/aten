@@ -16,7 +16,7 @@ namespace aten {
         }
         AT_VIRTUAL(~Sobol() = default;)
 
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const void* data = nullptr))
+        AT_VIRTUAL_OVERRIDE_FINAL(AT_HOST_DEVICE_API void init(uint32_t seed, const void* data = nullptr))
         {
             m_idx = (seed == 0 ? 1 : seed);
             m_dimension = 0;
@@ -27,7 +27,7 @@ namespace aten {
 #endif
         }
 
-        AT_DEVICE_API void init(
+        AT_HOST_DEVICE_API void init(
             uint32_t index,
             uint32_t dimension,
             uint32_t scramble,
@@ -43,7 +43,7 @@ namespace aten {
 #endif
         }
 
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API real nextSample())
+        AT_VIRTUAL_OVERRIDE_FINAL(AT_HOST_DEVICE_API real nextSample())
         {
 #ifndef __CUDACC__
             if (m_dimension >= sobol::Matrices::num_dimensions) {

@@ -8,7 +8,7 @@
 namespace AT_NAME
 {
     template <class CONTEXT>
-    inline AT_DEVICE_API void evaluate_hit_result(
+    inline AT_HOST_DEVICE_API void evaluate_hit_result(
         aten::hitrecord& rec,
         const aten::ObjectParameter& obj,
         const CONTEXT& ctxt,
@@ -65,7 +65,7 @@ namespace AT_NAME
     }
 
     template <class CONTEXT>
-    inline AT_DEVICE_API void SamplePosAndNormal(
+    inline AT_HOST_DEVICE_API void SamplePosAndNormal(
         aten::SamplePosNormalPdfResult* result,
         const aten::ObjectParameter& obj,
         const CONTEXT& ctxt,

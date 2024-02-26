@@ -64,7 +64,7 @@ namespace npr {
          * @param[in] pixel_width Pixel width at distance 1 from camera.
          * @return Generated disc.
          */
-        static inline AT_DEVICE_MTRL_API Disc GenerateDisc(
+        static inline AT_DEVICE_API Disc GenerateDisc(
             const aten::ray &query_ray,
             real line_width,
             real pixel_width)
@@ -100,7 +100,7 @@ namespace npr {
          * @param[in] accumulatedDistanceFromCameraWithout_current_hit_distance Accumulated hit distance by query ray from camera without current hit distance.
          * @return Computed disc.
          */
-        static inline AT_DEVICE_MTRL_API Disc ComputeDiscAtQueryRayHitPoint(
+        static inline AT_DEVICE_API Disc ComputeDiscAtQueryRayHitPoint(
             const aten::vec3 &query_ray_hit_pos,
             const aten::vec3 &query_ray_dir,
             real previous_disc_radius,
@@ -149,7 +149,7 @@ namespace npr {
          * @param[out] desc Ray description to store sample ray.
          * @param[in] ray Ray to be stored.
          */
-        static inline AT_DEVICE_MTRL_API void StoreRayInSampleRayDesc(
+        static inline AT_DEVICE_API void StoreRayInSampleRayDesc(
             SampleRayDesc &desc,
             const aten::ray &ray)
         {
@@ -165,7 +165,7 @@ namespace npr {
          * @param[in] desc Sample ray description to store ray.
          * @return Stored ray.
          */
-        static inline AT_DEVICE_MTRL_API aten::ray ExtractRayFromSampleRayDesc(const SampleRayDesc &desc)
+        static inline AT_DEVICE_API aten::ray ExtractRayFromSampleRayDesc(const SampleRayDesc &desc)
         {
             aten::ray sample_ray(
                 aten::vec3(desc.ray_org_x, desc.ray_org_y, desc.ray_org_z),
@@ -182,7 +182,7 @@ namespace npr {
          * @param[in] first_disc First target disc.
          * @return Generated sample ray.
          */
-        static inline AT_DEVICE_MTRL_API aten::ray GenerateSampleRay(
+        static inline AT_DEVICE_API aten::ray GenerateSampleRay(
             SampleRayDesc &sample_ray_desc,
             aten::sampler &sampler,
             const aten::ray &query_ray,
@@ -217,7 +217,7 @@ namespace npr {
          * @return First variable is flag to describe if sample ray exists. Second one is next sample ray.
          *         Third one is ray target position on next disc.
          */
-        static inline AT_DEVICE_MTRL_API aten::tuple<bool, aten::ray, aten::vec3> ComputeNextSampleRay(
+        static inline AT_DEVICE_API aten::tuple<bool, aten::ray, aten::vec3> ComputeNextSampleRay(
             const SampleRayDesc &sample_ray_desc,
             const Disc &prev_disc,
             const Disc &next_disc)
@@ -266,7 +266,7 @@ namespace npr {
          * @param[in] disc Disc which ray aims to hit.
          * @return Hit position by ray on disc.
          */
-        static inline AT_DEVICE_MTRL_API aten::vec4 ComputeHitPositionOnDisc(
+        static inline AT_DEVICE_API aten::vec4 ComputeHitPositionOnDisc(
             const real u, const real v,
             const Disc &disc)
         {
@@ -299,7 +299,7 @@ namespace npr {
          * @param[in] hrec Hit record to compute plane.
          * @return Computed plane as vec4 <Normal of plane, D>.
          */
-        static inline AT_DEVICE_MTRL_API aten::vec4 ComputePlane(const aten::hitrecord &hrec)
+        static inline AT_DEVICE_API aten::vec4 ComputePlane(const aten::hitrecord &hrec)
         {
             // NOTE:
             // Plane:
@@ -319,7 +319,7 @@ namespace npr {
          * @param[in] ray Ray.
          * @return First variable is flag to describe if ray hits to plane. Second one is hit position on plane.
          */
-        static inline AT_DEVICE_MTRL_API aten::tuple<bool, aten::vec3> ComputeRayHitPositionOnPlane(
+        static inline AT_DEVICE_API aten::tuple<bool, aten::vec3> ComputeRayHitPositionOnPlane(
             const aten::vec4 &plane,
             const aten::ray &ray)
         {
@@ -367,7 +367,7 @@ namespace npr {
          * @param[out] hit_point Storage to set projected point on ray. If this value is null, point can't be stored.
          * @return Distance between projected point and ray.
          */
-        static inline AT_DEVICE_MTRL_API real ProjectPointOnRay(
+        static inline AT_DEVICE_API real ProjectPointOnRay(
             const aten::vec3 &point,
             const aten::ray &ray,
             aten::vec3 *hit_point)
@@ -405,7 +405,7 @@ namespace npr {
          * @param[in] ray Ray which point is projected on.
          * @return Distance between projected point on the ray and origin of the ray.
          */
-        static inline AT_DEVICE_MTRL_API real ComputeDistanceBetweenProjectedPositionOnRayAndRayOrigin(
+        static inline AT_DEVICE_API real ComputeDistanceBetweenProjectedPositionOnRayAndRayOrigin(
             const aten::vec3 &point,
             const aten::ray &ray)
         {
@@ -431,7 +431,7 @@ namespace npr {
          * @param[in] scale_factor_threshold_depth Scale factor to compute depth threshold.
          * @return If metric is valid, return true. Otherwise, return false.
          */
-        static inline AT_DEVICE_MTRL_API bool EvaluateMetrics(
+        static inline AT_DEVICE_API bool EvaluateMetrics(
             const aten::vec3 &p,
             const aten::hitrecord &hrec_query,
             const aten::hitrecord &hrec_sample,
@@ -469,7 +469,7 @@ namespace npr {
          * @param[in] hrec_sample Mesh id at sample ray hit point.
          * @return If metric is valid, return true. Otherwise, return false.
          */
-        static inline AT_DEVICE_MTRL_API bool EvaluateMeshIdMetric(
+        static inline AT_DEVICE_API bool EvaluateMeshIdMetric(
             const int32_t mesh_id_query,
             const int32_t mesh_id_sample)
         {
@@ -485,7 +485,7 @@ namespace npr {
          * @param[in] albedo_s Albedo at sample ray hit point.
          * @return If metric is valid, return true. Otherwise, return false.
          */
-        static inline AT_DEVICE_MTRL_API bool EvaluateAlbedoMetric(
+        static inline AT_DEVICE_API bool EvaluateAlbedoMetric(
             const real threshold_albedo,
             const aten::vec4 &albedo_q,
             const aten::vec4 &albedo_s)
@@ -504,7 +504,7 @@ namespace npr {
          * @param[in] normal_sample Albedo at sample ray hit point.
          * @return If metric is valid, return true. Otherwise, return false.
          */
-        static inline AT_DEVICE_MTRL_API bool EvaluateNormalMetric(
+        static inline AT_DEVICE_API bool EvaluateNormalMetric(
             const real threshold_normal,
             const aten::vec3 &normal_query,
             const aten::vec3 &normal_sample)
@@ -524,7 +524,7 @@ namespace npr {
          * @param[in] depth_s Depth at sample ray hit point.
          * @return If metric is valid, return true. Otherwise, return false.
          */
-        static inline AT_DEVICE_MTRL_API bool EvaluateDepthMetric(
+        static inline AT_DEVICE_API bool EvaluateDepthMetric(
             const aten::vec3 &p,
             const real scale_factor,
             const aten::hitrecord &hrec_query,
@@ -552,7 +552,7 @@ namespace npr {
          * @param[in] depth_s Depth at sample ray hit point.
          * @return Threshold for depth.
          */
-        static inline AT_DEVICE_MTRL_API real ComputeDepthThreshold(
+        static inline AT_DEVICE_API real ComputeDepthThreshold(
             const aten::vec3 &p,
             const real scale_factor,
             const aten::hitrecord &hrec_query,
@@ -600,7 +600,7 @@ namespace npr {
          * @param[in] pixelWidth Pixel width at distance 1 from camera.
          * @return If feature line width in 3D is valid based on line width in 2D, return true. Otherwise, return false.
          */
-        static inline AT_DEVICE_MTRL_API bool IsInLineWidth(
+        static inline AT_DEVICE_API bool IsInLineWidth(
             const real screen_line_width,
             const aten::ray &query_ray,
             const aten::vec3 &sample_hit_point,

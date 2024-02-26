@@ -41,7 +41,7 @@ namespace AT_NAME {
             m_param.expAttn = std::max(expAttn, real(0));
         }
 
-        static AT_DEVICE_API void sample(
+        static AT_HOST_DEVICE_API void sample(
             const aten::LightParameter* param,
             const aten::vec3& org,
             aten::sampler* sampler,

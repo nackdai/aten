@@ -25,10 +25,10 @@ namespace aten {
         uint32_t isIBL : 1;         ///< Image Based Light.
     };
 
-    AT_DEVICE_MTRL_API constexpr auto LightAttributeArea = aten::LightAttribute{ false, false, false };
-    AT_DEVICE_MTRL_API constexpr auto LightAttributeSingluar = aten::LightAttribute{ true,  false, false };
-    AT_DEVICE_MTRL_API constexpr auto LightAttributeDirectional = aten::LightAttribute{ true,  true,  false };
-    AT_DEVICE_MTRL_API constexpr auto LightAttributeIBL = aten::LightAttribute{ false, true,  true };
+    AT_DEVICE_API constexpr auto LightAttributeArea = aten::LightAttribute{ false, false, false };
+    AT_DEVICE_API constexpr auto LightAttributeSingluar = aten::LightAttribute{ true,  false, false };
+    AT_DEVICE_API constexpr auto LightAttributeDirectional = aten::LightAttribute{ true,  true,  false };
+    AT_DEVICE_API constexpr auto LightAttributeIBL = aten::LightAttribute{ false, true,  true };
 
     /**
      * @brief Light type.
@@ -81,11 +81,11 @@ namespace aten {
             };
         };
 
-        AT_DEVICE_API LightParameter()
+        AT_HOST_DEVICE_API LightParameter()
             : v0(0), v1(0)
         {};
 
-        AT_DEVICE_API LightParameter(LightType _type, const LightAttribute& _attrib)
+        AT_HOST_DEVICE_API LightParameter(LightType _type, const LightAttribute& _attrib)
             : attrib(_attrib), type(_type)
         {
             constAttn = real(1);
@@ -104,12 +104,12 @@ namespace aten {
             }
         }
 
-        AT_DEVICE_API LightParameter(const LightParameter& rhs)
+        AT_HOST_DEVICE_API LightParameter(const LightParameter& rhs)
         {
             *this = rhs;
         }
 
-        AT_DEVICE_API LightParameter& operator=(const LightParameter& rhs)
+        AT_HOST_DEVICE_API LightParameter& operator=(const LightParameter& rhs)
         {
             pos = rhs.pos;
             dir = rhs.dir;
@@ -121,7 +121,7 @@ namespace aten {
             return *this;
         }
 
-        AT_DEVICE_API bool IsValidLightObjectId() const
+        AT_HOST_DEVICE_API bool IsValidLightObjectId() const
         {
             if (type == LightType::Area) {
                 return objid >= 0;
@@ -129,7 +129,7 @@ namespace aten {
             return false;
         }
 
-        AT_DEVICE_API int32_t GetLightEnvmapId() const
+        AT_HOST_DEVICE_API int32_t GetLightEnvmapId() const
         {
             if (type == LightType::IBL) {
                 return envmapidx;

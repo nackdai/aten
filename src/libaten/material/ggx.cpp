@@ -11,7 +11,7 @@ namespace AT_NAME
     // NOTE
     // http://qiita.com/_Pheema_/items/f1ffb2e38cc766e6e668
 
-    AT_DEVICE_MTRL_API real MicrofacetGGX::pdf(
+    AT_DEVICE_API real MicrofacetGGX::pdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -27,7 +27,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::sampleDirection(
+    AT_DEVICE_API aten::vec3 MicrofacetGGX::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -44,7 +44,7 @@ namespace AT_NAME
         return dir;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::bsdf(
+    AT_DEVICE_API aten::vec3 MicrofacetGGX::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -66,7 +66,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::bsdf(
+    AT_DEVICE_API aten::vec3 MicrofacetGGX::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -89,7 +89,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API real MicrofacetGGX::sampleGGX_D(
+    AT_DEVICE_API real MicrofacetGGX::sampleGGX_D(
         const aten::vec3& wh,    // half
         const aten::vec3& n,    // normal
         real roughness)
@@ -126,7 +126,7 @@ namespace AT_NAME
         return D;
     }
 
-    AT_DEVICE_MTRL_API real MicrofacetGGX::computeGGXSmithG1(real roughness, const aten::vec3& v, const aten::vec3& n)
+    AT_DEVICE_API real MicrofacetGGX::computeGGXSmithG1(real roughness, const aten::vec3& v, const aten::vec3& n)
     {
         // NOTE
         // http://computergraphics.stackexchange.com/questions/2489/correct-form-of-the-ggx-geometry-term
@@ -146,7 +146,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API real MicrofacetGGX::pdf(
+    AT_DEVICE_API real MicrofacetGGX::pdf(
         real roughness,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -169,7 +169,7 @@ namespace AT_NAME
         return pdf;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::sampleDirection(
+    AT_DEVICE_API aten::vec3 MicrofacetGGX::sampleDirection(
         real roughness,
         const aten::vec3& in,
         const aten::vec3& normal,
@@ -182,7 +182,7 @@ namespace AT_NAME
         return dir;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::sampleNormal(
+    AT_DEVICE_API aten::vec3 MicrofacetGGX::sampleNormal(
         const real roughness,
         const aten::vec3& normal,
         aten::sampler* sampler)
@@ -214,7 +214,7 @@ namespace AT_NAME
         return w;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::bsdf(
+    AT_DEVICE_API aten::vec3 MicrofacetGGX::bsdf(
         const aten::vec3& albedo,
         const real roughness,
         const real ior,
@@ -278,7 +278,7 @@ namespace AT_NAME
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API void MicrofacetGGX::sample(
+    AT_DEVICE_API void MicrofacetGGX::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -306,7 +306,7 @@ namespace AT_NAME
         result->fresnel = fresnel;
     }
 
-    AT_DEVICE_MTRL_API void MicrofacetGGX::sample(
+    AT_DEVICE_API void MicrofacetGGX::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,

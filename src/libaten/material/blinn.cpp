@@ -9,7 +9,7 @@ namespace AT_NAME
     // http://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
     // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
-    AT_DEVICE_MTRL_API real MicrofacetBlinn::pdf(
+    AT_DEVICE_API real MicrofacetBlinn::pdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -40,7 +40,7 @@ namespace AT_NAME
         return pdf;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::sampleDirection(
+    AT_DEVICE_API aten::vec3 MicrofacetBlinn::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -100,7 +100,7 @@ namespace AT_NAME
         return dir;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
+    AT_DEVICE_API aten::vec3 MicrofacetBlinn::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -121,7 +121,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
+    AT_DEVICE_API aten::vec3 MicrofacetBlinn::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -140,7 +140,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
+    AT_DEVICE_API aten::vec3 MicrofacetBlinn::bsdf(
         const aten::vec3& albedo,
         const real shininess,
         const real ior,
@@ -219,7 +219,7 @@ namespace AT_NAME
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API void MicrofacetBlinn::sample(
+    AT_DEVICE_API void MicrofacetBlinn::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -266,7 +266,7 @@ namespace AT_NAME
 #endif
     }
 
-    AT_DEVICE_MTRL_API void MicrofacetBlinn::sample(
+    AT_DEVICE_API void MicrofacetBlinn::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,

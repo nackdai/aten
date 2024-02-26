@@ -9,18 +9,18 @@
 namespace aten {
     class aabb {
     public:
-        AT_DEVICE_API aabb()
+        AT_HOST_DEVICE_API aabb()
         {
             empty();
         }
-        AT_DEVICE_API aabb(const vec3& _min, const vec3& _max)
+        AT_HOST_DEVICE_API aabb(const vec3& _min, const vec3& _max)
         {
             init(_min, _max);
         }
-        AT_DEVICE_API ~aabb() {}
+        AT_HOST_DEVICE_API ~aabb() {}
 
     public:
-        AT_DEVICE_API void init(const vec3& _min, const vec3& _max)
+        AT_HOST_DEVICE_API void init(const vec3& _min, const vec3& _max)
         {
 #if 0
             AT_ASSERT(_min.x <= _max.x);
@@ -38,13 +38,13 @@ namespace aten {
             m_max = m_min + _size;
         }
 
-        AT_DEVICE_API vec3 size() const
+        AT_HOST_DEVICE_API vec3 size() const
         {
             vec3 size = m_max - m_min;
             return size;
         }
 
-        AT_DEVICE_API bool hit(
+        AT_HOST_DEVICE_API bool hit(
             const ray& r,
             real t_min, real t_max,
             real* t_result = nullptr) const
@@ -57,7 +57,7 @@ namespace aten {
         }
 
         template <class T>
-        static AT_DEVICE_API bool hit(
+        static AT_HOST_DEVICE_API bool hit(
             const ray& r,
             const T& _min, const T& _max,
             real t_min, real t_max,
@@ -84,7 +84,7 @@ namespace aten {
         }
 
         template <class T>
-        static AT_DEVICE_API bool hit(
+        static AT_HOST_DEVICE_API bool hit(
             const ray& r,
             const T& _min, const T& _max,
             real t_min, real t_max,
@@ -151,7 +151,7 @@ namespace aten {
             return b0 & b1;
         }
 
-        AT_DEVICE_API const vec3& minPos() const
+        AT_HOST_DEVICE_API const vec3& minPos() const
         {
             return m_min;
         }
@@ -215,7 +215,7 @@ namespace aten {
             return computeSurfaceArea(m_min, m_max);
         }
 
-        AT_DEVICE_API void empty()
+        AT_HOST_DEVICE_API void empty()
         {
             m_min.x = m_min.y = m_min.z = AT_MATH_INF;
             m_max.x = m_max.y = m_max.z = -AT_MATH_INF;
@@ -231,7 +231,7 @@ namespace aten {
             return (aten::cmpGEQ(m_min, m_max) & 0x07) == 0;
         }
 
-        AT_DEVICE_API real getDiagonalLenght() const
+        AT_HOST_DEVICE_API real getDiagonalLenght() const
         {
             auto ret = length(m_max - m_min);
             return ret;

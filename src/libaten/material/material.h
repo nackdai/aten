@@ -27,12 +27,12 @@ namespace aten
         uint32_t isGlossy : 1;
     };
 
-    AT_DEVICE_MTRL_API constexpr auto MaterialAttributeMicrofacet = aten::MaterialAttribute{false, false, false, true};
-    AT_DEVICE_MTRL_API constexpr auto MaterialAttributeLambert = aten::MaterialAttribute{false, false, false, false};
-    AT_DEVICE_MTRL_API constexpr auto MaterialAttributeEmissive = aten::MaterialAttribute{true,  false, false, false};
-    AT_DEVICE_MTRL_API constexpr auto MaterialAttributeSpecular = aten::MaterialAttribute{false, true,  false, true};
-    AT_DEVICE_MTRL_API constexpr auto MaterialAttributeRefraction = aten::MaterialAttribute{false, true,  true,  true};
-    AT_DEVICE_MTRL_API constexpr auto MaterialAttributeTransmission = aten::MaterialAttribute{false, false, true,  false};
+    AT_DEVICE_API constexpr auto MaterialAttributeMicrofacet = aten::MaterialAttribute{false, false, false, true};
+    AT_DEVICE_API constexpr auto MaterialAttributeLambert = aten::MaterialAttribute{false, false, false, false};
+    AT_DEVICE_API constexpr auto MaterialAttributeEmissive = aten::MaterialAttribute{true,  false, false, false};
+    AT_DEVICE_API constexpr auto MaterialAttributeSpecular = aten::MaterialAttribute{false, true,  false, true};
+    AT_DEVICE_API constexpr auto MaterialAttributeRefraction = aten::MaterialAttribute{false, true,  true,  true};
+    AT_DEVICE_API constexpr auto MaterialAttributeTransmission = aten::MaterialAttribute{false, false, true,  false};
 
     enum class MaterialType : int32_t {
         Emissive,
@@ -76,7 +76,7 @@ namespace aten
         real clearcoat;         // 第二の特別な目的のスペキュラーローブ.
         real clearcoatGloss;    // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
 
-        AT_DEVICE_API void Init()
+        AT_HOST_DEVICE_API void Init()
         {
             ior = 1.0;
 
@@ -94,12 +94,12 @@ namespace aten
             clearcoatGloss = 1.0;
         }
 
-        AT_DEVICE_API StandardMaterialParameter()
+        AT_HOST_DEVICE_API StandardMaterialParameter()
         {
             Init();
         }
 
-        AT_DEVICE_API auto& operator=(const StandardMaterialParameter& rhs)
+        AT_HOST_DEVICE_API auto& operator=(const StandardMaterialParameter& rhs)
         {
             ior = rhs.ior;
             shininess = rhs.shininess;
@@ -131,7 +131,7 @@ namespace aten
         real retrorelective_roughness;
         real padding[3];
 
-        AT_DEVICE_API void Init()
+        AT_HOST_DEVICE_API void Init()
         {
             aten::set(clearcoat_color, real(1), real(1), real(1));
             aten::set(retrorelective_color, real(1), real(1), real(1));
@@ -144,12 +144,12 @@ namespace aten
             retrorelective_roughness = real(0.26);
         }
 
-        AT_DEVICE_API RetroreflectiveMaterialParameter()
+        AT_HOST_DEVICE_API RetroreflectiveMaterialParameter()
         {
             Init();
         }
 
-        AT_DEVICE_API auto& operator=(const RetroreflectiveMaterialParameter& rhs)
+        AT_HOST_DEVICE_API auto& operator=(const RetroreflectiveMaterialParameter& rhs)
         {
             clearcoat_color = rhs.clearcoat_color;
             retrorelective_color = rhs.retrorelective_color;
@@ -180,7 +180,7 @@ namespace aten
         real flake_normal_orientation;
         real flake_color_multiplier;
 
-        AT_DEVICE_API void Init()
+        AT_HOST_DEVICE_API void Init()
         {
             aten::set(clearcoat_color, real(1), real(1), real(1));
             aten::set(flakes_color, real(1), real(1), real(0));
@@ -196,12 +196,12 @@ namespace aten
             flake_color_multiplier = real(1.0);
         }
 
-        AT_DEVICE_API CarPaintMaterialParameter()
+        AT_HOST_DEVICE_API CarPaintMaterialParameter()
         {
             Init();
         }
 
-        AT_DEVICE_API auto& operator=(const CarPaintMaterialParameter& rhs)
+        AT_HOST_DEVICE_API auto& operator=(const CarPaintMaterialParameter& rhs)
         {
             clearcoat_color = rhs.clearcoat_color;
             flakes_color = rhs.flakes_color;
@@ -240,12 +240,12 @@ namespace aten
             RetroreflectiveMaterialParameter retrorelective;
         };
 
-        AT_DEVICE_API void Init()
+        AT_HOST_DEVICE_API void Init()
         {
             standard.Init();
         }
 
-        AT_DEVICE_API MaterialParameter()
+        AT_HOST_DEVICE_API MaterialParameter()
         {
             baseColor.set(real(0), real(0), real(0), real(1));
             isIdealRefraction = false;
@@ -256,7 +256,7 @@ namespace aten
             Init();
         }
 
-        AT_DEVICE_API MaterialParameter(MaterialType _type, const MaterialAttribute& _attrib)
+        AT_HOST_DEVICE_API MaterialParameter(MaterialType _type, const MaterialAttribute& _attrib)
             : MaterialParameter()
         {
             type = _type;
@@ -272,7 +272,7 @@ namespace aten
             }
         }
 
-        AT_DEVICE_API auto& operator=(const MaterialParameter& rhs)
+        AT_HOST_DEVICE_API auto& operator=(const MaterialParameter& rhs)
         {
             baseColor = rhs.baseColor;
 
@@ -354,8 +354,8 @@ namespace AT_NAME
 
         real subpdf{ real(1) };
 
-        AT_DEVICE_MTRL_API MaterialSampling() {}
-        AT_DEVICE_MTRL_API MaterialSampling(const aten::vec3& d, const aten::vec3& b, real p)
+        AT_DEVICE_API MaterialSampling() {}
+        AT_DEVICE_API MaterialSampling(const aten::vec3& d, const aten::vec3& b, real p)
             : dir(d), bsdf(b), pdf(p)
         {}
     };
@@ -501,15 +501,15 @@ namespace AT_NAME
 
         static bool isValidMaterialType(aten::MaterialType type);
 
-        static AT_DEVICE_MTRL_API bool isTranslucentByAlpha(
+        static AT_DEVICE_API bool isTranslucentByAlpha(
             const aten::MaterialParameter& param,
             real u, real v);
 
-        static AT_DEVICE_MTRL_API real getTranslucentAlpha(
+        static AT_DEVICE_API real getTranslucentAlpha(
             const aten::MaterialParameter& param,
             real u, real v);
 
-        static AT_DEVICE_MTRL_API real computeFresnel(
+        static AT_DEVICE_API real computeFresnel(
             real ni, real nt,
             const aten::vec3& wi,
             const aten::vec3& normal)
@@ -528,7 +528,7 @@ namespace AT_NAME
             return Rsp;
         }
 
-        static AT_DEVICE_MTRL_API real computeFresnelShlick(
+        static AT_DEVICE_API real computeFresnelShlick(
             real ni, real nt,
             const aten::vec3& wi,
             const aten::vec3& n)
@@ -552,12 +552,12 @@ namespace AT_NAME
             return F;
         }
 
-        static AT_DEVICE_MTRL_API aten::vec4 sampleAlbedoMap(
+        static AT_DEVICE_API aten::vec4 sampleAlbedoMap(
             const aten::MaterialParameter* mtrl,
             real u, real v,
             uint32_t lod = 0);
 
-        static AT_DEVICE_MTRL_API void sampleMaterial(
+        static AT_DEVICE_API void sampleMaterial(
             AT_NAME::MaterialSampling* result,
             const aten::MaterialParameter* mtrl,
             const aten::vec3& normal,
@@ -572,7 +572,7 @@ namespace AT_NAME
             bool is_light_path = false);
 #endif
 
-        static AT_DEVICE_MTRL_API void sampleMaterialWithExternalAlbedo(
+        static AT_DEVICE_API void sampleMaterialWithExternalAlbedo(
             AT_NAME::MaterialSampling* result,
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
@@ -583,14 +583,14 @@ namespace AT_NAME
             float u, float v,
             const aten::vec4& externalAlbedo);
 
-        static AT_DEVICE_MTRL_API real samplePDF(
+        static AT_DEVICE_API real samplePDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v);
 
-        static AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
+        static AT_DEVICE_API aten::vec3 sampleDirection(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -598,7 +598,7 @@ namespace AT_NAME
             aten::sampler* sampler,
             real pre_sampled_r);
 
-        static AT_DEVICE_MTRL_API aten::vec3 sampleBSDF(
+        static AT_DEVICE_API aten::vec3 sampleBSDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -606,7 +606,7 @@ namespace AT_NAME
             real u, real v,
             real pre_sampled_r);
 
-        static AT_DEVICE_MTRL_API aten::vec3 sampleBSDFWithExternalAlbedo(
+        static AT_DEVICE_API aten::vec3 sampleBSDFWithExternalAlbedo(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -615,7 +615,7 @@ namespace AT_NAME
             const aten::vec4& externalAlbedo,
             real pre_sampled_r);
 
-        static AT_DEVICE_MTRL_API real applyNormal(
+        static AT_DEVICE_API real applyNormal(
             const aten::MaterialParameter* mtrl,
             const int32_t normalMapIdx,
             const aten::vec3& orgNml,

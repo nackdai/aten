@@ -5,7 +5,7 @@
 
 namespace AT_NAME
 {
-    AT_DEVICE_MTRL_API real Retroreflective::pdf(
+    AT_DEVICE_API real Retroreflective::pdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -63,7 +63,7 @@ namespace AT_NAME
         return pdf;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 Retroreflective::sampleDirection(
+    AT_DEVICE_API aten::vec3 Retroreflective::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -130,7 +130,7 @@ namespace AT_NAME
         return dir;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 Retroreflective::bsdf(
+    AT_DEVICE_API aten::vec3 Retroreflective::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -141,7 +141,7 @@ namespace AT_NAME
         return bsdf(param, normal, wi, wo, u, v, albedo);
     }
 
-    AT_DEVICE_MTRL_API real Retroreflective::getEffectiveRetroreflectiveArea(
+    AT_DEVICE_API real Retroreflective::getEffectiveRetroreflectiveArea(
         const aten::vec3& into_prismatic_sheet_dir,
         const aten::vec3& normal)
     {
@@ -210,7 +210,7 @@ namespace AT_NAME
         return result;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 Retroreflective::bsdf(
+    AT_DEVICE_API aten::vec3 Retroreflective::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -276,7 +276,7 @@ namespace AT_NAME
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API void Retroreflective::sample(
+    AT_DEVICE_API void Retroreflective::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -291,7 +291,7 @@ namespace AT_NAME
         result->bsdf = bsdf(param, normal, wi, result->dir, u, v);
     }
 
-    AT_DEVICE_MTRL_API void Retroreflective::sample(
+    AT_DEVICE_API void Retroreflective::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,

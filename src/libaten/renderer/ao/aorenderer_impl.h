@@ -33,7 +33,7 @@ namespace ao {
      * @param[in,out] scene Scene instance. Only for running on host.
      */
     template <class SCENE = void>
-    inline AT_DEVICE_MTRL_API void ShandeAO(
+    inline AT_DEVICE_API void ShandeAO(
         int32_t idx,
         uint32_t frame, uint32_t rnd,
         int32_t ao_num_rays, float ao_radius,
@@ -115,7 +115,7 @@ namespace ao {
      * @param[in] is_first_bounce Specify if this function is called for the first bounce.
      * @param[in,out] paths Information of paths.
      */
-    inline AT_DEVICE_MTRL_API void ShadeMissAO(
+    inline AT_DEVICE_API void ShadeMissAO(
         int32_t idx,
         bool is_first_bounce,
         AT_NAME::Path& paths)

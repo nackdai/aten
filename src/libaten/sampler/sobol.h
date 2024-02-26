@@ -37,7 +37,7 @@ struct Matrices
 // the point inside the sequence. The scramble parameter can be used
 // to permute elementary intervals, and might be chosen randomly to
 // generate a randomized QMC sequence.
-inline AT_DEVICE_API float sample(
+inline AT_HOST_DEVICE_API float sample(
     const uint32_t* matrices,
     unsigned long long index,
     const unsigned dimension,

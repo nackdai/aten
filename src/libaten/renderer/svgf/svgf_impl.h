@@ -15,7 +15,7 @@ namespace svgf {
     namespace _detail
     {
         template <bool NeedCheckSingularMtrlBounce>
-        inline AT_DEVICE_MTRL_API bool NeedFillAOVBySingularMtrl(
+        inline AT_DEVICE_API bool NeedFillAOVBySingularMtrl(
             const int32_t idx,
             const int32_t bounce,
             const AT_NAME::Path& paths)
@@ -27,7 +27,7 @@ namespace svgf {
             return false;
         }
 
-        inline AT_DEVICE_MTRL_API int32_t GetIdx(int32_t x, int32_t y, int32_t pitch)
+        inline AT_DEVICE_API int32_t GetIdx(int32_t x, int32_t y, int32_t pitch)
         {
             return x + y * pitch;
         }
@@ -51,7 +51,7 @@ namespace svgf {
      * @return If AOV is filled in this API, returns true. Otherwise, returns false.
      */
     template <bool NeedCheckSingularMtrlBounce, bool NeedOverrideMeshIdByMtrlId, bool IsExternalAlbedo>
-    inline AT_DEVICE_MTRL_API bool FillAOVs(
+    inline AT_DEVICE_API bool FillAOVs(
         const int32_t idx,
         const int32_t bounce,
         const AT_NAME::Path& paths,
@@ -99,7 +99,7 @@ namespace svgf {
      * @return Contribution as RGB.
      */
     template <bool IsFirstFrameExecution>
-    inline AT_DEVICE_MTRL_API AT_NAME::_detail::v4 PrepareForDenoise(
+    inline AT_DEVICE_API AT_NAME::_detail::v4 PrepareForDenoise(
         const int32_t idx,
         const AT_NAME::Path& paths,
         aten::span<AT_NAME::_detail::v4> temporary_color_buffer,
@@ -143,7 +143,7 @@ namespace svgf {
      * @return Tuple for the excracted center pixle data, normal, depth, mesh id, contribution.
      */
     template <bool WillDivideContribByW = true, class Span_v4>
-    inline AT_DEVICE_MTRL_API aten::tuple<AT_NAME::_detail::v3, real, int32_t, AT_NAME::_detail::v4> ExtractCenterPixel(
+    inline AT_DEVICE_API aten::tuple<AT_NAME::_detail::v3, real, int32_t, AT_NAME::_detail::v4> ExtractCenterPixel(
         int32_t idx,
         const aten::const_span<AT_NAME::_detail::v4>& contribs,
         Span_v4& aov_normal_depth,
@@ -178,7 +178,7 @@ namespace svgf {
      * @param[out] aov_moment_temporalweight Destination buffer to store moment of color luminance and temporal weight. If the pixle is background, only moments is updated with 1.
      * @return If the pixel is background, returns the color in the arguments directly. Otherwise, returns nullopt.
      */
-    inline AT_DEVICE_MTRL_API std::optional<AT_NAME::_detail::v4> UpdateAOVIfBackgroundPixel(
+    inline AT_DEVICE_API std::optional<AT_NAME::_detail::v4> UpdateAOVIfBackgroundPixel(
         const int32_t idx,
         const AT_NAME::_detail::v4& color,
         const int32_t center_meshid,
@@ -206,7 +206,7 @@ namespace svgf {
      * @param[out] curr_aov_moment_temporalweight AOV buffer to store moments and temporal weight for current frame.
      * @param[in] prev_aov_moment_temporalweight AOV buffer to store moments and temporal weight for previous frame.
      */
-    inline AT_DEVICE_MTRL_API void AccumulateMoments(
+    inline AT_DEVICE_API void AccumulateMoments(
         const int32_t idx,
         const float weight,
         const aten::const_span<AT_NAME::_detail::v4>& curr_aov_color_variance,
@@ -273,7 +273,7 @@ namespace svgf {
      * @return Tuple for weight to merge the colors and the reporjected color.
      */
     template <class BufferForMotionDepth>
-    inline AT_DEVICE_MTRL_API aten::tuple<float, AT_NAME::_detail::v4> TemporalReprojection(
+    inline AT_DEVICE_API aten::tuple<float, AT_NAME::_detail::v4> TemporalReprojection(
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
         const float threshold_normal,
@@ -373,7 +373,7 @@ namespace svgf {
      * @param[in] ov_moment_temporalweight AOV buffer to store moments and temporal weight.
      * @return Temporal weight which is affected with the propagation from the surrounding pixels. If the center pixle is background, returns nullopt.
      */
-    inline AT_DEVICE_MTRL_API std::optional<float> RecomputeTemporalWeightFromSurroundingPixels(
+    inline AT_DEVICE_API std::optional<float> RecomputeTemporalWeightFromSurroundingPixels(
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
         const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
@@ -422,7 +422,7 @@ namespace svgf {
      * @param[in,out] aov_moment_temporalweight AOV buffer to store moments and temporal weight.
      * @return Estivated variance. If the pixel is background, returns zero vector.
      */
-    inline AT_DEVICE_MTRL_API AT_NAME::_detail::v4 EstimateVariance(
+    inline AT_DEVICE_API AT_NAME::_detail::v4 EstimateVariance(
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
         const aten::mat4& mtx_C2V,
@@ -543,7 +543,7 @@ namespace svgf {
      * @return 3x3 gaussian filtered value.
      */
     template <class MemberVar>
-    inline AT_DEVICE_MTRL_API float Exec3x3GaussFilter(
+    inline AT_DEVICE_API float Exec3x3GaussFilter(
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,
         const aten::const_span<AT_NAME::_detail::v4>& buffer,
@@ -605,7 +605,7 @@ namespace svgf {
      *        If the pixel is background but this API is not calles as the final iteration, returns the valid optiaonal but no value.
      *        If the pixel is not background, returns nullopt.
      */
-    inline AT_DEVICE_MTRL_API std::optional<std::optional<AT_NAME::_detail::v4>> CheckIfBackgroundPixelForAtrous(
+    inline AT_DEVICE_API std::optional<std::optional<AT_NAME::_detail::v4>> CheckIfBackgroundPixelForAtrous(
         const bool is_final_iter,
         const int32_t idx,
         const AT_NAME::_detail::v4& center_color,
@@ -659,7 +659,7 @@ namespace svgf {
      * @param[in] camera_distance Distance from camera origin to the screen.
      * @return A-trous wavelet filtered color.
      */
-    inline AT_DEVICE_MTRL_API AT_NAME::_detail::v4 ExecAtrousWaveletFilter(
+    inline AT_DEVICE_API AT_NAME::_detail::v4 ExecAtrousWaveletFilter(
         bool is_first_iter,
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
@@ -794,7 +794,7 @@ namespace svgf {
      * @param[out] next_color_variance_buffer Buffer to store the filtered_color_variance for the next A-trous wavelt filter iteration.
      * @return If is_final_iter is true, returns the albedo multiplied color as the SVGF result for displaying. Otherwise, returns nullopt.
      */
-    inline AT_DEVICE_MTRL_API std::optional<AT_NAME::_detail::v4> PostProcessForAtrousFilter(
+    inline AT_DEVICE_API std::optional<AT_NAME::_detail::v4> PostProcessForAtrousFilter(
         bool is_first_iter, bool is_final_iter,
         const int32_t idx,
         const AT_NAME::_detail::v4& filtered_color_variance,
@@ -833,7 +833,7 @@ namespace svgf {
      * @param dst Destination buffer to store the copied value from the source buffer.
      */
     template <int32_t CopyElementNumPerItem>
-    inline AT_DEVICE_MTRL_API constexpr void CopyVectorBuffer(
+    inline AT_DEVICE_API constexpr void CopyVectorBuffer(
         const int32_t idx,
         const aten::const_span<AT_NAME::_detail::v4>& src,
         aten::span<AT_NAME::_detail::v4>& dst)

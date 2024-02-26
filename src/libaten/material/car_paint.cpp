@@ -11,7 +11,7 @@ namespace AT_NAME
 
     // TODO
     // Standardize API.
-    inline AT_DEVICE_MTRL_API void applyTangentSpaceCoord(const aten::vec3& nml, const aten::vec3& src, aten::vec3& dst)
+    inline AT_DEVICE_API void applyTangentSpaceCoord(const aten::vec3& nml, const aten::vec3& src, aten::vec3& dst)
     {
         aten::vec3 n = normalize(nml);
         aten::vec3 t = aten::getOrthoVector(n);
@@ -21,7 +21,7 @@ namespace AT_NAME
         dst = normalize(dst);
     }
 
-    AT_DEVICE_MTRL_API real CarPaint::pdf(
+    AT_DEVICE_API real CarPaint::pdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -55,7 +55,7 @@ namespace AT_NAME
         return pdf;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 CarPaint::sampleDirection(
+    AT_DEVICE_API aten::vec3 CarPaint::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -106,7 +106,7 @@ namespace AT_NAME
         return dir;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 CarPaint::bsdf(
+    AT_DEVICE_API aten::vec3 CarPaint::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -118,7 +118,7 @@ namespace AT_NAME
         return bsdf(param, normal, wi, wo, u, v, albedo, pre_sampled_r);
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 CarPaint::bsdf(
+    AT_DEVICE_API aten::vec3 CarPaint::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -180,7 +180,7 @@ namespace AT_NAME
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API void CarPaint::sample(
+    AT_DEVICE_API void CarPaint::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -196,7 +196,7 @@ namespace AT_NAME
         result->bsdf = bsdf(param, normal, wi, result->dir, u, v, pre_sampled_r);
     }
 
-    AT_DEVICE_MTRL_API void CarPaint::sample(
+    AT_DEVICE_API void CarPaint::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -213,7 +213,7 @@ namespace AT_NAME
         result->bsdf = bsdf(param, normal, wi, result->dir, u, v, externalAlbedo, pre_sampled_r);
     }
 
-    AT_DEVICE_MTRL_API real CarPaint::applyNormalMap(
+    AT_DEVICE_API real CarPaint::applyNormalMap(
         const aten::MaterialParameter* param,
         const aten::vec3& orgNml,
         aten::vec3& newNml,

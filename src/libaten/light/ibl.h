@@ -45,7 +45,7 @@ namespace AT_NAME {
 
         real samplePdf(const aten::ray& r) const;
 
-        static AT_DEVICE_API real samplePdf(const aten::vec3& clr, real avgIllum)
+        static AT_HOST_DEVICE_API real samplePdf(const aten::vec3& clr, real avgIllum)
         {
             auto illum = AT_NAME::color::luminance(clr);
 
@@ -70,7 +70,7 @@ namespace AT_NAME {
             aten::sampler* sampler) const;
 
         template <class CONTEXT>
-        static AT_DEVICE_MTRL_API void sample(
+        static AT_DEVICE_API void sample(
             aten::LightSampleResult& result,
             const aten::LightParameter& param,
             const CONTEXT& ctxt,

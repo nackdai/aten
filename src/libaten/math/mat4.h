@@ -24,15 +24,15 @@ namespace aten {
             };
         };
 
-        AT_DEVICE_API mat4()
+        AT_HOST_DEVICE_API mat4()
         {
             identity();
         }
-        AT_DEVICE_API mat4(const mat4& rhs)
+        AT_HOST_DEVICE_API mat4(const mat4& rhs)
         {
             *this = rhs;
         }
-        AT_DEVICE_API mat4(
+        AT_HOST_DEVICE_API mat4(
             real _m00, real _m01, real _m02, real _m03,
             real _m10, real _m11, real _m12, real _m13,
             real _m20, real _m21, real _m22, real _m23,
@@ -43,7 +43,7 @@ namespace aten {
             m20 = _m20; m21 = _m21; m22 = _m22; m23 = _m23;
             m30 = _m30; m31 = _m31; m32 = _m32; m33 = _m33;
         }
-        AT_DEVICE_API mat4(const vec3& x, const vec3& y, const vec3& z)
+        AT_HOST_DEVICE_API mat4(const vec3& x, const vec3& y, const vec3& z)
         {
             m00 = x.x; m01 = y.x; m02 = z.x; m03 = 0;
             m10 = x.y; m11 = y.y; m12 = z.y; m13 = 0;
@@ -51,7 +51,7 @@ namespace aten {
             m30 = 0.0; m31 = 0.0; m32 = 0.0; m33 = 1;
         }
 
-        inline AT_DEVICE_API mat4& identity()
+        inline AT_HOST_DEVICE_API mat4& identity()
         {
             // TODO
 #ifdef __AT_CUDA__
@@ -84,7 +84,7 @@ namespace aten {
             return a;
         }
 
-        AT_DEVICE_API mat4& operator=(const mat4& rhs)
+        AT_HOST_DEVICE_API mat4& operator=(const mat4& rhs)
         {
             m00 = rhs.m00; m01 = rhs.m01; m02 = rhs.m02; m03 = rhs.m03;
             m10 = rhs.m10; m11 = rhs.m11; m12 = rhs.m12; m13 = rhs.m13;
@@ -93,12 +93,12 @@ namespace aten {
             return *this;
         }
 
-        inline AT_DEVICE_API const mat4& operator+() const
+        inline AT_HOST_DEVICE_API const mat4& operator+() const
         {
             return *this;
         }
 
-        inline AT_DEVICE_API mat4 operator-() const
+        inline AT_HOST_DEVICE_API mat4 operator-() const
         {
             mat4 ret;
             ret.m00 = -m00; ret.m01 = -m01; ret.m02 = -m02; ret.m03 = -m03;
@@ -108,20 +108,20 @@ namespace aten {
             return ret;
         }
 
-        inline AT_DEVICE_API real* operator[](int32_t i)
+        inline AT_HOST_DEVICE_API real* operator[](int32_t i)
         {
             return m[i];
         }
-        inline AT_DEVICE_API real operator()(int32_t i, int32_t j) const
+        inline AT_HOST_DEVICE_API real operator()(int32_t i, int32_t j) const
         {
             return m[i][j];
         }
-        inline AT_DEVICE_API real& operator()(int32_t i, int32_t j)
+        inline AT_HOST_DEVICE_API real& operator()(int32_t i, int32_t j)
         {
             return m[i][j];
         }
 
-        inline AT_DEVICE_API mat4& operator+=(const mat4& mtx)
+        inline AT_HOST_DEVICE_API mat4& operator+=(const mat4& mtx)
         {
             m00 += mtx.m00; m01 += mtx.m01; m02 += mtx.m02; m03 += mtx.m03;
             m10 += mtx.m10; m11 += mtx.m11; m12 += mtx.m12; m13 += mtx.m13;
@@ -129,7 +129,7 @@ namespace aten {
             m30 += mtx.m30; m31 += mtx.m31; m32 += mtx.m32; m33 += mtx.m33;
             return *this;
         }
-        inline AT_DEVICE_API mat4& operator-=(const mat4& mtx)
+        inline AT_HOST_DEVICE_API mat4& operator-=(const mat4& mtx)
         {
             m00 -= mtx.m00; m01 -= mtx.m01; m02 -= mtx.m02; m03 -= mtx.m03;
             m10 -= mtx.m10; m11 -= mtx.m11; m12 -= mtx.m12; m13 -= mtx.m13;
@@ -137,7 +137,7 @@ namespace aten {
             m30 -= mtx.m30; m31 -= mtx.m31; m32 -= mtx.m32; m33 -= mtx.m33;
             return *this;
         }
-        inline AT_DEVICE_API mat4& operator*=(const mat4& mtx)
+        inline AT_HOST_DEVICE_API mat4& operator*=(const mat4& mtx)
         {
             mat4 tmp;
             for (int32_t i = 0; i < 4; ++i) {
@@ -154,7 +154,7 @@ namespace aten {
             return *this;
         }
 
-        inline AT_DEVICE_API mat4& operator*=(const real t)
+        inline AT_HOST_DEVICE_API mat4& operator*=(const real t)
         {
             m00 *= t; m01 *= t; m02 *= t; m03 *= t;
             m10 *= t; m11 *= t; m12 *= t; m13 *= t;
@@ -162,13 +162,13 @@ namespace aten {
             m30 *= t; m31 *= t; m32 *= t; m33 *= t;
             return *this;
         }
-        inline AT_DEVICE_API mat4& operator/=(const real t)
+        inline AT_HOST_DEVICE_API mat4& operator/=(const real t)
         {
             *this *= 1 / t;
             return *this;
         }
 
-        inline AT_DEVICE_API vec4 apply(const vec4& p) const
+        inline AT_HOST_DEVICE_API vec4 apply(const vec4& p) const
         {
             vec4 ret;
             ret.x = v[0].x * p.x + v[0].y * p.y + v[0].z * p.z + v[0].w * p.w;
@@ -179,7 +179,7 @@ namespace aten {
             return ret;
         }
 
-        inline AT_DEVICE_API vec3 apply(const vec3& p) const
+        inline AT_HOST_DEVICE_API vec3 apply(const vec3& p) const
         {
 #if 0
             vec4 t(v.x, v.y, v.z, 1);
@@ -200,7 +200,7 @@ namespace aten {
 
             return ret;
         }
-        inline AT_DEVICE_API vec3 applyXYZ(const vec3& p) const
+        inline AT_HOST_DEVICE_API vec3 applyXYZ(const vec3& p) const
         {
             vec3 ret;
 
@@ -276,7 +276,7 @@ namespace aten {
             return *this;
         }
 
-        inline AT_DEVICE_API mat4& transpose()
+        inline AT_HOST_DEVICE_API mat4& transpose()
         {
             mat4 tmp;
             for (int32_t i = 0; i < 4; ++i) {
@@ -290,7 +290,7 @@ namespace aten {
             return *this;
         }
 
-        inline AT_DEVICE_API mat4& asTrans(const vec3& v)
+        inline AT_HOST_DEVICE_API mat4& asTrans(const vec3& v)
         {
             identity();
 
@@ -301,12 +301,12 @@ namespace aten {
             return *this;
         }
 
-        inline AT_DEVICE_API mat4& asTrans(real x, real y, real z)
+        inline AT_HOST_DEVICE_API mat4& asTrans(real x, real y, real z)
         {
             return asTrans(vec3(x, y, z));
         }
 
-        inline AT_DEVICE_API mat4& asScale(real s)
+        inline AT_HOST_DEVICE_API mat4& asScale(real s)
         {
             identity();
 
@@ -317,7 +317,7 @@ namespace aten {
             return *this;
         }
 
-        inline AT_DEVICE_API mat4& asRotateByX(real r)
+        inline AT_HOST_DEVICE_API mat4& asRotateByX(real r)
         {
             const real c = aten::cos(r);
             const real s = aten::sin(r);
@@ -330,7 +330,7 @@ namespace aten {
             return *this;
         }
 
-        inline AT_DEVICE_API mat4& asRotateByY(real r)
+        inline AT_HOST_DEVICE_API mat4& asRotateByY(real r)
         {
             const real c = aten::cos(r);
             const real s = aten::sin(r);
@@ -343,7 +343,7 @@ namespace aten {
             return *this;
         }
 
-        inline AT_DEVICE_API mat4& asRotateByZ(real r)
+        inline AT_HOST_DEVICE_API mat4& asRotateByZ(real r)
         {
             const real c = aten::cos(r);
             const real s = aten::sin(r);
@@ -563,53 +563,53 @@ namespace aten {
         }
     };
 
-    inline AT_DEVICE_API mat4 operator+(const mat4& m1, const mat4& m2)
+    inline AT_HOST_DEVICE_API mat4 operator+(const mat4& m1, const mat4& m2)
     {
         mat4 ret = m1;
         ret += m2;
         return ret;
     }
 
-    inline AT_DEVICE_API mat4 operator-(const mat4& m1, const mat4& m2)
+    inline AT_HOST_DEVICE_API mat4 operator-(const mat4& m1, const mat4& m2)
     {
         mat4 ret = m1;
         ret -= m2;
         return ret;
     }
 
-    inline AT_DEVICE_API mat4 operator*(const mat4& m1, const mat4& m2)
+    inline AT_HOST_DEVICE_API mat4 operator*(const mat4& m1, const mat4& m2)
     {
         mat4 ret = m1;
         ret *= m2;
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 operator*(const mat4& m, const vec3 v)
+    inline AT_HOST_DEVICE_API vec3 operator*(const mat4& m, const vec3 v)
     {
         vec3 ret = m.apply(v);
         return ret;
     }
 
-    inline AT_DEVICE_API vec4 operator*(const mat4& m, const vec4 v)
+    inline AT_HOST_DEVICE_API vec4 operator*(const mat4& m, const vec4 v)
     {
         vec4 ret = m.apply(v);
         return ret;
     }
 
-    inline AT_DEVICE_API mat4 operator*(real t, const mat4& m)
+    inline AT_HOST_DEVICE_API mat4 operator*(real t, const mat4& m)
     {
         mat4 ret = m;
         ret *= t;
         return ret;
     }
 
-    inline AT_DEVICE_API mat4 operator*(const mat4& m, real t)
+    inline AT_HOST_DEVICE_API mat4 operator*(const mat4& m, real t)
     {
         mat4 ret = t * m;
         return ret;
     }
 
-    inline AT_DEVICE_API mat4 operator/(const mat4& m, real t)
+    inline AT_HOST_DEVICE_API mat4 operator/(const mat4& m, real t)
     {
         mat4 ret = m * (1 / t);
         return ret;

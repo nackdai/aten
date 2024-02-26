@@ -61,7 +61,7 @@ namespace AT_NAME {
             return m_ibl;
         }
 
-        static inline AT_DEVICE_API bool hitLight(
+        static inline AT_HOST_DEVICE_API bool hitLight(
             bool isHit,
             aten::LightAttribute attrib,
             const void* lightobj,

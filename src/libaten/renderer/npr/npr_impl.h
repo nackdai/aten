@@ -27,7 +27,7 @@ namespace npr {
      * @param[in] pixel_width Pixel width at distance 1 from camera.
      */
     template <size_t SampleRayNum>
-    inline AT_DEVICE_MTRL_API void GenerateSampleRayAndDiscPerQueryRay(
+    inline AT_DEVICE_API void GenerateSampleRayAndDiscPerQueryRay(
         std::array<AT_NAME::npr::FeatureLine::SampleRayDesc, SampleRayNum>& sample_ray_descs,
         AT_NAME::npr::FeatureLine::Disc& disc,
         const aten::ray& query_ray,
@@ -57,7 +57,7 @@ namespace npr {
      * @param[in] line_color Feature line color.
      */
     template <size_t SampleRayNum>
-    inline AT_DEVICE_MTRL_API void ComputeFeatureLineContribution(
+    inline AT_DEVICE_API void ComputeFeatureLineContribution(
         real closest_feature_line_point_distance,
         AT_NAME::Path& paths,
         int32_t idx,
@@ -85,7 +85,7 @@ namespace npr {
      * @param[in] prev_disc Disc at the previous hit point by the query ray.
      * @param[in] prev_disc Disc at the current hit point by the query ray.
      */
-    inline AT_DEVICE_MTRL_API aten::ray GetSampleRay(
+    inline AT_DEVICE_API aten::ray GetSampleRay(
         int32_t depth,
         AT_NAME::npr::FeatureLine::SampleRayDesc& sample_ray_desc,
         const AT_NAME::npr::FeatureLine::Disc& prev_disc,
@@ -128,7 +128,7 @@ namespace npr {
      * @param[in] normal_threshold Threshold to evaluate normal.
      * @return Tuple for the updated is_found_feature_line_point and closest_feature_line_point_distance.
      */
-    inline AT_DEVICE_MTRL_API aten::tuple<bool, float> EvaluateQueryAndSampleRayHit(
+    inline AT_DEVICE_API aten::tuple<bool, float> EvaluateQueryAndSampleRayHit(
         AT_NAME::npr::FeatureLine::SampleRayDesc& sample_ray_desc,
         const AT_NAME::context& ctxt,
         const aten::vec3& cam_org,
@@ -224,7 +224,7 @@ namespace npr {
      * @param[in] pixel_width Pixel width at distance 1 from camera.
      * @return Tuple for the updated is_found_feature_line_point and closest_feature_line_point_distance.
      */
-    inline AT_DEVICE_MTRL_API aten::tuple<bool, float> EvaluateQueryRayHitButSampleRayNotHit(
+    inline AT_DEVICE_API aten::tuple<bool, float> EvaluateQueryRayHitButSampleRayNotHit(
         AT_NAME::npr::FeatureLine::SampleRayDesc& sample_ray_desc,
         const aten::ray& query_ray,
         const aten::hitrecord& hrec_query,
@@ -297,7 +297,7 @@ namespace npr {
      * @param[in] disc Current disc.
      * @return Distance between the dummy hit point and query ray origin.
      */
-    inline AT_DEVICE_MTRL_API real CreateNextDiscByDummyQueryRayHitPoint(
+    inline AT_DEVICE_API real CreateNextDiscByDummyQueryRayHitPoint(
         int32_t depth,
         real hit_point_distance,
         const aten::ray& query_ray,
@@ -337,7 +337,7 @@ namespace npr {
      * @param[in] pixel_width Pixel width at distance 1 from camera.
      * @return Tuple for the updated is_found_feature_line_point and closest_feature_line_point_distance.
      */
-    inline AT_DEVICE_MTRL_API aten::tuple<bool, float> EvaluateQueryRayNotHitButSampleRayHit(
+    inline AT_DEVICE_API aten::tuple<bool, float> EvaluateQueryRayNotHitButSampleRayHit(
         const AT_NAME::context& ctxt,
         const aten::ray& query_ray,
         const aten::Intersection& isect_sample_ray,

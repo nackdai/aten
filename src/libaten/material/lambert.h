@@ -28,7 +28,7 @@ namespace AT_NAME
         virtual ~lambert() {}
 
     public:
-        static AT_DEVICE_API real pdf(
+        static AT_HOST_DEVICE_API real pdf(
             const aten::vec3& normal,
             const aten::vec3& wo)
         {
@@ -41,7 +41,7 @@ namespace AT_NAME
             return ret;
         }
 
-        static AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
+        static AT_DEVICE_API aten::vec3 sampleDirection(
             const aten::vec3& normal,
             real r1, real r2)
         {
@@ -80,7 +80,7 @@ namespace AT_NAME
             return dir;
         }
 
-        static AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
+        static AT_DEVICE_API aten::vec3 sampleDirection(
             const aten::vec3& normal,
             aten::sampler* sampler)
         {
@@ -90,7 +90,7 @@ namespace AT_NAME
             return sampleDirection(normal, r1, r2);
         }
 
-        static AT_DEVICE_MTRL_API aten::vec3 bsdf(
+        static AT_DEVICE_API aten::vec3 bsdf(
             const aten::MaterialParameter* param,
             real u, real v)
         {
@@ -104,7 +104,7 @@ namespace AT_NAME
             return ret;
         }
 
-        static AT_DEVICE_API aten::vec3 bsdf(
+        static AT_HOST_DEVICE_API aten::vec3 bsdf(
             const aten::MaterialParameter* param,
             const aten::vec3& externalAlbedo)
         {
@@ -115,7 +115,7 @@ namespace AT_NAME
             return ret;
         }
 
-        static AT_DEVICE_MTRL_API void sample(
+        static AT_DEVICE_API void sample(
             AT_NAME::MaterialSampling* result,
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
@@ -132,7 +132,7 @@ namespace AT_NAME
             result->bsdf = bsdf(param, u, v);
         }
 
-        static AT_DEVICE_MTRL_API void sample(
+        static AT_DEVICE_API void sample(
             AT_NAME::MaterialSampling* result,
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
@@ -149,7 +149,7 @@ namespace AT_NAME
             result->bsdf = bsdf(param, externalAlbedo);
         }
 
-        static AT_DEVICE_MTRL_API real computeFresnel(
+        static AT_DEVICE_API real computeFresnel(
             const aten::MaterialParameter* mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,

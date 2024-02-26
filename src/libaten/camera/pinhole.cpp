@@ -76,7 +76,7 @@ namespace AT_NAME {
         return result;
     }
 
-    AT_DEVICE_API void PinholeCamera::sample(
+    AT_HOST_DEVICE_API void PinholeCamera::sample(
         CameraSampleResult* result,
         const aten::CameraParameter* param,
         real s, real t)

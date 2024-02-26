@@ -10,19 +10,19 @@ namespace AT_NAME
     // Physically-Based Shading at Disney
     // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 
-    inline AT_DEVICE_API real sqr(real f)
+    inline AT_HOST_DEVICE_API real sqr(real f)
     {
         return f * f;
     }
 
-    inline AT_DEVICE_API real SchlickFresnel(real u)
+    inline AT_HOST_DEVICE_API real SchlickFresnel(real u)
     {
         real m = aten::clamp<real>(1 - u, 0, 1);
         real m2 = m * m;
         return m2 * m2 * m; // pow(m,5)
     }
 
-    inline AT_DEVICE_API real SchlickFresnelEta(real eta, real cosi)
+    inline AT_HOST_DEVICE_API real SchlickFresnelEta(real eta, real cosi)
     {
         const real f = ((real(1) - eta) / (real(1) + eta)) * ((real(1) - eta) / (real(1) + eta));
         const real m = real(1) - aten::abs(cosi);
@@ -30,7 +30,7 @@ namespace AT_NAME
         return f + (real(1) - f) * m2 * m2 * m;
     }
 
-    inline AT_DEVICE_API real GTR1(real NdotH, real a)
+    inline AT_HOST_DEVICE_API real GTR1(real NdotH, real a)
     {
         // NOTE
         // Physically-Based Shading at Disney
@@ -45,7 +45,7 @@ namespace AT_NAME
         return (a2 - 1) / (AT_MATH_PI * aten::log(a2) * t);
     }
 
-    inline AT_DEVICE_API real GTR2(real NdotH, real a)
+    inline AT_HOST_DEVICE_API real GTR2(real NdotH, real a)
     {
         // NOTE
         // Physically-Based Shading at Disney
@@ -57,7 +57,7 @@ namespace AT_NAME
         return a2 / (AT_MATH_PI * t * t);
     }
 
-    inline AT_DEVICE_API real GTR2_aniso(real NdotH, real HdotX, real HdotY, real ax, real ay)
+    inline AT_HOST_DEVICE_API real GTR2_aniso(real NdotH, real HdotX, real HdotY, real ax, real ay)
     {
         // NOTE
         // Physically-Based Shading at Disney
@@ -77,7 +77,7 @@ namespace AT_NAME
 #endif
     }
 
-    inline AT_DEVICE_API real smithG_GGX(real NdotV, real alphaG)
+    inline AT_HOST_DEVICE_API real smithG_GGX(real NdotV, real alphaG)
     {
         // NOTE
         // http://graphicrants.blogspot.jp/2013/08/specular-brdf-reference.html
@@ -94,17 +94,17 @@ namespace AT_NAME
 #endif
     }
 
-    inline AT_DEVICE_API real smithG_GGX_aniso(real NdotV, real VdotX, real VdotY, real ax, real ay)
+    inline AT_HOST_DEVICE_API real smithG_GGX_aniso(real NdotV, real VdotX, real VdotY, real ax, real ay)
     {
         return 1 / (NdotV + sqrt(sqr(VdotX * ax) + sqr(VdotY * ay) + sqr(NdotV)));
     }
 
-    inline AT_DEVICE_API aten::vec3 mon2lin(const aten::vec3& x)
+    inline AT_HOST_DEVICE_API aten::vec3 mon2lin(const aten::vec3& x)
     {
         return aten::vec3(aten::pow(x[0], real(2.2)), aten::pow(x[1], real(2.2)), aten::pow(x[2], real(2.2)));
     }
 
-    AT_DEVICE_MTRL_API real DisneyBRDF::pdf(
+    AT_DEVICE_API real DisneyBRDF::pdf(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,    /* in */
@@ -169,7 +169,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::sampleDirection(
+    AT_DEVICE_API aten::vec3 DisneyBRDF::sampleDirection(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -299,7 +299,7 @@ namespace AT_NAME
         return dir;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::bsdf(
+    AT_DEVICE_API aten::vec3 DisneyBRDF::bsdf(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -392,7 +392,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API void DisneyBRDF::sample(
+    AT_DEVICE_API void DisneyBRDF::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
@@ -410,7 +410,7 @@ namespace AT_NAME
         result->bsdf = bsdf(mtrl, normal, wi, wo, u, v);
     }
 
-    AT_DEVICE_MTRL_API real DisneyBRDF::computeFresnel(
+    AT_DEVICE_API real DisneyBRDF::computeFresnel(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,

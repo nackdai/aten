@@ -26,14 +26,14 @@ namespace AT_NAME {
 
         AOVBufferType() = default;
         ~AOVBufferType() = default;
-        AT_DEVICE_API AOVBufferType(int32_t type) : type_(static_cast<Type>(type)) {}
+        AT_HOST_DEVICE_API AOVBufferType(int32_t type) : type_(static_cast<Type>(type)) {}
 
-        AT_DEVICE_API Type type() const { return type_; }
+        AT_HOST_DEVICE_API Type type() const { return type_; }
 
-        AT_DEVICE_API friend bool operator==(const AOVBufferType& lhs, const AOVBufferType& rhs) {
+        AT_HOST_DEVICE_API friend bool operator==(const AOVBufferType& lhs, const AOVBufferType& rhs) {
             return lhs.type() == rhs.type();
         }
-        AT_DEVICE_API friend bool operator!=(const AOVBufferType& lhs, const AOVBufferType& rhs) {
+        AT_HOST_DEVICE_API friend bool operator!=(const AOVBufferType& lhs, const AOVBufferType& rhs) {
             return lhs.type() != rhs.type();
         }
     };
@@ -54,14 +54,14 @@ namespace AT_NAME {
 
         AOVType() = default;
         ~AOVType() = default;
-        AT_DEVICE_API AOVType(int32_t type) : type_(static_cast<Type>(type)) {}
+        AT_HOST_DEVICE_API AOVType(int32_t type) : type_(static_cast<Type>(type)) {}
 
-        AT_DEVICE_API Type type() const { return type_; }
+        AT_HOST_DEVICE_API Type type() const { return type_; }
 
-        AT_DEVICE_API friend bool operator==(const AOVType& lhs, const AOVType& rhs) {
+        AT_HOST_DEVICE_API friend bool operator==(const AOVType& lhs, const AOVType& rhs) {
             return lhs.type() == rhs.type();
         }
-        AT_DEVICE_API friend bool operator!=(const AOVType& lhs, const AOVType& rhs) {
+        AT_HOST_DEVICE_API friend bool operator!=(const AOVType& lhs, const AOVType& rhs) {
             return lhs.type() != rhs.type();
         }
     };
@@ -155,7 +155,7 @@ namespace AT_NAME
     };
 
     template <class BUFFER_VALUE_TYPE, class TNormal, class TAlbedo>
-    inline AT_DEVICE_API void FillBasicAOVs(
+    inline AT_HOST_DEVICE_API void FillBasicAOVs(
         BUFFER_VALUE_TYPE& aovNormalDepth,
         const TNormal& normal,
         const aten::hitrecord& rec,
@@ -180,7 +180,7 @@ namespace AT_NAME
     }
 
     template <class BUFFER_VALUE_TYPE, class TBg>
-    inline AT_DEVICE_API void FillBasicAOVsIfHitMiss(
+    inline AT_HOST_DEVICE_API void FillBasicAOVsIfHitMiss(
         BUFFER_VALUE_TYPE& aovNormalDepth,
         BUFFER_VALUE_TYPE& aovAlbedoMeshId,
         const TBg& bg)
@@ -197,7 +197,7 @@ namespace AT_NAME
     }
 
     template <class BUFFER_VALUE_TYPE>
-    inline AT_DEVICE_API void FillBaryCentricAOV(
+    inline AT_HOST_DEVICE_API void FillBaryCentricAOV(
         BUFFER_VALUE_TYPE& aovBuffer,
         const aten::Intersection& isect)
     {
@@ -207,7 +207,7 @@ namespace AT_NAME
     }
 
     template <class BUFFER_VALUE_TYPE>
-    inline AT_DEVICE_API void FillBaryCentricAOVIfHitMiss(BUFFER_VALUE_TYPE& aovBuffer)
+    inline AT_HOST_DEVICE_API void FillBaryCentricAOVIfHitMiss(BUFFER_VALUE_TYPE& aovBuffer)
     {
         aovBuffer.x = real(0);
         aovBuffer.y = real(0);

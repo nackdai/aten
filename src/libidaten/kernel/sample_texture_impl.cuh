@@ -1,6 +1,6 @@
 #include "kernel/idatendefs.cuh"
 
-AT_CUDA_INLINE AT_DEVICE_MTRL_API aten::vec4 sampleTexture(
+AT_CUDA_INLINE AT_DEVICE_API aten::vec4 sampleTexture(
     const int32_t texid,
     real u, real v,
     const aten::vec4& defaultValue,

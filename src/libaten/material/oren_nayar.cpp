@@ -9,7 +9,7 @@ namespace AT_NAME {
     // https://ja.wikipedia.org/wiki/%E3%82%AA%E3%83%BC%E3%83%AC%E3%83%B3%E3%83%BB%E3%83%8D%E3%82%A4%E3%83%A4%E3%83%BC%E5%8F%8D%E5%B0%84
     // https://github.com/imageworks/OpenShadingLanguage/blob/master/src/testrender/shading.cpp
 
-    AT_DEVICE_MTRL_API real OrenNayar::pdf(
+    AT_DEVICE_API real OrenNayar::pdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -28,7 +28,7 @@ namespace AT_NAME {
         return pdf;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 OrenNayar::sampleDirection(
+    AT_DEVICE_API aten::vec3 OrenNayar::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -39,7 +39,7 @@ namespace AT_NAME {
         return dir;
     }
 
-    inline AT_DEVICE_MTRL_API aten::vec3 computeBsdf(
+    inline AT_DEVICE_API aten::vec3 computeBsdf(
         real roughness,
         const aten::vec3& albedo,
         const aten::vec3& normal,
@@ -113,7 +113,7 @@ namespace AT_NAME {
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 OrenNayar::bsdf(
+    AT_DEVICE_API aten::vec3 OrenNayar::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -136,7 +136,7 @@ namespace AT_NAME {
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 OrenNayar::bsdf(
+    AT_DEVICE_API aten::vec3 OrenNayar::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -160,7 +160,7 @@ namespace AT_NAME {
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API void OrenNayar::sample(
+    AT_DEVICE_API void OrenNayar::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -175,7 +175,7 @@ namespace AT_NAME {
         result->bsdf = bsdf(param, normal, wi, result->dir, u, v);
     }
 
-    AT_DEVICE_MTRL_API void OrenNayar::sample(
+    AT_DEVICE_API void OrenNayar::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,

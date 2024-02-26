@@ -78,13 +78,13 @@ namespace idaten {
             m_maxSampleNum = computeMaxSampleNum(maxBounceNum);
         }
 
-        AT_DEVICE_API real nextSample()
+        AT_HOST_DEVICE_API real nextSample()
         {
             float r = sample();
             return r;
         }
 
-        AT_DEVICE_API aten::vec2 nextSample2D()
+        AT_HOST_DEVICE_API aten::vec2 nextSample2D()
         {
             aten::vec2 r;
             r.x = sample();
@@ -93,7 +93,7 @@ namespace idaten {
         }
 
     private:
-        AT_DEVICE_API float sample()
+        AT_HOST_DEVICE_API float sample()
         {
             // http://developer.download.nvidia.com/CUDA/training/texture_webinar_aug_2011.pdf
 

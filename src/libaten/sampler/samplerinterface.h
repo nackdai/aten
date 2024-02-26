@@ -23,9 +23,9 @@ namespace aten {
         {
             // Nothing is done...
         }
-        virtual AT_DEVICE_API real nextSample() = 0;
+        virtual AT_HOST_DEVICE_API real nextSample() = 0;
 
-        virtual AT_DEVICE_API vec2 nextSample2D()
+        virtual AT_HOST_DEVICE_API vec2 nextSample2D()
         {
             vec2 ret;
             ret.x = nextSample();

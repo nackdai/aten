@@ -7,7 +7,7 @@
 #define BLOCK_SIZE    (16)
 #define BLOCK_SIZE2    (BLOCK_SIZE * BLOCK_SIZE)
 
-inline AT_DEVICE_API int32_t getIdx(int32_t ix, int32_t iy, int32_t width)
+inline AT_HOST_DEVICE_API int32_t getIdx(int32_t ix, int32_t iy, int32_t width)
 {
 #if 0
     int32_t X = ix / BLOCK_SIZE;

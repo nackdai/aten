@@ -173,7 +173,7 @@ namespace AT_NAME {
             return real(0);
         }
 
-        static AT_DEVICE_API real computePixelWidthAtDistance(
+        static AT_HOST_DEVICE_API real computePixelWidthAtDistance(
             const aten::CameraParameter& param,
             real distanceFromCamera)
         {

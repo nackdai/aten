@@ -6,15 +6,15 @@ namespace aten
 {
     struct ray
     {
-        AT_DEVICE_API ray()
+        AT_HOST_DEVICE_API ray()
         {
         }
-        AT_DEVICE_API ray(const vec3& o, const vec3& d)
+        AT_HOST_DEVICE_API ray(const vec3& o, const vec3& d)
         {
             dir = normalize(d);
             org = o;
         }
-        AT_DEVICE_API ray(const vec3& o, const vec3& d, const vec3& normal)
+        AT_HOST_DEVICE_API ray(const vec3& o, const vec3& d, const vec3& normal)
         {
             dir = normalize(d);
 

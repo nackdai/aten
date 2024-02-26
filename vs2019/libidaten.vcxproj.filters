@@ -154,12 +154,6 @@
     <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh">
       <Filter>kernel\accelerator</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\qbvh.cuh">
-      <Filter>kernel\accelerator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\qbvh_impl.cuh">
-      <Filter>kernel\accelerator</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\accelerator.cuh">
       <Filter>kernel\accelerator</Filter>
     </ClInclude>
@@ -170,12 +164,6 @@
       <Filter>kernel\accelerator</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\stackless_bvh_impl.cuh">
-      <Filter>kernel\accelerator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh.cuh">
-      <Filter>kernel\accelerator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh_impl.cuh">
       <Filter>kernel\accelerator</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\geometry\sphere.h">
@@ -457,13 +445,7 @@
     <CudaCompile Include="..\src\libidaten\kernel\bvh.cu">
       <Filter>kernel\accelerator</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\qbvh.cu">
-      <Filter>kernel\accelerator</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\stackless_bvh.cu">
-      <Filter>kernel\accelerator</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\stackless_qbvh.cu">
       <Filter>kernel\accelerator</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\sbvh.cu">

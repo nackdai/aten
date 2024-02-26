@@ -14,11 +14,9 @@ namespace aten {
      */
     enum class AccelType {
         Bvh,            ///< BVH.
-        Qbvh,           ///< QBVH.
         Sbvh,           ///< SBVH.
         ThreadedBvh,    ///< Threaded BVH.
         StacklessBvh,   ///< Stackless BVH.
-        StacklessQbvh,  ///< Stackless QBVH.
         UserDefs,       ///< User defined.
 
         Default,        ///< Default type.

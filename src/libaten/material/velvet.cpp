@@ -6,7 +6,7 @@ namespace AT_NAME
 {
     // NOTE
     // Production Friendly Microfacet Sheen BRDF.
-    // http://www.aconty.com/pdf/s2017_pbs_imageworks_sheen.pdf
+    // https://blog.selfshadow.com/publications/s2017-shading-course/imageworks/s2017_pbs_imageworks_sheen.pdf
 
     AT_DEVICE_MTRL_API real MicrofacetVelvet::pdf(
         const aten::MaterialParameter* param,

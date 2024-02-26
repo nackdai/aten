@@ -1,4 +1,4 @@
-#include "kernel/idatendefs.cuh"
+#include "defs.h"
 
 #include "geometry/EvaluateHitResult.h"
 
@@ -30,7 +30,7 @@ inline __device__ int32_t cmpGEQ(const float4& a, const float4& b)
     return res.f;
 }
 
-AT_CUDA_INLINE __device__ int32_t hit4Triangles1Ray(
+AT_INLINE_RELEASE __device__ int32_t hit4Triangles1Ray(
     const idaten::context* ctxt,
     float4 primIdx, int32_t num,
     float4* resultT,
@@ -121,7 +121,7 @@ AT_CUDA_INLINE __device__ int32_t hit4Triangles1Ray(
     return ret;
 }
 
-AT_CUDA_INLINE __device__ int32_t hit4AABBWith1Ray(
+AT_INLINE_RELEASE __device__ int32_t hit4AABBWith1Ray(
     aten::vec4* result,
     const aten::vec3& org,
     const aten::vec3& dir,

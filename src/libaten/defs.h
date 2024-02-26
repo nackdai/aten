@@ -62,14 +62,27 @@ namespace aten {
 #include <cuda_runtime_api.h>
 #include "idaten_namespace.h"
 
-#define AT_HOST_DEVICE_API        __host__ __device__
-#define AT_DEVICE_API   __device__
+#define AT_HOST_DEVICE_API  __host__ __device__
+#define AT_DEVICE_API       __device__
 #else
 #include "aten_namespace.h"
 
 #define AT_HOST_DEVICE_API
 #define AT_DEVICE_API
 #endif
+
+#ifdef __CUDACC__
+#define AT_INLINE __forceinline__
+#else
+#define AT_INLINE inline
+#endif
+
+#ifdef __AT_DEBUG__
+#define AT_INLINE_RELEASE
+#else
+#define AT_INLINE_RELEASE   AT_INLINE
+#endif
+
 
 #include <assert.h>
 

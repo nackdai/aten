@@ -1,7 +1,7 @@
-#include "kernel/idatendefs.cuh"
+#include "defs.h"
 
 template <idaten::IntersectType Type>
-AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
+AT_INLINE_RELEASE __device__ bool intersectBVHTriangles(
     cudaTextureObject_t nodes,
     const idaten::context* ctxt,
     const aten::ray r,
@@ -82,7 +82,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
 #define ENABLE_PLANE_LOOP_BVH
 
 template <idaten::IntersectType Type>
-AT_CUDA_INLINE __device__ bool intersectBVH(
+AT_INLINE_RELEASE __device__ bool intersectBVH(
     const idaten::context* ctxt,
     const aten::ray r,
     float t_min, float t_max,
@@ -270,7 +270,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
     return (isect->objid >= 0);
 }
 
-AT_CUDA_INLINE __device__ bool intersectBVH(
+AT_INLINE_RELEASE __device__ bool intersectBVH(
     const idaten::context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
@@ -292,7 +292,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
     return isHit;
 }
 
-AT_CUDA_INLINE __device__ bool intersectCloserBVH(
+AT_INLINE_RELEASE __device__ bool intersectCloserBVH(
     const idaten::context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
@@ -314,7 +314,7 @@ AT_CUDA_INLINE __device__ bool intersectCloserBVH(
     return isHit;
 }
 
-AT_CUDA_INLINE __device__ bool intersectAnyBVH(
+AT_INLINE_RELEASE __device__ bool intersectAnyBVH(
     const idaten::context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,

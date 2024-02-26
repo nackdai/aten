@@ -103,7 +103,6 @@
     <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\device_scene_context.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\GenMipMaps.h" />
-    <ClInclude Include="..\src\libidaten\kernel\idatendefs.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\intersect.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\intersecttype.h" />
     <ClInclude Include="..\src\libidaten\kernel\intersect_impl.cuh" />

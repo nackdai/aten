@@ -328,9 +328,6 @@
     <ClInclude Include="..\src\libaten\filter\atrous.h">
       <Filter>filter</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\accelerator\qbvh.h">
-      <Filter>accelerator</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\accelerator\threaded_bvh.h">
       <Filter>accelerator</Filter>
     </ClInclude>
@@ -338,9 +335,6 @@
       <Filter>accelerator</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\accelerator\stackless_bvh.h">
-      <Filter>accelerator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\accelerator\stackless_qbvh.h">
       <Filter>accelerator</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\math\frustum.h">
@@ -681,16 +675,10 @@
     <ClCompile Include="..\src\libaten\accelerator\accelerator.cpp">
       <Filter>accelerator</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\accelerator\qbvh.cpp">
-      <Filter>accelerator</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\threaded_bvh.cpp">
       <Filter>accelerator</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\stackless_bvh.cpp">
-      <Filter>accelerator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\accelerator\stackless_qbvh.cpp">
       <Filter>accelerator</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\geometry\sphere.cpp">

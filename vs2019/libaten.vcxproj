@@ -250,10 +250,8 @@
     <ClInclude Include="..\src\libaten\accelerator\bvh_node.h" />
     <ClInclude Include="..\src\libaten\accelerator\bvh_util.h" />
     <ClInclude Include="..\src\libaten\accelerator\GpuPayloadDefs.h" />
-    <ClInclude Include="..\src\libaten\accelerator\qbvh.h" />
     <ClInclude Include="..\src\libaten\accelerator\sbvh.h" />
     <ClInclude Include="..\src\libaten\accelerator\stackless_bvh.h" />
-    <ClInclude Include="..\src\libaten\accelerator\stackless_qbvh.h" />
     <ClInclude Include="..\src\libaten\accelerator\threaded_bvh.h" />
     <ClInclude Include="..\src\libaten\aten.h" />
     <ClInclude Include="..\src\libaten\aten_namespace.h" />
@@ -402,11 +400,9 @@
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh_node.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh_update.cpp" />
-    <ClCompile Include="..\src\libaten\accelerator\qbvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\sbvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\sbvh_voxel.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\stackless_bvh.cpp" />
-    <ClCompile Include="..\src\libaten\accelerator\stackless_qbvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\threaded_bvh.cpp" />
     <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp" />
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />

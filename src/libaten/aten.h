@@ -75,11 +75,9 @@
 
 #include "accelerator/accelerator.h"
 #include "accelerator/bvh.h"
-#include "accelerator/qbvh.h"
 #include "accelerator/sbvh.h"
 #include "accelerator/threaded_bvh.h"
 #include "accelerator/stackless_bvh.h"
-#include "accelerator/stackless_qbvh.h"
 
 #include "accelerator/GpuPayloadDefs.h"
 

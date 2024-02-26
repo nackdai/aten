@@ -40,11 +40,11 @@ namespace aten {
             x = y = z = f;
         }
 
-        inline AT_DEVICE_API const vec3& operator+() const
+        inline AT_HOST_DEVICE_API const vec3& operator+() const
         {
             return *this;
         }
-        inline AT_DEVICE_API vec3 operator-() const
+        inline AT_HOST_DEVICE_API vec3 operator-() const
         {
             vec3 ret(0);
             ret.x = -x;
@@ -52,51 +52,51 @@ namespace aten {
             ret.z = -z;
             return ret;
         }
-        inline AT_DEVICE_API real operator[](int32_t i) const
+        inline AT_HOST_DEVICE_API real operator[](int32_t i) const
         {
             return a[i];
         }
-        inline AT_DEVICE_API real& operator[](int32_t i)
+        inline AT_HOST_DEVICE_API real& operator[](int32_t i)
         {
             return a[i];
         };
 
-        inline AT_DEVICE_API vec3& operator+=(const vec3& v)
+        inline AT_HOST_DEVICE_API vec3& operator+=(const vec3& v)
         {
             x += v.x;
             y += v.y;
             z += v.z;
             return *this;
         }
-        inline AT_DEVICE_API vec3& operator-=(const vec3& v)
+        inline AT_HOST_DEVICE_API vec3& operator-=(const vec3& v)
         {
             x -= v.x;
             y -= v.y;
             z -= v.z;
             return *this;
         }
-        inline AT_DEVICE_API vec3& operator*=(const vec3& v)
+        inline AT_HOST_DEVICE_API vec3& operator*=(const vec3& v)
         {
             x *= v.x;
             y *= v.y;
             z *= v.z;
             return *this;
         }
-        inline AT_DEVICE_API vec3& operator/=(const vec3& v)
+        inline AT_HOST_DEVICE_API vec3& operator/=(const vec3& v)
         {
             x /= v.x;
             y /= v.y;
             z /= v.z;
             return *this;
         }
-        inline AT_DEVICE_API vec3& operator*=(const real t)
+        inline AT_HOST_DEVICE_API vec3& operator*=(const real t)
         {
             x *= t;
             y *= t;
             z *= t;
             return *this;
         }
-        inline AT_DEVICE_API vec3& operator/=(const real t)
+        inline AT_HOST_DEVICE_API vec3& operator/=(const real t)
         {
             x /= t;
             y /= t;
@@ -105,73 +105,73 @@ namespace aten {
         }
     };
 
-    inline AT_DEVICE_API vec3 operator+(const vec3& v1, const vec3& v2)
+    inline AT_HOST_DEVICE_API vec3 operator+(const vec3& v1, const vec3& v2)
     {
         vec3 ret = aten::vec3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 operator+(const vec3& v1, real f)
+    inline AT_HOST_DEVICE_API vec3 operator+(const vec3& v1, real f)
     {
         vec3 ret = aten::vec3(v1.x + f, v1.y + f, v1.z + f);
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 operator-(const vec3& v1, const vec3& v2)
+    inline AT_HOST_DEVICE_API vec3 operator-(const vec3& v1, const vec3& v2)
     {
         vec3 ret = aten::vec3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 operator-(const vec3& v1, real f)
+    inline AT_HOST_DEVICE_API vec3 operator-(const vec3& v1, real f)
     {
         vec3 ret = aten::vec3(v1.x - f, v1.y - f, v1.z - f);
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 operator*(const vec3& v1, const vec3& v2)
+    inline AT_HOST_DEVICE_API vec3 operator*(const vec3& v1, const vec3& v2)
     {
         vec3 ret = aten::vec3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 operator/(const vec3& v1, const vec3& v2)
+    inline AT_HOST_DEVICE_API vec3 operator/(const vec3& v1, const vec3& v2)
     {
         vec3 ret = aten::vec3(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 operator*(real t, const vec3& v)
+    inline AT_HOST_DEVICE_API vec3 operator*(real t, const vec3& v)
     {
         vec3 ret = aten::vec3(t * v.x, t * v.y, t * v.z);
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 operator*(const vec3& v, real t)
+    inline AT_HOST_DEVICE_API vec3 operator*(const vec3& v, real t)
     {
         vec3 ret = aten::vec3(t * v.x, t * v.y, t * v.z);
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 operator/(const vec3& v, real t)
+    inline AT_HOST_DEVICE_API vec3 operator/(const vec3& v, real t)
     {
         vec3 ret = aten::vec3(v.x / t, v.y / t, v.z / t);
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 operator/(real t, const vec3& v)
+    inline AT_HOST_DEVICE_API vec3 operator/(real t, const vec3& v)
     {
         vec3 ret = aten::vec3(t / v.x, t / v.y, t / v.z);
         return ret;
     }
 
-    inline AT_DEVICE_API real dot(const vec3& v1, const vec3& v2)
+    inline AT_HOST_DEVICE_API real dot(const vec3& v1, const vec3& v2)
     {
         auto ret = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 cross(const vec3& v1, const vec3& v2)
+    inline AT_HOST_DEVICE_API vec3 cross(const vec3& v1, const vec3& v2)
     {
         vec3 ret = aten::vec3(
             v1.a[1] * v2.a[2] - v1.a[2] * v2.a[1],
@@ -181,14 +181,14 @@ namespace aten {
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 normalize(const vec3& v)
+    inline AT_HOST_DEVICE_API vec3 normalize(const vec3& v)
     {
         auto invLen = aten::rsqrt(dot(v, v));
         auto ret = v * invLen;
         return ret;
     }
 
-    inline AT_DEVICE_API real length(const vec3& v)
+    inline AT_HOST_DEVICE_API real length(const vec3& v)
     {
         auto ret = aten::sqrt(dot(v, v));
         return ret;
@@ -197,13 +197,13 @@ namespace aten {
 #ifdef TYPE_DOUBLE
     using vec3 = glm::dvec3;
 
-    inline AT_DEVICE_API vec3 operator*(real t, const vec3& v)
+    inline AT_HOST_DEVICE_API vec3 operator*(real t, const vec3& v)
     {
         vec3 ret(t * v.x, t * v.y, t * v.z);
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 operator*(const vec3& v, real t)
+    inline AT_HOST_DEVICE_API vec3 operator*(const vec3& v, real t)
     {
         vec3 ret(t * v.x, t * v.y, t * v.z);
         return ret;
@@ -213,26 +213,26 @@ namespace aten {
 #endif
 #endif
 
-    inline AT_DEVICE_API void set(vec3& v, real x, real y, real z)
+    inline AT_HOST_DEVICE_API void set(vec3& v, real x, real y, real z)
     {
         v.x = x;
         v.y = y;
         v.z = z;
     }
 
-    inline AT_DEVICE_API real squared_length(const vec3& v)
+    inline AT_HOST_DEVICE_API real squared_length(const vec3& v)
     {
         auto ret = dot(v, v);
         return ret;
     }
 
-    inline AT_DEVICE_API real length(const vec3& v)
+    inline AT_HOST_DEVICE_API real length(const vec3& v)
     {
         auto ret = aten::sqrt(dot(v, v));
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 vmin(const vec3& a, const vec3& b)
+    inline AT_HOST_DEVICE_API vec3 vmin(const vec3& a, const vec3& b)
     {
         return vec3(
             aten::cmpMin(a.x, b.x),
@@ -240,7 +240,7 @@ namespace aten {
             aten::cmpMin(a.z, b.z));
     }
 
-    inline AT_DEVICE_API vec3 vmax(const vec3& a, const vec3& b)
+    inline AT_HOST_DEVICE_API vec3 vmax(const vec3& a, const vec3& b)
     {
         return vec3(
             aten::cmpMax(a.x, b.x),
@@ -248,7 +248,7 @@ namespace aten {
             aten::cmpMax(a.z, b.z));
     }
 
-    inline AT_DEVICE_API vec3 pow(const vec3& v, real a)
+    inline AT_HOST_DEVICE_API vec3 pow(const vec3& v, real a)
     {
         vec3 ret(
             pow(v.x, a),
@@ -258,7 +258,7 @@ namespace aten {
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 mix(const vec3& v0, const vec3& v1, real a)
+    inline AT_HOST_DEVICE_API vec3 mix(const vec3& v0, const vec3& v1, real a)
     {
         vec3 ret = v0 * (real(1) - a) + v1 * a;
         return ret;
@@ -287,7 +287,7 @@ namespace aten {
     }
 
     // 直行ベクトルを計算.
-    inline AT_DEVICE_API vec3 getOrthoVector(const vec3& n)
+    inline AT_HOST_DEVICE_API vec3 getOrthoVector(const vec3& n)
     {
         vec3 p;
 
@@ -328,7 +328,7 @@ namespace aten {
         return p;
     }
 
-    inline AT_DEVICE_API bool isInvalid(const vec3& v)
+    inline AT_HOST_DEVICE_API bool isInvalid(const vec3& v)
     {
         bool b0 = isInvalid(v.x);
         bool b1 = isInvalid(v.y);
@@ -338,40 +338,40 @@ namespace aten {
     }
 
     template <class T>
-    inline AT_DEVICE_API float max_from_vec3(const T& v)
+    inline AT_HOST_DEVICE_API float max_from_vec3(const T& v)
     {
         return std::max(std::max(v.x, v.y), v.z);
     }
 
 #ifdef __CUDACC__
     template <>
-    inline AT_DEVICE_API float max_from_vec3(const float3& v)
+    inline AT_HOST_DEVICE_API float max_from_vec3(const float3& v)
     {
         return max(max(v.x, v.y), v.z);
     }
 #endif
 
     template <class T>
-    inline AT_DEVICE_API float min_from_vec3(const T& v)
+    inline AT_HOST_DEVICE_API float min_from_vec3(const T& v)
     {
         return std::min(std::min(v.x, v.y), v.z);
     }
 
 #ifdef __CUDACC__
     template <>
-    inline AT_DEVICE_API float min_from_vec3(const float3& v)
+    inline AT_HOST_DEVICE_API float min_from_vec3(const float3& v)
     {
         return min(min(v.x, v.y), v.z);
     }
 #endif
 
 #ifdef __CUDACC__
-    inline AT_DEVICE_API vec3 operator*(const vec3& a, const float3& b)
+    inline AT_HOST_DEVICE_API vec3 operator*(const vec3& a, const float3& b)
     {
         return aten::vec3(a.x * b.x, a.y * b.y, a.z * b.z);
     }
 
-    inline AT_DEVICE_API vec3 operator*(const float3& a, const vec3& b)
+    inline AT_HOST_DEVICE_API vec3 operator*(const float3& a, const vec3& b)
     {
         return aten::vec3(a.x * b.x, a.y * b.y, a.z * b.z);
     }

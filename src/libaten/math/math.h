@@ -45,12 +45,12 @@
 #define AT_MATH_IS_IN_BOUND(x, a, b)    ((a) <= (x) && (x) <= (b))
 
 namespace aten {
-    inline AT_DEVICE_API real sqrt(real f)
+    inline AT_HOST_DEVICE_API real sqrt(real f)
     {
         return AT_MATH_FUNC(::sqrt, f);
     }
 
-    inline AT_DEVICE_API real rsqrt(real f)
+    inline AT_HOST_DEVICE_API real rsqrt(real f)
     {
 #ifdef __CUDACC__
         return rsqrtf(f);
@@ -59,64 +59,64 @@ namespace aten {
 #endif
     }
 
-    inline AT_DEVICE_API real tan(real f)
+    inline AT_HOST_DEVICE_API real tan(real f)
     {
         return AT_MATH_FUNC(::tan, f);
     }
 
-    inline AT_DEVICE_API real cos(real f)
+    inline AT_HOST_DEVICE_API real cos(real f)
     {
         return AT_MATH_FUNC(::cos, f);
     }
 
-    inline AT_DEVICE_API real sin(real f)
+    inline AT_HOST_DEVICE_API real sin(real f)
     {
         return AT_MATH_FUNC(::sin, f);
     }
 
-    inline AT_DEVICE_API real atan2(real y, real x)
+    inline AT_HOST_DEVICE_API real atan2(real y, real x)
     {
         return AT_MATH_FUNC2(::atan2, y, x);
     }
 
-    inline AT_DEVICE_API real atan(real f)
+    inline AT_HOST_DEVICE_API real atan(real f)
     {
         return AT_MATH_FUNC(::atan, f);
     }
 
-    inline AT_DEVICE_API real asin(real f)
+    inline AT_HOST_DEVICE_API real asin(real f)
     {
         return AT_MATH_FUNC(::asin, f);
     }
 
-    inline AT_DEVICE_API real acos(real f)
+    inline AT_HOST_DEVICE_API real acos(real f)
     {
         return AT_MATH_FUNC(::acos, f);
     }
 
-    inline AT_DEVICE_API real log(real f)
+    inline AT_HOST_DEVICE_API real log(real f)
     {
         return AT_MATH_FUNC(::log, f);
     }
 
-    inline AT_DEVICE_API real exp(real f)
+    inline AT_HOST_DEVICE_API real exp(real f)
     {
         return AT_MATH_FUNC(::exp, f);
     }
 
-    inline AT_DEVICE_API real pow(real f, real v)
+    inline AT_HOST_DEVICE_API real pow(real f, real v)
     {
         return AT_MATH_FUNC2(::pow, f, v);
     }
 
     template <class T>
-    inline AT_DEVICE_API T abs(T f)
+    inline AT_HOST_DEVICE_API T abs(T f)
     {
         return static_cast<T>(abs<real>(static_cast<real>(f)));
     }
 
     template <>
-    inline AT_DEVICE_API real abs(real f)
+    inline AT_HOST_DEVICE_API real abs(real f)
     {
 #ifdef TYPE_DOUBLE
         return ::abs(f);
@@ -125,18 +125,18 @@ namespace aten {
 #endif
     }
 
-    inline AT_DEVICE_API real floor(real f)
+    inline AT_HOST_DEVICE_API real floor(real f)
     {
         return AT_MATH_FUNC(::floor, f);
     }
 
-    inline AT_DEVICE_API real ceil(real f)
+    inline AT_HOST_DEVICE_API real ceil(real f)
     {
         return AT_MATH_FUNC(::ceil, f);
     }
 
     template <class T>
-    inline AT_DEVICE_API void swapVal(T& a, T& b)
+    inline AT_HOST_DEVICE_API void swapVal(T& a, T& b)
     {
         T tmp = a;
         a = b;
@@ -145,25 +145,25 @@ namespace aten {
 
 #ifdef __CUDACC__
     template <class T>
-    inline AT_DEVICE_API auto cmpMax(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
+    inline AT_HOST_DEVICE_API auto cmpMax(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
     {
         return (a > b ? a : b);
     }
 
     template <>
-    inline AT_DEVICE_API float cmpMax(float a, float b)
+    inline AT_HOST_DEVICE_API float cmpMax(float a, float b)
     {
         return fmaxf(a, b);
     }
 
     template <>
-    inline AT_DEVICE_API int32_t cmpMax(int32_t a, int32_t b)
+    inline AT_HOST_DEVICE_API int32_t cmpMax(int32_t a, int32_t b)
     {
         return max(a, b);
     }
 #else
     template <class T>
-    inline AT_DEVICE_API auto cmpMax(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
+    inline AT_HOST_DEVICE_API auto cmpMax(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
     {
         return std::max<T>(a, b);
     }
@@ -171,37 +171,37 @@ namespace aten {
 
 #ifdef __CUDACC__
     template <class T>
-    inline AT_DEVICE_API auto cmpMin(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
+    inline AT_HOST_DEVICE_API auto cmpMin(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
     {
         return (a < b ? a : b);
     }
 
     template <>
-    inline AT_DEVICE_API float cmpMin(float a, float b)
+    inline AT_HOST_DEVICE_API float cmpMin(float a, float b)
     {
         return fminf(a, b);
     }
 
     template <>
-    inline AT_DEVICE_API int32_t cmpMin(int32_t a, int32_t b)
+    inline AT_HOST_DEVICE_API int32_t cmpMin(int32_t a, int32_t b)
     {
         return min(a, b);
     }
 #else
     template <class T>
-    inline AT_DEVICE_API auto cmpMin(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
+    inline AT_HOST_DEVICE_API auto cmpMin(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
     {
         return std::min<T>(a, b);
     }
 #endif
 
     template <class _T>
-    inline AT_DEVICE_API _T clamp(_T f, _T a, _T b)
+    inline AT_HOST_DEVICE_API _T clamp(_T f, _T a, _T b)
     {
         return cmpMin(cmpMax(f, a), b);
     }
 
-    inline AT_DEVICE_API bool isValid(real f)
+    inline AT_HOST_DEVICE_API bool isValid(real f)
     {
 #ifdef __CUDACC__
         bool is_invalid = isnan(f);
@@ -219,7 +219,7 @@ namespace aten {
 #endif
     }
 
-    inline AT_DEVICE_API bool isInvalid(real f)
+    inline AT_HOST_DEVICE_API bool isInvalid(real f)
     {
         bool b = !isValid(f);
         return b;
@@ -276,7 +276,7 @@ namespace aten {
     }
 
 #ifdef TYPE_DOUBLE
-    inline AT_DEVICE_API int64_t floatAsInt(double f)
+    inline AT_HOST_DEVICE_API int64_t floatAsInt(double f)
     {
         // NOTE
         // Accroding C# implementaion
@@ -286,7 +286,7 @@ namespace aten {
         return *(int64_t*)&f;
     }
 
-    inline AT_DEVICE_API double intAsFloat(int64_t n)
+    inline AT_HOST_DEVICE_API double intAsFloat(int64_t n)
     {
         // NOTE
         // Accroding C# implementaion
@@ -296,19 +296,19 @@ namespace aten {
         return *(double*)&n;
     }
 #else
-    inline AT_DEVICE_API int32_t floatAsInt(float f)
+    inline AT_HOST_DEVICE_API int32_t floatAsInt(float f)
     {
         return *(int32_t*)&f;
     }
 
-    inline AT_DEVICE_API float intAsFloat(int32_t n)
+    inline AT_HOST_DEVICE_API float intAsFloat(int32_t n)
     {
         return *(float*)&n;
     }
 #endif
 
     template <class TYPE>
-    inline AT_DEVICE_API TYPE mix(const TYPE& x, const TYPE& y, real a)
+    inline AT_HOST_DEVICE_API TYPE mix(const TYPE& x, const TYPE& y, real a)
     {
         // Linear interpolation.
         // x(1-a)+y*a
@@ -316,7 +316,7 @@ namespace aten {
     }
 
     // Neary Equal.
-    inline AT_DEVICE_API bool isClose(real A, real B, int32_t maxUlps)
+    inline AT_HOST_DEVICE_API bool isClose(real A, real B, int32_t maxUlps)
     {
 #ifdef TYPE_DOUBLE
         // TODO

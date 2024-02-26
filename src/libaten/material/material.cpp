@@ -194,7 +194,7 @@ namespace AT_NAME
         m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
     }
 
-    AT_DEVICE_MTRL_API bool material::isTranslucentByAlpha(
+    AT_DEVICE_API bool material::isTranslucentByAlpha(
         const aten::MaterialParameter& param,
         real u, real v)
     {
@@ -202,7 +202,7 @@ namespace AT_NAME
         return alpha < real(1);
     }
 
-    AT_DEVICE_MTRL_API real material::getTranslucentAlpha(
+    AT_DEVICE_API real material::getTranslucentAlpha(
         const aten::MaterialParameter& param,
         real u, real v)
     {

@@ -11,7 +11,7 @@
 #include "cuda/helper_math.h"
 
 namespace AT_NAME {
-    AT_DEVICE_MTRL_API aten::vec4 sampleTexture(const int32_t texid, real u, real v, const aten::vec4& defaultValue, int32_t lod = 0);
+    AT_DEVICE_API aten::vec4 sampleTexture(const int32_t texid, real u, real v, const aten::vec4& defaultValue, int32_t lod = 0);
 
 #ifndef __AT_DEBUG__
 #include "kernel/sample_texture_impl.cuh"
@@ -22,7 +22,7 @@ namespace AT_NAME {
 #include "scene/host_scene_context.h"
 
 namespace AT_NAME {
-    inline AT_DEVICE_MTRL_API aten::vec4 sampleTexture(const int32_t texid, real u, real v, const aten::vec4& defaultValue, int32_t lod = 0)
+    inline AT_DEVICE_API aten::vec4 sampleTexture(const int32_t texid, real u, real v, const aten::vec4& defaultValue, int32_t lod = 0)
     {
         aten::vec4 ret = defaultValue;
 
@@ -41,7 +41,7 @@ namespace AT_NAME {
 #endif
 
 namespace AT_NAME {
-    inline AT_DEVICE_MTRL_API void applyNormalMap(
+    inline AT_DEVICE_API void applyNormalMap(
         const int32_t normalMapIdx,
         const aten::vec3& orgNml,
         aten::vec3& newNml,

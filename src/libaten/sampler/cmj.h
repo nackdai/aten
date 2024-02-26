@@ -12,13 +12,13 @@ namespace aten {
         AT_VIRTUAL(~CMJ() = default;)
 
     public:
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const void* data = nullptr))
+        AT_VIRTUAL_OVERRIDE_FINAL(AT_HOST_DEVICE_API void init(uint32_t seed, const void* data = nullptr))
         {
             AT_ASSERT(false);
             init(seed, 0, 0, reinterpret_cast<const uint32_t*>(data));
         }
 
-        AT_DEVICE_API void init(
+        AT_HOST_DEVICE_API void init(
             uint32_t index,
             uint32_t dimension,
             uint32_t scramble,
@@ -29,14 +29,14 @@ namespace aten {
             m_scramble = scramble;
         }
 
-        AT_VIRTUAL_OVERRIDE(AT_DEVICE_API real nextSample())
+        AT_VIRTUAL_OVERRIDE(AT_HOST_DEVICE_API real nextSample())
         {
             vec2 r = sample2D();
             m_dimension++;
             return r.x;
         }
 
-        AT_VIRTUAL_OVERRIDE(AT_DEVICE_API vec2 nextSample2D())
+        AT_VIRTUAL_OVERRIDE(AT_HOST_DEVICE_API vec2 nextSample2D())
         {
             vec2 r = sample2D();
             m_dimension++;
@@ -48,7 +48,7 @@ namespace aten {
         };
 
     private:
-        AT_DEVICE_API uint32_t permute(uint32_t i, uint32_t l, uint32_t p)
+        AT_HOST_DEVICE_API uint32_t permute(uint32_t i, uint32_t l, uint32_t p)
         {
             uint32_t w = l - 1;
             w |= w >> 1;
@@ -82,7 +82,7 @@ namespace aten {
             return (i + p) % l;
         }
 
-        AT_DEVICE_API float randfloat(uint32_t i, uint32_t p)
+        AT_HOST_DEVICE_API float randfloat(uint32_t i, uint32_t p)
         {
             i ^= p;
             i ^= i >> 17;
@@ -98,7 +98,7 @@ namespace aten {
             return i * (1.0f / 4294967808.0f);
         }
 
-        AT_DEVICE_API vec2 cmj(int32_t s, int32_t n, int32_t p)
+        AT_HOST_DEVICE_API vec2 cmj(int32_t s, int32_t n, int32_t p)
         {
             int32_t sx = permute(s % n, n, p * 0xa511e9b3);
             int32_t sy = permute(s / n, n, p * 0x63d83595);
@@ -110,7 +110,7 @@ namespace aten {
                 (s / n + (sx + jy) / n) / n);
         }
 
-        AT_DEVICE_API vec2 sample2D()
+        AT_HOST_DEVICE_API vec2 sample2D()
         {
             int32_t idx = permute(m_idx, CMJ_DIM * CMJ_DIM, 0xa399d265 * m_dimension * m_scramble);
             auto ret = cmj(idx, CMJ_DIM, m_dimension * m_scramble);

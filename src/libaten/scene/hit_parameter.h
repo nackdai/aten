@@ -46,7 +46,7 @@ namespace aten {
 
         int32_t isVoxel{ 0 };
 
-        AT_DEVICE_API Intersection()
+        AT_HOST_DEVICE_API Intersection()
         {
             triangle_id = -1;
             a = b = real(0);

@@ -19,7 +19,7 @@ namespace aten {
         real t;
     };
 
-    inline AT_DEVICE_API int32_t maxDim(const vec3& v)
+    inline AT_HOST_DEVICE_API int32_t maxDim(const vec3& v)
     {
         uint32_t x = (uint32_t)aten::abs(v.x);
         uint32_t y = (uint32_t)aten::abs(v.y);
@@ -41,7 +41,7 @@ namespace aten {
         }
     }
 
-    inline AT_DEVICE_API intersectResult intersectTriangle(
+    inline AT_HOST_DEVICE_API intersectResult intersectTriangle(
         const ray& ray,
         const vec3& v0,
         const vec3& v1,

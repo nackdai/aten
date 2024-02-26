@@ -59,13 +59,13 @@ namespace AT_NAME {
         static const aten::vec3 YCbCr2G;
         static const aten::vec3 YCbCr2B;
 
-        static inline AT_DEVICE_API real luminance(const aten::vec3& v)
+        static inline AT_HOST_DEVICE_API real luminance(const aten::vec3& v)
         {
             real ret = luminance(v.r, v.g, v.b);
             return ret;
         }
 
-        static inline AT_DEVICE_API real luminance(real r, real g, real b)
+        static inline AT_HOST_DEVICE_API real luminance(real r, real g, real b)
         {
             real ret = real(0.2126) * r + real(0.7152) * g + real(0.0722) * b;
             return ret;

@@ -2,7 +2,7 @@
 
 namespace AT_NAME
 {
-    static inline AT_DEVICE_API void getUV(real& u, real& v, const aten::vec3& p)
+    static inline AT_HOST_DEVICE_API void getUV(real& u, real& v, const aten::vec3& p)
     {
         auto phi = aten::asin(p.y);
         auto theta = aten::atan(p.x / p.z);
@@ -27,7 +27,7 @@ namespace AT_NAME
         return isHit;
     }
 
-    bool AT_DEVICE_API sphere::hit(
+    bool AT_HOST_DEVICE_API sphere::hit(
         const aten::ObjectParameter* param,
         const aten::ray& r,
         real t_min, real t_max,

@@ -8,7 +8,7 @@ namespace AT_NAME
     // Production Friendly Microfacet Sheen BRDF.
     // https://blog.selfshadow.com/publications/s2017-shading-course/imageworks/s2017_pbs_imageworks_sheen.pdf
 
-    AT_DEVICE_MTRL_API real MicrofacetVelvet::pdf(
+    AT_DEVICE_API real MicrofacetVelvet::pdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -19,7 +19,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetVelvet::sampleDirection(
+    AT_DEVICE_API aten::vec3 MicrofacetVelvet::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -31,7 +31,7 @@ namespace AT_NAME
         return dir;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetVelvet::bsdf(
+    AT_DEVICE_API aten::vec3 MicrofacetVelvet::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -48,7 +48,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetVelvet::bsdf(
+    AT_DEVICE_API aten::vec3 MicrofacetVelvet::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -66,7 +66,7 @@ namespace AT_NAME
         return ret;
     }
 
-    static AT_DEVICE_MTRL_API inline real sampleVelvet_D(
+    static AT_DEVICE_API inline real sampleVelvet_D(
         const aten::vec3& h,
         const aten::vec3& n,
         real roughness)
@@ -84,7 +84,7 @@ namespace AT_NAME
         return D;
     }
 
-    static AT_DEVICE_MTRL_API inline real interpVelvetParam(int32_t i, real a)
+    static AT_DEVICE_API inline real interpVelvetParam(int32_t i, real a)
     {
         // NOTE
         // a = (1 - r)^2
@@ -101,7 +101,7 @@ namespace AT_NAME
         return p;
     }
 
-    static AT_DEVICE_MTRL_API inline real computeVelvet_L(real x, real roughness)
+    static AT_DEVICE_API inline real computeVelvet_L(real x, real roughness)
     {
         real r = roughness;
         real powOneMinusR = aten::pow(real(1) - r, real(2));
@@ -120,7 +120,7 @@ namespace AT_NAME
         return L;
     }
 
-    static AT_DEVICE_MTRL_API inline real computeVelvet_Lambda(real cosTheta, real roughness)
+    static AT_DEVICE_API inline real computeVelvet_Lambda(real cosTheta, real roughness)
     {
         real r = roughness;
 
@@ -131,7 +131,7 @@ namespace AT_NAME
         return aten::exp(2 * computeVelvet_L(0.5, r) - computeVelvet_L(1 - cosTheta, r));
     }
 
-    static AT_DEVICE_MTRL_API inline real sampleVelvet_G(real cos_wi, real cos_wo, real r)
+    static AT_DEVICE_API inline real sampleVelvet_G(real cos_wi, real cos_wo, real r)
     {
         cos_wi = real(cos_wi <= real(0) ? 0 : 1);
         cos_wo = real(cos_wo <= real(0) ? 0 : 1);
@@ -141,7 +141,7 @@ namespace AT_NAME
         return G;
     }
 
-    AT_DEVICE_MTRL_API real MicrofacetVelvet::pdf(
+    AT_DEVICE_API real MicrofacetVelvet::pdf(
         real roughness,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -163,7 +163,7 @@ namespace AT_NAME
         return 1 / AT_MATH_PI_HALF;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetVelvet::sampleDirection(
+    AT_DEVICE_API aten::vec3 MicrofacetVelvet::sampleDirection(
         real roughness,
         const aten::vec3& in,
         const aten::vec3& normal,
@@ -198,7 +198,7 @@ namespace AT_NAME
         return dir;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetVelvet::bsdf(
+    AT_DEVICE_API aten::vec3 MicrofacetVelvet::bsdf(
         const aten::vec3& albedo,
         const real roughness,
         const real ior,
@@ -231,7 +231,7 @@ namespace AT_NAME
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API void MicrofacetVelvet::sample(
+    AT_DEVICE_API void MicrofacetVelvet::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -254,7 +254,7 @@ namespace AT_NAME
         result->fresnel = fresnel;
     }
 
-    AT_DEVICE_MTRL_API void MicrofacetVelvet::sample(
+    AT_DEVICE_API void MicrofacetVelvet::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,

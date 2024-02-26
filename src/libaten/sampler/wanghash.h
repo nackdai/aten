@@ -15,13 +15,13 @@ namespace aten {
 
         AT_VIRTUAL(~WangHash() {})
 
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const void* data = nullptr))
+        AT_VIRTUAL_OVERRIDE_FINAL(AT_HOST_DEVICE_API void init(uint32_t seed, const void* data = nullptr))
         {
             m_seed = seed;
         }
 
         // [0, 1]
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API real nextSample())
+        AT_VIRTUAL_OVERRIDE_FINAL(AT_HOST_DEVICE_API real nextSample())
         {
             auto ret = static_cast<real>(next(m_seed) / UINT_MAX);
             m_seed += 1;
@@ -30,7 +30,7 @@ namespace aten {
 
         // NOTE
         // https://gist.github.com/badboy/6267743
-        static AT_DEVICE_API uint32_t next(uint32_t seed)
+        static AT_HOST_DEVICE_API uint32_t next(uint32_t seed)
         {
             uint32_t key = 1664525U * seed + 1013904223U;
 

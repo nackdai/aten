@@ -2,14 +2,14 @@
 
 namespace AT_NAME
 {
-    static inline AT_DEVICE_MTRL_API float bits_to_01(uint32_t bits)
+    static inline AT_DEVICE_API float bits_to_01(uint32_t bits)
     {
         // divide by 2^32-1
         uint32_t div = 0xffffffff;
         return bits * (1.0f / float(div));
     }
 
-    static inline AT_DEVICE_MTRL_API uint32_t rotl32(uint32_t var, uint32_t hops)
+    static inline AT_DEVICE_API uint32_t rotl32(uint32_t var, uint32_t hops)
     {
         return (var << hops) | (var >> (32 - hops));
     }
@@ -18,7 +18,7 @@ namespace AT_NAME
     // It's in the public domain.
 
     // Mix up the bits of a, b, and c (changing their values in place).
-    static inline AT_DEVICE_MTRL_API void bjmix(uint32_t& a, uint32_t& b, uint32_t& c)
+    static inline AT_DEVICE_API void bjmix(uint32_t& a, uint32_t& b, uint32_t& c)
     {
         a -= c;  a ^= rotl32(c, 4);  c += b;
         b -= a;  b ^= rotl32(a, 6);  a += c;
@@ -30,7 +30,7 @@ namespace AT_NAME
 
     // Mix up and combine the bits of a, b, and c (doesn't change them, but
     // returns a hash of those three original values).  21 ops
-    static inline AT_DEVICE_MTRL_API uint32_t bjfinal(uint32_t a, uint32_t b, uint32_t c)
+    static inline AT_DEVICE_API uint32_t bjfinal(uint32_t a, uint32_t b, uint32_t c)
     {
         c ^= b; c -= rotl32(b, 14);
         a ^= c; a -= rotl32(c, 11);
@@ -42,7 +42,7 @@ namespace AT_NAME
         return c;
     }
 
-    static inline AT_DEVICE_MTRL_API uint32_t inthash(aten::vec4& k)
+    static inline AT_DEVICE_API uint32_t inthash(aten::vec4& k)
     {
         int32_t N = 4;
 
@@ -86,7 +86,7 @@ namespace AT_NAME
         return c;
     }
 
-    static inline AT_DEVICE_MTRL_API aten::vec3 hash3(aten::vec4& k)
+    static inline AT_DEVICE_API aten::vec3 hash3(aten::vec4& k)
     {
         int32_t N = 4;
 
@@ -104,7 +104,7 @@ namespace AT_NAME
         return result;
     }
 
-    static inline AT_DEVICE_MTRL_API aten::vec3 cellnoise(const aten::vec3& p)
+    static inline AT_DEVICE_API aten::vec3 cellnoise(const aten::vec3& p)
     {
         aten::vec4 iv;
         iv[0] = aten::floor(p.x);
@@ -116,7 +116,7 @@ namespace AT_NAME
         return result;
     }
 
-    AT_DEVICE_MTRL_API aten::vec4 FlakesNormal::gen(
+    AT_DEVICE_API aten::vec4 FlakesNormal::gen(
         real u, real v,
         real flake_scale/*= real(50.0)*/,
         real flake_size/*= real(0.5)*/,

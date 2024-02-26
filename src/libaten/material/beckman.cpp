@@ -8,7 +8,7 @@ namespace AT_NAME
     // http://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
     // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
-    AT_DEVICE_MTRL_API real MicrofacetBeckman::pdf(
+    AT_DEVICE_API real MicrofacetBeckman::pdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -20,7 +20,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::sampleDirection(
+    AT_DEVICE_API aten::vec3 MicrofacetBeckman::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -32,7 +32,7 @@ namespace AT_NAME
         return dir;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::bsdf(
+    AT_DEVICE_API aten::vec3 MicrofacetBeckman::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -51,7 +51,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::bsdf(
+    AT_DEVICE_API aten::vec3 MicrofacetBeckman::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -71,7 +71,7 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API real MicrofacetBeckman::sampleBeckman_D(
+    AT_DEVICE_API real MicrofacetBeckman::sampleBeckman_D(
         const aten::vec3& wh,    // half
         const aten::vec3& n,    // normal
         real roughness)
@@ -100,7 +100,7 @@ namespace AT_NAME
         return D;
     }
 
-    AT_DEVICE_MTRL_API real MicrofacetBeckman::pdf(
+    AT_DEVICE_API real MicrofacetBeckman::pdf(
         const real roughness,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -122,7 +122,7 @@ namespace AT_NAME
         return pdf;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::sampleDirection(
+    AT_DEVICE_API aten::vec3 MicrofacetBeckman::sampleDirection(
         const real roughness,
         const aten::vec3& in,
         const aten::vec3& normal,
@@ -134,7 +134,7 @@ namespace AT_NAME
         return sampleDirection(roughness, in, normal, r1, r2);
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::sampleDirection(
+    AT_DEVICE_API aten::vec3 MicrofacetBeckman::sampleDirection(
         const real roughness,
         const aten::vec3& in,
         const aten::vec3& normal,
@@ -180,7 +180,7 @@ namespace AT_NAME
         return dir;
     }
 
-    AT_DEVICE_MTRL_API real MicrofacetBeckman::sampleBeckman_G(
+    AT_DEVICE_API real MicrofacetBeckman::sampleBeckman_G(
         const aten::vec3& n, const aten::vec3& v, const aten::vec3& m,
         real alpha)
     {
@@ -199,7 +199,7 @@ namespace AT_NAME
         }
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::bsdf(
+    AT_DEVICE_API aten::vec3 MicrofacetBeckman::bsdf(
         const aten::vec3& albedo,
         const real roughness,
         const real ior,
@@ -275,7 +275,7 @@ namespace AT_NAME
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API void MicrofacetBeckman::sample(
+    AT_DEVICE_API void MicrofacetBeckman::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -307,7 +307,7 @@ namespace AT_NAME
         result->fresnel = fresnel;
     }
 
-    AT_DEVICE_MTRL_API void MicrofacetBeckman::sample(
+    AT_DEVICE_API void MicrofacetBeckman::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,

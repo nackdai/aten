@@ -31,7 +31,7 @@ namespace AT_NAME
             aten::Intersection& isect) const override final;
 
         template <class CONTEXT>
-        static AT_DEVICE_API void evaluate_hit_result(
+        static AT_HOST_DEVICE_API void evaluate_hit_result(
             const aten::ObjectParameter& obj,
             const CONTEXT& ctxt,
             const aten::ray& r,
@@ -107,7 +107,7 @@ namespace AT_NAME
         void build(const aten::context& ctxt);
 
         template <class CONTEXT>
-        static AT_DEVICE_API void SamplePosAndNormal(
+        static AT_HOST_DEVICE_API void SamplePosAndNormal(
             aten::SamplePosNormalPdfResult* result,
             const aten::ObjectParameter& param,
             const CONTEXT& ctxt,

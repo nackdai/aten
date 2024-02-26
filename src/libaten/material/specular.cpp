@@ -3,7 +3,7 @@
 
 namespace AT_NAME
 {
-    AT_DEVICE_MTRL_API real specular::pdf(
+    AT_DEVICE_API real specular::pdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -13,7 +13,7 @@ namespace AT_NAME
         return real(1);
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 specular::sampleDirection(
+    AT_DEVICE_API aten::vec3 specular::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -26,7 +26,7 @@ namespace AT_NAME
         return reflect;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 specular::bsdf(
+    AT_DEVICE_API aten::vec3 specular::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -66,7 +66,7 @@ namespace AT_NAME
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 specular::bsdf(
+    AT_DEVICE_API aten::vec3 specular::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -82,7 +82,7 @@ namespace AT_NAME
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API void specular::sample(
+    AT_DEVICE_API void specular::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -97,7 +97,7 @@ namespace AT_NAME
         result->bsdf = bsdf(param, normal, wi, result->dir, u, v);
     }
 
-    AT_DEVICE_MTRL_API void specular::sample(
+    AT_DEVICE_API void specular::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,

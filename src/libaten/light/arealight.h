@@ -23,7 +23,7 @@ namespace AT_NAME {
         virtual ~AreaLight() = default;
 
     public:
-        static AT_DEVICE_API void sample(
+        static AT_HOST_DEVICE_API void sample(
             const aten::hitrecord* rec,
             const aten::LightParameter* param,
             const aten::vec3& org,
@@ -45,7 +45,7 @@ namespace AT_NAME {
         }
 
         template <class CONTEXT>
-        static AT_DEVICE_API void sample(
+        static AT_HOST_DEVICE_API void sample(
             aten::LightSampleResult& result,
             const aten::LightParameter& param,
             const CONTEXT& ctxt,

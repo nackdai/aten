@@ -83,18 +83,18 @@ namespace aten
             };
         };
 
-        AT_DEVICE_API TriangleParameter()
+        AT_HOST_DEVICE_API TriangleParameter()
         {
             needNormal = 0;
         }
 
-        AT_DEVICE_API TriangleParameter(const TriangleParameter& rhs)
+        AT_HOST_DEVICE_API TriangleParameter(const TriangleParameter& rhs)
         {
             v0 = rhs.v0;
             v1 = rhs.v1;
         }
 
-        AT_DEVICE_API TriangleParameter& operator=(const TriangleParameter& rhs)
+        AT_HOST_DEVICE_API TriangleParameter& operator=(const TriangleParameter& rhs)
         {
             v0 = rhs.v0;
             v1 = rhs.v1;

@@ -23,7 +23,7 @@ namespace AT_NAME
 
     public:
         template <class CONTEXT>
-        static AT_DEVICE_MTRL_API void sample(
+        static AT_DEVICE_API void sample(
             aten::LightSampleResult& result,
             const aten::LightParameter& param,
             const CONTEXT& ctxt,

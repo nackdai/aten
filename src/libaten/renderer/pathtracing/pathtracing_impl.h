@@ -29,7 +29,7 @@ namespace AT_NAME
     inline aten::vec4 make_float4(float x, float y, float z, float w) { return {x, y, z, w}; }
 #endif
 
-    inline AT_DEVICE_MTRL_API void GeneratePath(
+    inline AT_DEVICE_API void GeneratePath(
         aten::ray& generated_ray,
         int32_t idx,
         int32_t ix, int32_t iy,
@@ -77,7 +77,7 @@ namespace AT_NAME
 
     namespace _detail {
         template <class A, class B>
-        inline AT_DEVICE_MTRL_API void AddVec3(A& dst, const B& add)
+        inline AT_DEVICE_API void AddVec3(A& dst, const B& add)
         {
             if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec3>) {
                 dst += add;
@@ -95,7 +95,7 @@ namespace AT_NAME
         using HasMemberWOp = decltype(std::declval<T>().w);
 
         template <class A, class B>
-        inline AT_DEVICE_MTRL_API auto CopyVec(A& dst, const B& src)
+        inline AT_DEVICE_API auto CopyVec(A& dst, const B& src)
             -> std::enable_if_t<!aten::is_detected<HasMemberWOp, A>::value, void>
         {
             if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec3>) {
@@ -107,7 +107,7 @@ namespace AT_NAME
         }
 
         template <class A, class B>
-        inline AT_DEVICE_MTRL_API auto CopyVec(A& dst, const B& src)
+        inline AT_DEVICE_API auto CopyVec(A& dst, const B& src)
             -> std::enable_if_t<aten::is_detected<HasMemberWOp, A>::value, void>
         {
             if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec4>) {
@@ -119,7 +119,7 @@ namespace AT_NAME
         }
 
         template <class T = _detail::v3>
-        inline AT_DEVICE_MTRL_API T MakeVec3(real x, real y, real z)
+        inline AT_DEVICE_API T MakeVec3(real x, real y, real z)
         {
             if constexpr (std::is_same_v<T, aten::vec3>) {
                 return { x, y, z };
@@ -130,7 +130,7 @@ namespace AT_NAME
         }
 
         template <class T = _detail::v4>
-        inline AT_DEVICE_MTRL_API T MakeVec4(real x, real y, real z, real w)
+        inline AT_DEVICE_API T MakeVec4(real x, real y, real z, real w)
         {
             if constexpr (std::is_same_v<T, aten::vec4>) {
                 return { x, y, z, w };
@@ -142,7 +142,7 @@ namespace AT_NAME
     }
 
     template <class AOV_BUFFER_TYPE = aten::vec4>
-    inline AT_DEVICE_MTRL_API void ShadeMiss(
+    inline AT_DEVICE_API void ShadeMiss(
         int32_t idx,
         int32_t bounce,
         const aten::vec3& bg,
@@ -171,7 +171,7 @@ namespace AT_NAME
     }
 
     template <class AOV_BUFFER_TYPE = aten::vec4>
-    inline AT_DEVICE_MTRL_API void ShadeMissWithEnvmap(
+    inline AT_DEVICE_API void ShadeMissWithEnvmap(
         int32_t idx,
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,
@@ -244,13 +244,13 @@ namespace AT_NAME
     }
 
     namespace _detail {
-        inline AT_DEVICE_MTRL_API real ComputeBalanceHeuristic(real f, real g)
+        inline AT_DEVICE_API real ComputeBalanceHeuristic(real f, real g)
         {
             return f / (f + g);
         }
     }
 
-    inline AT_DEVICE_MTRL_API void FillShadowRay(
+    inline AT_DEVICE_API void FillShadowRay(
         AT_NAME::ShadowRay& shadow_ray,
         const AT_NAME::context& ctxt,
         int32_t bounce,
@@ -343,7 +343,7 @@ namespace AT_NAME
     }
 
     template <class SCENE = void>
-    inline AT_DEVICE_MTRL_API bool HitShadowRay(
+    inline AT_DEVICE_API bool HitShadowRay(
         int32_t idx,
         int32_t bounce,
         const AT_NAME::context& ctxt,
@@ -418,7 +418,7 @@ namespace AT_NAME
         return isHit;
     }
 
-    inline AT_DEVICE_MTRL_API bool HitImplicitLight(
+    inline AT_DEVICE_API bool HitImplicitLight(
         bool is_back_facing,
         int32_t bounce,
         AT_NAME::PathContrib& path_contrib,
@@ -467,7 +467,7 @@ namespace AT_NAME
         return true;
     }
 
-    inline AT_DEVICE_MTRL_API bool CheckMaterialTranslucentByAlpha(
+    inline AT_DEVICE_API bool CheckMaterialTranslucentByAlpha(
         const aten::MaterialParameter& mtrl,
         real u, real v,
         const aten::vec3& hit_pos,
@@ -501,7 +501,7 @@ namespace AT_NAME
         return false;
     }
 
-    inline AT_DEVICE_MTRL_API float ComputeRussianProbability(
+    inline AT_DEVICE_API float ComputeRussianProbability(
         int32_t bounce,
         int32_t rrBounce,
         AT_NAME::PathAttribute& path_attrib,
@@ -527,7 +527,7 @@ namespace AT_NAME
         return russianProb;
     }
 
-    inline AT_DEVICE_MTRL_API void PostProcessPathTrancing(
+    inline AT_DEVICE_API void PostProcessPathTrancing(
         int32_t idx,
         const aten::hitrecord& rec,
         bool is_backfacing,
@@ -569,7 +569,7 @@ namespace AT_NAME
     }
 
     template <class SCENE = void, bool ENABLE_ALPHA_TRANLUCENT=false>
-    inline AT_DEVICE_MTRL_API void ShadePathTracing(
+    inline AT_DEVICE_API void ShadePathTracing(
         int32_t idx,
         const AT_NAME::context& ctxt,
         AT_NAME::Path paths,

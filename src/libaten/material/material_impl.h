@@ -21,7 +21,7 @@
 
 namespace AT_NAME
 {
-    inline AT_DEVICE_MTRL_API aten::vec4 material::sampleAlbedoMap(
+    inline AT_DEVICE_API aten::vec4 material::sampleAlbedoMap(
         const aten::MaterialParameter* mtrl,
         real u, real v,
         uint32_t lod/*= 0*/)
@@ -29,7 +29,7 @@ namespace AT_NAME
         return sampleTexture(mtrl->albedoMap, u, v, mtrl->baseColor, lod);
     }
 
-    inline AT_DEVICE_MTRL_API void material::sampleMaterial(
+    inline AT_DEVICE_API void material::sampleMaterial(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
@@ -97,7 +97,7 @@ namespace AT_NAME
         }
     }
 
-    inline AT_DEVICE_MTRL_API void material::sampleMaterialWithExternalAlbedo(
+    inline AT_DEVICE_API void material::sampleMaterialWithExternalAlbedo(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
@@ -159,7 +159,7 @@ namespace AT_NAME
         }
     }
 
-    inline AT_DEVICE_MTRL_API real material::samplePDF(
+    inline AT_DEVICE_API real material::samplePDF(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -220,7 +220,7 @@ namespace AT_NAME
         return pdf;
     }
 
-    inline AT_DEVICE_MTRL_API aten::vec3 material::sampleDirection(
+    inline AT_DEVICE_API aten::vec3 material::sampleDirection(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -265,7 +265,7 @@ namespace AT_NAME
         return aten::vec3(0, 1, 0);
     }
 
-    inline AT_DEVICE_MTRL_API aten::vec3 material::sampleBSDF(
+    inline AT_DEVICE_API aten::vec3 material::sampleBSDF(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -310,7 +310,7 @@ namespace AT_NAME
         return aten::vec3();
     }
 
-    inline AT_DEVICE_MTRL_API aten::vec3 material::sampleBSDFWithExternalAlbedo(
+    inline AT_DEVICE_API aten::vec3 material::sampleBSDFWithExternalAlbedo(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -356,7 +356,7 @@ namespace AT_NAME
         return aten::vec3();
     }
 
-    inline AT_DEVICE_MTRL_API real material::applyNormal(
+    inline AT_DEVICE_API real material::applyNormal(
         const aten::MaterialParameter* mtrl,
         const int32_t normalMapIdx,
         const aten::vec3& orgNml,
@@ -390,7 +390,7 @@ namespace AT_NAME
     }
 
     template <class CONTEXT>
-    inline AT_DEVICE_MTRL_API bool FillMaterial(
+    inline AT_DEVICE_API bool FillMaterial(
         aten::MaterialParameter& dst_mtrl,
         const CONTEXT& ctxt,
         const int32_t mtrl_id,

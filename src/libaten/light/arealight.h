@@ -16,7 +16,10 @@ namespace AT_NAME {
         AreaLight()
             : Light(aten::LightType::Area, aten::LightAttributeArea)
         {}
-        AreaLight(const std::shared_ptr<aten::transformable>& obj, const aten::vec3& le);
+        AreaLight(
+            const std::shared_ptr<aten::transformable>& obj,
+            const aten::vec3& light_color,
+            float lux);
 
         AreaLight(const aten::Values& val);
 
@@ -24,24 +27,22 @@ namespace AT_NAME {
 
     public:
         static AT_HOST_DEVICE_API void sample(
-            const aten::hitrecord* rec,
-            const aten::LightParameter* param,
+            const aten::hitrecord& hrec,
+            const aten::LightParameter& param,
             const aten::vec3& org,
             aten::sampler* sampler,
-            aten::LightSampleResult* result)
+            aten::LightSampleResult& result)
         {
-            result->pos = rec->p;
+            result.pos = hrec.p;
 
-            // TODO
-            // AMDのProRender(Baikal)ではこ dist2/面積 となっているが...
-            auto dist2 = aten::squared_length(rec->p - org);
-            result->pdf = 1 / rec->area;
+            result.pdf = 1 / hrec.area;
 
-            result->dir = rec->p - org;
-            result->nml = rec->normal;
+            result.dir = hrec.p - org;
+            result.nml = hrec.normal;
 
-            result->le = param->le;
-            result->finalColor = param->le;
+            // Convert intenstiy[W/sr] to luminance[W/(sr * m^2)]
+            auto luminance = param.scale * param.intensity / hrec.area;
+            result.light_color = param.light_color * luminance;
         }
 
         template <class CONTEXT>
@@ -52,13 +53,13 @@ namespace AT_NAME {
             const aten::vec3& org,
             aten::sampler* sampler)
         {
-            if (param.objid < 0) {
+            if (param.arealight_objid < 0) {
                 return;
             }
 
             bool isHit = false;
 
-            const auto& obj = ctxt.GetObject(param.objid);
+            const auto& obj = ctxt.GetObject(param.arealight_objid);
 
             aten::ray r;
             aten::hitrecord rec;
@@ -116,11 +117,11 @@ namespace AT_NAME {
                 AT_NAME::evaluate_hit_result(rec, obj, ctxt, r, isect);
 
                 sample(
-                    &rec,
-                    &param,
+                    rec,
+                    param,
                     org,
                     sampler,
-                    &result);
+                    result);
             }
         }
 

@@ -51,9 +51,10 @@ namespace AT_NAME {
 
             auto pdf = illum / avgIllum;
 
-            // NOTE
-            // 半径１の球の面積で割る.
-            pdf /= (4 * AT_MATH_PI);
+            // NOTE:
+            // Sphere uniform sampling.
+            // Sample one point on sphere.
+            pdf /= (4.0f * AT_MATH_PI);
 
             return pdf;
         }
@@ -98,20 +99,23 @@ namespace AT_NAME {
             const auto v = uv.y;
 
             // TODO
-            // シーンのAABBを覆う球上に配置されるようにするべき.
+            // Sphere size should cover entire scene.
             result.pos = org + real(100000) * result.dir;
-            result.pdf = dot(nml, result.dir) / AT_MATH_PI;
+
+            // NOTE:
+            // Sphere uniform sampling.
+            // Sample one point on sphere.
+            result.pdf = 1.0f / (4.0f * AT_MATH_PI);
 
 #ifdef __CUDACC__
             // envmapidx is index to array of textures in context.
             // In GPU, sampleTexture requires texture id of CUDA. So, arguments is different.
-            const auto le = tex2DLod<float4>(ctxt.textures[param.envmapidx], u, v, lod);
+            const auto luminance = tex2DLod<float4>(ctxt.textures[param.envmapidx], u, v, lod);
 #else
-            const auto le = AT_NAME::sampleTexture(param.envmapidx, u, v, aten::vec4(1), lod);
+            const auto luminance = AT_NAME::sampleTexture(param.envmapidx, u, v, aten::vec4(1), lod);
 #endif
 
-            result.le = aten::vec3(le.x, le.y, le.z);
-            result.finalColor = result.le;
+            result.light_color = param.scale * luminance;
         }
 
     private:

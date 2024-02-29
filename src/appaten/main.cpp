@@ -7,9 +7,10 @@ static int32_t WIDTH = 512;
 static int32_t HEIGHT = 512;
 static const char* TITLE = "app";
 
+#define ENABLE_IBL
 // #define ENABLE_EVERY_FRAME_SC
 // #define ENABLE_DOF
-#define ENABLE_FEATURE_LINE
+//#define ENABLE_FEATURE_LINE
 
 #ifdef ENABLE_DOF
 static aten::ThinLensCamera g_camera;
@@ -24,13 +25,13 @@ static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static std::shared_ptr<aten::envmap> g_bg;
 static std::shared_ptr<aten::texture> g_envmap;
 
-//static aten::PathTracing g_tracer;
-static aten::SVGFRenderer g_tracer;
+static aten::PathTracing g_tracer;
+//static aten::SVGFRenderer g_tracer;
 
 static std::shared_ptr<aten::visualizer> g_visualizer;
 
-//static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
- static aten::Film g_buffer(WIDTH, HEIGHT);
+static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
+//static aten::Film g_buffer(WIDTH, HEIGHT);
 
 static aten::FBO g_fbo;
 
@@ -260,16 +261,15 @@ int32_t main(int32_t argc, char* argv[])
 
     g_scene.build(g_ctxt);
 
+#ifdef ENABLE_IBL
     g_envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
 
     g_bg = std::make_shared<aten::envmap>();
     g_bg->init(g_envmap);
 
     auto ibl = std::make_shared<aten::ImageBasedLight>(g_bg);
-
-    // NOTE
-    // BDPT doesn't support IBL yet.
     g_scene.addImageBasedLight(g_ctxt, ibl);
+#endif
 
 #ifdef ENABLE_FEATURE_LINE
     g_tracer.enableFeatureLine(true);

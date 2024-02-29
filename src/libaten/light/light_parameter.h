@@ -8,12 +8,11 @@ namespace aten {
      * @brief Data package for the result to sample light.
      */
     struct LightSampleResult {
-        vec3 pos;               ///< light position.
-        vec3 dir;               ///< light direction from the position.
-        vec3 nml;               ///< light object surface normal.
-        vec3 le;                ///< light color.
-        vec3 finalColor;        ///< le * intensity
-        real pdf{ real(0) };    ///< light sampling pdf.
+        vec3 pos;               ///< Light position.
+        vec3 dir;               ///< Light direction from the position.
+        vec3 nml;               ///< Light object surface normal.
+        vec3 light_color;       ///< Light color.
+        float pdf{ float(0) };    ///< Light sampling pdf.
     };
 
     /**
@@ -46,17 +45,13 @@ namespace aten {
     struct LightParameter {
         vec4 pos;   ///< Light position.
         vec4 dir;   ///< Light direction.
-        vec4 le;    ///< Light luminousness.
 
         union {
             aten::vec4 v0;
 
             struct {
                 LightType type;     ///< Light type.
-
-                real constAttn;     ///< Point/Spot light attenuation for constant.
-                real linearAttn;    ///< Point/Spot light attenuation for linear.
-                real expAttn;       ///< Point/Spot light attenuation for exponential.
+                vec3 light_color;   ///< Light color as RGB (0, 1).
             };
         };
 
@@ -64,59 +59,59 @@ namespace aten {
             aten::vec4 v1;
 
             struct {
-                union {
-                    struct {
-                        real innerAngle;    ///< Spot light inner angle.
-                        real outerAngle;    ///< Spot light outer angle.
-                        real falloff;       ///< Spot light fall off factor.
-                    };
-                    struct {
-                        int32_t objid;
-                        int32_t envmapidx;
-                        int32_t padding;
-                    };
-                };
-
+                float innerAngle;       ///< Spot light inner angle.
+                float outerAngle;       ///< Spot light outer angle.
                 LightAttribute attrib;  ///< Light attribute.
             };
         };
 
+        union {
+            aten::vec4 v2;
+
+            struct {
+                float scale;    ///< Scele factor to be multiplied to intensity or luminance.
+                union {
+                    float intensity;    ///< Light intetnsity for point/spot/area light. [W/sr]
+                    float luminance;    ///< Luminance emittance for directional light. [W/(sr*m^2)]
+                };
+                int32_t arealight_objid;    ///< Object index to be referred as area light.
+                int32_t envmapidx;          ///< Texture index as environment map.
+            };
+        };
+
         AT_HOST_DEVICE_API LightParameter()
-            : v0(0), v1(0)
-        {};
+            : v0(0), v1(0), v2(0)
+        {
+            innerAngle = AT_MATH_PI;
+            outerAngle = AT_MATH_PI;
+            arealight_objid = -1;
+            envmapidx = -1;
+            scale = 1.0f;
+        };
 
         AT_HOST_DEVICE_API LightParameter(LightType _type, const LightAttribute& _attrib)
-            : attrib(_attrib), type(_type)
+            : v0(0), v1(0), v2(0), attrib(_attrib), type(_type)
         {
-            constAttn = real(1);
-            linearAttn = real(0);
-            expAttn = real(0);
-
-            if (type == LightType::Area || type == LightType::IBL) {
-                objid = -1;
-                envmapidx = -1;
-                padding = 0;
-            }
-            else {
-                innerAngle = AT_MATH_PI;
-                outerAngle = AT_MATH_PI;
-                falloff = real(0);
-            }
+            innerAngle = AT_MATH_PI;
+            outerAngle = AT_MATH_PI;
+            arealight_objid = -1;
+            envmapidx = -1;
+            scale = 1.0f;
         }
 
-        AT_HOST_DEVICE_API LightParameter(const LightParameter& rhs)
+        LightParameter(const LightParameter& rhs)
         {
             *this = rhs;
         }
 
-        AT_HOST_DEVICE_API LightParameter& operator=(const LightParameter& rhs)
+        LightParameter& operator=(const LightParameter& rhs)
         {
             pos = rhs.pos;
             dir = rhs.dir;
-            le = rhs.le;
 
             v0 = rhs.v0;
             v1 = rhs.v1;
+            v2 = rhs.v2;
 
             return *this;
         }
@@ -124,7 +119,7 @@ namespace aten {
         AT_HOST_DEVICE_API bool IsValidLightObjectId() const
         {
             if (type == LightType::Area) {
-                return objid >= 0;
+                return arealight_objid >= 0;
             }
             return false;
         }
@@ -137,7 +132,5 @@ namespace aten {
             return -1;
         }
     };
-    //AT_STATICASSERT((sizeof(LightParameter) % 64) == 0);
-
-    static constexpr size_t LightParameter_float4_size = sizeof(LightParameter) / sizeof(aten::vec4);
+    AT_STATICASSERT((sizeof(LightParameter) % sizeof(aten::vec4)) == 0);
 }

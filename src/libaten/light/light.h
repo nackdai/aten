@@ -42,9 +42,9 @@ namespace AT_NAME
             m_param.dir = normalize(dir);
         }
 
-        void setLe(const aten::vec3& le)
+        void setLightColor(const aten::vec3& light_color)
         {
-            m_param.le = le;
+            m_param.light_color = light_color;
         }
 
         const aten::vec3& getPos() const
@@ -57,9 +57,9 @@ namespace AT_NAME
             return m_param.dir.v;
         }
 
-        const aten::vec3& getLe() const
+        const aten::vec3& getLightColor() const
         {
-            return m_param.le.v;
+            return m_param.light_color;
         }
 
         bool isSingular() const

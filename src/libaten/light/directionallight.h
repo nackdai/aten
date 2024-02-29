@@ -14,11 +14,13 @@ namespace AT_NAME {
         {}
         DirectionalLight(
             const aten::vec3& dir,
-            const aten::vec3& le)
+            const aten::vec3& light_color,
+            float luminance)
             : Light(aten::LightType::Direction, aten::LightAttributeDirectional)
         {
             m_param.dir = normalize(dir);
-            m_param.le = le;
+            m_param.light_color = light_color;
+            m_param.luminance = luminance;
         }
 
         DirectionalLight(aten::Values& val);
@@ -27,23 +29,21 @@ namespace AT_NAME {
 
     public:
         static AT_HOST_DEVICE_API void sample(
-            const aten::LightParameter* param,
+            const aten::LightParameter& param,
             const aten::vec3& org,
             aten::sampler* sampler,
-            aten::LightSampleResult* result)
+            aten::LightSampleResult& result)
         {
-            // PDF to sample area.
-            result->pdf = real(1);
+            result.pdf = 1.0f;
 
-            result->dir = -normalize(param->dir);
-            result->nml = normalize(param->dir);
+            result.dir = -normalize(param.dir);
+            result.nml = normalize(param.dir);
 
             // TODO
-            // シーンのAABBを覆う球上に配置されるようにするべき.
-            result->pos = org + real(100000) * real(0.5) * result->dir;
+            // Light should be located at sphere to cover entire scene.
+            result.pos = org + real(100000) * real(0.5) * result.dir;
 
-            result->le = param->le;
-            result->finalColor = param->le;
+            result.light_color = param.light_color * param.scale * param.luminance;
         }
     };
 }

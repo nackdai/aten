@@ -308,7 +308,7 @@ namespace AT_NAME
             bsdf *= throughtput.throughput;
 
             // Get light color.
-            auto emit{ sampleres.finalColor };
+            const auto& emit{ sampleres.light_color };
 
             auto cosLight = dot(nmlLight, -dirToLight);
 
@@ -319,15 +319,23 @@ namespace AT_NAME
                 && dist2 > 0
                 && path_pdf > real(0) && pdfLight > real(0))
             {
-                // Convert path PDF to NEE PDF.
-                // i.e. Convert solid angle PDF to area PDF.
-                path_pdf = path_pdf * cosLight / dist2;
+                // NOTE:
+                // Regarding punctual light, nothing to sample.
+                // It means there is nothing to convert pdf.
+                // TODO: IBL...
+                if (!light.attrib.isSingular || !light.attrib.isIBL) {
+                    // Convert path PDF to NEE PDF.
+                    // i.e. Convert solid angle PDF to area PDF.
+                    path_pdf = path_pdf * cosLight / dist2;
+                }
 
                 auto misW = light.attrib.isSingular
                     ? 1.0f
                     : _detail::ComputeBalanceHeuristic(pdfLight * lightSelectPdf, path_pdf);
 
-                const auto G = cosShadow * cosLight / dist2;
+                const auto G = light.attrib.isSingular
+                    ? cosShadow
+                    : cosShadow * cosLight / dist2;
 
                 // NOTE:
                 // 3point rendering equation.
@@ -369,7 +377,9 @@ namespace AT_NAME
         const auto distToLight = shadow_ray.distToLight;
 
         const auto& light = ctxt.GetLight(targetLightId);
-        const auto lightobj = (light.IsValidLightObjectId() ? &ctxt.GetObject(static_cast<uint32_t>(light.objid)) : nullptr);
+        const auto lightobj = (light.IsValidLightObjectId()
+            ? &ctxt.GetObject(static_cast<uint32_t>(light.arealight_objid))
+            : nullptr);
 
         real distHitObjToRayOrg = AT_MATH_INF;
 
@@ -447,8 +457,9 @@ namespace AT_NAME
             if (cosLight >= 0) {
                 auto pdfLight = 1 / hit_area;
 
-                // Convert NEE PDF to path tracing PDF.
-                // i.e. Convert area PDF to solid angle PDF.
+                // If logic comes here, light has area.
+                // But, samling is fully based on solid angle (path) because of brdf sampling in previous bounce.
+                // So, convert area PDF to solid angle PDF.
                 pdfLight = pdfLight * dist2 / cosLight;
 
                 weight = _detail::ComputeBalanceHeuristic(path_throughput.pdfb, pdfLight);

@@ -14,16 +14,15 @@ namespace AT_NAME {
         {}
         PointLight(
             const aten::vec3& pos,
-            const aten::vec3& le,
-            real constAttn = 1,
-            real linearAttn = 0,
-            real expAttn = 0)
+            const aten::vec3& light_color,
+            float flux)
             : Light(aten::LightType::Point, aten::LightAttributeSingluar)
         {
             m_param.pos = pos;
-            m_param.le = le;
+            m_param.light_color = light_color;
 
-            setAttenuation(constAttn, linearAttn, expAttn);
+            // Convert flux[W] to intensity[W/sr]
+            m_param.intensity = flux / (4.0f * AT_MATH_PI);
         }
 
         PointLight(aten::Values& val);
@@ -31,43 +30,23 @@ namespace AT_NAME {
         virtual ~PointLight() = default;
 
     public:
-        void setAttenuation(
-            real constAttn,
-            real linearAttn,
-            real expAttn)
-        {
-            m_param.constAttn = std::max(constAttn, real(0));
-            m_param.linearAttn = std::max(linearAttn, real(0));
-            m_param.expAttn = std::max(expAttn, real(0));
-        }
-
         static AT_HOST_DEVICE_API void sample(
-            const aten::LightParameter* param,
+            const aten::LightParameter& param,
             const aten::vec3& org,
             aten::sampler* sampler,
-            aten::LightSampleResult* result)
+            aten::LightSampleResult& result)
         {
-            result->pdf = real(1);
+            result.pdf = 1.0f;
 
-            result->dir = ((aten::vec3)param->pos) - org;
+            result.dir = ((aten::vec3)param.pos) - org;
 
-            auto dist2 = aten::squared_length(result->dir);
-            auto dist = aten::sqrt(dist2);
+            result.pos = param.pos;
+            result.nml = normalize(-result.dir);
 
-            result->pos = param->pos;
-            result->nml = normalize(-result->dir);
+            auto dist2 = aten::squared_length(result.dir);
 
-            // 減衰率.
-            // http://ogldev.atspace.co.uk/www/tutorial20/tutorial20.html
-            // 上記によると、L = Le / dist2 で正しいが、3Dグラフィックスでは見た目的にあまりよろしくないので、減衰率を使って計算する.
-            real attn = param->constAttn + param->linearAttn * dist + param->expAttn * dist2;
-
-            // TODO
-            // Is it correct?
-            attn = aten::cmpMax(attn, real(1));
-
-            result->le = param->le;
-            result->finalColor = param->le / attn;
+            auto luminance = param.scale * param.intensity / dist2;
+            result.light_color = param.light_color * luminance;
         }
     };
 }

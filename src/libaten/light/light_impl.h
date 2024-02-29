@@ -27,13 +27,13 @@ namespace AT_NAME
             AT_NAME::ImageBasedLight::sample(result, param, ctxt, org, nml, sampler, lod);
             break;
         case aten::LightType::Point:
-            AT_NAME::PointLight::sample(&param, org, sampler, &result);
+            AT_NAME::PointLight::sample(param, org, sampler, result);
             break;
         case aten::LightType::Spot:
-            AT_NAME::SpotLight::sample(&param, org, sampler, &result);
+            AT_NAME::SpotLight::sample(param, org, sampler, result);
             break;
         case aten::LightType::Direction:
-            AT_NAME::DirectionalLight::sample(&param, org, sampler, &result);
+            AT_NAME::DirectionalLight::sample(param, org, sampler, result);
             break;
         default:
             AT_ASSERT(false);

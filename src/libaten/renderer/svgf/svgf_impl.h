@@ -459,6 +459,7 @@ namespace svgf {
 
         int32_t frame = static_cast<int32_t>(center_moment.z);
 
+        AT_ASSERT(center_moment.z > 0);
         center_moment /= center_moment.z;
 
         float variance = 0.0f;
@@ -519,7 +520,7 @@ namespace svgf {
             moment_sum /= weight;
             color /= weight;
 
-            variance = 1.0f + 3.0f * (1.0f - frame / 4.0f) * aten::cmpMax(0.0f, moment_sum.y - moment_sum.x * moment_sum.x);
+            variance = aten::cmpMax(0.0f, moment_sum.x - moment_sum.y * moment_sum.y);
         }
         else {
             variance = aten::cmpMax(0.0f, center_moment.x - center_moment.y * center_moment.y);
@@ -843,15 +844,19 @@ namespace svgf {
 
         constexpr auto num = CopyElementNumPerItem > 4 ? 4 : CopyElementNumPerItem;
 
-        switch (num) {
-        case 1:
-            dst_v.x = src_v.x;
-        case 2:
-            dst_v.y = src_v.y;
-        case 3:
-            dst_v.z = src_v.z;
-        case 4:
-            dst_v.w = src_v.w;
+        if constexpr (num <= 4) {
+            if constexpr (num >= 4) {
+                dst_v.w = src_v.w;
+            }
+            if constexpr (num >= 3) {
+                dst_v.z = src_v.z;
+            }
+            if constexpr (num >= 2) {
+                dst_v.y = src_v.y;
+            }
+            if constexpr (num >= 1) {
+                dst_v.x = src_v.x;
+            }
         }
     }
 }   // namespace svgf

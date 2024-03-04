@@ -8,8 +8,8 @@
 //#define RELEASE_DEBUG
 
 #ifdef RELEASE_DEBUG
-#define BREAK_X    (-1)
-#define BREAK_Y    (-1)
+#define BREAK_X    (10)
+#define BREAK_Y    (511-447)
 #pragma optimize( "", off)
 #endif
 
@@ -540,6 +540,8 @@ namespace aten
                             path_host_.paths,
                             aten::span<decltype(params_)::buffer_value_type>(params_.temporary_color_buffer));
                     }
+
+                    dst.buffer->put(x, y, path_host_.paths.contrib[idx].contrib);
                 }
             }
 
@@ -595,23 +597,23 @@ namespace aten
                 }
             }
 
+            auto camera_distance = AT_NAME::camera::ComputeScreenDistance(camera->param(), height);
+
+            for (int32_t i = 0; i < params_.atrous_iter_cnt; i++) {
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for
 #endif
-            for (int32_t y = 0; y < height; y++) {
-                for (int32_t x = 0; x < width; x++) {
+                for (int32_t y = 0; y < height; y++) {
+                    for (int32_t x = 0; x < width; x++) {
 #ifdef RELEASE_DEBUG
-                    if (x == BREAK_X && y == BREAK_Y) {
-                        DEBUG_BREAK();
-                    }
+                        if (x == BREAK_X && y == BREAK_Y) {
+                            DEBUG_BREAK();
+                        }
 #endif
+                        int32_t idx = y * width + x;
 
-                    int32_t idx = y * width + x;
+                        std::optional<aten::vec4> filtered_color;
 
-                    auto camera_distance = AT_NAME::camera::ComputeScreenDistance(camera->param(), height);
-
-                    std::optional<aten::vec4> filtered_color;
-                    for (int32_t i = 0; i < params_.atrous_iter_cnt; i++) {
                         filtered_color = AtrousFilter(
                             i,
                             idx, x, y, width, height,
@@ -624,6 +626,9 @@ namespace aten
                 }
             }
 
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
             for (int32_t y = 0; y < height; y++) {
                 for (int32_t x = 0; x < width; x++) {
                     int32_t idx = y * width + x;

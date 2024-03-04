@@ -53,7 +53,7 @@ namespace aten
             scene* scene,
             int32_t rrDepth,
             int32_t bounce,
-            const AT_NAME::SVGFMtxPack mtxs,
+            const aten::mat4& mtx_W2C,
             aten::span<aten::vec4>& aov_normal_depth,
             aten::span<aten::vec4>& aov_albedo_meshid);
 

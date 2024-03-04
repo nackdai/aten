@@ -43,7 +43,7 @@ namespace aten
                     idx,
                     path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
                     isect, scene, russian_roulette_depth_, depth,
-                    params_.mtxs,
+                    params_.mtxs.GetW2C(),
                     aov_normal_depth, aov_albedo_meshid);
 
                 std::ignore = AT_NAME::HitShadowRay(
@@ -72,7 +72,7 @@ namespace aten
                     ShadeMiss(
                         idx,
                         depth,
-                        bg()->sample(rays_[idx]),
+                        aten::vec3(),
                         path_host_.paths,
                         aov.GetNormalDepthAsSpan(),
                         aov.GetAlbedoMeshIdAsSpan());
@@ -99,7 +99,7 @@ namespace aten
         scene* scene,
         int32_t rrDepth,
         int32_t bounce,
-        const AT_NAME::SVGFMtxPack mtxs,
+        const aten::mat4& mtx_W2C,
         aten::span<aten::vec4>& aov_normal_depth,
         aten::span<aten::vec4>& aov_albedo_meshid)
     {
@@ -121,6 +121,40 @@ namespace aten
             ctxt,
             rec.mtrlid, rec.isVoxel);
 
+        // Render AOVs.
+        // NOTE
+        // 厳密に法線をAOVに保持するなら、法線マップ適用後するべき.
+        // しかし、temporal reprojection、atrousなどのフィルタ適用時に法線を参照する際に、法線マップが細かすぎてはじかれてしまうことがある.
+        // それにより、フィルタがおもったようにかからずフィルタの品質が下がってしまう問題が発生する.
+        if (bounce == 0) {
+            // texture color
+            auto texcolor = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
+
+            AT_NAME::FillBasicAOVs(
+                aov_normal_depth[idx], orienting_normal, rec, mtx_W2C,
+                aov_albedo_meshid[idx], texcolor, isect);
+            aov_albedo_meshid[idx].w = isect.mtrlid;
+
+            // For exporting separated albedo.
+            mtrl.albedoMap = -1;
+        }
+        // TODO
+        // How to deal Refraction?
+        else if (bounce == 1 && paths.attrib[idx].mtrlType == aten::MaterialType::Specular) {
+            // texture color.
+            auto texcolor = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
+
+            // TODO
+            // No good idea to compute reflected depth.
+            AT_NAME::FillBasicAOVs(
+                aov_normal_depth[idx], orienting_normal, rec, mtx_W2C,
+                aov_albedo_meshid[idx], texcolor, isect);
+            aov_albedo_meshid[idx].w = isect.mtrlid;
+
+            // For exporting separated albedo.
+            mtrl.albedoMap = -1;
+        }
+
         auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
 
         auto& shadow_ray = shadow_rays[idx];
@@ -138,13 +172,6 @@ namespace aten
         if (is_hit_implicit_light) {
             return;
         }
-
-        AT_NAME::svgf::FillAOVs<true, true, true>(
-            idx, bounce,
-            paths, rec, isect,
-            mtxs.GetW2C(),
-            orienting_normal, mtrl,
-            aov_normal_depth, aov_albedo_meshid);
 
         if (!mtrl.attrib.isTranslucent && isBackfacing) {
             orienting_normal = -orienting_normal;
@@ -537,12 +564,51 @@ namespace aten
                             camera->param(),
                             params_);
                     }
-#if 1
+                    else {
+                        temporal_projected_clr = path_host_.paths.contrib[idx].contrib;
+                    }
+
+                    dst.buffer->put(x, y, temporal_projected_clr);
+                }
+            }
+
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+#ifdef RELEASE_DEBUG
+                    if (x == BREAK_X && y == BREAK_Y) {
+                        DEBUG_BREAK();
+                    }
+#endif
+
+                    int32_t idx = y * width + x;
+
                     auto camera_distance = AT_NAME::camera::ComputeScreenDistance(camera->param(), height);
                     auto variance = EstimateVariance(
                         x, y, width, height,
                         camera_distance,
                         params_);
+
+                    dst.buffer->put(x, y, variance);
+                }
+            }
+
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+#ifdef RELEASE_DEBUG
+                    if (x == BREAK_X && y == BREAK_Y) {
+                        DEBUG_BREAK();
+                    }
+#endif
+
+                    int32_t idx = y * width + x;
+
+                    auto camera_distance = AT_NAME::camera::ComputeScreenDistance(camera->param(), height);
 
                     std::optional<aten::vec4> filtered_color;
                     for (int32_t i = 0; i < params_.atrous_iter_cnt; i++) {
@@ -552,14 +618,16 @@ namespace aten
                             camera_distance,
                             params_);
                         if (filtered_color) {
-                            break;
+                            dst.buffer->put(x, y, filtered_color.value());
                         }
                     }
+                }
+            }
 
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+                    int32_t idx = y * width + x;
                     CopyFromTeporaryColorBufferToAov(idx, params_);
-#endif
-                    auto col = static_cast<aten::vec3>(filtered_color.value());
-                    dst.buffer->put(x, y, vec4(col, 1));
                 }
             }
         }

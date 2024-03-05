@@ -133,5 +133,5 @@ and it works on only Linux.
 For example:
 
 ```shell
-./scripts/build.sh -b Release -c 75 -d aten:latest
+./scripts/build.sh -b Release -c 75 -d ghcr.io/nackdai/aten/aten:latest
 ```

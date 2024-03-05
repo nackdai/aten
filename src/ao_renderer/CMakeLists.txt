@@ -1,4 +1,4 @@
-set(PROJECT_NAME idatentest)
+set(PROJECT_NAME ao_renderer)
 
 project(${PROJECT_NAME})
 

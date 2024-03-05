@@ -1,4 +1,4 @@
-set(PROJECT_NAME restirtest)
+set(PROJECT_NAME restir_renderer)
 
 project(${PROJECT_NAME})
 

@@ -39,7 +39,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3E3AE651-5D5D-4B7F-B94C-EFF0361E2D89}</ProjectGuid>
-    <RootNamespace>svgftest</RootNamespace>
+    <RootNamespace>VoxelViewer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

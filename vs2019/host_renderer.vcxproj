@@ -28,7 +28,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C55C3B42-D7EC-4569-ACDF-19EC5D71FB7C}</ProjectGuid>
-    <RootNamespace>appaten</RootNamespace>
+    <RootNamespace>host_renderer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -256,7 +256,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\appaten\main.cpp" />
+    <ClCompile Include="..\src\host_renderer\main.cpp" />
     <ClCompile Include="..\src\common\scenedefs.cpp" />
   </ItemGroup>
   <ItemGroup>

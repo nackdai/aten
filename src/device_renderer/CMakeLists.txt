@@ -1,4 +1,4 @@
-set(PROJECT_NAME aorenderer)
+set(PROJECT_NAME device_renderer)
 
 project(${PROJECT_NAME})
 

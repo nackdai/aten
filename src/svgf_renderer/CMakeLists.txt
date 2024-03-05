@@ -1,4 +1,4 @@
-set(PROJECT_NAME svgftest)
+set(PROJECT_NAME svgf_renderer)
 
 project(${PROJECT_NAME})
 

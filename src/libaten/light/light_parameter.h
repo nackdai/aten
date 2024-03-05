@@ -90,8 +90,10 @@ namespace aten {
         };
 
         AT_HOST_DEVICE_API LightParameter(LightType _type, const LightAttribute& _attrib)
-            : v0(0), v1(0), v2(0), attrib(_attrib), type(_type)
+            : v0(0), v1(0), v2(0)
         {
+            attrib = _attrib;
+            type = _type;
             innerAngle = AT_MATH_PI;
             outerAngle = AT_MATH_PI;
             arealight_objid = -1;

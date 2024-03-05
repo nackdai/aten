@@ -1,4 +1,4 @@
-set(PROJECT_NAME appaten)
+set(PROJECT_NAME host_renderer)
 
 project(${PROJECT_NAME})
 

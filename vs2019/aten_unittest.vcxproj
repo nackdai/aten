@@ -35,7 +35,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AE027FDF-561A-40BC-B5A8-8833D11353C9}</ProjectGuid>
-    <RootNamespace>appaten</RootNamespace>
+    <RootNamespace>aten_unittest</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

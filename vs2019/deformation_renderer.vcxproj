@@ -28,14 +28,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common\scenedefs.cpp" />
-    <ClCompile Include="..\src\aorenderer\main.cpp" />
+    <ClCompile Include="..\src\deformation_renderer\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\deformation_renderer\ssrt_deformable_vs.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\common\scenedefs.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B86F042B-0AD6-4BCD-8072-8F3C29EB926A}</ProjectGuid>
-    <RootNamespace>aorenderer</RootNamespace>
+    <ProjectGuid>{6CB34CD6-7181-48B8-92C3-B11776C84844}</ProjectGuid>
+    <RootNamespace>deformation_renderer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -137,7 +140,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\src\aorenderer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\src\deformation_renderer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -165,7 +168,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\src\aorenderer;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\src\deformation_renderer;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -199,7 +202,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\src\aorenderer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\src\deformation_renderer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -231,7 +234,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\src\aorenderer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\src\deformation_renderer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -263,7 +266,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\src\aorenderer;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\src\deformation_renderer;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -299,7 +302,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\src\aorenderer;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\src\deformation_renderer;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>

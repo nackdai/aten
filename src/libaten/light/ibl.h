@@ -107,13 +107,16 @@ namespace AT_NAME {
             // Sample one point on sphere.
             result.pdf = 1.0f / (4.0f * AT_MATH_PI);
 
-#ifdef __CUDACC__
             // envmapidx is index to array of textures in context.
             // In GPU, sampleTexture requires texture id of CUDA. So, arguments is different.
-            const auto luminance = tex2DLod<float4>(ctxt.textures[param.envmapidx], u, v, lod);
+            auto envmapidx =
+#ifdef __CUDACC__
+                ctxt.textures[param.envmapidx];
 #else
-            const auto luminance = AT_NAME::sampleTexture(param.envmapidx, u, v, aten::vec4(1), lod);
+                param.envmapidx;
 #endif
+
+            const auto luminance = AT_NAME::sampleTexture(envmapidx, u, v, aten::vec4(1), lod);
 
             result.light_color = param.scale * luminance;
         }

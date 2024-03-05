@@ -82,7 +82,7 @@ namespace AT_NAME
             return m_param;
         }
 
-        const aten::LightParameter& get_param() const
+        aten::LightParameter& param()
         {
             return m_param;
         }

@@ -524,10 +524,8 @@ int32_t main()
         // PointLight
         g_scene_light.point_light = std::make_shared<aten::PointLight>(
             aten::vec3(0.0, 0.0, 50.0),
-            aten::vec3(10.0, 0.0, 0.0),
-            real(0),
-            real(0.1),
-            real(0));
+            aten::vec3(1.0, 0.0, 0.0),
+            400.0f);
         g_ctxt.AddLight(g_scene_light.point_light);
     }
 

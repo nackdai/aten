@@ -25,15 +25,11 @@ add_library(
   accelerator/bvh_node.h
   accelerator/bvh_update.cpp
   accelerator/bvh_util.h
-  accelerator/qbvh.cpp
-  accelerator/qbvh.h
   accelerator/sbvh.cpp
   accelerator/sbvh.h
   accelerator/sbvh_voxel.cpp
   accelerator/stackless_bvh.cpp
   accelerator/stackless_bvh.h
-  accelerator/stackless_qbvh.cpp
-  accelerator/stackless_qbvh.h
   accelerator/threaded_bvh.cpp
   accelerator/threaded_bvh.h
   aten.h

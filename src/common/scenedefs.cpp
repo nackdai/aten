@@ -1294,8 +1294,9 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
     const auto& min_pos = aabb.minPos();
     const auto& max_pos = aabb.maxPos();
 
+    // NOTE:
+    // The unit seems to be [cm] not [m]...
     aten::vec3 step_v = max_pos - min_pos;
-
     step_v /= step;
 
     aten::vec3 pos = min_pos;
@@ -1316,7 +1317,11 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
                 auto l = std::make_shared<aten::PointLight>(
                     pos,
                     color[num % color.size()],
-                    400.0f);
+                    6000.0f);
+
+                // NOTE:
+                // Scaling for unit is [cm].
+                l->param().scale = 100.0f;
 
                 ctxt.AddLight(l);
 
@@ -1331,7 +1336,11 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
     auto l = std::make_shared<aten::PointLight>(
         aten::vec3(-353.4f, 359.4f, -41.2f),
         aten::vec3(1.0f, 1.0f, 1.0f),
-        400.0f);
+        6000.0f);
+
+    // NOTE:
+    // Scaling for unit is [cm].
+    l->param().scale = 100.0f;
 
     ctxt.AddLight(l);
 }

@@ -48,7 +48,7 @@ inline __device__ int32_t sampleLightWithReservoirRIP(
         auto cosLight = dot(nmlLight, -dirToLight);
         auto dist2 = aten::squared_length(lightsample.dir);
 
-        auto energy = brdf * lightsample.finalColor;
+        auto energy = brdf * lightsample.light_color;
 
         cosShadow = aten::abs(cosShadow);
 

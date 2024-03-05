@@ -371,7 +371,7 @@ __global__ void computeShadowRayContribution(
                 bsdf *= restir_info.throughput;
 
                 // Get light color.
-                auto emit = reservoir.light_sample_.finalColor;
+                auto emit = reservoir.light_sample_.light_color;
 
                 cosShadow = aten::abs(cosShadow);
 

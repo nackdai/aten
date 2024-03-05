@@ -163,7 +163,6 @@ cuda_add_library(
   kernel/bvh.cuh
   kernel/bvh_impl.cuh
   kernel/device_scene_context.cuh
-  kernel/idatendefs.cuh
   kernel/intersect.cu
   kernel/intersect.cuh
   kernel/intersect_impl.cuh
@@ -175,9 +174,6 @@ cuda_add_library(
   kernel/pt_common.h
   kernel/pt_standard_impl.cu
   kernel/pt_standard_impl.h
-  kernel/qbvh.cu
-  kernel/qbvh.cuh
-  kernel/qbvh_impl.cuh
   kernel/renderer.cpp
   kernel/renderer.h
   kernel/sample_texture_impl.cu
@@ -188,9 +184,6 @@ cuda_add_library(
   kernel/stackless_bvh.cu
   kernel/stackless_bvh.cuh
   kernel/stackless_bvh_impl.cuh
-  kernel/stackless_qbvh.cu
-  kernel/stackless_qbvh.cuh
-  kernel/stackless_qbvh_impl.cuh
   kernel/tex_viewer.cu
   npr/npr_pathtracing.cu
   npr/npr_pathtracing.h

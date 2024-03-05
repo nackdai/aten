@@ -275,9 +275,7 @@
     <ClInclude Include="..\src\libaten\deformable\SKLFormat.h" />
     <ClInclude Include="..\src\libaten\defs.h" />
     <ClInclude Include="..\src\libaten\filter\atrous.h" />
-    <ClInclude Include="..\src\libaten\filter\bilateral.h" />
     <ClInclude Include="..\src\libaten\filter\magnifier.h" />
-    <ClInclude Include="..\src\libaten\filter\nlm.h" />
     <ClInclude Include="..\src\libaten\filter\taa.h" />
     <ClInclude Include="..\src\libaten\geometry\EvaluateHitResult.h" />
     <ClInclude Include="..\src\libaten\geometry\geomparam.h" />
@@ -344,7 +342,6 @@
     <ClInclude Include="..\src\libaten\misc\tuple.h" />
     <ClInclude Include="..\src\libaten\misc\value.h" />
     <ClInclude Include="..\src\libaten\os\system.h" />
-    <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h" />
     <ClInclude Include="..\src\libaten\proxy\DataCollector.h" />
     <ClInclude Include="..\src\libaten\renderer\aov.h" />
     <ClInclude Include="..\src\libaten\renderer\ao\aorenderer.h" />
@@ -361,15 +358,10 @@
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf.h" />
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf_types.h" />
-    <ClInclude Include="..\src\libaten\sampler\bluenoiseSampler.h" />
     <ClInclude Include="..\src\libaten\sampler\cmj.h" />
-    <ClInclude Include="..\src\libaten\sampler\halton.h" />
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
     <ClInclude Include="..\src\libaten\sampler\samplerinterface.h" />
-    <ClInclude Include="..\src\libaten\sampler\sobol.h" />
-    <ClInclude Include="..\src\libaten\sampler\sobolproxy.h" />
     <ClInclude Include="..\src\libaten\sampler\wanghash.h" />
-    <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
     <ClInclude Include="..\src\libaten\scene\AcceleratedScene.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
     <ClInclude Include="..\src\libaten\scene\hit_parameter.h" />
@@ -417,9 +409,7 @@
     <ClCompile Include="..\src\libaten\deformable\DeformPrimitives.cpp" />
     <ClCompile Include="..\src\libaten\deformable\Skeleton.cpp" />
     <ClCompile Include="..\src\libaten\filter\atrous.cpp" />
-    <ClCompile Include="..\src\libaten\filter\bilateral.cpp" />
     <ClCompile Include="..\src\libaten\filter\magnifier.cpp" />
-    <ClCompile Include="..\src\libaten\filter\nlm.cpp" />
     <ClCompile Include="..\src\libaten\filter\taa.cpp" />
     <ClCompile Include="..\src\libaten\geometry\NoHitableMesh.cpp" />
     <ClCompile Include="..\src\libaten\geometry\PolygonObject.cpp" />
@@ -470,7 +460,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\os\windows\misc\timer_windows.cpp" />
     <ClCompile Include="..\src\libaten\os\windows\system_windows.cpp" />
-    <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp" />
     <ClCompile Include="..\src\libaten\proxy\DataCollector.cpp" />
     <ClCompile Include="..\src\libaten\renderer\ao\aorenderer.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
@@ -478,9 +467,7 @@
     <ClCompile Include="..\src\libaten\renderer\npr\feature_line.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing\pathtracing.cpp" />
     <ClCompile Include="..\src\libaten\renderer\svgf\svgf.cpp" />
-    <ClCompile Include="..\src\libaten\sampler\halton.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sampler.cpp" />
-    <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />
     <ClCompile Include="..\src\libaten\scene\hitable.cpp" />
     <ClCompile Include="..\src\libaten\scene\host_scene_context.cpp" />
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />
@@ -498,20 +485,12 @@
   <ItemGroup>
     <None Include="..\src\shader\atrous_final_fs.glsl" />
     <None Include="..\src\shader\atrous_fs.glsl" />
-    <None Include="..\src\shader\bilateral_fs.glsl" />
-    <None Include="..\src\shader\bloomeffect_fs_2x2.glsl" />
-    <None Include="..\src\shader\bloomeffect_fs_4x4.glsl" />
-    <None Include="..\src\shader\bloomeffect_fs_Final.glsl" />
-    <None Include="..\src\shader\bloomeffect_fs_Gauss.glsl" />
-    <None Include="..\src\shader\bloomeffect_fs_HBlur.glsl" />
-    <None Include="..\src\shader\bloomeffect_fs_VBlur.glsl" />
     <None Include="..\src\shader\drawobj_fs.glsl" />
     <None Include="..\src\shader\drawobj_vs.glsl" />
     <None Include="..\src\shader\fullscreen_fs.glsl" />
     <None Include="..\src\shader\fullscreen_vs.glsl" />
     <None Include="..\src\shader\gamma_fs.glsl" />
     <None Include="..\src\shader\magnifier_fs.glsl" />
-    <None Include="..\src\shader\nlm_fs.glsl" />
     <None Include="..\src\shader\simple3d_fs.glsl" />
     <None Include="..\src\shader\simple3d_vs.glsl" />
     <None Include="..\src\shader\skinning_fs.glsl" />

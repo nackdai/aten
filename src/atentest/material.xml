@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<root>
-  <material name="test" type="lambert" color="1.0 2.0 3.0" albedomap="earth.bmp"/>
-  <material name="test2" type="blinn" color="3.0 2.0 1.0"/>
-  <material name="test3" color="2.0 3.0 1.0"/>
-</root>

@@ -38,8 +38,7 @@ namespace aten {
 
     void initSampler(
         int32_t width, int32_t height,
-        int32_t seed = 0,
-        bool needInitHalton = false);
+        int32_t seed = 0);
 
     const std::vector<uint32_t>& getRandom();
     uint32_t getRandom(uint32_t idx);

@@ -159,7 +159,7 @@ void display(aten::window* wnd)
 
 int32_t main(int32_t argc, char* argv[])
 {
-    aten::initSampler(WIDTH, HEIGHT, 0, true);
+    aten::initSampler(WIDTH, HEIGHT);
 
     aten::timer::init();
     aten::OMPUtil::setThreadNum(g_threadnum);
@@ -179,31 +179,6 @@ int32_t main(int32_t argc, char* argv[])
         WIDTH, HEIGHT,
         "../shader/fullscreen_vs.glsl",
         "../shader/tonemap_fs.glsl");
-
-    aten::NonLocalMeanFilterShader nlmshd;
-    nlmshd.init(
-        WIDTH, HEIGHT,
-        "../shader/fullscreen_vs.glsl",
-        "../shader/nlm_fs.glsl");
-
-    aten::BilateralFilterShader bishd;
-    bishd.init(
-        WIDTH, HEIGHT,
-        "../shader/fullscreen_vs.glsl",
-        "../shader/bilateral_fs.glsl");
-
-    aten::BloomEffect bloom;
-    bloom.init(
-        WIDTH, HEIGHT,
-        aten::PixelFormat::rgba32f, aten::PixelFormat::rgba32f,
-        "../shader/fullscreen_vs.glsl",
-        "../shader/bloomeffect_fs_4x4.glsl",
-        "../shader/bloomeffect_fs_2x2.glsl",
-        "../shader/bloomeffect_fs_HBlur.glsl",
-        "../shader/bloomeffect_fs_VBlur.glsl",
-        "../shader/bloomeffect_fs_Gauss.glsl",
-        "../shader/bloomeffect_fs_Final.glsl");
-    bloom.setParam(0.2f, 0.4f);
 
     aten::GammaCorrection gamma;
     gamma.init(

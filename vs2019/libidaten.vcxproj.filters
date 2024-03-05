@@ -136,12 +136,6 @@
     <ClInclude Include="..\src\libaten\material\disney_brdf.h">
       <Filter>aten\material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\sampler\sobol.h">
-      <Filter>aten\sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\sampler\sobolproxy.h">
-      <Filter>aten\sampler</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\sampler\cmj.h">
       <Filter>aten\sampler</Filter>
     </ClInclude>
@@ -367,9 +361,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\misc\color.cpp">
       <Filter>aten\misc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\sampler\sobol.cpp">
-      <Filter>aten\sampler</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libidaten\kernel\renderer.cpp">
       <Filter>kernel\renderer</Filter>

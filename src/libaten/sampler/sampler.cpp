@@ -1,22 +1,16 @@
 #include <random>
 #include <algorithm>
 #include "sampler/samplerinterface.h"
-#include "sampler/halton.h"
 
 namespace aten {
     static std::vector<uint32_t> g_random;
 
     void initSampler(
         int32_t width, int32_t height,
-        int32_t seed/*= 0*/,
-        bool needInitHalton/*= false*/)
+        int32_t seed/*= 0*/)
     {
         // TODO
         ::srand(seed);
-
-        if (needInitHalton) {
-            Halton::makePrimeNumbers();
-        }
 
         g_random.resize(width * height);
         std::mt19937 rand_src(seed);

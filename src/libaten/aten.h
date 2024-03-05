@@ -8,8 +8,6 @@
 #include "camera/equirect.h"
 #include "camera/CameraOperator.h"
 
-#include "filter/nlm.h"
-#include "filter/bilateral.h"
 #include "filter/atrous.h"
 #include "filter/taa.h"
 #include "filter/magnifier.h"
@@ -81,9 +79,7 @@
 
 #include "accelerator/GpuPayloadDefs.h"
 
-#include "sampler/xorshift.h"
-#include "sampler/halton.h"
-#include "sampler/sobolproxy.h"
+#include "sampler/cmj.h"
 #include "sampler/wanghash.h"
 
 #include "geometry/PolygonObject.h"
@@ -105,7 +101,5 @@
 #include "renderer/pathtracing/pathtracing.h"
 #include "renderer/ao/aorenderer.h"
 #include "renderer/svgf/svgf.h"
-
-#include "posteffect/BloomEffect.h"
 
 #include "os/system.h"

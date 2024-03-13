@@ -241,6 +241,8 @@
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pt_params.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
+    <ClInclude Include="..\src\libaten\renderer\restir\restir_impl.h" />
+    <ClInclude Include="..\src\libaten\renderer\restir\restir_types.h" />
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf.h" />
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf_types.h" />

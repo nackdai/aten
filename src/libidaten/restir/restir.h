@@ -8,10 +8,8 @@
 #include "cuda/cudaGLresource.h"
 
 #include "kernel/pathtracing.h"
+#include "renderer/restir/restir_types.h"
 #include "sampler/sampler.h"
-
-#include "reservior.h"
-#include "restir_info.h"
 
 namespace idaten
 {
@@ -215,24 +213,26 @@ namespace idaten
         void setStream(cudaStream_t stream);
 
     protected:
-        idaten::TypedCudaMemory<ReSTIRInfo> m_restir_infos;
+        idaten::TypedCudaMemory<AT_NAME::ReSTIRInfo> m_restir_infos;
 
         // NOTE
-        // previous �� spatial destination �͎g���܂킷�̂łQ�ő����.
-        // �ŏ��� temporal reuse �� previous ���Q�Ƃ�����
-        // ��i�� spatila reuse �ł͕s�v�Ȃ̂ŁAspatial destination �ɂ��邱�Ƃ��ł���.
+        // temporal reuse で利用する previous reservoir は
+        // spatial reuse をする前のものでないといけない
+        // spatial reuse はあくまでも現在フレームに対して行われるもので
+        // 次フレームに影響を与えないようにする
         // e.g.
         //  - frame 1
         //     cur:0
-        //     prev:N/A (�ŏ��Ȃ̂� temporal �� skip)
+        //     prev:N/A (最初なので temporal は skip)
         //     spatial_dst:1
         //     pos=0 -> pos=1(for next)
         //  - frame 2
         //     cur:1(=pos)
         //     prev:0
-        //     spatial_dst:0 (prev:0 �͎Q�ƍς݂Ȃ̂ŁA�V�������̂Ŗ��߂Ă�����)
+        //     spatial_dst:0
         //     pos=1 -> pos=0(for next)
-        std::array<idaten::TypedCudaMemory<Reservoir>, 2> m_reservoirs;
+        //     このとき prev は前フレームの cur となっている
+        std::array<idaten::TypedCudaMemory<AT_NAME::Reservoir>, 2> m_reservoirs;
         int32_t m_curReservoirPos = 0;
 
         aten::mat4 m_mtx_W2V;    // World - View.

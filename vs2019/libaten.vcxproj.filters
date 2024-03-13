@@ -100,6 +100,9 @@
     <Filter Include="renderer\svgf">
       <UniqueIdentifier>{3cb456ce-0082-4f4b-bbcc-6e8bca0f4fce}</UniqueIdentifier>
     </Filter>
+    <Filter Include="renderer\restir">
+      <UniqueIdentifier>{fc29292e-ce9f-4868-9779-be83ddf06b5a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -513,6 +516,12 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\misc\const_span.h">
       <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\restir\restir_impl.h">
+      <Filter>renderer\restir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\restir\restir_types.h">
+      <Filter>renderer\restir</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

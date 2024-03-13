@@ -108,10 +108,7 @@
     <ClInclude Include="..\src\libidaten\kernel\stackless_bvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\StreamCompaction.h" />
     <ClInclude Include="..\src\libidaten\npr\npr_pathtracing.h" />
-    <ClInclude Include="..\src\libidaten\restir\reservior.h" />
     <ClInclude Include="..\src\libidaten\restir\restir.h" />
-    <ClInclude Include="..\src\libidaten\restir\restir_info.h" />
-    <ClInclude Include="..\src\libidaten\restir\restir_sample_light.cuh" />
     <ClInclude Include="..\src\libidaten\svgf\svgf.h" />
   </ItemGroup>
   <ItemGroup>

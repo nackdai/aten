@@ -173,7 +173,7 @@ __global__ void shade(
     {
         auto& reservoir = reservoirs[idx];
 
-        AT_NAME::SampleLightWithReservoirRIP(
+        AT_NAME::restir::SampleLightWithReservoirRIP(
             reservoir,
             shMtrls[threadIdx.x],
             ctxt,

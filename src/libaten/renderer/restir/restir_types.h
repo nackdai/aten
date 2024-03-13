@@ -1,10 +1,8 @@
 #pragma once
 
-#include "cuda/cudadefs.h"
-#include "cuda/helper_math.h"
-#include "aten4idaten.h"
+#include "light/light_parameter.h"
 
-namespace idaten {
+namespace AT_NAME {
     struct Reservoir {
         float w_sum_{ 0.0f };
         uint32_t m_{ 0 };
@@ -13,7 +11,7 @@ namespace idaten {
         float target_density_{ 0.0f };
         aten::LightSampleResult light_sample_;
 
-        __host__ __device__ void clear()
+        AT_HOST_DEVICE_API void clear()
         {
             w_sum_ = 0.0f;
             m_ = 0;
@@ -22,12 +20,12 @@ namespace idaten {
             target_density_ = 0.0f;
         }
 
-        __host__ __device__ bool IsValid() const
+        AT_HOST_DEVICE_API bool IsValid() const
         {
             return light_idx_ >= 0;
         }
 
-        __host__ __device__ bool update(
+        AT_HOST_DEVICE_API bool update(
             const aten::LightSampleResult& light_sample,
             int32_t new_target_idx, float weight, uint32_t m, float u)
         {
@@ -41,11 +39,51 @@ namespace idaten {
             return is_accepted;
         }
 
-        __host__ __device__ bool update(
+        AT_HOST_DEVICE_API bool update(
             const aten::LightSampleResult& light_sample,
             int32_t new_target_idx, float weight, float u)
         {
             return update(light_sample, new_target_idx, weight, 1, u);
+        }
+    };
+
+    // NOTE
+    // size of "bool" is expected as 1 byte.
+    static_assert(sizeof(bool) == 1, "");
+
+    struct ReSTIRInfo {
+        aten::vec3 nml;
+        int16_t mtrl_idx{ -1 };
+        bool is_voxel{ false };
+        uint8_t padding[3];
+
+        aten::vec3 wi;
+        float u;
+
+        aten::vec3 throughput;
+        float v;
+
+        aten::vec3 p;
+        float pre_sampled_r;
+
+        AT_HOST_DEVICE_API void clear()
+        {
+            nml.x = nml.y = nml.z = 0.0f;
+
+            is_voxel = false;
+            mtrl_idx = -1;
+
+            wi.x = wi.y = wi.z = 0.0f;
+            throughput.x = throughput.y = throughput.z = 0.0f;
+
+            u = v = 0.0f;
+
+            pre_sampled_r = 0.0f;
+        }
+
+        AT_HOST_DEVICE_API bool isMtrlValid() const
+        {
+            return mtrl_idx >= 0;
         }
     };
 }

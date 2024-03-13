@@ -223,15 +223,6 @@
     <ClInclude Include="..\src\libidaten\restir\restir.h">
       <Filter>restir</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\restir\reservior.h">
-      <Filter>restir</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\restir\restir_sample_light.cuh">
-      <Filter>restir</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\restir\restir_info.h">
-      <Filter>restir</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\pt_standard_impl.h">
       <Filter>kernel\renderer</Filter>
     </ClInclude>

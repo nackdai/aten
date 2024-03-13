@@ -1,7 +1,6 @@
 #include <utility>
 
 #include "restir/restir.h"
-#include "restir/restir_sample_light.cuh"
 
 #include "aten4idaten.h"
 #include "kernel/accelerator.cuh"
@@ -15,6 +14,7 @@
 #include "cuda/cudamemory.h"
 
 #include "renderer/pathtracing/pathtracing_impl.h"
+#include "renderer/restir/restir_impl.h"
 
 __global__ void initReSTIRParameters(
     int32_t width, int32_t height,
@@ -173,10 +173,10 @@ __global__ void shade(
     {
         auto& reservoir = reservoirs[idx];
 
-        sampleLightWithReservoirRIP(
+        AT_NAME::SampleLightWithReservoirRIP(
             reservoir,
             shMtrls[threadIdx.x],
-            &ctxt,
+            ctxt,
             rec.p, orienting_normal,
             ray.dir,
             rec.u, rec.v, albedo,

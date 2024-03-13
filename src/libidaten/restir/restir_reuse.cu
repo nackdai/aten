@@ -11,6 +11,7 @@
 #include "aten4idaten.h"
 #include "light/light_impl.h"
 #include "renderer/pathtracing/pt_params.h"
+#include "renderer/restir/restir_impl.h"
 
 __global__ void computeTemporalReuse(
     idaten::Path paths,
@@ -46,137 +47,24 @@ __global__ void computeTemporalReuse(
     ctxt.prims = prims;
     ctxt.matrices = matrices;
 
-    const auto& self_info = infos[idx];
-    aten::MaterialParameter mtrl;
-    AT_NAME::FillMaterial(
-        mtrl,
-        ctxt,
-        self_info.mtrl_idx,
-        self_info.is_voxel);
-
-    const auto& normal = self_info.nml;
-
     auto& sampler = paths.sampler[idx];
 
-    const auto& albedo_meshid = aovTexclrMeshid[idx];
-    const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
+    const auto size = width * height;
 
-    auto& comibined_reservoir = reservoirs[idx];
+    aten::const_span prev_reservoirs_as_span(prev_reservoirs, size);
+    aten::const_span resitr_infos(infos, size);
+    aten::const_span aov_texclr_meshid(aovTexclrMeshid, size);
 
-    float selected_target_density = comibined_reservoir.IsValid()
-        ? comibined_reservoir.target_density_
-        : 0.0f;
-
-    // NOTE
-    // In this case, self reservoir's M should be number of number of light sampling.
-    const auto maxM = 20 * comibined_reservoir.m_;
-
-    float4 motionDepth;
-    surf2Dread(&motionDepth, motionDetphBuffer, ix * sizeof(float4), iy);
-
-    // 前のフレームのスクリーン座標.
-    int32_t px = (int32_t)(ix + motionDepth.x * width);
-    int32_t py = (int32_t)(iy + motionDepth.y * height);
-
-    bool is_acceptable = AT_MATH_IS_IN_BOUND(px, 0, width - 1)
-        && AT_MATH_IS_IN_BOUND(py, 0, height - 1);
-
-    if (is_acceptable)
-    {
-        aten::LightSampleResult lightsample;
-
-        auto neighbor_idx = getIdx(px, py, width);
-        const auto& neighbor_reservoir = prev_reservoirs[neighbor_idx];
-
-        auto m = std::min(neighbor_reservoir.m_, maxM);
-
-        if (neighbor_reservoir.IsValid()) {
-            const auto& neighbor_info = infos[neighbor_idx];
-
-            const auto& neighbor_normal = neighbor_info.nml;
-
-            aten::MaterialParameter neightbor_mtrl;
-            auto is_valid_mtrl = AT_NAME::FillMaterial(
-                neightbor_mtrl,
-                ctxt,
-                neighbor_info.mtrl_idx,
-                neighbor_info.is_voxel);
-
-            // Check how close with neighbor pixel.
-            is_acceptable = is_valid_mtrl
-                && (mtrl.type == neightbor_mtrl.type)
-                && (dot(normal, neighbor_normal) >= 0.95f);
-
-            if (is_acceptable) {
-                const auto light_pos = neighbor_reservoir.light_idx_;
-
-                const auto& light = ctxt.lights[light_pos];
-
-                AT_NAME::Light::sample(lightsample, light, ctxt, self_info.p, neighbor_normal, &sampler, 0);
-
-                aten::vec3 nmlLight = lightsample.nml;
-                aten::vec3 dirToLight = normalize(lightsample.dir);
-
-                auto pdf = AT_NAME::material::samplePDF(
-                    &neightbor_mtrl,
-                    normal,
-                    self_info.wi, dirToLight,
-                    self_info.u, self_info.v);
-                auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(
-                    &neightbor_mtrl,
-                    normal,
-                    self_info.wi, dirToLight,
-                    self_info.u, self_info.v,
-                    albedo,
-                    self_info.pre_sampled_r);
-                brdf /= pdf;
-
-                auto cosShadow = dot(normal, dirToLight);
-                auto cosLight = dot(nmlLight, -dirToLight);
-                auto dist2 = aten::squared_length(lightsample.dir);
-
-                auto energy = brdf * lightsample.light_color;
-
-                cosShadow = aten::abs(cosShadow);
-
-                if (cosShadow > 0 && cosLight > 0) {
-                    if (light.attrib.isSingular) {
-                        energy = energy * cosShadow * cosLight;
-                    }
-                    else {
-                        energy = energy * cosShadow * cosLight / dist2;
-                    }
-                }
-                else {
-                    energy.x = energy.y = energy.z = 0.0f;
-                }
-
-                auto target_density = (energy.x + energy.y + energy.z) / 3; // p_hat
-
-                auto weight = target_density * neighbor_reservoir.pdf_ * m;
-
-                auto r = sampler.nextSample();
-
-                if (comibined_reservoir.update(lightsample, light_pos, weight, m, r)) {
-                    selected_target_density = target_density;
-                }
-            }
-        }
-        else {
-            comibined_reservoir.update(lightsample, -1, 0.0f, m, 0.0f);
-        }
-    }
-
-    if (selected_target_density > 0.0f) {
-        comibined_reservoir.target_density_ = selected_target_density;
-        // NOTE
-        // 1/p_hat(xz) * (1/M * w_sum) = w_sum / (p_hat(xi) * M)
-        comibined_reservoir.pdf_ = comibined_reservoir.w_sum_ / (comibined_reservoir.target_density_ * comibined_reservoir.m_);
-    }
-
-    if (!isfinite(comibined_reservoir.pdf_)) {
-        comibined_reservoir.clear();
-    }
+    AT_NAME::restir::ApplyTemporalReuse(
+        ix, iy,
+        width, height,
+        ctxt,
+        sampler,
+        reservoirs[idx],
+        resitr_infos[idx],
+        prev_reservoirs_as_span,
+        resitr_infos,
+        aov_texclr_meshid[idx], motionDetphBuffer);
 }
 
 __global__ void computeSpatialReuse(

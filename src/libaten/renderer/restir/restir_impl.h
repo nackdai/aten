@@ -191,9 +191,11 @@ namespace restir {
         const AT_NAME::ReSTIRInfo& self_info,
         const aten::const_span<AT_NAME::Reservoir>& prev_reservoirs,
         const aten::const_span<AT_NAME::ReSTIRInfo>& infos,
-        const AT_NAME::_detail::v4& albedo_meshid,
+        const aten::const_span<AT_NAME::_detail::v4>& aov_albedo_meshid,
         BufferForMotionDepth& motion_detph_buffer)
     {
+        const auto idx = getIdx(ix, iy, width);
+
         aten::MaterialParameter mtrl;
         AT_NAME::FillMaterial(
             mtrl,
@@ -203,7 +205,7 @@ namespace restir {
 
         const auto& normal = self_info.nml;
 
-        const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
+        const auto mesh_id = static_cast<int32_t>(aov_albedo_meshid[idx].w);
 
         float cadidate_target_pdf = combined_reservoir.IsValid()
             ? combined_reservoir.target_pdf_of_y
@@ -249,9 +251,12 @@ namespace restir {
                     neighbor_info.mtrl_idx,
                     neighbor_info.is_voxel);
 
+                const auto neighbor_mesh_id = static_cast<int32_t>(aov_albedo_meshid[neighbor_idx].w);
+
                 // Check how close with neighbor pixel.
                 is_acceptable = is_valid_mtrl
                     && (mtrl.type == neightbor_mtrl.type)
+                    && (mesh_id == neighbor_mesh_id)
                     && (dot(normal, neighbor_normal) >= 0.95f);
 
                 if (is_acceptable) {
@@ -269,12 +274,11 @@ namespace restir {
                         normal,
                         self_info.wi, dirToLight,
                         self_info.u, self_info.v);
-                    auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(
+                    auto brdf = AT_NAME::material::sampleBSDF(
                         &neightbor_mtrl,
                         normal,
                         self_info.wi, dirToLight,
                         self_info.u, self_info.v,
-                        albedo,
                         self_info.pre_sampled_r);
                     brdf /= pdf;
 
@@ -335,7 +339,7 @@ namespace restir {
         const aten::const_span<AT_NAME::Reservoir>& reservoirs,
         aten::span<AT_NAME::Reservoir>& dst_reservoirs,
         const aten::const_span<AT_NAME::ReSTIRInfo>& infos,
-        const AT_NAME::_detail::v4& albedo_meshid)
+        const aten::const_span<AT_NAME::_detail::v4>& aov_albedo_meshid)
     {
         const auto idx = getIdx(ix, iy, width);
 
@@ -350,7 +354,7 @@ namespace restir {
 
         const auto& normal = self_info.nml;
 
-        const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
+        const auto mesh_id = static_cast<int32_t>(aov_albedo_meshid[idx].w);
 
         constexpr int32_t offset_x[] = {
             -1,  0,  1,
@@ -402,9 +406,12 @@ namespace restir {
                         neighbor_info.mtrl_idx,
                         neighbor_info.is_voxel);
 
+                    const auto neighbor_mesh_id = static_cast<int32_t>(aov_albedo_meshid[neighbor_idx].w);
+
                     // Check how close with neighbor pixel.
                     is_acceptable = is_valid_mtrl
                         && (mtrl.type == neightbor_mtrl.type)
+                        &&(mesh_id == neighbor_mesh_id)
                         && (dot(normal, neighbor_normal) >= 0.95f);
 
                     if (is_acceptable) {
@@ -422,12 +429,11 @@ namespace restir {
                             normal,
                             self_info.wi, dirToLight,
                             self_info.u, self_info.v);
-                        auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(
+                        auto brdf = AT_NAME::material::sampleBSDF(
                             &neightbor_mtrl,
                             normal,
                             self_info.wi, dirToLight,
                             self_info.u, self_info.v,
-                            albedo,
                             self_info.pre_sampled_r);
                         brdf /= pdf;
 

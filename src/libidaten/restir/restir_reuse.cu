@@ -64,7 +64,7 @@ __global__ void computeTemporalReuse(
         resitr_infos[idx],
         prev_reservoirs_as_span,
         resitr_infos,
-        aov_texclr_meshid[idx], motionDetphBuffer);
+        aov_texclr_meshid, motionDetphBuffer);
 }
 
 __global__ void computeSpatialReuse(
@@ -117,7 +117,7 @@ __global__ void computeSpatialReuse(
         reservoirs_as_span,
         dst_reservoirs_as_span,
         resitr_infos,
-        aov_texclr_meshid[idx]);
+        aov_texclr_meshid);
 }
 
 namespace idaten {

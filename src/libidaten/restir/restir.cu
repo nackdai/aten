@@ -173,7 +173,7 @@ __global__ void shade(
     {
         auto& reservoir = reservoirs[idx];
 
-        AT_NAME::restir::SampleLightWithReservoirRIP(
+        AT_NAME::restir::SampleLightByStreamingRIS(
             reservoir,
             shMtrls[threadIdx.x],
             ctxt,
@@ -333,7 +333,7 @@ __global__ void computeShadowRayContribution(
             const auto& albedo_meshid = aovTexclrMeshid[idx];
             const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
 
-            const auto& light = lights[reservoir.light_idx_];
+            const auto& light = lights[reservoir.y];
 
             const auto& nmlLight = reservoir.light_sample_.nml;
             const auto& dirToLight = shadowRays[idx].raydir;
@@ -367,7 +367,7 @@ __global__ void computeShadowRayContribution(
 
                 if (light.attrib.isInfinite || light.attrib.isSingular) {
                     if (cosShadow >= 0) {
-                        lightcontrib = bsdf * emit * cosShadow * reservoir.pdf_;
+                        lightcontrib = bsdf * emit * cosShadow * reservoir.W;
                     }
                 }
                 else {
@@ -377,7 +377,7 @@ __global__ void computeShadowRayContribution(
                         auto dist2 = distToLight * distToLight;
                         auto G = cosShadow * cosLight / dist2;
 
-                        lightcontrib = (bsdf * emit * G) * reservoir.pdf_;
+                        lightcontrib = (bsdf * emit * G) * reservoir.W;
                     }
                 }
             }

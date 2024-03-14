@@ -333,8 +333,8 @@ namespace AT_NAME
                     ? 1.0f
                     : _detail::ComputeBalanceHeuristic(pdfLight * lightSelectPdf, path_pdf);
 
-                const auto G = light.attrib.isSingular
-                    ? cosShadow
+                const auto G = light.attrib.isSingular || light.attrib.isInfinite
+                    ? cosShadow * cosLight
                     : cosShadow * cosLight / dist2;
 
                 // NOTE:

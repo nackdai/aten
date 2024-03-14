@@ -13,6 +13,44 @@
 
 namespace AT_NAME {
 namespace restir {
+    namespace _detail {
+        inline AT_DEVICE_API float ComputeTargetPDF(
+            const aten::LightSampleResult& lightsample,
+            const aten::LightAttribute& light_attrib,
+            const aten::vec3& normal,
+            const aten::vec3& ray_dir,
+            const aten::MaterialParameter& mtrl,
+            const aten::vec4& albedo,
+            real pre_sampled_r)
+        {
+            aten::vec3 nmlLight = lightsample.nml;
+            aten::vec3 dirToLight = normalize(lightsample.dir);
+
+            const auto cosShadow = aten::abs(dot(normal, dirToLight));
+            const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
+            const auto dist2 = aten::squared_length(lightsample.dir);
+
+            // NOTE:
+            // Sample BSDF with external albedo. In this case, uv are unnecessary.
+            // So, we can specify any value as uv. They can be zero here.
+            constexpr auto u = 0.0f;
+            constexpr auto v = 0.0f;
+            auto pdf = AT_NAME::material::samplePDF(&mtrl, normal, ray_dir, dirToLight, u, v);
+            auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, normal, ray_dir, dirToLight, u, v, albedo, pre_sampled_r);
+            brdf /= pdf;
+
+            const auto geometry_term = light_attrib.isSingular || light_attrib.isInfinite
+                ? cosShadow * cosLight
+                : cosShadow * cosLight / dist2;
+
+            auto energy = brdf * lightsample.light_color * geometry_term;
+
+            auto target_pdf = (energy.x + energy.y + energy.z) / 3;
+
+            return target_pdf;
+        }
+    }
+
     template<class CONTEXT>
     inline AT_DEVICE_API int32_t SampleLightByStreamingRIS(
         AT_NAME::Reservoir& reservoir,
@@ -35,9 +73,9 @@ namespace restir {
 
         reservoir.clear();
 
-        real selected_target_density = real(0);
+        real cadidate_target_pdf = real(0);
 
-        real lightSelectProb = real(1) / max_light_num;
+        real light_select_prob = real(1) / max_light_num;
 
         for (auto i = 0U; i < light_cnt; i++) {
             const auto r_light = sampler->nextSample();
@@ -51,50 +89,48 @@ namespace restir {
             aten::vec3 nmlLight = lightsample.nml;
             aten::vec3 dirToLight = normalize(lightsample.dir);
 
-            auto pdf = AT_NAME::material::samplePDF(&mtrl, normal, ray_dir, dirToLight, u, v);
-            auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, normal, ray_dir, dirToLight, u, v, albedo, pre_sampled_r);
-            brdf /= pdf;
+            const auto cosShadow = aten::abs(dot(normal, dirToLight));
+            const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
+            const auto dist2 = aten::squared_length(lightsample.dir);
 
-            auto cosShadow = dot(normal, dirToLight);
-            auto cosLight = dot(nmlLight, -dirToLight);
-            auto dist2 = aten::squared_length(lightsample.dir);
-
-            auto energy = brdf * lightsample.light_color;
-
-            cosShadow = aten::abs(cosShadow);
-
-            if (cosShadow > 0 && cosLight > 0) {
-                if (light.attrib.isSingular) {
-                    energy = energy * cosShadow * cosLight;
-                }
-                else {
-                    energy = energy * cosShadow * cosLight / dist2;
-                }
-            }
-            else {
-                energy.x = energy.y = energy.z = 0.0f;
+            // NOTE:
+            // Regarding punctual light, nothing to sample.
+            // It means there is nothing to convert pdf.
+            // TODO: IBL...
+            auto path_pdf = lightsample.pdf;
+            if (!light.attrib.isSingular && !light.attrib.isIBL) {
+                // Convert solid angle PDF to area PDF.
+                path_pdf = path_pdf * cosLight / dist2;
             }
 
-            auto target_density = (energy.x + energy.y + energy.z) / 3; // p_hat
-            auto sampling_density = lightsample.pdf * lightSelectProb;  // q
+            // p
+            auto sampling_pdf = path_pdf * light_select_prob;
+
+            // p_hat
+            auto target_pdf = _detail::ComputeTargetPDF(
+                lightsample, light.attrib,
+                normal, ray_dir,
+                mtrl, albedo, pre_sampled_r);
 
             // NOTE
-            // p_hat(xi) / q(xi)
-            auto weight = sampling_density > 0
-                ? target_density / sampling_density
+            // Equation(5)
+            // w(x) = p_hat(x) / p(x)
+            auto weight = sampling_pdf > 0
+                ? target_pdf / sampling_pdf
                 : 0.0f;
 
             auto r = sampler->nextSample();
 
             if (reservoir.update(lightsample, light_pos, weight, r)) {
-                selected_target_density = target_density;
+                cadidate_target_pdf = target_pdf;
             }
         }
 
-        if (selected_target_density > 0.0f) {
-            reservoir.target_pdf_of_y = selected_target_density;
-            // NOTE
-            // 1/p_hat(xz) * (1/M * w_sum) = w_sum / (p_hat(xi) * M)
+        if (cadidate_target_pdf > 0.0f) {
+            reservoir.target_pdf_of_y = cadidate_target_pdf;
+            // NOTE:
+            // Equation(6)
+            // W = 1/p_hat(x) * (1/M * w_sum) = w_sum / (p_hat(x) * M)
             reservoir.W = reservoir.w_sum / (reservoir.target_pdf_of_y * reservoir.M);
         }
 
@@ -169,7 +205,7 @@ namespace restir {
 
         const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
 
-        float selected_target_density = combined_reservoir.IsValid()
+        float cadidate_target_pdf = combined_reservoir.IsValid()
             ? combined_reservoir.target_pdf_of_y
             : 0.0f;
 
@@ -269,7 +305,7 @@ namespace restir {
                     auto r = sampler.nextSample();
 
                     if (combined_reservoir.update(lightsample, light_pos, weight, m, r)) {
-                        selected_target_density = target_density;
+                        cadidate_target_pdf = target_density;
                     }
                 }
             }
@@ -278,8 +314,8 @@ namespace restir {
             }
         }
 
-        if (selected_target_density > 0.0f) {
-            combined_reservoir.target_pdf_of_y = selected_target_density;
+        if (cadidate_target_pdf > 0.0f) {
+            combined_reservoir.target_pdf_of_y = cadidate_target_pdf;
             // NOTE
             // 1/p_hat(xz) * (1/M * w_sum) = w_sum / (p_hat(xi) * M)
             combined_reservoir.W = combined_reservoir.w_sum / (combined_reservoir.target_pdf_of_y * combined_reservoir.M);
@@ -332,11 +368,11 @@ namespace restir {
 
         const auto& reservoir = reservoirs[idx];
 
-        float selected_target_density = 0.0f;
+        float cadidate_target_pdf = 0.0f;
 
         if (reservoir.IsValid()) {
             comibined_reservoir = reservoir;
-            selected_target_density = reservoir.target_pdf_of_y;
+            cadidate_target_pdf = reservoir.target_pdf_of_y;
         }
 
 #pragma unroll
@@ -423,7 +459,7 @@ namespace restir {
                         auto r = sampler.nextSample();
 
                         if (comibined_reservoir.update(lightsample, light_pos, weight, m, r)) {
-                            selected_target_density = target_density;
+                            cadidate_target_pdf = target_density;
                         }
                     }
                 }
@@ -433,8 +469,8 @@ namespace restir {
             }
         }
 
-        if (selected_target_density > 0.0f) {
-            comibined_reservoir.target_pdf_of_y = selected_target_density;
+        if (cadidate_target_pdf > 0.0f) {
+            comibined_reservoir.target_pdf_of_y = cadidate_target_pdf;
             // NOTE
             // 1/p_hat(xz) * (1/M * w_sum) = w_sum / (p_hat(xi) * M)
             comibined_reservoir.W = comibined_reservoir.w_sum / (comibined_reservoir.target_pdf_of_y * comibined_reservoir.M);

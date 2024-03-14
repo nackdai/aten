@@ -3,47 +3,75 @@
 #include "light/light_parameter.h"
 
 namespace AT_NAME {
+    /**
+     * Reservoir.
+     */
     struct Reservoir {
-        float w_sum_{ 0.0f };
-        uint32_t m_{ 0 };
-        int32_t light_idx_{ 0 };
-        float pdf_{ 0.0f };
-        float target_density_{ 0.0f };
+        float w_sum{ 0.0f };    ///< Sum of weights.
+        int32_t M{ 0 };         ///< The number of samples seen so far.
+        int32_t y{ -1 };        ///< The output sample.
+        float W{ 0.0f };        ///< The stochastic weight for the generated sample y.
+        float target_pdf_of_y{ 0.0f };   ///< The target PDF of generated sample y.
+
         aten::LightSampleResult light_sample_;
 
+        /**
+         * @brief Clear reservoir.
+         */
         AT_HOST_DEVICE_API void clear()
         {
-            w_sum_ = 0.0f;
-            m_ = 0;
-            light_idx_ = -1;
-            pdf_ = 0.0f;
-            target_density_ = 0.0f;
+            w_sum = 0.0f;
+            M = 0;
+            y = -1;
+            target_pdf_of_y = 0.0f;
+            W = 0.0f;
         }
 
+        /**
+         * @brief Check if reservoir has valid sample.
+         * @return If reservoir has valid sample, returns true, Otherwise, returns false.
+         */
         AT_HOST_DEVICE_API bool IsValid() const
         {
-            return light_idx_ >= 0;
+            return y >= 0;
         }
 
+        /**
+         * @brief Update content of reservoir.
+         * @param[in] light_sample
+         * @param[in] sample sample.
+         * @param[in] weight Weight of sample.
+         * @param[in] m Number of samples seen so far.
+         * @param[in] u Ramdom value if sample is adopted.
+         * @return If sample is adopted, returns true. Otherwise, returns false.
+         */
         AT_HOST_DEVICE_API bool update(
             const aten::LightSampleResult& light_sample,
-            int32_t new_target_idx, float weight, uint32_t m, float u)
+            int32_t sample, float weight, int32_t m, float u)
         {
-            w_sum_ += weight;
-            bool is_accepted = u < weight / w_sum_;
+            w_sum += weight;
+            bool is_accepted = u < weight / w_sum;
             if (is_accepted) {
                 light_sample_ = light_sample;
-                light_idx_ = new_target_idx;
+                y = sample;
             }
-            m_ += m;
+            M += m;
             return is_accepted;
         }
 
+        /**
+         * @brief Update content of reservoir.
+         * @param[in] light_sample
+         * @param[in] sample sample.
+         * @param[in] weight Weight of sample.
+         * @param[in] u Ramdom value if sample is adopted.
+         * @return If sample is adopted, returns true. Otherwise, returns false.
+         */
         AT_HOST_DEVICE_API bool update(
             const aten::LightSampleResult& light_sample,
-            int32_t new_target_idx, float weight, float u)
+            int32_t sample, float weight, float u)
         {
-            return update(light_sample, new_target_idx, weight, 1, u);
+            return update(light_sample, sample, weight, 1, u);
         }
     };
 

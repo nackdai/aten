@@ -14,7 +14,7 @@
 namespace AT_NAME {
 namespace restir {
     template<class CONTEXT>
-    inline AT_DEVICE_API int32_t SampleLightWithReservoirRIP(
+    inline AT_DEVICE_API int32_t SampleLightByStreamingRIS(
         AT_NAME::Reservoir& reservoir,
         const aten::MaterialParameter& mtrl,
         const CONTEXT& ctxt,
@@ -92,30 +92,28 @@ namespace restir {
         }
 
         if (selected_target_density > 0.0f) {
-            reservoir.target_density_ = selected_target_density;
+            reservoir.target_pdf_of_y = selected_target_density;
             // NOTE
             // 1/p_hat(xz) * (1/M * w_sum) = w_sum / (p_hat(xi) * M)
-            reservoir.pdf_ = reservoir.w_sum_ / (reservoir.target_density_ * reservoir.m_);
+            reservoir.W = reservoir.w_sum / (reservoir.target_pdf_of_y * reservoir.M);
         }
 
-        if (!isfinite(reservoir.pdf_)) {
-            reservoir.pdf_ = 0.0f;
-            reservoir.target_density_ = 0.0f;
-            reservoir.light_idx_ = -1;
+        if (!isfinite(reservoir.W)) {
+            reservoir.clear();
         }
 
-        return reservoir.light_idx_;
+        return reservoir.y;
     }
 
     template <class CONTEXT>
     inline AT_DEVICE_API void EvaluateVisibility(
         int32_t idx,
         int32_t bounce,
-        idaten::Path& paths,
+        AT_NAME::Path& paths,
         CONTEXT& ctxt,
-        aten::span<idaten::Reservoir>& reservoirs,
-        const aten::const_span<idaten::ReSTIRInfo>& restir_infos,
-        aten::span<idaten::ShadowRay>& shadowRays)
+        aten::span<AT_NAME::Reservoir>& reservoirs,
+        const aten::const_span<AT_NAME::ReSTIRInfo>& restir_infos,
+        aten::span<AT_NAME::ShadowRay>& shadowRays)
     {
         bool isHit = false;
 
@@ -126,7 +124,7 @@ namespace restir {
 
             shadowRays[idx].rayorg = restir_info.p + AT_MATH_EPSILON * restir_info.nml;
             shadowRays[idx].raydir = reservoir.light_sample_.pos - shadowRays[idx].rayorg;
-            shadowRays[idx].targetLightId = reservoir.light_idx_;
+            shadowRays[idx].targetLightId = reservoir.y;
             shadowRays[idx].isActive = true;
 
             auto dist = length(shadowRays[idx].raydir);;
@@ -137,10 +135,10 @@ namespace restir {
         }
 
         if (!isHit) {
-            reservoirs[idx].w_sum_ = 0.0f;
-            reservoirs[idx].pdf_ = 0.0f;
-            reservoirs[idx].target_density_ = 0.0f;
-            reservoirs[idx].light_idx_ = -1;
+            reservoirs[idx].w_sum = 0.0f;
+            reservoirs[idx].W = 0.0f;
+            reservoirs[idx].target_pdf_of_y = 0.0f;
+            reservoirs[idx].y = -1;
         }
     }
 
@@ -169,12 +167,12 @@ namespace restir {
         const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
 
         float selected_target_density = combined_reservoir.IsValid()
-            ? combined_reservoir.target_density_
+            ? combined_reservoir.target_pdf_of_y
             : 0.0f;
 
         // NOTE
         // In this case, self reservoir's M should be number of number of light sampling.
-        const auto maxM = 20 * combined_reservoir.m_;
+        const auto maxM = 20 * combined_reservoir.M;
 
         AT_NAME::_detail::v4 motion_depth;
         if constexpr (std::is_class_v<std::remove_reference_t<decltype(motion_detph_buffer)>>) {
@@ -198,7 +196,7 @@ namespace restir {
             auto neighbor_idx = getIdx(px, py, width);
             const auto& neighbor_reservoir = prev_reservoirs[neighbor_idx];
 
-            auto m = std::min(neighbor_reservoir.m_, maxM);
+            auto m = std::min(neighbor_reservoir.M, maxM);
 
             if (neighbor_reservoir.IsValid()) {
                 const auto& neighbor_info = infos[neighbor_idx];
@@ -218,7 +216,7 @@ namespace restir {
                     && (dot(normal, neighbor_normal) >= 0.95f);
 
                 if (is_acceptable) {
-                    const auto light_pos = neighbor_reservoir.light_idx_;
+                    const auto light_pos = neighbor_reservoir.y;
 
                     const auto& light = ctxt.lights[light_pos];
 
@@ -263,7 +261,7 @@ namespace restir {
 
                     auto target_density = (energy.x + energy.y + energy.z) / 3; // p_hat
 
-                    auto weight = target_density * neighbor_reservoir.pdf_ * m;
+                    auto weight = target_density * neighbor_reservoir.W * m;
 
                     auto r = sampler.nextSample();
 
@@ -278,13 +276,13 @@ namespace restir {
         }
 
         if (selected_target_density > 0.0f) {
-            combined_reservoir.target_density_ = selected_target_density;
+            combined_reservoir.target_pdf_of_y = selected_target_density;
             // NOTE
             // 1/p_hat(xz) * (1/M * w_sum) = w_sum / (p_hat(xi) * M)
-            combined_reservoir.pdf_ = combined_reservoir.w_sum_ / (combined_reservoir.target_density_ * combined_reservoir.m_);
+            combined_reservoir.W = combined_reservoir.w_sum / (combined_reservoir.target_pdf_of_y * combined_reservoir.M);
         }
 
-        if (!isfinite(combined_reservoir.pdf_)) {
+        if (!isfinite(combined_reservoir.W)) {
             combined_reservoir.clear();
         }
     }
@@ -335,7 +333,7 @@ namespace restir {
 
         if (reservoir.IsValid()) {
             comibined_reservoir = reservoir;
-            selected_target_density = reservoir.target_density_;
+            selected_target_density = reservoir.target_pdf_of_y;
         }
 
 #pragma unroll
@@ -371,7 +369,7 @@ namespace restir {
                         && (dot(normal, neighbor_normal) >= 0.95f);
 
                     if (is_acceptable) {
-                        const auto light_pos = neighbor_reservoir.light_idx_;
+                        const auto light_pos = neighbor_reservoir.y;
 
                         const auto& light = ctxt.lights[light_pos];
 
@@ -416,8 +414,8 @@ namespace restir {
 
                         auto target_density = (energy.x + energy.y + energy.z) / 3; // p_hat
 
-                        auto m = neighbor_reservoir.m_;
-                        auto weight = target_density * neighbor_reservoir.pdf_ * m;
+                        auto m = neighbor_reservoir.M;
+                        auto weight = target_density * neighbor_reservoir.W * m;
 
                         auto r = sampler.nextSample();
 
@@ -427,19 +425,19 @@ namespace restir {
                     }
                 }
                 else {
-                    comibined_reservoir.update(lightsample, -1, 0.0f, neighbor_reservoir.m_, 0.0f);
+                    comibined_reservoir.update(lightsample, -1, 0.0f, neighbor_reservoir.M, 0.0f);
                 }
             }
         }
 
         if (selected_target_density > 0.0f) {
-            comibined_reservoir.target_density_ = selected_target_density;
+            comibined_reservoir.target_pdf_of_y = selected_target_density;
             // NOTE
             // 1/p_hat(xz) * (1/M * w_sum) = w_sum / (p_hat(xi) * M)
-            comibined_reservoir.pdf_ = comibined_reservoir.w_sum_ / (comibined_reservoir.target_density_ * comibined_reservoir.m_);
+            comibined_reservoir.W = comibined_reservoir.w_sum / (comibined_reservoir.target_pdf_of_y * comibined_reservoir.M);
         }
 
-        if (!isfinite(comibined_reservoir.pdf_)) {
+        if (!isfinite(comibined_reservoir.W)) {
             comibined_reservoir.clear();
         }
     }

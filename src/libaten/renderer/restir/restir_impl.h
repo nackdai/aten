@@ -107,6 +107,43 @@ namespace restir {
         return reservoir.light_idx_;
     }
 
+    template <class CONTEXT>
+    inline AT_DEVICE_API void EvaluateVisibility(
+        int32_t idx,
+        int32_t bounce,
+        idaten::Path& paths,
+        CONTEXT& ctxt,
+        aten::span<idaten::Reservoir>& reservoirs,
+        const aten::const_span<idaten::ReSTIRInfo>& restir_infos,
+        aten::span<idaten::ShadowRay>& shadowRays)
+    {
+        bool isHit = false;
+
+        const auto& reservoir = reservoirs[idx];
+
+        if (reservoir.IsValid()) {
+            const auto& restir_info = restir_infos[idx];
+
+            shadowRays[idx].rayorg = restir_info.p + AT_MATH_EPSILON * restir_info.nml;
+            shadowRays[idx].raydir = reservoir.light_sample_.pos - shadowRays[idx].rayorg;
+            shadowRays[idx].targetLightId = reservoir.light_idx_;
+            shadowRays[idx].isActive = true;
+
+            auto dist = length(shadowRays[idx].raydir);;
+            shadowRays[idx].distToLight = dist;
+            shadowRays[idx].raydir /= dist;
+
+            isHit = AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays[idx]);
+        }
+
+        if (!isHit) {
+            reservoirs[idx].w_sum_ = 0.0f;
+            reservoirs[idx].pdf_ = 0.0f;
+            reservoirs[idx].target_density_ = 0.0f;
+            reservoirs[idx].light_idx_ = -1;
+        }
+    }
+
     template <class CONTEXT, class BufferForMotionDepth>
     inline AT_DEVICE_API void ApplyTemporalReuse(
         int32_t ix, int32_t iy,

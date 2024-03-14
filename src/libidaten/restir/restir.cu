@@ -235,6 +235,7 @@ __global__ void shade(
 
 __global__ void hitShadowRay(
     int32_t bounce,
+    int32_t width, int32_t height,
     idaten::Path paths,
     int32_t* hitindices,
     int32_t* hitnum,
@@ -262,31 +263,20 @@ __global__ void hitShadowRay(
 
     idx = hitindices[idx];
 
-    bool isHit = false;
+    const auto size = width * height;
 
-    const auto& reservoir = reservoirs[idx];
+    aten::span reservoirs_as_span(reservoirs, size);
+    aten::const_span resitr_infos_as_span(restir_infos, size);
+    aten::span shadow_rays(shadowRays, size);
 
-    if (reservoir.IsValid()) {
-        const auto& restir_info = restir_infos[idx];
-
-        shadowRays[idx].rayorg = restir_info.p + AT_MATH_EPSILON * restir_info.nml;
-        shadowRays[idx].raydir = reservoir.light_sample_.pos - shadowRays[idx].rayorg;
-        shadowRays[idx].targetLightId = reservoir.light_idx_;
-        shadowRays[idx].isActive = true;
-
-        auto dist = length(shadowRays[idx].raydir);;
-        shadowRays[idx].distToLight = dist;
-        shadowRays[idx].raydir /= dist;
-
-        isHit = AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays[idx]);
-    }
-
-    if (!isHit) {
-        reservoirs[idx].w_sum_ = 0.0f;
-        reservoirs[idx].pdf_ = 0.0f;
-        reservoirs[idx].target_density_ = 0.0f;
-        reservoirs[idx].light_idx_ = -1;
-    }
+    AT_NAME::restir::EvaluateVisibility(
+        idx,
+        bounce,
+        paths,
+        ctxt,
+        reservoirs_as_span,
+        resitr_infos_as_span,
+        shadow_rays);
 }
 
 __global__ void computeShadowRayContribution(
@@ -484,6 +474,7 @@ namespace idaten
 
         hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             bounce,
+            width, height,
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
             m_reservoirs[m_curReservoirPos].data(),

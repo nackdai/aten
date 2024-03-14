@@ -135,6 +135,9 @@ namespace restir {
         }
 
         if (!isHit) {
+            // NOTE:
+            // In the function to combine the streams of multiple reservoirs (Alg.4), M is used to compute sum of samples.
+            // So, M should not be cleared.
             reservoirs[idx].w_sum = 0.0f;
             reservoirs[idx].W = 0.0f;
             reservoirs[idx].target_pdf_of_y = 0.0f;

@@ -14,14 +14,16 @@
 namespace AT_NAME {
 namespace restir {
     namespace _detail {
+        template <bool IsWithExternalAlbedo = false>
         inline AT_DEVICE_API float ComputeTargetPDF(
             const aten::LightSampleResult& lightsample,
             const aten::LightAttribute& light_attrib,
             const aten::vec3& normal,
             const aten::vec3& ray_dir,
             const aten::MaterialParameter& mtrl,
-            const aten::vec4& albedo,
-            real pre_sampled_r)
+            const float u, const float v,
+            real pre_sampled_r,
+            const aten::vec4& albedo = aten::vec4())
         {
             aten::vec3 nmlLight = lightsample.nml;
             aten::vec3 dirToLight = normalize(lightsample.dir);
@@ -30,13 +32,15 @@ namespace restir {
             const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
             const auto dist2 = aten::squared_length(lightsample.dir);
 
-            // NOTE:
-            // Sample BSDF with external albedo. In this case, uv are unnecessary.
-            // So, we can specify any value as uv. They can be zero here.
-            constexpr auto u = 0.0f;
-            constexpr auto v = 0.0f;
             auto pdf = AT_NAME::material::samplePDF(&mtrl, normal, ray_dir, dirToLight, u, v);
-            auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, normal, ray_dir, dirToLight, u, v, albedo, pre_sampled_r);
+
+            aten::vec3 brdf;
+            if constexpr (IsWithExternalAlbedo) {
+                brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, normal, ray_dir, dirToLight, u, v, albedo, pre_sampled_r);
+            }
+            else {
+                brdf = AT_NAME::material::sampleBSDF(&mtrl, normal, ray_dir, dirToLight, u, v, pre_sampled_r);
+            }
             brdf /= pdf;
 
             const auto geometry_term = light_attrib.isSingular || light_attrib.isInfinite
@@ -107,10 +111,13 @@ namespace restir {
             auto sampling_pdf = path_pdf * light_select_prob;
 
             // p_hat
-            auto target_pdf = _detail::ComputeTargetPDF(
+            auto target_pdf = _detail::ComputeTargetPDF<true>(
                 lightsample, light.attrib,
                 normal, ray_dir,
-                mtrl, albedo, pre_sampled_r);
+                mtrl,
+                u, v,
+                pre_sampled_r,
+                albedo);
 
             // NOTE
             // Equation(5)
@@ -266,50 +273,22 @@ namespace restir {
 
                     AT_NAME::Light::sample(lightsample, light, ctxt, self_info.p, neighbor_normal, &sampler, 0);
 
-                    aten::vec3 nmlLight = lightsample.nml;
-                    aten::vec3 dirToLight = normalize(lightsample.dir);
-
-                    auto pdf = AT_NAME::material::samplePDF(
-                        &neightbor_mtrl,
-                        normal,
-                        self_info.wi, dirToLight,
-                        self_info.u, self_info.v);
-                    auto brdf = AT_NAME::material::sampleBSDF(
-                        &neightbor_mtrl,
-                        normal,
-                        self_info.wi, dirToLight,
+                    // Compute target pdf at the center pixel with the output sample in neighor's reservoir.
+                    // In this case, "the output sample in neighor's reservoir" mean the sampled light of the neighor pixel.
+                    const auto target_pdf = _detail::ComputeTargetPDF<false>(
+                        lightsample,
+                        light.attrib,
+                        self_info.nml, self_info.wi,
+                        mtrl,
                         self_info.u, self_info.v,
                         self_info.pre_sampled_r);
-                    brdf /= pdf;
 
-                    auto cosShadow = dot(normal, dirToLight);
-                    auto cosLight = dot(nmlLight, -dirToLight);
-                    auto dist2 = aten::squared_length(lightsample.dir);
-
-                    auto energy = brdf * lightsample.light_color;
-
-                    cosShadow = aten::abs(cosShadow);
-
-                    if (cosShadow > 0 && cosLight > 0) {
-                        if (light.attrib.isSingular) {
-                            energy = energy * cosShadow * cosLight;
-                        }
-                        else {
-                            energy = energy * cosShadow * cosLight / dist2;
-                        }
-                    }
-                    else {
-                        energy.x = energy.y = energy.z = 0.0f;
-                    }
-
-                    auto target_density = (energy.x + energy.y + energy.z) / 3; // p_hat
-
-                    auto weight = target_density * neighbor_reservoir.W * m;
+                    auto weight = target_pdf * neighbor_reservoir.W * m;
 
                     auto r = sampler.nextSample();
 
                     if (combined_reservoir.update(lightsample, light_pos, weight, m, r)) {
-                        cadidate_target_pdf = target_density;
+                        cadidate_target_pdf = target_pdf;
                     }
                 }
             }
@@ -412,7 +391,7 @@ namespace restir {
                     is_acceptable = is_valid_mtrl
                         && (mtrl.type == neightbor_mtrl.type)
                         &&(mesh_id == neighbor_mesh_id)
-                        && (dot(normal, neighbor_normal) >= 0.95f);
+                        && (dot(self_info.nml, neighbor_normal) >= 0.95f);
 
                     if (is_acceptable) {
                         const auto light_pos = neighbor_reservoir.y;
@@ -421,51 +400,23 @@ namespace restir {
 
                         AT_NAME::Light::sample(lightsample, light, ctxt, self_info.p, neighbor_normal, &sampler, 0);
 
-                        aten::vec3 nmlLight = lightsample.nml;
-                        aten::vec3 dirToLight = normalize(lightsample.dir);
-
-                        auto pdf = AT_NAME::material::samplePDF(
-                            &neightbor_mtrl,
-                            normal,
-                            self_info.wi, dirToLight,
-                            self_info.u, self_info.v);
-                        auto brdf = AT_NAME::material::sampleBSDF(
-                            &neightbor_mtrl,
-                            normal,
-                            self_info.wi, dirToLight,
+                        // Compute target pdf at the center pixel with the output sample in neighor's reservoir.
+                        // In this case, "the output sample in neighor's reservoir" mean the sampled light of the neighor pixel.
+                        const auto target_pdf = _detail::ComputeTargetPDF<false>(
+                            lightsample,
+                            light.attrib,
+                            self_info.nml, self_info.wi,
+                            mtrl,
                             self_info.u, self_info.v,
                             self_info.pre_sampled_r);
-                        brdf /= pdf;
-
-                        auto cosShadow = dot(normal, dirToLight);
-                        auto cosLight = dot(nmlLight, -dirToLight);
-                        auto dist2 = aten::squared_length(lightsample.dir);
-
-                        auto energy = brdf * lightsample.light_color;
-
-                        cosShadow = aten::abs(cosShadow);
-
-                        if (cosShadow > 0 && cosLight > 0) {
-                            if (light.attrib.isSingular) {
-                                energy = energy * cosShadow * cosLight;
-                            }
-                            else {
-                                energy = energy * cosShadow * cosLight / dist2;
-                            }
-                        }
-                        else {
-                            energy.x = energy.y = energy.z = 0.0f;
-                        }
-
-                        auto target_density = (energy.x + energy.y + energy.z) / 3; // p_hat
 
                         auto m = neighbor_reservoir.M;
-                        auto weight = target_density * neighbor_reservoir.W * m;
+                        auto weight = target_pdf * neighbor_reservoir.W * m;
 
                         auto r = sampler.nextSample();
 
                         if (comibined_reservoir.update(lightsample, light_pos, weight, m, r)) {
-                            cadidate_target_pdf = target_density;
+                            cadidate_target_pdf = target_pdf;
                         }
                     }
                 }

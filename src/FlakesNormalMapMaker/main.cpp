@@ -20,7 +20,7 @@ static std::shared_ptr<aten::visualizer> g_visualizer;
 
 static bool g_willShowGUI = true;
 
-void onRun(aten::window* window)
+bool onRun()
 {
     aten::RasterizeRenderer::clearBuffer(
         aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
@@ -42,6 +42,8 @@ void onRun(aten::window* window)
             aten::FlakesNormalMapMaker::setParemter(flakeParam);
         }
     }
+
+    return true;
 }
 
 void onClose()
@@ -107,15 +109,21 @@ int32_t main(int32_t argc, char* argv[])
 {
     aten::SetCurrentDirectoryFromExe();
 
-    aten::window::init(
-        WIDTH, HEIGHT,
-        TITLE,
+    auto wnd = std::make_shared<aten::window>();
+
+    auto id = wnd->Create(
+        WIDTH, HEIGHT, TITLE,
         onRun,
         onClose,
         onMouseBtn,
         onMouseMove,
         onMouseWheel,
         onKey);
+
+    if (id < 0) {
+        AT_ASSERT(false);
+        return 1;
+    }
 
     g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
 
@@ -127,9 +135,9 @@ int32_t main(int32_t argc, char* argv[])
 
     g_visualizer->addPostProc(&maker);
 
-    aten::window::run();
+    wnd->Run();
 
-    aten::window::terminate();
+    wnd->Terminate();
 
-    return 1;
+    return 0;
 }

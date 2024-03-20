@@ -41,7 +41,7 @@ static int32_t g_prevY = 0;
 
 static std::vector<std::vector<aten::ThreadedSbvhNode>> g_voxels;
 
-void onRun(aten::window* window)
+bool onRun()
 {
     if (g_isCameraDirty) {
         g_camera.update();
@@ -90,6 +90,8 @@ void onRun(aten::window* window)
         ImGui::Checkbox("Wireframe,", &g_isWireframe);
         ImGui::Checkbox("Draw mesh,", &g_drawMesh);
     }
+
+    return true;
 }
 
 void onClose()
@@ -287,15 +289,24 @@ int32_t main(int32_t argc, char* argv[])
 
     aten::AssetManager::suppressWarnings();
 
-    aten::window::init(
-        WIDTH, HEIGHT,
-        TITLE,
+    auto wnd = std::make_shared<aten::window>();
+
+    auto id = wnd->Create(
+        WIDTH, HEIGHT, TITLE,
         onRun,
         onClose,
         onMouseBtn,
         onMouseMove,
         onMouseWheel,
         onKey);
+
+    if (id >= 0) {
+        g_ctxt.SetIsWindowInitialized(true);
+    }
+    else {
+        AT_ASSERT(false);
+        return 1;
+    }
 
     loadObj(g_opt);
 
@@ -323,9 +334,9 @@ int32_t main(int32_t argc, char* argv[])
         "../shader/drawobj_vs.glsl",
         "../shader/drawobj_fs.glsl");
 
-    aten::window::run();
+    wnd->Run();
 
-    aten::window::terminate();
+    wnd->Terminate();
 
     return 1;
 }

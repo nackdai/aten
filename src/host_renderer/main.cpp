@@ -80,7 +80,7 @@ void update()
     }
 }
 
-void display(aten::window* wnd)
+bool display()
 {
     // update();
 
@@ -155,6 +155,8 @@ void display(aten::window* wnd)
     }
 #endif
     g_frameNo++;
+
+    return true;
 }
 
 int32_t main(int32_t argc, char* argv[])
@@ -164,7 +166,17 @@ int32_t main(int32_t argc, char* argv[])
     aten::timer::init();
     aten::OMPUtil::setThreadNum(g_threadnum);
 
-    aten::window::init(WIDTH, HEIGHT, TITLE, display);
+    auto wnd = std::make_shared<aten::window>();
+
+    auto id = wnd->Create(WIDTH, HEIGHT, TITLE, display);
+
+    if (id >= 0) {
+        g_ctxt.SetIsWindowInitialized(true);
+    }
+    else {
+        AT_ASSERT(false);
+        return 1;
+    }
 
     g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
 
@@ -266,11 +278,11 @@ int32_t main(int32_t argc, char* argv[])
     }
 #endif
 
-    aten::window::run();
+    wnd->Run();
 
     g_rasterizer.release();
     g_rasterizerAABB.release();
     g_ctxt.release();
 
-    aten::window::terminate();
+    wnd->Terminate();
 }

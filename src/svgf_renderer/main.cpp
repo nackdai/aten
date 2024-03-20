@@ -121,11 +121,11 @@ void update()
     }
 }
 
-void onRun(aten::window *window)
+bool onRun()
 {
     if (g_enableFrameStep && !g_frameStep)
     {
-        return;
+        return true;
     }
 
     auto frame = g_tracer.frame();
@@ -299,6 +299,8 @@ void onRun(aten::window *window)
         AT_PRINTF("  nml[%f, %f, %f]\n", info.normal.x, info.normal.y, info.normal.z);
         AT_PRINTF("  mesh[%d] mtrl[%d], tri[%d]\n", info.meshid, info.mtrlid, info.triid);
     }
+
+    return true;
 }
 
 void onClose()
@@ -465,7 +467,9 @@ int32_t main()
 
     aten::initSampler(WIDTH, HEIGHT);
 
-    aten::window::init(
+    auto wnd = std::make_shared<aten::window>();
+
+    auto id = wnd->Create(
         WIDTH, HEIGHT, TITLE,
         onRun,
         onClose,
@@ -473,6 +477,14 @@ int32_t main()
         onMouseMove,
         onMouseWheel,
         onKey);
+
+    if (id >= 0) {
+        g_ctxt.SetIsWindowInitialized(true);
+    }
+    else {
+        AT_ASSERT(false);
+        return 1;
+    }
 
     aten::GLProfiler::start();
 
@@ -605,7 +617,7 @@ int32_t main()
     g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
     g_tracer.setAOVMode((AT_NAME::SVGFAovMode)g_curAOVMode);
 
-    aten::window::run();
+    wnd->Run();
 
     aten::GLProfiler::terminate();
 
@@ -613,5 +625,5 @@ int32_t main()
     g_rasterizerAABB.release();
     g_ctxt.release();
 
-    aten::window::terminate();
+    wnd->Terminate();
 }

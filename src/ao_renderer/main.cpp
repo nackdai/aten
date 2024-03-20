@@ -41,7 +41,7 @@ static int32_t g_cntScreenShot = 0;
 static int32_t g_renderMode = 0; // 0: AO, 1: TexView
 static int32_t g_viewTexIdx = 0;
 
-void onRun(aten::window *window)
+bool onRun()
 {
     if (g_isCameraDirty)
     {
@@ -120,6 +120,8 @@ void onRun(aten::window *window)
         }
 #endif
     }
+
+    return true;
 }
 
 void onClose()
@@ -250,7 +252,9 @@ int32_t main()
 
     aten::initSampler(WIDTH, HEIGHT);
 
-    aten::window::init(
+    auto wnd = std::make_shared<aten::window>();
+
+    auto id = wnd->Create(
         WIDTH, HEIGHT, TITLE,
         onRun,
         onClose,
@@ -258,6 +262,14 @@ int32_t main()
         onMouseMove,
         onMouseWheel,
         onKey);
+
+    if (id >= 0) {
+        g_ctxt.SetIsWindowInitialized(true);
+    }
+    else {
+        AT_ASSERT(false);
+        return 1;
+    }
 
     g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
 
@@ -342,7 +354,7 @@ int32_t main()
             tex, idaten::EnvmapResource());
     }
 
-    aten::window::run();
+    wnd->Run();
 
-    aten::window::terminate();
+    wnd->Terminate();
 }

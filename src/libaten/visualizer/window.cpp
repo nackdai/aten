@@ -304,14 +304,15 @@ namespace aten
         }
     }
 
-    int32_t window::Create(
+    int32_t window::CreateImpl(
         int32_t width, int32_t height, std::string_view title,
+        bool is_offscreen,
         OnRunFunc onRun,
-        OnCloseFunc _onClose/*= nullptr*/,
-        OnMouseBtnFunc _onMouseBtn/*= nullptr*/,
-        OnMouseMoveFunc _onMouseMove/*= nullptr*/,
-        OnMouseWheelFunc _onMouseWheel/*= nullptr*/,
-        OnKeyFunc _onKey/*= nullptr*/)
+        OnCloseFunc onClose/*= nullptr*/,
+        OnMouseBtnFunc onMouseBtn/*= nullptr*/,
+        OnMouseMoveFunc onMouseMove/*= nullptr*/,
+        OnMouseWheelFunc onMouseWheel/*= nullptr*/,
+        OnKeyFunc onKey/*= nullptr*/)
     {
         auto result = ::glfwInit();
         if (!result) {
@@ -330,6 +331,10 @@ namespace aten
         if (windows_.size() >= 1) {
             // ２つめ以降.
             //::glfwWindowHint(GLFW_FLOATING, GL_TRUE);
+        }
+
+        if (is_offscreen) {
+            ::glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         }
 
         auto glfwWindow = ::glfwCreateWindow(
@@ -414,11 +419,11 @@ namespace aten
         auto wnd = std::make_shared<_detail::WindowImpl>(glfwWindow, static_cast<int32_t>(windows_.size()));
         {
             wnd->on_run_ = onRun;
-            wnd->on_close_ = _onClose;
-            wnd->on_mouse_btn_ = _onMouseBtn;
-            wnd->on_mouse_move_ = _onMouseMove;
-            wnd->on_mouse_wheel_ = _onMouseWheel;
-            wnd->on_key_ = _onKey;
+            wnd->on_close_ = onClose;
+            wnd->on_mouse_btn_ = onMouseBtn;
+            wnd->on_mouse_move_ = onMouseMove;
+            wnd->on_mouse_wheel_ = onMouseWheel;
+            wnd->on_key_ = onKey;
 
             wnd->imgui_ctxt_ = ImGui::GetCurrentContext();
         }

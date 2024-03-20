@@ -4,7 +4,6 @@
 #include "math/intersect.h"
 #include "accelerator/accelerator.h"
 #include "geometry/vertex.h"
-#include "visualizer/window.h"
 
 namespace AT_NAME
 {

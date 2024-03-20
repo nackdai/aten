@@ -34,7 +34,7 @@ namespace AT_NAME
         m_aabb.init(boxmin, boxmax);
 
         // For rasterize rendering.
-        if (window::isInitialized())
+        if (ctxt.IsWindowInitialized())
         {
             std::vector<uint32_t> idx;
             idx.reserve(triangles_.size() * 3);

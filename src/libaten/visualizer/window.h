@@ -182,93 +182,103 @@ namespace aten {
         Key_UNDEFINED,
     };
 
+    namespace _detail {
+        class WindowImpl;
+    }
+
     class window {
-    protected:
-        window(GLFWwindow* wnd, int32_t id);
+    public:
+        window() {}
         virtual ~window() = default;
 
-    public:
-        using OnRun = std::function<void(window*)>;
-        using OnClose = std::function<void()>;
-        using OnMouseBtn = std::function<void(bool left, bool press, int32_t x, int32_t y)>;
-        using OnMouseMove = std::function<void(int32_t x, int32_t y)>;
-        using OnMouseWheel = std::function<void(int32_t delta)>;
-        using OnKey = std::function<void(bool press, Key key)>;
+        window(const window&) = delete;
+        window(window&&) = delete;
+        window& operator=(const window&) = delete;
+        window& operator=(window&&) = delete;
 
-        static window* init(
+        using OnRunFunc = std::function<bool()>;
+        using OnCloseFunc = std::function<void()>;
+        using OnMouseBtnFunc = std::function<void(bool left, bool press, int32_t x, int32_t y)>;
+        using OnMouseMoveFunc = std::function<void(int32_t x, int32_t y)>;
+        using OnMouseWheelFunc = std::function<void(int32_t delta)>;
+        using OnKeyFunc = std::function<void(bool press, Key key)>;
+
+        int32_t Create(
             int32_t width, int32_t height, std::string_view title,
-            OnRun onRun,
-            OnClose _onClose = nullptr,
-            OnMouseBtn _onMouseBtn = nullptr,
-            OnMouseMove _onMouseMove = nullptr,
-            OnMouseWheel _onMouseWheel = nullptr,
-            OnKey _onKey = nullptr);
+            OnRunFunc onRun,
+            OnCloseFunc _onClose = nullptr,
+            OnMouseBtnFunc _onMouseBtn = nullptr,
+            OnMouseMoveFunc _onMouseMove = nullptr,
+            OnMouseWheelFunc _onMouseWheel = nullptr,
+            OnKeyFunc _onKey = nullptr);
 
-        static void run();
+        void Run();
 
-        void asCurrent();
+        bool SetCurrent(int32_t id);
 
-        void enableVSync(bool enabled);
+        bool EnableVSync(int32_t id, bool enabled);
 
-        static void terminate();
+        void Terminate();
 
-        static bool isInitialized();
-
-        GLFWwindow* getNativeHandle();
-
-        void onClose()
-        {
-            if (m_onClose) {
-                m_onClose();
-            }
-        }
-
-        void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
-        {
-            if (m_onMouseBtn) {
-                m_onMouseBtn(left, press, x, y);
-            }
-        }
-
-        void onMouseMove(int32_t x, int32_t y)
-        {
-            if (m_onMouseMove) {
-                m_onMouseMove(x, y);
-            }
-        }
-
-        void onMouseWheel(int32_t delta)
-        {
-            if (m_onMouseWheel) {
-                m_onMouseWheel(delta);
-            }
-        }
-
-        void onKey(bool press, Key key)
-        {
-            if (m_onKey) {
-                m_onKey(press, key);
-            }
-        }
-
-        int32_t id() const
-        {
-            return m_id;
-        }
+        bool IsInitialized() const;
 
     private:
-        void drawImGui();
+        std::shared_ptr<_detail::WindowImpl> FindWindowByNativeHandle(GLFWwindow* w);
+        std::shared_ptr<_detail::WindowImpl> FindWindowById(int32_t id);
 
-        GLFWwindow* m_wnd{ nullptr };
-        int32_t m_id{ -1 };
+        void Close(GLFWwindow* window);
+        void Key(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods);
+        void MouseBtn(GLFWwindow* window, int32_t button, int32_t action, int32_t mods);
+        void MouseMotion(GLFWwindow* window, double xpos, double ypos);
+        void MouseWheel(GLFWwindow* window, double xoffset, double yoffset);
+        void FocusWindow(GLFWwindow* window, int32_t focused);
 
-        void* m_imguiCtxt{ nullptr };
+        static void OnClose(GLFWwindow* window)
+        {
+            if (OnCloseCallback) {
+                OnCloseCallback(window);
+            }
+        }
+        static void OnKey(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods)
+        {
+            if (OnKeyCallback) {
+                OnKeyCallback(window, key, scancode, action, mods);
+            }
+        }
+        static void OnMouseBtn(GLFWwindow* window, int32_t button, int32_t action, int32_t mods)
+        {
+            if (OnMouseBtnCallback) {
+                OnMouseBtnCallback(window, button, action, mods);
+            }
+        }
+        static void OnMouseMotion(GLFWwindow* window, double xpos, double ypos)
+        {
+            if (OnMouseMotionCallback) {
+                OnMouseMotionCallback(window, xpos, ypos);
+            }
+        }
+        static void OnMouseWheel(GLFWwindow* window, double xoffset, double yoffset)
+        {
+            if (OnMouseWheelCallback) {
+                OnMouseWheelCallback(window, xoffset, yoffset);
+            }
+        }
+        static void OnFocusWindow(GLFWwindow* window, int32_t focused)
+        {
+            if (OnFocusWindowCallback) {
+                OnFocusWindowCallback(window, focused);
+            }
+        }
 
-        OnRun m_onRun{ nullptr };
-        OnClose m_onClose{ nullptr };
-        OnMouseBtn m_onMouseBtn{ nullptr };
-        OnMouseMove m_onMouseMove{ nullptr };
-        OnMouseWheel m_onMouseWheel{ nullptr };
-        OnKey m_onKey{ nullptr };
+        static std::function<void(GLFWwindow*)> OnCloseCallback;
+        static std::function<void(GLFWwindow*, int32_t, int32_t, int32_t, int32_t)> OnKeyCallback;
+        static std::function<void(GLFWwindow*, int32_t, int32_t, int32_t)> OnMouseBtnCallback;
+        static std::function<void(GLFWwindow*, double, double)> OnMouseMotionCallback;
+        static std::function<void(GLFWwindow*, double, double)> OnMouseWheelCallback;
+        static std::function<void(GLFWwindow*, int32_t)> OnFocusWindowCallback;
+
+        void* imgui_ctxt_{ nullptr };
+
+        std::vector<std::shared_ptr<_detail::WindowImpl>> windows_;
     };
 }

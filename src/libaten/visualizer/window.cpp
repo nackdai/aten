@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <memory>
+#include <tuple>
 
 #include "visualizer/atengl.h"
 #include "visualizer/window.h"
@@ -13,158 +14,256 @@
 
 namespace aten
 {
-    class windowImpl : public window {
-    public:
-        windowImpl(GLFWwindow* wnd, int32_t id) : window(wnd, id) {}
-        virtual ~windowImpl() = default;
-    };
+    namespace _detail {
+        class WindowImpl {
+        public:
+            WindowImpl(GLFWwindow* wnd, int32_t id) : wnd_(wnd), id_(id) {}
+            ~WindowImpl() = default;
 
+            GLFWwindow* GetNativeHandle()
+            {
+                return wnd_;
+            }
 
-    static std::vector<std::shared_ptr<windowImpl>> g_windows;
+            int32_t id() const
+            {
+                return id_;
+            }
 
-    static std::vector<int32_t> g_mouseX;
-    static std::vector<int32_t> g_mouseY;
+            void OnClose()
+            {
+                if (on_close_) {
+                    on_close_();
+                }
+            }
 
-    window* findWindow(GLFWwindow* w)
+            void OnMouseBtn(bool left, bool press, int32_t x, int32_t y)
+            {
+                if (on_mouse_btn_) {
+                    on_mouse_btn_(left, press, x, y);
+                }
+            }
+
+            void OnMouseMove(int32_t x, int32_t y)
+            {
+                if (on_mouse_move_) {
+                    on_mouse_move_(x, y);
+                }
+            }
+
+            void OnMouseWheel(int32_t delta)
+            {
+                if (on_mouse_wheel_) {
+                    on_mouse_wheel_(delta);
+                }
+            }
+
+            void OnKey(bool press, aten::Key key)
+            {
+                if (on_key_) {
+                    on_key_(press, key);
+                }
+            }
+
+            auto GetMousePos() const
+            {
+                return std::tie(mouse_x_, mouse_y_);
+            }
+
+            void SetMousePos(int32_t x, int32_t y)
+            {
+                mouse_x_ = x;
+                mouse_y_ = y;
+            }
+
+            void DrawImGui()
+            {
+                AT_ASSERT(wnd_);
+                AT_ASSERT(imgui_ctxt_);
+
+                // Rendering
+                int32_t display_w, display_h;
+                ::glfwGetFramebufferSize(wnd_, &display_w, &display_h);
+                CALL_GL_API(glViewport(0, 0, display_w, display_h));
+
+                ImGui::SetCurrentContext(imgui_ctxt_);
+                ImGui::Render();
+                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            }
+
+            GLFWwindow* wnd_{ nullptr };
+            int32_t id_{ -1 };
+
+            int32_t mouse_x_{ -1 };
+            int32_t mouse_y_{ -1 };
+
+            ImGuiContext* imgui_ctxt_{ nullptr };
+
+            window::OnRunFunc on_run_{ nullptr };
+            window::OnCloseFunc on_close_{ nullptr };
+            window::OnMouseBtnFunc on_mouse_btn_{ nullptr };
+            window::OnMouseMoveFunc on_mouse_move_{ nullptr };
+            window::OnMouseWheelFunc on_mouse_wheel_{ nullptr };
+            window::OnKeyFunc on_key_{ nullptr };
+        };
+    }
+
+    std::function<void(GLFWwindow*)> window::OnCloseCallback;
+    std::function<void(GLFWwindow*, int32_t, int32_t, int32_t, int32_t)> window::OnKeyCallback;
+    std::function<void(GLFWwindow*, int32_t, int32_t, int32_t)> window::OnMouseBtnCallback;
+    std::function<void(GLFWwindow*, double, double)> window::OnMouseMotionCallback;
+    std::function<void(GLFWwindow*, double, double)> window::OnMouseWheelCallback;
+    std::function<void(GLFWwindow*, int32_t)> window::OnFocusWindowCallback;
+
+    std::shared_ptr<_detail::WindowImpl> window::FindWindowByNativeHandle(GLFWwindow* w)
     {
         auto found = std::find_if(
-            g_windows.begin(), g_windows.end(),
-            [&](const std::shared_ptr<windowImpl>& wnd)
+            windows_.begin(), windows_.end(),
+            [&](const std::shared_ptr<_detail::WindowImpl>& wnd)
         {
-            if (wnd->getNativeHandle() == w) {
+            if (wnd->GetNativeHandle() == w) {
                 return true;
             }
             return false;
         });
 
-        if (found != g_windows.end()) {
-            return (*found).get();
+        if (found != windows_.end()) {
+            return *found;
         }
 
         return nullptr;
     }
 
-    static void closeCallback(GLFWwindow* window)
+    std::shared_ptr<_detail::WindowImpl> window::FindWindowById(int32_t id)
     {
-        auto wnd = findWindow(window);
+        bool is_in_range = (id >= 0) && (id < windows_.size());
+        AT_ASSERT(is_in_range);
+        return is_in_range ? windows_[id] : nullptr;
+    }
+
+    void window::Close(GLFWwindow* window)
+    {
+        auto wnd = FindWindowByNativeHandle(window);
 
         if (wnd) {
-            wnd->onClose();
+            wnd->OnClose();
             ::glfwSetWindowShouldClose(window, GL_TRUE);
         }
     }
 
-    static inline Key getKeyMap(int32_t key)
-    {
-        if ('0' <= key && key <= '9') {
-            key = key - '0';
-            return (Key)(Key_0 + key);
-        }
-        else if ('A' <= key && key <= 'Z') {
-            key = key - 'A';
-            return (Key)(Key_A + key);
-        }
-        else {
-            switch (key) {
-            case GLFW_KEY_ESCAPE:
-                return Key_ESCAPE;
-            case GLFW_KEY_ENTER:
-                return Key_RETURN;
-            case GLFW_KEY_TAB:
-                return Key_TAB;
-            case GLFW_KEY_BACKSPACE:
-                return Key_BACKSPACE;
-            case GLFW_KEY_INSERT:
-                return Key_INSERT;
-            case GLFW_KEY_DELETE:
-                return Key_DELETE;
-            case GLFW_KEY_RIGHT:
-                return Key_RIGHT;
-            case GLFW_KEY_LEFT:
-                return Key_LEFT;
-            case GLFW_KEY_DOWN:
-                return Key_DOWN;
-            case GLFW_KEY_UP:
-                return Key_UP;
-            case GLFW_KEY_F1:
-                return Key_F1;
-            case GLFW_KEY_F2:
-                return Key_F2;
-            case GLFW_KEY_F3:
-                return Key_F3;
-            case GLFW_KEY_F4:
-                return Key_F4;
-            case GLFW_KEY_F5:
-                return Key_F5;
-            case GLFW_KEY_F6:
-                return Key_F6;
-            case GLFW_KEY_F7:
-                return Key_F7;
-            case GLFW_KEY_F8:
-                return Key_F8;
-            case GLFW_KEY_F9:
-                return Key_F9;
-            case GLFW_KEY_F10:
-                return Key_F10;
-            case GLFW_KEY_F11:
-                return Key_F11;
-            case GLFW_KEY_F12:
-                return Key_F12;
-            case GLFW_KEY_LEFT_SHIFT:
-                return Key_SHIFT;
-            case GLFW_KEY_LEFT_CONTROL:
-                return Key_CONTROL;
-            case GLFW_KEY_RIGHT_SHIFT:
-                return Key_SHIFT;
-            case GLFW_KEY_RIGHT_CONTROL:
-                return Key_CONTROL;
-            case GLFW_KEY_SPACE:
-                return Key_SPACE;
-            default:
-                break;
+    namespace _detail {
+        inline Key GetKeyMap(int32_t key)
+        {
+            if ('0' <= key && key <= '9') {
+                key = key - '0';
+                return (Key)(Key_0 + key);
             }
-        }
+            else if ('A' <= key && key <= 'Z') {
+                key = key - 'A';
+                return (Key)(Key_A + key);
+            }
+            else {
+                switch (key) {
+                case GLFW_KEY_ESCAPE:
+                    return Key_ESCAPE;
+                case GLFW_KEY_ENTER:
+                    return Key_RETURN;
+                case GLFW_KEY_TAB:
+                    return Key_TAB;
+                case GLFW_KEY_BACKSPACE:
+                    return Key_BACKSPACE;
+                case GLFW_KEY_INSERT:
+                    return Key_INSERT;
+                case GLFW_KEY_DELETE:
+                    return Key_DELETE;
+                case GLFW_KEY_RIGHT:
+                    return Key_RIGHT;
+                case GLFW_KEY_LEFT:
+                    return Key_LEFT;
+                case GLFW_KEY_DOWN:
+                    return Key_DOWN;
+                case GLFW_KEY_UP:
+                    return Key_UP;
+                case GLFW_KEY_F1:
+                    return Key_F1;
+                case GLFW_KEY_F2:
+                    return Key_F2;
+                case GLFW_KEY_F3:
+                    return Key_F3;
+                case GLFW_KEY_F4:
+                    return Key_F4;
+                case GLFW_KEY_F5:
+                    return Key_F5;
+                case GLFW_KEY_F6:
+                    return Key_F6;
+                case GLFW_KEY_F7:
+                    return Key_F7;
+                case GLFW_KEY_F8:
+                    return Key_F8;
+                case GLFW_KEY_F9:
+                    return Key_F9;
+                case GLFW_KEY_F10:
+                    return Key_F10;
+                case GLFW_KEY_F11:
+                    return Key_F11;
+                case GLFW_KEY_F12:
+                    return Key_F12;
+                case GLFW_KEY_LEFT_SHIFT:
+                    return Key_SHIFT;
+                case GLFW_KEY_LEFT_CONTROL:
+                    return Key_CONTROL;
+                case GLFW_KEY_RIGHT_SHIFT:
+                    return Key_SHIFT;
+                case GLFW_KEY_RIGHT_CONTROL:
+                    return Key_CONTROL;
+                case GLFW_KEY_SPACE:
+                    return Key_SPACE;
+                default:
+                    break;
+                }
+            }
 
-        return Key_UNDEFINED;
+            return Key_UNDEFINED;
+        }
     }
 
-    static void keyCallback(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods)
+    void window::Key(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods)
     {
-        auto wnd = findWindow(window);
+        auto wnd = FindWindowByNativeHandle(window);
 
         if (wnd) {
-            Key k = getKeyMap(key);
+            auto k = _detail::GetKeyMap(key);
             bool press = (action == GLFW_PRESS || action == GLFW_REPEAT);
 
-            wnd->onKey(press, k);
+            wnd->OnKey(press, k);
         }
 
         // For imgui.
         ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
     }
 
-    static void mouseCallback(GLFWwindow* window, int32_t button, int32_t action, int32_t mods)
+    void window::MouseBtn(GLFWwindow* window, int32_t button, int32_t action, int32_t mods)
     {
-        auto wnd = findWindow(window);
+        auto wnd = FindWindowByNativeHandle(window);
 
         if (wnd) {
-            auto mouseX = g_mouseX[wnd->id()];
-            auto mouseY = g_mouseY[wnd->id()];
+            int32_t mouseX, mouseY;
+            std::tie(mouseX, mouseY) = wnd->GetMousePos();
 
             if (button == GLFW_MOUSE_BUTTON_LEFT) {
                 if (action == GLFW_PRESS) {
-                    wnd->onMouseBtn(true, true, mouseX, mouseY);
+                    wnd->OnMouseBtn(true, true, mouseX, mouseY);
                 }
                 else if (action == GLFW_RELEASE) {
-                    wnd->onMouseBtn(true, false, mouseX, mouseY);
+                    wnd->OnMouseBtn(true, false, mouseX, mouseY);
                 }
             }
             else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
                 if (action == GLFW_PRESS) {
-                    wnd->onMouseBtn(false, true, mouseX, mouseY);
+                    wnd->OnMouseBtn(false, true, mouseX, mouseY);
                 }
                 else if (action == GLFW_RELEASE) {
-                    wnd->onMouseBtn(false, false, mouseX, mouseY);
+                    wnd->OnMouseBtn(false, false, mouseX, mouseY);
                 }
             }
         }
@@ -173,56 +272,52 @@ namespace aten
         ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
     }
 
-    static void motionCallback(GLFWwindow* window, double xpos, double ypos)
+    void window::MouseMotion(GLFWwindow* window, double xpos, double ypos)
     {
-        auto wnd = findWindow(window);
-
-        g_mouseX[wnd->id()] = (int32_t)xpos;
-        g_mouseY[wnd->id()] = (int32_t)ypos;
+        auto wnd = FindWindowByNativeHandle(window);
 
         if (wnd) {
-            wnd->onMouseMove((int32_t)xpos, (int32_t)ypos);
+            wnd->SetMousePos((int32_t)xpos, (int32_t)ypos);
+            wnd->OnMouseMove((int32_t)xpos, (int32_t)ypos);
         }
     }
 
-    static void wheelCallback(GLFWwindow* window, double xoffset, double yoffset)
+    void window::MouseWheel(GLFWwindow* window, double xoffset, double yoffset)
     {
-        auto offset = (int32_t)(yoffset * 10.0f);
-
-        auto wnd = findWindow(window);
+        auto wnd = FindWindowByNativeHandle(window);
 
         if (wnd) {
-            wnd->onMouseWheel(offset);
+            auto offset = (int32_t)(yoffset * 10.0f);
+            wnd->OnMouseWheel(offset);
         }
 
         // For imgui.
         ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
     }
 
-    static void onFocusWindow(GLFWwindow* window, int32_t focused)
+    void window::FocusWindow(GLFWwindow* window, int32_t focused)
     {
-        auto wnd = findWindow(window);
+        auto wnd = FindWindowByNativeHandle(window);
         if (wnd) {
             // TODO
             // As current context.
         }
     }
 
-    window::window(GLFWwindow* wnd, int32_t id)
-        : m_wnd(wnd), m_id(id)
-    {}
-
-    window* window::init(
+    int32_t window::Create(
         int32_t width, int32_t height, std::string_view title,
-        OnRun onRun,
-        OnClose _onClose/*= nullptr*/,
-        OnMouseBtn _onMouseBtn/*= nullptr*/,
-        OnMouseMove _onMouseMove/*= nullptr*/,
-        OnMouseWheel _onMouseWheel/*= nullptr*/,
-        OnKey _onKey/*= nullptr*/)
+        OnRunFunc onRun,
+        OnCloseFunc _onClose/*= nullptr*/,
+        OnMouseBtnFunc _onMouseBtn/*= nullptr*/,
+        OnMouseMoveFunc _onMouseMove/*= nullptr*/,
+        OnMouseWheelFunc _onMouseWheel/*= nullptr*/,
+        OnKeyFunc _onKey/*= nullptr*/)
     {
         auto result = ::glfwInit();
-        AT_VRETURN(result, nullptr);
+        if (!result) {
+            AT_ASSERT(false);
+            return -1;
+        }
 
         // Not specify version.
         // Default value sepcify latest version.
@@ -232,7 +327,7 @@ namespace aten
         ::glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
         ::glfwWindowHint(GLFW_MAXIMIZED, GL_FALSE);
 
-        if (g_windows.size() >= 1) {
+        if (windows_.size() >= 1) {
             // ２つめ以降.
             //::glfwWindowHint(GLFW_FLOATING, GL_TRUE);
         }
@@ -245,10 +340,11 @@ namespace aten
 
         if (!glfwWindow) {
             ::glfwTerminate();
-            AT_VRETURN(false, nullptr);
+            AT_ASSERT(false);
+            return -1;
         }
 
-        if (g_windows.size() >= 1) {
+        if (windows_.size() >= 1) {
             // ２つめ以降.
             auto imguiCtxt = ImGui::GetCurrentContext();
             ImGui::SetCurrentContext(imguiCtxt);
@@ -256,29 +352,31 @@ namespace aten
 
         SetCurrentDirectoryFromExe();
 
-        ::glfwSetWindowCloseCallback(
-            glfwWindow,
-            closeCallback);
+        if (!OnCloseCallback) {
+            OnCloseCallback = std::bind(&window::Close, this, std::placeholders::_1);
+        }
+        if (!OnKeyCallback) {
+            OnKeyCallback = std::bind(&window::Key, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
+        }
+        if (!OnMouseBtnCallback) {
+            OnMouseBtnCallback = std::bind(&window::MouseBtn, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+        }
+        if (!OnMouseMotionCallback) {
+            OnMouseMotionCallback = std::bind(&window::MouseMotion, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        }
+        if (!OnMouseWheelCallback) {
+            OnMouseWheelCallback = std::bind(&window::MouseWheel, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        }
+        if (!OnFocusWindowCallback) {
+            OnFocusWindowCallback = std::bind(&window::FocusWindow, this, std::placeholders::_1, std::placeholders::_2);
+        }
 
-        ::glfwSetKeyCallback(
-            glfwWindow,
-            keyCallback);
-
-        ::glfwSetMouseButtonCallback(
-            glfwWindow,
-            mouseCallback);
-
-        ::glfwSetCursorPosCallback(
-            glfwWindow,
-            motionCallback);
-
-        ::glfwSetScrollCallback(
-            glfwWindow,
-            wheelCallback);
-
-        ::glfwSetWindowFocusCallback(
-            glfwWindow,
-            onFocusWindow);
+        ::glfwSetWindowCloseCallback(glfwWindow, &window::OnClose);
+        ::glfwSetKeyCallback(glfwWindow, &window::OnKey);
+        ::glfwSetMouseButtonCallback(glfwWindow, &window::OnMouseBtn);
+        ::glfwSetCursorPosCallback(glfwWindow, &window::OnMouseMotion);
+        ::glfwSetScrollCallback(glfwWindow, &window::OnMouseWheel);
+        ::glfwSetWindowFocusCallback(glfwWindow, &window::OnFocusWindow);
 
         // For imgui.
         ::glfwSetCharCallback(glfwWindow, ImGui_ImplGlfw_CharCallback);
@@ -313,47 +411,47 @@ namespace aten
         succeeded = ImGui_ImplOpenGL3_Init("#version 400");
         AT_ASSERT(succeeded);
 
-        windowImpl* ret = new windowImpl(glfwWindow, static_cast<int32_t>(g_windows.size()));
+        auto wnd = std::make_shared<_detail::WindowImpl>(glfwWindow, static_cast<int32_t>(windows_.size()));
         {
-            ret->m_onRun = onRun;
-            ret->m_onClose = _onClose;
-            ret->m_onMouseBtn = _onMouseBtn;
-            ret->m_onMouseMove = _onMouseMove;
-            ret->m_onMouseWheel = _onMouseWheel;
-            ret->m_onKey = _onKey;
+            wnd->on_run_ = onRun;
+            wnd->on_close_ = _onClose;
+            wnd->on_mouse_btn_ = _onMouseBtn;
+            wnd->on_mouse_move_ = _onMouseMove;
+            wnd->on_mouse_wheel_ = _onMouseWheel;
+            wnd->on_key_ = _onKey;
 
-            ret->m_imguiCtxt = ImGui::GetCurrentContext();
+            wnd->imgui_ctxt_ = ImGui::GetCurrentContext();
         }
-        g_windows.push_back(std::shared_ptr<windowImpl>(ret));
 
-        g_mouseX.resize(g_windows.size());
-        g_mouseY.resize(g_windows.size());
+        auto id = wnd->id();
 
-        return ret;
+        windows_.push_back(std::move(wnd));
+
+        return id;
     }
 
-    void window::run()
+    void window::Run()
     {
         bool running = true;
 
         while (running) {
-            for (auto& wnd : g_windows) {
-                auto glfwWnd = wnd->m_wnd;
+            for (auto& wnd : windows_) {
+                auto glfwWnd = wnd->GetNativeHandle();
 
                 ::glfwMakeContextCurrent(glfwWnd);
 
                 ::glfwPollEvents();
 
-                ImGui::SetCurrentContext((ImGuiContext*)wnd->m_imguiCtxt);
+                ImGui::SetCurrentContext(wnd->imgui_ctxt_);
 
                 // For imgui.
                 ImGui_ImplOpenGL3_NewFrame();
                 ImGui_ImplGlfw_NewFrame();
                 ImGui::NewFrame();
 
-                wnd->m_onRun(wnd.get());
+                running = wnd->on_run_();
 
-                wnd->drawImGui();
+                wnd->DrawImGui();
 
                 ::glfwSwapBuffers(glfwWnd);
 
@@ -366,18 +464,25 @@ namespace aten
         }
     }
 
-    void window::asCurrent()
+    bool window::SetCurrent(int32_t id)
     {
-        ::glfwMakeContextCurrent(m_wnd);
+        auto wnd = FindWindowById(id);
+        if (wnd) {
+            ::glfwMakeContextCurrent(wnd->GetNativeHandle());
+        }
+        return wnd != nullptr;
     }
 
-    void window::enableVSync(bool enabled)
+    bool window::EnableVSync(int id, bool enabled)
     {
-        asCurrent();
-        ::glfwSwapInterval(enabled ? 1 : 0);
+        auto wnd = FindWindowById(id);
+        if (wnd) {
+            ::glfwSwapInterval(enabled ? 1 : 0);
+        }
+        return wnd != nullptr;
     }
 
-    void window::terminate()
+    void window::Terminate()
     {
         // For imgui.
         ImGui_ImplOpenGL3_Shutdown();
@@ -386,16 +491,16 @@ namespace aten
 
         ImGuiContext* defaultImguiCtxt = nullptr;
 
-        for (uint32_t i = 0; i < g_windows.size(); i++) {
-            auto wnd = g_windows[i];
+        for (uint32_t i = 0; i < windows_.size(); i++) {
+            auto wnd = windows_[i];
 
-            ::glfwDestroyWindow(wnd->m_wnd);
+            ::glfwDestroyWindow(wnd->GetNativeHandle());
 
             if (i == 0) {
-                defaultImguiCtxt = (ImGuiContext*)wnd->m_imguiCtxt;
+                defaultImguiCtxt = wnd->imgui_ctxt_;
             }
             else {
-                ImGui::DestroyContext((ImGuiContext*)wnd->m_imguiCtxt);
+                ImGui::DestroyContext(wnd->imgui_ctxt_);
             }
         }
 
@@ -405,28 +510,11 @@ namespace aten
 
         ::glfwTerminate();
 
-        g_windows.clear();
+        windows_.clear();
     }
 
-    void window::drawImGui()
+    bool window::IsInitialized() const
     {
-        // Rendering
-        int32_t display_w, display_h;
-        ::glfwGetFramebufferSize(m_wnd, &display_w, &display_h);
-        CALL_GL_API(glViewport(0, 0, display_w, display_h));
-
-        ImGui::SetCurrentContext((ImGuiContext*)m_imguiCtxt);
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    }
-
-    bool window::isInitialized()
-    {
-        return !g_windows.empty();
-    }
-
-    GLFWwindow* window::getNativeHandle()
-    {
-        return m_wnd;
+        return windows_.size() > 0;
     }
 }

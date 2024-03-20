@@ -188,7 +188,7 @@ void updateLightParameter()
     g_tracer.setEnableEnvmap(g_scene_light.is_envmap);
 }
 
-void onRun(aten::window* window)
+bool onRun()
 {
 #ifdef GPU_RENDERING
     float updateTime = 0.0f;
@@ -344,6 +344,8 @@ void onRun(aten::window* window)
 
     g_visualizer->render(g_buffer.image(), g_camera.needRevert());
 #endif
+
+    return true;
 }
 
 void onClose()
@@ -467,7 +469,9 @@ int32_t main()
 
     aten::initSampler(WIDTH, HEIGHT);
 
-    auto wnd = aten::window::init(
+    auto wnd = std::make_shared<aten::window>();
+
+    auto id = wnd->Create(
         WIDTH, HEIGHT, TITLE,
         onRun,
         onClose,
@@ -475,6 +479,11 @@ int32_t main()
         onMouseMove,
         onMouseWheel,
         onKey);
+
+    if (id < 0) {
+        AT_ASSERT(false);
+        return 1;
+    }
 
     aten::GLProfiler::start();
 
@@ -582,9 +591,9 @@ int32_t main()
 
     g_tracer.setEnableEnvmap(g_scene_light.is_envmap);
 
-    aten::window::run();
+    wnd->Run();
 
     aten::GLProfiler::terminate();
 
-    aten::window::terminate();
+    wnd->Terminate();
 }

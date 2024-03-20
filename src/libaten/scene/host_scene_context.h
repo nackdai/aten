@@ -489,6 +489,16 @@ namespace aten
          */
         size_t GetLightNum() const;
 
+        void SetIsWindowInitialized(bool b)
+        {
+            is_window_initialized_ = b;
+        }
+
+        bool IsWindowInitialized() const
+        {
+            return is_window_initialized_;
+        }
+
     private:
         static const context* s_pinnedCtxt;
 
@@ -502,5 +512,7 @@ namespace aten
         std::vector<std::shared_ptr<aten::texture>> textures_;
         std::vector<std::shared_ptr<aten::mat4>> matrices_;
         std::vector<std::shared_ptr<AT_NAME::Light>> lights_;
+
+        bool is_window_initialized_{ false };
     };
 }

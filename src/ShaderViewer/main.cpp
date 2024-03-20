@@ -38,7 +38,7 @@ static bool g_isMouseRBtnDown = false;
 static int32_t g_prevX = 0;
 static int32_t g_prevY = 0;
 
-void onRun(aten::window* window)
+bool onRun()
 {
     if (g_isCameraDirty) {
         g_camera.update();
@@ -112,6 +112,8 @@ void onRun(aten::window* window)
 
         AT_PRINTF("Take Screenshot[%s]\n", buffer);
     }
+
+    return true;
 }
 
 void onClose()
@@ -284,15 +286,24 @@ int32_t main(int32_t argc, char* argv[])
 
     aten::SetCurrentDirectoryFromExe();
 
-    aten::window::init(
-        WIDTH, HEIGHT,
-        TITLE,
+    auto wnd = std::make_shared<aten::window>();
+
+    auto id = wnd->Create(
+        WIDTH, HEIGHT, TITLE,
         onRun,
         onClose,
         onMouseBtn,
         onMouseMove,
         onMouseWheel,
         onKey);
+
+    if (id >= 0) {
+        g_ctxt.SetIsWindowInitialized(true);
+    }
+    else {
+        AT_ASSERT(false);
+        return 1;
+    }
 
     //loadObj("../../asset/sphere/sphere.obj", {}, g_objs);
     //loadObj("../../asset/cube/cube.obj", {}, g_objs);
@@ -344,9 +355,9 @@ int32_t main(int32_t argc, char* argv[])
         vfov,
         WIDTH, HEIGHT);
 
-    aten::window::run();
+    wnd->Run();
 
-    aten::window::terminate();
+    wnd->Terminate();
 
     return 1;
 }

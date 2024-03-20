@@ -206,11 +206,31 @@ namespace aten {
         int32_t Create(
             int32_t width, int32_t height, std::string_view title,
             OnRunFunc onRun,
-            OnCloseFunc _onClose = nullptr,
-            OnMouseBtnFunc _onMouseBtn = nullptr,
-            OnMouseMoveFunc _onMouseMove = nullptr,
-            OnMouseWheelFunc _onMouseWheel = nullptr,
-            OnKeyFunc _onKey = nullptr);
+            OnCloseFunc onClose = nullptr,
+            OnMouseBtnFunc onMouseBtn = nullptr,
+            OnMouseMoveFunc onMouseMove = nullptr,
+            OnMouseWheelFunc onMouseWheel = nullptr,
+            OnKeyFunc onKey = nullptr)
+        {
+            return CreateImpl(
+                width, height, title, false,
+                onRun, onClose, onMouseBtn, onMouseMove, onMouseWheel, onKey);
+        }
+
+        int32_t window::Create(
+            int32_t width, int32_t height, std::string_view title,
+            bool is_offscreen,
+            OnRunFunc onRun,
+            OnCloseFunc onClose = nullptr,
+            OnMouseBtnFunc onMouseBtn = nullptr,
+            OnMouseMoveFunc onMouseMove = nullptr,
+            OnMouseWheelFunc onMouseWheel = nullptr,
+            OnKeyFunc onKey = nullptr)
+        {
+            return CreateImpl(
+                width, height, title, is_offscreen,
+                onRun, onClose, onMouseBtn, onMouseMove, onMouseWheel, onKey);
+        }
 
         void Run();
 
@@ -223,6 +243,16 @@ namespace aten {
         bool IsInitialized() const;
 
     private:
+        int32_t CreateImpl(
+            int32_t width, int32_t height, std::string_view title,
+            bool is_offscreen,
+            OnRunFunc onRun,
+            OnCloseFunc _onClose = nullptr,
+            OnMouseBtnFunc _onMouseBtn = nullptr,
+            OnMouseMoveFunc _onMouseMove = nullptr,
+            OnMouseWheelFunc _onMouseWheel = nullptr,
+            OnKeyFunc _onKey = nullptr);
+
         std::shared_ptr<_detail::WindowImpl> FindWindowByNativeHandle(GLFWwindow* w);
         std::shared_ptr<_detail::WindowImpl> FindWindowById(int32_t id);
 

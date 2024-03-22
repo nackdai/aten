@@ -15,7 +15,7 @@ Ke 0.0000 0.0000 0.0000
 map_Ka sponza_thorn_diff.png
 map_Kd sponza_thorn_diff.png
 map_d sponza_thorn_mask.png
-map_bump sponza_thorn_bump.png
+map_bump sponza_thorn_nml.png
 
 newmtl vase_round
 Ns 10.0000
@@ -30,7 +30,7 @@ Ks 0.0100 0.0100 0.0100
 Ke 0.0000 0.0000 0.0000
 map_Ka vase_round.png
 map_Kd vase_round.png
-map_bump vase_round_bump.png
+map_bump vase_round_nml.png
 
 newmtl Material__57
 Ns 10.0000
@@ -60,7 +60,7 @@ Ks 0.0100 0.0100 0.0100
 Ke 0.0000 0.0000 0.0000
 map_Ka background.png
 map_Kd background.png
-map_bump background_bump.png
+map_bump background_nml.png
 
 
 newmtl bricks
@@ -77,7 +77,7 @@ Ke 0.0000 0.0000 0.0000
 map_Ks spnza_bricks_a_spec.png
 map_Ka spnza_bricks_a_diff.png
 map_Kd spnza_bricks_a_diff.png
-map_bump spnza_bricks_a_bump.png
+map_bump spnza_bricks_a_nml.png
 
 newmtl arch
 Ns 40.0000
@@ -120,7 +120,7 @@ Ks 0.0100 0.0100 0.0100
 Ke 0.0000 0.0000 0.0000
 map_Ka sponza_column_a_diff.png
 map_Kd sponza_column_a_diff.png
-map_bump sponza_column_a_bump.png
+map_bump sponza_column_a_nml.png
 
 newmtl floor
 Ns 70.0000
@@ -150,7 +150,7 @@ Ks 0.0100 0.0100 0.0100
 Ke 0.0000 0.0000 0.0000
 map_Ka sponza_column_c_diff.png
 map_Kd sponza_column_c_diff.png
-map_bump sponza_column_c_bump.png
+map_bump sponza_column_c_nml.png
 
 newmtl details
 Ns 10.0000
@@ -179,7 +179,7 @@ Ks 0.0000 0.0000 0.0000
 Ke 0.0000 0.0000 0.0000
 map_Ka sponza_column_b_diff.png
 map_Kd sponza_column_b_diff.png
-map_bump sponza_column_b_bump.png
+map_bump sponza_column_b_nml.png
 
 newmtl Material__47
 Ns 10.0000
@@ -305,7 +305,7 @@ Ke 0.000 0.000 0.000
 map_Ka chain_texture.png
 map_Kd chain_texture.png
 map_d chain_texture_mask.png
-map_bump chain_texture_bump.png
+map_bump chain_texture_nml.png
 
 newmtl vase_hanging
 Ns 50.0
@@ -335,7 +335,7 @@ Ks 0.0000 0.0000 0.0000
 Ke 0.0000 0.0000 0.0000
 map_Ka vase_dif.png
 map_Kd vase_dif.png
-map_bump vase_bump.png
+map_bump vase_nml.png
 
 newmtl Material__25
 Ns 10.0000
@@ -350,7 +350,7 @@ Ks 0.0100 0.0100 0.0100
 Ke 0.0000 0.0000 0.0000
 map_Ka lion.png
 map_Kd lion.png
-map_bump lion_bump.png
+map_bump lion_nml.png
 
 newmtl roof
 Ns 10.0000

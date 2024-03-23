@@ -201,28 +201,19 @@ namespace aten {
         return cmpMin(cmpMax(f, a), b);
     }
 
-    inline AT_HOST_DEVICE_API bool isValid(real f)
-    {
-#ifdef __CUDACC__
-        bool is_invalid = isnan(f);
-        if (!is_invalid) {
-            is_invalid = isinf(f);
-        }
-        return !is_invalid;
-#else
-        bool b = std::isnan(f);
-        if (!b) {
-            b = std::isinf(f);
-        }
-
-        return !b;
-#endif
-    }
-
     inline AT_HOST_DEVICE_API bool isInvalid(real f)
     {
-        bool b = !isValid(f);
-        return b;
+#ifdef __CUDACC__
+        bool is_invalid = isnan(f) || isinf(f);
+#else
+        bool is_invalid = std::isnan(f) || std::isinf(f);
+#endif
+        return is_invalid;
+    }
+
+    inline AT_HOST_DEVICE_API bool isValid(real f)
+    {
+        return !isInvalid(f);
     }
 
     inline int32_t clz(uint32_t x)

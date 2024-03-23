@@ -330,11 +330,7 @@ namespace aten {
 
     inline AT_HOST_DEVICE_API bool isInvalid(const vec3& v)
     {
-        bool b0 = isInvalid(v.x);
-        bool b1 = isInvalid(v.y);
-        bool b2 = isInvalid(v.z);
-
-        return b0 || b1 || b2;
+        return isInvalid(v.x) || isInvalid(v.y) || isInvalid(v.z);
     }
 
     template <class T>

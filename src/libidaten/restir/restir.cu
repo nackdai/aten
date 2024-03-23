@@ -179,7 +179,7 @@ __global__ void shade(
             ctxt,
             rec.p, orienting_normal,
             ray.dir,
-            rec.u, rec.v, albedo,
+            rec.u, rec.v,
             &paths.sampler[idx],
             bounce);
     }

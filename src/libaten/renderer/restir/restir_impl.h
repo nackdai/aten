@@ -14,7 +14,6 @@
 namespace AT_NAME {
 namespace restir {
     namespace _detail {
-        template <bool IsWithExternalAlbedo = false>
         inline AT_DEVICE_API float ComputeTargetPDF(
             const aten::LightSampleResult& lightsample,
             const aten::LightAttribute& light_attrib,
@@ -22,8 +21,7 @@ namespace restir {
             const aten::vec3& ray_dir,
             const aten::MaterialParameter& mtrl,
             const float u, const float v,
-            real pre_sampled_r,
-            const aten::vec4& albedo = aten::vec4())
+            real pre_sampled_r)
         {
             aten::vec3 nmlLight = lightsample.nml;
             aten::vec3 dirToLight = normalize(lightsample.dir);
@@ -37,13 +35,15 @@ namespace restir {
                 return 0.0f;
             }
 
-            aten::vec3 brdf;
-            if constexpr (IsWithExternalAlbedo) {
-                brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, normal, ray_dir, dirToLight, u, v, albedo, pre_sampled_r);
-            }
-            else {
-                brdf = AT_NAME::material::sampleBSDF(&mtrl, normal, ray_dir, dirToLight, u, v, pre_sampled_r);
-            }
+            // NOTE:
+            // Apply albedo at the final phase to compute pixel color.
+            // So, specify albedo color (1, 1, 1) temporarily.
+            auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(
+                &mtrl, normal,
+                ray_dir, dirToLight,
+                u, v,
+                aten::vec4(1.0f),
+                pre_sampled_r);
             brdf /= pdf;
 
             const auto geometry_term = light_attrib.isSingular || light_attrib.isInfinite
@@ -67,7 +67,6 @@ namespace restir {
         const aten::vec3& normal,
         const aten::vec3& ray_dir,
         float u, float v,
-        const aten::vec4& albedo,
         aten::sampler* sampler,
         real pre_sampled_r,
         int32_t lod = 0)
@@ -114,13 +113,12 @@ namespace restir {
             auto sampling_pdf = path_pdf * light_select_prob;
 
             // p_hat
-            auto target_pdf = _detail::ComputeTargetPDF<true>(
+            auto target_pdf = _detail::ComputeTargetPDF(
                 lightsample, light.attrib,
                 normal, ray_dir,
                 mtrl,
                 u, v,
-                pre_sampled_r,
-                albedo);
+                pre_sampled_r);
 
             // NOTE
             // Equation(5)
@@ -188,6 +186,23 @@ namespace restir {
             reservoirs[idx].W = 0.0f;
             reservoirs[idx].target_pdf_of_y = 0.0f;
             reservoirs[idx].y = -1;
+        }
+    }
+
+    namespace _detail {
+        inline AT_DEVICE_API bool IsAcceptableNeighbor(
+            const aten::MaterialParameter& mtrl,
+            const int32_t mesh_id,
+            const aten::vec3& normal,
+            const aten::MaterialParameter& neightbor_mtrl,
+            const int32_t neighbor_mesh_id,
+            const aten::vec3& neighbor_normal)
+        {
+            constexpr auto NormalThreshold = 0.95f;
+
+            return (mtrl.type == neightbor_mtrl.type)
+                && (mesh_id == neighbor_mesh_id)
+                && (dot(normal, neighbor_normal) >= NormalThreshold);
         }
     }
 
@@ -265,9 +280,9 @@ namespace restir {
 
                 // Check how close with neighbor pixel.
                 is_acceptable = is_valid_mtrl
-                    && (mtrl.type == neightbor_mtrl.type)
-                    && (mesh_id == neighbor_mesh_id)
-                    && (dot(normal, neighbor_normal) >= 0.95f);
+                    && _detail::IsAcceptableNeighbor(
+                        mtrl, mesh_id, normal,
+                        neightbor_mtrl, neighbor_mesh_id, neighbor_normal);
 
                 if (is_acceptable) {
                     const auto light_pos = neighbor_reservoir.y;
@@ -278,7 +293,7 @@ namespace restir {
 
                     // Compute target pdf at the center pixel with the output sample in neighor's reservoir.
                     // In this case, "the output sample in neighor's reservoir" mean the sampled light of the neighor pixel.
-                    const auto target_pdf = _detail::ComputeTargetPDF<false>(
+                    const auto target_pdf = _detail::ComputeTargetPDF(
                         lightsample,
                         light.attrib,
                         self_info.nml, self_info.wi,
@@ -361,6 +376,8 @@ namespace restir {
             candidate_target_pdf = reservoir.target_pdf_of_y;
         }
 
+        int32_t M_sum = combined_reservoir.M;
+
 #pragma unroll
         for (int32_t i = 0; i < AT_COUNTOF(offset_x); i++) {
             const int32_t xx = ix + offset_x[i];
@@ -392,9 +409,9 @@ namespace restir {
 
                     // Check how close with neighbor pixel.
                     is_acceptable = is_valid_mtrl
-                        && (mtrl.type == neightbor_mtrl.type)
-                        &&(mesh_id == neighbor_mesh_id)
-                        && (dot(self_info.nml, neighbor_normal) >= 0.95f);
+                        && _detail::IsAcceptableNeighbor(
+                            mtrl, mesh_id, normal,
+                            neightbor_mtrl, neighbor_mesh_id, neighbor_normal);
 
                     if (is_acceptable) {
                         const auto light_pos = neighbor_reservoir.y;
@@ -405,7 +422,7 @@ namespace restir {
 
                         // Compute target pdf at the center pixel with the output sample in neighor's reservoir.
                         // In this case, "the output sample in neighor's reservoir" mean the sampled light of the neighor pixel.
-                        const auto target_pdf = _detail::ComputeTargetPDF<false>(
+                        const auto target_pdf = _detail::ComputeTargetPDF(
                             lightsample,
                             light.attrib,
                             self_info.nml, self_info.wi,

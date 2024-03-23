@@ -165,9 +165,7 @@ namespace idaten
             if (StandardPT::initPath(width, height)) {
                 m_restir_infos.resize(width * height);
 
-                for (auto& r : m_reservoirs) {
-                    r.resize(width * height);
-                }
+                m_reservoirs.Init(width * height);
 
                 return true;
             }
@@ -215,25 +213,7 @@ namespace idaten
     protected:
         idaten::TypedCudaMemory<AT_NAME::ReSTIRInfo> m_restir_infos;
 
-        // NOTE
-        // temporal reuse で利用する previous reservoir は
-        // spatial reuse をする前のものでないといけない
-        // spatial reuse はあくまでも現在フレームに対して行われるもので
-        // 次フレームに影響を与えないようにする
-        // e.g.
-        //  - frame 1
-        //     cur:0
-        //     prev:N/A (最初なので temporal は skip)
-        //     spatial_dst:1
-        //     pos=0 -> pos=1(for next)
-        //  - frame 2
-        //     cur:1(=pos)
-        //     prev:0
-        //     spatial_dst:0
-        //     pos=1 -> pos=0(for next)
-        //     このとき prev は前フレームの cur となっている
-        std::array<idaten::TypedCudaMemory<AT_NAME::Reservoir>, 2> m_reservoirs;
-        int32_t m_curReservoirPos = 0;
+        AT_NAME::ReuseParams<idaten::TypedCudaMemory<AT_NAME::Reservoir>> m_reservoirs;
 
         aten::mat4 m_mtx_W2V;    // World - View.
         aten::mat4 m_mtx_V2C;    // View - Clip.

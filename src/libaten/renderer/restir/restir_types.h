@@ -86,34 +86,28 @@ namespace AT_NAME {
         aten::vec3 nml;             ///< Normal on point.
         int16_t mtrl_idx{ -1 };     ///< Index to material on point.
         bool is_voxel{ false };     ///< Whether material is treated as voxel.
-        uint8_t padding[3];
+        uint8_t padding;
 
-        aten::vec3 wi;  ///< Incoming ray direction.
-        float u;        ///< U for texture coordinate on point.
+        aten::vec3 wi;      ///< Incoming ray direction.
+        float u{ 0.0f };    ///< U for texture coordinate on point.
 
         aten::vec3 point_to_light;  ///< Direction between point and light without normalization.
-        float v;        ///< V for texture coordinate on point.
+        float v{ 0.0f };    ///< V for texture coordinate on point.
 
-        aten::vec3 p;           ///< Hit point.
-        float pre_sampled_r;    ///< Pre sampled random value for brdf calculation.
+        aten::vec3 p;                   ///< Hit point.
+        float pre_sampled_r{ 0.0f };    ///< Pre sampled random value for brdf calculation.
+
+        int32_t mesh_id{ -1 };  ///< Mesh id on point.
 
         AT_HOST_DEVICE_API void clear()
         {
             nml.x = nml.y = nml.z = 0.0f;
-
             is_voxel = false;
             mtrl_idx = -1;
-
             wi.x = wi.y = wi.z = 0.0f;
-
             u = v = 0.0f;
-
             pre_sampled_r = 0.0f;
-        }
-
-        AT_HOST_DEVICE_API bool isMtrlValid() const
-        {
-            return mtrl_idx >= 0;
+            mesh_id = -1;
         }
     };
 

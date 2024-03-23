@@ -137,6 +137,7 @@ __global__ void shade(
         restir_info.v = rec.v;
         restir_info.p = rec.p;
         restir_info.pre_sampled_r = pre_sampled_r;
+        restir_info.mesh_id = isect.meshid;
     }
 
     if (bounce == 0) {
@@ -151,7 +152,7 @@ __global__ void shade(
         pos = mtx_W2C.apply(pos);
 
         aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
-        aovTexclrMeshid[_idx] = make_float4(albedo.x, albedo.y, albedo.z, isect.mtrlid);
+        aovTexclrMeshid[_idx] = make_float4(albedo.x, albedo.y, albedo.z, isect.meshid);
     }
 
     // Implicit conection to light.

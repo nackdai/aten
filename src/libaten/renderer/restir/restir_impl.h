@@ -384,13 +384,11 @@ namespace restir {
                     neighbor_info.mtrl_idx,
                     neighbor_info.is_voxel);
 
-                const auto neighbor_mesh_id = static_cast<int32_t>(aov_albedo_meshid[neighbor_idx].w);
-
                 // Check how close with neighbor pixel.
                 is_acceptable = is_valid_mtrl
                     && _detail::IsAcceptableNeighbor(
                         mtrl, mesh_id, normal,
-                        neighbor_mtrl, neighbor_mesh_id, neighbor_normal);
+                        neighbor_mtrl, neighbor_info.mesh_id, neighbor_normal);
 
                 if (is_acceptable) {
                     const auto light_pos = neighbor_reservoir.y;

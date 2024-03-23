@@ -87,9 +87,9 @@ namespace idaten {
 
                     texDesc.normalizedCoords = 1;
                     texDesc.filterMode = cudaFilterModeLinear;
-                    texDesc.addressMode[0] = cudaAddressModeClamp;
-                    texDesc.addressMode[1] = cudaAddressModeClamp;
-                    texDesc.addressMode[2] = cudaAddressModeClamp;
+                    texDesc.addressMode[0] = cudaAddressModeWrap;
+                    texDesc.addressMode[1] = cudaAddressModeWrap;
+                    texDesc.addressMode[2] = cudaAddressModeWrap;
                     texDesc.readMode = cudaReadModeElementType;
                 }
 

@@ -378,28 +378,20 @@ namespace restir {
 
         constexpr int32_t offset_x[] = {
             -1,  0,  1,
-            -1,  1,
+            -1,  0,  1,
             -1,  0,  1,
         };
         constexpr int32_t offset_y[] = {
             -1, -1, -1,
-             0,  0,
+             0,  0,  0,
              1,  1,  1,
         };
 
         auto& combined_reservoir = dst_reservoirs[idx];
         combined_reservoir.clear();
 
-        const auto& reservoir = reservoirs[idx];
-
         float candidate_target_pdf = 0.0f;
-
-        if (reservoir.IsValid()) {
-            combined_reservoir = reservoir;
-            candidate_target_pdf = reservoir.target_pdf_of_y;
-        }
-
-        int32_t M_sum = combined_reservoir.M;
+        int32_t M_sum = 0;
 
 #pragma unroll
         for (int32_t i = 0; i < AT_COUNTOF(offset_x); i++) {
@@ -411,10 +403,10 @@ namespace restir {
 
             if (is_acceptable)
             {
-                aten::LightSampleResult lightsample;
-
                 auto neighbor_idx = getIdx(xx, yy, width);
                 const auto& neighbor_reservoir = reservoirs[neighbor_idx];
+
+                M_sum += neighbor_reservoir.M;
 
                 if (neighbor_reservoir.IsValid()) {
                     const auto& neighbor_info = infos[neighbor_idx];
@@ -441,6 +433,7 @@ namespace restir {
 
                         const auto& light = ctxt.lights[light_pos];
 
+                        aten::LightSampleResult lightsample;
                         AT_NAME::Light::sample(lightsample, light, ctxt, self_info.p, neighbor_normal, &sampler, 0);
 
                         // Compute target pdf at the center pixel with the output sample in neighor's reservoir.
@@ -463,11 +456,12 @@ namespace restir {
                         }
                     }
                 }
-                else {
-                    combined_reservoir.update(lightsample, -1, 0.0f, neighbor_reservoir.M, 0.0f);
-                }
             }
         }
+
+        // Use M in the following to compute reservior's W.
+        // So, we have to upadate before using M.
+        combined_reservoir.M = M_sum;
 
         if (candidate_target_pdf > 0.0f) {
             combined_reservoir.target_pdf_of_y = candidate_target_pdf;

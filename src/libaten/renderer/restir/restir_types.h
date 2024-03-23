@@ -38,7 +38,7 @@ namespace AT_NAME {
 
         /**
          * @brief Update content of reservoir.
-         * @param[in] light_sample
+         * @param[in] light_sample Sampled light.
          * @param[in] sample sample.
          * @param[in] weight Weight of sample.
          * @param[in] m Number of samples seen so far.
@@ -61,7 +61,7 @@ namespace AT_NAME {
 
         /**
          * @brief Update content of reservoir.
-         * @param[in] light_sample
+         * @param[in] light_sample Sampled light.
          * @param[in] sample sample.
          * @param[in] weight Weight of sample.
          * @param[in] u Ramdom value if sample is adopted.

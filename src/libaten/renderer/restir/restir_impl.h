@@ -310,7 +310,7 @@ namespace restir {
      * @param[in,out] combined_reservoir Reservoir to combine neighbors' one.
      * @param[in] self_info ReSTIR information of target pixel.
      * @param[in] prev_reservoirs Reservoirs of previous frame.
-     * @param[in] info ReSTIR informations.
+     * @param[in] prev_infos ReSTIR informations of previous frame.
      * @param[in] aov_albedo_meshid Buffer to store albedo color and mesh id.
      * @param[in] motion_detph_buffer Buffer to store motion vector and depth.
      */
@@ -323,7 +323,7 @@ namespace restir {
         AT_NAME::Reservoir& combined_reservoir,
         const AT_NAME::ReSTIRInfo& self_info,
         const aten::const_span<AT_NAME::Reservoir>& prev_reservoirs,
-        const aten::const_span<AT_NAME::ReSTIRInfo>& infos,
+        const aten::const_span<AT_NAME::ReSTIRInfo>& prev_infos,
         const aten::const_span<AT_NAME::_detail::v4>& aov_albedo_meshid,
         MotionDepthBufferType& motion_detph_buffer)
     {
@@ -373,7 +373,7 @@ namespace restir {
             auto m = std::min(neighbor_reservoir.M, maxM);
 
             if (neighbor_reservoir.IsValid()) {
-                const auto& neighbor_info = infos[neighbor_idx];
+                const auto& neighbor_info = prev_infos[neighbor_idx];
 
                 const auto& neighbor_normal = neighbor_info.nml;
 

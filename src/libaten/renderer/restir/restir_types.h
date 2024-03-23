@@ -116,4 +116,60 @@ namespace AT_NAME {
             return mtrl_idx >= 0;
         }
     };
+
+    template <class ParamContainer>
+    struct ReuseParams {
+        std::array<ParamContainer, 2> params_list;
+        int32_t curr_idx{ 0 };
+
+        void Init(size_t size)
+        {
+            for (auto& p : params_list) {
+                p.resize(size);
+            }
+        }
+
+        ParamContainer& GetParams(int32_t idx)
+        {
+            return params_list[idx];
+        }
+
+        int32_t GetCurrParamsIdx() const
+        {
+            return curr_idx;
+        }
+
+        int32_t GetPreviousFrameParamsIdxForTemporalReuse() const
+        {
+            return (curr_idx + 1) & 0x01;
+        }
+
+        int32_t GetDestinationParamsIdxForSpatialReuse() const
+        {
+            return (curr_idx + 1) & 0x01;
+        }
+
+        ParamContainer& GetCurrParams()
+        {
+            const auto curr_idx = GetCurrParamsIdx();
+            return params_list[curr_idx];
+        }
+
+        ParamContainer& GetPreviousFrameParamsForTemporalReuse()
+        {
+            const auto prev_idx = GetPreviousFrameParamsIdxForTemporalReuse();
+            return params_list[prev_idx];
+        }
+
+        ParamContainer& GetDestinationParamsForSpatialReuse()
+        {
+            const auto dst_idx = GetDestinationParamsIdxForSpatialReuse();
+            return params_list[dst_idx];
+        }
+
+        void Update()
+        {
+            curr_idx = (curr_idx + 1) & 0x01;
+        }
+    };
 }

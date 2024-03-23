@@ -322,7 +322,7 @@ namespace idaten
 
         initReSTIRParameters << < grid, block, 0, m_stream >> > (
             width, height,
-            m_reservoirs[m_curReservoirPos].data(),
+            m_reservoirs.GetCurrParams().data(),
             m_restir_infos.data());
 
         checkCudaKernel(initReSTIRParameters);
@@ -359,7 +359,7 @@ namespace idaten
         auto& hitcount = m_compaction.getCount();
 
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            m_reservoirs[m_curReservoirPos].data(),
+            m_reservoirs.GetCurrParams().data(),
             m_restir_infos.data(),
             aov_.normal_depth().data(),
             aov_.albedo_meshid().data(),
@@ -401,7 +401,7 @@ namespace idaten
             width, height,
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
-            m_reservoirs[m_curReservoirPos].data(),
+            m_reservoirs.GetCurrParams().data(),
             m_restir_infos.data(),
             m_shadowRays.data(),
             ctxt_host_.ctxt,
@@ -418,7 +418,7 @@ namespace idaten
             bounce);
 
         ComputePixelColor << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            m_reservoirs[target_idx].data(),
+            m_reservoirs.GetParams(target_idx).data(),
             m_restir_infos.data(),
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),

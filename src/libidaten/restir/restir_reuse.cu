@@ -129,6 +129,9 @@ namespace idaten {
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
+        const auto curr_reservoirs_idx = m_reservoirs.GetCurrParamsIdx();
+        const auto dst_reservoirs_idx = m_reservoirs.GetDestinationParamsIdxForSpatialReuse();
+
         if (bounce == 0) {
             // NOTE
             // temporal reuse で利用する previous reservoir は
@@ -148,11 +151,11 @@ namespace idaten {
             //     pos=1 -> pos=0(for next)
             //     このとき prev は前フレームの cur となっている
 
-            const auto cur_idx = m_curReservoirPos;
-            const auto prev_idx = (m_curReservoirPos + 1) & 0x01;
-            const auto dst_idx = (m_curReservoirPos + 1) & 0x01;
+            auto& cur_reservoirs = m_reservoirs.GetCurrParams();
+            auto& prev_reservoirs = m_reservoirs.GetPreviousFrameParamsForTemporalReuse();
+            auto& dst_reservoirs = m_reservoirs.GetDestinationParamsForSpatialReuse();
+            m_reservoirs.Update();
 
-            m_curReservoirPos = (m_curReservoirPos + 1) & 0x01;
             if (m_restirMode == ReSTIRMode::ReSTIR
                 || m_restirMode == ReSTIRMode::TemporalReuse) {
                 if (m_frame > 1) {
@@ -168,8 +171,8 @@ namespace idaten {
                         ctxt_host_.primparams.data(),
                         ctxt_host_.mtxparams.data(),
                         aov_.albedo_meshid().data(),
-                        m_reservoirs[cur_idx].data(),
-                        m_reservoirs[prev_idx].data(),
+                        cur_reservoirs.data(),
+                        prev_reservoirs.data(),
                         m_restir_infos.data(),
                         motionDepthBuffer,
                         width, height);
@@ -189,17 +192,17 @@ namespace idaten {
                     ctxt_host_.primparams.data(),
                     ctxt_host_.mtxparams.data(),
                     aov_.albedo_meshid().data(),
-                    m_reservoirs[cur_idx].data(),
-                    m_reservoirs[dst_idx].data(),
+                    cur_reservoirs.data(),
+                    dst_reservoirs.data(),
                     m_restir_infos.data(),
                     width, height);
 
                 checkCudaKernel(computeSpatialReuse);
 
-                return dst_idx;
+                return dst_reservoirs_idx;
             }
         }
 
-        return m_curReservoirPos;
+        return curr_reservoirs_idx;
     }
 }

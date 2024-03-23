@@ -33,6 +33,9 @@ namespace restir {
             const auto dist2 = aten::squared_length(lightsample.dir);
 
             auto pdf = AT_NAME::material::samplePDF(&mtrl, normal, ray_dir, dirToLight, u, v);
+            if (pdf == 0.0f) {
+                return 0.0f;
+            }
 
             aten::vec3 brdf;
             if constexpr (IsWithExternalAlbedo) {

@@ -334,24 +334,7 @@ namespace idaten
         int32_t sample,
         int32_t bounce, int32_t rrBounce)
     {
-        m_mtx_W2V.lookat(
-            m_cam.origin,
-            m_cam.center,
-            m_cam.up);
-
-        m_mtx_V2C.perspective(
-            m_cam.znear,
-            m_cam.zfar,
-            m_cam.vfov,
-            m_cam.aspect);
-
-        m_mtx_C2V = m_mtx_V2C;
-        m_mtx_C2V.invert();
-
-        m_mtx_V2W = m_mtx_W2V;
-        m_mtx_V2W.invert();
-
-        aten::mat4 mtx_W2C = m_mtx_V2C * m_mtx_W2V;
+        aten::mat4 mtx_W2C = mtxs_.GetW2C();
 
         dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);

@@ -92,6 +92,8 @@ namespace idaten
             width * height,
             1024);
 
+        mtxs_.Reset(m_cam);
+
         clearPath();
 
         onRender(
@@ -99,8 +101,6 @@ namespace idaten
             outputSurf);
 
         {
-            m_mtx_prev_W2V = m_mtx_W2V;
-
             pick(
                 m_pickedInfo.ix, m_pickedInfo.iy,
                 width, height);

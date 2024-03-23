@@ -4,6 +4,7 @@
 #include "math/mat4.h"
 #include "misc/tuple.h"
 #include "renderer/aov.h"
+#include "renderer/pathtracing/pt_params.h"
 
 namespace AT_NAME
 {
@@ -45,46 +46,6 @@ namespace AT_NAME
     };
 
     /**
-     * @brief Matrices for SVGF.
-     */
-    struct SVGFMtxPack {
-        aten::mat4 mtx_W2V;         ///< Matrix to convert from World coordinate to View cooridnate.
-        aten::mat4 mtx_V2C;         ///< Matrix to convert from View coordinate to Clip cooridnate.
-        aten::mat4 mtx_C2V;         ///< Matrix to convert from Clip coordinate to View cooridnate.
-
-        aten::mat4 mtx_V2W;         ///< Matrix to convert from View coordinate to World cooridnate.
-        aten::mat4 mtx_PrevW2V;     ///< Matrix to convert from World coordinate to View cooridnate in the previous frame.
-
-        /**
-         * @param Get a matrix to convert from World coordinate to Clip cooridnate.
-         *
-         * @return Matrix to convert from World coordinate to Clip cooridnate.
-         */
-        aten::mat4 GetW2C() const
-        {
-            return mtx_V2C * mtx_W2V;
-        }
-
-        /**
-         * @brief Reset the matrices with the specified camera parameter.
-         *
-         * @param[in] camera Camera parameter to reset the matrices.
-         */
-        void Reset(const aten::CameraParameter& camera)
-        {
-            mtx_PrevW2V = mtx_W2V;
-
-            camera::ComputeCameraMatrices(camera, mtx_W2V, mtx_V2C);
-
-            mtx_C2V = mtx_V2C;
-            mtx_C2V.invert();
-
-            mtx_V2W = mtx_W2V;
-            mtx_V2W.invert();
-        }
-    };
-
-    /**
      * @brief SVGF parameters to be managed in host.
      *
      * @tparam BufferContainer Buffer container type in host.
@@ -110,7 +71,7 @@ namespace AT_NAME
 
         int32_t atrous_iter_cnt{ 5 };   ///< Count of A-trous wavelet filter iterations.
 
-        SVGFMtxPack mtxs;   ///< Matrices for SVGF.
+        AT_NAME::MatricesForRendering mtxs;   ///< Matrices for rendering.
 
         /**
          * @brief Get AOV buffer of the current frame

@@ -182,4 +182,44 @@ namespace AT_NAME {
         aten::vec3 lightcontrib;
         uint32_t targetLightId;
     };
+
+    /**
+     * @brief Matrices for rendering.
+     */
+    struct MatricesForRendering {
+        aten::mat4 mtx_W2V;         ///< Matrix to convert from World coordinate to View cooridnate.
+        aten::mat4 mtx_V2C;         ///< Matrix to convert from View coordinate to Clip cooridnate.
+        aten::mat4 mtx_C2V;         ///< Matrix to convert from Clip coordinate to View cooridnate.
+
+        aten::mat4 mtx_V2W;         ///< Matrix to convert from View coordinate to World cooridnate.
+        aten::mat4 mtx_PrevW2V;     ///< Matrix to convert from World coordinate to View cooridnate in the previous frame.
+
+        /**
+         * @param Get a matrix to convert from World coordinate to Clip cooridnate.
+         *
+         * @return Matrix to convert from World coordinate to Clip cooridnate.
+         */
+        aten::mat4 GetW2C() const
+        {
+            return mtx_V2C * mtx_W2V;
+        }
+
+        /**
+         * @brief Reset the matrices with the specified camera parameter.
+         *
+         * @param[in] camera Camera parameter to reset the matrices.
+         */
+        void Reset(const aten::CameraParameter& camera)
+        {
+            mtx_PrevW2V = mtx_W2V;
+
+            camera::ComputeCameraMatrices(camera, mtx_W2V, mtx_V2C);
+
+            mtx_C2V = mtx_V2C;
+            mtx_C2V.invert();
+
+            mtx_V2W = mtx_W2V;
+            mtx_V2W.invert();
+        }
+    };
 }

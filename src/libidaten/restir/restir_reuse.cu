@@ -105,7 +105,6 @@ __global__ void computeSpatialReuse(
     const auto size = width * height;
 
     aten::const_span reservoirs_as_span(reservoirs, size);
-    aten::span dst_reservoirs_as_span(dst_reservoirs, size);
     aten::const_span resitr_infos(infos, size);
     aten::const_span aov_texclr_meshid(aovTexclrMeshid, size);
 
@@ -114,8 +113,8 @@ __global__ void computeSpatialReuse(
         width, height,
         ctxt,
         sampler,
+        dst_reservoirs[idx],
         reservoirs_as_span,
-        dst_reservoirs_as_span,
         resitr_infos,
         aov_texclr_meshid);
 }

@@ -386,7 +386,7 @@ namespace aten
             sampler, pre_sampled_r,
             rec.u, rec.v);
 
-        AT_NAME::PostProcessPathTrancing(
+        AT_NAME::PrepareForNextBounce(
             idx,
             rec, isBackfacing, russianProb,
             orienting_normal,

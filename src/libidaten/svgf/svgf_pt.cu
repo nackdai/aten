@@ -186,7 +186,7 @@ namespace svgf_kernel {
             rec.u, rec.v,
             albedo);
 
-        AT_NAME::PostProcessPathTrancing(
+        AT_NAME::PrepareForNextBounce(
             idx,
             rec, isBackfacing, russianProb,
             orienting_normal,

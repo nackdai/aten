@@ -538,7 +538,7 @@ namespace AT_NAME
         return russianProb;
     }
 
-    inline AT_DEVICE_API void PostProcessPathTrancing(
+    inline AT_DEVICE_API void PrepareForNextBounce(
         int32_t idx,
         const aten::hitrecord& rec,
         bool is_backfacing,
@@ -681,7 +681,7 @@ namespace AT_NAME
             sampler, pre_sampled_r,
             rec.u, rec.v);
 
-        AT_NAME::PostProcessPathTrancing(
+        AT_NAME::PrepareForNextBounce(
             idx,
             rec, isBackfacing, russianProb,
             orienting_normal,

@@ -16,6 +16,20 @@
 namespace AT_NAME {
 namespace restir {
     namespace _detail {
+        /**
+         * @brief Compute radiance.
+         *
+         * @param[in] lightsample Sampled light parameter.
+         * @param[in] light_attrib Attribute of sampled light.
+         * @param[in] normal Normal on point.
+         * @param[in] ray_dir Incoming ray direction.
+         * @param[in] mtrl Material on point.
+         * @param[in] u U for texture coordinate on point.
+         * @param[in] v V for texture coordinate on point.
+         * @param[in] albedo Albedo of material.
+         * @param[in] pre_sampled_r Pre sampled random value for brdf calculation.
+         * @return Radiance.
+         */
         inline AT_DEVICE_API auto ComputeRadiance(
             const aten::LightSampleResult& lightsample,
             const aten::LightAttribute& light_attrib,
@@ -48,6 +62,19 @@ namespace restir {
             return le;
         }
 
+        /**
+         * @brief Compute target PDF.
+         *
+         * @param[in] lightsample Sampled light parameter.
+         * @param[in] light_attrib Attribute of sampled light.
+         * @param[in] normal Normal on point.
+         * @param[in] ray_dir Incoming ray direction.
+         * @param[in] mtrl Material on point.
+         * @param[in] u U for texture coordinate on point.
+         * @param[in] v V for texture coordinate on point.
+         * @param[in] pre_sampled_r Pre sampled random value for brdf calculation.
+         * @return Target PDF.
+         */
         inline AT_DEVICE_API float ComputeTargetPDF(
             const aten::LightSampleResult& lightsample,
             const aten::LightAttribute& light_attrib,
@@ -82,8 +109,25 @@ namespace restir {
         }
     }
 
+    /**
+     * @brief Generate initial candidate.
+     *
+     * @tparam CONTEXT Type of scene context.
+     * @param[in,out] reservoir Reservoir to keep candidate.
+     * @param[in] mtrl Material on point.
+     * @param[in] ctxt Scene context.
+     * @param[in] org Point which ray hits.
+     * @param[in] normal Normal on point.
+     * @param[in] ray_dir Incoming ray direction.
+     * @param[in] u U for texture coordinate on point.
+     * @param[in] v V for texture coordinate on point.
+     * @param[in,out] sampler Sampler to sample random value.
+     * @param[in] pre_sampled_r Pre sampled random value for brdf calculation.
+     * @param[in] lod LoD level for IBL image.
+     * @return Output sample candidate.
+     */
     template<class CONTEXT>
-    inline AT_DEVICE_API int32_t GenerateInitialCandidates(
+    inline AT_DEVICE_API int32_t GenerateInitialCandidate(
         AT_NAME::Reservoir& reservoir,
         const aten::MaterialParameter& mtrl,
         const CONTEXT& ctxt,
@@ -108,6 +152,7 @@ namespace restir {
         real light_select_prob = real(1) / max_light_num;
 
         for (auto i = 0U; i < light_cnt; i++) {
+            // Sample light.
             const auto r_light = sampler->nextSample();
             const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
 
@@ -173,12 +218,23 @@ namespace restir {
         return reservoir.y;
     }
 
+    /**
+     * @brief Evaluate visibility from point to light.
+     *
+     * @tparam CONTEXT Type of scene context.
+     * @param[in] idx Index at pixel.
+     * @param[in] bounce Current ray bounce count.
+     * @param[in] ctxt Scene context.
+     * @param[in,out] reservoir Reservoir to keep candidate.
+     * @param[in,out] restir_info Storage to refer parameters for ReSTIR.
+     * @param[in,out] shadowRays
+     */
     template <class CONTEXT>
     inline AT_DEVICE_API void EvaluateVisibility(
         int32_t idx,
         int32_t bounce,
         AT_NAME::Path& paths,
-        CONTEXT& ctxt,
+        const CONTEXT& ctxt,
         AT_NAME::Reservoir& reservoir,
         AT_NAME::ReSTIRInfo& restir_info,
         aten::span<AT_NAME::ShadowRay>& shadowRays)
@@ -213,34 +269,63 @@ namespace restir {
     }
 
     namespace _detail {
+        /**
+         * @brief Check if neighbor pixel is acceptable.
+         *
+         * @param[in] mtrl Material of target pixel.
+         * @param[in] mesh_id Mesh id of target pixel.
+         * @param[in] normal Normal of target pixel.
+         * @param[in] neighbor_mtrl Material of neighbor pixel.
+         * @param[in] neighbor_mesh_id Mesh id of neighbor pixel.
+         * @param[in] neighbor_normal Normal of neighbor pixel.
+         * @return If neighbor pixel is acceptable, returns true. Otherwise, returns false.
+         */
         inline AT_DEVICE_API bool IsAcceptableNeighbor(
             const aten::MaterialParameter& mtrl,
             const int32_t mesh_id,
             const aten::vec3& normal,
-            const aten::MaterialParameter& neightbor_mtrl,
+            const aten::MaterialParameter& neighbor_mtrl,
             const int32_t neighbor_mesh_id,
             const aten::vec3& neighbor_normal)
         {
             constexpr auto NormalThreshold = 0.95f;
 
-            return (mtrl.type == neightbor_mtrl.type)
+            return (mtrl.type == neighbor_mtrl.type)
                 && (mesh_id == neighbor_mesh_id)
                 && (dot(normal, neighbor_normal) >= NormalThreshold);
         }
     }
 
-    template <class CONTEXT, class BufferForMotionDepth>
+    /**
+     * @brief Apply temporal reuse.
+     *
+     * @tparam CONTEXT Type of scene context.
+     * @tparam MotionDepthBufferType Type of motion depth buffer.
+     * @param[in] ix X coordinate of target pixel.
+     * @param[in] iy Y coordinate of target pixel.
+     * @param[in] width Screen width,
+     * @param[in] height Screen height,
+     * @param[in] ctxt Scene context.
+     * @param[in,out] sampler Sampler to sample random value.
+     * @param[in,out] combined_reservoir Reservoir to combine neighbors' one.
+     * @param[in] self_info ReSTIR information of target pixel.
+     * @param[in] prev_reservoirs Reservoirs of previous frame.
+     * @param[in] info ReSTIR informations.
+     * @param[in] aov_albedo_meshid Buffer to store albedo color and mesh id.
+     * @param[in] motion_detph_buffer Buffer to store motion vector and depth.
+     */
+    template <class CONTEXT, class MotionDepthBufferType>
     inline AT_DEVICE_API void ApplyTemporalReuse(
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,
-        CONTEXT& ctxt,
+        const CONTEXT& ctxt,
         aten::sampler& sampler,
         AT_NAME::Reservoir& combined_reservoir,
         const AT_NAME::ReSTIRInfo& self_info,
         const aten::const_span<AT_NAME::Reservoir>& prev_reservoirs,
         const aten::const_span<AT_NAME::ReSTIRInfo>& infos,
         const aten::const_span<AT_NAME::_detail::v4>& aov_albedo_meshid,
-        BufferForMotionDepth& motion_detph_buffer)
+        MotionDepthBufferType& motion_detph_buffer)
     {
         const auto idx = getIdx(ix, iy, width);
 
@@ -271,7 +356,7 @@ namespace restir {
             surf2Dread(&motion_depth, motion_detph_buffer, ix * sizeof(motion_depth), iy);
         }
 
-        // 前のフレームのスクリーン座標.
+        // Compute pixel in previous frame with motion vectior.
         int32_t px = (int32_t)(ix + motion_depth.x * width);
         int32_t py = (int32_t)(iy + motion_depth.y * height);
 
@@ -292,9 +377,9 @@ namespace restir {
 
                 const auto& neighbor_normal = neighbor_info.nml;
 
-                aten::MaterialParameter neightbor_mtrl;
+                aten::MaterialParameter neighbor_mtrl;
                 auto is_valid_mtrl = AT_NAME::FillMaterial(
-                    neightbor_mtrl,
+                    neighbor_mtrl,
                     ctxt,
                     neighbor_info.mtrl_idx,
                     neighbor_info.is_voxel);
@@ -305,7 +390,7 @@ namespace restir {
                 is_acceptable = is_valid_mtrl
                     && _detail::IsAcceptableNeighbor(
                         mtrl, mesh_id, normal,
-                        neightbor_mtrl, neighbor_mesh_id, neighbor_normal);
+                        neighbor_mtrl, neighbor_mesh_id, neighbor_normal);
 
                 if (is_acceptable) {
                     const auto light_pos = neighbor_reservoir.y;
@@ -350,14 +435,29 @@ namespace restir {
         }
     }
 
+    /**
+     * @brief Apply spatial reuse.
+     *
+     * @tparam CONTEXT Type of scene context.
+     * @param[in] ix X coordinate of target pixel.
+     * @param[in] iy Y coordinate of target pixel.
+     * @param[in] width Screen width,
+     * @param[in] height Screen height,
+     * @param[in] ctxt Scene context.
+     * @param[in,out] sampler Sampler to sample random value.
+     * @param[in,out] combined_reservoir Reservoir to combine neighbors' one.
+     * @param[in,out] reservoirs Reservoirs.
+     * @param[in] info ReSTIR informations.
+     * @param[in] aov_albedo_meshid Buffer to store albedo color and mesh id.
+     */
     template<class CONTEXT>
     inline AT_DEVICE_API void ApplySpatialReuse(
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,
         CONTEXT& ctxt,
         aten::sampler& sampler,
+        AT_NAME::Reservoir& combined_reservoir,
         const aten::const_span<AT_NAME::Reservoir>& reservoirs,
-        aten::span<AT_NAME::Reservoir>& dst_reservoirs,
         const aten::const_span<AT_NAME::ReSTIRInfo>& infos,
         const aten::const_span<AT_NAME::_detail::v4>& aov_albedo_meshid)
     {
@@ -387,7 +487,6 @@ namespace restir {
              1,  1,  1,
         };
 
-        auto& combined_reservoir = dst_reservoirs[idx];
         combined_reservoir.clear();
 
         float candidate_target_pdf = 0.0f;
@@ -413,9 +512,9 @@ namespace restir {
 
                     const auto& neighbor_normal = neighbor_info.nml;
 
-                    aten::MaterialParameter neightbor_mtrl;
+                    aten::MaterialParameter neighbor_mtrl;
                     auto is_valid_mtrl = AT_NAME::FillMaterial(
-                        neightbor_mtrl,
+                        neighbor_mtrl,
                         ctxt,
                         neighbor_info.mtrl_idx,
                         neighbor_info.is_voxel);
@@ -426,7 +525,7 @@ namespace restir {
                     is_acceptable = is_valid_mtrl
                         && _detail::IsAcceptableNeighbor(
                             mtrl, mesh_id, normal,
-                            neightbor_mtrl, neighbor_mesh_id, neighbor_normal);
+                            neighbor_mtrl, neighbor_mesh_id, neighbor_normal);
 
                     if (is_acceptable) {
                         const auto light_pos = neighbor_reservoir.y;
@@ -475,7 +574,17 @@ namespace restir {
         }
     }
 
-    inline AT_DEVICE_API std::optional<aten::vec3> ComputeContribution(
+    /**
+     * @brief Compute pixel color.
+     *
+     * @param[in] reservoir Reservoir to keep result of RIS.
+     * @param[in] restir_info ReSTIR information of target pixel.
+     * @param[in] mtrl Material of target pixel.
+     * @param[in] albedo_meshid Albedo color and mesh id of target pixel.
+     * @param[in] lights Lights of scene.
+     * @return If output sample in reservoir is valid, returns pixel color. Otherwise, returns nullopt.
+     */
+    inline AT_DEVICE_API std::optional<aten::vec3> ComputePixelColor(
         const Reservoir& reservoir,
         const ReSTIRInfo& restir_info,
         const aten::MaterialParameter& mtrl,

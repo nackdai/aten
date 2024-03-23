@@ -172,7 +172,7 @@ __global__ void shade(
     {
         auto& reservoir = reservoirs[idx];
 
-        AT_NAME::restir::GenerateInitialCandidates(
+        AT_NAME::restir::GenerateInitialCandidate(
             reservoir,
             shMtrls[threadIdx.x],
             ctxt,
@@ -322,14 +322,14 @@ __global__ void ComputePixelColor(
 
     aten::const_span lights_as_span(lights, lightnum);
 
-    auto contrib = AT_NAME::restir::ComputeContribution(
+    auto pixel_color = AT_NAME::restir::ComputePixelColor(
         reservoir, restir_info,
         shMtrls[threadIdx.x],
         aovTexclrMeshid[idx],
         lights_as_span);
-    if (contrib) {
-        const auto pixel_color = contrib.value() * paths.throughput[idx].throughput;
-        paths.contrib[idx].contrib += make_float3(pixel_color.x, pixel_color.y, pixel_color.z);
+    if (pixel_color) {
+        const auto result = pixel_color.value() * paths.throughput[idx].throughput;
+        paths.contrib[idx].contrib += make_float3(result.x, result.y, result.z);
     }
 }
 

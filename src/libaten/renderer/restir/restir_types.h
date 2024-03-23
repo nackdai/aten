@@ -79,20 +79,23 @@ namespace AT_NAME {
     // size of "bool" is expected as 1 byte.
     static_assert(sizeof(bool) == 1, "");
 
+    /**
+     * Storage to refer parameters several at various places for ReSTIR.
+     */
     struct ReSTIRInfo {
-        aten::vec3 nml;
-        int16_t mtrl_idx{ -1 };
-        bool is_voxel{ false };
+        aten::vec3 nml;             ///< Normal on point.
+        int16_t mtrl_idx{ -1 };     ///< Index to material on point.
+        bool is_voxel{ false };     ///< Whether material is treated as voxel.
         uint8_t padding[3];
 
-        aten::vec3 wi;
-        float u;
+        aten::vec3 wi;  ///< Incoming ray direction.
+        float u;        ///< U for texture coordinate on point.
 
-        aten::vec3 point_to_light;
-        float v;
+        aten::vec3 point_to_light;  ///< Direction between point and light without normalization.
+        float v;        ///< V for texture coordinate on point.
 
-        aten::vec3 p;
-        float pre_sampled_r;
+        aten::vec3 p;           ///< Hit point.
+        float pre_sampled_r;    ///< Pre sampled random value for brdf calculation.
 
         AT_HOST_DEVICE_API void clear()
         {

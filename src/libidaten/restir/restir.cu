@@ -132,7 +132,6 @@ __global__ void shade(
         restir_info.nml = orienting_normal;
         restir_info.is_voxel = rec.isVoxel;
         restir_info.mtrl_idx = rec.mtrlid;
-        restir_info.throughput = paths.throughput[idx].throughput;
         restir_info.wi = ray.dir;
         restir_info.u = rec.u;
         restir_info.v = rec.v;
@@ -173,7 +172,7 @@ __global__ void shade(
     {
         auto& reservoir = reservoirs[idx];
 
-        AT_NAME::restir::SampleLightByStreamingRIS(
+        AT_NAME::restir::GenerateInitialCandidates(
             reservoir,
             shMtrls[threadIdx.x],
             ctxt,
@@ -240,7 +239,7 @@ __global__ void EvaluateVisibility(
     int32_t* hitindices,
     int32_t* hitnum,
     idaten::Reservoir* reservoirs,
-    const idaten::ReSTIRInfo* __restrict__ restir_infos,
+    idaten::ReSTIRInfo* restir_infos,
     idaten::ShadowRay* shadowRays,
     idaten::context ctxt,
     const aten::ObjectParameter* __restrict__ shapes,
@@ -264,9 +263,6 @@ __global__ void EvaluateVisibility(
     idx = hitindices[idx];
 
     const auto size = width * height;
-
-    aten::span reservoirs_as_span(reservoirs, size);
-    aten::const_span resitr_infos_as_span(restir_infos, size);
     aten::span shadow_rays(shadowRays, size);
 
     AT_NAME::restir::EvaluateVisibility(
@@ -274,8 +270,8 @@ __global__ void EvaluateVisibility(
         bounce,
         paths,
         ctxt,
-        reservoirs_as_span,
-        resitr_infos_as_span,
+        reservoirs[idx],
+        restir_infos[idx],
         shadow_rays);
 }
 
@@ -330,7 +326,6 @@ __global__ void ComputePixelColor(
         reservoir, restir_info,
         shMtrls[threadIdx.x],
         aovTexclrMeshid[idx],
-        shadowRays[idx],
         lights_as_span);
     if (contrib) {
         const auto pixel_color = contrib.value() * paths.throughput[idx].throughput;

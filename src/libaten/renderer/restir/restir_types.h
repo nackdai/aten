@@ -88,7 +88,7 @@ namespace AT_NAME {
         aten::vec3 wi;
         float u;
 
-        aten::vec3 throughput;
+        aten::vec3 point_to_light;
         float v;
 
         aten::vec3 p;
@@ -102,7 +102,6 @@ namespace AT_NAME {
             mtrl_idx = -1;
 
             wi.x = wi.y = wi.z = 0.0f;
-            throughput.x = throughput.y = throughput.z = 0.0f;
 
             u = v = 0.0f;
 

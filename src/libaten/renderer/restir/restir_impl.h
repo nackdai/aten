@@ -83,7 +83,7 @@ namespace restir {
     }
 
     template<class CONTEXT>
-    inline AT_DEVICE_API int32_t SampleLightByStreamingRIS(
+    inline AT_DEVICE_API int32_t GenerateInitialCandidates(
         AT_NAME::Reservoir& reservoir,
         const aten::MaterialParameter& mtrl,
         const CONTEXT& ctxt,
@@ -179,21 +179,20 @@ namespace restir {
         int32_t bounce,
         AT_NAME::Path& paths,
         CONTEXT& ctxt,
-        aten::span<AT_NAME::Reservoir>& reservoirs,
-        const aten::const_span<AT_NAME::ReSTIRInfo>& restir_infos,
+        AT_NAME::Reservoir& reservoir,
+        AT_NAME::ReSTIRInfo& restir_info,
         aten::span<AT_NAME::ShadowRay>& shadowRays)
     {
         bool isHit = false;
 
-        const auto& reservoir = reservoirs[idx];
-
         if (reservoir.IsValid()) {
-            const auto& restir_info = restir_infos[idx];
 
             shadowRays[idx].rayorg = restir_info.p + AT_MATH_EPSILON * restir_info.nml;
             shadowRays[idx].raydir = reservoir.light_sample_.pos - shadowRays[idx].rayorg;
             shadowRays[idx].targetLightId = reservoir.y;
             shadowRays[idx].isActive = true;
+
+            restir_info.point_to_light = reservoir.light_sample_.pos - shadowRays[idx].rayorg;
 
             auto dist = length(shadowRays[idx].raydir);;
             shadowRays[idx].distToLight = dist;
@@ -206,10 +205,10 @@ namespace restir {
             // NOTE:
             // In the function to combine the streams of multiple reservoirs (Alg.4), M is used to compute sum of samples.
             // So, M should not be cleared.
-            reservoirs[idx].w_sum = 0.0f;
-            reservoirs[idx].W = 0.0f;
-            reservoirs[idx].target_pdf_of_y = 0.0f;
-            reservoirs[idx].y = -1;
+            reservoir.w_sum = 0.0f;
+            reservoir.W = 0.0f;
+            reservoir.target_pdf_of_y = 0.0f;
+            reservoir.y = -1;
         }
     }
 
@@ -487,7 +486,6 @@ namespace restir {
         const ReSTIRInfo& restir_info,
         const aten::MaterialParameter& mtrl,
         const AT_NAME::_detail::v4& albedo_meshid,
-        const AT_NAME::ShadowRay& shadow_ray,
         const aten::const_span<aten::LightParameter>& lights)
     {
         if (reservoir.IsValid()) {
@@ -497,13 +495,15 @@ namespace restir {
 
             const auto& light = lights[reservoir.y];
 
-            const auto& nmlLight = reservoir.light_sample_.nml;
-            const auto& dirToLight = shadow_ray.raydir;
-            const auto& distToLight = shadow_ray.distToLight;
+            const auto& nml_on_light = reservoir.light_sample_.nml;
 
-            const auto cosShadow = aten::abs(dot(orienting_normal, dirToLight));
-            const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
-            const auto dist2 = distToLight * distToLight;
+            auto point_to_light = restir_info.point_to_light;
+            const auto distance_to_light = length(point_to_light);
+            point_to_light /= distance_to_light;
+
+            const auto cosShadow = aten::abs(dot(orienting_normal, point_to_light));
+            const auto cosLight = aten::abs(dot(nml_on_light, -point_to_light));
+            const auto dist2 = distance_to_light * distance_to_light;
 
             // TODO
             // åvéZçœÇ›ÇÃalbedoÇó^Ç¶ÇƒÇ¢ÇÈÇΩÇﬂ

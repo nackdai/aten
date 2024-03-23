@@ -163,10 +163,9 @@ namespace idaten
             int32_t width, int32_t height) override final
         {
             if (StandardPT::initPath(width, height)) {
-                m_restir_infos.resize(width * height);
-
-                m_reservoirs.Init(width * height);
-
+                size_t size = width * height;
+                m_restir_infos.Init(size);
+                m_reservoirs.Init(size);
                 return true;
             }
 
@@ -191,7 +190,7 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t bounce);
 
-        int32_t computelReuse(
+        aten::tuple<int32_t, int32_t> ComputelReuse(
             int32_t width, int32_t height,
             int32_t bounce);
 
@@ -211,7 +210,7 @@ namespace idaten
         void setStream(cudaStream_t stream);
 
     protected:
-        idaten::TypedCudaMemory<AT_NAME::ReSTIRInfo> m_restir_infos;
+        AT_NAME::ReuseParams<idaten::TypedCudaMemory<AT_NAME::ReSTIRInfo>> m_restir_infos;
 
         AT_NAME::ReuseParams<idaten::TypedCudaMemory<AT_NAME::Reservoir>> m_reservoirs;
 

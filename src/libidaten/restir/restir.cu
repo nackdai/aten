@@ -323,7 +323,7 @@ namespace idaten
         initReSTIRParameters << < grid, block, 0, m_stream >> > (
             width, height,
             m_reservoirs.GetCurrParams().data(),
-            m_restir_infos.data());
+            m_restir_infos.GetCurrParams().data());
 
         checkCudaKernel(initReSTIRParameters);
     }
@@ -360,7 +360,7 @@ namespace idaten
 
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_reservoirs.GetCurrParams().data(),
-            m_restir_infos.data(),
+            m_restir_infos.GetCurrParams().data(),
             aov_.normal_depth().data(),
             aov_.albedo_meshid().data(),
             mtx_W2C,
@@ -402,7 +402,7 @@ namespace idaten
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
             m_reservoirs.GetCurrParams().data(),
-            m_restir_infos.data(),
+            m_restir_infos.GetCurrParams().data(),
             m_shadowRays.data(),
             ctxt_host_.ctxt,
             ctxt_host_.shapeparam.data(),
@@ -413,13 +413,14 @@ namespace idaten
 
         checkCudaKernel(EvaluateVisibility);
 
-        const auto target_idx = computelReuse(
-            width, height,
-            bounce);
+        int32_t target_reservoirs_idx{ 0 };
+        int32_t target_restir_infos_idx{ 0 };
+
+        aten::tie(target_reservoirs_idx, target_restir_infos_idx) = ComputelReuse(width, height, bounce);
 
         ComputePixelColor << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            m_reservoirs.GetParams(target_idx).data(),
-            m_restir_infos.data(),
+            m_reservoirs.GetParams(target_reservoirs_idx).data(),
+            m_restir_infos.GetParams(target_restir_infos_idx).data(),
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
             aov_.albedo_meshid().data(),

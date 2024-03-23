@@ -1243,16 +1243,16 @@ void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
     std::vector<std::shared_ptr<aten::PolygonObject>> objs;
 
     aten::ObjLoader::load(
-        objs, "../../asset/models/sponza/sponza.obj", ctxt,
+        objs, "../../asset/crytek_sponza/sponza.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
                 auto albedo_map = albedo.empty()
                     ? nullptr
-                    : aten::ImageLoader::load("../../asset/models/sponza/" + albedo, ctxt);
+                    : aten::ImageLoader::load("../../asset/crytek_sponza/" + albedo, ctxt);
                 auto nml_map = nml.empty()
                     ? nullptr
-                    : aten::ImageLoader::load("../../asset/models/sponza/" + nml, ctxt);
+                    : aten::ImageLoader::load("../../asset/crytek_sponza/" + nml, ctxt);
 
                 auto mtrl = CreateMaterial(ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
                 mtrl->setName(name.data());

@@ -176,7 +176,7 @@ __global__ void pickPixel(
 
 namespace idaten
 {
-    void ReSTIRPathTracing::onDisplayAOV(
+    void ReSTIRPathTracing::OnDisplayAOV(
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height)
     {

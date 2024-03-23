@@ -428,7 +428,7 @@ namespace aten
         paths.contrib[idx].contrib += paths.throughput[idx].throughput * misW * emit;
     }
 
-    void PathTracing::onRender(
+    void PathTracing::OnRender(
         const context& ctxt,
         Destination& dst,
         scene* scene,

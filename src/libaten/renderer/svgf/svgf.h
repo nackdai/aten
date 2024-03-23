@@ -22,7 +22,7 @@ namespace aten
         SVGFRenderer& operator=(const SVGFRenderer&) = delete;
         SVGFRenderer& operator=(SVGFRenderer&&) = delete;
 
-        virtual void onRender(
+        virtual void OnRender(
             const context& ctxt,
             Destination& dst,
             scene* scene,

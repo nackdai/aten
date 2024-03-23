@@ -15,7 +15,7 @@ namespace aten
         AORenderer() {}
         ~AORenderer() {}
 
-        virtual void onRender(
+        virtual void OnRender(
             const context& ctxt,
             Destination& dst,
             scene* scene,

@@ -49,7 +49,7 @@ namespace idaten
         aov_.traverse([&width, &height](auto& buffer) { buffer.resize(width * height); });
     }
 
-    void ReSTIRPathTracing::setGBuffer(
+    void ReSTIRPathTracing::SetGBuffer(
         GLuint gltexGbuffer,
         GLuint gltexMotionDepthbuffer)
     {
@@ -80,7 +80,7 @@ namespace idaten
 
         m_shadowRays.resize(width * height);
 
-        initPath(width, height);
+        InitPath(width, height);
 
         CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
         auto outputSurf = m_glimg.bind();
@@ -96,7 +96,7 @@ namespace idaten
 
         clearPath();
 
-        onRender(
+        OnRender(
             width, height, maxSamples, maxBounce,
             outputSurf);
 
@@ -111,7 +111,7 @@ namespace idaten
         }
     }
 
-    void ReSTIRPathTracing::onRender(
+    void ReSTIRPathTracing::OnRender(
         int32_t width, int32_t height,
         int32_t maxSamples,
         int32_t maxBounce,
@@ -136,7 +136,7 @@ namespace idaten
                 i, maxBounce,
                 seed);
 
-            initReSTIR(width, height);
+            InitReSTIR(width, height);
 
             int32_t bounce = 0;
 
@@ -155,7 +155,7 @@ namespace idaten
                 //AT_PRINTF("%d\n", hitcount);
 
                 if (is_restir && bounce == 0) {
-                    onShadeReSTIR(
+                    OnShadeReSTIR(
                         outputSurf,
                         width, height,
                         i,
@@ -177,16 +177,16 @@ namespace idaten
             onGather(outputSurf, width, height, maxSamples);
         }
         else if (m_mode == Mode::AOVar) {
-            onDisplayAOV(outputSurf, width, height);
+            OnDisplayAOV(outputSurf, width, height);
         }
         else {
             AT_ASSERT(false);
         }
     }
 
-    void ReSTIRPathTracing::setStream(cudaStream_t stream)
+    void ReSTIRPathTracing::SetStream(cudaStream_t stream)
     {
         m_stream = stream;
-        m_compaction.setStream(stream);
+        m_compaction.SetStream(stream);
     }
 }

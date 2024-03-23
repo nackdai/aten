@@ -253,10 +253,10 @@ bool onRun()
             g_tracer.reset();
         }
 
-        bool isProgressive = g_tracer.isEnableProgressive();
+        bool isProgressive = g_tracer.IsEnableProgressive();
 
         if (ImGui::Checkbox("Progressive", &isProgressive)) {
-            g_tracer.setEnableProgressive(isProgressive);
+            g_tracer.SetEnableProgressive(isProgressive);
             g_tracer.reset();
         }
 

@@ -183,7 +183,7 @@ bool onRun()
 
         if (ImGui::Combo("mode", (int32_t *)&g_curMode, items, AT_COUNTOF(items)))
         {
-            g_tracer.setMode(g_curMode);
+            g_tracer.SetMode(g_curMode);
         }
 
         if (g_curMode == idaten::ReSTIRPathTracing::Mode::ReSTIR)
@@ -192,7 +192,7 @@ bool onRun()
 
             if (ImGui::Combo("restir mode", (int32_t *)&g_curReSTIRMode, restir_items, AT_COUNTOF(restir_items)))
             {
-                g_tracer.setReSTIRMode(g_curReSTIRMode);
+                g_tracer.SetReSTIRMode(g_curReSTIRMode);
             }
         }
 
@@ -202,13 +202,13 @@ bool onRun()
 
             if (ImGui::Combo("aov", (int32_t *)&g_curAOVMode, aovitems, AT_COUNTOF(aovitems)))
             {
-                g_tracer.setAOVMode(g_curAOVMode);
+                g_tracer.SetAOVMode(g_curAOVMode);
             }
         }
 
         if (ImGui::Checkbox("Progressive", &g_enableProgressive))
         {
-            g_tracer.setEnableProgressive(g_enableProgressive);
+            g_tracer.SetEnableProgressive(g_enableProgressive);
         }
 
 #if 0
@@ -228,9 +228,9 @@ bool onRun()
         ImGui::Checkbox("Show AABB", &g_showAABB);
 
 #if 0
-        bool canSSRTHitTest = g_tracer.canSSRTHitTest();
-        if (ImGui::Checkbox("Can SSRT Hit", &canSSRTHitTest)) {
-            g_tracer.setCanSSRTHitTest(canSSRTHitTest);
+        bool CanSSRTHitTest = g_tracer.CanSSRTHitTest();
+        if (ImGui::Checkbox("Can SSRT Hit", &CanSSRTHitTest)) {
+            g_tracer.SetCanSSRTHitTest(CanSSRTHitTest);
         }
 #endif
 
@@ -242,7 +242,7 @@ bool onRun()
     }
 
     idaten::ReSTIRPathTracing::PickedInfo info;
-    auto isPicked = g_tracer.getPickedPixelInfo(info);
+    auto isPicked = g_tracer.GetPickedPixelInfo(info);
     if (isPicked)
     {
         AT_PRINTF("[%d, %d]\n", info.ix, info.iy);
@@ -277,7 +277,7 @@ void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 
         if (g_pickPixel)
         {
-            g_tracer.willPickPixel(x, y);
+            g_tracer.WillPickPixel(x, y);
             g_pickPixel = false;
         }
     }
@@ -541,13 +541,13 @@ int32_t main()
             tex,
             idaten::EnvmapResource());
 
-        g_tracer.setGBuffer(
+        g_tracer.SetGBuffer(
             g_fbo.GetGLTextureHandle(0),
             g_fbo.GetGLTextureHandle(1));
     }
 
-    g_tracer.setMode((idaten::ReSTIRPathTracing::Mode)g_curMode);
-    g_tracer.setAOVMode((idaten::ReSTIRPathTracing::AOVMode)g_curAOVMode);
+    g_tracer.SetMode((idaten::ReSTIRPathTracing::Mode)g_curMode);
+    g_tracer.SetAOVMode((idaten::ReSTIRPathTracing::AOVMode)g_curAOVMode);
 
     wnd->Run();
 

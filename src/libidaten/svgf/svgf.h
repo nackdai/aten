@@ -57,15 +57,15 @@ namespace idaten
             const std::vector<TextureResource>& texs,
             const EnvmapResource& envmapRsc) override;
 
-        void setGBuffer(
+        void SetGBuffer(
             GLuint gltexGbuffer,
             GLuint gltexMotionDepthbuffer);
 
-        Mode getMode() const
+        Mode GetMode() const
         {
             return m_mode;
         }
-        void setMode(Mode mode)
+        void SetMode(Mode mode)
         {
             auto prev = m_mode;
             m_mode = mode;
@@ -74,11 +74,11 @@ namespace idaten
             }
         }
 
-        AT_NAME::SVGFAovMode getAOVMode() const
+        AT_NAME::SVGFAovMode GetAOVMode() const
         {
             return m_aovMode;
         }
-        void setAOVMode(AT_NAME::SVGFAovMode mode)
+        void SetAOVMode(AT_NAME::SVGFAovMode mode)
         {
             m_aovMode = mode;
         }
@@ -89,14 +89,14 @@ namespace idaten
             params_.curr_aov_pos = 0;
         }
 
-        void willPickPixel(int32_t ix, int32_t iy)
+        void WillPickPixel(int32_t ix, int32_t iy)
         {
             m_willPicklPixel = true;
             m_pickedInfo.ix = ix;
             m_pickedInfo.iy = iy;
         }
 
-        bool getPickedPixelInfo(PickedInfo& ret)
+        bool GetPickedPixelInfo(PickedInfo& ret)
         {
             bool isValid = (m_pickedInfo.ix >= 0);
 
@@ -126,12 +126,12 @@ namespace idaten
             m_nmlThresholdTF = aten::clamp(th, 0.0f, 1.0f);
         }
 
-        bool canSSRTHitTest() const
+        bool CanSSRTHitTest() const
         {
             return m_canSSRTHitTest;
         }
 
-        void setCanSSRTHitTest(bool f)
+        void SetCanSSRTHitTest(bool f)
         {
             m_canSSRTHitTest = f;
         }
@@ -146,7 +146,7 @@ namespace idaten
         }
 
     protected:
-        void onRender(
+        void OnRender(
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce,
@@ -205,7 +205,7 @@ namespace idaten
 
         void onCopyFromTmpBufferToAov(int32_t width, int32_t height);
 
-        void onDisplayAOV(
+        void OnDisplayAOV(
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height);
 
@@ -213,12 +213,12 @@ namespace idaten
             int32_t ix, int32_t iy,
             int32_t width, int32_t height);
 
-        bool isFirstFrame() const
+        bool IsFirstFrame() const
         {
             return (m_frame == 1);
         }
 
-        void setStream(cudaStream_t stream);
+        void SetStream(cudaStream_t stream);
 
     protected:
         AT_NAME::SVGFParams<idaten::TypedCudaMemory<float4>, idaten::CudaGLSurface> params_;

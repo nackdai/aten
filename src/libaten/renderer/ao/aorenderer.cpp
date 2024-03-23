@@ -50,7 +50,7 @@ namespace aten
         }
     }
 
-    void AORenderer::onRender(
+    void AORenderer::OnRender(
         const context& ctxt,
         Destination& dst,
         scene* scene,

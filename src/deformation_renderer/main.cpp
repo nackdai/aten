@@ -318,14 +318,14 @@ bool onRun()
         static const char* items[] = { "SVGF", "TF", "PT", "VAR", "AOV" };
 
         if (ImGui::Combo("mode", &g_curMode, items, AT_COUNTOF(items))) {
-            g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
+            g_tracer.SetMode((idaten::SVGFPathTracing::Mode)g_curMode);
         }
 
         if (g_curMode == idaten::SVGFPathTracing::Mode::AOVar) {
             static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion", "ObjId" };
 
             if (ImGui::Combo("aov", &g_curAOVMode, aovitems, AT_COUNTOF(aovitems))) {
-                g_tracer.setAOVMode((aten::SVGFAovMode)g_curAOVMode);
+                g_tracer.SetAOVMode((aten::SVGFAovMode)g_curAOVMode);
             }
         }
         else if (g_curMode == idaten::SVGFPathTracing::Mode::SVGF) {
@@ -355,7 +355,7 @@ bool onRun()
 
 #ifdef ENABLE_SVGF
     idaten::SVGFPathTracing::PickedInfo info;
-    auto isPicked = g_tracer.getPickedPixelInfo(info);
+    auto isPicked = g_tracer.GetPickedPixelInfo(info);
     if (isPicked) {
         AT_PRINTF("[%d, %d]\n", info.ix, info.iy);
         AT_PRINTF("  nml[%f, %f, %f]\n", info.normal.x, info.normal.y, info.normal.z);
@@ -390,7 +390,7 @@ void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 
 #ifdef ENABLE_SVGF
         if (g_pickPixel) {
-            g_tracer.willPickPixel(x, y);
+            g_tracer.WillPickPixel(x, y);
             g_pickPixel = false;
         }
 #endif
@@ -720,7 +720,7 @@ int32_t main()
         auto d = aabb.getDiagonalLenght();
         g_tracer.setHitDistanceLimit(d * 0.25f);
 
-        g_tracer.setGBuffer(
+        g_tracer.SetGBuffer(
             g_fbo.GetGLTextureHandle(0),
             g_fbo.GetGLTextureHandle(1));
 #endif
@@ -781,9 +781,9 @@ int32_t main()
     }
 
 #ifdef ENABLE_SVGF
-    g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
-    g_tracer.setAOVMode((aten::SVGFAovMode)g_curAOVMode);
-    //g_tracer.setCanSSRTHitTest(false);
+    g_tracer.SetMode((idaten::SVGFPathTracing::Mode)g_curMode);
+    g_tracer.SetAOVMode((aten::SVGFAovMode)g_curAOVMode);
+    //g_tracer.SetCanSSRTHitTest(false);
 #endif
 
     wnd->Run();

@@ -71,7 +71,7 @@ namespace idaten {
         m_glimg.map();
         auto outputSurf = m_glimg.bind();
 
-        initPath(width, height);
+        InitPath(width, height);
         clearPath();
 
         static const int32_t rrBounce = 3;

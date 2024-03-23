@@ -456,7 +456,7 @@ namespace aten
         fbo.SaveToBuffer(motion_depth_buffer, 1);
     }
 
-    void SVGFRenderer::onRender(
+    void SVGFRenderer::OnRender(
         const context& ctxt,
         Destination& dst,
         scene* scene,

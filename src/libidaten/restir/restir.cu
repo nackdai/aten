@@ -313,7 +313,7 @@ __global__ void ComputePixelColor(
 
 namespace idaten
 {
-    void ReSTIRPathTracing::initReSTIR(int32_t width, int32_t height)
+    void ReSTIRPathTracing::InitReSTIR(int32_t width, int32_t height)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
@@ -328,7 +328,7 @@ namespace idaten
         checkCudaKernel(initReSTIRParameters);
     }
 
-    void ReSTIRPathTracing::onShadeReSTIR(
+    void ReSTIRPathTracing::OnShadeReSTIR(
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height,
         int32_t sample,
@@ -365,12 +365,12 @@ namespace idaten
 
         checkCudaKernel(shade);
 
-        onShadeByShadowRayReSTIR(
+        OnShadeByShadowRayReSTIR(
             width, height,
             bounce);
     }
 
-    void ReSTIRPathTracing::onShadeByShadowRayReSTIR(
+    void ReSTIRPathTracing::OnShadeByShadowRayReSTIR(
         int32_t width, int32_t height,
         int32_t bounce)
     {

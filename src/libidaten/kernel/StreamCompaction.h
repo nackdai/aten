@@ -23,7 +23,7 @@ namespace idaten {
 
         idaten::TypedCudaMemory<int32_t>& getCount();
 
-        void setStream(cudaStream_t stream)
+        void SetStream(cudaStream_t stream)
         {
             m_stream = stream;
         }

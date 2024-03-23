@@ -55,7 +55,7 @@ namespace idaten {
             m_random.writeFromHostToDeviceByNum(&r[0], width * height);
         }
 
-        virtual bool initPath(
+        virtual bool InitPath(
             int32_t width, int32_t height);
 
         virtual void clearPath();

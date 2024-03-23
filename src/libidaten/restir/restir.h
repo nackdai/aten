@@ -82,15 +82,15 @@ namespace idaten
             const std::vector<TextureResource>& texs,
             const EnvmapResource& envmapRsc) override;
 
-        void setGBuffer(
+        void SetGBuffer(
             GLuint gltexGbuffer,
             GLuint gltexMotionDepthbuffer);
 
-        Mode getMode() const
+        Mode GetMode() const
         {
             return m_mode;
         }
-        void setMode(Mode mode)
+        void SetMode(Mode mode)
         {
             auto prev = m_mode;
             m_mode = mode;
@@ -99,11 +99,11 @@ namespace idaten
             }
         }
 
-        ReSTIRMode getReSTIRMode() const
+        ReSTIRMode GetReSTIRMode() const
         {
             return m_restirMode;
         }
-        void setReSTIRMode(ReSTIRMode mode)
+        void SetReSTIRMode(ReSTIRMode mode)
         {
             const auto prev = m_restirMode;
             m_restirMode = mode;
@@ -112,23 +112,23 @@ namespace idaten
             }
         }
 
-        AOVMode getAOVMode() const
+        AOVMode GetAOVMode() const
         {
             return m_aovMode;
         }
-        void setAOVMode(AOVMode mode)
+        void SetAOVMode(AOVMode mode)
         {
             m_aovMode = mode;
         }
 
-        void willPickPixel(int32_t ix, int32_t iy)
+        void WillPickPixel(int32_t ix, int32_t iy)
         {
             m_willPicklPixel = true;
             m_pickedInfo.ix = ix;
             m_pickedInfo.iy = iy;
         }
 
-        bool getPickedPixelInfo(PickedInfo& ret)
+        bool GetPickedPixelInfo(PickedInfo& ret)
         {
             bool isValid = (m_pickedInfo.ix >= 0);
 
@@ -140,30 +140,30 @@ namespace idaten
             return isValid;
         }
 
-        bool canSSRTHitTest() const
+        bool CanSSRTHitTest() const
         {
             return m_canSSRTHitTest;
         }
 
-        void setCanSSRTHitTest(bool f)
+        void SetCanSSRTHitTest(bool f)
         {
             m_canSSRTHitTest = f;
         }
 
-        bool isEnableProgressive() const
+        bool IsEnableProgressive() const
         {
             return m_enableProgressive;
         }
-        void setEnableProgressive(bool b)
+        void SetEnableProgressive(bool b)
         {
             m_enableProgressive = b;
         }
 
     protected:
-        virtual bool initPath(
+        virtual bool InitPath(
             int32_t width, int32_t height) override final
         {
-            if (StandardPT::initPath(width, height)) {
+            if (StandardPT::InitPath(width, height)) {
                 size_t size = width * height;
                 m_restir_infos.Init(size);
                 m_reservoirs.Init(size);
@@ -173,21 +173,21 @@ namespace idaten
             return false;
         }
 
-        void initReSTIR(int32_t width, int32_t height);
+        void InitReSTIR(int32_t width, int32_t height);
 
-        void onRender(
+        void OnRender(
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce,
             cudaSurfaceObject_t outputSurf);
 
-        void onShadeReSTIR(
+        void OnShadeReSTIR(
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height,
             int32_t sample,
             int32_t bounce, int32_t rrBounce);
 
-        void onShadeByShadowRayReSTIR(
+        void OnShadeByShadowRayReSTIR(
             int32_t width, int32_t height,
             int32_t bounce);
 
@@ -195,7 +195,7 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t bounce);
 
-        void onDisplayAOV(
+        void OnDisplayAOV(
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height);
 
@@ -203,12 +203,12 @@ namespace idaten
             int32_t ix, int32_t iy,
             int32_t width, int32_t height);
 
-        bool isFirstFrame() const
+        bool IsFirstFrame() const
         {
             return (m_frame == 1);
         }
 
-        void setStream(cudaStream_t stream);
+        void SetStream(cudaStream_t stream);
 
     protected:
         AT_NAME::ReuseParams<idaten::TypedCudaMemory<AT_NAME::ReSTIRInfo>> m_restir_infos;

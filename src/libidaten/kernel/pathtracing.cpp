@@ -94,7 +94,7 @@ namespace idaten
 
         m_shadowRays.resize(width * height);
 
-        initPath(width, height);
+        InitPath(width, height);
 
         CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
         auto outputSurf = m_glimg.bind();
@@ -108,14 +108,14 @@ namespace idaten
 
         clearPath();
 
-        onRender(
+        OnRender(
             width, height, maxSamples, maxBounce,
             outputSurf);
 
         m_frame++;
     }
 
-    void PathTracing::onRender(
+    void PathTracing::OnRender(
         int32_t width, int32_t height,
         int32_t maxSamples,
         int32_t maxBounce,
@@ -174,9 +174,9 @@ namespace idaten
         }
     }
 
-    void PathTracing::setStream(cudaStream_t stream)
+    void PathTracing::SetStream(cudaStream_t stream)
     {
         m_stream = stream;
-        m_compaction.setStream(stream);
+        m_compaction.SetStream(stream);
     }
 }

@@ -231,7 +231,7 @@ bool onRun()
 
         if (ImGui::Checkbox("Progressive", &g_enableProgressive))
         {
-            g_tracer.setEnableProgressive(g_enableProgressive);
+            g_tracer.SetEnableProgressive(g_enableProgressive);
         }
 
         ImGui::Checkbox("Show AABB", &g_showAABB);

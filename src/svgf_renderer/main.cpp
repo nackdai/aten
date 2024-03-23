@@ -244,7 +244,7 @@ bool onRun()
 
         if (ImGui::Combo("mode", &g_curMode, items, AT_COUNTOF(items)))
         {
-            g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
+            g_tracer.SetMode((idaten::SVGFPathTracing::Mode)g_curMode);
         }
 
         if (g_curMode == idaten::SVGFPathTracing::Mode::AOVar)
@@ -253,7 +253,7 @@ bool onRun()
 
             if (ImGui::Combo("aov", &g_curAOVMode, aovitems, AT_COUNTOF(aovitems)))
             {
-                g_tracer.setAOVMode((AT_NAME::SVGFAovMode)g_curAOVMode);
+                g_tracer.SetAOVMode((AT_NAME::SVGFAovMode)g_curAOVMode);
             }
         }
 
@@ -272,9 +272,9 @@ bool onRun()
         ImGui::Checkbox("Show AABB", &g_showAABB);
 
 #if 0
-        bool canSSRTHitTest = g_tracer.canSSRTHitTest();
-        if (ImGui::Checkbox("Can SSRT Hit", &canSSRTHitTest)) {
-            g_tracer.setCanSSRTHitTest(canSSRTHitTest);
+        bool CanSSRTHitTest = g_tracer.CanSSRTHitTest();
+        if (ImGui::Checkbox("Can SSRT Hit", &CanSSRTHitTest)) {
+            g_tracer.SetCanSSRTHitTest(CanSSRTHitTest);
         }
 #endif
 
@@ -292,7 +292,7 @@ bool onRun()
     }
 
     idaten::SVGFPathTracing::PickedInfo info;
-    auto isPicked = g_tracer.getPickedPixelInfo(info);
+    auto isPicked = g_tracer.GetPickedPixelInfo(info);
     if (isPicked)
     {
         AT_PRINTF("[%d, %d]\n", info.ix, info.iy);
@@ -327,7 +327,7 @@ void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 
         if (g_pickPixel)
         {
-            g_tracer.willPickPixel(x, y);
+            g_tracer.WillPickPixel(x, y);
             g_pickPixel = false;
         }
     }
@@ -609,13 +609,13 @@ int32_t main()
             idaten::EnvmapResource());
 #endif
 
-        g_tracer.setGBuffer(
+        g_tracer.SetGBuffer(
             g_fbo.GetGLTextureHandle(0),
             g_fbo.GetGLTextureHandle(1));
     }
 
-    g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
-    g_tracer.setAOVMode((AT_NAME::SVGFAovMode)g_curAOVMode);
+    g_tracer.SetMode((idaten::SVGFPathTracing::Mode)g_curMode);
+    g_tracer.SetAOVMode((AT_NAME::SVGFAovMode)g_curAOVMode);
 
     wnd->Run();
 

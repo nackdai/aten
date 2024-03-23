@@ -49,7 +49,7 @@ namespace idaten
         params_.InitBuffers(width, height);
     }
 
-    void SVGFPathTracing::setGBuffer(
+    void SVGFPathTracing::SetGBuffer(
         GLuint gltexGbuffer,
         GLuint gltexMotionDepthbuffer)
     {
@@ -80,7 +80,7 @@ namespace idaten
 
         m_shadowRays.resize(width * height);
 
-        initPath(width, height);
+        InitPath(width, height);
 
         CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
         auto outputSurf = m_glimg.bind();
@@ -96,7 +96,7 @@ namespace idaten
 
         clearPath();
 
-        onRender(
+        OnRender(
             width, height, maxSamples, maxBounce,
             outputSurf);
 
@@ -124,7 +124,7 @@ namespace idaten
         }
     }
 
-    void SVGFPathTracing::onRender(
+    void SVGFPathTracing::OnRender(
         int32_t width, int32_t height,
         int32_t maxSamples,
         int32_t maxBounce,
@@ -177,7 +177,7 @@ namespace idaten
             onGather(outputSurf, width, height, maxSamples);
         }
         else if (m_mode == Mode::AOVar) {
-            onDisplayAOV(outputSurf, width, height);
+            OnDisplayAOV(outputSurf, width, height);
         }
         else {
             onGather(outputSurf, width, height, maxSamples);
@@ -192,7 +192,7 @@ namespace idaten
             || m_mode == Mode::TF
             || m_mode == Mode::VAR)
         {
-            if (isFirstFrame()) {
+            if (IsFirstFrame()) {
                 // Nothing is done...
             }
             else {
@@ -209,9 +209,9 @@ namespace idaten
         }
     }
 
-    void SVGFPathTracing::setStream(cudaStream_t stream)
+    void SVGFPathTracing::SetStream(cudaStream_t stream)
     {
         m_stream = stream;
-        m_compaction.setStream(stream);
+        m_compaction.SetStream(stream);
     }
 }

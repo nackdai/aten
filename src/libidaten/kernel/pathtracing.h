@@ -20,11 +20,11 @@ namespace idaten
         PathTracingImplBase& operator=(const PathTracingImplBase&) = delete;
         PathTracingImplBase& operator=(PathTracingImplBase&&) = delete;
 
-        bool isEnableProgressive() const
+        bool IsEnableProgressive() const
         {
             return m_enableProgressive;
         }
-        void setEnableProgressive(bool b)
+        void SetEnableProgressive(bool b)
         {
             m_enableProgressive = b;
         }
@@ -103,18 +103,18 @@ namespace idaten
         void updateLight(const std::vector<aten::LightParameter>& lights);
 
     protected:
-        void onRender(
+        void OnRender(
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce,
             cudaSurfaceObject_t outputSurf);
 
-        bool isFirstFrame() const
+        bool IsFirstFrame() const
         {
             return (m_frame == 1);
         }
 
-        void setStream(cudaStream_t stream);
+        void SetStream(cudaStream_t stream);
 
     protected:
         Mode m_mode{ Mode::PT };

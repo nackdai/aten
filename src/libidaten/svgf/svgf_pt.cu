@@ -308,7 +308,7 @@ namespace idaten
 
         auto& curaov = params_.GetCurrAovBuffer();
 
-        if (isFirstFrame() || m_mode == Mode::PT) {
+        if (IsFirstFrame() || m_mode == Mode::PT) {
             svgf_kernel::gather<true> << <grid, block, 0, m_stream >> > (
                 outputSurf,
                 width, height,

@@ -386,7 +386,7 @@ namespace idaten
     StandardPT::StandardPT() : path_host_(std::make_shared<PathHost>())
     {}
 
-    bool StandardPT::initPath(int32_t width, int32_t height)
+    bool StandardPT::InitPath(int32_t width, int32_t height)
     {
         ctxt_host_.BindToDeviceContext();
 

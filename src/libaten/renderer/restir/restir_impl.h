@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "light/light.h"
 #include "material/material.h"
 #include "math/mat4.h"
@@ -14,6 +16,38 @@
 namespace AT_NAME {
 namespace restir {
     namespace _detail {
+        inline AT_DEVICE_API auto ComputeRadiance(
+            const aten::LightSampleResult& lightsample,
+            const aten::LightAttribute& light_attrib,
+            const aten::vec3& normal,
+            const aten::vec3& ray_dir,
+            const aten::MaterialParameter& mtrl,
+            const float u, const float v,
+            const aten::vec4& albedo,
+            real pre_sampled_r)
+        {
+            aten::vec3 nmlLight = lightsample.nml;
+            aten::vec3 dirToLight = normalize(lightsample.dir);
+
+            const auto cosShadow = aten::abs(dot(normal, dirToLight));
+            const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
+            const auto dist2 = aten::squared_length(lightsample.dir);
+
+            auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(
+                &mtrl, normal,
+                ray_dir, dirToLight,
+                u, v,
+                albedo,
+                pre_sampled_r);
+
+            const auto geometry_term = light_attrib.isSingular || light_attrib.isInfinite
+                ? cosShadow * cosLight
+                : cosShadow * cosLight / dist2;
+
+            auto le = brdf * lightsample.light_color * geometry_term;
+            return le;
+        }
+
         inline AT_DEVICE_API float ComputeTargetPDF(
             const aten::LightSampleResult& lightsample,
             const aten::LightAttribute& light_attrib,
@@ -26,10 +60,6 @@ namespace restir {
             aten::vec3 nmlLight = lightsample.nml;
             aten::vec3 dirToLight = normalize(lightsample.dir);
 
-            const auto cosShadow = aten::abs(dot(normal, dirToLight));
-            const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
-            const auto dist2 = aten::squared_length(lightsample.dir);
-
             auto pdf = AT_NAME::material::samplePDF(&mtrl, normal, ray_dir, dirToLight, u, v);
             if (pdf == 0.0f) {
                 return 0.0f;
@@ -38,19 +68,13 @@ namespace restir {
             // NOTE:
             // Apply albedo at the final phase to compute pixel color.
             // So, specify albedo color (1, 1, 1) temporarily.
-            auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(
-                &mtrl, normal,
-                ray_dir, dirToLight,
+            auto energy = ComputeRadiance(
+                lightsample, light_attrib,
+                normal, ray_dir, mtrl,
                 u, v,
                 aten::vec4(1.0f),
                 pre_sampled_r);
-            brdf /= pdf;
-
-            const auto geometry_term = light_attrib.isSingular || light_attrib.isInfinite
-                ? cosShadow * cosLight
-                : cosShadow * cosLight / dist2;
-
-            auto energy = brdf * lightsample.light_color * geometry_term;
+            energy /= pdf;
 
             auto target_pdf = (energy.x + energy.y + energy.z) / 3;
 
@@ -328,7 +352,7 @@ namespace restir {
     }
 
     template<class CONTEXT>
-    inline void AT_DEVICE_API ApplySpatialReuse(
+    inline AT_DEVICE_API void ApplySpatialReuse(
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,
         CONTEXT& ctxt,
@@ -458,5 +482,48 @@ namespace restir {
         }
     }
 
+    inline AT_DEVICE_API std::optional<aten::vec3> ComputeContribution(
+        const Reservoir& reservoir,
+        const ReSTIRInfo& restir_info,
+        const aten::MaterialParameter& mtrl,
+        const AT_NAME::_detail::v4& albedo_meshid,
+        const AT_NAME::ShadowRay& shadow_ray,
+        const aten::const_span<aten::LightParameter>& lights)
+    {
+        if (reservoir.IsValid()) {
+            const auto& orienting_normal = restir_info.nml;
+
+            const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
+
+            const auto& light = lights[reservoir.y];
+
+            const auto& nmlLight = reservoir.light_sample_.nml;
+            const auto& dirToLight = shadow_ray.raydir;
+            const auto& distToLight = shadow_ray.distToLight;
+
+            const auto cosShadow = aten::abs(dot(orienting_normal, dirToLight));
+            const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
+            const auto dist2 = distToLight * distToLight;
+
+            // TODO
+            // åvéZçœÇ›ÇÃalbedoÇó^Ç¶ÇƒÇ¢ÇÈÇΩÇﬂ
+            // u,v ÇÕ samplePDF/sampleBSDF ì‡ïîÇ≈ÇÕóòópÇ≥ÇÍÇƒÇ¢Ç»Ç¢
+            constexpr auto u = 0.0f;
+            constexpr auto v = 0.0f;
+
+            const auto le = _detail::ComputeRadiance(
+                reservoir.light_sample_, light.attrib,
+                orienting_normal, restir_info.wi,
+                mtrl,
+                u, v, albedo,
+                restir_info.pre_sampled_r);
+
+            auto contrib = le * reservoir.W;
+
+            return contrib;
+        }
+
+        return std::nullopt;
+    }
 }
 }

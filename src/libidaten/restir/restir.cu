@@ -168,7 +168,7 @@ __global__ void shade(
         return;
     }
 
-    // Explicit conection to light.
+    // Generate initial candidates.
     if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
     {
         auto& reservoir = reservoirs[idx];
@@ -233,7 +233,7 @@ __global__ void shade(
     paths.attrib[idx].mtrlType = shMtrls[threadIdx.x].type;
 }
 
-__global__ void hitShadowRay(
+__global__ void EvaluateVisibility(
     int32_t bounce,
     int32_t width, int32_t height,
     idaten::Path paths,
@@ -279,13 +279,12 @@ __global__ void hitShadowRay(
         shadow_rays);
 }
 
-__global__ void computeShadowRayContribution(
+__global__ void ComputePixelColor(
     const idaten::Reservoir* __restrict__ reservoirs,
     const idaten::ReSTIRInfo* __restrict__ restir_infos,
     idaten::Path paths,
     int32_t* hitindices,
     int32_t* hitnum,
-    const float4* __restrict__ aovNormalDepth,
     const float4* __restrict__ aovTexclrMeshid,
     const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     const aten::MaterialParameter* __restrict__ mtrls,
@@ -325,65 +324,17 @@ __global__ void computeShadowRayContribution(
         restir_info.mtrl_idx,
         restir_info.is_voxel);
 
-    if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
-    {
-        if (reservoir.IsValid()) {
-            const auto& orienting_normal = restir_info.nml;
+    aten::const_span lights_as_span(lights, lightnum);
 
-            const auto& albedo_meshid = aovTexclrMeshid[idx];
-            const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
-
-            const auto& light = lights[reservoir.y];
-
-            const auto& nmlLight = reservoir.light_sample_.nml;
-            const auto& dirToLight = shadowRays[idx].raydir;
-            const auto& distToLight = shadowRays[idx].distToLight;
-
-            aten::vec3 lightcontrib;
-            {
-                auto cosShadow = dot(orienting_normal, dirToLight);
-
-                // TODO
-                // 計算済みのalbedoを与えているため
-                // u,v は samplePDF/sampleBSDF 内部では利用されていない
-                float u = 0.0f;
-                float v = 0.0f;
-
-                auto bsdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(
-                    &shMtrls[threadIdx.x],
-                    orienting_normal,
-                    restir_info.wi,
-                    dirToLight,
-                    u, v,
-                    albedo,
-                    restir_info.pre_sampled_r);
-
-                bsdf *= restir_info.throughput;
-
-                // Get light color.
-                auto emit = reservoir.light_sample_.light_color;
-
-                cosShadow = aten::abs(cosShadow);
-
-                if (light.attrib.isInfinite || light.attrib.isSingular) {
-                    if (cosShadow >= 0) {
-                        lightcontrib = bsdf * emit * cosShadow * reservoir.W;
-                    }
-                }
-                else {
-                    auto cosLight = dot(nmlLight, -dirToLight);
-
-                    if (cosShadow >= 0 && cosLight >= 0) {
-                        auto dist2 = distToLight * distToLight;
-                        auto G = cosShadow * cosLight / dist2;
-
-                        lightcontrib = (bsdf * emit * G) * reservoir.W;
-                    }
-                }
-            }
-
-            paths.contrib[idx].contrib += make_float3(lightcontrib.x, lightcontrib.y, lightcontrib.z);
-        }
+    auto contrib = AT_NAME::restir::ComputeContribution(
+        reservoir, restir_info,
+        shMtrls[threadIdx.x],
+        aovTexclrMeshid[idx],
+        shadowRays[idx],
+        lights_as_span);
+    if (contrib) {
+        const auto pixel_color = contrib.value() * paths.throughput[idx].throughput;
+        paths.contrib[idx].contrib += make_float3(pixel_color.x, pixel_color.y, pixel_color.z);
     }
 }
 
@@ -472,7 +423,7 @@ namespace idaten
 
         auto& hitcount = m_compaction.getCount();
 
-        hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
+        EvaluateVisibility << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             bounce,
             width, height,
             path_host_->paths,
@@ -487,24 +438,23 @@ namespace idaten
             ctxt_host_.primparams.data(),
             ctxt_host_.mtxparams.data());
 
-        checkCudaKernel(hitShadowRay);
+        checkCudaKernel(EvaluateVisibility);
 
         const auto target_idx = computelReuse(
             width, height,
             bounce);
 
-        computeShadowRayContribution << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
+        ComputePixelColor << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_reservoirs[target_idx].data(),
             m_restir_infos.data(),
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
-            aov_.normal_depth().data(),
             aov_.albedo_meshid().data(),
             ctxt_host_.lightparam.data(), ctxt_host_.lightparam.num(),
             ctxt_host_.mtrlparam.data(),
             ctxt_host_.tex.data(),
             m_shadowRays.data());
 
-        checkCudaKernel(computeShadowRayContribution);
+        checkCudaKernel(ComputePixelColor);
     }
 }

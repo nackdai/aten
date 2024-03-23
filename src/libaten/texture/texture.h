@@ -30,11 +30,13 @@ namespace aten
 
         vec4 at(real u, real v) const
         {
-            u -= floor(u);
-            v -= floor(v);
+            int32_t iu = static_cast<int32_t>(u * (width_ - 1));
+            int32_t iv = static_cast<int32_t>(v * (height_ - 1));
 
-            uint32_t x = (uint32_t)(aten::cmpMin(u, real(1)) * (width_ - 1));
-            uint32_t y = (uint32_t)(aten::cmpMin(v, real(1)) * (height_ - 1));
+            // NOTE:
+            // Wrap as repeat.
+            const auto x = NormalizeToWrapRepeat(iu, width_ - 1);
+            const auto y = NormalizeToWrapRepeat(iv, height_ - 1);
 
             uint32_t pos = y * width_ + x;
 
@@ -134,6 +136,19 @@ namespace aten
             -> std::enable_if_t<(std::is_signed<T>::value && !std::is_floating_point<T>::value) || std::is_same<T, std::size_t>::value, void>
         {
             m_id = static_cast<decltype(m_id)>(id);
+        }
+
+        static int32_t NormalizeToWrapRepeat(int32_t value, int32_t wrap_size)
+        {
+            if (value > wrap_size) {
+                auto n = value / wrap_size;
+                value -= n * wrap_size;
+            }
+            else if (value < 0) {
+                auto n = value / wrap_size;
+                value += (n + 1) * wrap_size;
+            }
+            return value;
         }
 
     private:

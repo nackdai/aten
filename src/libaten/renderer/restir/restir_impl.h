@@ -80,7 +80,7 @@ namespace restir {
 
         reservoir.clear();
 
-        real cadidate_target_pdf = real(0);
+        real candidate_target_pdf = real(0);
 
         real light_select_prob = real(1) / max_light_num;
 
@@ -132,12 +132,12 @@ namespace restir {
             auto r = sampler->nextSample();
 
             if (reservoir.update(lightsample, light_pos, weight, r)) {
-                cadidate_target_pdf = target_pdf;
+                candidate_target_pdf = target_pdf;
             }
         }
 
-        if (cadidate_target_pdf > 0.0f) {
-            reservoir.target_pdf_of_y = cadidate_target_pdf;
+        if (candidate_target_pdf > 0.0f) {
+            reservoir.target_pdf_of_y = candidate_target_pdf;
             // NOTE:
             // Equation(6)
             // W = 1/p_hat(x) * (1/M * w_sum) = w_sum / (p_hat(x) * M)
@@ -217,12 +217,12 @@ namespace restir {
 
         const auto mesh_id = static_cast<int32_t>(aov_albedo_meshid[idx].w);
 
-        float cadidate_target_pdf = combined_reservoir.IsValid()
+        float candidate_target_pdf = combined_reservoir.IsValid()
             ? combined_reservoir.target_pdf_of_y
             : 0.0f;
 
         // NOTE
-        // In this case, self reservoir's M should be number of number of light sampling.
+        // In this case, self reservoir's M should be number of light sampling.
         const auto maxM = 20 * combined_reservoir.M;
 
         AT_NAME::_detail::v4 motion_depth;
@@ -291,7 +291,7 @@ namespace restir {
                     auto r = sampler.nextSample();
 
                     if (combined_reservoir.update(lightsample, light_pos, weight, m, r)) {
-                        cadidate_target_pdf = target_pdf;
+                        candidate_target_pdf = target_pdf;
                     }
                 }
             }
@@ -300,8 +300,8 @@ namespace restir {
             }
         }
 
-        if (cadidate_target_pdf > 0.0f) {
-            combined_reservoir.target_pdf_of_y = cadidate_target_pdf;
+        if (candidate_target_pdf > 0.0f) {
+            combined_reservoir.target_pdf_of_y = candidate_target_pdf;
             // NOTE
             // 1/p_hat(xz) * (1/M * w_sum) = w_sum / (p_hat(xi) * M)
             combined_reservoir.W = combined_reservoir.w_sum / (combined_reservoir.target_pdf_of_y * combined_reservoir.M);
@@ -349,16 +349,16 @@ namespace restir {
              1,  1,  1,
         };
 
-        auto& comibined_reservoir = dst_reservoirs[idx];
-        comibined_reservoir.clear();
+        auto& combined_reservoir = dst_reservoirs[idx];
+        combined_reservoir.clear();
 
         const auto& reservoir = reservoirs[idx];
 
-        float cadidate_target_pdf = 0.0f;
+        float candidate_target_pdf = 0.0f;
 
         if (reservoir.IsValid()) {
-            comibined_reservoir = reservoir;
-            cadidate_target_pdf = reservoir.target_pdf_of_y;
+            combined_reservoir = reservoir;
+            candidate_target_pdf = reservoir.target_pdf_of_y;
         }
 
 #pragma unroll
@@ -418,26 +418,26 @@ namespace restir {
 
                         auto r = sampler.nextSample();
 
-                        if (comibined_reservoir.update(lightsample, light_pos, weight, m, r)) {
-                            cadidate_target_pdf = target_pdf;
+                        if (combined_reservoir.update(lightsample, light_pos, weight, m, r)) {
+                            candidate_target_pdf = target_pdf;
                         }
                     }
                 }
                 else {
-                    comibined_reservoir.update(lightsample, -1, 0.0f, neighbor_reservoir.M, 0.0f);
+                    combined_reservoir.update(lightsample, -1, 0.0f, neighbor_reservoir.M, 0.0f);
                 }
             }
         }
 
-        if (cadidate_target_pdf > 0.0f) {
-            comibined_reservoir.target_pdf_of_y = cadidate_target_pdf;
+        if (candidate_target_pdf > 0.0f) {
+            combined_reservoir.target_pdf_of_y = candidate_target_pdf;
             // NOTE
             // 1/p_hat(xz) * (1/M * w_sum) = w_sum / (p_hat(xi) * M)
-            comibined_reservoir.W = comibined_reservoir.w_sum / (comibined_reservoir.target_pdf_of_y * comibined_reservoir.M);
+            combined_reservoir.W = combined_reservoir.w_sum / (combined_reservoir.target_pdf_of_y * combined_reservoir.M);
         }
 
-        if (!isfinite(comibined_reservoir.W)) {
-            comibined_reservoir.clear();
+        if (!isfinite(combined_reservoir.W)) {
+            combined_reservoir.clear();
         }
     }
 

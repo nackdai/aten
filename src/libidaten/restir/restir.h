@@ -8,6 +8,7 @@
 #include "cuda/cudaGLresource.h"
 
 #include "kernel/pathtracing.h"
+#include "renderer/pathtracing/pt_params.h"
 #include "renderer/restir/restir_types.h"
 #include "sampler/sampler.h"
 
@@ -214,13 +215,7 @@ namespace idaten
 
         AT_NAME::ReuseParams<idaten::TypedCudaMemory<AT_NAME::Reservoir>> m_reservoirs;
 
-        aten::mat4 m_mtx_W2V;    // World - View.
-        aten::mat4 m_mtx_V2C;    // View - Clip.
-        aten::mat4 m_mtx_C2V;    // Clip - View.
-
-        // View - World.
-        aten::mat4 m_mtx_V2W;
-        aten::mat4 m_mtx_prev_W2V;
+        AT_NAME::MatricesForRendering mtxs_;
 
         // G-Buffer rendered by OpenGL.
         idaten::CudaGLSurface m_gbuffer;

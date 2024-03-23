@@ -24,7 +24,8 @@ __global__ void computeTemporalReuse(
     const float4* __restrict__ aovTexclrMeshid,
     idaten::Reservoir* reservoirs,
     const idaten::Reservoir* __restrict__ prev_reservoirs,
-    const idaten::ReSTIRInfo* __restrict__ infos,
+    const idaten::ReSTIRInfo* __restrict__ curr_infos,
+    const idaten::ReSTIRInfo* __restrict__ prev_infos,
     cudaSurfaceObject_t motionDetphBuffer,
     int32_t width, int32_t height)
 {
@@ -52,7 +53,7 @@ __global__ void computeTemporalReuse(
     const auto size = width * height;
 
     aten::const_span prev_reservoirs_as_span(prev_reservoirs, size);
-    aten::const_span resitr_infos(infos, size);
+    aten::const_span prev_resitr_infos(prev_infos, size);
     aten::const_span aov_texclr_meshid(aovTexclrMeshid, size);
 
     AT_NAME::restir::ApplyTemporalReuse(
@@ -61,9 +62,9 @@ __global__ void computeTemporalReuse(
         ctxt,
         sampler,
         reservoirs[idx],
-        resitr_infos[idx],
+        curr_infos[idx],
         prev_reservoirs_as_span,
-        resitr_infos,
+        prev_resitr_infos,
         aov_texclr_meshid, motionDetphBuffer);
 }
 
@@ -120,7 +121,7 @@ __global__ void computeSpatialReuse(
 }
 
 namespace idaten {
-    int32_t ReSTIRPathTracing::computelReuse(
+    aten::tuple<int32_t, int32_t> ReSTIRPathTracing::ComputelReuse(
         int32_t width, int32_t height,
         int32_t bounce)
     {
@@ -131,6 +132,8 @@ namespace idaten {
 
         const auto curr_reservoirs_idx = m_reservoirs.GetCurrParamsIdx();
         const auto dst_reservoirs_idx = m_reservoirs.GetDestinationParamsIdxForSpatialReuse();
+
+        const auto curr_restir_info_idx = m_restir_infos.GetCurrParamsIdx();
 
         if (bounce == 0) {
             // NOTE
@@ -151,10 +154,14 @@ namespace idaten {
             //     pos=1 -> pos=0(for next)
             //     Ç±ÇÃÇ∆Ç´ prev ÇÕëOÉtÉåÅ[ÉÄÇÃ cur Ç∆Ç»Ç¡ÇƒÇ¢ÇÈ
 
-            auto& cur_reservoirs = m_reservoirs.GetCurrParams();
+            auto& curr_reservoirs = m_reservoirs.GetCurrParams();
             auto& prev_reservoirs = m_reservoirs.GetPreviousFrameParamsForTemporalReuse();
             auto& dst_reservoirs = m_reservoirs.GetDestinationParamsForSpatialReuse();
             m_reservoirs.Update();
+
+            auto& curr_restir_infos = m_restir_infos.GetCurrParams();
+            auto& prev_restir_infos = m_restir_infos.GetPreviousFrameParamsForTemporalReuse();
+            m_restir_infos.Update();
 
             if (m_restirMode == ReSTIRMode::ReSTIR
                 || m_restirMode == ReSTIRMode::TemporalReuse) {
@@ -171,9 +178,10 @@ namespace idaten {
                         ctxt_host_.primparams.data(),
                         ctxt_host_.mtxparams.data(),
                         aov_.albedo_meshid().data(),
-                        cur_reservoirs.data(),
+                        curr_reservoirs.data(),
                         prev_reservoirs.data(),
-                        m_restir_infos.data(),
+                        curr_restir_infos.data(),
+                        prev_restir_infos.data(),
                         motionDepthBuffer,
                         width, height);
 
@@ -192,17 +200,17 @@ namespace idaten {
                     ctxt_host_.primparams.data(),
                     ctxt_host_.mtxparams.data(),
                     aov_.albedo_meshid().data(),
-                    cur_reservoirs.data(),
+                    curr_reservoirs.data(),
                     dst_reservoirs.data(),
-                    m_restir_infos.data(),
+                    curr_restir_infos.data(),
                     width, height);
 
                 checkCudaKernel(computeSpatialReuse);
 
-                return dst_reservoirs_idx;
+                return aten::make_tuple(dst_reservoirs_idx, curr_restir_info_idx);
             }
         }
 
-        return curr_reservoirs_idx;
+        return aten::make_tuple(curr_reservoirs_idx, curr_restir_info_idx);
     }
 }

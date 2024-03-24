@@ -139,7 +139,7 @@ namespace restir {
         real pre_sampled_r,
         int32_t lod = 0)
     {
-        constexpr auto MaxLightCount = 32U;
+        constexpr auto MaxLightCount = 32;
 
         const auto light_num = ctxt.GetLightNum();
         const auto max_light_num = static_cast<decltype(MaxLightCount)>(light_num);
@@ -151,10 +151,10 @@ namespace restir {
 
         real light_select_prob = real(1) / max_light_num;
 
-        for (auto i = 0U; i < light_cnt; i++) {
+        for (auto i = 0; i < light_cnt; i++) {
             // Sample light.
             const auto r_light = sampler->nextSample();
-            const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
+            const auto light_pos = aten::clamp<int32_t>(static_cast<int32_t>(r_light * max_light_num), 0, max_light_num - 1);
 
             const auto& light = ctxt.GetLight(light_pos);
 
@@ -229,7 +229,7 @@ namespace restir {
      * @param[in,out] restir_info Storage to refer parameters for ReSTIR.
      * @param[in,out] shadowRays
      */
-    template <class CONTEXT>
+    template <class CONTEXT, class SCENE = void>
     inline AT_DEVICE_API void EvaluateVisibility(
         int32_t idx,
         int32_t bounce,
@@ -237,7 +237,8 @@ namespace restir {
         const CONTEXT& ctxt,
         AT_NAME::Reservoir& reservoir,
         AT_NAME::ReSTIRInfo& restir_info,
-        aten::span<AT_NAME::ShadowRay>& shadowRays)
+        aten::span<AT_NAME::ShadowRay>& shadowRays,
+        SCENE* scene = nullptr)
     {
         bool isHit = false;
 
@@ -254,7 +255,7 @@ namespace restir {
             shadowRays[idx].distToLight = dist;
             shadowRays[idx].raydir /= dist;
 
-            isHit = AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays[idx]);
+            isHit = AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays[idx], scene);
         }
 
         if (!isHit) {
@@ -450,7 +451,7 @@ namespace restir {
      */
     template<class CONTEXT>
     inline AT_DEVICE_API void ApplySpatialReuse(
-        int32_t ix, int32_t iy,
+        int32_t idx,
         int32_t width, int32_t height,
         CONTEXT& ctxt,
         aten::sampler& sampler,
@@ -459,7 +460,8 @@ namespace restir {
         const aten::const_span<AT_NAME::ReSTIRInfo>& infos,
         const aten::const_span<AT_NAME::_detail::v4>& aov_albedo_meshid)
     {
-        const auto idx = getIdx(ix, iy, width);
+        const auto ix = idx % width;
+        const auto iy = idx / width;
 
         const auto& self_info = infos[idx];
 
@@ -500,7 +502,7 @@ namespace restir {
 
             if (is_acceptable)
             {
-                auto neighbor_idx = getIdx(xx, yy, width);
+                const auto neighbor_idx = yy * width + xx;
                 const auto& neighbor_reservoir = reservoirs[neighbor_idx];
 
                 M_sum += neighbor_reservoir.M;
@@ -528,7 +530,7 @@ namespace restir {
                     if (is_acceptable) {
                         const auto light_pos = neighbor_reservoir.y;
 
-                        const auto& light = ctxt.lights[light_pos];
+                        const auto& light = ctxt.GetLight(light_pos);
 
                         aten::LightSampleResult lightsample;
                         AT_NAME::Light::sample(lightsample, light, ctxt, self_info.p, neighbor_normal, &sampler, 0);
@@ -575,26 +577,28 @@ namespace restir {
     /**
      * @brief Compute pixel color.
      *
+     * @tparam CONTEXT Type of scene context.
+     * @param[in] ctxt Scene context.
      * @param[in] reservoir Reservoir to keep result of RIS.
      * @param[in] restir_info ReSTIR information of target pixel.
      * @param[in] mtrl Material of target pixel.
      * @param[in] albedo_meshid Albedo color and mesh id of target pixel.
-     * @param[in] lights Lights of scene.
      * @return If output sample in reservoir is valid, returns pixel color. Otherwise, returns nullopt.
      */
+    template<class CONTEXT>
     inline AT_DEVICE_API std::optional<aten::vec3> ComputePixelColor(
+        const CONTEXT& ctxt,
         const Reservoir& reservoir,
         const ReSTIRInfo& restir_info,
         const aten::MaterialParameter& mtrl,
-        const AT_NAME::_detail::v4& albedo_meshid,
-        const aten::const_span<aten::LightParameter>& lights)
+        const AT_NAME::_detail::v4& albedo_meshid)
     {
         if (reservoir.IsValid()) {
             const auto& orienting_normal = restir_info.nml;
 
             const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
 
-            const auto& light = lights[reservoir.y];
+            const auto& light = ctxt.GetLight(reservoir.y);
 
             const auto& nml_on_light = reservoir.light_sample_.nml;
 

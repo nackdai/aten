@@ -1,11 +1,13 @@
 #pragma once
 
 #include <array>
+#include <functional>
 
 #include "defs.h"
 #include "math/vec4.h"
 #include "misc/span.h"
 #include "misc/const_span.h"
+#include "scene/hit_parameter.h"
 
 namespace AT_NAME {
     /**

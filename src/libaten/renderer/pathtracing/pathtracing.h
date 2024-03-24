@@ -28,6 +28,17 @@ namespace aten
             enable_feature_line_ = e;
         }
 
+        static void shade(
+            int32_t idx,
+            aten::Path& paths,
+            const context& ctxt,
+            ray* rays,
+            aten::ShadowRay* shadow_rays,
+            const aten::Intersection& isect,
+            scene* scene,
+            int32_t rrDepth,
+            int32_t bounce);
+
     protected:
         void radiance(
             int32_t idx,
@@ -49,17 +60,6 @@ namespace aten
             camera* cam,
             scene* scene,
             const background* bg);
-
-        static void shade(
-            int32_t idx,
-            aten::Path& paths,
-            const context& ctxt,
-            ray* rays,
-            aten::ShadowRay* shadow_rays,
-            const aten::Intersection& isect,
-            scene* scene,
-            int32_t rrDepth,
-            int32_t bounce);
 
         static void shadeMiss(
             int32_t idx,

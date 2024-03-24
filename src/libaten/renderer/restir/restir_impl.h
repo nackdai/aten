@@ -126,7 +126,7 @@ namespace restir {
      * @param[in] lod LoD level for IBL image.
      * @return Output sample candidate.
      */
-    template<class CONTEXT>
+    template<class CONTEXT, int32_t MaxLightCount = 32>
     inline AT_DEVICE_API int32_t GenerateInitialCandidate(
         AT_NAME::Reservoir& reservoir,
         const aten::MaterialParameter& mtrl,
@@ -139,8 +139,6 @@ namespace restir {
         real pre_sampled_r,
         int32_t lod = 0)
     {
-        constexpr auto MaxLightCount = 32;
-
         const auto light_num = ctxt.GetLightNum();
         const auto max_light_num = static_cast<decltype(MaxLightCount)>(light_num);
         const auto light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
@@ -317,7 +315,7 @@ namespace restir {
      */
     template <class CONTEXT, class MotionDepthBufferType>
     inline AT_DEVICE_API void ApplyTemporalReuse(
-        int32_t ix, int32_t iy,
+        int32_t idx,
         int32_t width, int32_t height,
         const CONTEXT& ctxt,
         aten::sampler& sampler,
@@ -328,7 +326,8 @@ namespace restir {
         const aten::const_span<AT_NAME::_detail::v4>& aov_albedo_meshid,
         MotionDepthBufferType& motion_detph_buffer)
     {
-        const auto idx = getIdx(ix, iy, width);
+        const auto ix = idx % width;
+        const auto iy = idx / width;
 
         aten::MaterialParameter mtrl;
         AT_NAME::FillMaterial(
@@ -368,7 +367,7 @@ namespace restir {
         {
             aten::LightSampleResult lightsample;
 
-            auto neighbor_idx = getIdx(px, py, width);
+            auto neighbor_idx = py * width + px;
             const auto& neighbor_reservoir = prev_reservoirs[neighbor_idx];
 
             auto m = std::min(neighbor_reservoir.M, maxM);
@@ -394,7 +393,7 @@ namespace restir {
                 if (is_acceptable) {
                     const auto light_pos = neighbor_reservoir.y;
 
-                    const auto& light = ctxt.lights[light_pos];
+                    const auto& light = ctxt.GetLight(light_pos);
 
                     AT_NAME::Light::sample(lightsample, light, ctxt, self_info.p, neighbor_normal, &sampler, 0);
 

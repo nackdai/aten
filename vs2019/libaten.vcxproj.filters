@@ -523,6 +523,9 @@
     <ClInclude Include="..\src\libaten\renderer\restir\restir_types.h">
       <Filter>renderer\restir</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\restir\restir.h">
+      <Filter>renderer\restir</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -779,6 +782,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\svgf\svgf.cpp">
       <Filter>renderer\svgf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\restir\restir.cpp">
+      <Filter>renderer\restir</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

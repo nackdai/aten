@@ -280,6 +280,12 @@
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf_types.h">
       <Filter>svgf</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\restir\restir_types.h">
+      <Filter>restir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\restir\restir_impl.h">
+      <Filter>restir</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

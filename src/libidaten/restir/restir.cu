@@ -142,17 +142,12 @@ __global__ void shade(
 
     if (bounce == 0) {
         // Store AOV.
-        int32_t ix = idx % width;
-        int32_t iy = idx / width;
-
-        const auto _idx = getIdx(ix, iy, width);
-
         // World coordinate to Clip coordinate.
         aten::vec4 pos = aten::vec4(rec.p, 1);
         pos = mtx_W2C.apply(pos);
 
-        aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
-        aovTexclrMeshid[_idx] = make_float4(albedo.x, albedo.y, albedo.z, isect.meshid);
+        aovNormalDepth[idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
+        aovTexclrMeshid[idx] = make_float4(albedo.x, albedo.y, albedo.z, isect.meshid);
     }
 
     // Implicit conection to light.
@@ -181,6 +176,7 @@ __global__ void shade(
             ray.dir,
             rec.u, rec.v,
             &paths.sampler[idx],
+            pre_sampled_r,
             bounce);
     }
 
@@ -230,6 +226,10 @@ __global__ void EvaluateVisibility(
     int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (idx >= *hitnum) {
+        return;
+    }
+
+    if (paths.attrib[idx].isTerminate) {
         return;
     }
 
@@ -286,6 +286,8 @@ __global__ void ComputePixelColor(
     {
         ctxt.mtrls = mtrls;
         ctxt.textures = textures;
+        ctxt.lights = lights;
+        ctxt.lightnum = lightnum;
     }
 
     __shared__ aten::MaterialParameter shMtrls[64];
@@ -299,13 +301,11 @@ __global__ void ComputePixelColor(
         restir_info.mtrl_idx,
         restir_info.is_voxel);
 
-    aten::const_span lights_as_span(lights, lightnum);
-
     auto pixel_color = AT_NAME::restir::ComputePixelColor(
+        ctxt,
         reservoir, restir_info,
         shMtrls[threadIdx.x],
-        aovTexclrMeshid[idx],
-        lights_as_span);
+        aovTexclrMeshid[idx]);
     if (pixel_color) {
         const auto result = pixel_color.value() * paths.throughput[idx].throughput;
         paths.contrib[idx].contrib += make_float3(result.x, result.y, result.z);

@@ -110,7 +110,7 @@ __global__ void computeSpatialReuse(
     aten::const_span aov_texclr_meshid(aovTexclrMeshid, size);
 
     AT_NAME::restir::ApplySpatialReuse(
-        ix, iy,
+        idx,
         width, height,
         ctxt,
         sampler,

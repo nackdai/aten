@@ -246,7 +246,7 @@ namespace aten
         auto& curr_aov = svgf_param.GetCurrAovBuffer();
         auto& prev_aov = svgf_param.GetPrevAovBuffer();
 
-        aten::span<aten::vec4> contribs(reinterpret_cast<aten::vec4*>(paths.contrib), width * height);
+        aten::span contribs(reinterpret_cast<aten::vec4*>(paths.contrib), width * height);
         auto curr_aov_normal_depth{ curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::NormalDepth>() };
         auto curr_aov_texclr_meshid{ curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::AlbedoMeshId>() };
         auto curr_aov_color_variance{ curr_aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>() };
@@ -337,13 +337,13 @@ namespace aten
         bool isFirstIter = (filter_iter_count == 0);
         bool isFinalIter = (filter_iter_count == svgf_param.atrous_iter_cnt - 1);
 
-        auto temporary_color_buffer{ aten::span<aten::vec4>(svgf_param.temporary_color_buffer) };
+        aten::span temporary_color_buffer(svgf_param.temporary_color_buffer);
         auto aov_normal_depth{ curr_aov.GetAsConstSpan<AT_NAME::SVGFAovBufferType::NormalDepth>() };
         auto aov_texclr_meshid{ curr_aov.GetAsConstSpan<AT_NAME::SVGFAovBufferType::AlbedoMeshId>() };
         auto aov_color_variance{ curr_aov.GetAsConstSpan<AT_NAME::SVGFAovBufferType::ColorVariance>() };
         auto aov_moment_temporalweight{ curr_aov.GetAsConstSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>() };
-        auto color_variance_buffer{ aten::const_span<aten::vec4>(curr_atrous_clr_variance) };
-        auto next_color_variance_buffer{ aten::span<aten::vec4>(next_atrous_clr_variance) };
+        aten::const_span color_variance_buffer(curr_atrous_clr_variance);
+        aten::span next_color_variance_buffer(next_atrous_clr_variance);
 
         auto extracted_center_pixel = AT_NAME::svgf::ExtractCenterPixel<false>(
             idx,
@@ -408,8 +408,8 @@ namespace aten
 
         auto& aov_clr_variance = curaov.get<AT_NAME::SVGFAovBufferType::ColorVariance>();
 
-        auto src{ aten::const_span<aten::vec4>(svgf_param.temporary_color_buffer) };
-        auto dst{ aten::span<aten::vec4>(aov_clr_variance) };
+        aten::const_span src(svgf_param.temporary_color_buffer);
+        aten::span<aten::vec4> dst(aov_clr_variance);
 
         AT_NAME::svgf::CopyVectorBuffer<3>(idx, src, dst);
     }
@@ -452,7 +452,7 @@ namespace aten
         const auto height = fbo.GetHeight();
         params_.motion_depth_buffer.resize(width * height);
 
-        aten::span<decltype(params_.motion_depth_buffer)::value_type> motion_depth_buffer(params_.motion_depth_buffer);
+        aten::span motion_depth_buffer(params_.motion_depth_buffer);
         fbo.SaveToBuffer(motion_depth_buffer, 1);
     }
 
@@ -530,7 +530,7 @@ namespace aten
                         AT_NAME::svgf::PrepareForDenoise<true>(
                             idx,
                             path_host_.paths,
-                            aten::span<decltype(params_)::buffer_value_type>(params_.temporary_color_buffer),
+                            aten::span(params_.temporary_color_buffer),
                             aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>(),
                             aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>());
                     }
@@ -538,7 +538,7 @@ namespace aten
                         AT_NAME::svgf::PrepareForDenoise<false>(
                             idx,
                             path_host_.paths,
-                            aten::span<decltype(params_)::buffer_value_type>(params_.temporary_color_buffer));
+                            aten::span(params_.temporary_color_buffer));
                     }
 
                     dst.buffer->put(x, y, path_host_.paths.contrib[idx].contrib);

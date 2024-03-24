@@ -14,23 +14,23 @@ TEST(span_test, SpanConstructor)
     ASSERT_EQ(s0.size(), 0);
 
     const int32_t x = 0;
-    aten::span<decltype(x)> s1(&x, 1);
+    aten::span s1(&x, 1);
     ASSERT_EQ(s1.data(), &x);
     ASSERT_EQ(s1.size(), 1);
 
     const int32_t a[4] = { 0, 1, 2, 3 };
     using c_style_array_type = std::remove_reference_t<decltype(std::declval<decltype(a)>()[0])>;
-    aten::span<c_style_array_type> s2(a);
+    aten::span s2(a);
     ASSERT_EQ(s2.data(), a);
     ASSERT_EQ(s2.size(), std::size(a));
 
     std::array<int32_t, 4> aa{ 0, 1, 2, 3 };
-    aten::span<decltype(aa)::value_type> s3(aa);
+    aten::span s3(aa);
     ASSERT_EQ(s3.data(), aa.data());
     ASSERT_EQ(s3.size(), aa.size());
 
     std::vector<int32_t> v{ 0, 1, 2, 3 };
-    aten::span<decltype(aa)::value_type> s4(v);
+    aten::span s4(v);
     ASSERT_EQ(s4.data(), v.data());
     ASSERT_EQ(s4.size(), v.size());
 

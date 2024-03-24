@@ -119,13 +119,12 @@ cuda_add_library(
   ../libaten/renderer/npr/npr_impl.h
   ../libaten/renderer/pathtracing/pathtracing_impl.h
   ../libaten/renderer/pathtracing/pt_params.h
+  ../libaten/renderer/restir/restir_impl.h
+  ../libaten/renderer/restir/restir_types.h
   ../libaten/renderer/svgf/svgf_impl.h
   ../libaten/renderer/svgf/svgf_types.h
   ../libaten/sampler/cmj.h
   ../libaten/sampler/sampler.h
-  ../libaten/sampler/sobol.cpp
-  ../libaten/sampler/sobol.h
-  ../libaten/sampler/sobolproxy.h
   ../libaten/sampler/wanghash.h
   ../libaten/scene/hitable.h
   ../libaten/scene/scene.h
@@ -187,14 +186,11 @@ cuda_add_library(
   kernel/tex_viewer.cu
   npr/npr_pathtracing.cu
   npr/npr_pathtracing.h
-  restir/reservior.h
   restir/restir.cpp
   restir/restir.cu
   restir/restir.h
   restir/restir_debug.cu
-  restir/restir_info.h
   restir/restir_reuse.cu
-  restir/restir_sample_light.cuh
   svgf/svgf.cpp
   svgf/svgf.h
   svgf/svgf_VarianceEstimation.cu

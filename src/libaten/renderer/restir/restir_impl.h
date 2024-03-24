@@ -209,7 +209,7 @@ namespace restir {
             reservoir.W = reservoir.w_sum / (reservoir.target_pdf_of_y * reservoir.M);
         }
 
-        if (!isfinite(reservoir.W)) {
+        if (!aten::isfinite(reservoir.W)) {
             reservoir.clear();
         }
 
@@ -428,7 +428,7 @@ namespace restir {
             combined_reservoir.W = combined_reservoir.w_sum / (combined_reservoir.target_pdf_of_y * combined_reservoir.M);
         }
 
-        if (!isfinite(combined_reservoir.W)) {
+        if (!aten::isfinite(combined_reservoir.W)) {
             combined_reservoir.clear();
         }
     }
@@ -568,7 +568,7 @@ namespace restir {
             combined_reservoir.W = combined_reservoir.w_sum / (combined_reservoir.target_pdf_of_y * combined_reservoir.M);
         }
 
-        if (!isfinite(combined_reservoir.W)) {
+        if (!aten::isfinite(combined_reservoir.W)) {
             combined_reservoir.clear();
         }
     }
@@ -610,8 +610,8 @@ namespace restir {
             const auto dist2 = distance_to_light * distance_to_light;
 
             // TODO
-            // ŒvZÏ‚İ‚Ìalbedo‚ğ—^‚¦‚Ä‚¢‚é‚½‚ß
-            // u,v ‚Í samplePDF/sampleBSDF “à•”‚Å‚Í—˜—p‚³‚ê‚Ä‚¢‚È‚¢
+            // ï¿½vï¿½Zï¿½Ï‚İ‚ï¿½albedoï¿½ï¿½^ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½é‚½ï¿½ï¿½
+            // u,v ï¿½ï¿½ samplePDF/sampleBSDF ï¿½ï¿½ï¿½ï¿½ï¿½Å‚Í—ï¿½ï¿½pï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½È‚ï¿½
             constexpr auto u = 0.0f;
             constexpr auto v = 0.0f;
 

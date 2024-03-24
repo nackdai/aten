@@ -35,7 +35,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shader DESTINATION ${CMAKE_BINARY_DIR})
 
 add_subdirectory(libaten)
 add_subdirectory(libatenscene)
-add_subdirectory(appaten)
+add_subdirectory(host_renderer)
 add_subdirectory(libidaten)
 add_subdirectory(device_renderer)
 add_subdirectory(svgf_renderer)

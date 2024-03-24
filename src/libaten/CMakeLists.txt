@@ -67,12 +67,8 @@ add_library(
   defs.h
   filter/atrous.cpp
   filter/atrous.h
-  filter/bilateral.cpp
-  filter/bilateral.h
   filter/magnifier.cpp
   filter/magnifier.h
-  filter/nlm.cpp
-  filter/nlm.h
   filter/taa.cpp
   filter/taa.h
   geometry/EvaluateHitResult.h
@@ -173,8 +169,6 @@ add_library(
   os/linux/misc/timer_linux.cpp
   os/linux/system_linux.cpp
   os/system.h
-  posteffect/BloomEffect.cpp
-  posteffect/BloomEffect.h
   proxy/DataCollector.cpp
   proxy/DataCollector.h
   renderer/ao/aorenderer.cpp
@@ -194,22 +188,19 @@ add_library(
   renderer/pathtracing/pathtracing_impl.h
   renderer/pathtracing/pt_params.h
   renderer/renderer.h
+  renderer/restir/restir.cpp
+  renderer/restir/restir.h
+  renderer/restir/restir_impl.h
+  renderer/restir/restir_types.h
   renderer/svgf/svgf.cpp
   renderer/svgf/svgf.h
   renderer/svgf/svgf_impl.h
   renderer/svgf/svgf_types.h
-  sampler/bluenoiseSampler.h
   sampler/cmj.h
-  sampler/halton.cpp
-  sampler/halton.h
   sampler/sampler.cpp
   sampler/sampler.h
   sampler/samplerinterface.h
-  sampler/sobol.cpp
-  sampler/sobol.h
-  sampler/sobolproxy.h
   sampler/wanghash.h
-  sampler/xorshift.h
   scene/AcceleratedScene.h
   scene/hit_parameter.h
   scene/hitable.cpp

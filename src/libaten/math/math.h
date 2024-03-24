@@ -340,4 +340,14 @@ namespace aten {
         return false;
 #endif
     }
+
+
+    inline AT_HOST_DEVICE_API bool isfinite(float f)
+    {
+#ifdef __CUDACC__
+        return isfinite(f);
+#else
+        return std::isfinite(f);
+#endif
+    }
 }

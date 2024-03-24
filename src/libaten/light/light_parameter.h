@@ -8,11 +8,11 @@ namespace aten {
      * @brief Data package for the result to sample light.
      */
     struct LightSampleResult {
-        vec3 pos;               ///< Light position.
-        vec3 dir;               ///< Light direction from the position.
-        vec3 nml;               ///< Light object surface normal.
-        vec3 light_color;       ///< Light color.
-        float pdf{ float(0) };    ///< Light sampling pdf.
+        vec3 pos;           ///< Light position.
+        vec3 dir;           ///< Light direction from the position.
+        vec3 nml;           ///< Light object surface normal.
+        vec3 light_color;   ///< Light color.
+        float pdf{ 0.0f };  ///< Light sampling pdf.
     };
 
     /**

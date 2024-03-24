@@ -145,7 +145,7 @@ namespace aten
                 value -= n * wrap_size;
             }
             else if (value < 0) {
-                auto n = value / wrap_size;
+                auto n = aten::abs(value / wrap_size);
                 value += (n + 1) * wrap_size;
             }
             return value;

@@ -339,8 +339,8 @@ namespace kernel {
             bounce,
             aten::vec3(0),
             paths,
-            aten::span<std::remove_pointer_t<decltype(aovNormalDepth)>>(aovNormalDepth, width * height),
-            aten::span<std::remove_pointer_t<decltype(aovAlbedoMeshid)>>(aovAlbedoMeshid, width * height));
+            aten::span(aovNormalDepth, width * height),
+            aten::span(aovAlbedoMeshid, width * height));
     }
 
     __global__ void shadeMissWithEnvmap(
@@ -375,8 +375,8 @@ namespace kernel {
             envmap_multiplyer,
             ctxt, camera,
             paths, rays[idx],
-            aten::span<std::remove_pointer_t<decltype(aovNormalDepth)>>(aovNormalDepth, width * height),
-            aten::span<std::remove_pointer_t<decltype(aovAlbedoMeshid)>>(aovAlbedoMeshid, width * height));
+            aten::span(aovNormalDepth, width * height),
+            aten::span(aovAlbedoMeshid, width * height));
     }
 }
 }

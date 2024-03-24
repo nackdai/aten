@@ -89,15 +89,15 @@ __global__ void temporalReprojection(
 
     const size_t size = width * height;
 
-    auto contribs{ aten::const_span<float4>(contributes, size) };
-    auto curr_aov_normal_depth{ aten::span<float4>(curAovNormalDepth, size) };
-    auto curr_aov_texclr_meshid{ aten::span<float4>(curAovTexclrMeshid, size) };
-    auto curr_aov_color_variance{ aten::span<float4>(curAovColorVariance, size) };
-    auto curr_aov_moment_temporalweight{ aten::span<float4>(curAovMomentTemporalWeight, size) };
-    auto prev_aov_normal_depth{ aten::const_span<float4>(prevAovNormalDepth, size) };
-    auto prev_aov_texclr_meshid{ aten::const_span<float4>(prevAovTexclrMeshid, size) };
-    auto prev_aov_color_variance{ aten::const_span<float4>(prevAovColorVariance, size) };
-    auto prev_aov_moment_temporalweight{ aten::const_span<float4>(prevAovMomentTemporalWeight, size) };
+    aten::const_span contribs(contributes, size);
+    aten::span curr_aov_normal_depth(curAovNormalDepth, size);
+    aten::span curr_aov_texclr_meshid(curAovTexclrMeshid, size);
+    aten::span curr_aov_color_variance(curAovColorVariance, size);
+    aten::span curr_aov_moment_temporalweight(curAovMomentTemporalWeight, size);
+    aten::const_span prev_aov_normal_depth(prevAovNormalDepth, size);
+    aten::const_span prev_aov_texclr_meshid(prevAovTexclrMeshid, size);
+    aten::const_span prev_aov_color_variance(prevAovColorVariance, size);
+    aten::const_span prev_aov_moment_temporalweight(prevAovMomentTemporalWeight, size);
 
     auto extracted_center_pixel = AT_NAME::svgf::ExtractCenterPixel(
         idx,

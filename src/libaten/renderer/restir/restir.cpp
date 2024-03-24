@@ -385,7 +385,7 @@ namespace aten
         const auto height = fbo.GetHeight();
         motion_depth_buffer_.resize(width * height);
 
-        aten::span<decltype(motion_depth_buffer_)::value_type> motion_depth_buffer(motion_depth_buffer_);
+        aten::span motion_depth_buffer(motion_depth_buffer_);
         fbo.SaveToBuffer(motion_depth_buffer, 1);
     }
 

@@ -220,9 +220,9 @@ namespace svgf_kernel {
         auto contrib = AT_NAME::svgf::PrepareForDenoise<IsFirstFrameExecution>(
             idx,
             paths,
-            aten::span<BufferType>(temporary_color_buffer, size),
-            aten::span<BufferType>(aov_color_variance, size),
-            aten::span<BufferType>(aov_moment_temporalweight, size));
+            aten::span(temporary_color_buffer, size),
+            aten::span(aov_color_variance, size),
+            aten::span(aov_moment_temporalweight, size));
 
         if (IsFirstFrameExecution) {
             if (dst) {

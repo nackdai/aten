@@ -48,7 +48,7 @@ TEST(span_test, SpanSubspane)
     std::array<int32_t, 10> a;
     std::iota(a.begin(), a.end(), 0);
 
-    aten::span<decltype(a)::value_type> s(a);
+    aten::span s(a);
     ASSERT_EQ(s.data(), a.data());
     ASSERT_EQ(s.size(), a.size());
 
@@ -90,7 +90,7 @@ TEST(span_test, SpanObservers)
     std::array<int32_t, 10> a;
     std::iota(a.begin(), a.end(), 0);
 
-    aten::span<decltype(a)::value_type> s(a);
+    aten::span s(a);
     ASSERT_EQ(s.data(), a.data());
     ASSERT_EQ(s.size(), a.size());
 
@@ -105,7 +105,7 @@ TEST(span_test, SpanAccess)
     std::array<int32_t, 10> a;
     std::iota(a.begin(), a.end(), 0);
 
-    aten::span<decltype(a)::value_type> s(a);
+    aten::span s(a);
     ASSERT_EQ(s.data(), a.data());
     ASSERT_EQ(s.size(), a.size());
 
@@ -127,17 +127,17 @@ TEST(const_span_test, ConstSpanConstructor)
 
     const int32_t a[4] = { 0, 1, 2, 3 };
     using c_style_array_type = std::remove_reference_t<decltype(std::declval<decltype(a)>()[0])>;
-    aten::const_span<c_style_array_type> s2(a);
+    aten::const_span s2(a);
     ASSERT_EQ(s2.data(), a);
     ASSERT_EQ(s2.size(), std::size(a));
 
     std::array<int32_t, 4> aa{ 0, 1, 2, 3 };
-    aten::const_span<decltype(aa)::value_type> s3(aa);
+    aten::const_span s3(aa);
     ASSERT_EQ(s3.data(), aa.data());
     ASSERT_EQ(s3.size(), aa.size());
 
     std::vector<int32_t> v{ 0, 1, 2, 3 };
-    aten::const_span<decltype(aa)::value_type> s4(v);
+    aten::const_span s4(v);
     ASSERT_EQ(s4.data(), v.data());
     ASSERT_EQ(s4.size(), v.size());
 
@@ -155,7 +155,7 @@ TEST(const_span_test, ConstSpanSubspane)
     std::array<int32_t, 10> a;
     std::iota(a.begin(), a.end(), 0);
 
-    aten::const_span<decltype(a)::value_type> s(a);
+    aten::const_span s(a);
     ASSERT_EQ(s.data(), a.data());
     ASSERT_EQ(s.size(), a.size());
 
@@ -197,7 +197,7 @@ TEST(const_span_test, ConstSpanObservers)
     std::array<int32_t, 10> a;
     std::iota(a.begin(), a.end(), 0);
 
-    aten::const_span<decltype(a)::value_type> s(a);
+    aten::const_span s(a);
     ASSERT_EQ(s.data(), a.data());
     ASSERT_EQ(s.size(), a.size());
 
@@ -212,7 +212,7 @@ TEST(const_span_test, ConstSpanAccess)
     std::array<int32_t, 10> a;
     std::iota(a.begin(), a.end(), 0);
 
-    aten::const_span<decltype(a)::value_type> s(a);
+    aten::const_span s(a);
     ASSERT_EQ(s.data(), a.data());
     ASSERT_EQ(s.size(), a.size());
 

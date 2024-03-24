@@ -29,10 +29,10 @@ __global__ void varianceEstimation(
 
     const size_t size = width * height;
 
-    auto aov_normal_depth{ aten::const_span<float4>(aovNormalDepth, size) };
-    auto aov_texclr_meshid{ aten::span<float4>(aovTexclrMeshid, size) };
-    auto aov_color_variance{ aten::span<float4>(aovColorVariance, size) };
-    auto aov_moment_temporalweight{ aten::span<float4>(aovMomentTemporalWeight, size) };
+    aten::const_span aov_normal_depth(aovNormalDepth, size);
+    aten::span aov_texclr_meshid(aovTexclrMeshid, size);
+    aten::span aov_color_variance(aovColorVariance, size);
+    aten::span aov_moment_temporalweight(aovMomentTemporalWeight, size);
 
     auto result = AT_NAME::svgf::EstimateVariance(
         ix, iy, width, height,

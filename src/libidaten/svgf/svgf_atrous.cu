@@ -33,13 +33,13 @@ __global__ void atrousFilter(
 
     const size_t size = width * height;
 
-    auto temporary_color_buffer{ aten::span<float4>(temporaryColorBuffer, size) };
-    auto aov_normal_depth{ aten::const_span<float4>(aovNormalDepth, size) };
-    auto aov_texclr_meshid{ aten::const_span<float4>(aovTexclrMeshid, size) };
-    auto aov_color_variance{ aten::const_span<float4>(aovColorVariance, size) };
-    auto aov_moment_temporalweight{ aten::const_span<float4>(aovMomentTemporalWeight, size) };
-    auto color_variance_buffer{ aten::const_span<float4>(clrVarBuffer, size) };
-    auto next_color_variance_buffer{ aten::span<float4>(nextClrVarBuffer, size) };
+    aten::span temporary_color_buffer(temporaryColorBuffer, size);
+    aten::const_span aov_normal_depth(aovNormalDepth, size);
+    aten::const_span aov_texclr_meshid(aovTexclrMeshid, size);
+    aten::const_span aov_color_variance(aovColorVariance, size);
+    aten::const_span aov_moment_temporalweight(aovMomentTemporalWeight, size);
+    aten::const_span color_variance_buffer(clrVarBuffer, size);
+    aten::span next_color_variance_buffer(nextClrVarBuffer, size);
 
     const int32_t idx = getIdx(ix, iy, width);
 
@@ -120,8 +120,8 @@ __global__ void CopyFromTeporaryColorBufferToAov(
 
     const auto size = width * height;
 
-    auto src{ aten::const_span<float4>(src_buffer, size) };
-    auto dst{ aten::span<float4>(aovColorVariance, size) };
+    aten::const_span src(src_buffer, size);
+    aten::span dst(aovColorVariance, size);
 
     AT_NAME::svgf::CopyVectorBuffer<3>(idx, src, dst);
 }

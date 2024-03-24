@@ -33,8 +33,7 @@ namespace aten {
         template <size_t N>
         constexpr const_span(const std::array<value_type, N>& arr) noexcept : const_span(arr.data(), N) {}
 
-        template <class Container>
-        constexpr const_span(const Container & cont) : const_span(cont.data(), cont.size()) {}
+        constexpr const_span(const std::vector<element_type>& v) noexcept : const_span(v.data(), v.size()) {}
 
         constexpr const_span(const const_span& other) noexcept : const_span(other.data_, other.size_) {}
 

@@ -7,7 +7,7 @@ static int32_t WIDTH = 512;
 static int32_t HEIGHT = 512;
 static const char* TITLE = "app";
 
-#define ENABLE_IBL
+//#define ENABLE_IBL
 // #define ENABLE_EVERY_FRAME_SC
 // #define ENABLE_DOF
 //#define ENABLE_FEATURE_LINE
@@ -27,11 +27,12 @@ static std::shared_ptr<aten::texture> g_envmap;
 
 static aten::PathTracing g_tracer;
 //static aten::SVGFRenderer g_tracer;
+//static aten::ReSTIRRenderer g_tracer;
 
 static std::shared_ptr<aten::visualizer> g_visualizer;
 
-static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
-//static aten::Film g_buffer(WIDTH, HEIGHT);
+//static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
+static aten::Film g_buffer(WIDTH, HEIGHT);
 
 static aten::FBO g_fbo;
 
@@ -90,13 +91,13 @@ bool display()
     {
         dst.width = WIDTH;
         dst.height = HEIGHT;
-        dst.maxDepth = 5;
+        dst.maxDepth = 3;
         dst.russianRouletteDepth = 3;
         dst.sample = 1;
         dst.buffer = &g_buffer;
     }
 
-    if (std::is_same_v<decltype(g_tracer), aten::SVGFRenderer>) {
+    if constexpr (std::is_member_function_pointer_v<decltype(&decltype(g_tracer)::SetMotionDepthBuffer)>) {
         g_rasterizer.drawSceneForGBuffer(
             g_tracer.GetFrameCount(),
             g_ctxt,
@@ -210,7 +211,7 @@ int32_t main(int32_t argc, char* argv[])
         "../shader/simple3d_vs.glsl",
         "../shader/simple3d_fs.glsl");
 
-    if (std::is_same_v<decltype(g_tracer), aten::SVGFRenderer>) {
+    if constexpr (std::is_member_function_pointer_v<decltype(&decltype(g_tracer)::SetMotionDepthBuffer)>) {
         g_fbo.asMulti(2);
         g_fbo.init(
             WIDTH, HEIGHT,

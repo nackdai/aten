@@ -100,6 +100,7 @@
 #include "renderer/envmap.h"
 #include "renderer/pathtracing/pathtracing.h"
 #include "renderer/ao/aorenderer.h"
+#include "renderer/restir/restir.h"
 #include "renderer/svgf/svgf.h"
 
 #include "os/system.h"

@@ -57,7 +57,7 @@ __global__ void computeTemporalReuse(
     aten::const_span aov_texclr_meshid(aovTexclrMeshid, size);
 
     AT_NAME::restir::ApplyTemporalReuse(
-        ix, iy,
+        idx,
         width, height,
         ctxt,
         sampler,

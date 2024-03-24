@@ -217,7 +217,7 @@ namespace aten {
                 onRun, onClose, onMouseBtn, onMouseMove, onMouseWheel, onKey);
         }
 
-        int32_t window::Create(
+        int32_t Create(
             int32_t width, int32_t height, std::string_view title,
             bool is_offscreen,
             OnRunFunc onRun,

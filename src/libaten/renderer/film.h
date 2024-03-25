@@ -27,20 +27,14 @@ namespace aten
 
         const vec4& at(int32_t x, int32_t y) const;
 
-        vec4* image()
+        std::vector<aten::vec4>& image()
         {
-            if (m_image.size() > 0) {
-                return &m_image[0];
-            }
-            return nullptr;
+            return m_image;
         }
 
-        const vec4* image() const
+        const std::vector<aten::vec4>& image() const
         {
-            if (m_image.size() > 0) {
-                return &m_image[0];
-            }
-            return nullptr;
+            return m_image;
         }
 
         uint32_t width() const

@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 
+#include "AssetManager.h"
+
 #include "texture/texture.h"
 #include "scene/host_scene_context.h"
 
@@ -23,12 +25,14 @@ namespace aten {
         static std::shared_ptr<texture> load(
             const std::string& path,
             context& ctxt,
+            aten::AssetManager& asset_manager,
             ImgFormat fmt = ImgFormat::Fmt8Bit);
 
         static std::shared_ptr<texture> load(
             const std::string& tag,
             const std::string& path,
             context& ctxt,
+            aten::AssetManager& asset_manager,
             ImgFormat fmt = ImgFormat::Fmt8Bit);
     };
 }

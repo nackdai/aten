@@ -4,7 +4,6 @@
 #include "stb_image.h"
 
 #include "ImageLoader.h"
-#include "AssetManager.h"
 #include "utility.h"
 
 namespace aten {
@@ -18,6 +17,7 @@ namespace aten {
     std::shared_ptr<texture> ImageLoader::load(
         const std::string& path,
         context& ctxt,
+        aten::AssetManager& asset_manager,
         ImgFormat fmt/*= ImgFormat::Fmt8Bit*/)
     {
         std::string pathname;
@@ -30,7 +30,7 @@ namespace aten {
             extname,
             filename);
 
-        return load(filename, path, ctxt, fmt);
+        return load(filename, path, ctxt, asset_manager, fmt);
     }
 
     template <class TYPE>
@@ -69,6 +69,7 @@ namespace aten {
         const std::string& tag,
         const std::string& path,
         context& ctxt,
+        aten::AssetManager& asset_manager,
         ImgFormat fmt/*= ImgFormat::Fmt8Bit*/)
     {
         std::string fullpath = path;
@@ -88,7 +89,7 @@ namespace aten {
 
         std::string texname = filename + extname;
 
-        auto stored_tex = AssetManager::getTex(tag);
+        auto stored_tex = asset_manager.getTex(tag);
 
         if (stored_tex) {
             AT_PRINTF("There is same tag texture. [%s]\n", tag.c_str());
@@ -140,7 +141,7 @@ namespace aten {
 
         if (tex) {
             // Store as shared_ptr
-            AssetManager::registerTex(tag, tex);
+            asset_manager.registerTex(tag, tex);
         }
         else {
             AT_ASSERT(false);
@@ -149,7 +150,7 @@ namespace aten {
         }
 
         // Get as shared_ptr
-        auto ret = AssetManager::getTex(tag);
+        auto ret = asset_manager.getTex(tag);
         AT_ASSERT(ret);
 
         return ret;

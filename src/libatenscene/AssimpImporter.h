@@ -1,6 +1,7 @@
 #pragma once
 
 #include "aten.h"
+#include "AssetManager.h"
 
 namespace aten
 {
@@ -18,6 +19,7 @@ namespace aten
             const std::string& path,
             std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
             context& ctxt,
+            aten::AssetManager& asset_manager,
             FuncCreateMaterial func_create_mtrl);
 
     private:
@@ -33,6 +35,7 @@ namespace aten
             const std::string& path,
             std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
             context& ctxt,
+            aten::AssetManager& asset_manager,
             FuncCreateMaterial func_create_mtrl);
 
         std::vector<std::string> mtrl_list_;

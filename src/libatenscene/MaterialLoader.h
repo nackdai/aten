@@ -4,13 +4,15 @@
 
 #include "aten.h"
 
+#include "AssetManager.h"
+
 namespace aten {
     class MaterialLoader {
         friend class SceneLoader;
 
     private:
-        MaterialLoader();
-        ~MaterialLoader();
+        MaterialLoader() = delete;
+        ~MaterialLoader() = delete;
 
     public:
         using MaterialCreator = std::function<material*(Values&)>;
@@ -21,7 +23,8 @@ namespace aten {
 
         static bool load(
             std::string_view path,
-            context& ctxt);
+            context& ctxt,
+            aten::AssetManager& asset_manager);
 
         static std::shared_ptr<material> create(
             const std::string& type,
@@ -34,7 +37,8 @@ namespace aten {
 #else
         static void onLoad(
             const void* xmlRoot,
-            context& ctxt);
+            context& ctxt,
+            aten::AssetManager& asset_manager);
 #endif
     };
 }

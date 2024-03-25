@@ -6,7 +6,6 @@
 
 #include "MaterialLoader.h"
 #include "ImageLoader.h"
-#include "AssetManager.h"
 #include "utility.h"
 
 namespace aten {
@@ -126,7 +125,7 @@ namespace aten {
     using GetValueFromFile = std::function<aten::PolymorphicValue(picojson::value&)>;
 #else
     template <class TYPE>
-    aten::PolymorphicValue getValue(const tinyxml2::XMLElement* e, aten::context& ctxt)
+    aten::PolymorphicValue getValue(const tinyxml2::XMLElement* e, aten::context& ctxt, aten::AssetManager& asset_manager)
     {
         AT_ASSERT(false);
         PolymorphicValue ret;
@@ -134,7 +133,7 @@ namespace aten {
     }
 
     template <>
-    aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLElement* e, aten::context& ctxt)
+    aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLElement* e, aten::context& ctxt, aten::AssetManager& asset_manager)
     {
         aten::PolymorphicValue val;
 
@@ -154,7 +153,7 @@ namespace aten {
     }
 
     template <>
-    aten::PolymorphicValue getValue<real>(const tinyxml2::XMLElement* e, aten::context& ctxt)
+    aten::PolymorphicValue getValue<real>(const tinyxml2::XMLElement* e, aten::context& ctxt, aten::AssetManager& asset_manager)
     {
         aten::PolymorphicValue v;
         v = (real)e->DoubleText();
@@ -162,7 +161,7 @@ namespace aten {
     }
 
     template <>
-    aten::PolymorphicValue getValue<texture*>(const tinyxml2::XMLElement* e, aten::context& ctxt)
+    aten::PolymorphicValue getValue<texture*>(const tinyxml2::XMLElement* e, aten::context& ctxt, aten::AssetManager& asset_manager)
     {
         auto s = e->GetText();
 
@@ -176,7 +175,7 @@ namespace aten {
             extname,
             filename);
 
-        auto tex = ImageLoader::load(s, ctxt);
+        auto tex = ImageLoader::load(s, ctxt, asset_manager);
 
         aten::PolymorphicValue v;
         v = tex;
@@ -184,15 +183,14 @@ namespace aten {
         return v;
     }
 
-    using GetValueFromFile = std::function<aten::PolymorphicValue(const tinyxml2::XMLElement*, aten::context&)>;
+    using GetValueFromFile = std::function<aten::PolymorphicValue(const tinyxml2::XMLElement*, aten::context&, aten::AssetManager&)>;
 #endif
 
-    static GetValueFromFile g_funcGetValueFromFile[] = {
+    static std::array<GetValueFromFile, static_cast<size_t>(MtrlParamType::Num)> g_funcGetValueFromFile = {
         getValue<vec3>,
         getValue<texture*>,
         getValue<real>,
     };
-    AT_STATICASSERT(AT_COUNTOF(g_funcGetValueFromFile) == (int32_t)MtrlParamType::Num);
 
     std::map<std::string, MtrlParamType> g_paramtypes = {
         std::pair<std::string, MtrlParamType>("baseColor", MtrlParamType::Vec3),
@@ -252,7 +250,7 @@ namespace aten {
                 auto mtrlName = it->first;
 
                 // Check if there is same name material.
-                auto mtrl = AssetManager::getMtrl(mtrlName);
+                auto mtrl = asset_manager.getMtrl(mtrlName);
 
                 if (mtrl) {
                     AT_PRINTF("There is same tag material. [%s]\n", mtrlName.c_str());
@@ -302,7 +300,7 @@ namespace aten {
                     mtrl = create(mtrlType, mtrlValues);
 
                     if (mtrl) {
-                        AssetManager::registerMtrl(mtrlName, mtrl);
+                        asset_manager.registerMtrl(mtrlName, mtrl);
                     }
                     else {
                         AT_ASSERT(false);
@@ -347,7 +345,8 @@ namespace aten {
 
     bool MaterialLoader::load(
         std::string_view path,
-        context& ctxt)
+        context& ctxt,
+        aten::AssetManager& asset_manager)
     {
         std::string fullpath(path);
         if (!g_base.empty()) {
@@ -365,7 +364,7 @@ namespace aten {
 
         auto root = xml.FirstChildElement("root");
         if (root) {
-            onLoad(root, ctxt);
+            onLoad(root, ctxt, asset_manager);
         }
         else {
             // TODO
@@ -379,7 +378,8 @@ namespace aten {
 
     void MaterialLoader::onLoad(
         const void* xmlRoot,
-        context& ctxt)
+        context& ctxt,
+        aten::AssetManager& asset_manager)
     {
         const tinyxml2::XMLElement* root = (const tinyxml2::XMLElement*)xmlRoot;
 
@@ -396,7 +396,7 @@ namespace aten {
                     mtrlName = child->GetText();
 
                     // Check if there is same name material.
-                    mtrl = AssetManager::getMtrl(mtrlName);
+                    mtrl = asset_manager.getMtrl(mtrlName);
 
                     if (mtrl) {
                         AT_PRINTF("There is same tag material. [%s]\n", mtrlName.c_str());
@@ -415,7 +415,7 @@ namespace aten {
                         auto funcGetValue = g_funcGetValueFromFile[(int32_t)paramType];
 
                         // Get value from json.
-                        auto value = funcGetValue(child, ctxt);
+                        auto value = funcGetValue(child, ctxt, asset_manager);
 
                         mtrlValues.add(paramName, value);
                     }
@@ -432,7 +432,7 @@ namespace aten {
                 mtrl = create(mtrlType, ctxt, mtrlValues);
 
                 if (mtrl) {
-                    AssetManager::registerMtrl(mtrlName, mtrl);
+                    asset_manager.registerMtrl(mtrlName, mtrl);
                 }
                 else {
                     AT_ASSERT(false);

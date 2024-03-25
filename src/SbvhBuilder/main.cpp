@@ -68,8 +68,6 @@ int32_t main(int32_t argc, char* argv[])
 
     aten::SetCurrentDirectoryFromExe();
 
-    aten::AssetManager::suppressWarnings();
-
     aten::context ctxt;
 
     // TODO
@@ -78,13 +76,15 @@ int32_t main(int32_t argc, char* argv[])
     mtrlParam.type = aten::MaterialType::Emissive;
     mtrlParam.baseColor = aten::vec3(1);
 
+    aten::AssetManager asset_manager;
+
     auto emit = ctxt.CreateMaterialWithMaterialParameter(
         mtrlParam,
         nullptr, nullptr, nullptr);
-    aten::AssetManager::registerMtrl("light", emit);
+    asset_manager.registerMtrl("light", emit);
 
     std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-    aten::ObjLoader::load(objs, opt.input, ctxt);
+    aten::ObjLoader::load(objs, opt.input, ctxt, asset_manager);
 
     if (objs.empty()) {
         // TODO

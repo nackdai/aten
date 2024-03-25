@@ -33,7 +33,7 @@ static int32_t g_prevY = 0;
 
 static std::vector<std::vector<aten::ThreadedSbvhNode>> g_voxels;
 
-void onRun(aten::window* window)
+bool onRun()
 {
     if (g_isCameraDirty) {
         g_camera.update();
@@ -51,6 +51,8 @@ void onRun(aten::window* window)
 
     const auto& pos = g_camera.getPos();
     ImGui::Text("%.3f, %.3d, %.3f", pos.x, pos.y, pos.z);
+
+    return true;
 }
 
 void onClose()
@@ -207,7 +209,9 @@ int32_t main(int32_t argc, char* argv[])
     }
 #endif
 
-    aten::window::init(
+    auto wnd = std::make_shared<aten::window>();
+
+    auto id = wnd->Create(
         WIDTH, HEIGHT,
         TITLE,
         onRun,
@@ -216,6 +220,14 @@ int32_t main(int32_t argc, char* argv[])
         onMouseMove,
         onMouseWheel,
         onKey);
+
+    if (id >= 0) {
+        g_ctxt.SetIsWindowInitialized(true);
+    }
+    else {
+        AT_ASSERT(false);
+        return 1;
+    }
 
     // TODO
     aten::vec3 pos(0, 0, 3);
@@ -241,9 +253,9 @@ int32_t main(int32_t argc, char* argv[])
         "../shader/drawobj_vs.glsl",
         "../shader/drawobj_fs.glsl");
 
-    aten::window::run();
+    wnd->Run();
 
-    aten::window::terminate();
+    wnd->Terminate();
 
     return 1;
 }

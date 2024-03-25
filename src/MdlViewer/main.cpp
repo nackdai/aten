@@ -321,7 +321,9 @@ int32_t main(int32_t argc, char* argv[])
 
     aten::ImageLoader::setBasePath(opt.texDir.c_str());
 
-    if (!aten::MaterialLoader::load(opt.mtrl.c_str(), g_ctxt)) {
+    aten::AssetManager asset_manager;
+
+    if (!aten::MaterialLoader::load(opt.mtrl.c_str(), g_ctxt, asset_manager)) {
         return 0;
     }
 

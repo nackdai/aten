@@ -172,7 +172,8 @@ void onKey(bool press, aten::Key key)
 
 std::shared_ptr<aten::PolygonObject> loadObj(
     std::string_view objpath,
-    std::string_view mtrlpath)
+    std::string_view mtrlpath,
+    aten::AssetManager& asset_manager)
 {
     std::string pathname;
     std::string extname;
@@ -192,31 +193,31 @@ std::shared_ptr<aten::PolygonObject> loadObj(
         auto mtrl = g_ctxt.CreateMaterialWithMaterialParameter(
             param,
             nullptr, nullptr, nullptr);
-        aten::AssetManager::registerMtrl("dummy", mtrl);
+        asset_manager.registerMtrl("dummy", mtrl);
     }
     else {
-        aten::MaterialLoader::load(mtrlpath, g_ctxt);
+        aten::MaterialLoader::load(mtrlpath, g_ctxt, asset_manager);
     }
 
     std::vector<std::shared_ptr<aten::PolygonObject>> objs;
     aten::AssimpImporter::load(
         "../../asset/simpleScene/box.fbx",
         objs,
-        g_ctxt,
+        g_ctxt, asset_manager,
         [&](const std::string& name,
             aten::context& ctxt,
             const aten::MaterialParameter& mtrl_param,
             const std::string& albedo,
             const std::string& nml)
         {
-            auto mtrl = aten::AssetManager::getMtrl(name);
+            auto mtrl = asset_manager.getMtrl(name);
             if (!mtrl) {
                 auto albedo_map = albedo.empty()
                     ? nullptr
-                    : aten::ImageLoader::load(pathname + albedo, ctxt);
+                    : aten::ImageLoader::load(pathname + albedo, ctxt, asset_manager);
                 auto nml_map = nml.empty()
                     ? nullptr
-                    : aten::ImageLoader::load(pathname + nml, ctxt);
+                    : aten::ImageLoader::load(pathname + nml, ctxt, asset_manager);
 
                 mtrl = ctxt.CreateMaterialWithMaterialParameter(
                     mtrl_param,
@@ -303,7 +304,9 @@ int32_t main(int32_t argc, char* argv[])
         return 1;
     }
 
-    g_obj = loadObj("box.fbx", "");
+    aten::AssetManager asset_manager;
+
+    g_obj = loadObj("box.fbx", "", asset_manager);
 
     g_ctxt.InitAllTextureAsGLTexture();
 

@@ -540,11 +540,12 @@ int32_t main()
         vfov,
         WIDTH, HEIGHT);
 
-    Scene::makeScene(g_ctxt, &g_scene);
+    aten::AssetManager asset_manager;
+    Scene::makeScene(g_ctxt, &g_scene, asset_manager);
     g_scene.build(g_ctxt);
 
 #ifdef ENABLE_ENVMAP
-    auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
+    auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt, asset_manager);
     auto bg = std::make_shared<aten::envmap>();
     bg->init(envmap);
     auto ibl = std::make_shared<aten::ImageBasedLight>(bg);

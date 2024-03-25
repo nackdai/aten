@@ -252,7 +252,8 @@ void onKey(bool press, aten::Key key)
 void loadObj(
     std::string_view objpath,
     std::string_view mtrlpath,
-    std::vector<std::shared_ptr<aten::PolygonObject>>& objs)
+    std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
+    aten::AssetManager& asset_manager)
 {
     std::string pathname;
     std::string extname;
@@ -272,13 +273,13 @@ void loadObj(
         auto mtrl = g_ctxt.CreateMaterialWithMaterialParameter(
             param,
             nullptr, nullptr, nullptr);
-        aten::AssetManager::registerMtrl("dummy", mtrl);
+        asset_manager.registerMtrl("dummy", mtrl);
     }
     else {
-        aten::MaterialLoader::load(mtrlpath, g_ctxt);
+        aten::MaterialLoader::load(mtrlpath, g_ctxt, asset_manager);
     }
 
-    aten::ObjLoader::load(objs, objpath, g_ctxt, nullptr, true);
+    aten::ObjLoader::load(objs, objpath, g_ctxt, asset_manager, nullptr, true);
 
     g_obj_aabb.empty();
     for (const auto& obj : objs) {
@@ -353,8 +354,10 @@ int32_t main(int32_t argc, char* argv[])
         return 1;
     }
 
+    aten::AssetManager asset_manager;
+
     //loadObj("../../asset/models/sponza/sponza.obj", "", g_objs);
-    loadObj("../../asset/bunny/bunny.obj", "", g_objs);
+    loadObj("../../asset/bunny/bunny.obj", "", g_objs, asset_manager);
     //loadObj("../../asset/dragon/dragon.obj", "", g_objs);
     //loadObj("../../asset/models/plane/plane.obj", "", g_objs);
     //loadObj("../../asset/cornellbox/orig.obj", "", g_objs);

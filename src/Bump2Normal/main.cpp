@@ -214,7 +214,10 @@ int32_t main(int32_t argc, char* argv[])
         return 1;
     }
 
-    app->Init();
+    if (!app->Init()) {
+        AT_ASSERT(false);
+        return 1;
+    }
 
     aten::SetCurrentDirectoryFromExe();
 

@@ -8,13 +8,13 @@ namespace idaten {
     public:
         CudaMemory() {}
 
-        CudaMemory(uint32_t bytes);
-        CudaMemory(const void* p, uint32_t bytes);
+        CudaMemory(size_t bytes);
+        CudaMemory(const void* p, size_t bytes);
 
         virtual ~CudaMemory();
 
     public:
-        void resize(uint32_t bytes);
+        void resize(size_t bytes);
 
         const void* data() const
         {
@@ -25,14 +25,14 @@ namespace idaten {
             return m_device;
         }
 
-        uint32_t bytes() const
+        size_t bytes() const
         {
             return m_bytes;
         }
 
-        uint32_t writeFromHostToDeviceByBytes(const void* p, uint32_t sizeBytes, uint32_t offsetBytes = 0);
-        uint32_t readFromDeviceToHostByBytes(void* p, uint32_t bytes);
-        uint32_t readFromDeviceToHostByBytesWithOffset(void* p, uint32_t bytes, uint32_t offset_bytes);
+        size_t writeFromHostToDeviceByBytes(const void* p, size_t sizeBytes, size_t offsetBytes = 0);
+        size_t readFromDeviceToHostByBytes(void* p, size_t bytes);
+        size_t readFromDeviceToHostByBytesWithOffset(void* p, size_t bytes, size_t offset_bytes);
 
         operator void*()
         {
@@ -46,11 +46,11 @@ namespace idaten {
             return (m_device == nullptr);
         }
 
-        static uint32_t getHeapSize();
+        static size_t getHeapSize();
 
     private:
         uint8_t* m_device{ nullptr };
-        uint32_t m_bytes{ 0 };
+        size_t m_bytes{ 0 };
     };
 
     template <class _T>
@@ -58,12 +58,12 @@ namespace idaten {
     public:
         TypedCudaMemory() {}
 
-        TypedCudaMemory(uint32_t num)
+        TypedCudaMemory(size_t num)
             : CudaMemory(sizeof(_T) * num)
         {
             m_num = num;
         }
-        TypedCudaMemory(const _T* p, uint32_t num)
+        TypedCudaMemory(const _T* p, size_t num)
             : CudaMemory(p, sizeof(_T) * num)
         {
             m_num = num;
@@ -74,24 +74,24 @@ namespace idaten {
         using value_type = _T;
 
     public:
-        void resize(uint32_t num)
+        void resize(size_t num)
         {
             CudaMemory::resize(sizeof(_T) * num);
             m_num = num;
         }
 
-        uint32_t writeFromHostToDeviceByNum(const _T* p, uint32_t num)
+        size_t writeFromHostToDeviceByNum(const _T* p, size_t num)
         {
             auto ret = CudaMemory::writeFromHostToDeviceByBytes(p, sizeof(_T) * num);
             return ret;
         }
 
-        uint32_t readFromDeviceToHostByNum(void* p, uint32_t num = 0)
+        size_t readFromDeviceToHostByNum(void* p, size_t num = 0)
         {
             return CudaMemory::readFromDeviceToHostByBytes(p, sizeof(_T) * num);
         }
 
-        uint32_t num() const
+        size_t num() const
         {
             return m_num;
         }
@@ -114,13 +114,13 @@ namespace idaten {
             return (uint32_t)sizeof(_T);
         }
 
-        uint32_t readFromDeviceToHost(std::vector<_T>& host)
+        size_t readFromDeviceToHost(std::vector<_T>& host)
         {
             host.resize(m_num);
             return readFromDeviceToHostByNum(&host[0], m_num);
         }
 
-        uint32_t readFromDeviceToHostByNumWithOffset(_T* host, uint32_t num, uint32_t offset_num)
+        size_t readFromDeviceToHostByNumWithOffset(_T* host, size_t num, size_t offset_num)
         {
             auto bytes = sizeof(_T) * num;
             auto offset_bytes = sizeof(_T) * offset_num;
@@ -128,6 +128,6 @@ namespace idaten {
         }
 
     private:
-        uint32_t m_num{ 0 };
+        size_t m_num{ 0 };
     };
 }

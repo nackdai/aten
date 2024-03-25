@@ -287,15 +287,14 @@ bool onRun()
 
     if (g_willTakeScreenShot)
     {
-        static char buffer[1024];
-        ::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
+        auto buffer = aten::StringFormat("sc_%d.png\0", g_cntScreenShot);
 
         g_visualizer->takeScreenshot(buffer);
 
         g_willTakeScreenShot = false;
         g_cntScreenShot++;
 
-        AT_PRINTF("Take Screenshot[%s]\n", buffer);
+        AT_PRINTF("Take Screenshot[%s]\n", buffer.c_str());
     }
 
     if (g_willShowGUI)

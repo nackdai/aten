@@ -1,5 +1,7 @@
 #pragma once
 
+#include "AssetManager.h"
+
 #include "aten.h"
 
 namespace aten
@@ -24,12 +26,14 @@ namespace aten
         static std::shared_ptr<aten::PolygonObject> load(
             std::string_view path,
             context& ctxt,
+            aten::AssetManager& asset_manager,
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool needComputeNormalOntime = false);
         static std::shared_ptr<aten::PolygonObject> load(
             std::string_view tag,
             std::string_view path,
             context& ctxt,
+            aten::AssetManager& asset_manager,
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool needComputeNormalOntime = false);
 
@@ -37,6 +41,7 @@ namespace aten
             std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
             std::string_view path,
             context& ctxt,
+            aten::AssetManager& asset_manager,
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool willSeparate = false,
             bool needComputeNormalOntime = false);
@@ -45,6 +50,7 @@ namespace aten
             std::string_view tag,
             std::string_view path,
             context& ctxt,
+            aten::AssetManager& asset_manager,
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool willSeparate = false,
             bool needComputeNormalOntime = false);

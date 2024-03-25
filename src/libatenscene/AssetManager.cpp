@@ -3,139 +3,72 @@
 #include "AssetManager.h"
 
 namespace aten {
-    struct Asset {
-        std::shared_ptr<texture> tex;
-        std::shared_ptr<material> mtrl;
-        std::shared_ptr<aten::PolygonObject> obj;
-
-        AssetManager::AssetType type;
-
-        Asset() = default;
-        ~Asset() = default;
-        Asset(const std::shared_ptr<texture> t)
-            : tex(t), type(AssetManager::AssetType::Texture) {}
-        Asset(const std::shared_ptr<material> m)
-            : mtrl(m), type(AssetManager::AssetType::Material) {}
-        Asset(const std::shared_ptr<aten::PolygonObject> o)
-            : obj(o), type(AssetManager::AssetType::Object) {}
-
-        Asset(const Asset& rhs) = delete;
-        Asset& operator=(const Asset& rhs) = delete;
-        Asset& operator=(Asset&& rhs) = delete;
-
-        Asset(Asset&& rhs)
-        {
-            type = rhs.type;
-
-            switch (type) {
-            case AssetManager::AssetType::Texture:
-                tex = std::move(rhs.tex);
-                break;
-            case AssetManager::AssetType::Material:
-                mtrl = std::move(rhs.mtrl);
-                break;
-            case AssetManager::AssetType::Object:
-                obj = std::move(rhs.obj);
-                break;
-            default:
-                AT_ASSERT(false);
-                break;
-            }
-        }
-
-        bool operator==(const Asset& rhs) const
-        {
-            bool ret = false;
-
-            switch (type) {
-            case AssetManager::AssetType::Texture:
-                ret = tex == rhs.tex;
-                break;
-            case AssetManager::AssetType::Material:
-                ret = mtrl == rhs.mtrl;
-                break;
-            case AssetManager::AssetType::Object:
-                ret = obj == rhs.obj;
-                break;
-            default:
-                AT_ASSERT(false);
-                break;
-            }
-
-            return ret;
-        }
-    };
-
-    using AssetStorage = std::map<std::string, Asset>;
-    static AssetStorage g_assets[AssetManager::AssetType::Num];
-
-    static bool g_enableWarnings = true;
-
-    static const char* AssetTypeName[AssetManager::AssetType::Num] = {
+    static constexpr std::array<char*, static_cast<size_t>(AssetManager::AssetType::Num)> AssetTypeName = {
         "Texture",
         "Material",
         "Object",
+        "Invalid",
     };
 
-    template <class T>
-    static bool registerAsset(
-        std::string_view name,
-        const std::shared_ptr<T> asset,
-        AssetManager::AssetType type)
-    {
-        auto& mapAsset = g_assets[type];
+    class AssetRegister {
+    public:
+        template <class T>
+        static bool Register(
+            AssetManager& asset_manager,
+            std::string_view name,
+            std::shared_ptr<T>& asset,
+            AssetManager::AssetType type)
+        {
+            const auto idx = static_cast<int32_t>(type);
 
-        auto it = mapAsset.find(std::string(name));
-        if (it != mapAsset.end()) {
-            AT_PRINTF("Registered already [%s] (%s)\n", name.data(), AssetTypeName[type]);
-            return false;
+            auto& mapAsset = asset_manager.assets_[idx];
+
+            auto it = mapAsset.find(std::string(name));
+            if (it != mapAsset.end()) {
+                AT_PRINTF("Registered already [%s] (%s)\n", name.data(), AssetTypeName[idx]);
+                return false;
+            }
+
+            mapAsset.insert(std::pair<std::string, AssetManager::Asset>(name, AssetManager::Asset(asset)));
+
+            return true;
         }
+    };
 
-        mapAsset.insert(std::pair<std::string, Asset>(name, Asset(asset)));
-
-        return true;
-    }
-
-    static const Asset& getAsset(
+    std::optional<AssetManager::Asset> AssetManager::getAsset(
         std::string_view name,
         AssetManager::AssetType type)
     {
-        auto& mapAsset = g_assets[type];
+        auto& mapAsset = assets_[static_cast<int32_t>(type)];
 
         auto it = mapAsset.find(std::string(name));
 
         if (it == mapAsset.end()) {
-            //AT_ASSERT(false);
-            if (g_enableWarnings) {
-                AT_PRINTF("Asset is not registered [%s] (%s)\n", name.data(), AssetTypeName[type]);
-            }
-
-            static Asset dummy;
-
-            return dummy;
+            return std::nullopt;
         }
 
-        auto& asset = it->second;
-
-        return asset;
+        return it->second;
     }
 
-    bool AssetManager::registerMtrl(std::string_view name, const std::shared_ptr<material>& mtrl)
+    bool AssetManager::registerMtrl(std::string_view name, std::shared_ptr<material>& mtrl)
     {
         mtrl->setName(name);
 
-        return registerAsset(name, mtrl, AssetType::Material);
+        return AssetRegister::Register(*this, name, mtrl, AssetType::Material);
     }
 
     std::shared_ptr<material> AssetManager::getMtrl(std::string_view name)
     {
-        auto& asset = getAsset(name, AssetType::Material);
-        return asset.mtrl;
+        auto asset = getAsset(name, AssetType::Material);
+        if (asset) {
+            return asset.value().mtrl;
+        }
+        return nullptr;
     }
 
     std::shared_ptr<material> AssetManager::getMtrlByIdx(uint32_t idx)
     {
-        const auto& assets = g_assets[AssetType::Material];
+        const auto& assets = assets_[static_cast<int32_t>(AssetType::Material)];
         if (idx < assets.size()) {
             uint32_t pos = 0;
             for (auto it = assets.begin(); it != assets.end(); it++, pos++) {
@@ -149,36 +82,37 @@ namespace aten {
         return nullptr;
     }
 
-    bool AssetManager::registerTex(std::string_view name, const std::shared_ptr<texture>& tex)
+    bool AssetManager::registerTex(std::string_view name, std::shared_ptr<texture>& tex)
     {
-        return registerAsset(name, tex, AssetType::Texture);
+        return AssetRegister::Register(*this, name, tex, AssetType::Texture);
     }
 
     std::shared_ptr<texture> AssetManager::getTex(const std::string& name)
     {
         auto& asset = getAsset(name, AssetType::Texture);
-        return asset.tex;
+        if (asset) {
+            return asset.value().tex;
+        }
+        return nullptr;
     }
 
-    bool AssetManager::registerObj(std::string_view name, const std::shared_ptr<aten::PolygonObject>& obj)
+    bool AssetManager::registerObj(std::string_view name, std::shared_ptr<aten::PolygonObject>& obj)
     {
-        return registerAsset(name, obj, AssetType::Object);
+        return AssetRegister::Register(*this, name, obj, AssetType::Object);
     }
 
     std::shared_ptr<aten::PolygonObject> AssetManager::getObj(std::string_view name)
     {
         auto& asset = getAsset(name, AssetType::Object);
-        return asset.obj;
+        if (asset) {
+            return asset.value().obj;
+        }
+        return nullptr;
     }
 
     uint32_t AssetManager::getAssetNum(AssetManager::AssetType type)
     {
-        auto& assets = g_assets[type];
+        auto& assets = assets_[static_cast<int32_t>(type)];
         return static_cast<uint32_t>(assets.size());
-    }
-
-    void AssetManager::suppressWarnings()
-    {
-        g_enableWarnings = false;
     }
 }

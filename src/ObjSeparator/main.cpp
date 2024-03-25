@@ -65,15 +65,14 @@ int32_t main(int32_t argc, char* argv[])
 
     aten::SetCurrentDirectoryFromExe();
 
-    aten::AssetManager::suppressWarnings();
-
+    aten::AssetManager asset_manager;
     aten::context ctxt;
 
     std::vector<std::shared_ptr<aten::PolygonObject>> objs;
     aten::ObjLoader::load(
         objs,
         "../../asset/mansion/interior_bundled4_chairmove_1163769_606486_2.obj",
-        ctxt);
+        ctxt, asset_manager);
 
     if (objs.empty()) {
         // TODO

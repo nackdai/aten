@@ -69,7 +69,7 @@ void getCameraPosAndAt(
     fov = 45;
 }
 
-void makeScene(aten::scene* scene)
+void makeScene(aten::scene* scene, aten::AssetManager& asset_manager)
 {
     aten::MaterialParameter mtrlParam;
     mtrlParam.type = aten::MaterialType::Lambert;
@@ -79,9 +79,9 @@ void makeScene(aten::scene* scene)
         mtrlParam,
         nullptr, nullptr, nullptr);
 
-    aten::AssetManager::registerMtrl("m1", mtrl);
+    asset_manager.registerMtrl("m1", mtrl);
 
-    auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj", g_ctxt);
+    auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj", g_ctxt, asset_manager);
     auto teapot = aten::TransformableFactory::createInstance<aten::PolygonObject>(g_ctxt, obj, aten::mat4::Identity);
     scene->add(teapot);
 
@@ -515,7 +515,9 @@ int32_t main()
         vfov,
         WIDTH, HEIGHT);
 
-    makeScene(&g_scene);
+    aten::AssetManager asset_manager;
+
+    makeScene(&g_scene, asset_manager);
     g_scene.build(g_ctxt);
 
     g_tracer.getCompaction().init(
@@ -524,7 +526,7 @@ int32_t main()
 
     {
         // IBL
-        g_scene_light.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
+        g_scene_light.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt, asset_manager);
         g_scene_light.envmap = std::make_shared<aten::envmap>();
         g_scene_light.envmap->init(g_scene_light.envmap_texture);
         g_scene_light.ibl = std::make_shared<aten::ImageBasedLight>(g_scene_light.envmap);

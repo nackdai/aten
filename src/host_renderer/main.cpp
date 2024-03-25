@@ -245,7 +245,8 @@ int32_t main(int32_t argc, char* argv[])
         WIDTH, HEIGHT);
 #endif
 
-    Scene::makeScene(g_ctxt, &g_scene);
+    aten::AssetManager asset_manager;
+    Scene::makeScene(g_ctxt, &g_scene, asset_manager);
 
     g_scene.build(g_ctxt);
 

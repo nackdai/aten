@@ -7,7 +7,7 @@ std::shared_ptr<aten::DeformAnimation> getDeformAnm();
 
 class CornellBoxScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -17,7 +17,7 @@ public:
 
 class RandomScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -27,7 +27,7 @@ public:
 
 class MtrlTestScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -37,7 +37,7 @@ public:
 
 class ObjectScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -47,7 +47,7 @@ public:
 
 class PointLightScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -58,7 +58,7 @@ public:
 
 class DirectionalLightScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -69,7 +69,7 @@ public:
 
 class SpotLightScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -80,7 +80,7 @@ public:
 
 class ManyLightScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -91,7 +91,7 @@ public:
 
 class TexturesScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -101,7 +101,7 @@ public:
 
 class HideLightScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -111,7 +111,7 @@ public:
 
 class DisneyMaterialTestScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -121,7 +121,7 @@ public:
 
 class ObjCornellBoxScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -131,7 +131,7 @@ public:
 
 class SponzaScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -141,7 +141,7 @@ public:
 
 class BunnyScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -151,9 +151,7 @@ public:
 
 class DeformScene {
 public:
-    static void makeScene(
-        aten::context& ctxt,
-        aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -163,9 +161,7 @@ public:
 
 class DeformInBoxScene {
 public:
-    static void makeScene(
-        aten::context& ctxt,
-        aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -175,9 +171,7 @@ public:
 
 class AlphaBlendedObjCornellBoxScene {
 public:
-    static void makeScene(
-        aten::context& ctxt,
-        aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -187,9 +181,7 @@ public:
 
 class CryteckSponzaScene {
 public:
-    static void makeScene(
-        aten::context& ctxt,
-        aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -199,9 +191,7 @@ public:
 
 class ManyLightCryteckSponzaScene {
 public:
-    static void makeScene(
-        aten::context& ctxt,
-        aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,

@@ -1,9 +1,10 @@
 #include <vector>
+
 #include "tiny_obj_loader.h"
-#include "ObjLoader.h"
-#include "AssetManager.h"
-#include "utility.h"
+
 #include "ImageLoader.h"
+#include "ObjLoader.h"
+#include "utility.h"
 
 //#pragma optimize( "", off)
 
@@ -19,11 +20,12 @@ namespace aten
     std::shared_ptr<aten::PolygonObject> ObjLoader::load(
         std::string_view path,
         context& ctxt,
+        aten::AssetManager& asset_manager,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
         std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-        load(objs, path, ctxt, callback_crate_mtrl, needComputeNormalOntime);
+        load(objs, path, ctxt, asset_manager, callback_crate_mtrl, needComputeNormalOntime);
 
         return (!objs.empty() ? objs[0] : nullptr);
     }
@@ -32,11 +34,12 @@ namespace aten
         std::string_view tag,
         std::string_view path,
         context& ctxt,
+        aten::AssetManager& asset_manager,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
         std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-        load(objs, tag, path, ctxt, callback_crate_mtrl, needComputeNormalOntime);
+        load(objs, tag, path, ctxt, asset_manager, callback_crate_mtrl, needComputeNormalOntime);
 
         return (!objs.empty() ? objs[0] : nullptr);
     }
@@ -45,6 +48,7 @@ namespace aten
         std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
         std::string_view path,
         context& ctxt,
+        aten::AssetManager& asset_manager,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
@@ -64,7 +68,7 @@ namespace aten
             fullpath = g_base + "/" + fullpath;
         }
 
-        load(objs, filename, fullpath, ctxt, callback_crate_mtrl, willSeparate, needComputeNormalOntime);
+        load(objs, filename, fullpath, ctxt, asset_manager, callback_crate_mtrl, willSeparate, needComputeNormalOntime);
     }
 
     void ObjLoader::load(
@@ -72,11 +76,12 @@ namespace aten
         std::string_view tag,
         std::string_view path,
         context& ctxt,
+        aten::AssetManager& asset_manager,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
     {
-        auto asset_obj = AssetManager::getObj(tag);
+        auto asset_obj = asset_manager.getObj(tag);
         if (asset_obj) {
             AT_PRINTF("There is same tag object. [%s]\n", tag.data());
             objs.push_back(asset_obj);
@@ -236,7 +241,7 @@ namespace aten
                 if (m < 0 && !dst_shape) {
                     // If a material doesn't exist.
                     dst_shape = std::make_shared<aten::TriangleGroupMesh>();
-                    dst_shape->SetMaterial(AssetManager::getMtrlByIdx(0));
+                    dst_shape->SetMaterial(asset_manager.getMtrlByIdx(0));
                 }
                 else if (prev_mtrl_idx != m) {
                     // If different material appear.
@@ -268,7 +273,7 @@ namespace aten
                         // Apply new materil to the shape.
                         const auto& mtrl = mtrls[prev_mtrl_idx];
 
-                        auto aten_mtrl = AssetManager::getMtrl(mtrl.name);
+                        auto aten_mtrl = asset_manager.getMtrl(mtrl.name);
 
                         if (!aten_mtrl && callback_crate_mtrl) {
                             std::shared_ptr<material> new_mtrl(
@@ -311,28 +316,28 @@ namespace aten
 
                             // Albedo map.
                             if (!objmtrl.diffuse_texname.empty()) {
-                                auto tex = AssetManager::getTex(objmtrl.diffuse_texname.c_str());
+                                auto tex = asset_manager.getTex(objmtrl.diffuse_texname.c_str());
 
                                 if (tex) {
                                     albedoMap = tex.get();
                                 }
                                 else {
                                     std::string texname = pathname + "/" + objmtrl.diffuse_texname;
-                                    auto loaded_img = aten::ImageLoader::load(texname, ctxt);
+                                    auto loaded_img = aten::ImageLoader::load(texname, ctxt, asset_manager);
                                     albedoMap = loaded_img.get();
                                 }
                             }
 
                             // Normal map.
                             if (!objmtrl.bump_texname.empty()) {
-                                auto tex = AssetManager::getTex(objmtrl.bump_texname.c_str());
+                                auto tex = asset_manager.getTex(objmtrl.bump_texname.c_str());
 
                                 if (tex) {
                                     normalMap = tex.get();
                                 }
                                 else {
                                     std::string texname = pathname + "/" + objmtrl.bump_texname;
-                                    auto loaded_img = aten::ImageLoader::load(texname, ctxt);
+                                    auto loaded_img = aten::ImageLoader::load(texname, ctxt, asset_manager);
                                     normalMap = loaded_img.get();
                                 }
                             }
@@ -352,7 +357,7 @@ namespace aten
 
                         dst_shape->SetMaterial(mtrl);
 
-                        AssetManager::registerMtrl(mtrl->name(), mtrl);
+                        asset_manager.registerMtrl(mtrl->name(), mtrl);
                     }
                 }
 
@@ -415,7 +420,7 @@ namespace aten
             obj->setBoundingBox(aten::aabb(shapemin, shapemax));
 
             // TODO
-            AssetManager::registerObj(tag, obj);
+            asset_manager.registerObj(tag, obj);
 
             objs.push_back(std::move(obj));
         }

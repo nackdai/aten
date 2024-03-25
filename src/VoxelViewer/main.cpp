@@ -229,7 +229,7 @@ bool parseOption(
 }
 
 // TODO
-void loadObj(const Options& opt)
+void loadObj(const Options& opt, aten::AssetManager& asset_manager)
 {
 #if 0
     auto emit = new aten::emissive(aten::vec3(36, 33, 24));
@@ -249,9 +249,9 @@ void loadObj(const Options& opt)
         mtrlParam,
         nullptr, nullptr, nullptr);
 
-    aten::AssetManager::registerMtrl("m", mtrl);
+    asset_manager.registerMtrl("m", mtrl);
 
-    aten::ObjLoader::load(g_objs, opt.input, g_ctxt);
+    aten::ObjLoader::load(g_objs, opt.input, g_ctxt, asset_manager);
 #else
     aten::ObjLoader::load(g_objs, "../../asset/sponza/sponza.obj");
 
@@ -287,8 +287,6 @@ int32_t main(int32_t argc, char* argv[])
 
     aten::SetCurrentDirectoryFromExe();
 
-    aten::AssetManager::suppressWarnings();
-
     auto wnd = std::make_shared<aten::window>();
 
     auto id = wnd->Create(
@@ -308,7 +306,8 @@ int32_t main(int32_t argc, char* argv[])
         return 1;
     }
 
-    loadObj(g_opt);
+    aten::AssetManager asset_manager;
+    loadObj(g_opt, asset_manager);
 
     g_ctxt.InitAllTextureAsGLTexture();
 

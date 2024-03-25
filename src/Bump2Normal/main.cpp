@@ -10,7 +10,7 @@ public:
 
     bool Init()
     {
-        bump_map_ = aten::ImageLoader::load(args_.input, ctxt_);
+        bump_map_ = aten::ImageLoader::load(args_.input, ctxt_, asset_manager_);
 
         if (!bump_map_) {
             AT_ASSERT(false);
@@ -81,7 +81,6 @@ public:
 
     void onClose()
     {
-
     }
 
     void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
@@ -163,6 +162,11 @@ public:
         return args_.need_gui;
     }
 
+    aten::context& GetContext()
+    {
+        return ctxt_;
+    }
+
 private:
     struct Args {
         std::string input;
@@ -196,37 +200,44 @@ private:
 
     Normal2BumpBlitter blitter_;
 
+    aten::AssetManager asset_manager_;
+
     bool will_take_screenshot_{ false };
 };
 
 int32_t main(int32_t argc, char* argv[])
 {
-    Bump2NormalApp app;
+    auto app = std::make_shared<Bump2NormalApp>();
 
-    if (!app.ParseArgs(argc, argv)) {
+    if (!app->ParseArgs(argc, argv)) {
         AT_ASSERT(false);
         return 1;
     }
 
-    app.Init();
+    app->Init();
 
     aten::SetCurrentDirectoryFromExe();
 
     auto wnd = std::make_shared<aten::window>();
 
     auto id = wnd->Create(
-        app.width(), app.height(),
+        app->width(), app->height(),
         Bump2NormalApp::TITLE,
-        !app.NeedGui(),
-        std::bind(&Bump2NormalApp::onRun, &app),
-        std::bind(&Bump2NormalApp::onClose, &app));
+        !app->NeedGui(),
+        std::bind(&Bump2NormalApp::onRun, app),
+        std::bind(&Bump2NormalApp::onClose, app));
 
-    if (id < 0) {
+    if (id >= 0) {
+        app->GetContext().SetIsWindowInitialized(true);
+    }
+    else {
         AT_ASSERT(false);
         return 1;
     }
 
     wnd->Run();
+
+    app.reset();
 
     wnd->Terminate();
 

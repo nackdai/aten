@@ -91,6 +91,21 @@ namespace aten
                 ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             }
 
+            void ClearCallbacks()
+            {
+                // NOTE:
+                // If these callbacks are specified with std::bind, these callbacks might handle the instance.
+                // For example, if the instance is shared_ptr, these callbacks might keep the ownership of the instances.
+                // In that case, the instance might not be released as expected due to that these callbacks keep its ownership.
+                // So, in order to release the ownership, set nullptr to the callbacks explicitly.
+                on_run_ = nullptr;
+                on_close_ = nullptr;
+                on_mouse_btn_ = nullptr;
+                on_mouse_move_ = nullptr;
+                on_mouse_wheel_ = nullptr;
+                on_key_ = nullptr;
+            }
+
             GLFWwindow* wnd_{ nullptr };
             int32_t id_{ -1 };
 
@@ -466,6 +481,10 @@ namespace aten
                     running = false;
                 }
             }
+        }
+
+        for (auto& wnd : windows_) {
+            wnd->ClearCallbacks();
         }
     }
 

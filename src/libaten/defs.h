@@ -1,6 +1,62 @@
 #pragma once
 
+#include <cstdio>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <type_traits>
+
 #define NOMINMAX
+
+// NOTE:
+// In C++20, we can use std::format.
+namespace _format {
+    namespace detail {
+        // https://an-embedded-engineer.hateblo.jp/entry/2020/08/23/161317
+
+        // To call std::string::c_str automatically.
+        template<class T>
+        inline auto Convert(T&& value)
+        {
+            if constexpr (std::is_same_v<std::remove_cv_t<std::remove_reference_t<T>>, std::string>) {
+                return std::forward<T>(value).c_str();
+            }
+            return std::forward<T>(value);
+        }
+
+        template<class ... Args>
+        std::string StringFormat(const std::string_view format, Args&& ... args)
+        {
+            // NOTE:
+            // https://en.cppreference.com/w/cpp/io/c/fprintf
+            // Calling std::snprintf with zero buf_size and null pointer for buffer is useful (when the overhead of double-call is acceptable) to determine the necessary buffer size to contain the output:
+            const auto str_len = std::snprintf(nullptr, 0, format.data(), std::forward<Args>(args) ...);
+
+            if (str_len < 0) {
+                throw std::runtime_error("String Formatting Error");
+            }
+
+            // Add 1 byte for null character.
+            const auto buffer_size = str_len + sizeof(char);
+
+            std::unique_ptr<char[]> buffer(new char[buffer_size]);
+
+            std::snprintf(buffer.get(), buffer_size, format.data(), args ...);
+
+            return std::string(buffer.get(), buffer.get() + str_len);
+        }
+    }
+}
+
+namespace aten {
+    template<typename ... Args>
+    inline std::string StringFormat(const std::string_view format, Args&& ... args)
+    {
+        return _format::detail::StringFormat(
+            format,
+            _format::detail::Convert(std::forward<Args>(args)) ...);
+    }
+}
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
@@ -10,21 +66,13 @@
 
 #include "types.h"
 
-#define AT_VSPRINTF     vsprintf_s
-#define AT_SPRINTF      sprintf_s
-#define AT_FPRINTF      fprintf_s
-
 namespace aten {
-    inline void OutputDebugString(const char* format, ...)
+    template<typename ... Args>
+    inline void OutputDebugString(const std::string_view format, Args&& ... args)
     {
-        va_list argp;
-        char buf[256];
-        va_start(argp, format);
-        AT_VSPRINTF(buf, sizeof(buf), format, argp);
-        va_end(argp);
-
-        ::OutputDebugString(buf);
-        printf("%s", buf);
+        auto display_str = aten::StringFormat(format, std::forward<Args>(args) ...);
+        ::OutputDebugString(display_str.c_str());
+        printf("%s", display_str.c_str());
     }
 
     using AT_TIME = int64_t;
@@ -43,10 +91,6 @@ namespace aten {
 #include <cstring>
 
 #include "types.h"
-
-#define AT_VSPRINTF     vsnprintf
-#define AT_SPRINTF      snprintf
-#define AT_FPRINTF      fprintf
 
 namespace aten {
     using AT_TIME = timeval;

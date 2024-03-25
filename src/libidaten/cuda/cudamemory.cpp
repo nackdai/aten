@@ -3,14 +3,14 @@
 #include "cuda/cudautil.h"
 
 namespace idaten {
-    static std::atomic<uint32_t> g_heapsize(0);
+    static std::atomic<size_t> g_heapsize(0);
 
-    CudaMemory::CudaMemory(uint32_t bytes)
+    CudaMemory::CudaMemory(size_t bytes)
     {
         resize(bytes);
     }
 
-    CudaMemory::CudaMemory(const void* p, uint32_t bytes)
+    CudaMemory::CudaMemory(const void* p, size_t bytes)
     {
         resize(bytes);
         writeFromHostToDeviceByBytes(p, bytes);
@@ -21,7 +21,7 @@ namespace idaten {
         free();
     }
 
-    void CudaMemory::resize(uint32_t bytes)
+    void CudaMemory::resize(size_t bytes)
     {
         if (m_bytes != bytes) {
             free();
@@ -33,7 +33,7 @@ namespace idaten {
         }
     }
 
-    uint32_t CudaMemory::writeFromHostToDeviceByBytes(const void* p, uint32_t sizeBytes, uint32_t offsetBytes/*= 0*/)
+    size_t CudaMemory::writeFromHostToDeviceByBytes(const void* p, size_t sizeBytes, size_t offsetBytes/*= 0*/)
     {
         if (!m_device) {
             resize(sizeBytes);
@@ -51,7 +51,7 @@ namespace idaten {
         return sizeBytes;
     }
 
-    uint32_t CudaMemory::readFromDeviceToHostByBytes(void* p, uint32_t bytes)
+    size_t CudaMemory::readFromDeviceToHostByBytes(void* p, size_t bytes)
     {
         if (bytes == 0) {
             bytes = m_bytes;
@@ -67,7 +67,7 @@ namespace idaten {
         return bytes;
     }
 
-    uint32_t CudaMemory::readFromDeviceToHostByBytesWithOffset(void* p, uint32_t bytes, uint32_t offset_bytes)
+    size_t CudaMemory::readFromDeviceToHostByBytesWithOffset(void* p, size_t bytes, size_t offset_bytes)
     {
         if (bytes == 0) {
             bytes = m_bytes;
@@ -96,7 +96,7 @@ namespace idaten {
         m_bytes = 0;
     }
 
-    uint32_t CudaMemory::getHeapSize()
+    size_t CudaMemory::getHeapSize()
     {
         return g_heapsize.load();
     }

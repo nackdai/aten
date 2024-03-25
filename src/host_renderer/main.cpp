@@ -7,284 +7,274 @@ static int32_t WIDTH = 512;
 static int32_t HEIGHT = 512;
 static const char* TITLE = "app";
 
-//#define ENABLE_IBL
+#define ENABLE_IBL
 // #define ENABLE_EVERY_FRAME_SC
-// #define ENABLE_DOF
 //#define ENABLE_FEATURE_LINE
 
-#ifdef ENABLE_DOF
-static aten::ThinLensCamera g_camera;
-#else
-static aten::PinholeCamera g_camera;
-#endif
-
-static aten::AcceleratedScene<aten::sbvh> g_scene;
-static aten::context g_ctxt;
-
-static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
-static std::shared_ptr<aten::envmap> g_bg;
-static std::shared_ptr<aten::texture> g_envmap;
-
-static aten::PathTracing g_tracer;
-//static aten::SVGFRenderer g_tracer;
-//static aten::ReSTIRRenderer g_tracer;
-
-static std::shared_ptr<aten::visualizer> g_visualizer;
-
-//static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
-static aten::Film g_buffer(WIDTH, HEIGHT);
-
-static aten::FBO g_fbo;
-
-static aten::RasterizeRenderer g_rasterizerAABB;
-static aten::RasterizeRenderer g_rasterizer;
-
-static bool isExportedHdr = false;
-
+class HostRendererApp {
+public:
+    static constexpr int32_t ThreadNum
 #ifdef ENABLE_OMP
-static uint32_t g_threadnum = 8;
+    { 8 };
 #else
-static uint32_t g_threadnum = 1;
+    { 1 };
 #endif
 
-static uint32_t g_frameNo = 0;
-static float g_avgElapsed = 0.0f;
+    HostRendererApp() = default;
+    ~HostRendererApp() = default;
 
-void update()
-{
-    static float y = 0.0f;
-    static float d = -0.1f;
+    HostRendererApp(const HostRendererApp&) = delete;
+    HostRendererApp(HostRendererApp&&) = delete;
+    HostRendererApp operator=(const HostRendererApp&) = delete;
+    HostRendererApp operator=(HostRendererApp&&) = delete;
 
-    auto obj = getMovableObj();
-
-    if (obj)
+    bool Init()
     {
-        auto t = obj->getTrans();
+        visualizer_ = aten::visualizer::init(WIDTH, HEIGHT);
 
-        if (y >= 0.0f)
-        {
-            d = -0.1f;
+        gamma_.init(
+            WIDTH, HEIGHT,
+            "../shader/fullscreen_vs.glsl",
+            "../shader/gamma_fs.glsl");
+
+        visualizer_->addPostProc(&gamma_);
+
+        rasterizer_.init(
+            WIDTH, HEIGHT,
+            "../shader/ssrt_vs.glsl",
+            "../shader/ssrt_gs.glsl",
+            "../shader/ssrt_fs.glsl");
+        aabb_rasterizer_.init(
+            WIDTH, HEIGHT,
+            "../shader/simple3d_vs.glsl",
+            "../shader/simple3d_fs.glsl");
+
+        if constexpr (std::is_member_function_pointer_v<decltype(&decltype(renderer_)::SetMotionDepthBuffer)>) {
+            fbo_.asMulti(2);
+            fbo_.init(
+                WIDTH, HEIGHT,
+                aten::PixelFormat::rgba32f,
+                true);
         }
-        else if (y <= -0.5f)
-        {
-            d = 0.1f;
-        }
 
-        y += d;
-        t.y += d;
+        aten::vec3 lookfrom;
+        aten::vec3 lookat;
+        real fov;
 
-        obj->setTrans(t);
-        obj->update();
+        Scene::getCameraPosAndAt(lookfrom, lookat, fov);
 
-        auto accel = g_scene.getAccel();
-        accel->update(g_ctxt);
-    }
-}
-
-bool display()
-{
-    // update();
-
-    g_camera.update();
-
-    aten::Destination dst;
-    {
-        dst.width = WIDTH;
-        dst.height = HEIGHT;
-        dst.maxDepth = 3;
-        dst.russianRouletteDepth = 3;
-        dst.sample = 1;
-        dst.buffer = &g_buffer;
-    }
-
-    if constexpr (std::is_member_function_pointer_v<decltype(&decltype(g_tracer)::SetMotionDepthBuffer)>) {
-        g_rasterizer.drawSceneForGBuffer(
-            g_tracer.GetFrameCount(),
-            g_ctxt,
-            &g_scene,
-            &g_camera,
-            g_fbo);
-
-        g_tracer.SetMotionDepthBuffer(g_fbo, 1);
-    }
-
-    aten::timer timer;
-    timer.begin();
-
-    // Trace rays.
-    g_tracer.render(g_ctxt, dst, &g_scene, &g_camera);
-
-    auto elapsed = timer.end();
-
-    g_avgElapsed = g_avgElapsed * g_frameNo + elapsed;
-    g_avgElapsed /= (g_frameNo + 1);
-
-    AT_PRINTF("Elapsed %f[ms] / Avg %f[ms]\n", elapsed, g_avgElapsed);
-
-    if (!isExportedHdr)
-    {
-        isExportedHdr = true;
-
-        // Export to hdr format.
-        aten::HDRExporter::save(
-            "result.hdr",
-            g_buffer.image(),
+        camera_.Initalize(
+            lookfrom,
+            lookat,
+            aten::vec3(0, 1, 0),
+            fov,
+            real(0.1), real(10000.0),
             WIDTH, HEIGHT);
+
+        aten::AssetManager asset_manager;
+        Scene::makeScene(ctxt_, &scene_, asset_manager);
+
+        scene_.build(ctxt_);
+
+#ifdef ENABLE_IBL
+        envmap_ = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager);
+
+        bg_ = std::make_shared<aten::envmap>();
+        bg_->init(envmap_);
+
+        auto ibl = std::make_shared<aten::ImageBasedLight>(bg_);
+        scene_.addImageBasedLight(ctxt_, ibl);
+#endif
+
+#ifdef ENABLE_FEATURE_LINE
+        renderer_.enableFeatureLine(true);
+#endif
+
+        return true;
     }
 
-    aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
-    aten::RasterizeRenderer::clearBuffer(
-        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
-        clear_color,
-        1.0f,
-        0);
+    void update()
+    {
+        static float y = 0.0f;
+        static float d = -0.1f;
 
-    g_visualizer->renderPixelData(g_buffer.image(), g_camera.needRevert());
+        auto obj = getMovableObj();
+
+        if (obj)
+        {
+            auto t = obj->getTrans();
+
+            if (y >= 0.0f)
+            {
+                d = -0.1f;
+            }
+            else if (y <= -0.5f)
+            {
+                d = 0.1f;
+            }
+
+            y += d;
+            t.y += d;
+
+            obj->setTrans(t);
+            obj->update();
+
+            auto accel = scene_.getAccel();
+            accel->update(ctxt_);
+        }
+    }
+
+    bool Run()
+    {
+        // update();
+
+        camera_.update();
+
+        aten::Destination dst;
+        {
+            dst.width = WIDTH;
+            dst.height = HEIGHT;
+            dst.maxDepth = 3;
+            dst.russianRouletteDepth = 3;
+            dst.sample = 1;
+            dst.buffer = &buffer_;
+        }
+
+        if constexpr (std::is_member_function_pointer_v<decltype(&decltype(renderer_)::SetMotionDepthBuffer)>) {
+            rasterizer_.drawSceneForGBuffer(
+                renderer_.GetFrameCount(),
+                ctxt_,
+                &scene_,
+                &camera_,
+                fbo_);
+
+            renderer_.SetMotionDepthBuffer(fbo_, 1);
+        }
+
+        const auto frame_cnt = renderer_.GetFrameCount();
+
+        aten::timer timer;
+        timer.begin();
+
+        // Trace rays.
+        renderer_.render(ctxt_, dst, &scene_, &camera_);
+
+        const auto elapsed = timer.end();
+        avg_elapsed_ = avg_elapsed_ * frame_cnt + elapsed;
+        avg_elapsed_ /= (frame_cnt + 1);
+
+        AT_PRINTF("Elapsed %f[ms] / Avg %f[ms]\n", elapsed, avg_elapsed_);
+
+        // TODO
+        if (need_exporte_as_hdr_)
+        {
+            need_exporte_as_hdr_ = false;
+
+            // Export to hdr format.
+            aten::HDRExporter::save(
+                "result.hdr",
+                buffer_.image().data(),
+                WIDTH, HEIGHT);
+        }
+
+        aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
+        aten::RasterizeRenderer::clearBuffer(
+            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+            clear_color,
+            1.0f,
+            0);
+
+        visualizer_->renderPixelData(buffer_.image().data(), camera_.needRevert());
 
 #if 0
-    g_rasterizerAABB.drawAABB(
-        &g_camera,
-        g_scene.getAccel());
+        g_rasterizerAABB.drawAABB(
+            &g_camera,
+            g_scene.getAccel());
 #endif
 
 #ifdef ENABLE_EVERY_FRAME_SC
-    {
-        static char tmp[1024];
-        sprintf(tmp, "sc_%d.png\0", g_frameNo);
+        {
+            static char tmp[1024];
+            sprintf(tmp, "sc_%d.png\0", g_frameNo);
 
-        g_visualizer->takeScreenshot(tmp);
-    }
+            g_visualizer->takeScreenshot(tmp);
+        }
 #endif
-    g_frameNo++;
 
-    return true;
-}
+        return true;
+    }
+
+    aten::context& GetContext()
+    {
+        return ctxt_;
+    }
+
+protected:
+    aten::PinholeCamera camera_;
+
+    aten::AcceleratedScene<aten::sbvh> scene_;
+    aten::context ctxt_;
+
+    aten::AssetManager asset_manager;
+
+    std::shared_ptr<aten::envmap> bg_;
+    std::shared_ptr<aten::texture> envmap_;
+
+    aten::PathTracing renderer_;
+    //aten::SVGFRenderer renderer_;
+    //aten::ReSTIRRenderer renderer_;
+
+    std::shared_ptr<aten::visualizer> visualizer_;
+
+    //aten::FilmProgressive buffer_{ WIDTH, HEIGHT };
+    aten::Film buffer_{ WIDTH, HEIGHT };
+
+    aten::FBO fbo_;
+
+    aten::GammaCorrection gamma_;
+
+    aten::RasterizeRenderer aabb_rasterizer_;
+    aten::RasterizeRenderer rasterizer_;
+
+    bool need_exporte_as_hdr_{ false };
+
+    float avg_elapsed_{ 0.0f };
+};
+
+
 
 int32_t main(int32_t argc, char* argv[])
 {
     aten::initSampler(WIDTH, HEIGHT);
 
     aten::timer::init();
-    aten::OMPUtil::setThreadNum(g_threadnum);
+    aten::OMPUtil::setThreadNum(HostRendererApp::ThreadNum);
+
+    auto app = std::make_shared<HostRendererApp>();
 
     auto wnd = std::make_shared<aten::window>();
 
-    auto id = wnd->Create(WIDTH, HEIGHT, TITLE, display);
+    auto id = wnd->Create(
+        WIDTH, HEIGHT,
+        TITLE,
+        std::bind(&HostRendererApp::Run, app));
 
     if (id >= 0) {
-        g_ctxt.SetIsWindowInitialized(true);
+        app->GetContext().SetIsWindowInitialized(true);
     }
     else {
         AT_ASSERT(false);
         return 1;
     }
 
-    g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
-
-    aten::Blitter blitter;
-    blitter.init(
-        WIDTH, HEIGHT,
-        "../shader/fullscreen_vs.glsl",
-        "../shader/fullscreen_fs.glsl");
-
-    aten::TonemapPostProc tonemap;
-    tonemap.init(
-        WIDTH, HEIGHT,
-        "../shader/fullscreen_vs.glsl",
-        "../shader/tonemap_fs.glsl");
-
-    aten::GammaCorrection gamma;
-    gamma.init(
-        WIDTH, HEIGHT,
-        "../shader/fullscreen_vs.glsl",
-        "../shader/gamma_fs.glsl");
-
-    g_visualizer->addPostProc(&gamma);
-
-    g_rasterizer.init(
-        WIDTH, HEIGHT,
-        "../shader/ssrt_vs.glsl",
-        "../shader/ssrt_gs.glsl",
-        "../shader/ssrt_fs.glsl");
-    g_rasterizerAABB.init(
-        WIDTH, HEIGHT,
-        "../shader/simple3d_vs.glsl",
-        "../shader/simple3d_fs.glsl");
-
-    if constexpr (std::is_member_function_pointer_v<decltype(&decltype(g_tracer)::SetMotionDepthBuffer)>) {
-        g_fbo.asMulti(2);
-        g_fbo.init(
-            WIDTH, HEIGHT,
-            aten::PixelFormat::rgba32f,
-            true);
+    if (!app->Init()) {
+        AT_ASSERT(false);
+        return 1;
     }
-
-    aten::vec3 lookfrom;
-    aten::vec3 lookat;
-    real fov;
-
-    Scene::getCameraPosAndAt(lookfrom, lookat, fov);
-
-#ifdef ENABLE_DOF
-    g_camera.init(
-        WIDTH, HEIGHT,
-        lookfrom, lookat,
-        aten::vec3(0, 1, 0),
-        30.0,  // image sensor size
-        40.0,  // distance image sensor to lens
-        130.0, // distance lens to object plane
-        5.0,   // lens radius
-        28.0); // W scale
-#else
-    g_camera.Initalize(
-        lookfrom,
-        lookat,
-        aten::vec3(0, 1, 0),
-        fov,
-        real(0.1), real(10000.0),
-        WIDTH, HEIGHT);
-#endif
-
-    aten::AssetManager asset_manager;
-    Scene::makeScene(g_ctxt, &g_scene, asset_manager);
-
-    g_scene.build(g_ctxt);
-
-#ifdef ENABLE_IBL
-    g_envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
-
-    g_bg = std::make_shared<aten::envmap>();
-    g_bg->init(g_envmap);
-
-    auto ibl = std::make_shared<aten::ImageBasedLight>(g_bg);
-    g_scene.addImageBasedLight(g_ctxt, ibl);
-#endif
-
-#ifdef ENABLE_FEATURE_LINE
-    g_tracer.enableFeatureLine(true);
-#endif
-
-#if 0
-    // Experimental
-    char buf[8] = { 0 };
-    for (int32_t i = 0; i < 128; i++) {
-        std::string path("../../asset/bluenoise/256_256/HDR_RGBA_");
-        snprintf(buf, sizeof(buf), "%04d\0", i);
-        path += buf;
-        path += ".png";
-
-        std::shared_ptr<aten::texture> tex(aten::ImageLoader::load(
-            path,
-            g_ctxt));
-        g_tracer.registerBlueNoiseTex(tex);
-    }
-#endif
 
     wnd->Run();
 
-    g_rasterizer.release();
-    g_rasterizerAABB.release();
-    g_ctxt.release();
+    app.reset();
 
     wnd->Terminate();
 }

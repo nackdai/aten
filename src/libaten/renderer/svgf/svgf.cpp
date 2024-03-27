@@ -123,9 +123,9 @@ namespace aten
 
         // Render AOVs.
         // NOTE
-        // �����ɖ@����AOV�ɕێ�����Ȃ�A�@���}�b�v�K�p�シ��ׂ�.
-        // �������Atemporal reprojection�Aatrous�Ȃǂ̃t�B���^�K�p���ɖ@�����Q�Ƃ���ۂɁA�@���}�b�v���ׂ������Ă͂�����Ă��܂����Ƃ�����.
-        // ����ɂ��A�t�B���^�����������悤�ɂ����炸�t�B���^�̕i�����������Ă��܂���肪��������.
+        // 厳密に法線をAOVに保持するなら、法線マップ適用後するべき.
+        // しかし、temporal reprojection、atrousなどのフィルタ適用時に法線を参照する際に、法線マップが細かすぎてはじかれてしまうことがある.
+        // それにより、フィルタがおもったようにかからずフィルタの品質が下がってしまう問題が発生する.
         if (bounce == 0) {
             // texture color
             auto texcolor = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));

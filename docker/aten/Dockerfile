@@ -8,6 +8,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
 RUN apt-get update && apt-get install -y \
+    apt-utils \
     build-essential \
     curl \
     gdb \
@@ -31,9 +32,23 @@ RUN apt-get update && apt-get install -y \
 
 # https://apt.llvm.org/
 # NOTE: When we specify 'all' option, installing some of packages is failed.
+
+# NOTE:
+# llvm.sh seems not to be relable...
+# https://github.com/llvm/llvm-project/issues/54676
 ARG clang_version=12
-RUN curl -fL https://apt.llvm.org/llvm.sh | bash -s ${clang_version} \
-    && apt-get update && apt-get install -y \
+RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
+    && add-apt-repository -y "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-${clang_version} main" \
+    && apt-get update -y \
+    && apt-get install -y \
+    libllvm${clang_version} \
+    llvm-${clang_version}-dev \
+    libclang-cpp${clang_version} \
+    libclang-common-${clang_version}-dev \
+    clang-${clang_version} \
+    lldb-${clang_version} \
+    lld-${clang_version} \
+    clangd-${clang_version} \
     clang-tidy-${clang_version} \
     libc++-${clang_version}-dev \
     libc++abi-${clang_version}-dev \

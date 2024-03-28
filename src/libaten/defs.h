@@ -21,7 +21,9 @@ namespace _format {
             if constexpr (std::is_same_v<std::remove_cv_t<std::remove_reference_t<T>>, std::string>) {
                 return std::forward<T>(value).c_str();
             }
-            return std::forward<T>(value);
+            else {
+                return std::forward<T>(value);
+            }
         }
 
         template<class ... Args>

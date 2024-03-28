@@ -16,4 +16,5 @@ cmake \
   -D CMAKE_C_COMPILER=/usr/bin/clang-12 \
   -D CUDA_HOST_COMPILER=/usr/bin/clang-12 \
   -D CUDA_TARGET_COMPUTE_CAPABILITY="${compute_capability}" \
+  -D CMAKE_EXPORT_COMPILE_COMMANDS=ON \
   -L -G Ninja ..

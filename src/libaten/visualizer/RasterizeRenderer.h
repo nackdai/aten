@@ -40,7 +40,7 @@ namespace aten {
             int32_t clear_stencil);
 
         static void beginRender(FBO* fbo = nullptr);
-        static void beginRender(std::shared_ptr<FBO> fbo)
+        static void beginRender(const std::shared_ptr<FBO>& fbo)
         {
             beginRender(fbo.get());
         }

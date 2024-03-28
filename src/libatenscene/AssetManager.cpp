@@ -16,7 +16,7 @@ namespace aten {
         static bool Register(
             AssetManager& asset_manager,
             std::string_view name,
-            std::shared_ptr<T>& asset,
+            const std::shared_ptr<T>& asset,
             AssetManager::AssetType type)
         {
             const auto idx = static_cast<int32_t>(type);
@@ -50,7 +50,7 @@ namespace aten {
         return it->second;
     }
 
-    bool AssetManager::registerMtrl(std::string_view name, std::shared_ptr<material>& mtrl)
+    bool AssetManager::registerMtrl(std::string_view name, const std::shared_ptr<material>& mtrl)
     {
         mtrl->setName(name);
 
@@ -82,7 +82,7 @@ namespace aten {
         return nullptr;
     }
 
-    bool AssetManager::registerTex(std::string_view name, std::shared_ptr<texture>& tex)
+    bool AssetManager::registerTex(std::string_view name, const std::shared_ptr<texture>& tex)
     {
         return AssetRegister::Register(*this, name, tex, AssetType::Texture);
     }
@@ -96,7 +96,7 @@ namespace aten {
         return nullptr;
     }
 
-    bool AssetManager::registerObj(std::string_view name, std::shared_ptr<aten::PolygonObject>& obj)
+    bool AssetManager::registerObj(std::string_view name, const std::shared_ptr<aten::PolygonObject>& obj)
     {
         return AssetRegister::Register(*this, name, obj, AssetType::Object);
     }

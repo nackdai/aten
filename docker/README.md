@@ -58,3 +58,33 @@ build_docker_image.sh -b docker -n 11.7.1-devel-ubuntu20.04 -p ghcr.io/nackdai/a
 ```
 
 If `-n` is not specified, the default is `11.7.1-devel-ubuntu20.04`.
+
+## How to upgrade docker-compose
+
+* Check where docker-compose is located:
+
+```sh
+$ which docker-compose
+/usr/local/bin/docker-compose
+```
+
+* Remove docker-compose
+
+```sh
+sudo rm -rf /usr/bin/docker-compose
+```
+
+* Download docker-cmpose
+
+We can locate where ever we want, if that location is in PATH.
+
+```sh
+sudo curl -L https://github.com/docker/compose/releases/download/<version>/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+* Confirm if docker-compose works
+
+```sh
+docker-compose version
+```

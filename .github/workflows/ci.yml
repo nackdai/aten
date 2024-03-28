@@ -79,7 +79,7 @@ jobs:
         id: build_image
         if: ${{ steps.check_image_time.outcome == 'success' }}
         run: |
-          ./docker/build_docker_Image.sh -b ./docker/ -p "ghcr.io/${{ github.repository }}/"
+          ./docker/build_docker_image.sh -b ./docker/ -p "ghcr.io/${{ github.repository }}/"
 
       - name: Push images
         if: ${{ steps.build_image.outcome == 'success' }}

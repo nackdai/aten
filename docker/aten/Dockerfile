@@ -55,6 +55,11 @@ RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
     libomp-${clang_version}-dev \
     && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
+RUN ln -s /usr/bin/clang-${clang_version} /usr/local/bin/clang \
+    && ln -s /usr/bin/clangd-${clang_version} /usr/local/bin/clangd \
+    && ln -s /usr/bin/clang-tidy-${clang_version} /usr/local/bin/clang-tidy \
+    && ln -s /usr/bin/lldb-${clang_version} /usr/local/bin/lldb
+
 ARG cmake_version=3.21.3
 RUN curl -fL https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-Linux-x86_64.sh > cmake.sh  \
     && mkdir -p /bin/cmake \

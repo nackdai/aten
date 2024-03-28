@@ -1,25 +1,7 @@
 version: "3.8"
 services:
-  base:
-    build:
-      # docker-compose newer than ver3 supports out of context build.
-      # But, it doesn't support 'runtime'.
-      # Therefore, context specifies parent directory which is root directory,
-      # and then this yaml file specifies the dockerfile as relative path from root.
-      context: ..
-      dockerfile: ./env/aten/Dockerfile
   aten:
-    build:
-      # docker-compose newer than ver3 supports out of context build.
-      # But, it doesn't support 'runtime'.
-      # Therefore, context specifies parent directory which is root directory,
-      # and then this yaml file specifies the dockerfile as relative path from root.
-      context: ..
-      dockerfile: ./env/dev/Dockerfile
-      args:
-        - base_from=aten_devcontainer_base:latest
-        - http_proxy=${http_proxy}
-        - https_proxy=${https_proxy}
+    image: docker.io/aten/aten_dev:latest
     container_name: aten-docker
     deploy:
       resources:

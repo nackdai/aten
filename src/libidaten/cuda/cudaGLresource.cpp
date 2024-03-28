@@ -55,8 +55,6 @@ namespace idaten
 
     void CudaGLSurface::unbind()
     {
-        AT_ASSERT(m_isMapped);
-
         if (m_surf > 0) {
             checkCudaErrors(cudaDestroySurfaceObject(m_surf));
             m_surf = 0;

@@ -526,11 +526,13 @@ namespace aten
 
                     auto& aov = params_.GetCurrAovBuffer();
 
+                    aten::span tmp_color_buffer(params_.temporary_color_buffer);
+
                     if (GetFrameCount() == 0) {
                         AT_NAME::svgf::PrepareForDenoise<true>(
                             idx,
                             path_host_.paths,
-                            aten::span(params_.temporary_color_buffer),
+                            tmp_color_buffer,
                             aov.GetAsSpan<AT_NAME::SVGFAovBufferType::ColorVariance>(),
                             aov.GetAsSpan<AT_NAME::SVGFAovBufferType::MomentTemporalWeight>());
                     }
@@ -538,7 +540,7 @@ namespace aten
                         AT_NAME::svgf::PrepareForDenoise<false>(
                             idx,
                             path_host_.paths,
-                            aten::span(params_.temporary_color_buffer));
+                            tmp_color_buffer);
                     }
 
                     dst.buffer->put(x, y, path_host_.paths.contrib[idx].contrib);

@@ -89,7 +89,7 @@ namespace aten {
 
     std::shared_ptr<texture> AssetManager::getTex(const std::string& name)
     {
-        auto& asset = getAsset(name, AssetType::Texture);
+        auto asset = getAsset(name, AssetType::Texture);
         if (asset) {
             return asset.value().tex;
         }
@@ -103,7 +103,7 @@ namespace aten {
 
     std::shared_ptr<aten::PolygonObject> AssetManager::getObj(std::string_view name)
     {
-        auto& asset = getAsset(name, AssetType::Object);
+        auto asset = getAsset(name, AssetType::Object);
         if (asset) {
             return asset.value().obj;
         }

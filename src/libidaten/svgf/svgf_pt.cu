@@ -217,10 +217,12 @@ namespace svgf_kernel {
         const size_t size = static_cast<size_t>(width * height);
         using BufferType = std::remove_pointer_t<decltype(aov_color_variance)>;
 
+        aten::span tmp_color_buffer(temporary_color_buffer, size);
+
         auto contrib = AT_NAME::svgf::PrepareForDenoise<IsFirstFrameExecution>(
             idx,
             paths,
-            aten::span(temporary_color_buffer, size),
+            tmp_color_buffer,
             aten::span(aov_color_variance, size),
             aten::span(aov_moment_temporalweight, size));
 

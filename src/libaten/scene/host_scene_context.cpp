@@ -298,7 +298,7 @@ namespace aten
         }
     }
 
-    void context::AddLight(std::shared_ptr<Light> light)
+    void context::AddLight(const std::shared_ptr<Light>& light)
     {
         lights_.emplace_back(light);
     }

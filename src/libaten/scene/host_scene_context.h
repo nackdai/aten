@@ -472,7 +472,7 @@ namespace aten
          *
          * @param ligh Light instance to be added.
          */
-        void AddLight(std::shared_ptr<AT_NAME::Light> light);
+        void AddLight(const std::shared_ptr<AT_NAME::Light>& light);
 
         /**
          * @brief Get the actual light instance by index.

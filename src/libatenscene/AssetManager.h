@@ -30,14 +30,14 @@ namespace aten {
         AssetManager& operator=(const AssetManager&) = delete;
         AssetManager& operator=(AssetManager&&) = delete;
 
-        bool registerMtrl(std::string_view name, std::shared_ptr<material>& mtrl);
+        bool registerMtrl(std::string_view name, const std::shared_ptr<material>& mtrl);
         std::shared_ptr<material> getMtrl(std::string_view name);
         std::shared_ptr<material> getMtrlByIdx(uint32_t idx);
 
-        bool registerTex(std::string_view name, std::shared_ptr<texture>& tex);
+        bool registerTex(std::string_view name, const std::shared_ptr<texture>& tex);
         std::shared_ptr<texture> getTex(const std::string& name);
 
-        bool registerObj(std::string_view name, std::shared_ptr<aten::PolygonObject>& obj);
+        bool registerObj(std::string_view name, const std::shared_ptr<aten::PolygonObject>& obj);
         std::shared_ptr<aten::PolygonObject> getObj(std::string_view name);
 
         uint32_t getAssetNum(AssetType type);
@@ -50,11 +50,11 @@ namespace aten {
 
             AssetManager::AssetType type{ AssetManager::AssetType::Invalid };
 
-            Asset(std::shared_ptr<texture>& t)
+            Asset(const std::shared_ptr<texture>& t)
                 : tex(t), type(AssetManager::AssetType::Texture) {}
-            Asset(std::shared_ptr<material>& m)
+            Asset(const std::shared_ptr<material>& m)
                 : mtrl(m), type(AssetManager::AssetType::Material) {}
-            Asset(std::shared_ptr<aten::PolygonObject>& o)
+            Asset(const std::shared_ptr<aten::PolygonObject>& o)
                 : obj(o), type(AssetManager::AssetType::Object) {}
 
             Asset() {}

@@ -3,9 +3,9 @@
 #include "atenscene.h"
 #include "../common/scenedefs.h"
 
-static int32_t WIDTH = 512;
-static int32_t HEIGHT = 512;
-static const char* TITLE = "app";
+constexpr int32_t WIDTH = 512;
+constexpr int32_t HEIGHT = 512;
+constexpr const char* TITLE = "app";
 
 #define ENABLE_IBL
 // #define ENABLE_EVERY_FRAME_SC
@@ -194,8 +194,7 @@ public:
 
 #ifdef ENABLE_EVERY_FRAME_SC
         {
-            static char tmp[1024];
-            sprintf(tmp, "sc_%d.png\0", g_frameNo);
+            const auto tmp = aten::StringFormat("sc_%d.png", g_frameNo);
 
             g_visualizer->takeScreenshot(tmp);
         }

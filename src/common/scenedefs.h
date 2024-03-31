@@ -2,8 +2,6 @@
 #include "atenscene.h"
 
 std::shared_ptr<aten::instance<aten::PolygonObject>> getMovableObj();
-std::shared_ptr<aten::instance<aten::deformable>> getDeformable();
-std::shared_ptr<aten::DeformAnimation> getDeformAnm();
 
 class CornellBoxScene {
 public:
@@ -151,7 +149,9 @@ public:
 
 class DeformScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
+    static aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<aten::DeformAnimation>> makeScene(
+        aten::context& ctxt, aten::scene* scene,
+        aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -161,7 +161,9 @@ public:
 
 class DeformInBoxScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
+    static aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<aten::DeformAnimation>> makeScene(
+        aten::context& ctxt, aten::scene* scene,
+        aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -213,9 +215,9 @@ public:
 //#define Scene LayeredMaterialTestScene
 //#define Scene ToonShadeTestScene
 //#define Scene ObjCornellBoxScene
-#define Scene SponzaScene
+//#define Scene SponzaScene
 //#define Scene BunnyScene
-//#define Scene DeformScene
+#define Scene DeformScene
 //#define Scene DeformInBoxScene
 //#define Scene AlphaBlendedObjCornellBoxScene
 //#define Scene CryteckSponzaScene

@@ -2,13 +2,6 @@
 
 #include <array>
 
-static std::shared_ptr<aten::instance<aten::PolygonObject>> g_movableObj;
-
-std::shared_ptr<aten::instance<aten::PolygonObject>> getMovableObj()
-{
-    return g_movableObj;
-}
-
 static std::shared_ptr<aten::material> CreateMaterial(
     aten::context& ctxt,
     aten::MaterialType type,
@@ -871,7 +864,8 @@ void DisneyMaterialTestScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+std::shared_ptr<aten::instance<aten::PolygonObject>> ObjCornellBoxScene::makeScene(
+    aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
 {
     auto emit = CreateMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
     asset_manager.registerMtrl(
@@ -931,8 +925,6 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten
         aten::vec3(1.0f));
     scene->add(light);
 
-    g_movableObj = light;
-
     auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 200.0f);
     ctxt.AddLight(areaLight);
 
@@ -940,6 +932,8 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten
         auto box = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[i], aten::mat4::Identity);
         scene->add(box);
     }
+
+    return light;
 }
 
 void ObjCornellBoxScene::getCameraPosAndAt(
@@ -1197,8 +1191,6 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
         aten::vec3(0.0f),
         aten::vec3(1.0f));
     scene->add(light);
-
-    g_movableObj = light;
 
     auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 400.0f);
     ctxt.AddLight(areaLight);

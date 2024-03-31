@@ -71,13 +71,25 @@ public:
             real(0.1), real(10000.0),
             WIDTH, HEIGHT);
 
-        aten::AssetManager asset_manager;
-        Scene::makeScene(ctxt_, &scene_, asset_manager);
+        using result_of_make_scene = decltype(Scene::makeScene(std::declval<aten::context>(), std::declval<aten::scene*>(), std::declval<aten::AssetManager>()));
+
+        // NOTE
+        // https://stackoverflow.com/questions/65508488/how-to-skip-uncompilable-code-through-constexpr-if-in-c
+        // If we'd like to unompilable by if constexpr, the function has to be template.
+        // lambda with the arguments defined as auto is the same as template function.
+        [&](auto& obj) {
+            if constexpr (std::is_same_v<result_of_make_scene, std::remove_reference_t<decltype(obj)>>) {
+                obj = Scene::makeScene(ctxt_, &scene_, asset_manager_);
+            }
+            else {
+                Scene::makeScene(ctxt_, &scene_, asset_manager_);
+            }
+        }(movable_obj_);
 
         scene_.build(ctxt_);
 
 #ifdef ENABLE_IBL
-        envmap_ = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager);
+        envmap_ = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
 
         bg_ = std::make_shared<aten::envmap>();
         bg_->init(envmap_);
@@ -98,11 +110,9 @@ public:
         static float y = 0.0f;
         static float d = -0.1f;
 
-        auto obj = getMovableObj();
-
-        if (obj)
+        if (movable_obj_)
         {
-            auto t = obj->getTrans();
+            auto t = movable_obj_->getTrans();
 
             if (y >= 0.0f)
             {
@@ -116,8 +126,8 @@ public:
             y += d;
             t.y += d;
 
-            obj->setTrans(t);
-            obj->update();
+            movable_obj_->setTrans(t);
+            movable_obj_->update();
 
             auto accel = scene_.getAccel();
             accel->update(ctxt_);
@@ -214,7 +224,7 @@ protected:
     aten::AcceleratedScene<aten::sbvh> scene_;
     aten::context ctxt_;
 
-    aten::AssetManager asset_manager;
+    aten::AssetManager asset_manager_;
 
     std::shared_ptr<aten::envmap> bg_;
     std::shared_ptr<aten::texture> envmap_;
@@ -224,6 +234,8 @@ protected:
     //aten::ReSTIRRenderer renderer_;
 
     std::shared_ptr<aten::visualizer> visualizer_;
+
+    std::shared_ptr<aten::instance<aten::PolygonObject>> movable_obj_;
 
     //aten::FilmProgressive buffer_{ WIDTH, HEIGHT };
     aten::Film buffer_{ WIDTH, HEIGHT };

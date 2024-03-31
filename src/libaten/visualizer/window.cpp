@@ -408,7 +408,7 @@ namespace aten
         AT_ASSERT(result == GLEW_OK);
 
         auto version = ::glGetString(GL_VERSION);
-        AT_PRINTF("GL Version(%s)¥n", version);
+        AT_PRINTF("GL Version(%s)\n", version);
 
         CALL_GL_API(::glClipControl(
             GL_LOWER_LEFT,

@@ -1,8 +1,6 @@
 #include "aten.h"
 #include "atenscene.h"
 
-std::shared_ptr<aten::instance<aten::PolygonObject>> getMovableObj();
-
 class CornellBoxScene {
 public:
     static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
@@ -119,7 +117,8 @@ public:
 
 class ObjCornellBoxScene {
 public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
+    static std::shared_ptr<aten::instance<aten::PolygonObject>> makeScene(
+        aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -217,8 +216,8 @@ public:
 //#define Scene ObjCornellBoxScene
 //#define Scene SponzaScene
 //#define Scene BunnyScene
-#define Scene DeformScene
+//#define Scene DeformScene
 //#define Scene DeformInBoxScene
 //#define Scene AlphaBlendedObjCornellBoxScene
 //#define Scene CryteckSponzaScene
-//#define Scene ManyLightCryteckSponzaScene
+#define Scene ManyLightCryteckSponzaScene

@@ -259,7 +259,7 @@ public:
 
             static const char* items[] = { "ReSTIR", "PT", "AOV" };
 
-            if (ImGui::Combo("mode", (int32_t*)&curr_rendering_mode_, items, AT_COUNTOF(items)))
+            if (ImGui::Combo("mode", reinterpret_cast<int32_t*>(&curr_rendering_mode_), items, AT_COUNTOF(items)))
             {
                 renderer_.SetMode(curr_rendering_mode_);
             }
@@ -268,7 +268,7 @@ public:
             {
                 static const char* restir_items[] = { "ReSTIR", "SpatialReuse" };
 
-                if (ImGui::Combo("restir mode", (int32_t*)&curr_restir_mode_, restir_items, AT_COUNTOF(restir_items)))
+                if (ImGui::Combo("restir mode", reinterpret_cast<int32_t*>(&curr_restir_mode_), restir_items, AT_COUNTOF(restir_items)))
                 {
                     renderer_.SetReSTIRMode(curr_restir_mode_);
                 }

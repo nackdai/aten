@@ -130,7 +130,7 @@ namespace idaten {
         void BindToDeviceContext()
         {
             if (!ctxt.shapes) {
-                ctxt.lightnum = lightparam.num();
+                ctxt.lightnum = static_cast<int32_t>(lightparam.num());
 
                 std::vector<cudaTextureObject_t> tmp_node;
                 for (auto& node : nodeparam) {

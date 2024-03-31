@@ -21,15 +21,9 @@
 #define ENABLE_ENVMAP
 #define ENABLE_SVGF
 
-static int32_t WIDTH = 1280;
-static int32_t HEIGHT = 720;
-static const char* TITLE = "deform";
-
-#ifdef ENABLE_OMP
-static uint32_t g_threadnum = 8;
-#else
-static uint32_t g_threadnum = 1;
-#endif
+constexpr int32_t WIDTH = 1280;
+constexpr int32_t HEIGHT = 720;
+constexpr const char* TITLE = "deform_mdl_";
 
 class Lbvh : aten::accelerator {
 public:
@@ -78,123 +72,132 @@ public:
     aten::bvh m_bvh;
 };
 
-static aten::PinholeCamera g_camera;
-static bool g_isCameraDirty = false;
-
-static aten::AcceleratedScene<aten::GPUBvh> g_scene;
-static aten::context g_ctxt;
-
-#ifdef ENABLE_SVGF
-static idaten::SVGFPathTracing g_tracer;
+class DeformationRendererApp {
+public:
+    static constexpr int32_t ThreadNum
+#ifdef ENABLE_OMP
+    { 8 };
 #else
-static idaten::PathTracing g_tracer;
+    { 1 };
 #endif
 
-static aten::PathTracing g_cputracer;
-static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
+    DeformationRendererApp() = default;
+    ~DeformationRendererApp() = default;
 
-static std::shared_ptr<aten::visualizer> g_visualizer;
+    DeformationRendererApp(const DeformationRendererApp&) = delete;
+    DeformationRendererApp(DeformationRendererApp&&) = delete;
+    DeformationRendererApp operator=(const DeformationRendererApp&) = delete;
+    DeformationRendererApp operator=(DeformationRendererApp&&) = delete;
 
-static float g_avgcuda = 0.0f;
+    bool Init()
+    {
+        visualizer_ = aten::visualizer::init(WIDTH, HEIGHT);
 
-static aten::TAA g_taa;
+        gamma_.init(
+            WIDTH, HEIGHT,
+            "../shader/fullscreen_vs.glsl",
+            "../shader/gamma_fs.glsl");
 
-static aten::FBO g_fbo;
+#ifdef ENABLE_SVGF
+        taa_.init(
+            WIDTH, HEIGHT,
+            "../shader/fullscreen_vs.glsl", "../shader/taa_fs.glsl",
+            "../shader/fullscreen_vs.glsl", "../shader/taa_final_fs.glsl");
 
-static aten::RasterizeRenderer g_rasterizer;
-static aten::RasterizeRenderer g_rasterizerAABB;
+        visualizer_->addPostProc(&taa_);
+#endif
 
-static aten::shader g_shdRasterizeDeformable;
+        visualizer_->addPostProc(&gamma_);
 
-static idaten::Skinning g_skinning;
-static aten::Timeline g_timeline;
+        rasterizer_.init(
+            WIDTH, HEIGHT,
+            "../shader/ssrt_vs.glsl",
+            "../shader/ssrt_gs.glsl",
+            "../shader/ssrt_fs.glsl");
+        rasterizer_aabb_.init(
+            WIDTH, HEIGHT,
+            "../shader/simple3d_vs.glsl",
+            "../shader/simple3d_fs.glsl");
 
-static idaten::LBVHBuilder g_lbvh;
-static int32_t g_triOffset = 0;
-static int32_t g_vtxOffset = 0;
+        shader_raasterize_deformable_.init(
+            WIDTH, HEIGHT,
+            "./ssrt_deformable_vs.glsl",
+            "../shader/ssrt_gs.glsl",
+            "../shader/ssrt_fs.glsl");
 
-static bool g_willShowGUI = true;
-static bool g_willTakeScreenShot = false;
-static int32_t g_cntScreenShot = 0;
+#ifdef ENABLE_SVGF
+        fbo_.asMulti(2);
+        fbo_.init(
+            WIDTH, HEIGHT,
+            aten::PixelFormat::rgba32f,
+            true);
 
-static int32_t g_maxSamples = 1;
-static int32_t g_maxBounce = 5;
-static int32_t g_curMode = (int32_t)idaten::SVGFPathTracing::Mode::SVGF;
-static int32_t g_curAOVMode = (int32_t)aten::SVGFAovMode::WireFrame;
-static bool g_showAABB = false;
+        taa_.setMotionDepthBufferHandle(fbo_.GetGLTextureHandle(1));
+#endif
 
-static bool g_pickPixel = false;
+        aten::vec3 pos, at;
+        real vfov;
+        Scene::getCameraPosAndAt(pos, at, vfov);
 
-void update(int32_t frame)
-{
-    auto deform = getDeformable();
+        camera_.init(
+            pos,
+            at,
+            aten::vec3(0, 1, 0),
+            vfov,
+            WIDTH, HEIGHT);
 
-    if (deform) {
-        auto mdl = deform->getHasObjectAsRealType();
-        auto anm = getDeformAnm();
+        aten::accelerator::setUserDefsInternalAccelCreator(Lbvh::create);
 
-        if (anm) {
-            aten::mat4 mtx_L2W;
-            mtx_L2W.asScale(0.01);
-            mdl->update(mtx_L2W, g_timeline.getTime(), anm.get());
+        aten::AssetManager asset_manager;
+        aten::tie(deform_mdl_, defrom_anm_) = Scene::makeScene(ctxt_, &scene_, asset_manager);
+        scene_.build(ctxt_);
+
+#ifdef ENABLE_ENVMAP
+        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager);
+        auto bg = std::make_shared<aten::envmap>();
+        bg->init(envmap);
+
+        auto ibl = std::make_shared<aten::ImageBasedLight>(bg);
+
+        scene_.addImageBasedLight(ctxt_, ibl);
+#endif
+
+        size_t advanceVtxNum = 0;
+        size_t advanceTriNum = 0;
+        std::vector<aten::TriangleParameter> deformTris;
+
+        // Initialize skinning.
+        if (deform_mdl_)
+        {
+            auto mdl = deform_mdl_->getHasObjectAsRealType();
+
+            mdl->initGLResources(&shader_raasterize_deformable_);
+
+            auto& vb = mdl->getVBForGPUSkinning();
+
+            std::vector<aten::SkinningVertex> vtx;
+            std::vector<uint32_t> idx;
+
+            int32_t vtxIdOffset = ctxt_.GetVertexNum();
+
+            mdl->getGeometryData(ctxt_, vtx, idx, deformTris);
+
+            skinning_.initWithTriangles(
+                &vtx[0], vtx.size(),
+                &deformTris[0], deformTris.size(),
+                &vb);
+
+            advanceVtxNum = vtx.size();
+            advanceTriNum = deformTris.size();
+
+            if (defrom_anm_) {
+                timeline_.init(defrom_anm_->getDesc().time, real(0));
+                timeline_.enableLoop(true);
+                timeline_.start();
+            }
         }
-        else {
-            mdl->update(aten::mat4(), 0, nullptr);
-        }
-
-        g_timeline.advance(1.0f / 60.0f);
-
-        const auto& mtx = mdl->getMatrices();
-        g_skinning.update(&mtx[0], mtx.size());
-
-        aten::vec3 aabbMin, aabbMax;
-
-        bool isRestart = (frame == 1);
-
-        // NOTE
-        // Add verted offset, in the first frame.
-        // In "g_skinning.compute", vertex offset is added to triangle paremters.
-        // Added vertex offset is valid permanently, so specify vertex offset just only one time.
-        g_skinning.compute(aabbMin, aabbMax, isRestart);
-
-        mdl->setBoundingBox(aten::aabb(aabbMin, aabbMax));
-        deform->update(true);
-
-        const auto sceneBbox = aten::aabb(aabbMin, aabbMax);
-        auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();
-
-        auto& vtxPos = g_skinning.getInteropVBO()[0];
-        auto& tris = g_skinning.getTriangles();
-
-        // TODO
-        int32_t deformPos = nodes.size() - 1;
-
-        // NOTE
-        // Vertex offset was added in "g_skinning.compute".
-        // But, in "g_lbvh.build", vertex index have to be handled as zero based index.
-        // Vertex offset have to be removed from vertex index.
-        // So, specify minus vertex offset.
-        // This is work around, too complicated...
-        g_lbvh.build(
-            nodes[deformPos],
-            tris,
-            g_triOffset,
-            sceneBbox,
-            vtxPos,
-            -g_vtxOffset,
-            nullptr);
-
-        // Copy computed vertices, triangles to the tracer.
-        g_tracer.updateGeometry(
-            g_skinning.getInteropVBO(),
-            g_vtxOffset,
-            g_skinning.getTriangles(),
-            g_triOffset);
 
         {
-            auto accel = g_scene.getAccel();
-            accel->update(g_ctxt);
-
             std::vector<aten::ObjectParameter> shapeparams;
             std::vector<aten::TriangleParameter> primparams;
             std::vector<aten::LightParameter> lightparams;
@@ -203,7 +206,7 @@ void update(int32_t frame)
             std::vector<aten::mat4> mtxs;
 
             aten::DataCollector::collect(
-                g_ctxt,
+                ctxt_,
                 shapeparams,
                 primparams,
                 lightparams,
@@ -211,296 +214,555 @@ void update(int32_t frame)
                 vtxparams,
                 mtxs);
 
-            const auto& nodes = g_scene.getAccel()->getNodes();
+            tri_offset_ = primparams.size();
+            vtx_offset_ = vtxparams.size();
 
-            g_tracer.updateBVH(
+            const auto& nodes = scene_.getAccel()->getNodes();
+
+            std::vector<idaten::TextureResource> tex;
+            {
+                auto texNum = ctxt_.GetTextureNum();
+
+                for (int32_t i = 0; i < texNum; i++) {
+                    auto t = ctxt_.GtTexture(i);
+                    tex.push_back(
+                        idaten::TextureResource(t->colors(), t->width(), t->height()));
+                }
+            }
+
+#ifdef ENABLE_ENVMAP
+            for (auto& l : lightparams) {
+                if (l.type == aten::LightType::IBL) {
+                    l.envmapidx = envmap->id();
+                }
+            }
+#endif
+
+            auto camparam = camera_.param();
+            camparam.znear = real(0.1);
+            camparam.zfar = real(10000.0);
+
+            renderer_.update(
+                visualizer_->GetGLTextureHandle(),
+                WIDTH, HEIGHT,
+                camparam,
                 shapeparams,
+                mtrlparms,
+                lightparams,
                 nodes,
-                mtxs);
-        }
-    }
-}
-
-bool onRun()
-{
-    auto frame = g_tracer.frame();
-
-    update(frame);
-
-    if (g_isCameraDirty) {
-        g_camera.update();
-
-        auto camparam = g_camera.param();
-        camparam.znear = real(0.1);
-        camparam.zfar = real(10000.0);
-
-        g_tracer.updateCamera(camparam);
-        g_isCameraDirty = false;
-
-        g_visualizer->clear();
-    }
-
-    aten::GLProfiler::begin();
-
-#ifdef ENABLE_SVGF
-    g_rasterizer.drawSceneForGBuffer(
-        g_tracer.frame(),
-        g_ctxt,
-        &g_scene,
-        &g_camera,
-        g_fbo,
-        &g_shdRasterizeDeformable);
+                primparams, advanceTriNum,
+                vtxparams, advanceVtxNum,
+                mtxs,
+                tex,
+#ifdef ENABLE_ENVMAP
+                idaten::EnvmapResource(envmap->id(), ibl->getAvgIlluminace(), real(1)));
+#else
+                idaten::EnvmapResource());
 #endif
 
-    auto rasterizerTime = aten::GLProfiler::end();
+#ifdef ENABLE_SVGF
+            auto aabb = scene_.getAccel()->getBoundingbox();
+            auto d = aabb.getDiagonalLenght();
+            renderer_.setHitDistanceLimit(d * 0.25f);
 
-    aten::timer timer;
-    timer.begin();
-
-    g_tracer.render(
-        WIDTH, HEIGHT,
-        g_maxSamples,
-        g_maxBounce);
-
-    auto cudaelapsed = timer.end();
-
-    g_avgcuda = g_avgcuda * (frame - 1) + cudaelapsed;
-    g_avgcuda /= (float)frame;
-
-    aten::GLProfiler::begin();
-
-    aten::RasterizeRenderer::clearBuffer(
-        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
-        aten::vec4(0, 0.5f, 1.0f, 1.0f),
-        1.0f,
-        0);
-
-    g_visualizer->render(false);
-
-    auto visualizerTime = aten::GLProfiler::end();
-
-    if (g_showAABB) {
-        g_rasterizerAABB.drawAABB(
-            &g_camera,
-            g_scene.getAccel());
-    }
-
-    if (g_willTakeScreenShot)
-    {
-        auto buffer = aten::StringFormat("sc_%d.png\0", g_cntScreenShot);
-
-        g_visualizer->takeScreenshot(buffer);
-
-        g_willTakeScreenShot = false;
-        g_cntScreenShot++;
-
-        AT_PRINTF("Take Screenshot[%s]\n", buffer.c_str());
-    }
-
-    if (g_willShowGUI)
-    {
-        ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", g_tracer.frame(), 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::Text("cuda : %.3f ms (avg : %.3f ms)", cudaelapsed, g_avgcuda);
-        ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
-
-        if (aten::GLProfiler::isEnabled()) {
-            ImGui::Text("GL : [rasterizer %.3f ms] [visualizer %.3f ms]", rasterizerTime, visualizerTime);
+            renderer_.SetGBuffer(
+                fbo_.GetGLTextureHandle(0),
+                fbo_.GetGLTextureHandle(1));
+#endif
         }
 
-        if (ImGui::SliderInt("Samples", &g_maxSamples, 1, 100)
-            || ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10))
+        // For LBVH.
+        if (deform_mdl_) {
+            skinning_.setVtxOffset(vtx_offset_);
+            lbvh_.init(advanceTriNum);
+        }
+        else
         {
-            g_tracer.reset();
-        }
+            std::vector<std::vector<aten::TriangleParameter>> triangles;
+            std::vector<int32_t> triIdOffsets;
 
-#ifdef ENABLE_SVGF
-        static const char* items[] = { "SVGF", "TF", "PT", "VAR", "AOV" };
+            aten::DataCollector::collectTriangles(ctxt_, triangles, triIdOffsets);
 
-        if (ImGui::Combo("mode", &g_curMode, items, AT_COUNTOF(items))) {
-            g_tracer.SetMode((idaten::SVGFPathTracing::Mode)g_curMode);
-        }
+            uint32_t maxTriNum = 0;
+            for (const auto& tris : triangles) {
+                maxTriNum = std::max<uint32_t>(maxTriNum, tris.size());
+            }
 
-        if (g_curMode == idaten::SVGFPathTracing::Mode::AOVar) {
-            static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion", "ObjId" };
+            lbvh_.init(maxTriNum);
 
-            if (ImGui::Combo("aov", &g_curAOVMode, aovitems, AT_COUNTOF(aovitems))) {
-                g_tracer.SetAOVMode((aten::SVGFAovMode)g_curAOVMode);
+            const auto& sceneBbox = scene_.getAccel()->getBoundingbox();
+            auto& nodes = renderer_.getCudaTextureResourceForBvhNodes();
+            auto& vtxPos = renderer_.getCudaTextureResourceForVtxPos();
+
+            // TODO
+            // もし、GPUBvh が SBVH だとした場合.
+            // ここで取得するノード配列は SBVH のノードである、ThreadedSbvhNode となる.
+            // しかし、LBVHBuilder::build で渡すことができるのは、ThreadBVH のノードである ThreadedBvhNode である.
+            // そのため、現状、ThreadedBvhNode に無理やりキャストしている.
+            // もっとスマートな方法を考えたい.
+            // If GPUBvh is SBVH, what we can retrieve the array of ThreadedSbvhNode as SBVH node type.
+            // But, what we can pass to LBVHBuilder::build is ThreadedBvhNode of ThreadBVH's node.
+            // So, we need to reinterpret cast ThreadedSbvhNode to ThreadedBvhNode.
+            // It's not safe and we neeed to consider the safer way.
+
+            auto& cpunodes = scene_.getAccel()->getNodes();
+
+            for (int32_t i = 0; i < triangles.size(); i++)
+            {
+                auto& tris = triangles[i];
+                auto triIdOffset = triIdOffsets[i];
+
+                // NOTE
+                // 0 is for top layer.
+                lbvh_.build(
+                    nodes[i + 1],
+                    tris,
+                    triIdOffset,
+                    sceneBbox,
+                    vtxPos,
+                    0,
+                    (std::vector<aten::ThreadedBvhNode>*) & cpunodes[i + 1]);
             }
         }
-        else if (g_curMode == idaten::SVGFPathTracing::Mode::SVGF) {
-            int32_t iterCnt = g_tracer.getAtrousIterCount();
-            if (ImGui::SliderInt("Atrous Iter", &iterCnt, 1, 5)) {
-                g_tracer.setAtrousIterCount(iterCnt);
-            }
-        }
-
-        bool enableTAA = g_taa.isEnableTAA();
-        bool canShowTAADiff = g_taa.canShowTAADiff();
-
-        if (ImGui::Checkbox("Enable TAA", &enableTAA)) {
-            g_taa.enableTAA(enableTAA);
-        }
-        if (ImGui::Checkbox("Show TAA Diff", &canShowTAADiff)) {
-            g_taa.showTAADiff(canShowTAADiff);
-        }
-
-        ImGui::Checkbox("Show AABB", &g_showAABB);
-#endif
-
-        auto cam = g_camera.param();
-        ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
-        ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
-    }
 
 #ifdef ENABLE_SVGF
-    idaten::SVGFPathTracing::PickedInfo info;
-    auto isPicked = g_tracer.GetPickedPixelInfo(info);
-    if (isPicked) {
-        AT_PRINTF("[%d, %d]\n", info.ix, info.iy);
-        AT_PRINTF("  nml[%f, %f, %f]\n", info.normal.x, info.normal.y, info.normal.z);
-        AT_PRINTF("  mesh[%d] mtrl[%d], tri[%d]\n", info.meshid, info.mtrlid, info.triid);
-    }
+        renderer_.SetMode((idaten::SVGFPathTracing::Mode)curr_rendering_mode_);
+        renderer_.SetAOVMode((aten::SVGFAovMode)curr_aov_mode_);
+        //renderer_.SetCanSSRTHitTest(false);
 #endif
+    }
 
-    return true;
-}
+    bool Run()
+    {
+        auto frame = renderer_.frame();
 
-void onClose()
-{
+        update(frame);
 
-}
+        if (is_camera_dirty_) {
+            camera_.update();
 
-bool g_isMouseLBtnDown = false;
-bool g_isMouseRBtnDown = false;
-int32_t g_prevX = 0;
-int32_t g_prevY = 0;
+            auto camparam = camera_.param();
+            camparam.znear = real(0.1);
+            camparam.zfar = real(10000.0);
 
-void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
-{
-    g_isMouseLBtnDown = false;
-    g_isMouseRBtnDown = false;
+            renderer_.updateCamera(camparam);
+            is_camera_dirty_ = false;
 
-    if (press) {
-        g_prevX = x;
-        g_prevY = y;
+            visualizer_->clear();
+        }
 
-        g_isMouseLBtnDown = left;
-        g_isMouseRBtnDown = !left;
+        aten::GLProfiler::begin();
 
 #ifdef ENABLE_SVGF
-        if (g_pickPixel) {
-            g_tracer.WillPickPixel(x, y);
-            g_pickPixel = false;
-        }
+        rasterizer_.drawSceneForGBuffer(
+            renderer_.frame(),
+            ctxt_,
+            &scene_,
+            &camera_,
+            fbo_,
+            &shader_raasterize_deformable_);
 #endif
-    }
-}
 
-void onMouseMove(int32_t x, int32_t y)
-{
-    if (g_isMouseLBtnDown) {
-        aten::CameraOperator::rotate(
-            g_camera,
+        auto rasterizerTime = aten::GLProfiler::end();
+
+        aten::timer timer;
+        timer.begin();
+
+        renderer_.render(
             WIDTH, HEIGHT,
-            g_prevX, g_prevY,
-            x, y);
-        g_isCameraDirty = true;
+            max_samples_,
+            max_bounce_);
+
+        auto cudaelapsed = timer.end();
+
+        avg_cuda_time_ = avg_cuda_time_ * (frame - 1) + cudaelapsed;
+        avg_cuda_time_ /= (float)frame;
+
+        aten::GLProfiler::begin();
+
+        aten::RasterizeRenderer::clearBuffer(
+            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+            aten::vec4(0, 0.5f, 1.0f, 1.0f),
+            1.0f,
+            0);
+
+        visualizer_->render(false);
+
+        auto visualizerTime = aten::GLProfiler::end();
+
+        if (is_show_aabb_) {
+            rasterizer_aabb_.drawAABB(
+                &camera_,
+                scene_.getAccel());
+        }
+
+        if (will_take_screen_shot_)
+        {
+            auto buffer_ = aten::StringFormat("sc_%d.png\0", screen_shot_count_);
+
+            visualizer_->takeScreenshot(buffer_);
+
+            will_take_screen_shot_ = false;
+            screen_shot_count_++;
+
+            AT_PRINTF("Take Screenshot[%s]\n", buffer_.c_str());
+        }
+
+        if (will_show_gui_)
+        {
+            ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", renderer_.frame(), 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::Text("cuda : %.3f ms (avg : %.3f ms)", cudaelapsed, avg_cuda_time_);
+            ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * max_samples_) / real(1000 * 1000) * (real(1000) / cudaelapsed));
+
+            if (aten::GLProfiler::isEnabled()) {
+                ImGui::Text("GL : [rasterizer %.3f ms] [visualizer %.3f ms]", rasterizerTime, visualizerTime);
+            }
+
+            if (ImGui::SliderInt("Samples", &max_samples_, 1, 100)
+                || ImGui::SliderInt("Bounce", &max_bounce_, 1, 10))
+            {
+                renderer_.reset();
+            }
+
+#ifdef ENABLE_SVGF
+            const char* items[] = { "SVGF", "TF", "PT", "VAR", "AOV" };
+
+            if (ImGui::Combo("mode", &curr_rendering_mode_, items, AT_COUNTOF(items))) {
+                renderer_.SetMode((idaten::SVGFPathTracing::Mode)curr_rendering_mode_);
+            }
+
+            if (curr_rendering_mode_ == idaten::SVGFPathTracing::Mode::AOVar) {
+                const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion", "ObjId" };
+
+                if (ImGui::Combo("aov", &curr_aov_mode_, aovitems, AT_COUNTOF(aovitems))) {
+                    renderer_.SetAOVMode((aten::SVGFAovMode)curr_aov_mode_);
+                }
+            }
+            else if (curr_rendering_mode_ == idaten::SVGFPathTracing::Mode::SVGF) {
+                int32_t iterCnt = renderer_.getAtrousIterCount();
+                if (ImGui::SliderInt("Atrous Iter", &iterCnt, 1, 5)) {
+                    renderer_.setAtrousIterCount(iterCnt);
+                }
+            }
+
+            bool enableTAA = taa_.isEnableTAA();
+            bool canShowTAADiff = taa_.canShowTAADiff();
+
+            if (ImGui::Checkbox("Enable TAA", &enableTAA)) {
+                taa_.enableTAA(enableTAA);
+            }
+            if (ImGui::Checkbox("Show TAA Diff", &canShowTAADiff)) {
+                taa_.showTAADiff(canShowTAADiff);
+            }
+
+            ImGui::Checkbox("Show AABB", &is_show_aabb_);
+#endif
+
+            auto cam = camera_.param();
+            ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
+            ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
+        }
+
+#ifdef ENABLE_SVGF
+        idaten::SVGFPathTracing::PickedInfo info;
+        auto isPicked = renderer_.GetPickedPixelInfo(info);
+        if (isPicked) {
+            AT_PRINTF("[%d, %d]\n", info.ix, info.iy);
+            AT_PRINTF("  nml[%f, %f, %f]\n", info.normal.x, info.normal.y, info.normal.z);
+            AT_PRINTF("  mesh[%d] mtrl[%d], tri[%d]\n", info.meshid, info.mtrlid, info.triid);
+        }
+#endif
+
+        return true;
     }
-    else if (g_isMouseRBtnDown) {
-        aten::CameraOperator::move(
-            g_camera,
-            g_prevX, g_prevY,
-            x, y,
-            real(0.001));
-        g_isCameraDirty = true;
+
+    void OnClose()
+    {
+
     }
 
-    g_prevX = x;
-    g_prevY = y;
-}
+    void OnMouseBtn(bool left, bool press, int32_t x, int32_t y)
+    {
+        is_mouse_l_btn_down_ = false;
+        is_mouse_r_btn_down_ = false;
 
-void onMouseWheel(int32_t delta)
-{
-    aten::CameraOperator::dolly(g_camera, delta * real(0.1));
-    g_isCameraDirty = true;
-}
+        if (press) {
+            prev_mouse_pos_x_ = x;
+            prev_mouse_pos_y_ = y;
 
-void onKey(bool press, aten::Key key)
-{
-    static const real offset = real(0.5);
+            is_mouse_l_btn_down_ = left;
+            is_mouse_r_btn_down_ = !left;
 
-    if (press) {
-        if (key == aten::Key::Key_F1) {
-            g_willShowGUI = !g_willShowGUI;
-            return;
+#ifdef ENABLE_SVGF
+            if (will_pick_pixel_info_) {
+                renderer_.WillPickPixel(x, y);
+                will_pick_pixel_info_ = false;
+            }
+#endif
         }
-        else if (key == aten::Key::Key_F2) {
-            g_willTakeScreenShot = true;
-            return;
+    }
+
+    void OnMouseMove(int32_t x, int32_t y)
+    {
+        if (is_mouse_l_btn_down_) {
+            aten::CameraOperator::rotate(
+                camera_,
+                WIDTH, HEIGHT,
+                prev_mouse_pos_x_, prev_mouse_pos_y_,
+                x, y);
+            is_camera_dirty_ = true;
         }
-        else if (key == aten::Key::Key_F5) {
-            aten::GLProfiler::trigger();
-            return;
+        else if (is_mouse_r_btn_down_) {
+            aten::CameraOperator::move(
+                camera_,
+                prev_mouse_pos_x_, prev_mouse_pos_y_,
+                x, y,
+                real(0.001));
+            is_camera_dirty_ = true;
         }
-        else if (key == aten::Key::Key_SPACE) {
-            if (g_timeline.isPaused()) {
-                g_timeline.start();
+
+        prev_mouse_pos_x_ = x;
+        prev_mouse_pos_y_ = y;
+    }
+
+    void OnMouseWheel(int32_t delta)
+    {
+        aten::CameraOperator::dolly(camera_, delta * real(0.1));
+        is_camera_dirty_ = true;
+    }
+
+    void OnKey(bool press, aten::Key key)
+    {
+        const real offset = real(0.5);
+
+        if (press) {
+            if (key == aten::Key::Key_F1) {
+                will_show_gui_ = !will_show_gui_;
+                return;
+            }
+            else if (key == aten::Key::Key_F2) {
+                will_take_screen_shot_ = true;
+                return;
+            }
+            else if (key == aten::Key::Key_F5) {
+                aten::GLProfiler::trigger();
+                return;
+            }
+            else if (key == aten::Key::Key_SPACE) {
+                if (timeline_.isPaused()) {
+                    timeline_.start();
+                }
+                else {
+                    timeline_.pause();
+                }
+            }
+            else if (key == aten::Key::Key_CONTROL) {
+                will_pick_pixel_info_ = true;
+                return;
+            }
+        }
+
+        if (press) {
+            switch (key) {
+            case aten::Key::Key_W:
+            case aten::Key::Key_UP:
+                aten::CameraOperator::moveForward(camera_, offset);
+                break;
+            case aten::Key::Key_S:
+            case aten::Key::Key_DOWN:
+                aten::CameraOperator::moveForward(camera_, -offset);
+                break;
+            case aten::Key::Key_D:
+            case aten::Key::Key_RIGHT:
+                aten::CameraOperator::moveRight(camera_, offset);
+                break;
+            case aten::Key::Key_A:
+            case aten::Key::Key_LEFT:
+                aten::CameraOperator::moveRight(camera_, -offset);
+                break;
+            case aten::Key::Key_Z:
+                aten::CameraOperator::moveUp(camera_, offset);
+                break;
+            case aten::Key::Key_X:
+                aten::CameraOperator::moveUp(camera_, -offset);
+                break;
+            case aten::Key::Key_R:
+            {
+                aten::vec3 pos, at;
+                real vfov;
+                Scene::getCameraPosAndAt(pos, at, vfov);
+
+                camera_.init(
+                    pos,
+                    at,
+                    aten::vec3(0, 1, 0),
+                    vfov,
+                    WIDTH, HEIGHT);
+            }
+            break;
+            default:
+                break;
+            }
+
+            is_camera_dirty_ = true;
+        }
+    }
+
+    aten::context& GetContext()
+    {
+        return ctxt_;
+    }
+
+
+private:
+    void update(int32_t frame)
+    {
+        if (deform_mdl_) {
+            auto mdl = deform_mdl_->getHasObjectAsRealType();
+
+            if (defrom_anm_) {
+                aten::mat4 mtx_L2W;
+                mtx_L2W.asScale(0.01f);
+                mdl->update(mtx_L2W, timeline_.getTime(), defrom_anm_.get());
             }
             else {
-                g_timeline.pause();
+                mdl->update(aten::mat4(), 0, nullptr);
+            }
+
+            timeline_.advance(1.0f / 60.0f);
+
+            const auto& mtx = mdl->getMatrices();
+            skinning_.update(&mtx[0], mtx.size());
+
+            aten::vec3 aabbMin, aabbMax;
+
+            bool isRestart = (frame == 1);
+
+            // NOTE
+            // Add verted offset, in the first frame.
+            // In "skinning_.compute", vertex offset is added to triangle paremters.
+            // Added vertex offset is valid permanently, so specify vertex offset just only one time.
+            skinning_.compute(aabbMin, aabbMax, isRestart);
+
+            mdl->setBoundingBox(aten::aabb(aabbMin, aabbMax));
+            deform_mdl_->update(true);
+
+            const auto sceneBbox = aten::aabb(aabbMin, aabbMax);
+            auto& nodes = renderer_.getCudaTextureResourceForBvhNodes();
+
+            auto& vtxPos = skinning_.getInteropVBO()[0];
+            auto& tris = skinning_.getTriangles();
+
+            // TODO
+            size_t deformPos = nodes.size() - 1;
+
+            // NOTE
+            // Vertex offset was added in "skinning_.compute".
+            // But, in "lbvh_.build", vertex index have to be handled as zero based index.
+            // Vertex offset have to be removed from vertex index.
+            // So, specify minus vertex offset.
+            // This is work around, too complicated...
+            lbvh_.build(
+                nodes[deformPos],
+                tris,
+                tri_offset_,
+                sceneBbox,
+                vtxPos,
+                -vtx_offset_,
+                nullptr);
+
+            // Copy computed vertices, triangles to the tracer.
+            renderer_.updateGeometry(
+                skinning_.getInteropVBO(),
+                vtx_offset_,
+                skinning_.getTriangles(),
+                tri_offset_);
+
+            {
+                auto accel = scene_.getAccel();
+                accel->update(ctxt_);
+
+                std::vector<aten::ObjectParameter> shapeparams;
+                std::vector<aten::TriangleParameter> primparams;
+                std::vector<aten::LightParameter> lightparams;
+                std::vector<aten::MaterialParameter> mtrlparms;
+                std::vector<aten::vertex> vtxparams;
+                std::vector<aten::mat4> mtxs;
+
+                aten::DataCollector::collect(
+                    ctxt_,
+                    shapeparams,
+                    primparams,
+                    lightparams,
+                    mtrlparms,
+                    vtxparams,
+                    mtxs);
+
+                const auto& nodes = scene_.getAccel()->getNodes();
+
+                renderer_.updateBVH(
+                    shapeparams,
+                    nodes,
+                    mtxs);
             }
         }
-        else if (key == aten::Key::Key_CONTROL) {
-            g_pickPixel = true;
-            return;
-        }
     }
 
-    if (press) {
-        switch (key) {
-        case aten::Key::Key_W:
-        case aten::Key::Key_UP:
-            aten::CameraOperator::moveForward(g_camera, offset);
-            break;
-        case aten::Key::Key_S:
-        case aten::Key::Key_DOWN:
-            aten::CameraOperator::moveForward(g_camera, -offset);
-            break;
-        case aten::Key::Key_D:
-        case aten::Key::Key_RIGHT:
-            aten::CameraOperator::moveRight(g_camera, offset);
-            break;
-        case aten::Key::Key_A:
-        case aten::Key::Key_LEFT:
-            aten::CameraOperator::moveRight(g_camera, -offset);
-            break;
-        case aten::Key::Key_Z:
-            aten::CameraOperator::moveUp(g_camera, offset);
-            break;
-        case aten::Key::Key_X:
-            aten::CameraOperator::moveUp(g_camera, -offset);
-            break;
-        case aten::Key::Key_R:
-        {
-            aten::vec3 pos, at;
-            real vfov;
-            Scene::getCameraPosAndAt(pos, at, vfov);
+    aten::PinholeCamera camera_;
+    bool is_camera_dirty_{ false };
 
-            g_camera.init(
-                pos,
-                at,
-                aten::vec3(0, 1, 0),
-                vfov,
-                WIDTH, HEIGHT);
-        }
-            break;
-        default:
-            break;
-        }
+    aten::AcceleratedScene<aten::GPUBvh> scene_;
+    aten::context ctxt_;
 
-        g_isCameraDirty = true;
-    }
-}
+    std::shared_ptr<aten::instance<aten::deformable>> deform_mdl_;
+    std::shared_ptr<aten::DeformAnimation> defrom_anm_;
+
+#ifdef ENABLE_SVGF
+    idaten::SVGFPathTracing renderer_;
+#else
+    idaten::PathTracing renderer_;
+#endif
+
+    aten::FilmProgressive buffer_{ WIDTH, HEIGHT };
+
+    std::shared_ptr<aten::visualizer> visualizer_;
+
+    float avg_cuda_time_{ 0.0f };
+
+    aten::GammaCorrection gamma_;
+    aten::TAA taa_;
+
+    aten::FBO fbo_;
+
+    aten::RasterizeRenderer rasterizer_;
+    aten::RasterizeRenderer rasterizer_aabb_;
+
+    aten::shader shader_raasterize_deformable_;
+
+    idaten::Skinning skinning_;
+    aten::Timeline timeline_;
+
+    idaten::LBVHBuilder lbvh_;
+    size_t tri_offset_{ 0 };
+    int32_t vtx_offset_{ 0 };
+
+    bool will_show_gui_{ true };
+    bool will_take_screen_shot_{ false };
+    int32_t screen_shot_count_{ 0 };
+
+    int32_t max_samples_{ 1 };
+    int32_t max_bounce_{ 5 };
+    int32_t curr_rendering_mode_{ static_cast<int32_t>(idaten::SVGFPathTracing::Mode::SVGF) };
+    int32_t curr_aov_mode_{ static_cast<int32_t>(aten::SVGFAovMode::WireFrame) };
+    bool is_show_aabb_{ false };
+
+    bool will_pick_pixel_info_{ false };
+
+    bool is_mouse_l_btn_down_{ false };
+    bool is_mouse_r_btn_down_{ false };
+    int32_t prev_mouse_pos_x_{ 0 };
+    int32_t prev_mouse_pos_y_{ 0 };
+};
 
 int32_t main()
 {
@@ -509,290 +771,40 @@ int32_t main()
         "Allow only deformable scene");
 
     aten::timer::init();
-    aten::OMPUtil::setThreadNum(g_threadnum);
+    aten::OMPUtil::setThreadNum(DeformationRendererApp::ThreadNum);
 
     aten::initSampler(WIDTH, HEIGHT);
+
+    auto app = std::make_shared<DeformationRendererApp>();
 
     auto wnd = std::make_shared<aten::window>();
 
     auto id = wnd->Create(
         WIDTH, HEIGHT, TITLE,
-        onRun,
-        onClose,
-        onMouseBtn,
-        onMouseMove,
-        onMouseWheel,
-        onKey);
+        std::bind(&DeformationRendererApp::Run, app),
+        std::bind(&DeformationRendererApp::OnClose, app),
+        std::bind(&DeformationRendererApp::OnMouseBtn, app, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4),
+        std::bind(&DeformationRendererApp::OnMouseMove, app, std::placeholders::_1, std::placeholders::_2),
+        std::bind(&DeformationRendererApp::OnMouseWheel, app, std::placeholders::_1),
+        std::bind(&DeformationRendererApp::OnKey, app, std::placeholders::_1, std::placeholders::_2));
 
     if (id >= 0) {
-        g_ctxt.SetIsWindowInitialized(true);
+        app->GetContext().SetIsWindowInitialized(true);
     }
     else {
         AT_ASSERT(false);
         return 1;
     }
 
+    app->Init();
+
     aten::GLProfiler::start();
-
-    g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
-
-    aten::GammaCorrection gamma;
-    gamma.init(
-        WIDTH, HEIGHT,
-        "../shader/fullscreen_vs.glsl",
-        "../shader/gamma_fs.glsl");
-
-    aten::Blitter blitter;
-    blitter.init(
-        WIDTH, HEIGHT,
-        "../shader/fullscreen_vs.glsl",
-        "../shader/fullscreen_fs.glsl");
-
-#ifdef ENABLE_SVGF
-    g_taa.init(
-        WIDTH, HEIGHT,
-        "../shader/fullscreen_vs.glsl", "../shader/taa_fs.glsl",
-        "../shader/fullscreen_vs.glsl", "../shader/taa_final_fs.glsl");
-
-    g_visualizer->addPostProc(&g_taa);
-#endif
-
-    g_visualizer->addPostProc(&gamma);
-    //aten::visualizer::addPostProc(&blitter);
-
-    g_rasterizer.init(
-        WIDTH, HEIGHT,
-        "../shader/ssrt_vs.glsl",
-        "../shader/ssrt_gs.glsl",
-        "../shader/ssrt_fs.glsl");
-    g_rasterizerAABB.init(
-        WIDTH, HEIGHT,
-        "../shader/simple3d_vs.glsl",
-        "../shader/simple3d_fs.glsl");
-
-    g_shdRasterizeDeformable.init(
-        WIDTH, HEIGHT,
-        "./ssrt_deformable_vs.glsl",
-        "../shader/ssrt_gs.glsl",
-        "../shader/ssrt_fs.glsl");
-
-#ifdef ENABLE_SVGF
-    g_fbo.asMulti(2);
-    g_fbo.init(
-        WIDTH, HEIGHT,
-        aten::PixelFormat::rgba32f,
-        true);
-
-    g_taa.setMotionDepthBufferHandle(g_fbo.GetGLTextureHandle(1));
-#endif
-
-    aten::vec3 pos, at;
-    real vfov;
-    Scene::getCameraPosAndAt(pos, at, vfov);
-
-    g_camera.init(
-        pos,
-        at,
-        aten::vec3(0, 1, 0),
-        vfov,
-        WIDTH, HEIGHT);
-
-    aten::accelerator::setUserDefsInternalAccelCreator(Lbvh::create);
-
-    aten::AssetManager asset_manager;
-    Scene::makeScene(g_ctxt, &g_scene, asset_manager);
-    g_scene.build(g_ctxt);
-
-#ifdef ENABLE_ENVMAP
-    auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt, asset_manager);
-    auto bg = std::make_shared<aten::envmap>();
-    bg->init(envmap);
-
-    auto ibl = std::make_shared<aten::ImageBasedLight>(bg);
-
-    g_scene.addImageBasedLight(g_ctxt, ibl);
-#endif
-
-    uint32_t advanceVtxNum = 0;
-    uint32_t advanceTriNum = 0;
-    std::vector<aten::TriangleParameter> deformTris;
-
-    auto deform = getDeformable();
-
-    // Initialize skinning.
-    if (deform)
-    {
-        auto mdl = deform->getHasObjectAsRealType();
-
-        mdl->initGLResources(&g_shdRasterizeDeformable);
-
-        auto& vb = mdl->getVBForGPUSkinning();
-
-        std::vector<aten::SkinningVertex> vtx;
-        std::vector<uint32_t> idx;
-
-        int32_t vtxIdOffset = g_ctxt.GetVertexNum();
-
-        mdl->getGeometryData(g_ctxt, vtx, idx, deformTris);
-
-        g_skinning.initWithTriangles(
-            &vtx[0], vtx.size(),
-            &deformTris[0], deformTris.size(),
-            &vb);
-
-        advanceVtxNum = vtx.size();
-        advanceTriNum = deformTris.size();
-
-        auto anm = getDeformAnm();
-
-        if (anm) {
-            g_timeline.init(anm->getDesc().time, real(0));
-            g_timeline.enableLoop(true);
-            g_timeline.start();
-        }
-    }
-
-    {
-        std::vector<aten::ObjectParameter> shapeparams;
-        std::vector<aten::TriangleParameter> primparams;
-        std::vector<aten::LightParameter> lightparams;
-        std::vector<aten::MaterialParameter> mtrlparms;
-        std::vector<aten::vertex> vtxparams;
-        std::vector<aten::mat4> mtxs;
-
-        aten::DataCollector::collect(
-            g_ctxt,
-            shapeparams,
-            primparams,
-            lightparams,
-            mtrlparms,
-            vtxparams,
-            mtxs);
-
-        g_triOffset = primparams.size();
-        g_vtxOffset = vtxparams.size();
-
-        const auto& nodes = g_scene.getAccel()->getNodes();
-
-        std::vector<idaten::TextureResource> tex;
-        {
-            auto texNum = g_ctxt.GetTextureNum();
-
-            for (int32_t i = 0; i < texNum; i++) {
-                auto t = g_ctxt.GtTexture(i);
-                tex.push_back(
-                    idaten::TextureResource(t->colors(), t->width(), t->height()));
-            }
-        }
-
-#ifdef ENABLE_ENVMAP
-        for (auto& l : lightparams) {
-            if (l.type == aten::LightType::IBL) {
-                l.envmapidx = envmap->id();
-            }
-        }
-#endif
-
-        auto camparam = g_camera.param();
-        camparam.znear = real(0.1);
-        camparam.zfar = real(10000.0);
-
-        g_tracer.update(
-            g_visualizer->GetGLTextureHandle(),
-            WIDTH, HEIGHT,
-            camparam,
-            shapeparams,
-            mtrlparms,
-            lightparams,
-            nodes,
-            primparams, advanceTriNum,
-            vtxparams, advanceVtxNum,
-            mtxs,
-            tex,
-#ifdef ENABLE_ENVMAP
-            idaten::EnvmapResource(envmap->id(), ibl->getAvgIlluminace(), real(1)));
-#else
-            idaten::EnvmapResource());
-#endif
-
-#ifdef ENABLE_SVGF
-        auto aabb = g_scene.getAccel()->getBoundingbox();
-        auto d = aabb.getDiagonalLenght();
-        g_tracer.setHitDistanceLimit(d * 0.25f);
-
-        g_tracer.SetGBuffer(
-            g_fbo.GetGLTextureHandle(0),
-            g_fbo.GetGLTextureHandle(1));
-#endif
-    }
-
-    // For LBVH.
-    if (deform) {
-        g_skinning.setVtxOffset(g_vtxOffset);
-        g_lbvh.init(advanceTriNum);
-    }
-    else
-    {
-        std::vector<std::vector<aten::TriangleParameter>> triangles;
-        std::vector<int32_t> triIdOffsets;
-
-        aten::DataCollector::collectTriangles(g_ctxt, triangles, triIdOffsets);
-
-        uint32_t maxTriNum = 0;
-        for (const auto& tris : triangles) {
-            maxTriNum = std::max<uint32_t>(maxTriNum, tris.size());
-        }
-
-        g_lbvh.init(maxTriNum);
-
-        const auto& sceneBbox = g_scene.getAccel()->getBoundingbox();
-        auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();
-        auto& vtxPos = g_tracer.getCudaTextureResourceForVtxPos();
-
-        // TODO
-        // もし、GPUBvh が SBVH だとした場合.
-        // ここで取得するノード配列は SBVH のノードである、ThreadedSbvhNode となる.
-        // しかし、LBVHBuilder::build で渡すことができるのは、ThreadBVH のノードである ThreadedBvhNode である.
-        // そのため、現状、ThreadedBvhNode に無理やりキャストしている.
-        // もっとスマートな方法を考えたい.
-        // If GPUBvh is SBVH, what we can retrieve the array of ThreadedSbvhNode as SBVH node type.
-        // But, what we can pass to LBVHBuilder::build is ThreadedBvhNode of ThreadBVH's node.
-        // So, we need to reinterpret cast ThreadedSbvhNode to ThreadedBvhNode.
-        // It's not safe and we neeed to consider the safer way.
-
-        auto& cpunodes = g_scene.getAccel()->getNodes();
-
-        for (int32_t i = 0; i < triangles.size(); i++)
-        {
-            auto& tris = triangles[i];
-            auto triIdOffset = triIdOffsets[i];
-
-            // NOTE
-            // 0 is for top layer.
-            g_lbvh.build(
-                nodes[i + 1],
-                tris,
-                triIdOffset,
-                sceneBbox,
-                vtxPos,
-                0,
-                (std::vector<aten::ThreadedBvhNode>*)&cpunodes[i + 1]);
-        }
-    }
-
-#ifdef ENABLE_SVGF
-    g_tracer.SetMode((idaten::SVGFPathTracing::Mode)g_curMode);
-    g_tracer.SetAOVMode((aten::SVGFAovMode)g_curAOVMode);
-    //g_tracer.SetCanSSRTHitTest(false);
-#endif
 
     wnd->Run();
 
     aten::GLProfiler::terminate();
 
-    g_rasterizer.release();
-    g_rasterizerAABB.release();
-    g_ctxt.release();
+    app.reset();
 
     wnd->Terminate();
 }

@@ -3,22 +3,10 @@
 #include <array>
 
 static std::shared_ptr<aten::instance<aten::PolygonObject>> g_movableObj;
-static std::shared_ptr<aten::instance<aten::deformable>> s_deformMdl;
-static std::shared_ptr<aten::DeformAnimation> s_deformAnm;
 
 std::shared_ptr<aten::instance<aten::PolygonObject>> getMovableObj()
 {
     return g_movableObj;
-}
-
-std::shared_ptr<aten::instance<aten::deformable>> getDeformable()
-{
-    return s_deformMdl;
-}
-
-std::shared_ptr<aten::DeformAnimation> getDeformAnm()
-{
-    return s_deformAnm;
 }
 
 static std::shared_ptr<aten::material> CreateMaterial(
@@ -1052,7 +1040,8 @@ void BunnyScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void DeformScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<aten::DeformAnimation>> DeformScene::makeScene(
+    aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
 {
     auto mdl = aten::TransformableFactory::createDeformable(ctxt);
     mdl->read("../../asset/converted_unitychan/unitychan_gpu.mdl");
@@ -1063,12 +1052,12 @@ void DeformScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Asset
     auto deformMdl = aten::TransformableFactory::createInstance<aten::deformable>(ctxt, mdl, aten::mat4::Identity);
     scene->add(deformMdl);
 
-    s_deformMdl = deformMdl;
-
     aten::ImageLoader::setBasePath("./");
 
-    s_deformAnm = std::make_shared<aten::DeformAnimation>();
-    s_deformAnm->read("../../asset/converted_unitychan/unitychan_WAIT00.anm");
+    auto deformAnm = std::make_shared<aten::DeformAnimation>();
+    deformAnm->read("../../asset/converted_unitychan/unitychan_WAIT00.anm");
+
+    return aten::make_tuple(deformMdl, deformAnm);
 }
 
 void DeformScene::getCameraPosAndAt(
@@ -1083,7 +1072,7 @@ void DeformScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void DeformInBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<aten::DeformAnimation>> DeformInBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
 {
 #if 1
     {
@@ -1129,23 +1118,21 @@ void DeformInBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::
     }
 #endif
 
-    {
-        auto mdl = aten::TransformableFactory::createDeformable(ctxt);
-        mdl->read("../../asset/converted_unitychan/unitychan_gpu.mdl");
+    auto mdl = aten::TransformableFactory::createDeformable(ctxt);
+    mdl->read("../../asset/converted_unitychan/unitychan_gpu.mdl");
 
-        aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
-        aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt, asset_manager);
+    aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
+    aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt, asset_manager);
 
-        auto deformMdl = aten::TransformableFactory::createInstance<aten::deformable>(ctxt, mdl, aten::mat4::Identity);
-        scene->add(deformMdl);
+    auto deformMdl = aten::TransformableFactory::createInstance<aten::deformable>(ctxt, mdl, aten::mat4::Identity);
+    scene->add(deformMdl);
 
-        s_deformMdl = deformMdl;
+    aten::ImageLoader::setBasePath("./");
 
-        aten::ImageLoader::setBasePath("./");
+    auto deformAnm = std::make_shared<aten::DeformAnimation>();
+    deformAnm->read("../../asset/converted_unitychan/unitychan_WAIT00.anm");
 
-        s_deformAnm = std::make_shared<aten::DeformAnimation>();
-        s_deformAnm->read("../../asset/converted_unitychan/unitychan_WAIT00.anm");
-    }
+    return aten::make_tuple(deformMdl, deformAnm);
 }
 
 void DeformInBoxScene::getCameraPosAndAt(

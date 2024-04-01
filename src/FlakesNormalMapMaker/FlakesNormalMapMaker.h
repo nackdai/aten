@@ -43,17 +43,18 @@ namespace aten {
             }
         };
 
-        static const Parameter& getParameter()
+        const Parameter& GetParameter() const
         {
-            return s_param;
+            return param_;
         }
-        static void setParemter(const Parameter& param)
+
+        Parameter& GetParameter()
         {
-            s_param = param;
+            return param_;
         }
 
     private:
-        static Parameter s_param;
+        Parameter param_;
     };
 
 }

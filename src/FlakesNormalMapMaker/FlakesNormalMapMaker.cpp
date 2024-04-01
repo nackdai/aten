@@ -2,23 +2,25 @@
 #include "FlakesNormalMapMaker.h"
 
 namespace aten {
-    FlakesNormalMapMaker::Parameter FlakesNormalMapMaker::s_param;
-
     void FlakesNormalMapMaker::prepareRender(
         const void* pixels,
         bool revert)
     {
         shader::prepareRender(pixels, revert);
 
-        float resolution[4] = { width_, height_, 0.0f, 0.0f };
+        std::array<float, 4> resolution = {
+            static_cast<float>(width_),
+            static_cast<float>(height_),
+            0.0f, 0.0f
+        };
         auto hRes = getHandle("u_resolution");
         if (hRes >= 0) {
-            CALL_GL_API(::glUniform4fv(hRes, 1, resolution));
+            CALL_GL_API(::glUniform4fv(hRes, 1, resolution.data()));
         }
 
-        shader::setUniformFloat("flake_scale", s_param.flake_scale);
-        shader::setUniformFloat("flake_size", s_param.flake_size);
-        shader::setUniformFloat("flake_size_variance", s_param.flake_size_variance);
-        shader::setUniformFloat("flake_normal_orientation", s_param.flake_normal_orientation);
+        shader::setUniformFloat("flake_scale", param_.flake_scale);
+        shader::setUniformFloat("flake_size", param_.flake_size);
+        shader::setUniformFloat("flake_size_variance", param_.flake_size_variance);
+        shader::setUniformFloat("flake_normal_orientation", param_.flake_normal_orientation);
     }
 }

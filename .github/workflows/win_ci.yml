@@ -47,14 +47,15 @@ jobs:
           files_yaml_from_source_file: .github/workflows/resources/change_file_win_ci.yml
 
       # NOTE:
-      # As GHA spec, returning exit code 0 doesn't exit the workflow.
-      # It means that the step is succeeded.
-      # If we'd like to exit the workflow immediately, we need to return error code (e.g. 1).
-      # But, if any specified file changes is detected, I'd like to run the later steps.
+      # As GHA spec, returning exit code doesn't exit the workflow.
+      # It just notifies to the later steps if the step is succeeded or failed.
+      # All steps are specified success in if condition as default.
+      # If any specified file changes is detected, I'd like to run the later steps.
       # So, if any specified file changes is detected, this step returns exit code 0 as success.
-      # And then, the later steps is executed by whether this steps is succeeded.
+      # And then, the next step can be executed.
       - name: Check changed files
-        if: ${{ steps.changed_files.outputs.src_any_changed == 'true' }}
+        #if: ${{ steps.changed_files.outputs.src_any_changed == 'true' }}
+        if: ${{ steps.changed_files.outputs.src_any_changed == 'false' }}
         run: |
           exit 0
 
@@ -66,7 +67,6 @@ jobs:
           msbuild-architecture: x64
 
       - name: Install CUDA
-        if: success()
         run: |
           powershell -NoProfile -ExecutionPolicy Unrestricted .\scripts\install_cuda.ps1
           if ($LastExitCode -ne 0) { exit 1 }
@@ -78,7 +78,6 @@ jobs:
       #   - $env:GITHUB_ENV
       #     - https://stackoverflow.com/questions/66733076/github-actions-set-environment-variable-for-windows-build-with-powershell
       - name: Setup CUDA
-        if: success()
         shell: pwsh
         run: |
           echo "CUDA_PATH_V11_7=${{ env.CUDA_PATH }}" >> $env:GITHUB_ENV
@@ -87,13 +86,11 @@ jobs:
       # NOTE:
       # In GHA windows runner, Visual Studio is Enterprise.
       - name: Build 3rdparty
-        if: success()
         run: |
           cd 3rdparty
           .\Build3rdParty.bat Release Enterprise
 
       - name: Build
-        if: success()
         env:
           TARGET: Build
           CONFIG: Release

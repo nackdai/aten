@@ -29,11 +29,11 @@ public:
         uint32_t depth);
 
 private:
-    aten::shader m_shader;
+    aten::shader shader_;
     aten::GeomVertexBuffer vertex_buffer_;
-    aten::GeomIndexBuffer m_ib;
+    aten::GeomIndexBuffer ib_;
 
-    aten::GeomIndexBuffer m_ibForWireframe;
+    aten::GeomIndexBuffer ib_for_wireframe_;
 
     int32_t width_{ 0 };
     int32_t height_{ 0 };

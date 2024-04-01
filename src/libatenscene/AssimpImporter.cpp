@@ -9,7 +9,7 @@
 namespace aten
 {
     bool AssimpImporter::load(
-        const std::string& path,
+        std::string_view path,
         std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
         context& ctxt,
         aten::AssetManager& asset_manager,
@@ -299,7 +299,7 @@ namespace aten
     }
 
     bool AssimpImporter::loadModel(
-        const std::string& path,
+        std::string_view path,
         std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
         context& ctxt,
         aten::AssetManager& asset_manager,
@@ -313,7 +313,7 @@ namespace aten
         assimp_flags &= ~(aiProcess_CalcTangentSpace);
 
         Assimp::Importer importer;
-        auto assimp_scene = importer.ReadFile(path, assimp_flags);
+        auto assimp_scene = importer.ReadFile(path.data(), assimp_flags);
 
         auto is_valid_scene = [](const decltype(assimp_scene) scene) {
             if (scene->mTextures) {
@@ -324,7 +324,7 @@ namespace aten
         };
 
         if (!assimp_scene || !is_valid_scene(assimp_scene)) {
-            AT_PRINTF("Can't open model file [%s]\n", path.c_str());
+            AT_PRINTF("Can't open model file [%s]\n", path.data());
             AT_PRINTF("  %s\n", importer.GetErrorString());
             return false;
         }

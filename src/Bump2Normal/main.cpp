@@ -8,6 +8,14 @@ class Bump2NormalApp {
 public:
     static constexpr char* TITLE = "Bump2Normal";
 
+    Bump2NormalApp() = default;
+    ~Bump2NormalApp() = default;
+
+    Bump2NormalApp(const Bump2NormalApp&) = delete;
+    Bump2NormalApp(Bump2NormalApp&&) = delete;
+    Bump2NormalApp operator=(const Bump2NormalApp&) = delete;
+    Bump2NormalApp operator=(Bump2NormalApp&&) = delete;
+
     bool Init()
     {
         bump_map_ = aten::ImageLoader::load(args_.input, ctxt_, asset_manager_);
@@ -27,7 +35,7 @@ public:
         return true;
     }
 
-    bool onRun()
+    bool Run()
     {
         if (!bump_map_->initAsGLTexture()) {
             AT_ASSERT(false);
@@ -79,23 +87,23 @@ public:
         return false;
     }
 
-    void onClose()
+    void OnClose()
     {
     }
 
-    void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
+    void OnMouseBtn(bool left, bool press, int32_t x, int32_t y)
     {
     }
 
-    void onMouseMove(int32_t x, int32_t y)
+    void OnMouseMove(int32_t x, int32_t y)
     {
     }
 
-    void onMouseWheel(int32_t delta)
+    void OnMouseWheel(int32_t delta)
     {
     }
 
-    void onKey(bool press, aten::Key key)
+    void OnKey(bool press, aten::Key key)
     {
     }
 
@@ -227,8 +235,8 @@ int32_t main(int32_t argc, char* argv[])
         app->width(), app->height(),
         Bump2NormalApp::TITLE,
         !app->NeedGui(),
-        std::bind(&Bump2NormalApp::onRun, app),
-        std::bind(&Bump2NormalApp::onClose, app));
+        std::bind(&Bump2NormalApp::Run, app),
+        std::bind(&Bump2NormalApp::OnClose, app));
 
     if (id >= 0) {
         app->GetContext().SetIsWindowInitialized(true);

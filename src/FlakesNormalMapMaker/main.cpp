@@ -5,139 +5,199 @@
 #include <cmdline.h>
 #include <imgui.h>
 
-int32_t WIDTH = 1280;
-int32_t HEIGHT = 720;
+class FlakesNormalMapMakerApp {
+public:
+    static constexpr char* TITLE = "FlakesNormalMapMaker";
 
-static const char* TITLE = "FlakesNormalMapMaker";
+    FlakesNormalMapMakerApp() = default;
+    ~FlakesNormalMapMakerApp() = default;
 
-struct Options {
-    std::string output;
-    int32_t width{ 1280 };
-    int32_t height{ 720 };
-} g_opt;
+    FlakesNormalMapMakerApp(const FlakesNormalMapMakerApp&) = delete;
+    FlakesNormalMapMakerApp(FlakesNormalMapMakerApp&&) = delete;
+    FlakesNormalMapMakerApp operator=(const FlakesNormalMapMakerApp&) = delete;
+    FlakesNormalMapMakerApp operator=(FlakesNormalMapMakerApp&&) = delete;
 
-static std::shared_ptr<aten::visualizer> g_visualizer;
-
-static bool g_willShowGUI = true;
-
-bool onRun()
-{
-    aten::RasterizeRenderer::clearBuffer(
-        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
-        aten::vec4(0, 0.5f, 1.0f, 1.0f),
-        1.0f,
-        0);
-
-    g_visualizer->render(false);
-
-    if (g_willShowGUI) {
-        auto flakeParam = aten::FlakesNormalMapMaker::getParameter();
-
-        auto b0 = ImGui::SliderFloat("scale", &flakeParam.flake_scale, 0.1f, 100.0f);
-        auto b1 = ImGui::SliderFloat("size", &flakeParam.flake_size, 0.1f, 1.0f);
-        auto b2 = ImGui::SliderFloat("size variance", &flakeParam.flake_size_variance, 0.0f, 1.0f);
-        auto b3 = ImGui::SliderFloat("orientation", &flakeParam.flake_normal_orientation, 0.0f, 1.0f);
-
-        if (b0 || b1 || b2 || b3) {
-            aten::FlakesNormalMapMaker::setParemter(flakeParam);
-        }
-    }
-
-    return true;
-}
-
-void onClose()
-{
-
-}
-
-void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
-{
-}
-
-void onMouseMove(int32_t x, int32_t y)
-{
-}
-
-void onMouseWheel(int32_t delta)
-{
-}
-
-void onKey(bool press, aten::Key key)
-{
-}
-
-bool parseOption(
-    int32_t argc, char* argv[],
-    cmdline::parser& cmd,
-    Options& opt)
-{
+    bool Init()
     {
-        cmd.add<std::string>("output", 'o', "output filename", false, "result");
-        cmd.add<std::string>("width", 'w', "texture width", false);
-        cmd.add<std::string>("height", 'h', "texture height", false);
-
-        cmd.add<std::string>("help", '?', "print usage", false);
+        return true;
     }
 
-    bool isCmdOk = cmd.parse(argc, argv);
+    bool Run()
+    {
+        if (!maker_.IsValid()) {
+            visualizer_ = aten::visualizer::init(args_.width, args_.height);
 
-    if (cmd.exist("help")) {
-        std::cerr << cmd.usage();
+            if (!maker_.init(
+                args_.width, args_.height,
+                "../shader/FlakesTextureMaker_vs.glsl",
+                "../shader/FlakesTextureMaker_fs.glsl"))
+            {
+                AT_ASSERT(false);
+                return false;
+            }
+
+            visualizer_->addPostProc(&maker_);
+        }
+
+        aten::RasterizeRenderer::clearBuffer(
+            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+            aten::vec4(0, 0.5f, 1.0f, 1.0f),
+            1.0f,
+            0);
+
+        visualizer_->render(false);
+
+        if (NeedGui()) {
+            auto flake_param = maker_.GetParameter();
+            ImGui::SliderFloat("scale", &flake_param.flake_scale, 0.1f, 100.0f);
+            ImGui::SliderFloat("size", &flake_param.flake_size, 0.1f, 1.0f);
+            ImGui::SliderFloat("size variance", &flake_param.flake_size_variance, 0.0f, 1.0f);
+            ImGui::SliderFloat("orientation", &flake_param.flake_normal_orientation, 0.0f, 1.0f);
+            return true;
+        }
+
         return false;
     }
 
-    if (!isCmdOk) {
-        std::cerr << cmd.error() << std::endl << cmd.usage();
-        return false;
+    void OnClose()
+    {
     }
 
-    if (cmd.exist("output")) {
-        opt.output = cmd.get<std::string>("output");
-    }
-    else {
-        // TODO
-        opt.output = "result.png";
+    void OnMouseBtn(bool left, bool press, int32_t x, int32_t y)
+    {
     }
 
-    // TODO
+    void OnMouseMove(int32_t x, int32_t y)
+    {
+    }
 
-    return true;
-}
+    void OnMouseWheel(int32_t delta)
+    {
+    }
+
+    void OnKey(bool press, aten::Key key)
+    {
+    }
+
+    bool ParseArgs(int32_t argc, char* argv[])
+    {
+        cmdline::parser cmd;
+        {
+            cmd.add<std::string>("output", 'o', "output flakes normal map(png)", false, "result");
+            cmd.add<int32_t>("width", 'w', "texture width", false);
+            cmd.add<int32_t>("height", 'h', "texture height", false);
+            cmd.add("gui", 'g', "GUI mode");
+
+            cmd.add<std::string>("help", '?', "print usage", false);
+        }
+
+        bool is_cmd_valid = cmd.parse(argc, argv);
+
+        if (cmd.exist("help")) {
+            std::cerr << cmd.usage();
+            return false;
+        }
+
+        if (!is_cmd_valid) {
+            std::cerr << cmd.error() << std::endl << cmd.usage();
+            return false;
+        }
+
+        if (cmd.exist("output")) {
+            args_.output = cmd.get<std::string>("output");
+        }
+        else {
+            args_.output = "result.png";
+        }
+
+        if (cmd.exist("height")) {
+            args_.width = cmd.get<int32_t>("height");
+        }
+
+        if (cmd.exist("width")) {
+            args_.width = cmd.get<int32_t>("width");
+        }
+
+        args_.need_gui = cmd.exist("gui");
+        will_take_screenshot_ = !args_.need_gui;
+
+        return true;
+    }
+
+    int32_t width() const
+    {
+        return args_.width;
+    }
+
+    int32_t height() const
+    {
+        return args_.height;
+    }
+
+    bool NeedGui() const
+    {
+        return args_.need_gui;
+    }
+
+    aten::context& GetContext()
+    {
+        return ctxt_;
+    }
+
+private:
+    struct Args {
+        std::string output;
+        int32_t width{ 1280 };
+        int32_t height{ 720 };
+        bool need_gui{ true };
+    } args_;
+
+    aten::context ctxt_;
+    std::shared_ptr<aten::texture> bump_map_;
+
+    std::shared_ptr<aten::visualizer> visualizer_;
+
+    aten::FlakesNormalMapMaker maker_;
+
+    bool will_take_screenshot_{ false };
+};
 
 int32_t main(int32_t argc, char* argv[])
 {
     aten::SetCurrentDirectoryFromExe();
 
-    auto wnd = std::make_shared<aten::window>();
+    auto app = std::make_shared<FlakesNormalMapMakerApp>();
 
-    auto id = wnd->Create(
-        WIDTH, HEIGHT, TITLE,
-        onRun,
-        onClose,
-        onMouseBtn,
-        onMouseMove,
-        onMouseWheel,
-        onKey);
-
-    if (id < 0) {
+    if (!app->ParseArgs(argc, argv)) {
         AT_ASSERT(false);
         return 1;
     }
 
-    g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
+    if (!app->Init()) {
+        AT_ASSERT(false);
+        return 1;
+    }
 
-    aten::FlakesNormalMapMaker maker;
-    maker.init(
-        WIDTH, HEIGHT,
-        "../shader/FlakesTextureMaker_vs.glsl",
-        "../shader/FlakesTextureMaker_fs.glsl");
+    auto wnd = std::make_shared<aten::window>();
 
-    g_visualizer->addPostProc(&maker);
+    auto id = wnd->Create(
+        app->width(), app->height(),
+        FlakesNormalMapMakerApp::TITLE,
+        !app->NeedGui(),
+        std::bind(&FlakesNormalMapMakerApp::Run, app),
+        std::bind(&FlakesNormalMapMakerApp::OnClose, app));
+
+    if (id >= 0) {
+        app->GetContext().SetIsWindowInitialized(true);
+    }
+    else {
+        AT_ASSERT(false);
+        return 1;
+    }
 
     wnd->Run();
 
-    wnd->Terminate();
+    app.reset();
 
-    return 0;
+    wnd->Terminate();
 }

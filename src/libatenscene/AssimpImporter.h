@@ -9,14 +9,14 @@ namespace aten
     public:
         using FuncCreateMaterial = std::function<
             std::shared_ptr<aten::material> (
-                const std::string& name,
+                std::string_view name,
                 context& ctxt,
                 const MaterialParameter& mtrl_param,
                 const std::string& albedo,
                 const std::string& nml)>;
 
         static bool load(
-            const std::string& path,
+            std::string_view path,
             std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
             context& ctxt,
             aten::AssetManager& asset_manager,
@@ -32,7 +32,7 @@ namespace aten
         AssimpImporter& operator=(AssimpImporter&&) = delete;
 
         bool loadModel(
-            const std::string& path,
+            std::string_view path,
             std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
             context& ctxt,
             aten::AssetManager& asset_manager,

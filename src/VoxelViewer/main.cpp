@@ -5,335 +5,345 @@
 #include "atenscene.h"
 #include "VoxelViewer.h"
 
-static const int32_t WIDTH = 1280;
-static const int32_t HEIGHT = 720;
+constexpr int32_t WIDTH = 1280;
+constexpr int32_t HEIGHT = 720;
+constexpr char* TITLE = "VoxelViewer";
 
-static const char* TITLE = "VoxelViewer";
+class VoxelViewerApp {
+public:
+    VoxelViewerApp() = default;
+    ~VoxelViewerApp() = default;
 
-struct Options {
-    std::string input;
-    std::string output;
+    VoxelViewerApp(const VoxelViewerApp&) = delete;
+    VoxelViewerApp(VoxelViewerApp&&) = delete;
+    VoxelViewerApp operator=(const VoxelViewerApp&) = delete;
+    VoxelViewerApp operator=(VoxelViewerApp&&) = delete;
 
-    std::string inputBasepath;
-    std::string inputFilename;
-} g_opt;
+    bool Init(int32_t argc, char* argv[])
+    {
+        // TODO
+        //args_.input = "../../asset/cornellbox/orig.obj";
+        //args_.input = "../../asset/sponza/lod.obj";
+        //args_.input = "../../asset/suzanne/suzanne.obj";
+        args_.input = "../../asset/bunny/bunny.obj";
 
-static std::vector<std::shared_ptr<aten::PolygonObject>> g_objs;
-static aten::AcceleratedScene<aten::sbvh> g_scene;
-static aten::context g_ctxt;
+#if 0
+        if (!ParseArguments(argc, argv, cmd, args_)) {
+            return 0;
+        }
+#endif
 
-static VoxelViewer g_viewer;
-static aten::RasterizeRenderer g_rasterizer;
+        LoadObj();
 
-static aten::PinholeCamera g_camera;
-static bool g_isCameraDirty = false;
+        ctxt_.InitAllTextureAsGLTexture();
 
-static bool g_willShowGUI = true;
+        // TODO
+        aten::vec3 pos(0, 1, 3);
+        aten::vec3 at(0, 1, 0);
+        real vfov = real(45);
 
-static int32_t g_drawVoxelDepth = 1;
-static bool g_drawMesh = false;
-static bool g_isWireframe = false;
+        camera_.init(
+            pos,
+            at,
+            aten::vec3(0, 1, 0),
+            vfov,
+            WIDTH, HEIGHT);
 
-static bool g_isMouseLBtnDown = false;
-static bool g_isMouseRBtnDown = false;
-static int32_t g_prevX = 0;
-static int32_t g_prevY = 0;
+        viewer_.init(
+            WIDTH, HEIGHT,
+            "voxelviewer_vs.glsl",
+            "voxelviewer_fs.glsl");
 
-static std::vector<std::vector<aten::ThreadedSbvhNode>> g_voxels;
+        rasterizer_.init(
+            WIDTH, HEIGHT,
+            "../shader/drawobj_vs.glsl",
+            "../shader/drawobj_fs.glsl");
 
-bool onRun()
-{
-    if (g_isCameraDirty) {
-        g_camera.update();
+        return true;
+    }
 
-        auto camparam = g_camera.param();
-        camparam.znear = real(0.1);
-        camparam.zfar = real(10000.0);
+    bool Run()
+    {
+        if (is_camera_dirty_) {
+            camera_.update();
 
-        g_isCameraDirty = false;
+            auto camparam = camera_.param();
+            camparam.znear = real(0.1);
+            camparam.zfar = real(10000.0);
+
+            is_camera_dirty_ = false;
+        }
+
+        // TODO
+        auto sbvh = reinterpret_cast<aten::sbvh*>(objs_[0]->getInternalAccelerator());
+
+        if (voxels_.empty()) {
+            auto maxDepth = sbvh->getMaxDepth();
+            voxels_.resize(maxDepth);
+
+            // NOTE
+            // nodes[0] is top layer.
+            const auto& nodes = scene_.getAccel()->getNodes();
+            viewer_.bringVoxels(nodes[1], voxels_);
+        }
+
+        aten::RasterizeRenderer::clearBuffer(
+            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+            aten::vec4(0, 0.5f, 1.0f, 1.0f),
+            1.0f,
+            0);
+
+        viewer_.draw(
+            ctxt_,
+            &camera_,
+            voxels_,
+            is_wireframe_,
+            draw_voxel_depth_);
+
+        if (is_draw_wesh_) {
+            for (auto& obj : objs_) {
+                rasterizer_.drawObject(ctxt_, *obj, &camera_, false);
+            }
+        }
+
+        {
+            ImGui::SliderInt("Depth", &draw_voxel_depth_, 1, sbvh->getMaxDepth());
+            ImGui::Checkbox("Wireframe,", &is_wireframe_);
+            ImGui::Checkbox("Draw mesh,", &is_draw_wesh_);
+        }
+
+        return true;
+    }
+
+    void OnClose()
+    {
+    }
+
+    void OnMouseBtn(bool left, bool press, int32_t x, int32_t y)
+    {
+        is_mouse_l_btn_down_ = false;
+        is_mouse_r_btn_down_ = false;
+
+        if (press)
+        {
+            prev_mouse_pos_x_ = x;
+            prev_mouse_pos_y_ = y;
+
+            is_mouse_l_btn_down_ = left;
+            is_mouse_r_btn_down_ = !left;
+        }
+    }
+
+    void OnMouseMove(int32_t x, int32_t y)
+    {
+        if (is_mouse_l_btn_down_)
+        {
+            aten::CameraOperator::rotate(
+                camera_,
+                WIDTH, HEIGHT,
+                prev_mouse_pos_x_, prev_mouse_pos_y_,
+                x, y);
+            is_camera_dirty_ = true;
+        }
+        else if (is_mouse_r_btn_down_)
+        {
+            aten::CameraOperator::move(
+                camera_,
+                prev_mouse_pos_x_, prev_mouse_pos_y_,
+                x, y,
+                real(0.001));
+            is_camera_dirty_ = true;
+        }
+
+        prev_mouse_pos_x_ = x;
+        prev_mouse_pos_y_ = y;
+    }
+
+    void OnMouseWheel(int32_t delta)
+    {
+        aten::CameraOperator::dolly(camera_, delta * real(0.1));
+        is_camera_dirty_ = true;
+    }
+
+    void OnKey(bool press, aten::Key key)
+    {
+        static const real offset_base = real(0.1);
+
+        if (press)
+        {
+            if (key == aten::Key::Key_F1)
+            {
+                will_show_gui_ = !will_show_gui_;
+                return;
+            }
+        }
+
+        auto offset = offset_base;
+
+        if (press)
+        {
+            switch (key)
+            {
+            case aten::Key::Key_W:
+            case aten::Key::Key_UP:
+                aten::CameraOperator::moveForward(camera_, offset);
+                break;
+            case aten::Key::Key_S:
+            case aten::Key::Key_DOWN:
+                aten::CameraOperator::moveForward(camera_, -offset);
+                break;
+            case aten::Key::Key_D:
+            case aten::Key::Key_RIGHT:
+                aten::CameraOperator::moveRight(camera_, offset);
+                break;
+            case aten::Key::Key_A:
+            case aten::Key::Key_LEFT:
+                aten::CameraOperator::moveRight(camera_, -offset);
+                break;
+            case aten::Key::Key_Z:
+                aten::CameraOperator::moveUp(camera_, offset);
+                break;
+            case aten::Key::Key_X:
+                aten::CameraOperator::moveUp(camera_, -offset);
+                break;
+            default:
+                break;
+            }
+
+            is_camera_dirty_ = true;
+        }
+    }
+
+    aten::context& GetContext()
+    {
+        return ctxt_;
+    }
+
+private:
+    struct Args {
+        std::string input;
+        std::string output;
+    } args_;
+
+    bool ParseArguments(
+        int32_t argc, char* argv[],
+        Args& args)
+    {
+        cmdline::parser cmd;
+        {
+            cmd.add<std::string>("input", 'i', "input filename", true);
+            cmd.add<std::string>("output", 'o', "output filename base", false, "result");
+
+            cmd.add<std::string>("help", '?', "print usage", false);
+        }
+
+        bool is_cmd_valid = cmd.parse(argc, argv);
+
+        if (cmd.exist("help")) {
+            std::cerr << cmd.usage();
+            return false;
+        }
+
+        if (!is_cmd_valid) {
+            std::cerr << cmd.error() << std::endl << cmd.usage();
+            return false;
+        }
+
+        args.input = cmd.get<std::string>("input");
+
+        if (cmd.exist("output")) {
+            args.output = cmd.get<std::string>("output");
+        }
+        else {
+            // TODO
+            args.output = "result.sbvh";
+        }
+
+        return true;
     }
 
     // TODO
-    auto sbvh = (aten::sbvh*)g_objs[0]->getInternalAccelerator();
-
-    if (g_voxels.empty()) {
-        auto maxDepth = sbvh->getMaxDepth();
-        g_voxels.resize(maxDepth);
-
-        // NOTE
-        // nodes[0] is top layer.
-        const auto& nodes = g_scene.getAccel()->getNodes();
-        g_viewer.bringVoxels(nodes[1], g_voxels);
-    }
-
-    aten::RasterizeRenderer::clearBuffer(
-        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
-        aten::vec4(0, 0.5f, 1.0f, 1.0f),
-        1.0f,
-        0);
-
-    g_viewer.draw(
-        g_ctxt,
-        &g_camera,
-        g_voxels,
-        g_isWireframe,
-        g_drawVoxelDepth);
-
-    if (g_drawMesh) {
-        for (auto obj : g_objs) {
-            g_rasterizer.drawObject(g_ctxt, *obj, &g_camera, false);
-        }
-    }
-
+    void LoadObj()
     {
-        ImGui::SliderInt("Depth", &g_drawVoxelDepth, 1, sbvh->getMaxDepth());
-        ImGui::Checkbox("Wireframe,", &g_isWireframe);
-        ImGui::Checkbox("Draw mesh,", &g_drawMesh);
-    }
+        aten::MaterialParameter mtrlParam;
+        mtrlParam.type = aten::MaterialType::GGX;
+        mtrlParam.baseColor = aten::vec3(0.7, 0.7, 0.7);
+        mtrlParam.standard.ior = 0.2;
+        mtrlParam.standard.roughness = 0.2;
 
-    return true;
-}
+        auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
+            mtrlParam,
+            nullptr, nullptr, nullptr);
 
-void onClose()
-{
+        asset_manager_.registerMtrl("m", mtrl);
 
-}
+        aten::ObjLoader::load(objs_, args_.input, ctxt_, asset_manager_);
 
-void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
-{
-    g_isMouseLBtnDown = false;
-    g_isMouseRBtnDown = false;
-
-    if (press) {
-        g_prevX = x;
-        g_prevY = y;
-
-        g_isMouseLBtnDown = left;
-        g_isMouseRBtnDown = !left;
-    }
-}
-
-void onMouseMove(int32_t x, int32_t y)
-{
-    if (g_isMouseLBtnDown) {
-        aten::CameraOperator::rotate(
-            g_camera,
-            WIDTH, HEIGHT,
-            g_prevX, g_prevY,
-            x, y);
-        g_isCameraDirty = true;
-    }
-    else if (g_isMouseRBtnDown) {
-        aten::CameraOperator::move(
-            g_camera,
-            g_prevX, g_prevY,
-            x, y,
-            real(0.001));
-        g_isCameraDirty = true;
-    }
-
-    g_prevX = x;
-    g_prevY = y;
-}
-
-void onMouseWheel(int32_t delta)
-{
-    aten::CameraOperator::dolly(g_camera, delta * real(0.1));
-    g_isCameraDirty = true;
-}
-
-void onKey(bool press, aten::Key key)
-{
-    static const real offset = real(0.1);
-
-    if (press) {
-        if (key == aten::Key::Key_F1) {
-            g_willShowGUI = !g_willShowGUI;
-            return;
-        }
-    }
-
-    if (press) {
-        switch (key) {
-        case aten::Key::Key_W:
-        case aten::Key::Key_UP:
-            aten::CameraOperator::moveForward(g_camera, offset);
-            break;
-        case aten::Key::Key_S:
-        case aten::Key::Key_DOWN:
-            aten::CameraOperator::moveForward(g_camera, -offset);
-            break;
-        case aten::Key::Key_D:
-        case aten::Key::Key_RIGHT:
-            aten::CameraOperator::moveRight(g_camera, offset);
-            break;
-        case aten::Key::Key_A:
-        case aten::Key::Key_LEFT:
-            aten::CameraOperator::moveRight(g_camera, -offset);
-            break;
-        case aten::Key::Key_Z:
-            aten::CameraOperator::moveUp(g_camera, offset);
-            break;
-        case aten::Key::Key_X:
-            aten::CameraOperator::moveUp(g_camera, -offset);
-            break;
-        default:
-            break;
+        for (auto& obj : objs_) {
+            auto instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt_, obj, aten::mat4::Identity);
+            scene_.add(instance);
         }
 
-        g_isCameraDirty = true;
-    }
-}
-
-bool parseOption(
-    int32_t argc, char* argv[],
-    cmdline::parser& cmd,
-    Options& opt)
-{
-    {
-        cmd.add<std::string>("input", 'i', "input filename", true);
-        cmd.add<std::string>("output", 'o', "output filename base", false, "result");
-
-        cmd.add<std::string>("help", '?', "print usage", false);
+        scene_.build(ctxt_);
     }
 
-    bool isCmdOk = cmd.parse(argc, argv);
+    aten::context ctxt_;
 
-    if (cmd.exist("help")) {
-        std::cerr << cmd.usage();
-        return false;
-    }
+    aten::AssetManager asset_manager_;
 
-    if (!isCmdOk) {
-        std::cerr << cmd.error() << std::endl << cmd.usage();
-        return false;
-    }
+    std::vector<std::shared_ptr<aten::PolygonObject>> objs_;
+    aten::AcceleratedScene<aten::sbvh> scene_;
 
-    if (cmd.exist("input")) {
-        opt.input = cmd.get<std::string>("input");
-    }
-    else {
-        std::cerr << cmd.error() << std::endl << cmd.usage();
-        return false;
-    }
+    aten::RasterizeRenderer rasterizer_;
 
-    if (cmd.exist("output")) {
-        opt.output = cmd.get<std::string>("output");
-    }
-    else {
-        // TODO
-        opt.output = "result.sbvh";
-    }
+    std::vector<std::vector<aten::ThreadedSbvhNode>> voxels_;
+    VoxelViewer viewer_;
 
-    return true;
-}
+    aten::PinholeCamera camera_;
+    bool is_camera_dirty_{ false };
 
-// TODO
-void loadObj(const Options& opt, aten::AssetManager& asset_manager)
-{
-#if 0
-    auto emit = new aten::emissive(aten::vec3(36, 33, 24));
-    aten::AssetManager::registerMtrl(
-        "light",
-        emit);
+    bool will_show_gui_{ true };
 
-    aten::ObjLoader::load(g_objs, opt.input);
-#elif 1
-    aten::MaterialParameter mtrlParam;
-    mtrlParam.type = aten::MaterialType::GGX;
-    mtrlParam.baseColor = aten::vec3(0.7, 0.7, 0.7);
-    mtrlParam.standard.ior = 0.2;
-    mtrlParam.standard.roughness = 0.2;
+    int32_t draw_voxel_depth_{ 1 };
+    bool is_draw_wesh_{ false };
+    bool is_wireframe_{ false };
 
-    auto mtrl = g_ctxt.CreateMaterialWithMaterialParameter(
-        mtrlParam,
-        nullptr, nullptr, nullptr);
-
-    asset_manager.registerMtrl("m", mtrl);
-
-    aten::ObjLoader::load(g_objs, opt.input, g_ctxt, asset_manager);
-#else
-    aten::ObjLoader::load(g_objs, "../../asset/sponza/sponza.obj");
-
-    g_objs[0]->importInternalAccelTree("../../asset/sponza/sponza.sbvh");
-#endif
-
-    for (auto obj : g_objs) {
-        auto instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(g_ctxt, obj, aten::mat4::Identity);
-        g_scene.add(instance);
-    }
-
-    g_scene.build(g_ctxt);
-}
+    bool is_mouse_l_btn_down_{ false };
+    bool is_mouse_r_btn_down_{ false };
+    int32_t prev_mouse_pos_x_{ 0 };
+    int32_t prev_mouse_pos_y_{ 0 };
+};
 
 int32_t main(int32_t argc, char* argv[])
 {
-    //g_opt.input = "../../asset/cornellbox/orig.obj";
-    //g_opt.input = "../../asset/sponza/lod.obj";
-    //g_opt.input = "../../asset/suzanne/suzanne.obj";
-    g_opt.input = "../../asset/bunny/bunny.obj";
-
-    // TODO
-#if 0
-    cmdline::parser cmd;
-
-    if (!parseOption(argc, argv, cmd, g_opt)) {
-        return 0;
-    }
-#endif
-
-    std::string extname;
-    aten::getStringsFromPath(g_opt.input, g_opt.inputBasepath, extname, g_opt.inputFilename);
-
     aten::SetCurrentDirectoryFromExe();
+
+    auto app = std::make_shared<VoxelViewerApp>();
 
     auto wnd = std::make_shared<aten::window>();
 
     auto id = wnd->Create(
         WIDTH, HEIGHT, TITLE,
-        onRun,
-        onClose,
-        onMouseBtn,
-        onMouseMove,
-        onMouseWheel,
-        onKey);
+        std::bind(&VoxelViewerApp::Run, app),
+        std::bind(&VoxelViewerApp::OnClose, app),
+        std::bind(&VoxelViewerApp::OnMouseBtn, app, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4),
+        std::bind(&VoxelViewerApp::OnMouseMove, app, std::placeholders::_1, std::placeholders::_2),
+        std::bind(&VoxelViewerApp::OnMouseWheel, app, std::placeholders::_1),
+        std::bind(&VoxelViewerApp::OnKey, app, std::placeholders::_1, std::placeholders::_2));
 
     if (id >= 0) {
-        g_ctxt.SetIsWindowInitialized(true);
+        app->GetContext().SetIsWindowInitialized(true);
     }
     else {
         AT_ASSERT(false);
         return 1;
     }
 
-    aten::AssetManager asset_manager;
-    loadObj(g_opt, asset_manager);
-
-    g_ctxt.InitAllTextureAsGLTexture();
-
-    // TODO
-    aten::vec3 pos(0, 1, 3);
-    aten::vec3 at(0, 1, 0);
-    real vfov = real(45);
-
-    g_camera.init(
-        pos,
-        at,
-        aten::vec3(0, 1, 0),
-        vfov,
-        WIDTH, HEIGHT);
-
-    g_viewer.init(
-        WIDTH, HEIGHT,
-        "voxelviewer_vs.glsl",
-        "voxelviewer_fs.glsl");
-
-    g_rasterizer.init(
-        WIDTH, HEIGHT,
-        "../shader/drawobj_vs.glsl",
-        "../shader/drawobj_fs.glsl");
+    app->Init(argc, argv);
 
     wnd->Run();
+
+    app.reset();
 
     wnd->Terminate();
 

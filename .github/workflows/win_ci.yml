@@ -4,12 +4,6 @@ on:
   pull_request:
     branches:
       - 'main'
-    paths:
-      - 'src/**'
-      - 'vs2019/**'
-      - '3rdparty/**'
-      - 'scripts/install_cuda.ps1'
-      - '.github/workflows/win_ci.yml'
   # NOTE: In order to reduce the number of running workflow on windows runner, suppress the following code.
   # push:
   #   branches:
@@ -42,6 +36,19 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: true
+
+      # NOTE:
+      # https://github.com/actions/runner-images/issues/1281
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v44
+        with:
+          files_yaml_from_source_file: .github/workflows/resources/change_file_win_ci.yml
+
+      - name: Check changed files
+        if: ${{ steps.changed_files.outputs.any_changed == false }}
+        run: |
+          exit 0
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.3.1

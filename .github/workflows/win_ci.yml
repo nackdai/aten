@@ -46,7 +46,8 @@ jobs:
           files_yaml_from_source_file: .github/workflows/resources/change_file_win_ci.yml
 
       - name: Check changed files
-        if: ${{ steps.changed_files.outputs.src_any_changed == false }}
+        # if: ${{ steps.changed_files.outputs.src_any_changed == 'false' }}
+        if: ${{ steps.changed_files.outputs.src_any_changed == 'true' }}
         run: |
           exit 0
 

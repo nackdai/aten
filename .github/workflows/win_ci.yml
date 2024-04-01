@@ -39,25 +39,34 @@ jobs:
 
       # NOTE:
       # https://github.com/actions/runner-images/issues/1281
+      # Check if the specified files are chnaged.
       - name: Get changed files
         id: changed_files
         uses: tj-actions/changed-files@v44
         with:
           files_yaml_from_source_file: .github/workflows/resources/change_file_win_ci.yml
 
+      # NOTE:
+      # As GHA spec, returning exit code 0 doesn't exit the workflow.
+      # It means that the step is succeeded.
+      # If we'd like to exit the workflow immediately, we need to return error code (e.g. 1).
+      # But, if any specified file changes is detected, I'd like to run the later steps.
+      # So, if any specified file changes is detected, this step returns exit code 0 as success.
+      # And then, the later steps is executed by whether this steps is succeeded.
       - name: Check changed files
-        # if: ${{ steps.changed_files.outputs.src_any_changed == 'false' }}
         if: ${{ steps.changed_files.outputs.src_any_changed == 'true' }}
         run: |
           exit 0
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.3.1
+        if: success()
         with:
           vs-version: 16.11
           msbuild-architecture: x64
 
       - name: Install CUDA
+        if: success()
         run: |
           powershell -NoProfile -ExecutionPolicy Unrestricted .\scripts\install_cuda.ps1
           if ($LastExitCode -ne 0) { exit 1 }
@@ -69,6 +78,7 @@ jobs:
       #   - $env:GITHUB_ENV
       #     - https://stackoverflow.com/questions/66733076/github-actions-set-environment-variable-for-windows-build-with-powershell
       - name: Setup CUDA
+        if: success()
         shell: pwsh
         run: |
           echo "CUDA_PATH_V11_7=${{ env.CUDA_PATH }}" >> $env:GITHUB_ENV
@@ -77,11 +87,13 @@ jobs:
       # NOTE:
       # In GHA windows runner, Visual Studio is Enterprise.
       - name: Build 3rdparty
+        if: success()
         run: |
           cd 3rdparty
           .\Build3rdParty.bat Release Enterprise
 
       - name: Build
+        if: success()
         env:
           TARGET: Build
           CONFIG: Release

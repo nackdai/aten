@@ -21,8 +21,8 @@ namespace aten {
             : std::false_type {};
 
         // This the partial specialized class template.
-        // Even though the primary template is specified, the specialization is deducted firstly.
-        // If std::void_t<Op<Args...>> is deducted and it's the well-formed, this specialization is deducted.
+        // Even though the primary template is specified, the specialization is deduced firstly.
+        // If std::void_t<Op<Args...>> is deduced and it's the well-formed, this specialization is deduced.
         // It means the deduced template arguments are substituted and this specialization is used.
         // But, std::void_t<Op<Args...>> is the ill-formed, the specialization isn't used and fall-back to the primary template happens.
         template<template<class...>class Op, class ...Args>
@@ -44,7 +44,7 @@ namespace aten {
 
     // NOTE:
     // detector<void, Op, Args...> seems to specify the primary template.
-    // But, even though the primary template is specified, the specialization is deducted firstly.
+    // But, even though the primary template is specified, the specialization is deduced firstly.
     template<template<class...>class Op, class ...Args>
     using is_detected = _detail::detector<void, Op, Args...>;
 }

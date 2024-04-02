@@ -398,14 +398,14 @@ public:
 
         if (will_take_screen_shot_)
         {
-            auto buffer_ = aten::StringFormat("sc_%d.png\0", screen_shot_count_);
+            auto screen_shot_file_name = aten::StringFormat("sc_%d.png\0", screen_shot_count_);
 
-            visualizer_->takeScreenshot(buffer_);
+            visualizer_->takeScreenshot(screen_shot_file_name);
 
             will_take_screen_shot_ = false;
             screen_shot_count_++;
 
-            AT_PRINTF("Take Screenshot[%s]\n", buffer_.c_str());
+            AT_PRINTF("Take Screenshot[%s]\n", screen_shot_file_name.c_str());
         }
 
         if (will_show_gui_)

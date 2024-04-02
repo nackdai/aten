@@ -120,6 +120,8 @@ public:
     static std::shared_ptr<aten::instance<aten::PolygonObject>> makeScene(
         aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
 
+    static constexpr bool IsMovableObjectScene{ true };
+
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
@@ -199,6 +201,22 @@ public:
         aten::vec3& at,
         real& fov);
 };
+
+namespace _detail {
+    template <class T>
+    using IsMovableObjectScene = decltype(std::declval<T>().IsMovableObjectScene);
+}
+
+template <class SCENE, class T>
+void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+{
+    if constexpr (aten::is_detected<_detail::IsMovableObjectScene, SCENE>::value) {
+        obj = SCENE::makeScene(ctxt, scene, asset_manager);
+    }
+    else {
+        SCENE::makeScene(ctxt, scene, asset_manager);
+    }
+}
 
 //#define Scene CornellBoxScene
 //#define Scene RandomScene

@@ -83,21 +83,7 @@ public:
             vfov,
             WIDTH, HEIGHT);
 
-        using result_of_make_scene = decltype(Scene::makeScene(std::declval<aten::context>(), std::declval<aten::scene*>(), std::declval<aten::AssetManager>()));
-
-        // NOTE
-        // https://stackoverflow.com/questions/65508488/how-to-skip-uncompilable-code-through-constexpr-if-in-c
-        // If we'd like to unompilable by if constexpr, the function has to be template.
-        // lambda with the arguments defined as auto is the same as template function.
-        [&](auto& obj) {
-            if constexpr (std::is_same_v<result_of_make_scene, std::remove_reference_t<decltype(obj)>>) {
-                obj = Scene::makeScene(ctxt_, &scene_, asset_manager_);
-            }
-            else {
-                Scene::makeScene(ctxt_, &scene_, asset_manager_);
-            }
-        }(movable_obj_);
-        scene_.build(ctxt_);
+        MakeScene<Scene>(movable_obj_, ctxt_, &scene_, asset_manager_);
 
 #ifdef ENABLE_ENVMAP
         auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);

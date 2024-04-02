@@ -5,398 +5,417 @@
 #include "atenscene.h"
 #include "idaten.h"
 
-static const int32_t WIDTH = 1280;
-static const int32_t HEIGHT = 720;
+constexpr int32_t WIDTH = 1280;
+constexpr int32_t HEIGHT = 720;
+constexpr char* TITLE = "ObjViewer";
 
-static const char* TITLE = "ObjViewer";
+class ObjViewerApp {
+public:
+    ObjViewerApp() = default;
+    ~ObjViewerApp() = default;
 
-struct Options {
-    std::string input;
-    std::string texDir;
-};
+    ObjViewerApp(const ObjViewerApp&) = delete;
+    ObjViewerApp(ObjViewerApp&&) = delete;
+    ObjViewerApp operator=(const ObjViewerApp&) = delete;
+    ObjViewerApp operator=(ObjViewerApp&&) = delete;
 
-static aten::context g_ctxt;
+    bool Init(int32_t argc, char* argv[])
+    {
+        if (!ParseArguments(argc, argv)) {
+            AT_ASSERT(false);
+            return false;
+        }
 
-static aten::RasterizeRenderer g_rasterizer;
+        LoadObj(args_.input, "");
 
-std::vector<std::shared_ptr<aten::PolygonObject>> g_objs;
-std::vector<bool> g_objenable;
-aten::aabb g_obj_aabb;
+        obj_enables_.resize(objs_.size(), true);
 
-static aten::PinholeCamera g_camera;
-static bool g_isCameraDirty = false;
+        ctxt_.InitAllTextureAsGLTexture();
 
-static bool g_willTakeScreenShot = false;
-static int32_t g_cntScreenShot = 0;
+        for (auto& obj : objs_) {
+            obj->buildForRasterizeRendering(ctxt_);
+        }
 
-static bool g_willShowGUI = true;
+        rasterizer_.init(
+            WIDTH, HEIGHT,
+            "../shader/drawobj_vs.glsl",
+            "../shader/drawobj_fs.glsl");
 
-static bool g_isWireFrame = false;
+        auto texNum = ctxt_.GetTextureNum();
 
-static bool g_isMouseLBtnDown = false;
-static bool g_isMouseRBtnDown = false;
-static int32_t g_prevX = 0;
-static int32_t g_prevY = 0;
+        for (int32_t i = 0; i < texNum; i++) {
+            auto tex = ctxt_.GtTexture(i);
+            tex->initAsGLTexture();
+        }
 
-static int32_t obj_min = 0;
-static int32_t obj_max = 20;
+        // TODO
+        aten::vec3 pos(0.f, 100.0f, 300.0f);
+        aten::vec3 at(0.f, 0.f, 0.f);
+        real vfov = real(45);
 
-bool onRun()
-{
-    if (g_isCameraDirty) {
-        g_camera.update();
+        camera_.init(
+            pos,
+            at,
+            aten::vec3(0, 1, 0),
+            vfov,
+            WIDTH, HEIGHT);
 
-        auto camparam = g_camera.param();
-        camparam.znear = real(0.1);
-        camparam.zfar = real(10000.0);
-
-        g_isCameraDirty = false;
+        return true;
     }
 
-    aten::RasterizeRenderer::beginRender();
+    bool Run()
+    {
+        if (is_camera_dirty_) {
+            camera_.update();
 
-    aten::RasterizeRenderer::clearBuffer(
-        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
-        aten::vec4(0, 0.5f, 1.0f, 1.0f),
-        1.0f,
-        0);
+            auto camparam = camera_.param();
+            camparam.znear = real(0.1);
+            camparam.zfar = real(10000.0);
 
-    obj_min = std::min<int32_t>(obj_min, static_cast<int32_t>(g_objs.size()));
-    obj_max = std::min<int32_t>(obj_max, static_cast<int32_t>(g_objs.size()));
+            is_camera_dirty_ = false;
+        }
 
-    g_rasterizer.drawWithOutsideRenderFunc(
-        g_ctxt,
-        [&] (aten::RasterizeRenderer::FuncObjRenderer func) {
-            for (size_t i = obj_min; i < obj_max; i++) {
-                auto is_enable = g_objenable[i];
+        aten::RasterizeRenderer::beginRender();
+
+        aten::RasterizeRenderer::clearBuffer(
+            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+            aten::vec4(0, 0.5f, 1.0f, 1.0f),
+            1.0f,
+            0);
+
+        obj_min_ = std::min<int32_t>(obj_min_, static_cast<int32_t>(objs_.size()));
+        obj_max_ = std::min<int32_t>(obj_max_, static_cast<int32_t>(objs_.size()));
+
+        rasterizer_.drawWithOutsideRenderFunc(
+            ctxt_,
+            [&](aten::RasterizeRenderer::FuncObjRenderer func) {
+                for (size_t i = 0; i < objs_.size(); i++) {
+                    auto is_enable = obj_enables_[i];
+
+                    if (is_enable) {
+                        auto& obj = objs_[i];
+                        func(*obj);
+                    }
+                }
+            },
+            &camera_,
+                is_wireframe_);
+
+        if (ImGui::Button("Export")) {
+            decltype(objs_) export_objs;
+            for (size_t i = obj_min_; i < obj_max_; i++) {
+                auto is_enable = obj_enables_[i];
 
                 if (is_enable) {
-                    auto& obj = g_objs[i];
-                    func(*obj);
+                    export_objs.push_back(objs_[i]);
                 }
             }
-        },
-        &g_camera,
-        g_isWireFrame);
-
-    if (ImGui::Button("Export")) {
-        decltype(g_objs) export_objs;
-        for (size_t i = obj_min; i < obj_max; i++) {
-            auto is_enable = g_objenable[i];
-
-            if (is_enable) {
-                export_objs.push_back(g_objs[i]);
-            }
+            aten::ObjWriter::writeObjects(
+                "sponza.obj",
+                "sponza.mtl",
+                ctxt_,
+                export_objs);
         }
-        aten::ObjWriter::writeObjects(
-            "sponza.obj",
-            "sponza.mtl",
-            g_ctxt,
-            export_objs);
-    }
 
-    const auto& aabb_max = g_obj_aabb.maxPos();
-    const auto& aabb_min = g_obj_aabb.minPos();
-    ImGui::Text("max(%.3f, %.3f, %.3f)", aabb_max.x, aabb_max.y, aabb_max.z);
-    ImGui::Text("min(%.3f, %.3f, %.3f)", aabb_min.x, aabb_min.y, aabb_min.z);
+        const auto& aabb_max = obj_aabb_.maxPos();
+        const auto& aabb_min = obj_aabb_.minPos();
+        ImGui::Text("max(%.3f, %.3f, %.3f)", aabb_max.x, aabb_max.y, aabb_max.z);
+        ImGui::Text("min(%.3f, %.3f, %.3f)", aabb_min.x, aabb_min.y, aabb_min.z);
 
-    ImGui::SliderInt("min", &obj_min, 0, obj_max);
-    ImGui::SliderInt("max", &obj_max, obj_min, static_cast<int32_t>(g_objs.size() - 1));
+        ImGui::SliderInt("min", &obj_min_, 0, obj_max_);
+        ImGui::SliderInt("max", &obj_max_, obj_min_, static_cast<int32_t>(objs_.size() - 1));
 
-    if (!g_objs.empty()) {
-        if (ImGui::Button("all_enable")) {
-            for (auto& is_enable : g_objenable) {
-                is_enable = true;
+        if (!objs_.empty()) {
+            if (ImGui::Button("all_enable")) {
+                for (auto& is_enable : obj_enables_) {
+                    is_enable = true;
+                }
+            }
+
+            if (ImGui::Button("all_disable")) {
+                for (auto& is_enable : obj_enables_) {
+                    is_enable = false;
+                }
             }
         }
 
-        if (ImGui::Button("all_disable")) {
-            for (auto& is_enable : g_objenable) {
-                is_enable = false;
+        for (size_t i = obj_min_; i < obj_max_; i++) {
+            const auto& obj = objs_[i];
+            auto mtrl_name = obj->getShapes()[0]->GetMaterial()->name();
+
+            const auto name_ptr = obj->getName();
+            std::string name;
+            if (name_ptr != nullptr) {
+                name = name_ptr;
+            }
+            name += mtrl_name;
+
+            bool is_enable = obj_enables_.at(i);
+            if (ImGui::Checkbox(name.c_str(), &is_enable)) {
+                obj_enables_[i] = is_enable;
             }
         }
+
+        if (will_take_screen_shot_)
+        {
+            auto screen_shot_file_name = aten::StringFormat("sc_%d.png", screen_shot_count_);
+
+            aten::visualizer::takeScreenshot(screen_shot_file_name, WIDTH, HEIGHT);
+
+            will_take_screen_shot_ = false;
+            screen_shot_count_++;
+
+            AT_PRINTF("Take Screenshot[%s]\n", screen_shot_file_name.c_str());
+        }
+
+        return true;
     }
 
-    for (size_t i = obj_min; i < obj_max; i++) {
-        const auto& obj = g_objs[i];
-        auto mtrl_name = obj->getShapes()[0]->GetMaterial()->name();
-
-        const auto name_ptr = obj->getName();
-        std::string name;
-        if (name_ptr != nullptr) {
-            name = name_ptr;
-        }
-        name += mtrl_name;
-
-        bool is_enable = g_objenable.at(i);
-        if (ImGui::Checkbox(name.c_str(), &is_enable)) {
-            g_objenable[i] = is_enable;
-        }
-    }
-
-    if (g_willTakeScreenShot)
+    void OnClose()
     {
-        static char buffer[1024];
-        ::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
-
-        aten::visualizer::takeScreenshot(buffer, WIDTH, HEIGHT);
-
-        g_willTakeScreenShot = false;
-        g_cntScreenShot++;
-
-        AT_PRINTF("Take Screenshot[%s]\n", buffer);
     }
 
-    return true;
-}
-
-void onClose()
-{
-
-}
-
-void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
-{
-    g_isMouseLBtnDown = false;
-    g_isMouseRBtnDown = false;
-
-    if (press) {
-        g_prevX = x;
-        g_prevY = y;
-
-        g_isMouseLBtnDown = left;
-        g_isMouseRBtnDown = !left;
-    }
-}
-
-void onMouseMove(int32_t x, int32_t y)
-{
-    if (g_isMouseLBtnDown) {
-        aten::CameraOperator::rotate(
-            g_camera,
-            WIDTH, HEIGHT,
-            g_prevX, g_prevY,
-            x, y);
-        g_isCameraDirty = true;
-    }
-    else if (g_isMouseRBtnDown) {
-        aten::CameraOperator::move(
-            g_camera,
-            g_prevX, g_prevY,
-            x, y,
-            real(0.001));
-        g_isCameraDirty = true;
-    }
-
-    g_prevX = x;
-    g_prevY = y;
-}
-
-void onMouseWheel(int32_t delta)
-{
-    aten::CameraOperator::dolly(g_camera, delta * real(0.1));
-    g_isCameraDirty = true;
-}
-
-void onKey(bool press, aten::Key key)
-{
-    static const real offset = real(5);
-
-    if (press) {
-        if (key == aten::Key::Key_F1) {
-            g_willShowGUI = !g_willShowGUI;
-            return;
-        }
-        else if (key == aten::Key::Key_F2) {
-            g_willTakeScreenShot = true;
-            return;
-        }
-        else if (key == aten::Key::Key_F3) {
-            g_isWireFrame = !g_isWireFrame;
-            return;
-        }
-    }
-
-    if (press) {
-        switch (key) {
-        case aten::Key::Key_W:
-        case aten::Key::Key_UP:
-            aten::CameraOperator::moveForward(g_camera, offset);
-            break;
-        case aten::Key::Key_S:
-        case aten::Key::Key_DOWN:
-            aten::CameraOperator::moveForward(g_camera, -offset);
-            break;
-        case aten::Key::Key_D:
-        case aten::Key::Key_RIGHT:
-            aten::CameraOperator::moveRight(g_camera, offset);
-            break;
-        case aten::Key::Key_A:
-        case aten::Key::Key_LEFT:
-            aten::CameraOperator::moveRight(g_camera, -offset);
-            break;
-        case aten::Key::Key_Z:
-            aten::CameraOperator::moveUp(g_camera, offset);
-            break;
-        case aten::Key::Key_X:
-            aten::CameraOperator::moveUp(g_camera, -offset);
-            break;
-        default:
-            break;
-        }
-
-        g_isCameraDirty = true;
-    }
-}
-
-void loadObj(
-    std::string_view objpath,
-    std::string_view mtrlpath,
-    std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
-    aten::AssetManager& asset_manager)
-{
-    std::string pathname;
-    std::string extname;
-    std::string filename;
-
-    aten::getStringsFromPath(
-        objpath,
-        pathname,
-        extname,
-        filename);
-
-    if (mtrlpath.empty()) {
-        aten::MaterialParameter param;
-        param.type = aten::MaterialType::Lambert;
-        param.baseColor = aten::vec3(1, 1, 1);;
-
-        auto mtrl = g_ctxt.CreateMaterialWithMaterialParameter(
-            param,
-            nullptr, nullptr, nullptr);
-        asset_manager.registerMtrl("dummy", mtrl);
-    }
-    else {
-        aten::MaterialLoader::load(mtrlpath, g_ctxt, asset_manager);
-    }
-
-    aten::ObjLoader::load(objs, objpath, g_ctxt, asset_manager, nullptr, true);
-
-    g_obj_aabb.empty();
-    for (const auto& obj : objs) {
-        const auto& aabb = obj->getBoundingbox();
-        g_obj_aabb.expand(aabb);
-    }
-}
-
-bool parseOption(
-    int32_t argc, char* argv[],
-    Options& opt)
-{
-    cmdline::parser cmd;
-
+    void OnMouseBtn(bool left, bool press, int32_t x, int32_t y)
     {
-        cmd.add<std::string>("input", 'i', "input model filename", true);
+        is_mouse_l_btn_down_ = false;
+        is_mouse_r_btn_down_ = false;
 
-        cmd.add("help", '?', "print usage");
+        if (press)
+        {
+            prev_mouse_pos_x_ = x;
+            prev_mouse_pos_y_ = y;
+
+            is_mouse_l_btn_down_ = left;
+            is_mouse_r_btn_down_ = !left;
+        }
     }
 
-    bool isCmdOk = cmd.parse(argc, argv);
+    void OnMouseMove(int32_t x, int32_t y)
+    {
+        if (is_mouse_l_btn_down_)
+        {
+            aten::CameraOperator::rotate(
+                camera_,
+                WIDTH, HEIGHT,
+                prev_mouse_pos_x_, prev_mouse_pos_y_,
+                x, y);
+            is_camera_dirty_ = true;
+        }
+        else if (is_mouse_r_btn_down_)
+        {
+            aten::CameraOperator::move(
+                camera_,
+                prev_mouse_pos_x_, prev_mouse_pos_y_,
+                x, y,
+                real(0.001));
+            is_camera_dirty_ = true;
+        }
 
-    if (cmd.exist("help")) {
-        std::cerr << cmd.usage();
-        return false;
+        prev_mouse_pos_x_ = x;
+        prev_mouse_pos_y_ = y;
     }
 
-    if (!isCmdOk) {
-        std::cerr << cmd.error_full() << std::endl << cmd.usage();
-        return false;
+    void OnMouseWheel(int32_t delta)
+    {
+        aten::CameraOperator::dolly(camera_, delta * real(0.1));
+        is_camera_dirty_ = true;
     }
 
-    if (cmd.exist("input")) {
-        opt.input = cmd.get<std::string>("input");
-    }
-    else {
-        std::cerr << cmd.error() << std::endl << cmd.usage();
-        return false;
+    void OnKey(bool press, aten::Key key)
+    {
+        static const real offset_base = real(0.1);
+
+        if (press)
+        {
+            if (key == aten::Key::Key_F1)
+            {
+                will_show_gui_ = !will_show_gui_;
+                return;
+            }
+            else if (key == aten::Key::Key_F2)
+            {
+                will_take_screen_shot_ = true;
+                return;
+            }
+            else if (key == aten::Key::Key_F3) {
+                is_wireframe_ = !is_wireframe_;
+                return;
+            }
+        }
+
+        auto offset = offset_base;
+
+        if (press)
+        {
+            switch (key)
+            {
+            case aten::Key::Key_W:
+            case aten::Key::Key_UP:
+                aten::CameraOperator::moveForward(camera_, offset);
+                break;
+            case aten::Key::Key_S:
+            case aten::Key::Key_DOWN:
+                aten::CameraOperator::moveForward(camera_, -offset);
+                break;
+            case aten::Key::Key_D:
+            case aten::Key::Key_RIGHT:
+                aten::CameraOperator::moveRight(camera_, offset);
+                break;
+            case aten::Key::Key_A:
+            case aten::Key::Key_LEFT:
+                aten::CameraOperator::moveRight(camera_, -offset);
+                break;
+            case aten::Key::Key_Z:
+                aten::CameraOperator::moveUp(camera_, offset);
+                break;
+            case aten::Key::Key_X:
+                aten::CameraOperator::moveUp(camera_, -offset);
+                break;
+            default:
+                break;
+            }
+
+            is_camera_dirty_ = true;
+        }
     }
 
-    return true;
-}
+    aten::context& GetContext()
+    {
+        return ctxt_;
+    }
+
+private:
+    std::shared_ptr<aten::PolygonObject> LoadObj(
+        std::string_view objpath,
+        std::string_view mtrlpath)
+    {
+        std::string pathname;
+        std::string extname;
+        std::string filename;
+
+        aten::getStringsFromPath(
+            objpath,
+            pathname,
+            extname,
+            filename);
+
+        if (mtrlpath.empty()) {
+            aten::MaterialParameter param;
+            param.type = aten::MaterialType::Lambert;
+            param.baseColor = aten::vec3(1, 1, 1);;
+
+            auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
+                param,
+                nullptr, nullptr, nullptr);
+            asset_manager_.registerMtrl("dummy", mtrl);
+        }
+        else {
+            aten::MaterialLoader::load(mtrlpath, ctxt_, asset_manager_);
+        }
+
+        aten::ObjLoader::load(objs_, objpath, ctxt_, asset_manager_, nullptr, true);
+
+        obj_aabb_.empty();
+        for (const auto& obj : objs_) {
+            const auto& aabb = obj->getBoundingbox();
+            obj_aabb_.expand(aabb);
+        }
+
+        return objs_[0];
+    }
+
+    bool ParseArguments(int32_t argc, char* argv[])
+    {
+        cmdline::parser cmd;
+
+        {
+            cmd.add<std::string>("input", 'i', "input model filename", false);
+
+            cmd.add("help", '?', "print usage");
+        }
+
+        bool is_cmd_valid = cmd.parse(argc, argv);
+
+        if (cmd.exist("help")) {
+            std::cerr << cmd.usage();
+            return false;
+        }
+
+        if (!is_cmd_valid) {
+            std::cerr << cmd.error_full() << std::endl << cmd.usage();
+            return false;
+        }
+
+        if (cmd.exist("input")) {
+            args_.input = cmd.get<std::string>("input");
+        }
+
+        return true;
+    }
+
+    struct Args {
+        std::string input{ "../../asset/bunny/bunny.obj" };
+    } args_;
+
+    aten::context ctxt_;
+
+    aten::AssetManager asset_manager_;
+
+    aten::RasterizeRenderer rasterizer_;
+
+    std::vector<std::shared_ptr<aten::PolygonObject>> objs_;
+    std::vector<bool> obj_enables_;
+    aten::aabb obj_aabb_;
+
+    int32_t obj_min_{ 0 };
+    int32_t obj_max_{ 20 };
+
+    aten::PinholeCamera camera_;
+    bool is_camera_dirty_{ false };
+
+    bool will_show_gui_{ true };
+    bool will_take_screen_shot_{ false };
+    int32_t screen_shot_count_{ 0 };
+
+    bool is_wireframe_{ false };
+
+    bool is_mouse_l_btn_down_{ false };
+    bool is_mouse_r_btn_down_{ false };
+    int32_t prev_mouse_pos_x_{ 0 };
+    int32_t prev_mouse_pos_y_{ 0 };
+};
+
 
 int32_t main(int32_t argc, char* argv[])
 {
-    Options opt;
-
-#if 0
-    if (!parseOption(argc, argv, opt)) {
-        return 0;
-    }
-#endif
-
     aten::SetCurrentDirectoryFromExe();
+
+    auto app = std::make_shared<ObjViewerApp>();
 
     auto wnd = std::make_shared<aten::window>();
 
     auto id = wnd->Create(
         WIDTH, HEIGHT, TITLE,
-        onRun,
-        onClose,
-        onMouseBtn,
-        onMouseMove,
-        onMouseWheel,
-        onKey);
+        std::bind(&ObjViewerApp::Run, app),
+        std::bind(&ObjViewerApp::OnClose, app),
+        std::bind(&ObjViewerApp::OnMouseBtn, app, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4),
+        std::bind(&ObjViewerApp::OnMouseMove, app, std::placeholders::_1, std::placeholders::_2),
+        std::bind(&ObjViewerApp::OnMouseWheel, app, std::placeholders::_1),
+        std::bind(&ObjViewerApp::OnKey, app, std::placeholders::_1, std::placeholders::_2));
 
     if (id >= 0) {
-        g_ctxt.SetIsWindowInitialized(true);
+        app->GetContext().SetIsWindowInitialized(true);
     }
     else {
         AT_ASSERT(false);
         return 1;
     }
 
-    aten::AssetManager asset_manager;
-
-    //loadObj("../../asset/models/sponza/sponza.obj", "", g_objs);
-    loadObj("../../asset/bunny/bunny.obj", "", g_objs, asset_manager);
-    //loadObj("../../asset/dragon/dragon.obj", "", g_objs);
-    //loadObj("../../asset/models/plane/plane.obj", "", g_objs);
-    //loadObj("../../asset/cornellbox/orig.obj", "", g_objs);
-
-    g_objenable.resize(g_objs.size(), true);
-
-    g_ctxt.InitAllTextureAsGLTexture();
-
-    for (auto& obj : g_objs) {
-        obj->buildForRasterizeRendering(g_ctxt);
-    }
-
-    g_rasterizer.init(
-        WIDTH, HEIGHT,
-        "../shader/drawobj_vs.glsl",
-        "../shader/drawobj_fs.glsl");
-
-    auto texNum = g_ctxt.GetTextureNum();
-
-    for (int32_t i = 0; i < texNum; i++) {
-        auto tex = g_ctxt.GtTexture(i);
-        tex->initAsGLTexture();
-    }
-
-    // TODO
-    aten::vec3 pos(0.f, 100.0f, 300.0f);
-    aten::vec3 at(0.f, 0.f, 0.f);
-    real vfov = real(45);
-
-    g_camera.init(
-        pos,
-        at,
-        aten::vec3(0, 1, 0),
-        vfov,
-        WIDTH, HEIGHT);
+    app->Init(argc, argv);
 
     wnd->Run();
 
-    wnd->Terminate();
+    app.reset();
 
-    return 1;
+    wnd->Terminate();
 }

@@ -14,113 +14,25 @@
 
 #define GPU_RENDERING
 
-static int32_t WIDTH = 1280;
-static int32_t HEIGHT = 720;
-static const char* TITLE = "MaterialViewer";
-
-#ifdef ENABLE_OMP
-static uint32_t g_threadnum = 8;
-#else
-static uint32_t g_threadnum = 1;
-#endif
-
-static aten::PinholeCamera g_camera;
-static bool g_isCameraDirty = false;
-
-static aten::AcceleratedScene<aten::GPUBvh> g_scene;
-static aten::context g_ctxt;
-
-static idaten::PathTracing g_tracer;
-
-static aten::PathTracing g_cpuPT;
-static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
-
-static std::shared_ptr<aten::visualizer> g_visualizer;
-
-static aten::texture* g_albedoMap = nullptr;
-static aten::texture* g_normalMap = nullptr;
-
-static bool g_willShowGUI = true;
-static bool g_willTakeScreenShot = false;
-static int32_t g_cntScreenShot = 0;
-
-static int32_t g_maxSamples = 1;
-static int32_t g_maxBounce = 5;
-
-static bool g_enableAlbedoMap = true;
-static bool g_enableNormalMap = true;
-
-static struct SceneLight {
-    bool is_envmap{ true };
-
-    std::shared_ptr<aten::texture> envmap_texture;
-    std::shared_ptr<aten::envmap> envmap;
-    std::shared_ptr<aten::ImageBasedLight> ibl;
-    std::shared_ptr<aten::PointLight> point_light;
-} g_scene_light;
-
-void getCameraPosAndAt(
-    aten::vec3& pos,
-    aten::vec3& at,
-    real& fov)
-{
-    pos = aten::vec3(0.f, 1.f, 10.f);
-    at = aten::vec3(0.f, 1.f, 0.f);
-    fov = 45;
-}
-
-void makeScene(aten::scene* scene, aten::AssetManager& asset_manager)
-{
-    aten::MaterialParameter mtrlParam;
-    mtrlParam.type = aten::MaterialType::Lambert;
-    mtrlParam.baseColor = aten::vec3(0.580000, 0.580000, 0.580000);
-
-    auto mtrl = g_ctxt.CreateMaterialWithMaterialParameter(
-        mtrlParam,
-        nullptr, nullptr, nullptr);
-
-    asset_manager.registerMtrl("m1", mtrl);
-
-    auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj", g_ctxt, asset_manager);
-    auto teapot = aten::TransformableFactory::createInstance<aten::PolygonObject>(g_ctxt, obj, aten::mat4::Identity);
-    scene->add(teapot);
-
-    // TODO
-    //g_albedoMap = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");
-    //g_normalMap = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
-
-    obj->getShapes()[0]->GetMaterial()->setTextures(g_albedoMap, g_normalMap, nullptr);
-}
-
-std::shared_ptr<aten::material> CreateMaterial(aten::MaterialType type)
-{
-    auto mtrl = g_ctxt.CreateMaterialWithDefaultValue(type);
-
-    if (mtrl) {
-        mtrl->setTextures(
-            g_enableAlbedoMap ? g_albedoMap : nullptr,
-            g_enableNormalMap ? g_normalMap : nullptr,
-            nullptr);
-    }
-
-    return mtrl;
-}
+constexpr int32_t WIDTH = 1280;
+constexpr int32_t HEIGHT = 720;
+constexpr char* TITLE = "MaterialViewer";
 
 class MaterialParamEditor : public aten::IMaterialParamEditor {
 public:
-    MaterialParamEditor() {}
-    virtual ~MaterialParamEditor() {}
+    MaterialParamEditor() = default;
+    ~MaterialParamEditor() = default;
 
 public:
-    virtual bool edit(std::string_view name, real& param, real _min = real(0), real _max = real(1)) override final
+    bool edit(std::string_view name, real& param, real _min = real(0), real _max = real(1)) override final
     {
         return ImGui::SliderFloat(name.data(), &param, _min, _max);
     }
 
-    virtual bool edit(std::string_view name, aten::vec3& param) override final
+    bool edit(std::string_view name, aten::vec3& param) override final
     {
-        float f[3] = { param.x, param.y, param.z };
-        bool ret = ImGui::ColorEdit3(name.data(), f);
+        std::array f = { param.x, param.y, param.z };
+        bool ret = ImGui::ColorEdit3(name.data(), f.data());
 
         param.x = f[0];
         param.y = f[1];
@@ -129,10 +41,10 @@ public:
         return ret;
     }
 
-    virtual bool edit(std::string_view name, aten::vec4& param) override final
+    bool edit(std::string_view name, aten::vec4& param) override final
     {
-        float f[4] = { param.x, param.y, param.z, param.w };
-        bool ret = ImGui::ColorEdit4(name.data(), f);
+        std::array f = { param.x, param.y, param.z, param.w };
+        bool ret = ImGui::ColorEdit4(name.data(), f.data());
 
         param.x = f[0];
         param.y = f[1];
@@ -142,460 +54,583 @@ public:
         return ret;
     }
 
-    virtual void edit(std::string_view name, std::string_view str) override final
+    void edit(std::string_view name, std::string_view str) override final
     {
         std::string s(str);
         ImGui::Text("[%s] : (%s)", name.data(), s.empty() ? "none" : str.data());
     }
 };
 
-static MaterialParamEditor g_mtrlParamEditor;
+class MaterialViewerApp {
+public:
+    static constexpr int32_t ThreadNum
+#ifdef ENABLE_OMP
+    { 8 };
+#else
+    { 1 };
+#endif
 
-void mershallLightParameter(std::vector<aten::LightParameter>& lightparams)
-{
-    if (g_scene_light.is_envmap) {
-        auto result = std::remove_if(lightparams.begin(), lightparams.end(),
-            [](const auto& l) {
-                return l.type != aten::LightType::IBL;
+    MaterialViewerApp() = default;
+    ~MaterialViewerApp() = default;
+
+    MaterialViewerApp(const MaterialViewerApp&) = delete;
+    MaterialViewerApp(MaterialViewerApp&&) = delete;
+    MaterialViewerApp operator=(const MaterialViewerApp&) = delete;
+    MaterialViewerApp operator=(MaterialViewerApp&&) = delete;
+
+    bool Init()
+    {
+        visualizer_ = aten::visualizer::init(WIDTH, HEIGHT);
+
+        gamma_.init(
+            WIDTH, HEIGHT,
+            "../shader/fullscreen_vs.glsl",
+            "../shader/gamma_fs.glsl");
+
+        visualizer_->addPostProc(&gamma_);
+
+        aten::vec3 pos, at;
+        real vfov;
+        GetCameraPosAndAt(pos, at, vfov);
+
+        camera_.init(
+            pos,
+            at,
+            aten::vec3(0, 1, 0),
+            vfov,
+            WIDTH, HEIGHT);
+
+        MakeScene(&scene_);
+        scene_.build(ctxt_);
+
+        renderer_.getCompaction().init(
+            WIDTH * HEIGHT,
+            1024);
+
+        {
+            // IBL
+            scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
+            scene_light_.envmap = std::make_shared<aten::envmap>();
+            scene_light_.envmap->init(scene_light_.envmap_texture);
+            scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(scene_light_.envmap);
+            scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
+
+            // PointLight
+            scene_light_.point_light = std::make_shared<aten::PointLight>(
+                aten::vec3(0.0, 0.0, 50.0),
+                aten::vec3(1.0, 0.0, 0.0),
+                400.0f);
+            ctxt_.AddLight(scene_light_.point_light);
+        }
+
+        std::vector<aten::ObjectParameter> shapeparams;
+        std::vector<aten::TriangleParameter> primparams;
+        std::vector<aten::LightParameter> lightparams;
+        std::vector<aten::MaterialParameter> mtrlparms;
+        std::vector<aten::vertex> vtxparams;
+        std::vector<aten::mat4> mtxs;
+
+        aten::DataCollector::collect(
+            ctxt_,
+            shapeparams,
+            primparams,
+            lightparams,
+            mtrlparms,
+            vtxparams,
+            mtxs);
+
+        const auto& nodes = scene_.getAccel()->getNodes();
+
+        std::vector<idaten::TextureResource> tex;
+        {
+            auto texNum = ctxt_.GetTextureNum();
+
+            for (int32_t i = 0; i < texNum; i++) {
+                auto t = ctxt_.GtTexture(i);
+                tex.push_back(
+                    idaten::TextureResource(t->colors(), t->width(), t->height()));
             }
-        );
-        lightparams.erase(result, lightparams.end());
-    }
-    else {
-        auto result = std::remove_if(lightparams.begin(), lightparams.end(),
-            [](const auto& l) {
-                return l.type == aten::LightType::IBL;
-            }
-        );
-        lightparams.erase(result, lightparams.end());
-    }
-}
+        }
 
-void updateLightParameter()
-{
-    std::vector<aten::LightParameter> lightparams;
+        MershallLightParameter(lightparams);
 
-    auto lightNum = g_ctxt.GetLightNum();
-
-    for (uint32_t i = 0; i < lightNum; i++) {
-        const auto& param = g_ctxt.GetLight(i);
-        lightparams.push_back(param);
-    }
-
-    mershallLightParameter(lightparams);
-
-    g_tracer.updateLight(lightparams);
-    g_tracer.setEnableEnvmap(g_scene_light.is_envmap);
-}
-
-bool onRun()
-{
-#ifdef GPU_RENDERING
-    float updateTime = 0.0f;
-
-    if (g_isCameraDirty) {
-        g_camera.update();
-
-        auto camparam = g_camera.param();
+        auto camparam = camera_.param();
         camparam.znear = real(0.1);
         camparam.zfar = real(10000.0);
 
-        g_tracer.updateCamera(camparam);
-        g_isCameraDirty = false;
+        renderer_.update(
+            visualizer_->GetGLTextureHandle(),
+            WIDTH, HEIGHT,
+            camparam,
+            shapeparams,
+            mtrlparms,
+            lightparams,
+            nodes,
+            primparams, 0,
+            vtxparams, 0,
+            mtxs,
+            tex,
+            scene_light_.is_envmap
+            ? idaten::EnvmapResource(scene_light_.envmap_texture->id(), scene_light_.ibl->getAvgIlluminace(), real(1))
+            : idaten::EnvmapResource());
 
-        g_visualizer->clear();
+        renderer_.setEnableEnvmap(scene_light_.is_envmap);
+
+        return true;
     }
 
-    g_tracer.render(
-        WIDTH, HEIGHT,
-        g_maxSamples,
-        g_maxBounce);
-
-    aten::RasterizeRenderer::clearBuffer(
-        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
-        aten::vec4(0, 0.5f, 1.0f, 1.0f),
-        1.0f,
-        0);
-
-    g_visualizer->render(false);
-
-    if (g_willTakeScreenShot)
+    bool Run()
     {
-        static char buffer[1024];
-        ::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
+#ifdef GPU_RENDERING
+        float updateTime = 0.0f;
 
-        g_visualizer->takeScreenshot(buffer);
+        if (is_camera_dirty_) {
+            camera_.update();
 
-        g_willTakeScreenShot = false;
-        g_cntScreenShot++;
+            auto camparam = camera_.param();
+            camparam.znear = real(0.1);
+            camparam.zfar = real(10000.0);
 
-        AT_PRINTF("Take Screenshot[%s]\n", buffer);
-    }
+            renderer_.updateCamera(camparam);
+            is_camera_dirty_ = false;
 
-    if (g_willShowGUI)
-    {
-        bool need_renderer_reset = false;
+            visualizer_->clear();
+        }
 
-        constexpr char* light_types[] = { "IBL", "PointLight" };
-        int32_t lighttype = g_scene_light.is_envmap ? 0 : 1;
-        if (ImGui::Combo("light", &lighttype, light_types, AT_COUNTOF(light_types))) {
-            auto next_is_envmap = lighttype == 0;
-            if (g_scene_light.is_envmap != next_is_envmap) {
-                g_scene_light.is_envmap = next_is_envmap;
-                updateLightParameter();
-                need_renderer_reset = true;
+        renderer_.render(
+            WIDTH, HEIGHT,
+            max_samples_,
+            max_bounce_);
+
+        aten::RasterizeRenderer::clearBuffer(
+            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+            aten::vec4(0, 0.5f, 1.0f, 1.0f),
+            1.0f,
+            0);
+
+        visualizer_->render(false);
+
+        if (will_take_screen_shot_)
+        {
+            auto screen_shot_file_name = aten::StringFormat("sc_%d.png", screen_shot_count_);
+
+            visualizer_->takeScreenshot(screen_shot_file_name);
+
+            will_take_screen_shot_ = false;
+            screen_shot_count_++;
+
+            AT_PRINTF("Take Screenshot[%s]\n", screen_shot_file_name.c_str());
+        }
+
+        if (will_show_gui_)
+        {
+            bool need_renderer_reset = false;
+
+            constexpr char* light_types[] = { "IBL", "PointLight" };
+            int32_t lighttype = scene_light_.is_envmap ? 0 : 1;
+            if (ImGui::Combo("light", &lighttype, light_types, AT_COUNTOF(light_types))) {
+                auto next_is_envmap = lighttype == 0;
+                if (scene_light_.is_envmap != next_is_envmap) {
+                    scene_light_.is_envmap = next_is_envmap;
+                    UpdateLightParameter();
+                    need_renderer_reset = true;
+                }
             }
-        }
 
-        if (ImGui::SliderInt("Samples", &g_maxSamples, 1, 100)
-            || ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10))
-        {
-            g_tracer.reset();
-        }
+            if (ImGui::SliderInt("Samples", &max_samples_, 1, 100)
+                || ImGui::SliderInt("Bounce", &max_bounce_, 1, 10))
+            {
+                renderer_.reset();
+            }
 
-        bool isProgressive = g_tracer.IsEnableProgressive();
+            bool isProgressive = renderer_.IsEnableProgressive();
 
-        if (ImGui::Checkbox("Progressive", &isProgressive)) {
-            g_tracer.SetEnableProgressive(isProgressive);
-            g_tracer.reset();
-        }
+            if (ImGui::Checkbox("Progressive", &isProgressive)) {
+                renderer_.SetEnableProgressive(isProgressive);
+                renderer_.reset();
+            }
 
-        auto mtrl = g_ctxt.GetMaterialInstance(0);
-        bool needUpdateMtrl = false;
+            auto mtrl = ctxt_.GetMaterialInstance(0);
+            bool needUpdateMtrl = false;
 
-        constexpr char* mtrl_types[] = {
-            "Emissive",
-            "Lambert",
-            "OrneNayar",
-            "Specular",
-            "Refraction",
-            "Blinn",
-            "GGX",
-            "Beckman",
-            "Velvet",
-            "LambertRefraction",
-            "MicrofacetRefraction",
-            "Retroreflective",
-            "CarPaint",
-            "Disney",
-        };
-        int32_t mtrlType = (int32_t)mtrl->param().type;
-        if (ImGui::Combo("mode", &mtrlType, mtrl_types, AT_COUNTOF(mtrl_types))) {
-            g_ctxt.DeleteAllMaterialsAndClearList();
-            mtrl = CreateMaterial((aten::MaterialType)mtrlType);
-            needUpdateMtrl = true;
-        }
-
-        {
-            bool b0 = ImGui::Checkbox("AlbedoMap", &g_enableAlbedoMap);
-            bool b1 = ImGui::Checkbox("NormalMap", &g_enableNormalMap);
-
-            if (b0 || b1) {
-                mtrl->setTextures(
-                    g_enableAlbedoMap ? g_albedoMap : nullptr,
-                    g_enableNormalMap ? g_normalMap : nullptr,
-                    nullptr);
-
+            constexpr char* mtrl_types[] = {
+                "Emissive",
+                "Lambert",
+                "OrneNayar",
+                "Specular",
+                "Refraction",
+                "Blinn",
+                "GGX",
+                "Beckman",
+                "Velvet",
+                "LambertRefraction",
+                "MicrofacetRefraction",
+                "Retroreflective",
+                "CarPaint",
+                "Disney",
+            };
+            int32_t mtrlType = (int32_t)mtrl->param().type;
+            if (ImGui::Combo("mode", &mtrlType, mtrl_types, AT_COUNTOF(mtrl_types))) {
+                ctxt_.DeleteAllMaterialsAndClearList();
+                mtrl = CreateMaterial((aten::MaterialType)mtrlType);
                 needUpdateMtrl = true;
             }
-        }
 
-        if (mtrl->edit(&g_mtrlParamEditor)) {
-            needUpdateMtrl = true;
-        }
+            {
+                bool b0 = ImGui::Checkbox("AlbedoMap", &enable_albedo_map_);
+                bool b1 = ImGui::Checkbox("NormalMap", &enable_normal_map_);
 
-        {
-            auto camPos = g_camera.getPos();
-            auto camAt = g_camera.getAt();
+                if (b0 || b1) {
+                    mtrl->setTextures(
+                        enable_albedo_map_ ? albedo_map_ : nullptr,
+                        enable_normal_map_ ? normal_map_ : nullptr,
+                        nullptr);
 
-            ImGui::Text("Pos (%f, %f, %f)", camPos.x, camPos.y, camPos.z);
-            ImGui::Text("At  (%f, %f, %f)", camAt.x, camAt.y, camAt.z);
-        }
+                    needUpdateMtrl = true;
+                }
+            }
 
-        if (needUpdateMtrl) {
-            std::vector<aten::MaterialParameter> params(1);
-            params[0] = mtrl->param();
-            g_tracer.updateMaterial(params);
-            need_renderer_reset = true;
-        }
+            if (mtrl->edit(&mtrl_param_editor_)) {
+                needUpdateMtrl = true;
+            }
 
-        if (need_renderer_reset) {
-            g_tracer.reset();
+            {
+                auto camPos = camera_.getPos();
+                auto camAt = camera_.getAt();
+
+                ImGui::Text("Pos (%f, %f, %f)", camPos.x, camPos.y, camPos.z);
+                ImGui::Text("At  (%f, %f, %f)", camAt.x, camAt.y, camAt.z);
+            }
+
+            if (needUpdateMtrl) {
+                std::vector<aten::MaterialParameter> params(1);
+                params[0] = mtrl->param();
+                renderer_.updateMaterial(params);
+                need_renderer_reset = true;
+            }
+
+            if (need_renderer_reset) {
+                renderer_.reset();
+            }
         }
-    }
 #else
-    aten::Destination dst;
-    {
-        dst.width = WIDTH;
-        dst.height = HEIGHT;
-        dst.maxDepth = 5;
-        dst.russianRouletteDepth = 3;
-        dst.sample = 1;
-        dst.buffer = &g_buffer;
-    }
+        aten::Destination dst;
+        {
+            dst.width = WIDTH;
+            dst.height = HEIGHT;
+            dst.maxDepth = 5;
+            dst.russianRouletteDepth = 3;
+            dst.sample = 1;
+            dst.buffer = &host_renderer_dst_;
+        }
 
-    g_cpuPT.render(dst, &g_scene, &g_camera);
+        host_renderer_.render(dst, &scene_, &camera_);
 
-    aten::RasterizeRenderer::clearBuffer(
-        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
-        aten::vec4(0, 0.5f, 1.0f, 1.0f),
-        1.0f,
-        0);
+        aten::RasterizeRenderer::clearBuffer(
+            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+            aten::vec4(0, 0.5f, 1.0f, 1.0f),
+            1.0f,
+            0);
 
-    g_visualizer->render(g_buffer.image(), g_camera.needRevert());
+        visualizer_->render(host_renderer_dst_.image(), camera_.needRevert());
 #endif
 
-    return true;
-}
-
-void onClose()
-{
-
-}
-
-bool g_isMouseLBtnDown = false;
-bool g_isMouseRBtnDown = false;
-int32_t g_prevX = 0;
-int32_t g_prevY = 0;
-
-void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
-{
-    g_isMouseLBtnDown = false;
-    g_isMouseRBtnDown = false;
-
-    if (press) {
-        g_prevX = x;
-        g_prevY = y;
-
-        g_isMouseLBtnDown = left;
-        g_isMouseRBtnDown = !left;
-    }
-}
-
-void onMouseMove(int32_t x, int32_t y)
-{
-    if (g_isMouseLBtnDown) {
-        aten::CameraOperator::rotate(
-            g_camera,
-            WIDTH, HEIGHT,
-            g_prevX, g_prevY,
-            x, y);
-        g_isCameraDirty = true;
-    }
-    else if (g_isMouseRBtnDown) {
-        aten::CameraOperator::move(
-            g_camera,
-            g_prevX, g_prevY,
-            x, y,
-            real(0.001));
-        g_isCameraDirty = true;
+        return true;
     }
 
-    g_prevX = x;
-    g_prevY = y;
-}
-
-void onMouseWheel(int32_t delta)
-{
-    aten::CameraOperator::dolly(g_camera, delta * real(0.1));
-    g_isCameraDirty = true;
-}
-
-void onKey(bool press, aten::Key key)
-{
-    static const real offset = real(0.1);
-
-    if (press) {
-        if (key == aten::Key::Key_F1) {
-            g_willShowGUI = !g_willShowGUI;
-            return;
-        }
-        else if (key == aten::Key::Key_F2) {
-            g_willTakeScreenShot = true;
-            return;
-        }
+    void OnClose()
+    {
     }
 
-    if (press) {
-        switch (key) {
-        case aten::Key::Key_W:
-        case aten::Key::Key_UP:
-            aten::CameraOperator::moveForward(g_camera, offset);
-            break;
-        case aten::Key::Key_S:
-        case aten::Key::Key_DOWN:
-            aten::CameraOperator::moveForward(g_camera, -offset);
-            break;
-        case aten::Key::Key_D:
-        case aten::Key::Key_RIGHT:
-            aten::CameraOperator::moveRight(g_camera, offset);
-            break;
-        case aten::Key::Key_A:
-        case aten::Key::Key_LEFT:
-            aten::CameraOperator::moveRight(g_camera, -offset);
-            break;
-        case aten::Key::Key_Z:
-            aten::CameraOperator::moveUp(g_camera, offset);
-            break;
-        case aten::Key::Key_X:
-            aten::CameraOperator::moveUp(g_camera, -offset);
-            break;
-        case aten::Key::Key_R:
+    void OnMouseBtn(bool left, bool press, int32_t x, int32_t y)
+    {
+        is_mouse_l_btn_down_ = false;
+        is_mouse_r_btn_down_ = false;
+
+        if (press)
         {
-            aten::vec3 pos, at;
-            real vfov;
-            getCameraPosAndAt(pos, at, vfov);
+            prev_mouse_pos_x_ = x;
+            prev_mouse_pos_y_ = y;
 
-            g_camera.init(
-                pos,
-                at,
-                aten::vec3(0, 1, 0),
-                vfov,
-                WIDTH, HEIGHT);
+            is_mouse_l_btn_down_ = left;
+            is_mouse_r_btn_down_ = !left;
         }
-            break;
-        default:
-            break;
-        }
-
-        g_isCameraDirty = true;
     }
-}
+
+    void OnMouseMove(int32_t x, int32_t y)
+    {
+        if (is_mouse_l_btn_down_)
+        {
+            aten::CameraOperator::rotate(
+                camera_,
+                WIDTH, HEIGHT,
+                prev_mouse_pos_x_, prev_mouse_pos_y_,
+                x, y);
+            is_camera_dirty_ = true;
+        }
+        else if (is_mouse_r_btn_down_)
+        {
+            aten::CameraOperator::move(
+                camera_,
+                prev_mouse_pos_x_, prev_mouse_pos_y_,
+                x, y,
+                real(0.001));
+            is_camera_dirty_ = true;
+        }
+
+        prev_mouse_pos_x_ = x;
+        prev_mouse_pos_y_ = y;
+    }
+
+    void OnMouseWheel(int32_t delta)
+    {
+        aten::CameraOperator::dolly(camera_, delta * real(0.1));
+        is_camera_dirty_ = true;
+    }
+
+    void OnKey(bool press, aten::Key key)
+    {
+        static const real offset_base = real(0.1);
+
+        if (press)
+        {
+            if (key == aten::Key::Key_F1)
+            {
+                will_show_gui_ = !will_show_gui_;
+                return;
+            }
+            else if (key == aten::Key::Key_F2)
+            {
+                will_take_screen_shot_ = true;
+                return;
+            }
+        }
+
+        auto offset = offset_base;
+
+        if (press)
+        {
+            switch (key)
+            {
+            case aten::Key::Key_W:
+            case aten::Key::Key_UP:
+                aten::CameraOperator::moveForward(camera_, offset);
+                break;
+            case aten::Key::Key_S:
+            case aten::Key::Key_DOWN:
+                aten::CameraOperator::moveForward(camera_, -offset);
+                break;
+            case aten::Key::Key_D:
+            case aten::Key::Key_RIGHT:
+                aten::CameraOperator::moveRight(camera_, offset);
+                break;
+            case aten::Key::Key_A:
+            case aten::Key::Key_LEFT:
+                aten::CameraOperator::moveRight(camera_, -offset);
+                break;
+            case aten::Key::Key_Z:
+                aten::CameraOperator::moveUp(camera_, offset);
+                break;
+            case aten::Key::Key_X:
+                aten::CameraOperator::moveUp(camera_, -offset);
+                break;
+            case aten::Key::Key_R:
+            {
+                aten::vec3 pos, at;
+                real vfov;
+                GetCameraPosAndAt(pos, at, vfov);
+
+                camera_.init(
+                    pos,
+                    at,
+                    aten::vec3(0, 1, 0),
+                    vfov,
+                    WIDTH, HEIGHT);
+            }
+            break;
+            default:
+                break;
+            }
+
+            is_camera_dirty_ = true;
+        }
+    }
+
+    aten::context& GetContext()
+    {
+        return ctxt_;
+    }
+
+private:
+    void GetCameraPosAndAt(
+        aten::vec3& pos,
+        aten::vec3& at,
+        real& fov)
+    {
+        pos = aten::vec3(0.f, 1.f, 10.f);
+        at = aten::vec3(0.f, 1.f, 0.f);
+        fov = 45;
+    }
+
+    void MakeScene(aten::scene* scene)
+    {
+        aten::MaterialParameter mtrlParam;
+        mtrlParam.type = aten::MaterialType::Lambert;
+        mtrlParam.baseColor = aten::vec3(0.580000f, 0.580000f, 0.580000f);
+
+        auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
+            mtrlParam,
+            nullptr, nullptr, nullptr);
+
+        asset_manager_.registerMtrl("m1", mtrl);
+
+        auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj", ctxt_, asset_manager_);
+        auto teapot = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt_, obj, aten::mat4::Identity);
+        scene->add(teapot);
+
+        // TODO
+        //albedo_map_ = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");
+        //normal_map_ = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
+
+        obj->getShapes()[0]->GetMaterial()->setTextures(albedo_map_, normal_map_, nullptr);
+    }
+
+    std::shared_ptr<aten::material> CreateMaterial(aten::MaterialType type)
+    {
+        auto mtrl = ctxt_.CreateMaterialWithDefaultValue(type);
+
+        if (mtrl) {
+            mtrl->setTextures(
+                enable_albedo_map_ ? albedo_map_ : nullptr,
+                enable_normal_map_ ? normal_map_ : nullptr,
+                nullptr);
+        }
+
+        return mtrl;
+    }
+
+    void MershallLightParameter(std::vector<aten::LightParameter>& lightparams)
+    {
+        if (scene_light_.is_envmap) {
+            auto result = std::remove_if(lightparams.begin(), lightparams.end(),
+                [](const auto& l) {
+                    return l.type != aten::LightType::IBL;
+                }
+            );
+            lightparams.erase(result, lightparams.end());
+        }
+        else {
+            auto result = std::remove_if(lightparams.begin(), lightparams.end(),
+                [](const auto& l) {
+                    return l.type == aten::LightType::IBL;
+                }
+            );
+            lightparams.erase(result, lightparams.end());
+        }
+    }
+
+    void UpdateLightParameter()
+    {
+        std::vector<aten::LightParameter> lightparams;
+
+        auto lightNum = ctxt_.GetLightNum();
+
+        for (uint32_t i = 0; i < lightNum; i++) {
+            const auto& param = ctxt_.GetLight(i);
+            lightparams.push_back(param);
+        }
+
+        MershallLightParameter(lightparams);
+
+        renderer_.updateLight(lightparams);
+        renderer_.setEnableEnvmap(scene_light_.is_envmap);
+    }
+
+
+    struct SceneLight {
+        bool is_envmap{ true };
+
+        std::shared_ptr<aten::texture> envmap_texture;
+        std::shared_ptr<aten::envmap> envmap;
+        std::shared_ptr<aten::ImageBasedLight> ibl;
+        std::shared_ptr<aten::PointLight> point_light;
+    } scene_light_;
+
+    aten::PinholeCamera camera_;
+    bool is_camera_dirty_{ false };
+
+    aten::AcceleratedScene<aten::GPUBvh> scene_;
+    aten::context ctxt_;
+
+    aten::AssetManager asset_manager_;
+
+    idaten::PathTracing renderer_;
+
+    aten::PathTracing host_renderer_;
+    aten::FilmProgressive host_renderer_dst_{ WIDTH, HEIGHT };
+
+    std::shared_ptr<aten::visualizer> visualizer_;
+
+    aten::GammaCorrection gamma_;
+
+    aten::texture* albedo_map_{ nullptr };
+    aten::texture* normal_map_{ nullptr };
+
+    bool enable_albedo_map_{ false };
+    bool enable_normal_map_{ false };
+
+    MaterialParamEditor mtrl_param_editor_;
+
+    int32_t max_samples_{ 1 };
+    int32_t max_bounce_{ 5 };
+
+    bool will_show_gui_{ true };
+    bool will_take_screen_shot_{ false };
+    int32_t screen_shot_count_{ 0 };
+
+    bool is_mouse_l_btn_down_{ false };
+    bool is_mouse_r_btn_down_{ false };
+    int32_t prev_mouse_pos_x_{ 0 };
+    int32_t prev_mouse_pos_y_{ 0 };
+};
 
 int32_t main()
 {
     aten::timer::init();
-    aten::OMPUtil::setThreadNum(g_threadnum);
+    aten::OMPUtil::setThreadNum(MaterialViewerApp::ThreadNum);
 
     aten::initSampler(WIDTH, HEIGHT);
+
+    auto app = std::make_shared<MaterialViewerApp>();
 
     auto wnd = std::make_shared<aten::window>();
 
     auto id = wnd->Create(
         WIDTH, HEIGHT, TITLE,
-        onRun,
-        onClose,
-        onMouseBtn,
-        onMouseMove,
-        onMouseWheel,
-        onKey);
+        std::bind(&MaterialViewerApp::Run, app),
+        std::bind(&MaterialViewerApp::OnClose, app),
+        std::bind(&MaterialViewerApp::OnMouseBtn, app, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4),
+        std::bind(&MaterialViewerApp::OnMouseMove, app, std::placeholders::_1, std::placeholders::_2),
+        std::bind(&MaterialViewerApp::OnMouseWheel, app, std::placeholders::_1),
+        std::bind(&MaterialViewerApp::OnKey, app, std::placeholders::_1, std::placeholders::_2));
 
-    if (id < 0) {
+    if (id >= 0) {
+        app->GetContext().SetIsWindowInitialized(true);
+    }
+    else {
         AT_ASSERT(false);
         return 1;
     }
 
+    app->Init();
+
     aten::GLProfiler::start();
-
-    g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
-
-    aten::GammaCorrection gamma;
-    gamma.init(
-        WIDTH, HEIGHT,
-        "../shader/fullscreen_vs.glsl",
-        "../shader/gamma_fs.glsl");
-
-    aten::Blitter blitter;
-    blitter.init(
-        WIDTH, HEIGHT,
-        "../shader/fullscreen_vs.glsl",
-        "../shader/fullscreen_fs.glsl");
-
-    g_visualizer->addPostProc(&gamma);
-    //aten::visualizer::addPostProc(&blitter);
-
-    aten::vec3 pos, at;
-    real vfov;
-    getCameraPosAndAt(pos, at, vfov);
-
-    g_camera.init(
-        pos,
-        at,
-        aten::vec3(0, 1, 0),
-        vfov,
-        WIDTH, HEIGHT);
-
-    aten::AssetManager asset_manager;
-
-    makeScene(&g_scene, asset_manager);
-    g_scene.build(g_ctxt);
-
-    g_tracer.getCompaction().init(
-        WIDTH * HEIGHT,
-        1024);
-
-    {
-        // IBL
-        g_scene_light.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt, asset_manager);
-        g_scene_light.envmap = std::make_shared<aten::envmap>();
-        g_scene_light.envmap->init(g_scene_light.envmap_texture);
-        g_scene_light.ibl = std::make_shared<aten::ImageBasedLight>(g_scene_light.envmap);
-        g_scene.addImageBasedLight(g_ctxt, g_scene_light.ibl);
-
-        // PointLight
-        g_scene_light.point_light = std::make_shared<aten::PointLight>(
-            aten::vec3(0.0, 0.0, 50.0),
-            aten::vec3(1.0, 0.0, 0.0),
-            400.0f);
-        g_ctxt.AddLight(g_scene_light.point_light);
-    }
-
-    std::vector<aten::ObjectParameter> shapeparams;
-    std::vector<aten::TriangleParameter> primparams;
-    std::vector<aten::LightParameter> lightparams;
-    std::vector<aten::MaterialParameter> mtrlparms;
-    std::vector<aten::vertex> vtxparams;
-    std::vector<aten::mat4> mtxs;
-
-    aten::DataCollector::collect(
-        g_ctxt,
-        shapeparams,
-        primparams,
-        lightparams,
-        mtrlparms,
-        vtxparams,
-        mtxs);
-
-    const auto& nodes = g_scene.getAccel()->getNodes();
-
-    std::vector<idaten::TextureResource> tex;
-    {
-        auto texNum = g_ctxt.GetTextureNum();
-
-        for (int32_t i = 0; i < texNum; i++) {
-            auto t = g_ctxt.GtTexture(i);
-            tex.push_back(
-                idaten::TextureResource(t->colors(), t->width(), t->height()));
-        }
-    }
-
-    mershallLightParameter(lightparams);
-
-    auto camparam = g_camera.param();
-    camparam.znear = real(0.1);
-    camparam.zfar = real(10000.0);
-
-    g_tracer.update(
-        g_visualizer->GetGLTextureHandle(),
-        WIDTH, HEIGHT,
-        camparam,
-        shapeparams,
-        mtrlparms,
-        lightparams,
-        nodes,
-        primparams, 0,
-        vtxparams, 0,
-        mtxs,
-        tex,
-        g_scene_light.is_envmap
-        ? idaten::EnvmapResource(g_scene_light.envmap_texture->id(), g_scene_light.ibl->getAvgIlluminace(), real(1))
-        : idaten::EnvmapResource());
-
-    g_tracer.setEnableEnvmap(g_scene_light.is_envmap);
 
     wnd->Run();
 
     aten::GLProfiler::terminate();
+
+    app.reset();
 
     wnd->Terminate();
 }

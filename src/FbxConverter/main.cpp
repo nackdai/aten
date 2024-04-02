@@ -9,11 +9,6 @@
 #include "MtrlExporter.h"
 #include "AnmExporter.h"
 
-static const int32_t WIDTH = 1280;
-static const int32_t HEIGHT = 720;
-
-static const char* TITLE = "FbxConverter";
-
 struct Options {
     std::string input;
     std::string output;

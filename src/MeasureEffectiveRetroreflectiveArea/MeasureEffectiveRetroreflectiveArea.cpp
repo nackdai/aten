@@ -5,7 +5,7 @@
 #include "visualizer/atengl.h"
 #include "math/intersect.h"
 
-static const real Pos = real(1) / aten::sqrt(2);
+static const float Pos = 1.0f / aten::sqrt(2);
 
 const std::array<aten::vec4, MeasureEffectiveRetroreflectiveArea::VtxNum>
 MeasureEffectiveRetroreflectiveArea::TriangleVtxs = {
@@ -19,34 +19,11 @@ MeasureEffectiveRetroreflectiveArea::TriangleVtxs = {
     aten::vec4(   0,    0, -Pos, 1),
 };
 
-bool MeasureEffectiveRetroreflectiveArea::init(
-    int32_t width, int32_t height,
-    std::string_view pathVS,
-    std::string_view pathFS)
+void MeasureEffectiveRetroreflectiveArea::Init()
 {
-    static const std::array<uint32_t, VtxNum> TriangleIdx = {
-        0, 1, 2,
-        3, 4, 5,
-    };
-
-    static const std::array<aten::VertexAttrib, 1> attribs = {
-        aten::VertexAttrib{ GL_FLOAT, 3, sizeof(GLfloat), 0 },
-    };
-
-    width_ = width;
-    height_ = height;
-
-    // vertex buffer.
-    vertex_buffer_.init(
-        sizeof(aten::vec4),
-        TriangleVtxs.size(),
-        0,
-        attribs.data(),
-        attribs.size(),
-        TriangleVtxs.data());
-
-    // index buffer.
-    m_ib.init(TriangleIdx.size(), TriangleIdx.data());
+    if (!ray_orgs_.empty()) {
+        return;
+    }
 
     auto p0 = TriangleVtxs[0];
     auto p1 = TriangleVtxs[1];
@@ -82,6 +59,38 @@ bool MeasureEffectiveRetroreflectiveArea::init(
             }
         }
     }
+}
+
+bool MeasureEffectiveRetroreflectiveArea::InitDraw(
+    int32_t width, int32_t height,
+    std::string_view pathVS,
+    std::string_view pathFS)
+{
+    static const std::array TriangleIdx = {
+        0, 1, 2,
+        3, 4, 5,
+    };
+
+    static const std::array attribs = {
+        aten::VertexAttrib{ GL_FLOAT, 3, sizeof(GLfloat), 0 },
+    };
+
+    width_ = width;
+    height_ = height;
+
+    // vertex buffer.
+    vertex_buffer_.init(
+        sizeof(aten::vec4),
+        TriangleVtxs.size(),
+        0,
+        attribs.data(),
+        attribs.size(),
+        TriangleVtxs.data());
+
+    // index buffer.
+    m_ib.init(TriangleIdx.size(), TriangleIdx.data());
+
+    Init();
 
 #if 1
     // The arguments to pass for GenRay are just for debug visibility.

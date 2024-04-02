@@ -28,7 +28,7 @@ public:
         args_.input = "../../asset/bunny/bunny.obj";
 
 #if 0
-        if (!ParseArguments(argc, argv, cmd, args_)) {
+        if (!ParseArguments(argc, argv, cmd)) {
             return 0;
         }
 #endif
@@ -220,14 +220,7 @@ public:
     }
 
 private:
-    struct Args {
-        std::string input;
-        std::string output;
-    } args_;
-
-    bool ParseArguments(
-        int32_t argc, char* argv[],
-        Args& args)
+    bool ParseArguments(int32_t argc, char* argv[])
     {
         cmdline::parser cmd;
         {
@@ -249,14 +242,14 @@ private:
             return false;
         }
 
-        args.input = cmd.get<std::string>("input");
+        args_.input = cmd.get<std::string>("input");
 
         if (cmd.exist("output")) {
-            args.output = cmd.get<std::string>("output");
+            args_.output = cmd.get<std::string>("output");
         }
         else {
             // TODO
-            args.output = "result.sbvh";
+            args_.output = "result.sbvh";
         }
 
         return true;
@@ -286,6 +279,11 @@ private:
 
         scene_.build(ctxt_);
     }
+
+    struct Args {
+        std::string input;
+        std::string output;
+    } args_;
 
     aten::context ctxt_;
 

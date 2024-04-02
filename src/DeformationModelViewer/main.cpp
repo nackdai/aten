@@ -5,10 +5,9 @@
 #include "atenscene.h"
 #include "idaten.h"
 
-static const int32_t WIDTH = 1280;
-static const int32_t HEIGHT = 720;
-
-static const char* TITLE = "MdlViewer";
+constexpr int32_t WIDTH = 1280;
+constexpr int32_t HEIGHT = 720;
+constexpr char* TITLE = "DeformationModelViewer";
 
 struct Options {
     std::string input;
@@ -263,9 +262,15 @@ int32_t main(int32_t argc, char* argv[])
 {
     Options opt;
 
+#if 0
     if (!parseOption(argc, argv, opt)) {
         return 0;
     }
+#endif
+    opt.input = "../../asset/converted_unitychan/unitychan_gpu.mdl";
+    opt.texDir = "../../asset/unitychan/Texture";
+    opt.mtrl = "../../asset/converted_unitychan/unitychan_mtrl.xml";
+    opt.anm = "../../asset/converted_unitychan/unitychan_WAIT00.anm";
 
     aten::SetCurrentDirectoryFromExe();
 

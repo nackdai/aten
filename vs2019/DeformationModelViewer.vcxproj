@@ -15,15 +15,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\MdlViewer\drawobj_fs.glsl" />
-    <None Include="..\src\MdlViewer\drawobj_vs.glsl" />
+    <None Include="..\src\DeformationModelViewer\drawobj_fs.glsl" />
+    <None Include="..\src\DeformationModelViewer\drawobj_vs.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\MdlViewer\main.cpp" />
+    <ClCompile Include="..\src\DeformationModelViewer\main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0AEF81BD-B36E-4CFB-8278-9157CADC81F8}</ProjectGuid>
-    <RootNamespace>MdlViewer</RootNamespace>
+    <RootNamespace>DeformationModelViewer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -26,13 +26,13 @@ public:
         // TODO
         // Enable to handle and pass the command argument.
 #if 0
-        if (!ParseArguments(argc, argv, args_)) {
+        if (!ParseArguments(argc, argv)) {
             AT_ASSERT(false);
             return false;
         }
 #endif
 
-        obj_ = LoadObj("../../3rdparty/assimp/test/models/FBX/box.fbx", "", asset_manager_);
+        obj_ = LoadObj("../../3rdparty/assimp/test/models/FBX/box.fbx", "");
         if (!obj_) {
             AT_ASSERT(false);
             return false;
@@ -224,8 +224,7 @@ public:
 private:
     std::shared_ptr<aten::PolygonObject> LoadObj(
         std::string_view objpath,
-        std::string_view mtrlpath,
-        aten::AssetManager& asset_manager)
+        std::string_view mtrlpath)
     {
         std::string pathname;
         std::string extname;
@@ -245,31 +244,31 @@ private:
             auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
                 param,
                 nullptr, nullptr, nullptr);
-            asset_manager.registerMtrl("dummy", mtrl);
+            asset_manager_.registerMtrl("dummy", mtrl);
         }
         else {
-            aten::MaterialLoader::load(mtrlpath, ctxt_, asset_manager);
+            aten::MaterialLoader::load(mtrlpath, ctxt_, asset_manager_);
         }
 
         std::vector<std::shared_ptr<aten::PolygonObject>> objs;
         aten::AssimpImporter::load(
             objpath,
             objs,
-            ctxt_, asset_manager,
+            ctxt_, asset_manager_,
             [&](std::string_view name,
                 aten::context& ctxt,
                 const aten::MaterialParameter& mtrl_param,
                 const std::string& albedo,
                 const std::string& nml)
             {
-                auto mtrl = asset_manager.getMtrl(name);
+                auto mtrl = asset_manager_.getMtrl(name);
                 if (!mtrl) {
                     auto albedo_map = albedo.empty()
                         ? nullptr
-                        : aten::ImageLoader::load(pathname + albedo, ctxt, asset_manager);
+                        : aten::ImageLoader::load(pathname + albedo, ctxt, asset_manager_);
                     auto nml_map = nml.empty()
                         ? nullptr
-                        : aten::ImageLoader::load(pathname + nml, ctxt, asset_manager);
+                        : aten::ImageLoader::load(pathname + nml, ctxt, asset_manager_);
 
                     mtrl = ctxt.CreateMaterialWithMaterialParameter(
                         mtrl_param,
@@ -283,19 +282,13 @@ private:
             });
 
         // NOTE
-        // ‚P‚Â‚µ‚©‚ä‚é‚³‚È‚¢.
+        // Number of obj is currently only one.
         AT_ASSERT(objs.size() == 1);
 
         return objs[0];
     }
 
-    struct Args {
-        std::string input;
-    } args_;
-
-    bool ParseArguments(
-        int32_t argc, char* argv[],
-        Args& args)
+    bool ParseArguments(int32_t argc, char* argv[])
     {
         cmdline::parser cmd;
 
@@ -317,10 +310,14 @@ private:
             return false;
         }
 
-        args.input = cmd.get<std::string>("input");
+        args_.input = cmd.get<std::string>("input");
 
         return true;
     }
+
+    struct Args {
+        std::string input;
+    } args_;
 
     aten::context ctxt_;
 

@@ -179,9 +179,9 @@ namespace idaten
 
     void Skinning::initWithTriangles(
         aten::SkinningVertex* vertices,
-        uint32_t vtxNum,
+        size_t vtxNum,
         aten::TriangleParameter* tris,
-        uint32_t triNum,
+        size_t triNum,
         const aten::GeomMultiVertexBuffer* vb)
     {
         vertices_.resize(vtxNum);
@@ -213,7 +213,7 @@ namespace idaten
 
     void Skinning::update(
         const aten::mat4* matrices,
-        uint32_t mtxNum)
+        size_t mtxNum)
     {
         if (matrices_.bytes() == 0) {
             matrices_.resize(mtxNum);

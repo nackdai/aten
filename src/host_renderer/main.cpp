@@ -71,20 +71,7 @@ public:
             real(0.1), real(10000.0),
             WIDTH, HEIGHT);
 
-        using result_of_make_scene = decltype(Scene::makeScene(std::declval<aten::context>(), std::declval<aten::scene*>(), std::declval<aten::AssetManager>()));
-
-        // NOTE
-        // https://stackoverflow.com/questions/65508488/how-to-skip-uncompilable-code-through-constexpr-if-in-c
-        // If we'd like to unompilable by if constexpr, the function has to be template.
-        // lambda with the arguments defined as auto is the same as template function.
-        [&](auto& obj) {
-            if constexpr (std::is_same_v<result_of_make_scene, std::remove_reference_t<decltype(obj)>>) {
-                obj = Scene::makeScene(ctxt_, &scene_, asset_manager_);
-            }
-            else {
-                Scene::makeScene(ctxt_, &scene_, asset_manager_);
-            }
-        }(movable_obj_);
+        MakeScene<Scene>(movable_obj_, ctxt_, &scene_, asset_manager_);
 
         scene_.build(ctxt_);
 
@@ -129,7 +116,7 @@ public:
             movable_obj_->setTrans(t);
             movable_obj_->update();
 
-            auto accel = scene_.getAccel();
+            auto* accel = scene_.getAccel();
             accel->update(ctxt_);
         }
     }
@@ -218,7 +205,7 @@ public:
         return ctxt_;
     }
 
-protected:
+private:
     aten::PinholeCamera camera_;
 
     aten::AcceleratedScene<aten::sbvh> scene_;

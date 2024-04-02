@@ -44,6 +44,11 @@ namespace aten
             return m_header;
         }
 
+        bool IsValid() const
+        {
+            return m_nodes.size() > 0;
+        }
+
     private:
         bool read(FileInputStream* stream);
 

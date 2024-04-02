@@ -11,8 +11,9 @@ public:
     ~MeasureEffectiveRetroreflectiveArea() = default;
 
 public:
-    // ‰Šú‰».
-    bool init(
+    void Init();
+
+    bool InitDraw(
         int32_t width, int32_t height,
         std::string_view pathVS,
         std::string_view pathFS);
@@ -24,6 +25,11 @@ public:
     aten::vec3 GenRay(real theta, real phi);
 
     real HitTest(real theta, real phi);
+
+    bool IsValid() const
+    {
+        return m_shader.IsValid();
+    }
 
 private:
     aten::shader m_shader;

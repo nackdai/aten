@@ -23,14 +23,14 @@ namespace idaten
 
         void initWithTriangles(
             aten::SkinningVertex* vertices,
-            uint32_t vtxNum,
+            size_t vtxNum,
             aten::TriangleParameter* tris,
-            uint32_t triNum,
+            size_t triNum,
             const aten::GeomMultiVertexBuffer* vb);
 
         void update(
             const aten::mat4* matrices,
-            uint32_t mtxNum);
+            size_t mtxNum);
 
         void compute(
             aten::vec3& aabbMin,

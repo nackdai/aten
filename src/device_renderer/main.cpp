@@ -1,3 +1,4 @@
+#include "AssetManager.h"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
@@ -70,27 +71,12 @@ public:
             vfov,
             WIDTH, HEIGHT);
 
-        aten::AssetManager asset_manager;
-
-        using result_of_make_scene = decltype(Scene::makeScene(std::declval<aten::context>(), std::declval<aten::scene*>(), std::declval<aten::AssetManager>()));
-
-        // NOTE
-        // https://stackoverflow.com/questions/65508488/how-to-skip-uncompilable-code-through-constexpr-if-in-c
-        // If we'd like to unompilable by if constexpr, the function has to be template.
-        // lambda with the arguments defined as auto is the same as template function.
-        [&](auto& obj) {
-            if constexpr (std::is_same_v<result_of_make_scene, std::remove_reference_t<decltype(obj)>>) {
-                obj = Scene::makeScene(ctxt_, &scene_, asset_manager);
-            }
-            else {
-                Scene::makeScene(ctxt_, &scene_, asset_manager);
-            }
-        }(movable_obj_);
+        MakeScene<Scene>(movable_obj_, ctxt_, &scene_, asset_manager_);
 
         scene_.build(ctxt_);
 
 #ifdef ENABLE_ENVMAP
-        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager);
+        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
         auto bg = std::make_shared<aten::envmap>();
         bg->init(envmap);
         auto ibl = std::make_shared<aten::ImageBasedLight>(bg);
@@ -240,14 +226,14 @@ public:
 
         if (will_take_screen_shot_)
         {
-            auto buffer = aten::StringFormat("sc_%d.png", screen_shot_count_);
+            auto screen_shot_file_name = aten::StringFormat("sc_%d.png", screen_shot_count_);
 
-            visualizer_->takeScreenshot(buffer);
+            visualizer_->takeScreenshot(screen_shot_file_name);
 
             will_take_screen_shot_ = false;
             screen_shot_count_++;
 
-            AT_PRINTF("Take Screenshot[%s]\n", buffer);
+            AT_PRINTF("Take Screenshot[%s]\n", screen_shot_file_name.c_str());
         }
 
         if (will_show_gui_)
@@ -512,8 +498,7 @@ private:
     aten::AcceleratedScene<aten::GPUBvh> scene_;
     aten::context ctxt_;
 
-    std::shared_ptr<aten::instance<aten::deformable>> deform_mdl_;
-    std::shared_ptr<aten::DeformAnimation> defrom_anm_;
+    aten::AssetManager asset_manager_;
 
 #ifdef ENABLE_NPR
     idaten::NPRPathTracing renderer_;

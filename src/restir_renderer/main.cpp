@@ -234,7 +234,7 @@ public:
             will_take_screen_shot_ = false;
             screen_shot_count_++;
 
-            AT_PRINTF("Take Screenshot[%s]\n", screen_shot_file_name);
+            AT_PRINTF("Take Screenshot[%s]\n", screen_shot_file_name.c_str());
         }
 
         if (will_show_gui_)

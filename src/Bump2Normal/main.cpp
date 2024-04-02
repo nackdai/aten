@@ -70,21 +70,17 @@ public:
             will_take_screenshot_ = false;
         }
 
-        if (NeedGui()) {
-            ImGui::Text("width: %d", args_.width);
-            ImGui::Text("height: %d", args_.height);
+        ImGui::Text("width: %d", args_.width);
+        ImGui::Text("height: %d", args_.height);
 
-            ImGui::SliderFloat("scale", &blitter_.scale, 1, 100);
+        ImGui::SliderFloat("scale", &blitter_.scale, 1, 100);
 
-            ImGui::Text("Export to %s", args_.output.c_str());
-            if (ImGui::Button("Export")) {
-                will_take_screenshot_ = true;
-            }
-
-            return true;
+        ImGui::Text("Export to %s", args_.output.c_str());
+        if (ImGui::Button("Export")) {
+            will_take_screenshot_ = true;
         }
 
-        return false;
+        return NeedGui();
     }
 
     void OnClose()

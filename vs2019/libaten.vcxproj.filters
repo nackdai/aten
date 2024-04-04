@@ -179,9 +179,6 @@
     <ClInclude Include="..\src\libaten\material\lambert.h">
       <Filter>material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\material\blinn.h">
-      <Filter>material</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\ggx.h">
       <Filter>material</Filter>
     </ClInclude>
@@ -403,9 +400,6 @@
     <ClInclude Include="..\src\libaten\material\velvet.h">
       <Filter>material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\material\lambert_refraction.h">
-      <Filter>material</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\microfacet_refraction.h">
       <Filter>material</Filter>
     </ClInclude>
@@ -551,9 +545,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\visualizer\shader.cpp">
       <Filter>visualizer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\material\blinn.cpp">
-      <Filter>material</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\material.cpp">
       <Filter>material</Filter>
@@ -721,9 +712,6 @@
       <Filter>material</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\microfacet_refraction.cpp">
-      <Filter>material</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\material\lambert_refraction.cpp">
       <Filter>material</Filter>
     </ClCompile>
     <ClCompile Include="..\3rdparty\imgui\backends\imgui_impl_glfw.cpp">

@@ -9,11 +9,9 @@
 #include "material/oren_nayar.h"
 #include "material/specular.h"
 #include "material/refraction.h"
-#include "material/blinn.h"
 #include "material/ggx.h"
 #include "material/beckman.h"
 #include "material/velvet.h"
-#include "material/lambert_refraction.h"
 #include "material/microfacet_refraction.h"
 #include "material/disney_brdf.h"
 #include "material/retroreflective.h"
@@ -63,9 +61,6 @@ namespace AT_NAME
         case aten::MaterialType::Refraction:
             AT_NAME::refraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
             break;
-        case aten::MaterialType::Blinn:
-            AT_NAME::MicrofacetBlinn::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
-            break;
         case aten::MaterialType::GGX:
             AT_NAME::MicrofacetGGX::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v);
             break;
@@ -74,9 +69,6 @@ namespace AT_NAME
             break;
         case aten::MaterialType::Velvet:
             AT_NAME::MicrofacetVelvet::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
-            break;
-        case aten::MaterialType::Lambert_Refraction:
-            AT_NAME::LambertRefraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
             break;
         case aten::MaterialType::Microfacet_Refraction:
             AT_NAME::MicrofacetRefraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
@@ -122,9 +114,6 @@ namespace AT_NAME
         case aten::MaterialType::Refraction:
             pdf = AT_NAME::refraction::pdf(mtrl, normal, wi, wo, u, v);
             break;
-        case aten::MaterialType::Blinn:
-            pdf = AT_NAME::MicrofacetBlinn::pdf(mtrl, normal, wi, wo, u, v);
-            break;
         case aten::MaterialType::GGX:
             pdf = AT_NAME::MicrofacetGGX::pdf(mtrl, normal, wi, wo, u, v);
             break;
@@ -133,9 +122,6 @@ namespace AT_NAME
             break;
         case aten::MaterialType::Velvet:
             pdf = AT_NAME::MicrofacetVelvet::pdf(mtrl, normal, wi, wo, u, v);
-            break;
-        case aten::MaterialType::Lambert_Refraction:
-            pdf = AT_NAME::LambertRefraction::pdf(normal, wo);
             break;
         case aten::MaterialType::Microfacet_Refraction:
             pdf = AT_NAME::MicrofacetRefraction::pdf(mtrl, normal, wi, wo, u, v);
@@ -177,16 +163,12 @@ namespace AT_NAME
             return AT_NAME::specular::sampleDirection(mtrl, normal, wi, u, v, sampler);
         case aten::MaterialType::Refraction:
             return AT_NAME::refraction::sampleDirection(mtrl, normal, wi, u, v, sampler);
-        case aten::MaterialType::Blinn:
-            return AT_NAME::MicrofacetBlinn::sampleDirection(mtrl, normal, wi, u, v, sampler);
         case aten::MaterialType::GGX:
             return AT_NAME::MicrofacetGGX::sampleDirection(mtrl, normal, wi, u, v, sampler);
         case aten::MaterialType::Beckman:
             return AT_NAME::MicrofacetBeckman::sampleDirection(mtrl, normal, wi, u, v, sampler);
         case aten::MaterialType::Velvet:
             return AT_NAME::MicrofacetVelvet::sampleDirection(mtrl, normal, wi, u, v, sampler);
-        case aten::MaterialType::Lambert_Refraction:
-            return AT_NAME::LambertRefraction::sampleDirection(mtrl, normal, wi, u, v, sampler);
         case aten::MaterialType::Microfacet_Refraction:
             return AT_NAME::MicrofacetRefraction::sampleDirection(mtrl, normal, wi, u, v, sampler);
         case aten::MaterialType::Retroreflective:
@@ -222,16 +204,12 @@ namespace AT_NAME
             return AT_NAME::specular::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Refraction:
             return AT_NAME::refraction::bsdf(mtrl, normal, wi, wo, u, v);
-        case aten::MaterialType::Blinn:
-            return AT_NAME::MicrofacetBlinn::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::GGX:
             return AT_NAME::MicrofacetGGX::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Beckman:
             return AT_NAME::MicrofacetBeckman::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Velvet:
             return AT_NAME::MicrofacetVelvet::bsdf(mtrl, normal, wi, wo, u, v);
-        case aten::MaterialType::Lambert_Refraction:
-            return AT_NAME::LambertRefraction::bsdf(mtrl, u, v);
         case aten::MaterialType::Microfacet_Refraction:
             return AT_NAME::MicrofacetRefraction::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Retroreflective:

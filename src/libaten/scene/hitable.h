@@ -6,7 +6,6 @@
 #include "types.h"
 #include "math/aabb.h"
 #include "math/vec3.h"
-#include "material/material.h"
 #include "sampler/sampler.h"
 #include "scene/hit_parameter.h"
 

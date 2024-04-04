@@ -7,7 +7,6 @@
 #include "geometry/triangle.h"
 #include "geometry/TriangleGroupMesh.h"
 #include "geometry/transformable.h"
-#include "scene/host_scene_context.h"
 
 namespace AT_NAME
 {

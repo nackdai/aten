@@ -9,11 +9,9 @@
 #include "material/oren_nayar.h"
 #include "material/specular.h"
 #include "material/refraction.h"
-#include "material/blinn.h"
 #include "material/ggx.h"
 #include "material/beckman.h"
 #include "material/velvet.h"
-#include "material/lambert_refraction.h"
 #include "material/microfacet_refraction.h"
 #include "material/disney_brdf.h"
 #include "material/retroreflective.h"
@@ -27,11 +25,9 @@ namespace AT_NAME
         {"ornenayar", []() { return new OrenNayar(); }},
         {"specular", []() { return new specular(); }},
         {"refraction", []() { return new refraction(); }},
-        {"blinn", []() { return new MicrofacetBlinn(); }},
         {"ggx", []() { return new MicrofacetGGX(); }},
         {"beckman", []() { return new MicrofacetBeckman(); }},
         {"velvet", []() { return new MicrofacetVelvet(); }},
-        {"lambert_refraction", []() { return new LambertRefraction(); }},
         {"microfacet_refraction", []() { return new MicrofacetRefraction(); }},
         {"retroreflective", []() { return new Retroreflective(); }},
         {"carpaint", []() { return new CarPaint(); }},
@@ -102,9 +98,6 @@ namespace AT_NAME
         case aten::MaterialType::Refraction:
             mtrl = new AT_NAME::refraction(param.baseColor, param.standard.ior, param.isIdealRefraction, normalMap);
             break;
-        case aten::MaterialType::Blinn:
-            mtrl = new AT_NAME::MicrofacetBlinn(param.baseColor, param.standard.shininess, param.standard.ior, albedoMap, normalMap);
-            break;
         case aten::MaterialType::GGX:
             mtrl = new AT_NAME::MicrofacetGGX(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
             break;
@@ -113,9 +106,6 @@ namespace AT_NAME
             break;
         case aten::MaterialType::Velvet:
             mtrl = new AT_NAME::MicrofacetVelvet(param.baseColor, param.standard.roughness, albedoMap, normalMap);
-            break;
-        case aten::MaterialType::Lambert_Refraction:
-            mtrl = new AT_NAME::LambertRefraction(param.baseColor, param.standard.ior, normalMap);
             break;
         case aten::MaterialType::Microfacet_Refraction:
             mtrl = new AT_NAME::MicrofacetRefraction(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);

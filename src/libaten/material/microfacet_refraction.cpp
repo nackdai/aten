@@ -128,7 +128,7 @@ namespace AT_NAME
         auto denom = dot(ht, ht);
 
         // Expression(24)
-        auto pdf = MicrofacetGGX::sampleGGX_D(wh, n, roughness) * aten::abs(dot(wh, n));
+        auto pdf = MicrofacetGGX::ComputeDistribution(wh, n, roughness) * aten::abs(dot(wh, n));
 
         // Expression(38)
         pdf = denom > AT_MATH_EPSILON ? pdf * wh_wo / denom : real(0);
@@ -169,7 +169,7 @@ namespace AT_NAME
         }
 
         // Sample microfacet normal.
-        const auto m = MicrofacetGGX::sampleNormal(roughness, n, sampler);
+        const auto m = MicrofacetGGX::SampleMicrosurfaceNormal(roughness, n, sampler);
 
         // Expression(40)
         const auto c = dot(in, m);
@@ -227,16 +227,10 @@ namespace AT_NAME
         const auto ht = -(etai * in + etat * out);
         const auto wh = normalize(ht);
 
-        real D = MicrofacetGGX::sampleGGX_D(wh, n, roughness);
+        real D = MicrofacetGGX::ComputeDistribution(wh, n, roughness);
 
         // Compute G.
-        real G(1);
-        {
-            auto G1_lh = MicrofacetGGX::computeGGXSmithG1(roughness, in, wh);
-            auto G1_vh = MicrofacetGGX::computeGGXSmithG1(roughness, out, wh);
-
-            G = G1_lh * G1_vh;
-        }
+        real G = MicrofacetGGX::ComputeG2Smith(roughness, in, out, wh);
 
         real F(1);
         {

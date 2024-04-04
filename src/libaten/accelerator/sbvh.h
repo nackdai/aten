@@ -1,12 +1,13 @@
 #pragma once
 
 #include "accelerator/threaded_bvh.h"
-#include "scene/host_scene_context.h"
 
 #define SBVH_TRIANGLE_NUM    (1)
 
 namespace aten
 {
+    class context;
+
 #define AT_DISABLE_VOXEL    (-1.0f)
 #define AT_IS_VOXEL(v)    (v < AT_DISABLE_VOXEL)
 #define AT_SET_VOXEL_DETPH(d)    (-(d) + AT_DISABLE_VOXEL)

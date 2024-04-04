@@ -91,7 +91,7 @@ namespace pt {
             rec.mtrlid,
             rec.isVoxel);
 
-        auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
+        auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, shMtrls[threadIdx.x].baseColor, bounce);
 
         // Apply normal map.
         int32_t normalMap = shMtrls[threadIdx.x].normalMap;
@@ -170,21 +170,21 @@ namespace pt {
 
         AT_NAME::MaterialSampling sampling;
 
-        AT_NAME::material::sampleMaterialWithExternalAlbedo(
+        AT_NAME::material::sampleMaterial(
             &sampling,
             &shMtrls[threadIdx.x],
             orienting_normal,
             ray.dir,
             rec.normal,
             &paths.sampler[idx], pre_sampled_r,
-            rec.u, rec.v,
-            albedo);
+            rec.u, rec.v);
 
         AT_NAME::PrepareForNextBounce(
             idx,
             rec, isBackfacing, russianProb,
             orienting_normal,
             shMtrls[threadIdx.x], sampling,
+            albedo,
             paths,
             rays);
     }

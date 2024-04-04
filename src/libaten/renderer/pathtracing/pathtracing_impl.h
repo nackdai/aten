@@ -303,9 +303,10 @@ namespace AT_NAME
             auto cosShadow = dot(hit_nml, dirToLight);
 
             real path_pdf{ AT_NAME::material::samplePDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v) };
-            auto bsdf{ AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, external_albedo, pre_sampled_r) };
+            auto bsdf{ AT_NAME::material::sampleBSDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, pre_sampled_r) };
 
             bsdf *= throughtput.throughput;
+            bsdf *= static_cast<aten::vec3>(external_albedo);
 
             // Get light color.
             const auto& emit{ sampleres.light_color };
@@ -546,6 +547,7 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::MaterialParameter& mtrl,
         const AT_NAME::MaterialSampling& sampling,
+        const aten::vec3& albedo,
         AT_NAME::Path& paths,
         aten::ray* rays)
     {
@@ -571,6 +573,7 @@ namespace AT_NAME
             return;
         }
 
+        paths.throughput[idx].throughput *= albedo;
         paths.throughput[idx].pdfb = pdfb;
         paths.attrib[idx].isSingular = mtrl.attrib.isSingular;
         paths.attrib[idx].mtrlType = mtrl.type;
@@ -686,6 +689,7 @@ namespace AT_NAME
             rec, isBackfacing, russianProb,
             orienting_normal,
             mtrl, sampling,
+            albedo,
             paths, rays);
     }
 }

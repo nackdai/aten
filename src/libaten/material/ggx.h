@@ -62,14 +62,6 @@ namespace AT_NAME
             const aten::vec3& wo,
             float u, float v);
 
-        static AT_DEVICE_API aten::vec3 bsdf(
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            float u, float v,
-            const aten::vec4& externalAlbedo);
-
         static AT_DEVICE_API void sample(
             AT_NAME::MaterialSampling* result,
             const aten::MaterialParameter* param,
@@ -78,16 +70,6 @@ namespace AT_NAME
             const aten::vec3& orgnormal,
             aten::sampler* sampler,
             float u, float v);
-
-        static AT_DEVICE_API void sample(
-            AT_NAME::MaterialSampling* result,
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            float u, float v,
-            const aten::vec4& externalAlbedo);
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
 
@@ -209,7 +191,6 @@ namespace AT_NAME
          * @return BRDF.
          */
         static AT_DEVICE_API aten::vec3 ComputeBRDF(
-            const aten::vec3& albedo,
             const float roughness,
             const float ior,
             const aten::vec3& n,

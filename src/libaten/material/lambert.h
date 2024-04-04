@@ -32,12 +32,8 @@ namespace AT_NAME
             const aten::vec3& normal,
             const aten::vec3& wo)
         {
-            auto c = dot(normal, wo);
-            //AT_ASSERT(c >= 0);
-            c = aten::abs(c);
-
-            auto ret = c / AT_MATH_PI;
-
+            const auto c = aten::abs(dot(normal, wo));
+            const auto ret = c / AT_MATH_PI;
             return ret;
         }
 
@@ -45,28 +41,11 @@ namespace AT_NAME
             const aten::vec3& normal,
             real r1, real r2)
         {
-            // normalの方向を基準とした正規直交基底(w, u, v)を作る.
-            // この基底に対する半球内で次のレイを飛ばす.
-#if 1
             auto n = normal;
             auto t = aten::getOrthoVector(n);
             auto b = cross(n, t);
-#else
-            aten::vec3 n, t, b;
 
-            n = normal;
-
-            // nと平行にならないようにする.
-            if (fabs(n.x) > AT_MATH_EPSILON) {
-                t = normalize(cross(aten::vec3(0.0, 1.0, 0.0), n));
-            }
-            else {
-                t = normalize(cross(aten::vec3(1.0, 0.0, 0.0), n));
-            }
-            b = cross(n, t);
-#endif
-
-            // コサイン項を使った重点的サンプリング.
+            // Importance sampling with cosine factor.
             r1 = 2 * AT_MATH_PI * r1;
             const real r2s = sqrt(r2);
 
@@ -90,28 +69,9 @@ namespace AT_NAME
             return sampleDirection(normal, r1, r2);
         }
 
-        static AT_DEVICE_API aten::vec3 bsdf(
-            const aten::MaterialParameter* param,
-            real u, real v)
+        static AT_DEVICE_API aten::vec3 bsdf(const aten::MaterialParameter* param)
         {
-            auto albedo = param->baseColor;
-            albedo *= sampleTexture(
-                param->albedoMap,
-                u, v,
-                aten::vec4(real(1)));
-
-            aten::vec3 ret = albedo / AT_MATH_PI;
-            return ret;
-        }
-
-        static AT_HOST_DEVICE_API aten::vec3 bsdf(
-            const aten::MaterialParameter* param,
-            const aten::vec3& externalAlbedo)
-        {
-            aten::vec3 albedo = param->baseColor;
-            albedo *= externalAlbedo;
-
-            aten::vec3 ret = albedo / AT_MATH_PI;
+            aten::vec3 ret = aten::vec3(1.0f) / AT_MATH_PI;
             return ret;
         }
 
@@ -121,42 +81,13 @@ namespace AT_NAME
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            real u, real v,
-            bool isLightPath = false)
+            aten::sampler* sampler)
         {
             MaterialSampling ret;
 
             result->dir = sampleDirection(normal, sampler);
             result->pdf = pdf(normal, result->dir);
-            result->bsdf = bsdf(param, u, v);
-        }
-
-        static AT_DEVICE_API void sample(
-            AT_NAME::MaterialSampling* result,
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            const aten::vec3& externalAlbedo,
-            bool isLightPath = false)
-        {
-            MaterialSampling ret;
-
-            result->dir = sampleDirection(normal, sampler);
-            result->pdf = pdf(normal, result->dir);
-            result->bsdf = bsdf(param, externalAlbedo);
-        }
-
-        static AT_DEVICE_API real computeFresnel(
-            const aten::MaterialParameter* mtrl,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real outsideIor)
-        {
-            return real(1);
+            result->bsdf = bsdf(param);
         }
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final

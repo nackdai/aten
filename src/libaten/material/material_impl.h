@@ -52,7 +52,7 @@ namespace AT_NAME
             AT_NAME::emissive::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
             break;
         case aten::MaterialType::Lambert:
-            AT_NAME::lambert::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
+            AT_NAME::lambert::sample(result, mtrl, normal, wi, orgnormal, sampler);
             break;
         case aten::MaterialType::OrneNayar:
             AT_NAME::OrenNayar::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
@@ -67,7 +67,7 @@ namespace AT_NAME
             AT_NAME::MicrofacetBlinn::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
             break;
         case aten::MaterialType::GGX:
-            AT_NAME::MicrofacetGGX::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
+            AT_NAME::MicrofacetGGX::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v);
             break;
         case aten::MaterialType::Beckman:
             AT_NAME::MicrofacetBeckman::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
@@ -92,69 +92,7 @@ namespace AT_NAME
             break;
         default:
             AT_ASSERT(false);
-            AT_NAME::lambert::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
-            break;
-        }
-    }
-
-    inline AT_DEVICE_API void material::sampleMaterialWithExternalAlbedo(
-        AT_NAME::MaterialSampling* result,
-        const aten::MaterialParameter* mtrl,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real pre_sampled_r,
-        float u, float v,
-        const aten::vec4& externalAlbedo)
-    {
-        switch (mtrl->type) {
-        case aten::MaterialType::Emissive:
-            AT_NAME::emissive::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
-            break;
-        case aten::MaterialType::Lambert:
-            AT_NAME::lambert::sample(result, mtrl, normal, wi, orgnormal, sampler, externalAlbedo, false);
-            break;
-        case aten::MaterialType::OrneNayar:
-            AT_NAME::OrenNayar::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
-            break;
-        case aten::MaterialType::Specular:
-            AT_NAME::specular::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
-            break;
-        case aten::MaterialType::Refraction:
-            // TODO
-            AT_NAME::refraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
-            break;
-        case aten::MaterialType::Blinn:
-            AT_NAME::MicrofacetBlinn::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
-            break;
-        case aten::MaterialType::GGX:
-            AT_NAME::MicrofacetGGX::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo);
-            break;
-        case aten::MaterialType::Beckman:
-            AT_NAME::MicrofacetBeckman::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
-            break;
-        case aten::MaterialType::Velvet:
-            AT_NAME::MicrofacetVelvet::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
-            break;
-        case aten::MaterialType::Lambert_Refraction:
-            AT_NAME::LambertRefraction::sample(result, mtrl, normal, wi, orgnormal, sampler, externalAlbedo, false);
-            break;
-        case aten::MaterialType::Microfacet_Refraction:
-            AT_NAME::MicrofacetRefraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
-            break;
-        case aten::MaterialType::Retroreflective:
-            AT_NAME::Retroreflective::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
-            break;
-        case aten::MaterialType::CarPaint:
-            AT_NAME::CarPaint::sample(result, mtrl, normal, wi, orgnormal, sampler, pre_sampled_r, u, v, externalAlbedo, false);
-            break;
-        case aten::MaterialType::Disney:
-            AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
-            break;
-        default:
-            AT_ASSERT(false);
-            AT_NAME::lambert::sample(result, mtrl, normal, wi, orgnormal, sampler, externalAlbedo, false);
+            AT_NAME::lambert::sample(result, mtrl, normal, wi, orgnormal, sampler);
             break;
         }
     }
@@ -277,7 +215,7 @@ namespace AT_NAME
         case aten::MaterialType::Emissive:
             return AT_NAME::emissive::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Lambert:
-            return AT_NAME::lambert::bsdf(mtrl, u, v);
+            return AT_NAME::lambert::bsdf(mtrl);
         case aten::MaterialType::OrneNayar:
             return AT_NAME::OrenNayar::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Specular:
@@ -304,53 +242,7 @@ namespace AT_NAME
             return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
         default:
             AT_ASSERT(false);
-            return AT_NAME::lambert::bsdf(mtrl, u, v);
-        }
-
-        return aten::vec3();
-    }
-
-    inline AT_DEVICE_API aten::vec3 material::sampleBSDFWithExternalAlbedo(
-        const aten::MaterialParameter* mtrl,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        const aten::vec4& externalAlbedo,
-        real pre_sampled_r)
-    {
-        switch (mtrl->type) {
-        case aten::MaterialType::Emissive:
-            return AT_NAME::emissive::bsdf(mtrl, externalAlbedo);
-        case aten::MaterialType::Lambert:
-            return AT_NAME::lambert::bsdf(mtrl, externalAlbedo);
-        case aten::MaterialType::OrneNayar:
-            return AT_NAME::OrenNayar::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
-        case aten::MaterialType::Specular:
-            return AT_NAME::specular::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
-        case aten::MaterialType::Refraction:
-            return AT_NAME::refraction::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
-        case aten::MaterialType::Blinn:
-            return AT_NAME::MicrofacetBlinn::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
-        case aten::MaterialType::GGX:
-            return AT_NAME::MicrofacetGGX::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
-        case aten::MaterialType::Beckman:
-            return AT_NAME::MicrofacetBeckman::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
-        case aten::MaterialType::Velvet:
-            return AT_NAME::MicrofacetVelvet::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
-        case aten::MaterialType::Lambert_Refraction:
-            return AT_NAME::LambertRefraction::bsdf(mtrl, externalAlbedo);
-        case aten::MaterialType::Microfacet_Refraction:
-            return AT_NAME::MicrofacetRefraction::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
-        case aten::MaterialType::Retroreflective:
-            return AT_NAME::Retroreflective::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
-        case aten::MaterialType::CarPaint:
-            return AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo, pre_sampled_r);
-        case aten::MaterialType::Disney:
-            return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
-        default:
-            AT_ASSERT(false);
-            return AT_NAME::lambert::bsdf(mtrl, externalAlbedo);
+            return AT_NAME::lambert::bsdf(mtrl);
         }
 
         return aten::vec3();

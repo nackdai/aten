@@ -56,35 +56,9 @@ namespace AT_NAME
             u, v,
             aten::vec4(param->standard.roughness));
 
-        auto albedo = param->baseColor;
-        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(float(1)));
-
         float ior = param->standard.ior;
 
-        aten::vec3 ret = ComputeBRDF(albedo, roughness.r, ior, normal, wi, wo);
-        return ret;
-    }
-
-    AT_DEVICE_API aten::vec3 MicrofacetGGX::bsdf(
-        const aten::MaterialParameter* param,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        float u, float v,
-        const aten::vec4& externalAlbedo)
-    {
-        auto roughness = AT_NAME::sampleTexture(
-            param->roughnessMap,
-            u, v,
-            aten::vec4(param->standard.roughness));
-
-        auto albedo = param->baseColor;
-        albedo *= externalAlbedo;
-
-        float fresnel = 1;
-        float ior = param->standard.ior;
-
-        aten::vec3 ret = ComputeBRDF(albedo, roughness.r, ior, normal, wi, wo);
+        aten::vec3 ret = ComputeBRDF(roughness.r, ior, normal, wi, wo);
         return ret;
     }
 
@@ -207,7 +181,6 @@ namespace AT_NAME
     }
 
     AT_DEVICE_API aten::vec3 MicrofacetGGX::ComputeBRDF(
-        const aten::vec3& albedo,
         const float roughness,
         const float ior,
         const aten::vec3& n,
@@ -234,9 +207,9 @@ namespace AT_NAME
 
         const auto denom = 4 * NL * NV;
 
-        const auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G2 * D / denom : aten::vec3(0);
+        const auto bsdf = denom > AT_MATH_EPSILON ? F * G2 * D / denom : 0.0f;
 
-        return bsdf * albedo;
+        return aten::vec3(bsdf);
     }
 
     AT_DEVICE_API void MicrofacetGGX::sample(
@@ -248,22 +221,6 @@ namespace AT_NAME
         aten::sampler* sampler,
         float u, float v)
     {
-        auto albedo = param->baseColor;
-        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(float(1)));
-
-        sample(result, param, normal, wi, orgnormal, sampler, u, v, albedo);
-    }
-
-    AT_DEVICE_API void MicrofacetGGX::sample(
-        AT_NAME::MaterialSampling* result,
-        const aten::MaterialParameter* param,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        float u, float v,
-        const aten::vec4& externalAlbedo)
-    {
         auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
             u, v,
@@ -272,13 +229,9 @@ namespace AT_NAME
         result->dir = SampleReflectDirection(roughness.r, wi, normal, sampler);
         result->pdf = ComputeProbabilityToSampleOutputVector(roughness.r, normal, wi, result->dir);
 
-        auto albedo = param->baseColor;
-        albedo *= externalAlbedo;
-
-        float fresnel = 1;
         float ior = param->standard.ior;
 
-        result->bsdf = ComputeBRDF(albedo, roughness.r, ior, normal, wi, result->dir);
+        result->bsdf = ComputeBRDF(roughness.r, ior, normal, wi, result->dir);
     }
 
     bool MicrofacetGGX::edit(aten::IMaterialParamEditor* editor)

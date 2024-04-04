@@ -231,6 +231,7 @@ namespace aten
             rec, isBackfacing, russianProb,
             orienting_normal,
             mtrl, sampling,
+            albedo,
             paths, rays);
     }
 

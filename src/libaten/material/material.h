@@ -572,17 +572,6 @@ namespace AT_NAME
             bool is_light_path = false);
 #endif
 
-        static AT_DEVICE_API void sampleMaterialWithExternalAlbedo(
-            AT_NAME::MaterialSampling* result,
-            const aten::MaterialParameter* dst_mtrl,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            real pre_sampled_r,
-            float u, float v,
-            const aten::vec4& externalAlbedo);
-
         static AT_DEVICE_API real samplePDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
@@ -604,15 +593,6 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v,
-            real pre_sampled_r);
-
-        static AT_DEVICE_API aten::vec3 sampleBSDFWithExternalAlbedo(
-            const aten::MaterialParameter* dst_mtrl,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real u, real v,
-            const aten::vec4& externalAlbedo,
             real pre_sampled_r);
 
         static AT_DEVICE_API real applyNormal(

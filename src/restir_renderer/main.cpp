@@ -76,8 +76,7 @@ public:
             vfov,
             WIDTH, HEIGHT);
 
-        aten::AssetManager asset_manager;
-        Scene::makeScene(ctxt_, &scene_, asset_manager);
+        Scene::makeScene(ctxt_, &scene_, asset_manager_);
         scene_.build(ctxt_);
 
         {
@@ -458,6 +457,8 @@ private:
 
     aten::AcceleratedScene<aten::GPUBvh> scene_;
     aten::context ctxt_;
+
+    aten::AssetManager asset_manager_;
 
     std::shared_ptr<aten::instance<aten::deformable>> deform_mdl_;
     std::shared_ptr<aten::DeformAnimation> defrom_anm_;

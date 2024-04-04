@@ -84,6 +84,7 @@ public:
             WIDTH, HEIGHT);
 
         MakeScene<Scene>(movable_obj_, ctxt_, &scene_, asset_manager_);
+        scene_.build(ctxt_);
 
 #ifdef ENABLE_ENVMAP
         auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);

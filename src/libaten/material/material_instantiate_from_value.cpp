@@ -1,10 +1,8 @@
 #include "material/beckman.h"
-#include "material/blinn.h"
 #include "material/disney_brdf.h"
 #include "material/emissive.h"
 #include "material/ggx.h"
 #include "material/lambert.h"
-#include "material/lambert_refraction.h"
 #include "material/material.h"
 #include "material/microfacet_refraction.h"
 #include "material/oren_nayar.h"
@@ -37,12 +35,6 @@ namespace AT_NAME {
 
         auto roughnessMap = val.get<texture>("roughnessmap");
         m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
-    }
-
-    MicrofacetBlinn::MicrofacetBlinn(aten::Values& val)
-        : material(aten::MaterialType::Blinn, MaterialAttributeMicrofacet, val)
-    {
-        m_param.standard.shininess = val.get("shininess", m_param.standard.shininess);
     }
 
     DisneyBRDF::DisneyBRDF(aten::Values& val)
@@ -81,10 +73,6 @@ namespace AT_NAME {
 
     lambert::lambert(aten::Values& val)
         : material(aten::MaterialType::Lambert, MaterialAttributeLambert, val)
-    {}
-
-    LambertRefraction::LambertRefraction(aten::Values& val)
-        : material(aten::MaterialType::Lambert_Refraction, MaterialAttributeTransmission, val)
     {}
 
     MicrofacetRefraction::MicrofacetRefraction(aten::Values& val)

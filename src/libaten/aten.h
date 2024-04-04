@@ -16,13 +16,11 @@
 #include "material/lambert.h"
 #include "material/specular.h"
 #include "material/refraction.h"
-#include "material/blinn.h"
 #include "material/ggx.h"
 #include "material/beckman.h"
 #include "material/disney_brdf.h"
 #include "material/oren_nayar.h"
 #include "material/velvet.h"
-#include "material/lambert_refraction.h"
 #include "material/microfacet_refraction.h"
 
 #include "math/math.h"

@@ -4,10 +4,10 @@
 #include <vector>
 
 #include "scene/hitable.h"
-#include "math/frustum.h"
-#include "scene/host_scene_context.h"
 
 namespace aten {
+    class context;
+
     /**
      * @enum AccelType
      * @brief Enumulation for acceleration structures.

@@ -14,8 +14,13 @@
 
 #define GPU_RENDERING
 
+#ifdef GPU_RENDERING
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
+#else
+constexpr int32_t WIDTH = 512;
+constexpr int32_t HEIGHT = 512;
+#endif
 constexpr char* TITLE = "MaterialViewer";
 
 class MaterialParamEditor : public aten::IMaterialParamEditor {
@@ -93,35 +98,31 @@ public:
         real vfov;
         GetCameraPosAndAt(pos, at, vfov);
 
-        camera_.init(
+        camera_.Initalize(
             pos,
             at,
             aten::vec3(0, 1, 0),
             vfov,
+            real(0.1), real(10000.0),
             WIDTH, HEIGHT);
 
         MakeScene(&scene_);
         scene_.build(ctxt_);
 
-        renderer_.getCompaction().init(
-            WIDTH * HEIGHT,
-            1024);
+        // IBL
+        scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
+        scene_light_.envmap = std::make_shared<aten::envmap>();
+        scene_light_.envmap->init(scene_light_.envmap_texture);
+        scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(scene_light_.envmap);
+        scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
 
-        {
-            // IBL
-            scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
-            scene_light_.envmap = std::make_shared<aten::envmap>();
-            scene_light_.envmap->init(scene_light_.envmap_texture);
-            scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(scene_light_.envmap);
-            scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
-
-            // PointLight
-            scene_light_.point_light = std::make_shared<aten::PointLight>(
-                aten::vec3(0.0, 0.0, 50.0),
-                aten::vec3(1.0, 0.0, 0.0),
-                400.0f);
-            ctxt_.AddLight(scene_light_.point_light);
-        }
+#ifdef GPU_RENDERING
+        // PointLight
+        scene_light_.point_light = std::make_shared<aten::PointLight>(
+            aten::vec3(0.0, 0.0, 50.0),
+            aten::vec3(1.0, 0.0, 0.0),
+            400.0f);
+        ctxt_.AddLight(scene_light_.point_light);
 
         std::vector<aten::ObjectParameter> shapeparams;
         std::vector<aten::TriangleParameter> primparams;
@@ -158,6 +159,10 @@ public:
         camparam.znear = real(0.1);
         camparam.zfar = real(10000.0);
 
+        renderer_.getCompaction().init(
+            WIDTH * HEIGHT,
+            1024);
+
         renderer_.update(
             visualizer_->GetGLTextureHandle(),
             WIDTH, HEIGHT,
@@ -175,7 +180,7 @@ public:
             : idaten::EnvmapResource());
 
         renderer_.setEnableEnvmap(scene_light_.is_envmap);
-
+#endif
         return true;
     }
 
@@ -324,7 +329,7 @@ public:
             dst.buffer = &host_renderer_dst_;
         }
 
-        host_renderer_.render(dst, &scene_, &camera_);
+        host_renderer_.render(ctxt_, dst, &scene_, &camera_);
 
         aten::RasterizeRenderer::clearBuffer(
             aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
@@ -332,7 +337,7 @@ public:
             1.0f,
             0);
 
-        visualizer_->render(host_renderer_dst_.image(), camera_.needRevert());
+        visualizer_->renderPixelData(host_renderer_dst_.image().data(), camera_.needRevert());
 #endif
 
         return true;

@@ -169,7 +169,8 @@ namespace AT_NAME
         }
 
         // Sample microfacet normal.
-        const auto m = MicrofacetGGX::SampleMicrosurfaceNormal(roughness, n, sampler);
+        const auto r = sampler->nextSample2D();
+        const auto m = MicrofacetGGX::SampleMicrosurfaceNormal(roughness, n, r.x, r.y);
 
         // Expression(40)
         const auto c = dot(in, m);

@@ -264,7 +264,6 @@ public:
                 "OrneNayar",
                 "Specular",
                 "Refraction",
-                "Blinn",
                 "GGX",
                 "Beckman",
                 "Velvet",

@@ -544,6 +544,10 @@ namespace AT_NAME
             // NOTE:
             // F_schlick(v,h) ≒ f0 + (1 - f0)(1 - cos_theta)^5
             // f0 = pow((1 - ior) / (1 + ior), 2)
+            // ior = nt / ni
+            // f0 = pow((1 - ior) / (1 + ior), 2)
+            //    = pow((1 - nt/ni) / (1 + nt/ni), 2)
+            //    = pow((ni - nt) / (ni + nt), 2)
             auto f0 = (1.0f - ior) / (1.0f + ior);
             f0 = f0 * f0;
 

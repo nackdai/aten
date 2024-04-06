@@ -83,7 +83,21 @@ namespace AT_NAME
         static AT_DEVICE_API float ComputeDistribution(
             const aten::vec3& m,
             const aten::vec3& n,
-            float roughness);
+            float roughness)
+        {
+            const auto a = roughness;
+            const auto a2 = a * a;
+
+            const auto costheta = aten::abs(dot(m, n));
+            const auto cos2 = costheta * costheta;
+
+            const auto denom = (a2 - 1) * cos2 + 1.0f;
+            const auto denom2 = denom * denom;
+
+            const auto D = denom > 0 ? a2 / (AT_MATH_PI * denom2) : 0;
+
+            return D;
+        }
 
         /**
          * @brief Compute G2 shadowing masking function.
@@ -98,33 +112,12 @@ namespace AT_NAME
             float roughness,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            const aten::vec3& m);
-
-        /**
-         * @brief Compute schlick's fresnel.
-         * @param[in] ior Refraction index.
-         * @param[in] wo Output vector.
-         * @param[in] n Normal vector on surface.
-         * @return fresnel.
-         */
-        static inline AT_DEVICE_API float ComputeSchlickFresnel(
-            const float ior,
-            const aten::vec3& wo,
-            const aten::vec3& n)
+            const aten::vec3& m)
         {
-            // NOTE:
-            // http://d.hatena.ne.jp/hanecci/20130525/p3
-
-            // NOTE:
-            // F_schlick(v,h) à f0 + (1 - f0)(1 - cos_theta)^5
-            // f0 = pow((1 - ior) / (1 + ior), 2)
-            auto f0 = (1.0f - ior) / (1.0f + ior);
-            f0 = f0 * f0;
-
-            const auto LN = aten::abs(dot(wo, n));
-
-            const auto fresnel = f0 + (1 - f0) * aten::pow((1 - LN), 5);
-            return fresnel;
+            const auto lambda_wi = Lambda(roughness, wi, m);
+            const auto lambda_wo = Lambda(roughness, wo, m);
+            const auto g2 = 1.0f / (1.0f + lambda_wi + lambda_wo);
+            return g2;
         }
 
     private:
@@ -138,7 +131,22 @@ namespace AT_NAME
         static inline AT_DEVICE_API float Lambda(
             float roughness,
             const aten::vec3& w,
-            const aten::vec3& n);
+            const aten::vec3& n)
+        {
+            const auto alpha = roughness;
+
+            const auto cos_theta = aten::abs(dot(w, n));
+            const auto cos2 = cos_theta * cos_theta;
+
+            const auto sin2 = 1.0f - cos2;
+            const auto tan2 = sin2 / cos2;
+
+            const auto a2 = 1.0f / (alpha * alpha * tan2);
+
+            const auto lambda = (-1.0f + aten::sqrt(1.0f + 1.0f / a2)) / 2.0f;
+
+            return lambda;
+        }
 
         /**
          * @brief Compute probability to sample specified output vector.
@@ -152,7 +160,21 @@ namespace AT_NAME
             const float roughness,
             const aten::vec3& n,
             const aten::vec3& wi,
-            const aten::vec3& wo);
+            const aten::vec3& wo)
+        {
+            auto wh = normalize(-wi + wo);
+
+            auto D = ComputeDistribution(wh, n, roughness);
+
+            auto costheta = aten::abs(dot(wh, n));
+
+            // For Jacobian |dwh/dwo|
+            auto denom = 4 * aten::abs(dot(wo, wh));
+
+            auto pdf = denom > 0 ? (D * costheta) / denom : 0;
+
+            return pdf;
+        }
 
         /**
          * @brief Sample direction for reflection.
@@ -166,19 +188,55 @@ namespace AT_NAME
             const float roughness,
             const aten::vec3& wi,
             const aten::vec3& n,
-            aten::sampler* sampler);
+            aten::sampler* sampler)
+        {
+            const auto r1 = sampler->nextSample();
+            const auto r2 = sampler->nextSample();
+
+            const auto m = SampleMicrosurfaceNormal(roughness, n, r1, r2);
+
+            // We can assume ideal reflection on each micro surface.
+            // So, compute ideal reflection vector based on micro surface normal.
+            const auto wo = wi - 2 * dot(wi, m) * m;
+
+            return wo;
+        }
 
         /**
          * @brief Sample microsurface normal.
          * @param[in] roughness Roughness parameter.
          * @param[in] n Macrosurface normal.
-         * @param[in, out] sampler Sampler to sample
+         * @param[in] r1 Rondam value by uniforma sampleing.
+         * @param[in] r2 Rondam value by uniforma sampleing.
          * @return Microsurface normal.
          */
         static AT_DEVICE_API aten::vec3 SampleMicrosurfaceNormal(
             const float roughness,
             const aten::vec3& n,
-            aten::sampler* sampler);
+            float r1, float r2)
+        {
+            const auto a = roughness;
+
+            auto theta = aten::atan(a * aten::sqrt(r1 / (1 - r1)));
+            theta = ((theta >= 0) ? theta : (theta + 2 * AT_MATH_PI));
+
+            const auto phi = 2 * AT_MATH_PI * r2;
+
+            const auto costheta = aten::cos(theta);
+            const auto sintheta = aten::sqrt(1 - costheta * costheta);
+
+            const auto cosphi = aten::cos(phi);
+            const auto sinphi = aten::sqrt(1 - cosphi * cosphi);
+
+            // Ortho normal base.
+            const auto t = aten::getOrthoVector(n);
+            const auto b = normalize(cross(n, t));
+
+            auto m = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
+            m = normalize(m);
+
+            return m;
+        }
 
         /**
          * @brief Compute BRDF.
@@ -195,6 +253,31 @@ namespace AT_NAME
             const float ior,
             const aten::vec3& n,
             const aten::vec3& wi,
-            const aten::vec3& wo);
+            const aten::vec3& wo)
+        {
+            aten::vec3 V = -wi;
+            aten::vec3 L = wo;
+            aten::vec3 N = n;
+
+            // We can assume ideal reflection on each micro surface.
+            // It means wo (= L) is computed as ideal reflection vector.
+            // Then, we can compute micro surface normal as the half vector between incident and output vector.
+            aten::vec3 H = normalize(L + V);
+
+            auto NH = aten::abs(dot(N, H));
+            auto VH = aten::abs(dot(V, H));
+            auto NL = aten::abs(dot(N, L));
+            auto NV = aten::abs(dot(N, V));
+
+            const auto D = ComputeDistribution(H, N, roughness);
+            const auto G2 = ComputeG2Smith(roughness, V, L, H);
+            const auto F = material::ComputeSchlickFresnel(ior, L, H);
+
+            const auto denom = 4 * NL * NV;
+
+            const auto bsdf = denom > AT_MATH_EPSILON ? F * G2 * D / denom : 0.0f;
+
+            return aten::vec3(bsdf);
+        }
     };
 }

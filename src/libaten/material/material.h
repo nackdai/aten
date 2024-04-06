@@ -526,28 +526,31 @@ namespace AT_NAME
             return Rsp;
         }
 
-        static AT_DEVICE_API real computeFresnelShlick(
-            real ni, real nt,
-            const aten::vec3& wi,
+        /**
+         * @brief Compute schlick's fresnel.
+         * @param[in] ior Refraction index.
+         * @param[in] wo Output vector.
+         * @param[in] n Normal vector on surface.
+         * @return fresnel.
+         */
+        static inline AT_DEVICE_API float ComputeSchlickFresnel(
+            const float ior,
+            const aten::vec3& wo,
             const aten::vec3& n)
         {
-            float F = 1;
-            {
-                // http://d.hatena.ne.jp/hanecci/20130525/p3
+            // NOTE:
+            // http://d.hatena.ne.jp/hanecci/20130525/p3
 
-                // NOTE
-                // Fschlick(v,h) ≒ R0 + (1 - R0)(1 - cosΘ)^5
-                // R0 = ((n1 - n2) / (n1 + n2))^2
+            // NOTE:
+            // F_schlick(v,h) ≒ f0 + (1 - f0)(1 - cos_theta)^5
+            // f0 = pow((1 - ior) / (1 + ior), 2)
+            auto f0 = (1.0f - ior) / (1.0f + ior);
+            f0 = f0 * f0;
 
-                float r0 = (ni - nt) / (ni + nt);
-                r0 = r0 * r0;
+            const auto LN = aten::abs(dot(wo, n));
 
-                float c = aten::abs(dot(wi, n));
-
-                F = r0 + (1 - r0) * pow((1 - c), 5);
-            }
-
-            return F;
+            const auto fresnel = f0 + (1 - f0) * aten::pow((1 - LN), 5);
+            return fresnel;
         }
 
         static AT_DEVICE_API aten::vec4 sampleAlbedoMap(

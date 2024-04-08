@@ -182,7 +182,7 @@ namespace AT_NAME
          * @param[in] wi Incident vector.
          * @param[in] n Macrosurface normal.
          * @param[in, out] sampler Sampler to sample
-         * @return Probability to sample output vector.
+         * @return Output reflect vector.
          */
         static inline AT_DEVICE_API aten::vec3 SampleReflectDirection(
             const float roughness,

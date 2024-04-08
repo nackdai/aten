@@ -176,7 +176,7 @@ namespace AT_NAME
          * @param[in] n Macrosurface normal.
          * @param[in] r1 Rondam value by uniforma sampleing.
          * @param[in] r2 Rondam value by uniforma sampleing.
-         * @return Probability to sample output vector.
+         * @return Output reflect vector.
          */
         static inline AT_DEVICE_API aten::vec3 SampleReflectDirection(
             const float roughness,

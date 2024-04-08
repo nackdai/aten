@@ -126,7 +126,6 @@ namespace AT_NAME
             result->pdf = real(1);
             result->bsdf = albedo / cos_factor_reflect;
             result->dir = reflect;
-            result->fresnel = real(1);
 
             return;
         }
@@ -181,10 +180,6 @@ namespace AT_NAME
             real nnt2 = nnt * nnt;
 
             result->bsdf = nnt2 * Tr * albedo;
-
-            result->fresnel = 0;
-
-            result->subpdf = real(1);
         }
         else {
             auto prob = real(0.25) + real(0.5) * Re;
@@ -194,10 +189,6 @@ namespace AT_NAME
                 result->dir = reflect;
                 result->bsdf = Re * albedo / cos_factor_reflect;
                 result->bsdf /= prob;
-
-                result->subpdf = prob;
-
-                result->fresnel = Re;
             }
             else {
                 // 屈折.
@@ -217,10 +208,6 @@ namespace AT_NAME
 
                 result->bsdf = nnt2 * Tr * albedo;
                 result->bsdf /= (1 - prob);
-
-                result->subpdf = (1 - prob);
-
-                result->fresnel = Tr * nnt2;;
             }
         }
 

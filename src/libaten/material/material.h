@@ -221,10 +221,9 @@ namespace aten
 
         MaterialAttribute attrib;
 
-        struct {
-            uint32_t id : 16;
-            uint32_t isIdealRefraction : 1;
-        };
+        uint16_t id;
+        bool isIdealRefraction{ false };
+        uint8_t padding{ 0 };
 
         struct {
             int32_t albedoMap;
@@ -303,7 +302,7 @@ namespace aten
         virtual ~IMaterialParamEditor() {}
 
     public:
-        virtual bool edit(std::string_view name, real& param, real _min = real(0), real _max = real(1)) = 0;
+        virtual bool edit(std::string_view name, float& param, float _min = 0.0F, float _max = 1.0F) = 0;
         virtual bool edit(std::string_view name, vec3& param) = 0;
         virtual bool edit(std::string_view name, vec4& param) = 0;
 
@@ -348,9 +347,6 @@ namespace AT_NAME
         aten::vec3 dir;
         aten::vec3 bsdf;
         real pdf{ real(0) };
-        real fresnel{ real(1) };
-
-        real subpdf{ real(1) };
 
         AT_DEVICE_API MaterialSampling() {}
         AT_DEVICE_API MaterialSampling(const aten::vec3& d, const aten::vec3& b, real p)

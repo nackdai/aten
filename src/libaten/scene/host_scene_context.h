@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <limits>
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -258,7 +259,8 @@ namespace aten
         {
             AT_ASSERT(mtrl);
             materials_.push_back(mtrl);
-            mtrl->param().id = materials_.size() - 1;
+            AT_ASSERT(materials_.size() < std::numeric_limits<decltype(MaterialParameter::id)>::max());
+            mtrl->param().id = static_cast<uint16_t>(materials_.size() - 1);
         }
 
         /**

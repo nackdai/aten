@@ -524,13 +524,14 @@ namespace AT_NAME
 
         /**
          * @brief Compute schlick's fresnel.
-         * @param[in] ior Refraction index.
+         * @param[in] ni Index of refraction of the media on the incident side.
+         * @param[in] nt Index of refraction of the media on the transmitted side.
          * @param[in] wo Output vector.
          * @param[in] n Normal vector on surface.
          * @return fresnel.
          */
         static inline AT_DEVICE_API float ComputeSchlickFresnel(
-            const float ior,
+            const float ni, const float nt,
             const aten::vec3& wo,
             const aten::vec3& n)
         {
@@ -544,7 +545,7 @@ namespace AT_NAME
             // f0 = pow((1 - ior) / (1 + ior), 2)
             //    = pow((1 - nt/ni) / (1 + nt/ni), 2)
             //    = pow((ni - nt) / (ni + nt), 2)
-            auto f0 = (1.0f - ior) / (1.0f + ior);
+            auto f0 = (ni - nt) / (ni + nt);
             f0 = f0 * f0;
 
             const auto LN = aten::abs(dot(wo, n));

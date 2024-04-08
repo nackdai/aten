@@ -256,9 +256,13 @@ namespace AT_NAME
             auto NL = aten::abs(dot(N, L));
             auto NV = aten::abs(dot(N, V));
 
+            // Assume index of refraction of the medie on the incident side is vacuum.
+            const auto ni = 1.0F;
+            const auto nt = ior;
+
             const auto D = ComputeDistribution(H, N, roughness);
             const auto G2 = ComputeG1(roughness, V, H, N) * ComputeG1(roughness, L, H, N);
-            const auto F = material::ComputeSchlickFresnel(ior, L, H);
+            const auto F = material::ComputeSchlickFresnel(ni, nt, L, H);
 
             if (fresnel) {
                 *fresnel = F;

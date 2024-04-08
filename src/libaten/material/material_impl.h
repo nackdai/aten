@@ -56,7 +56,7 @@ namespace AT_NAME
             AT_NAME::OrenNayar::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
             break;
         case aten::MaterialType::Specular:
-            AT_NAME::specular::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
+            AT_NAME::specular::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v);
             break;
         case aten::MaterialType::Refraction:
             AT_NAME::refraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);

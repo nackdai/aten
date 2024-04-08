@@ -10,7 +10,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
-        return real(1);
+        return ComputeProbabilityToSampleOutputVector();
     }
 
     AT_DEVICE_API aten::vec3 specular::sampleDirection(
@@ -20,10 +20,7 @@ namespace AT_NAME
         real u, real v,
         aten::sampler* sampler)
     {
-        auto reflect = wi - 2 * dot(normal, wi) * normal;
-        reflect = normalize(reflect);
-
-        return reflect;
+        return ComputeReflectVector(wi, normal);
     }
 
     AT_DEVICE_API aten::vec3 specular::bsdf(
@@ -33,53 +30,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
-        // NOTE
-        // https://www.pbr-book.org/3ed-2018/Reflection_Models/Specular_Reflection_and_Transmission#SpecularReflection
-
-        auto bsdf = param->baseColor;
-
-        // For canceling cosine factor.
-        auto c = dot(normal, wo);
-        bsdf /= abs(c);
-
-        bsdf *= sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
-
-#if 0
-        if (param->ior > real(0)) {
-            real nc = real(1);      // 真空の屈折率.
-            real nt = param->ior;   // 物体内部の屈折率.
-
-            // SchlickによるFresnelの反射係数の近似を使う.
-            const real a = nt - nc;
-            const real b = nt + nc;
-            const real r0 = (a * a) / (b * b);
-
-            const real c = dot(normal, wo);
-
-            // 反射方向の光が反射してray.dirの方向に運ぶ割合。同時に屈折方向の光が反射する方向に運ぶ割合.
-            const real fresnel = r0 + (1 - r0) * aten::pow(c, 5);
-
-            bsdf *= fresnel;
-        }
-#endif
-
-        return bsdf;
-    }
-
-    AT_DEVICE_API aten::vec3 specular::bsdf(
-        const aten::MaterialParameter* param,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        const aten::vec3& externalAlbedo)
-    {
-        auto c = dot(normal, wo);
-
-        aten::vec3 bsdf = param->baseColor;
-        bsdf *= externalAlbedo;
-
-        return bsdf;
+        return ComputeBRDF(wo, normal);
     }
 
     AT_DEVICE_API void specular::sample(
@@ -89,28 +40,11 @@ namespace AT_NAME
         const aten::vec3& wi,
         const aten::vec3& orgnormal,
         aten::sampler* sampler,
-        real u, real v,
-        bool isLightPath/*= false*/)
+        real u, real v)
     {
         result->dir = sampleDirection(param, normal, wi, u, v, sampler);
         result->pdf = pdf(param, normal, wi, result->dir, u, v);
         result->bsdf = bsdf(param, normal, wi, result->dir, u, v);
-    }
-
-    AT_DEVICE_API void specular::sample(
-        AT_NAME::MaterialSampling* result,
-        const aten::MaterialParameter* param,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real u, real v,
-        const aten::vec3& externalAlbedo,
-        bool isLightPath/*= false*/)
-    {
-        result->dir = sampleDirection(param, normal, wi, u, v, sampler);
-        result->pdf = pdf(param, normal, wi, result->dir, u, v);
-        result->bsdf = bsdf(param, normal, wi, result->dir, u, v, externalAlbedo);
     }
 
     bool specular::edit(aten::IMaterialParamEditor* editor)

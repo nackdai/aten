@@ -557,6 +557,21 @@ namespace AT_NAME
             return fresnel;
         }
 
+        /**
+         * @brief Compute ideal reflection vector.
+         * @param[in] wi Incident vector.
+         * @param[in] n Normal vector on surface.
+         * @return Ideal reflection vector.
+         */
+        static AT_DEVICE_API aten::vec3 ComputeReflectVector(
+            const aten::vec3& wi,
+            const aten::vec3& n)
+        {
+            auto wo = wi - 2 * dot(wi, n) * n;
+            wo = normalize(wo);
+            return wo;
+        }
+
         static AT_DEVICE_API aten::vec4 sampleAlbedoMap(
             const aten::MaterialParameter* mtrl,
             real u, real v,

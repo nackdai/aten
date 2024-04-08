@@ -256,12 +256,14 @@ namespace AT_NAME
         // Retroreflective
         aten::vec3 retroreflective;
         {
+            // Assume index of refraction of the medie on the incident side is vacuum.
+            const auto ni = 1.0F;
+            const auto nt = param->retrorelective.retrorelective_ior;
+
             const auto roughness = param->retrorelective.retrorelective_roughness;
             const auto D = MicrofacetBeckman::ComputeDistribution(B, N, roughness);
             const auto G = MicrofacetBeckman::ComputeG1(roughness, V, H, N) * MicrofacetBeckman::ComputeG1(roughness, L, H, N);
-            const auto F = material::ComputeSchlickFresnel(
-                param->retrorelective.retrorelective_ior,
-                V, B);
+            const auto F = material::ComputeSchlickFresnel(ni, nt, V, B);
             const auto denom = real(4) * dot(N, L) * dot(N, V);
 
             retroreflective = denom > AT_MATH_EPSILON ? aten::vec3(F * G * D / denom) : aten::vec3(0);

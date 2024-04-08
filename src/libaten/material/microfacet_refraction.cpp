@@ -300,7 +300,6 @@ namespace AT_NAME
         real ior = param->standard.ior;
 
         result->bsdf = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, result->dir, u, v);
-        result->fresnel = fresnel;
     }
 
     AT_DEVICE_API void MicrofacetRefraction::sample(
@@ -329,7 +328,6 @@ namespace AT_NAME
         real ior = param->standard.ior;
 
         result->bsdf = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, result->dir, u, v);
-        result->fresnel = fresnel;
     }
 
     bool MicrofacetRefraction::edit(aten::IMaterialParamEditor* editor)

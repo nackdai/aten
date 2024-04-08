@@ -251,7 +251,6 @@ namespace AT_NAME
         real ior = param->standard.ior;
 
         result->bsdf = bsdf(albedo, param->standard.roughness, ior, fresnel, normal, wi, result->dir, u, v);
-        result->fresnel = fresnel;
     }
 
     AT_DEVICE_API void MicrofacetVelvet::sample(
@@ -275,7 +274,6 @@ namespace AT_NAME
         real ior = param->standard.ior;
 
         result->bsdf = bsdf(albedo, param->standard.roughness, ior, fresnel, normal, wi, result->dir, u, v);
-        result->fresnel = fresnel;
     }
 
     bool MicrofacetVelvet::edit(aten::IMaterialParamEditor* editor)

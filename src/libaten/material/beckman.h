@@ -188,7 +188,7 @@ namespace AT_NAME
 
             // We can assume ideal reflection on each micro surface.
             // So, compute ideal reflection vector based on micro surface normal.
-            const auto wo = wi - 2 * dot(wi, m) * m;
+            const auto wo = material::ComputeReflectVector(wi, m);
 
             return wo;
         }

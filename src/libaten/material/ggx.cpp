@@ -39,7 +39,7 @@ namespace AT_NAME
             u, v,
             aten::vec4(param->standard.roughness));
 
-        aten::vec3 dir = SampleReflectDirection(roughness.r, normal, wi, sampler);
+        aten::vec3 dir = SampleDirection(roughness.r, normal, wi, sampler);
 
         return dir;
     }
@@ -76,7 +76,7 @@ namespace AT_NAME
             u, v,
             aten::vec4(param->standard.roughness));
 
-        result->dir = SampleReflectDirection(roughness.r, wi, normal, sampler);
+        result->dir = SampleDirection(roughness.r, wi, normal, sampler);
         result->pdf = ComputeProbabilityToSampleOutputVector(roughness.r, normal, wi, result->dir);
 
         float ior = param->standard.ior;

@@ -81,7 +81,7 @@ namespace AT_NAME
 
         if (r0 < fresnel) {
             r0 /= fresnel;
-            dir = MicrofacetBeckman::SampleReflectDirection(
+            dir = MicrofacetBeckman::SampleDirection(
                 param->carpaint.clearcoat_roughness,
                 wi, N,
                 r0, r1);
@@ -93,7 +93,7 @@ namespace AT_NAME
             if (r1 < flakes_density) {
                 // Flakes
                 r1 /= flakes_density;
-                dir = MicrofacetBeckman::SampleReflectDirection(real(1), wi, N, r0, r1);
+                dir = MicrofacetBeckman::SampleDirection(real(1), wi, N, r0, r1);
             }
             else {
                 // Diffuse

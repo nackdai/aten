@@ -61,13 +61,10 @@ namespace AT_NAME
 
         /**
          * @brief Compute probability to sample specified output vector.
-         * @note Direction of ideal reflection is definitely one direction according with incident vector and normal. So, probability is always 1.0.
          * @return Always returns 1.0.
          */
         static inline AT_DEVICE_API float ComputeProbabilityToSampleOutputVector()
         {
-            // Output vector is definitely uniquely computed from incident vector and normal.
-            // So, probability is always one.
             return 1.0F;
         }
 
@@ -76,9 +73,9 @@ namespace AT_NAME
          * @param[in] roughness Roughness parameter.
          * @param[in] wi Incident vector.
          * @param[in] n Surface normal.
-         * @return Probability to sample output vector.
+         * @return Reflect vector.
          */
-        static inline AT_DEVICE_API aten::vec3 SampleReflectDirection(
+        static inline AT_DEVICE_API aten::vec3 SampleDirection(
             const aten::vec3& wi,
             const aten::vec3& n)
         {

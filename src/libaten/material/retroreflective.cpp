@@ -102,7 +102,7 @@ namespace AT_NAME
         if (r0 < fresnel) {
             // Beckman
             r0 /= fresnel;
-            dir = MicrofacetBeckman::SampleReflectDirection(
+            dir = MicrofacetBeckman::SampleDirection(
                 param->retrorelective.clearcoat_roughness,
                 wi, N,
                 r0, r1);
@@ -114,7 +114,7 @@ namespace AT_NAME
             if (r1 < era) {
                 // Retroreflective
                 r1 /= era;
-                dir = MicrofacetBeckman::SampleReflectDirection(
+                dir = MicrofacetBeckman::SampleDirection(
                     param->retrorelective.retrorelective_roughness,
                     wi, N,
                     r0, r1);

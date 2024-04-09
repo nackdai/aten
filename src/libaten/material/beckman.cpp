@@ -59,7 +59,7 @@ namespace AT_NAME
         auto r1 = sampler->nextSample();
         auto r2 = sampler->nextSample();
 
-        return SampleReflectDirection(roughness, in, normal, r1, r2);
+        return SampleDirection(roughness, in, normal, r1, r2);
     }
 
     AT_DEVICE_API void MicrofacetBeckman::sample(

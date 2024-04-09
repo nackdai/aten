@@ -231,9 +231,16 @@ public:
         {
             bool need_renderer_reset = false;
 
-            constexpr char* light_types[] = { "IBL", "PointLight" };
+            bool is_aov_rendering = renderer_.GetRenderingMode() == decltype(renderer_)::Mode::AOV;
+            if (ImGui::Checkbox("AOV", &is_aov_rendering)) {
+                renderer_.SetRenderingMode(
+                    is_aov_rendering ? decltype(renderer_)::Mode::AOV : decltype(renderer_)::Mode::PT);
+                need_renderer_reset = true;
+            }
+
+            constexpr std::array light_types = { "IBL", "PointLight" };
             int32_t lighttype = scene_light_.is_envmap ? 0 : 1;
-            if (ImGui::Combo("light", &lighttype, light_types, AT_COUNTOF(light_types))) {
+            if (ImGui::Combo("light", &lighttype, light_types.data(), light_types.size())) {
                 auto next_is_envmap = lighttype == 0;
                 if (scene_light_.is_envmap != next_is_envmap) {
                     scene_light_.is_envmap = next_is_envmap;
@@ -245,20 +252,20 @@ public:
             if (ImGui::SliderInt("Samples", &max_samples_, 1, 100)
                 || ImGui::SliderInt("Bounce", &max_bounce_, 1, 10))
             {
-                renderer_.reset();
+                need_renderer_reset = true;
             }
 
             bool isProgressive = renderer_.IsEnableProgressive();
 
             if (ImGui::Checkbox("Progressive", &isProgressive)) {
                 renderer_.SetEnableProgressive(isProgressive);
-                renderer_.reset();
+                need_renderer_reset = true;
             }
 
             auto mtrl = ctxt_.GetMaterialInstance(0);
             bool needUpdateMtrl = false;
 
-            constexpr char* mtrl_types[] = {
+            constexpr std::array mtrl_types = {
                 "Emissive",
                 "Lambert",
                 "OrneNayar",
@@ -267,16 +274,15 @@ public:
                 "GGX",
                 "Beckman",
                 "Velvet",
-                "LambertRefraction",
                 "MicrofacetRefraction",
                 "Retroreflective",
                 "CarPaint",
                 "Disney",
             };
-            int32_t mtrlType = (int32_t)mtrl->param().type;
-            if (ImGui::Combo("mode", &mtrlType, mtrl_types, AT_COUNTOF(mtrl_types))) {
+            int32_t mtrlType = static_cast<int32_t>(mtrl->param().type);
+            if (ImGui::Combo("mode", &mtrlType, mtrl_types.data(), mtrl_types.size())) {
                 ctxt_.DeleteAllMaterialsAndClearList();
-                mtrl = CreateMaterial((aten::MaterialType)mtrlType);
+                mtrl = CreateMaterial(static_cast<aten::MaterialType>(mtrlType));
                 needUpdateMtrl = true;
             }
 
@@ -486,11 +492,19 @@ private:
             mtrlParam,
             nullptr, nullptr, nullptr);
 
-        asset_manager_.registerMtrl("m1", mtrl);
+#if 1
+        constexpr char* asset_path = "../../asset/suzanne/suzanne.obj";
+        constexpr char* mtrl_in_asset = "Material.001";
+#else
+        constexpr char* asset_path = "../../asset/teapot/teapot.obj";
+        constexpr char* mtrl_in_asset = "m1";
+#endif
 
-        auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj", ctxt_, asset_manager_);
-        auto teapot = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt_, obj, aten::mat4::Identity);
-        scene->add(teapot);
+        asset_manager_.registerMtrl(mtrl_in_asset, mtrl);
+
+        auto obj = aten::ObjLoader::load(asset_path, ctxt_, asset_manager_);
+        auto poly_obj = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt_, obj, aten::mat4::Identity);
+        scene->add(poly_obj);
 
         // TODO
         //albedo_map_ = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");

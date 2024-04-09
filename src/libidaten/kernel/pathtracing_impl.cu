@@ -262,6 +262,34 @@ namespace pt {
                 cudaBoundaryModeTrap);
         }
     }
+
+    __global__ void DisplayAOV(
+        cudaSurfaceObject_t dst,
+        int32_t width, int32_t height,
+        const float4* __restrict__ aov_normal_depth,
+        const float4* __restrict__ aov_albedo_meshid)
+    {
+        auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+        auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+        if (ix >= width || iy >= height) {
+            return;
+        }
+
+        auto idx = getIdx(ix, iy, width);
+
+        float4 normal_depth = aov_normal_depth[idx];
+
+        // (-1, 1) -> (0, 1)
+        normal_depth = normal_depth * 0.5F + 0.5F;
+        normal_depth.w = 1.0F;
+
+        surf2Dwrite(
+            normal_depth,
+            dst,
+            ix * sizeof(float4), iy,
+            cudaBoundaryModeTrap);
+    }
 }
 
 namespace idaten
@@ -352,5 +380,23 @@ namespace idaten
             width, height);
 
         checkCudaKernel(gather);
+    }
+
+    void PathTracingImplBase::DisplayAOV(
+        cudaSurfaceObject_t output_surface,
+        int32_t width, int32_t height)
+    {
+        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+        dim3 grid(
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
+
+        pt::DisplayAOV << <grid, block, 0, m_stream >> > (
+            output_surface,
+            width, height,
+            aov_.normal_depth().data(),
+            aov_.albedo_meshid().data());
+
+        checkCudaKernel(DisplayAOV);
     }
 }

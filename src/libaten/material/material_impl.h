@@ -144,47 +144,6 @@ namespace AT_NAME
         return pdf;
     }
 
-    inline AT_DEVICE_API aten::vec3 material::sampleDirection(
-        const aten::MaterialParameter* mtrl,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        real u, real v,
-        aten::sampler* sampler,
-        real pre_sampled_r)
-    {
-        switch (mtrl->type) {
-        case aten::MaterialType::Emissive:
-            return AT_NAME::emissive::sampleDirection(mtrl, normal, wi, u, v, sampler);
-        case aten::MaterialType::Lambert:
-            return AT_NAME::lambert::sampleDirection(normal, sampler);
-        case aten::MaterialType::OrneNayar:
-            return AT_NAME::OrenNayar::sampleDirection(mtrl, normal, wi, u, v, sampler);
-        case aten::MaterialType::Specular:
-            return AT_NAME::specular::sampleDirection(mtrl, normal, wi, u, v, sampler);
-        case aten::MaterialType::Refraction:
-            return AT_NAME::refraction::sampleDirection(mtrl, normal, wi, u, v, sampler);
-        case aten::MaterialType::GGX:
-            return AT_NAME::MicrofacetGGX::sampleDirection(mtrl, normal, wi, u, v, sampler);
-        case aten::MaterialType::Beckman:
-            return AT_NAME::MicrofacetBeckman::sampleDirection(mtrl, normal, wi, u, v, sampler);
-        case aten::MaterialType::Velvet:
-            return AT_NAME::MicrofacetVelvet::sampleDirection(mtrl, normal, wi, u, v, sampler);
-        case aten::MaterialType::Microfacet_Refraction:
-            return AT_NAME::MicrofacetRefraction::sampleDirection(mtrl, normal, wi, u, v, sampler);
-        case aten::MaterialType::Retroreflective:
-            return AT_NAME::Retroreflective::sampleDirection(mtrl, normal, wi, u, v, sampler);
-        case aten::MaterialType::CarPaint:
-            return AT_NAME::CarPaint::sampleDirection(mtrl, normal, wi, u, v, sampler, pre_sampled_r);
-        case aten::MaterialType::Disney:
-            return AT_NAME::DisneyBRDF::sampleDirection(mtrl, normal, wi, u, v, sampler);
-        default:
-            AT_ASSERT(false);
-            return AT_NAME::lambert::sampleDirection(normal, sampler);
-        }
-
-        return aten::vec3(0, 1, 0);
-    }
-
     inline AT_DEVICE_API aten::vec3 material::sampleBSDF(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,

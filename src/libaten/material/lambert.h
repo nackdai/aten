@@ -37,7 +37,7 @@ namespace AT_NAME
             const aten::vec3& normal,
             real r1, real r2)
         {
-            return SampleReflectDirection(normal, r1, r2);
+            return SampleDirection(normal, r1, r2);
         }
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
@@ -47,7 +47,7 @@ namespace AT_NAME
             const auto r1 = sampler->nextSample();
             const auto r2 = sampler->nextSample();
 
-            return SampleReflectDirection(normal, r1, r2);
+            return SampleDirection(normal, r1, r2);
         }
 
         static AT_DEVICE_API aten::vec3 bsdf(const aten::MaterialParameter* param)
@@ -98,9 +98,9 @@ namespace AT_NAME
          * @param[in] n Macrosurface normal.
          * @param[in] r1 Rondam value by uniforma sampleing.
          * @param[in] r2 Rondam value by uniforma sampleing.
-         * @return Output reflect vector.
+         * @return Reflect vector.
          */
-        static inline AT_DEVICE_API aten::vec3 SampleReflectDirection(
+        static inline AT_DEVICE_API aten::vec3 SampleDirection(
             const aten::vec3& n,
             float r1, float r2)
         {

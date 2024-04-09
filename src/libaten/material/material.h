@@ -596,14 +596,6 @@ namespace AT_NAME
             const aten::vec3& wo,
             real u, real v);
 
-        static AT_DEVICE_API aten::vec3 sampleDirection(
-            const aten::MaterialParameter* dst_mtrl,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            real u, real v,
-            aten::sampler* sampler,
-            real pre_sampled_r);
-
         static AT_DEVICE_API aten::vec3 sampleBSDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,

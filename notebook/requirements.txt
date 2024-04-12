@@ -23,7 +23,7 @@ executing==2.0.1
 fastjsonschema==2.19.1
 fonttools==4.48.1
 fqdn==1.5.1
-idna==3.6
+idna==3.7
 importlib-metadata==7.0.1
 importlib-resources==6.1.1
 ipykernel==6.29.2

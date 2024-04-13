@@ -1,6 +1,10 @@
 #pragma once
 
+#include <type_traits>
+#include <utility>
+
 #include "material/material.h"
+#include "material/specular.h"
 
 namespace aten {
     class Values;
@@ -28,15 +32,6 @@ namespace AT_NAME
         virtual ~refraction() {}
 
     public:
-        void setIsIdealRefraction(bool f)
-        {
-            m_param.isIdealRefraction = f;
-        }
-        bool isIdealRefraction() const
-        {
-            return (m_param.isIdealRefraction > 0);
-        }
-
         static AT_DEVICE_API real pdf(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
@@ -58,54 +53,59 @@ namespace AT_NAME
             const aten::vec3& wo,
             real u, real v);
 
-        static AT_DEVICE_API aten::vec3 bsdf(
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real u, real v,
-            const aten::vec3& externalAlbedo);
-
         static AT_DEVICE_API void sample(
             AT_NAME::MaterialSampling* result,
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            real u, real v,
-            bool isLightPath = false);
+            aten::sampler* sampler);
 
-        struct RefractionSampling {
-            bool isRefraction;
-            bool isIdealRefraction;
-            real probReflection;
-            real probRefraction;
-
-            RefractionSampling(bool _isRefraction, real _probReflection, real _probRefraction, bool _isIdealRefraction = false)
-                : isRefraction(_isRefraction), probReflection(_probReflection), probRefraction(_probRefraction),
-                isIdealRefraction(_isIdealRefraction)
-            {}
-        };
-
-        static RefractionSampling check(
-            const material* mtrl,
-            const aten::vec3& in,
-            const aten::vec3& normal,
-            const aten::vec3& orienting_normal);
-
-        static AT_DEVICE_API real computeFresnel(
-            const aten::MaterialParameter* mtrl,
-            const aten::vec3& normal,
+        /**
+         * @brief Compute refract vector.
+         * @param[in] ni Index of refraction of the media on the incident side.
+         * @param[in] nt Index of refraction of the media on the transmitted side.
+         * @param[in] wi Incident vector.
+         * @param[in] n Normal vector on surface.
+         * @return Refract vector.
+         */
+        static AT_DEVICE_API aten::vec3 ComputeRefractVector(
+            const float ni, const float nt,
             const aten::vec3& wi,
-            const aten::vec3& wo,
-            real outsideIor)
+            const aten::vec3& n)
         {
-            // TODO
-            AT_ASSERT(false);
-            return real(0);
+            // NOTE:
+            // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
+            const auto w = -wi;
+
+            const auto costheta = aten::abs(dot(w, n));
+            const auto sintheta_2 = 1.0F - costheta * costheta;
+
+            const auto ni_nt = ni / nt;
+            const auto ni_nt_2 = ni_nt * ni_nt;
+
+            auto wo = (ni_nt * costheta - aten::sqrt(1.0F - ni_nt_2 * sintheta_2)) * n - ni_nt * w;
+            wo = normalize(wo);
+
+            return wo;
         }
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
+
+        /**
+        * @brief Compute probability to sample specified output vector.
+        * @return Always returns 1.0.
+        */
+        static inline AT_DEVICE_API float ComputeProbabilityToSampleOutputVector()
+        {
+            return 1.0F;
+        }
+
+        static AT_DEVICE_API void SampleRefraction(
+            AT_NAME::MaterialSampling& result,
+            aten::sampler* sampler,
+            const aten::MaterialParameter& param,
+            const aten::vec3& n,
+            const aten::vec3& wi);
     };
 }

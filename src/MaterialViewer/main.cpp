@@ -492,11 +492,14 @@ private:
             mtrlParam,
             nullptr, nullptr, nullptr);
 
-#if 1
+#if 0
         constexpr char* asset_path = "../../asset/suzanne/suzanne.obj";
         constexpr char* mtrl_in_asset = "Material.001";
-#else
+#elif 0
         constexpr char* asset_path = "../../asset/teapot/teapot.obj";
+        constexpr char* mtrl_in_asset = "m1";
+#else
+        constexpr char* asset_path = "../../asset/sphere/sphere.obj";
         constexpr char* mtrl_in_asset = "m1";
 #endif
 

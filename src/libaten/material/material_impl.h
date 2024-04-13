@@ -59,7 +59,7 @@ namespace AT_NAME
             AT_NAME::specular::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v);
             break;
         case aten::MaterialType::Refraction:
-            AT_NAME::refraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
+            AT_NAME::refraction::sample(result, mtrl, normal, wi, orgnormal, sampler);
             break;
         case aten::MaterialType::GGX:
             AT_NAME::MicrofacetGGX::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v);

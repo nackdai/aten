@@ -551,18 +551,16 @@ namespace AT_NAME
         AT_NAME::Path& paths,
         aten::ray* rays)
     {
-        auto nextDir = normalize(sampling.dir);
-        auto pdfb = sampling.pdf;
-        auto bsdf = sampling.bsdf;
+        const auto next_dir = normalize(sampling.dir);
+        const auto pdfb = sampling.pdf;
+        const auto bsdf = sampling.bsdf;
 
-        // Get normal to add ray offset.
-        // In refraction material case, new ray direction might be computed with inverted normal.
-        // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
-        auto rayBasedNormal{ (!is_backfacing && mtrl.attrib.isTranslucent)
-            ? -normal
-            : normal };
+        auto ray_along_normal = rec.normal;
 
-        auto c = dot(rayBasedNormal, static_cast<aten::vec3>(nextDir));
+        // Adjust the surface normal to along with the same direction as the next ray.
+        ray_along_normal = dot(ray_along_normal, next_dir) >= 0.0f ? ray_along_normal : -ray_along_normal;
+
+        auto c = dot(ray_along_normal, static_cast<aten::vec3>(next_dir));
 
         if (pdfb > 0 && c > 0) {
             paths.throughput[idx].throughput *= bsdf * c / pdfb;
@@ -579,7 +577,7 @@ namespace AT_NAME
         paths.attrib[idx].mtrlType = mtrl.type;
 
         // Make next ray.
-        rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
+        rays[idx] = aten::ray(rec.p, next_dir, ray_along_normal);
     }
 
     template <class SCENE = void, bool ENABLE_ALPHA_TRANLUCENT=false>

@@ -301,12 +301,6 @@ void MtrlTestScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Ass
     aten::MaterialParameter mtrlParam;
 
     mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
-    mtrlParam.standard.shininess = 200.0f;
-    mtrlParam.standard.ior = 0.2f;
-    auto s_blinn = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-1.0f, 0.0f, 0.0f), 1.0f, createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
-    scene->add(s_blinn);
-
-    mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
     mtrlParam.standard.roughness = 0.2f;
     mtrlParam.standard.ior = 0.2f;
     auto s_ggx = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-3.0f, 0.0f, 0.0f), 1.0f, createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam));
@@ -338,16 +332,16 @@ void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Asset
 {
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
-    mtrlParam.standard.shininess = 200.0f;
+    mtrlParam.standard.roughness = 0.5f;
     mtrlParam.standard.ior = 0.2f;
 
     asset_manager.registerMtrl(
         "m1",
-        createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
+        createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam));
 
     asset_manager.registerMtrl(
         "Material.001",
-        createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
+        createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam));
 
     auto obj = aten::ObjLoader::load("../../asset/suzanne/suzanne.obj", ctxt, asset_manager);
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
@@ -610,11 +604,11 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Ass
     aten::MaterialParameter mtrlParam;
 
     mtrlParam.baseColor = clr;
-    mtrlParam.standard.shininess = 200.0f;
+    mtrlParam.standard.roughness = 0.5f;
     mtrlParam.standard.ior = 0.2f;
 
     auto blinn = createMaterialWithParamter(
-        ctxt, aten::MaterialType::Blinn, mtrlParam,
+        ctxt, aten::MaterialType::GGX, mtrlParam,
         albedo.get(), nml.get(), nullptr);
 
     auto s_blinn = aten::TransformableFactory::createSphere(
@@ -1009,11 +1003,10 @@ void BunnyScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetM
 {
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(0.7f, 0.7f, 0.7f);
-    mtrlParam.standard.ior = 1.3f;
 
     asset_manager.registerMtrl(
         "m1",
-        createMaterialWithParamter(ctxt, aten::MaterialType::Lambert_Refraction, mtrlParam));
+        createMaterialWithParamter(ctxt, aten::MaterialType::Lambert, mtrlParam));
 
     std::vector<std::shared_ptr<aten::PolygonObject>> objs;
 

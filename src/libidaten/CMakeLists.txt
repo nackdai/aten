@@ -32,11 +32,9 @@ set_source_files_properties(
   ../libaten/geometry/sphere.cpp
   ../libaten/material/FlakesNormal.cpp
   ../libaten/material/beckman.cpp
-  ../libaten/material/blinn.cpp
   ../libaten/material/car_paint.cpp
   ../libaten/material/disney_brdf.cpp
   ../libaten/material/ggx.cpp
-  ../libaten/material/lambert_refraction.cpp
   ../libaten/material/material.cpp
   ../libaten/material/microfacet_refraction.cpp
   ../libaten/material/oren_nayar.cpp
@@ -70,8 +68,6 @@ cuda_add_library(
   ../libaten/material/FlakesNormal.h
   ../libaten/material/beckman.cpp
   ../libaten/material/beckman.h
-  ../libaten/material/blinn.cpp
-  ../libaten/material/blinn.h
   ../libaten/material/car_paint.cpp
   ../libaten/material/car_paint.h
   ../libaten/material/disney_brdf.cpp
@@ -80,8 +76,6 @@ cuda_add_library(
   ../libaten/material/ggx.cpp
   ../libaten/material/ggx.h
   ../libaten/material/lambert.h
-  ../libaten/material/lambert_refraction.cpp
-  ../libaten/material/lambert_refraction.h
   ../libaten/material/material.cpp
   ../libaten/material/material.h
   ../libaten/material/material_impl.h

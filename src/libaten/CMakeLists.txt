@@ -108,8 +108,6 @@ add_library(
   material/FlakesNormal.h
   material/beckman.cpp
   material/beckman.h
-  material/blinn.cpp
-  material/blinn.h
   material/car_paint.cpp
   material/car_paint.h
   material/disney_brdf.cpp
@@ -118,8 +116,6 @@ add_library(
   material/ggx.cpp
   material/ggx.h
   material/lambert.h
-  material/lambert_refraction.cpp
-  material/lambert_refraction.h
   material/material.cpp
   material/material.h
   material/material_impl.h

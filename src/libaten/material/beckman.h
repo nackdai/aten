@@ -70,11 +70,11 @@ namespace AT_NAME
             aten::sampler* sampler);
 
         /**
-         * @brief Compute GGX microfacet distribution.
+         * @brief Compute Beckman microfacet distribution.
          * @param[in] m Microsurface normal.
          * @param[in] n Macrosurface normal.
          * @param[in] roughness Roughness parameter.
-         * @param GGX microfacet distribution.
+         * @param Beckman microfacet distribution.
          */
         static AT_DEVICE_API float ComputeDistribution(
             const aten::vec3& m,
@@ -195,7 +195,6 @@ namespace AT_NAME
 
         /**
          * @brief Compute Beckman G1 shadowing masking function.
-         * @note Compute height correlated Smith shadowing-masking.
          * @param[in] roughness Roughness parameter.
          * @param[in] v Target vector to be shadowed and masked.
          * @param[in] n Macrosurface normal.

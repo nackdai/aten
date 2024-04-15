@@ -68,7 +68,7 @@ namespace AT_NAME
             AT_NAME::MicrofacetBeckman::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v);
             break;
         case aten::MaterialType::Velvet:
-            AT_NAME::MicrofacetVelvet::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
+            AT_NAME::MicrofacetVelvet::sample(result, mtrl, normal, wi, sampler, u, v);
             break;
         case aten::MaterialType::Microfacet_Refraction:
             AT_NAME::MicrofacetRefraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);

@@ -255,17 +255,15 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& wo)
         {
-            aten::vec3 V = -wi;
-            aten::vec3 L = wo;
-            aten::vec3 N = n;
+            const auto V = -wi;
+            const auto L = wo;
+            const auto N = n;
 
             // We can assume ideal reflection on each micro surface.
             // It means wo (= L) is computed as ideal reflection vector.
             // Then, we can compute micro surface normal as the half vector between incident and output vector.
-            aten::vec3 H = normalize(L + V);
+            const auto H = normalize(L + V);
 
-            auto NH = aten::abs(dot(N, H));
-            auto VH = aten::abs(dot(V, H));
             auto NL = aten::abs(dot(N, L));
             auto NV = aten::abs(dot(N, V));
 

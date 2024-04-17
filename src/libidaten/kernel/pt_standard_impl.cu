@@ -337,7 +337,7 @@ namespace kernel {
         AT_NAME::ShadeMiss(
             idx,
             bounce,
-            aten::vec3(0),
+            aten::vec3(1.0F),   // TODO
             paths,
             aten::span(aovNormalDepth, width * height),
             aten::span(aovAlbedoMeshid, width * height));

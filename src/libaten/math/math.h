@@ -201,6 +201,12 @@ namespace aten {
         return cmpMin(cmpMax(f, a), b);
     }
 
+    template <class _T>
+    inline AT_HOST_DEVICE_API auto saturate(_T f) -> std::enable_if_t<std::is_floating_point_v<_T>, _T>
+    {
+        return clamp(f, _T(0), _T(1));
+    }
+
     inline AT_HOST_DEVICE_API bool isInvalid(real f)
     {
 #ifdef __CUDACC__

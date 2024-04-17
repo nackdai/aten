@@ -59,7 +59,7 @@ namespace aten
             int32_t maxDepth,
             camera* cam,
             scene* scene,
-            const background* bg);
+            const std::shared_ptr<background>& bg);
 
         static void shadeMiss(
             int32_t idx,
@@ -67,7 +67,7 @@ namespace aten
             int32_t depth,
             Path& paths,
             const ray* rays,
-            const background* bg);
+            const std::shared_ptr<background>& bg);
 
     protected:
         PathHost path_host_;

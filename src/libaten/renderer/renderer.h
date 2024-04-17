@@ -41,7 +41,7 @@ namespace aten
             frame_count_++;
         }
 
-        void setBG(background* bg)
+        void setBG(const std::shared_ptr<background>& bg)
         {
             m_bg = bg;
         }
@@ -68,15 +68,15 @@ namespace aten
             scene* scene,
             camera* camera) = 0;
 
-        static vec3 sampleBG(const ray& inRay, const background* bg)
+        static vec3 sampleBG(const ray& inRay, const std::shared_ptr<background>& bg)
         {
             if (bg) {
                 return bg->sample(inRay);
             }
-            return vec3();
+            return vec3(1.0F);
         }
 
-        background* bg()
+        std::shared_ptr<background> bg()
         {
             return m_bg;
         }
@@ -94,7 +94,7 @@ namespace aten
         }
 
     protected:
-        background* m_bg{ nullptr };
+        std::shared_ptr<background> m_bg;
         uint32_t frame_count_{ 0 };
     };
 }

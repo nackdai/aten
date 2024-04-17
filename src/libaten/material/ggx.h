@@ -103,19 +103,19 @@ namespace AT_NAME
          * @brief Compute G2 shadowing masking function.
          * @note Compute height correlated Smith shadowing-masking.
          * @param[in] roughness Roughness parameter.
-         * @param[in] wi Incident vector.
-         * @param[in] wo Output vector.
-         * @param[in] m Microsurface normal.
+         * @param[in] view Vector to eye.
+         * @param[in] light Vector to light.
+         * @param[in] n Macrosurface normal.
          * @return G2 shadowing masking value.
          */
         static AT_DEVICE_API float ComputeG2Smith(
             float roughness,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            const aten::vec3& m)
+            const aten::vec3& view,
+            const aten::vec3& light,
+            const aten::vec3& n)
         {
-            const auto lambda_wi = Lambda(roughness, wi, m);
-            const auto lambda_wo = Lambda(roughness, wo, m);
+            const auto lambda_wi = Lambda(roughness, view, n);
+            const auto lambda_wo = Lambda(roughness, light, n);
             const auto g2 = 1.0f / (1.0f + lambda_wi + lambda_wo);
             return g2;
         }
@@ -133,6 +133,9 @@ namespace AT_NAME
             const aten::vec3& w,
             const aten::vec3& n)
         {
+            // NOTE:
+            // https://jcgt.org/published/0003/02/03/paper.pdf
+            // 5.3.
             const auto alpha = roughness;
 
             const auto cos_theta = aten::abs(dot(w, n));
@@ -272,7 +275,7 @@ namespace AT_NAME
             const auto nt = ior;
 
             const auto D = ComputeDistribution(H, N, roughness);
-            const auto G2 = ComputeG2Smith(roughness, V, L, H);
+            const auto G2 = ComputeG2Smith(roughness, V, L, N);
             const auto F = material::ComputeSchlickFresnel(ni, nt, L, H);
 
             const auto denom = 4 * NL * NV;

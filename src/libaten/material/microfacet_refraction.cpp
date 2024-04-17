@@ -231,7 +231,7 @@ namespace AT_NAME
         real D = MicrofacetGGX::ComputeDistribution(wh, n, roughness);
 
         // Compute G.
-        real G = MicrofacetGGX::ComputeG2Smith(roughness, in, out, wh);
+        real G = MicrofacetGGX::ComputeG2Smith(roughness, in, out, n);
 
         real F(1);
         {

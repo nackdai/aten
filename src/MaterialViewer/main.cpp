@@ -13,6 +13,7 @@
 #include "idaten.h"
 
 #define GPU_RENDERING
+//#define WHITE_FURNACE_TEST
 
 #ifdef GPU_RENDERING
 constexpr int32_t WIDTH = 1280;
@@ -109,20 +110,25 @@ public:
         MakeScene(&scene_);
         scene_.build(ctxt_);
 
+#ifndef WHITE_FURNACE_TEST
         // IBL
+        scene_light_.is_envmap = true;
         scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
         scene_light_.envmap = std::make_shared<aten::envmap>();
         scene_light_.envmap->init(scene_light_.envmap_texture);
         scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(scene_light_.envmap);
         scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
+#endif
 
 #ifdef GPU_RENDERING
+#ifndef WHITE_FURNACE_TEST
         // PointLight
         scene_light_.point_light = std::make_shared<aten::PointLight>(
             aten::vec3(0.0, 0.0, 50.0),
             aten::vec3(1.0, 0.0, 0.0),
             400.0f);
         ctxt_.AddLight(scene_light_.point_light);
+#endif
 
         std::vector<aten::ObjectParameter> shapeparams;
         std::vector<aten::TriangleParameter> primparams;
@@ -200,6 +206,7 @@ public:
             is_camera_dirty_ = false;
 
             visualizer_->clear();
+            progressive_accumulate_count_ = 0;
         }
 
         renderer_.render(
@@ -262,6 +269,11 @@ public:
                 need_renderer_reset = true;
             }
 
+            if (isProgressive) {
+                ImGui::Text("%d", progressive_accumulate_count_);
+                progressive_accumulate_count_ += 1;
+            }
+
             auto mtrl = ctxt_.GetMaterialInstance(0);
             bool needUpdateMtrl = false;
 
@@ -283,6 +295,7 @@ public:
             if (ImGui::Combo("mode", &mtrlType, mtrl_types.data(), mtrl_types.size())) {
                 ctxt_.DeleteAllMaterialsAndClearList();
                 mtrl = CreateMaterial(static_cast<aten::MaterialType>(mtrlType));
+                mtrl->param().baseColor.set(1.0F);
                 needUpdateMtrl = true;
             }
 
@@ -321,6 +334,7 @@ public:
 
             if (need_renderer_reset) {
                 renderer_.reset();
+                progressive_accumulate_count_ = 0;
             }
         }
 #else
@@ -485,8 +499,14 @@ private:
     void MakeScene(aten::scene* scene)
     {
         aten::MaterialParameter mtrlParam;
-        mtrlParam.type = aten::MaterialType::Lambert;
+        mtrlParam.type = aten::MaterialType::Velvet;
+#ifdef WHITE_FURNACE_TEST
+        mtrlParam.baseColor = aten::vec3(1.0F);
+#else
         mtrlParam.baseColor = aten::vec3(0.580000f, 0.580000f, 0.580000f);
+#endif
+        mtrlParam.standard.ior = 1.5F;
+        mtrlParam.standard.roughness = 0.5F;
 
         auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
             mtrlParam,
@@ -495,7 +515,7 @@ private:
 #if 0
         constexpr char* asset_path = "../../asset/suzanne/suzanne.obj";
         constexpr char* mtrl_in_asset = "Material.001";
-#elif 0
+#elif 1
         constexpr char* asset_path = "../../asset/teapot/teapot.obj";
         constexpr char* mtrl_in_asset = "m1";
 #else
@@ -569,7 +589,7 @@ private:
 
 
     struct SceneLight {
-        bool is_envmap{ true };
+        bool is_envmap{ false };
 
         std::shared_ptr<aten::texture> envmap_texture;
         std::shared_ptr<aten::envmap> envmap;
@@ -613,6 +633,8 @@ private:
     bool is_mouse_r_btn_down_{ false };
     int32_t prev_mouse_pos_x_{ 0 };
     int32_t prev_mouse_pos_y_{ 0 };
+
+    int32_t progressive_accumulate_count_{ 0 };
 };
 
 int32_t main()

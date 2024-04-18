@@ -526,15 +526,24 @@ namespace AT_NAME
          * @brief Compute schlick's fresnel.
          * @param[in] ni Index of refraction of the media on the incident side.
          * @param[in] nt Index of refraction of the media on the transmitted side.
-         * @param[in] wo Output vector.
+         * @param[in] w Direction to compute fresnel.
          * @param[in] n Normal vector on surface.
          * @return fresnel.
+         * @note If normal is half vector between incident vector and output vector,
+         *       this API can be accept whichever incident vector or output vector as `w`.
+         *       Because, dot(w, n) is computed in this API, if normal is half vector, result of dot is the same between both.
          */
         static inline AT_DEVICE_API float ComputeSchlickFresnel(
             const float ni, const float nt,
-            const aten::vec3& wo,
+            const aten::vec3& w,
             const aten::vec3& n)
         {
+            // NOTE:
+            // https://qiita.com/emadurandal/items/76348ad118c36317ec5c#f%E3%83%95%E3%83%AC%E3%83%8D%E3%83%AB%E9%A0%85
+            // If normal is half vector between incident vectorand output vector,
+            // `w` is acceptable as whichever incident vector or output vector.
+            // Because, shkick fresnel use cos_theta, if normal is half vector, cos_theta is the same between dot(V, H) and dot(L, H).
+
             // NOTE:
             // http://d.hatena.ne.jp/hanecci/20130525/p3
 
@@ -548,9 +557,9 @@ namespace AT_NAME
             auto f0 = (ni - nt) / (ni + nt);
             f0 = f0 * f0;
 
-            const auto LN = aten::abs(dot(wo, n));
+            const auto costheta = aten::abs(dot(w, n));
 
-            const auto fresnel = f0 + (1 - f0) * aten::pow((1 - LN), 5);
+            const auto fresnel = f0 + (1 - f0) * aten::pow((1 - costheta), 5);
             return fresnel;
         }
 
@@ -566,6 +575,35 @@ namespace AT_NAME
         {
             auto wo = wi - 2 * dot(wi, n) * n;
             wo = normalize(wo);
+            return wo;
+        }
+
+        /**
+         * @brief Compute refract vector.
+         * @param[in] ni Index of refraction of the media on the incident side.
+         * @param[in] nt Index of refraction of the media on the transmitted side.
+         * @param[in] wi Incident vector.
+         * @param[in] n Normal vector on surface.
+         * @return Refract vector.
+         */
+        static AT_DEVICE_API aten::vec3 ComputeRefractVector(
+            const float ni, const float nt,
+            const aten::vec3& wi,
+            const aten::vec3& n)
+        {
+            // NOTE:
+            // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
+            const auto w = -wi;
+
+            const auto costheta = aten::abs(dot(w, n));
+            const auto sintheta_2 = 1.0F - costheta * costheta;
+
+            const auto ni_nt = ni / nt;
+            const auto ni_nt_2 = ni_nt * ni_nt;
+
+            auto wo = (ni_nt * costheta - aten::sqrt(1.0F - ni_nt_2 * sintheta_2)) * n - ni_nt * w;
+            wo = normalize(wo);
+
             return wo;
         }
 

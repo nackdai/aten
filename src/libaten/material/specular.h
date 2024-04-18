@@ -63,7 +63,7 @@ namespace AT_NAME
          * @brief Compute probability to sample specified output vector.
          * @return Always returns 1.0.
          */
-        static inline AT_DEVICE_API float ComputeProbabilityToSampleOutputVector()
+        static inline AT_DEVICE_API float ComputePDF()
         {
             return 1.0F;
         }

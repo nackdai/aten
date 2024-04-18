@@ -15,7 +15,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         float u, float v)
     {
-        const auto ret = ComputeProbabilityToSampleOutputVector(n, wo);
+        const auto ret = ComputePDF(n, wo);
         return ret;
     }
 
@@ -145,14 +145,14 @@ namespace AT_NAME
         return G;
     }
 
-    AT_DEVICE_API float MicrofacetVelvet::ComputeProbabilityToSampleOutputVector(
+    AT_DEVICE_API float MicrofacetVelvet::ComputePDF(
         const aten::vec3& n,
         const aten::vec3& wo)
     {
         // NOTE:
         // The papaer mentions "We found plain uniform sampling of the upper hemisphere to be more effective".
         // So, sample based on hemisphere uniform sampling not importance sampling.
-        return lambert::ComputeProbabilityToSampleOutputVector(n, wo);
+        return lambert::ComputePDF(n, wo);
     }
 
     AT_DEVICE_API aten::vec3 MicrofacetVelvet::SampleDirection(
@@ -213,7 +213,7 @@ namespace AT_NAME
         const auto r2 = sampler->nextSample();
 
         result->dir = SampleDirection(normal, r1, r2);
-        result->pdf = ComputeProbabilityToSampleOutputVector(normal, result->dir);
+        result->pdf = ComputePDF(normal, result->dir);
 
         const auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,

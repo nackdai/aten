@@ -35,11 +35,11 @@ namespace AT_NAME
             real(1), param->carpaint.clearcoat_ior,
             V, N);
 
-        auto beckman_pdf = MicrofacetBeckman::ComputeProbabilityToSampleOutputVector(
+        auto beckman_pdf = MicrofacetBeckman::ComputePDF(
             param->carpaint.clearcoat_roughness,
             N, wi, wo);
 
-        auto flakes_beckman_pdf = MicrofacetBeckman::ComputeProbabilityToSampleOutputVector(
+        auto flakes_beckman_pdf = MicrofacetBeckman::ComputePDF(
             real(1),  // TODO
             N, wi, wo);
 

@@ -77,7 +77,7 @@ namespace AT_NAME
          * @param[in] wo Output vector.
          * @return Probability to sample output vector.
          */
-        static AT_DEVICE_API float ComputeProbabilityToSampleOutputVector(
+        static AT_DEVICE_API float ComputePDF(
             const aten::vec3& n,
             const aten::vec3& wo);
 

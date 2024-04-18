@@ -110,7 +110,7 @@ namespace AT_NAME
          * @param[in] wo Output vector.
          * @return Probability to sample output vector.
          */
-        static inline AT_DEVICE_API float ComputeProbabilityToSampleOutputVector(
+        static inline AT_DEVICE_API float ComputePDF(
             const float roughness,
             const aten::vec3& n,
             const aten::vec3& wi,

@@ -120,10 +120,24 @@ namespace AT_NAME
          * @param[in] wo Output vector.
          * @return Probability to sample output vector.
          */
-        static AT_DEVICE_API float ComputeProbabilityToSampleOutputVector(
+        static AT_DEVICE_API float ComputePDF(
             const float roughness,
             const aten::vec3& n,
             const aten::vec3& wi,
+            const aten::vec3& wo);
+
+        /**
+         * @brief Compute probability to sample specified output vector.
+         * @param[in] roughness Roughness parameter.
+         * @param[in] n Macrosurface normal.
+         * @param[in] m Microsurface vector(i.e. half vector).
+         * @param[in] wo Output vector.
+         * @return Probability to sample output vector.
+         */
+        static AT_DEVICE_API float ComputePDFWithHalfVector(
+            const float roughness,
+            const aten::vec3& n,
+            const aten::vec3& m,
             const aten::vec3& wo);
 
         /**
@@ -155,7 +169,6 @@ namespace AT_NAME
 
         /**
          * @brief Compute BRDF.
-         * @param[in] albedo Albedo color.
          * @param[in] roughness Roughness parameter.
          * @param[in] ior Refraction index.
          * @param[in] wi Incident vector.

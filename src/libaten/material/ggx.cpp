@@ -23,7 +23,7 @@ namespace AT_NAME
             u, v,
             aten::vec4(param->standard.roughness));
 
-        auto ret = ComputeProbabilityToSampleOutputVector(roughness.r, n, wi, wo);
+        auto ret = ComputePDF(roughness.r, n, wi, wo);
         return ret;
     }
 
@@ -77,7 +77,7 @@ namespace AT_NAME
             aten::vec4(param->standard.roughness));
 
         result->dir = SampleDirection(roughness.r, wi, normal, sampler);
-        result->pdf = ComputeProbabilityToSampleOutputVector(roughness.r, normal, wi, result->dir);
+        result->pdf = ComputePDF(roughness.r, normal, wi, result->dir);
 
         float ior = param->standard.ior;
 
@@ -103,15 +103,6 @@ namespace AT_NAME
         return D;
     }
 
-    /**
-     * @brief Compute G2 shadowing masking function.
-     * @note Compute height correlated Smith shadowing-masking.
-     * @param[in] roughness Roughness parameter.
-     * @param[in] view Vector to eye.
-     * @param[in] light Vector to light.
-     * @param[in] n Macrosurface normal.
-     * @return G2 shadowing masking value.
-     */
     AT_DEVICE_API float MicrofacetGGX::ComputeG2Smith(
         float roughness,
         const aten::vec3& view,
@@ -124,13 +115,6 @@ namespace AT_NAME
         return g2;
     }
 
-    /**
-     * @brief Compute lambda function for shadowing-masking function.
-     * @param[in] roughness Roughness parameter.
-     * @param[in] w Target vector.
-     * @param[in] m Microsurface normal.
-     * @param Lambda value for shadowing-masking function.
-     */
     AT_DEVICE_API float MicrofacetGGX::Lambda(
         float roughness,
         const aten::vec3& w,
@@ -154,42 +138,35 @@ namespace AT_NAME
         return lambda;
     }
 
-    /**
-     * @brief Compute probability to sample specified output vector.
-     * @param[in] roughness Roughness parameter.
-     * @param[in] n Macrosurface normal.
-     * @param[in] wi Incident vector.
-     * @param[in] wo Output vector.
-     * @return Probability to sample output vector.
-     */
-    AT_DEVICE_API float  MicrofacetGGX::ComputeProbabilityToSampleOutputVector(
+    AT_DEVICE_API float  MicrofacetGGX::ComputePDF(
         const float roughness,
         const aten::vec3& n,
         const aten::vec3& wi,
         const aten::vec3& wo)
     {
-        auto wh = normalize(-wi + wo);
+        const auto wh = normalize(-wi + wo);
+        const auto pdf = ComputePDFWithHalfVector(roughness, n, wh, wo);
+        return pdf;
+    }
 
-        auto D = ComputeDistribution(wh, n, roughness);
+    AT_DEVICE_API float MicrofacetGGX::ComputePDFWithHalfVector(
+        const float roughness,
+        const aten::vec3& n,
+        const aten::vec3& m,
+        const aten::vec3& wo)
+    {
+        const auto D = ComputeDistribution(m, n, roughness);
 
-        auto costheta = aten::abs(dot(wh, n));
+        const auto costheta = aten::abs(dot(m, n));
 
         // For Jacobian |dwh/dwo|
-        auto denom = 4 * aten::abs(dot(wo, wh));
+        const auto denom = 4 * aten::abs(dot(wo, m));
 
-        auto pdf = denom > 0 ? (D * costheta) / denom : 0;
+        const auto pdf = denom > 0 ? (D * costheta) / denom : 0;
 
         return pdf;
     }
 
-    /**
-     * @brief Sample direction for reflection.
-     * @param[in] roughness Roughness parameter.
-     * @param[in] wi Incident vector.
-     * @param[in] n Macrosurface normal.
-     * @param[in, out] sampler Sampler to sample
-     * @return Reflect vector.
-     */
     AT_DEVICE_API aten::vec3  MicrofacetGGX::SampleDirection(
         const float roughness,
         const aten::vec3& wi,
@@ -208,14 +185,6 @@ namespace AT_NAME
         return wo;
     }
 
-    /**
-     * @brief Sample microsurface normal.
-     * @param[in] roughness Roughness parameter.
-     * @param[in] n Macrosurface normal.
-     * @param[in] r1 Rondam value by uniforma sampleing.
-     * @param[in] r2 Rondam value by uniforma sampleing.
-     * @return Microsurface normal.
-     */
     AT_DEVICE_API aten::vec3  MicrofacetGGX::SampleMicrosurfaceNormal(
         const float roughness,
         const aten::vec3& n,
@@ -244,16 +213,6 @@ namespace AT_NAME
         return m;
     }
 
-    /**
-     * @brief Compute BRDF.
-     * @param[in] albedo Albedo color.
-     * @param[in] roughness Roughness parameter.
-     * @param[in] ior Refraction index.
-     * @param[in] wi Incident vector.
-     * @param[in] wo Output vector.
-     * @param[in] n Macrosurface normal.
-     * @return BRDF.
-     */
     AT_DEVICE_API aten::vec3 MicrofacetGGX::ComputeBRDF(
         const float roughness,
         const float ior,
@@ -278,12 +237,12 @@ namespace AT_NAME
         const auto nt = ior;
 
         const auto D = ComputeDistribution(H, N, roughness);
-        const auto G2 = ComputeG2Smith(roughness, V, L, N);
+        const auto G = ComputeG2Smith(roughness, V, L, N);
         const auto F = material::ComputeSchlickFresnel(ni, nt, L, H);
 
         const auto denom = 4 * NL * NV;
 
-        const auto bsdf = denom > AT_MATH_EPSILON ? F * G2 * D / denom : 0.0f;
+        const auto bsdf = denom > AT_MATH_EPSILON ? F * G * D / denom : 0.0f;
 
         return aten::vec3(bsdf);
     }

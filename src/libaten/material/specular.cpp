@@ -10,7 +10,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
-        return ComputeProbabilityToSampleOutputVector();
+        return ComputePDF();
     }
 
     AT_DEVICE_API aten::vec3 specular::sampleDirection(

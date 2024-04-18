@@ -36,7 +36,7 @@ namespace AT_NAME
         // In order to align how to compute the ouput, we use N(normal) here as well.
         const auto fresnel = material::computeFresnel(ni, nt, V, N);
 
-        const auto beckmanPdf = MicrofacetBeckman::ComputeProbabilityToSampleOutputVector(
+        const auto beckmanPdf = MicrofacetBeckman::ComputePDF(
             param->retrorelective.clearcoat_roughness,
             normal, wi, wo);
         const auto diffusePdf = lambert::pdf(N, wo);

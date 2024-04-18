@@ -30,7 +30,7 @@ namespace AT_NAME
             const aten::vec3& normal,
             const aten::vec3& wo)
         {
-            return ComputeProbabilityToSampleOutputVector(normal, wo);
+            return ComputePDF(normal, wo);
         }
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
@@ -84,7 +84,7 @@ namespace AT_NAME
          * @param[in] wo Output vector.
          * @return Probability to sample output vector.
          */
-        static inline AT_DEVICE_API float ComputeProbabilityToSampleOutputVector(
+        static inline AT_DEVICE_API float ComputePDF(
             const aten::vec3& n,
             const aten::vec3& wo)
         {
@@ -96,8 +96,8 @@ namespace AT_NAME
         /**
          * @brief Sample direction for reflection.
          * @param[in] n Macrosurface normal.
-         * @param[in] r1 Rondam value by uniforma sampleing.
-         * @param[in] r2 Rondam value by uniforma sampleing.
+         * @param[in] r1 Rondam value by uniform sampleing.
+         * @param[in] r2 Rondam value by uniform sampleing.
          * @return Reflect vector.
          */
         static inline AT_DEVICE_API aten::vec3 SampleDirection(

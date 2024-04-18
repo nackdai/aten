@@ -16,7 +16,7 @@ namespace AT_NAME
         real u, real v)
     {
         auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
-        auto ret = ComputeProbabilityToSampleOutputVector(roughness.r, normal, wi, wo);
+        auto ret = ComputePDF(roughness.r, normal, wi, wo);
         return ret;
     }
 
@@ -77,7 +77,7 @@ namespace AT_NAME
             aten::vec4(param->standard.roughness));
 
         result->dir = sampleDirection(roughness.r, wi, normal, sampler);
-        result->pdf = ComputeProbabilityToSampleOutputVector(roughness.r, normal, wi, result->dir);
+        result->pdf = ComputePDF(roughness.r, normal, wi, result->dir);
 
         real ior = param->standard.ior;
 

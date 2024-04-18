@@ -1,4 +1,5 @@
 #include "material/refraction.h"
+#include "misc/misc.h"
 
 //#pragma optimize( "", off)
 
@@ -58,6 +59,21 @@ namespace AT_NAME
         return b0 || b1;
     }
 
+    AT_DEVICE_API aten::vec3 refraction::ComputeBRDF(
+        const float ni, const float nt,
+        const aten::vec3& wo,
+        const aten::vec3& n,
+        const float fresnle_transmittance)
+    {
+        const auto c = aten::abs(dot(wo, n));
+
+        // https://cgg.mff.cuni.cz/~jaroslav/teaching/2017-npgr010/slides/03%20-%20npgr010-2017%20-%20BRDF.pdf#page=48.00
+        const auto nt_ni = nt / ni;
+        const auto bsdf = c == 0.0F ? 0.0F : (nt_ni * nt_ni) * fresnle_transmittance / c;
+
+        return aten::vec3(bsdf);
+    }
+
     AT_DEVICE_API void refraction::SampleRefraction(
         AT_NAME::MaterialSampling& result,
         aten::sampler* sampler,
@@ -75,11 +91,7 @@ namespace AT_NAME
 
         if (!is_enter) {
             N = -n;
-            // NOTE
-            // In cuda 11, std::swap isn't supported.
-            auto swap = ni;
-            ni = nt;
-            nt = swap;
+            aten::swap(ni, nt);
         }
 
         // NOTE:
@@ -94,13 +106,13 @@ namespace AT_NAME
 
         if (cos_t_2 < 0.0F) {
             // Relection.
-            result.pdf = specular::ComputeProbabilityToSampleOutputVector();
+            result.pdf = specular::ComputePDF();
             result.dir = specular::SampleDirection(wi, N);
             result.bsdf = specular::ComputeBRDF(result.dir, N);
             return;
         }
 
-        auto wo = ComputeRefractVector(ni, nt, wi, N);
+        auto wo = material::ComputeRefractVector(ni, nt, wi, N);
         const auto F = material::ComputeSchlickFresnel(ni, nt, wo, N);
 
         const auto R = F;       // reflectance.
@@ -108,15 +120,9 @@ namespace AT_NAME
 
         if (param.isIdealRefraction) {
             // Regardless any reflectance, refraction happens.
-            const auto c = aten::abs(dot(wo, N));
-
-            // https://cgg.mff.cuni.cz/~jaroslav/teaching/2017-npgr010/slides/03%20-%20npgr010-2017%20-%20BRDF.pdf#page=48.00
-            const auto nt_ni = nt / ni;
-            const auto bsdf = c == 0.0F ? 0.0F : (nt_ni * nt_ni) * T / c;
-
             result.pdf = 1.0F;
             result.dir = wo;
-            result.bsdf = aten::vec3(bsdf);
+            result.bsdf = ComputeBRDF(ni, nt, wo, N, T);
             return;
         }
 
@@ -141,15 +147,9 @@ namespace AT_NAME
         }
         else {
             // Refraction.
-            const auto c = aten::abs(dot(wo, N));
-
-            // https://cgg.mff.cuni.cz/~jaroslav/teaching/2017-npgr010/slides/03%20-%20npgr010-2017%20-%20BRDF.pdf#page=48.00
-            const auto nt_ni = nt / ni;
-            const auto bsdf = c == 0.0F ? 0.0F : (nt_ni * nt_ni) * T / c;
-
             result.pdf = 1.0F - prob;
             result.dir = wo;
-            result.bsdf = aten::vec3(bsdf);
+            result.bsdf = ComputeBRDF(ni, nt, wo, N, T);
         }
     }
 }

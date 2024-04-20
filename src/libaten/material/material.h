@@ -510,7 +510,12 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& normal)
         {
-            const auto cosi = dot(normal, wi);
+            auto cosi = dot(normal, wi);
+            // Potentially flip interface orientation for Fresnel equations.
+            if (cosi < 0) {
+                aten::swap(ni, nt);
+                cosi = -cosi;
+            }
 
             const auto nnt = ni / nt;
             const auto sini2 = real(1.0) - cosi * cosi;
@@ -536,10 +541,18 @@ namespace AT_NAME
          *       Because, dot(w, n) is computed in this API, if normal is half vector, result of dot is the same between both.
          */
         static inline AT_DEVICE_API float ComputeSchlickFresnel(
-            const float ni, const float nt,
+            float ni, float nt,
             const aten::vec3& w,
             const aten::vec3& n)
         {
+            auto costheta = dot(w, n);
+
+            // Potentially flip interface orientation for Fresnel equations.
+            if (costheta < 0) {
+                aten::swap(ni, nt);
+                costheta = -costheta;
+            }
+
             // NOTE:
             // https://qiita.com/emadurandal/items/76348ad118c36317ec5c#f%E3%83%95%E3%83%AC%E3%83%8D%E3%83%AB%E9%A0%85
             // If normal is half vector between incident vectorand output vector,
@@ -558,8 +571,6 @@ namespace AT_NAME
             //    = pow((ni - nt) / (ni + nt), 2)
             auto f0 = (ni - nt) / (ni + nt);
             f0 = f0 * f0;
-
-            const auto costheta = aten::abs(dot(w, n));
 
             const auto fresnel = f0 + (1 - f0) * aten::pow((1 - costheta), 5);
             return fresnel;

@@ -71,7 +71,7 @@ namespace AT_NAME
             AT_NAME::MicrofacetVelvet::sample(result, mtrl, normal, wi, sampler, u, v);
             break;
         case aten::MaterialType::Microfacet_Refraction:
-            AT_NAME::MicrofacetRefraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
+            AT_NAME::MicrofacetRefraction::sample(*result, *mtrl, normal, wi, sampler, u, v);
             break;
         case aten::MaterialType::Retroreflective:
             AT_NAME::Retroreflective::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
@@ -124,7 +124,7 @@ namespace AT_NAME
             pdf = AT_NAME::MicrofacetVelvet::pdf(mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::Microfacet_Refraction:
-            pdf = AT_NAME::MicrofacetRefraction::pdf(mtrl, normal, wi, wo, u, v);
+            pdf = AT_NAME::MicrofacetRefraction::pdf(*mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::Retroreflective:
             pdf = AT_NAME::Retroreflective::pdf(mtrl, normal, wi, wo, u, v);
@@ -170,7 +170,7 @@ namespace AT_NAME
         case aten::MaterialType::Velvet:
             return AT_NAME::MicrofacetVelvet::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Microfacet_Refraction:
-            return AT_NAME::MicrofacetRefraction::bsdf(mtrl, normal, wi, wo, u, v);
+            return AT_NAME::MicrofacetRefraction::bsdf(*mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Retroreflective:
             return AT_NAME::Retroreflective::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::CarPaint:

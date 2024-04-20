@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "material/material.h"
 
 namespace aten {
@@ -19,8 +21,8 @@ namespace AT_NAME
     private:
         MicrofacetRefraction(
             const aten::vec3& albedo = aten::vec3(0.5),
-            real roughness = real(0.5),
-            real ior = real(1),
+            const float roughness = 0.5F,
+            const float ior = 1.0F,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
@@ -32,81 +34,43 @@ namespace AT_NAME
         MicrofacetRefraction(aten::Values& val);
 
     public:
-        static AT_DEVICE_API real pdf(
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
+        static AT_DEVICE_API float pdf(
+            const aten::MaterialParameter& param,
+            const aten::vec3& n,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v);
+            const float u, const float v);
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
+            const aten::MaterialParameter& param,
+            const aten::vec3& n,
             const aten::vec3& wi,
-            real u, real v,
+            const float u, const float v,
             aten::sampler* sampler);
 
         static AT_DEVICE_API aten::vec3 bsdf(
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
+            const aten::MaterialParameter& param,
+            const aten::vec3& n,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v);
-
-        static AT_DEVICE_API aten::vec3 bsdf(
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real u, real v,
-            const aten::vec4& externalAlbedo);
+            const float u, const float v);
 
         static AT_DEVICE_API void sample(
-            AT_NAME::MaterialSampling* result,
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
+            AT_NAME::MaterialSampling& result,
+            const aten::MaterialParameter& param,
+            const aten::vec3& n,
             const aten::vec3& wi,
-            const aten::vec3& orgnormal,
             aten::sampler* sampler,
-            real u, real v,
-            bool isLightPath = false);
-
-        static AT_DEVICE_API void sample(
-            AT_NAME::MaterialSampling* result,
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            real u, real v,
-            const aten::vec4& externalAlbedo,
-            bool isLightPath = false);
+            const float u, const float v);
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
 
-    private:
-        static AT_DEVICE_API real pdf(
-            const real roughness,
-            real ior,
-            const aten::vec3& normal,
+        static AT_DEVICE_API void SampleMicrofacetRefraction(
+            AT_NAME::MaterialSampling& result,
+            const float roughness,
+            const float ior,
+            const aten::vec3& n,
             const aten::vec3& wi,
-            const aten::vec3& wo);
-
-        static AT_DEVICE_API aten::vec3 sampleDirection(
-            const real roughness,
-            real ior,
-            const aten::vec3& in,
-            const aten::vec3& normal,
             aten::sampler* sampler);
-
-        static AT_DEVICE_API aten::vec3 bsdf(
-            const aten::vec3& albedo,
-            const real roughness,
-            const real ior,
-            real& fresnel,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real u, real v);
     };
 }

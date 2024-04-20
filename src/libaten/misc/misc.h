@@ -13,7 +13,7 @@ namespace aten
     };
 
     template <class T>
-    inline AT_DEVICE_API void swap(T& a, T& b)
+    inline AT_DEVICE_API auto swap(T& a, T& b) -> std::enable_if_t<!std::is_const_v<T>>
     {
 #ifdef __CUDACC__
         const auto& t = a;

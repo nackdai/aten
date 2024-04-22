@@ -166,6 +166,15 @@ namespace aten
         }
 
         /**
+         * @brief Get the vertices as list.
+         * @return Vertices as list.
+         */
+        const std::vector<aten::vertex>& GetVertices() const
+        {
+            return vertices_;
+        }
+
+        /**
          * @brief Get the number of the registered vertices.
          * @return Number of the registered vertices.
          */

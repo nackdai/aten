@@ -297,46 +297,6 @@ namespace aten {
         return true;
     }
 
-    bool ObjWriter::writeMaterial(
-        const aten::context& ctxt,
-        const std::string& mtrlPath,
-        const std::vector<aten::material*>& mtrls)
-    {
-        FILE* fp = fopen(mtrlPath.c_str(), "wt");
-
-        for (const auto* mtrl : mtrls) {
-            fprintf(fp, "newmtl %s\n", mtrl->name());
-
-            const auto& param = mtrl->param();
-
-            fprintf(fp, "Ns 1.000000\n");
-            fprintf(fp, "Ka 0.000000 0.000000 0.000000\n");
-            fprintf(fp, "Kd %.6f %.6f %.6f\n", param.baseColor.x, param.baseColor.y, param.baseColor.z);
-            fprintf(fp, "Ks 0.000000 0.000000 0.000000\n");
-            fprintf(fp, "Ni 1.000000\n");
-            fprintf(fp, "d 1.000000\n");
-            fprintf(fp, "illum 2\n");
-
-            if (param.albedoMap >= 0) {
-                auto albedo = ctxt.GtTexture(param.albedoMap);
-                fprintf(fp, "map_Ka %s\n", albedo->name());
-                fprintf(fp, "map_Kd %s\n", albedo->name());
-            }
-
-            if (param.normalMap >= 0) {
-                auto normal = ctxt.GtTexture(param.normalMap);
-                fprintf(fp, "map_bump %s\n", normal->name());
-                fprintf(fp, "bump %s\n", normal->name());
-            }
-
-            fprintf(fp, "\n");
-        }
-
-        fclose(fp);
-
-        return true;
-    }
-
     bool ObjWriter::runOnThread(
         std::function<void()> funcFinish,
         const std::string& path,

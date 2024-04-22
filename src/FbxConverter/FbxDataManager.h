@@ -1,8 +1,12 @@
 #pragma once
 
+// NOTE:
+// It seems that "#define snprintf" might be defined within "fbxsdk.h".
+// And, it causes the error '_snprintf': is not a member of 'std' at the code to use std::snprintf in "defs.h".
+// To avoid it, including "defs.h before "fbxsdk.h" is necessary.
+#include "defs.h"
 #include "fbxsdk.h"
 #include "types.h"
-#include "defs.h"
 
 #include <vector>
 #include <map>

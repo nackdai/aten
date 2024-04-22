@@ -281,7 +281,7 @@ private:
             aten::MaterialLoader::load(mtrlpath, ctxt_, asset_manager_);
         }
 
-        aten::ObjLoader::load(objs_, objpath, ctxt_, asset_manager_, nullptr, true);
+        objs_ = aten::ObjLoader::load(objpath, ctxt_, asset_manager_, nullptr, true);
     }
 
     bool ParseArguments(int32_t argc, char* argv[])

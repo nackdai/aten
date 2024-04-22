@@ -270,7 +270,7 @@ private:
 
         asset_manager_.registerMtrl("m", mtrl);
 
-        aten::ObjLoader::load(objs_, args_.input, ctxt_, asset_manager_);
+        objs_ = aten::ObjLoader::load(args_.input, ctxt_, asset_manager_);
 
         for (auto& obj : objs_) {
             auto instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt_, obj, aten::mat4::Identity);

@@ -23,13 +23,14 @@ namespace aten
 
         static void setBasePath(std::string_view base);
 
-        static std::shared_ptr<aten::PolygonObject> load(
+        static std::shared_ptr<aten::PolygonObject> LoadFirstObj(
             std::string_view path,
             context& ctxt,
             aten::AssetManager& asset_manager,
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool needComputeNormalOntime = false);
-        static std::shared_ptr<aten::PolygonObject> load(
+
+        static std::shared_ptr<aten::PolygonObject> LoadFirstObjAndStoreToAssetManagerWithTag(
             std::string_view tag,
             std::string_view path,
             context& ctxt,
@@ -37,16 +38,15 @@ namespace aten
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool needComputeNormalOntime = false);
 
-        static void load(
-            std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
+        static std::vector<std::shared_ptr<aten::PolygonObject>> load(
             std::string_view path,
             context& ctxt,
             aten::AssetManager& asset_manager,
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool willSeparate = false,
             bool needComputeNormalOntime = false);
-        static void load(
-            std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
+
+        static std::vector<std::shared_ptr<aten::PolygonObject>> LoadAndStoreToAssetManagerWithTag(
             std::string_view tag,
             std::string_view path,
             context& ctxt,

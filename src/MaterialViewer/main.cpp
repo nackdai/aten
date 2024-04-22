@@ -525,7 +525,7 @@ private:
 
         asset_manager_.registerMtrl(mtrl_in_asset, mtrl);
 
-        auto obj = aten::ObjLoader::load(asset_path, ctxt_, asset_manager_);
+        auto obj = aten::ObjLoader::LoadFirstObj(asset_path, ctxt_, asset_manager_);
         auto poly_obj = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt_, obj, aten::mat4::Identity);
         scene->add(poly_obj);
 

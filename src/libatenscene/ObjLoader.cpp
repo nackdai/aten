@@ -17,20 +17,20 @@ namespace aten
         g_base = removeTailPathSeparator(base);
     }
 
-    std::shared_ptr<aten::PolygonObject> ObjLoader::load(
+    std::shared_ptr<aten::PolygonObject> ObjLoader::LoadFirstObj(
         std::string_view path,
         context& ctxt,
         aten::AssetManager& asset_manager,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
-        std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-        load(objs, path, ctxt, asset_manager, callback_crate_mtrl, needComputeNormalOntime);
+        auto objs = load(
+            path, ctxt, asset_manager, callback_crate_mtrl, needComputeNormalOntime);
 
         return (!objs.empty() ? objs[0] : nullptr);
     }
 
-    std::shared_ptr<aten::PolygonObject> ObjLoader::load(
+    std::shared_ptr<aten::PolygonObject> ObjLoader::LoadFirstObjAndStoreToAssetManagerWithTag(
         std::string_view tag,
         std::string_view path,
         context& ctxt,
@@ -38,14 +38,13 @@ namespace aten
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
-        std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-        load(objs, tag, path, ctxt, asset_manager, callback_crate_mtrl, needComputeNormalOntime);
+        auto objs = LoadAndStoreToAssetManagerWithTag(
+            tag, path, ctxt, asset_manager, callback_crate_mtrl, needComputeNormalOntime);
 
         return (!objs.empty() ? objs[0] : nullptr);
     }
 
-    void ObjLoader::load(
-        std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
+    std::vector<std::shared_ptr<aten::PolygonObject>> ObjLoader::load(
         std::string_view path,
         context& ctxt,
         aten::AssetManager& asset_manager,
@@ -53,6 +52,8 @@ namespace aten
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
     {
+        std::vector<std::shared_ptr<aten::PolygonObject>> objs;
+
         std::string pathname;
         std::string extname;
         std::string filename;
@@ -68,11 +69,11 @@ namespace aten
             fullpath = g_base + "/" + fullpath;
         }
 
-        load(objs, filename, fullpath, ctxt, asset_manager, callback_crate_mtrl, willSeparate, needComputeNormalOntime);
+        return LoadAndStoreToAssetManagerWithTag(
+            filename, fullpath, ctxt, asset_manager, callback_crate_mtrl, willSeparate, needComputeNormalOntime);
     }
 
-    void ObjLoader::load(
-        std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
+    std::vector<std::shared_ptr<aten::PolygonObject>> ObjLoader::LoadAndStoreToAssetManagerWithTag(
         std::string_view tag,
         std::string_view path,
         context& ctxt,
@@ -81,11 +82,13 @@ namespace aten
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
     {
+        std::vector<std::shared_ptr<aten::PolygonObject>> objs;
+
         auto asset_obj = asset_manager.getObj(tag);
         if (asset_obj) {
             AT_PRINTF("There is same tag object. [%s]\n", tag.data());
             objs.push_back(asset_obj);
-            return;
+            return objs;
         }
 
         std::string pathname;
@@ -108,7 +111,7 @@ namespace aten
 
         if (!result) {
             AT_PRINTF("LoadObj Err[%s]\n", path.data());
-            return;
+            return objs;
         }
 
         auto obj(aten::TransformableFactory::createObject(ctxt));
@@ -430,5 +433,7 @@ namespace aten
         AT_PRINTF("(%s)\n", path.data());
         AT_PRINTF("    %d[vertices]\n", vtxNum);
         AT_PRINTF("    %d[polygons]\n", numPolygons);
+
+        return objs;
     }
 }

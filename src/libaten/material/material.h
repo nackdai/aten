@@ -9,6 +9,7 @@
 #include "sampler/sampler.h"
 #include "texture/texture.h"
 #include "math/ray.h"
+#include "misc/misc.h"
 
 namespace AT_NAME {
     class Light;
@@ -27,12 +28,12 @@ namespace aten
         uint32_t isGlossy : 1;
     };
 
-    AT_DEVICE_API constexpr auto MaterialAttributeMicrofacet = aten::MaterialAttribute{false, false, false, true};
-    AT_DEVICE_API constexpr auto MaterialAttributeLambert = aten::MaterialAttribute{false, false, false, false};
-    AT_DEVICE_API constexpr auto MaterialAttributeEmissive = aten::MaterialAttribute{true,  false, false, false};
-    AT_DEVICE_API constexpr auto MaterialAttributeSpecular = aten::MaterialAttribute{false, true,  false, true};
-    AT_DEVICE_API constexpr auto MaterialAttributeRefraction = aten::MaterialAttribute{false, true,  true,  true};
-    AT_DEVICE_API constexpr auto MaterialAttributeTransmission = aten::MaterialAttribute{false, false, true,  false};
+    AT_DEVICE_API constexpr auto MaterialAttributeMicrofacet = aten::MaterialAttribute{ false, false, false, true };
+    AT_DEVICE_API constexpr auto MaterialAttributeLambert = aten::MaterialAttribute{ false, false, false, false };
+    AT_DEVICE_API constexpr auto MaterialAttributeEmissive = aten::MaterialAttribute{ true,  false, false, false };
+    AT_DEVICE_API constexpr auto MaterialAttributeSpecular = aten::MaterialAttribute{ false, true,  false, true };
+    AT_DEVICE_API constexpr auto MaterialAttributeRefraction = aten::MaterialAttribute{ false, true,  true,  true };
+    AT_DEVICE_API constexpr auto MaterialAttributeTransmission = aten::MaterialAttribute{ false, false, true,  false };
 
     enum class MaterialType : int32_t {
         Emissive,
@@ -588,21 +589,29 @@ namespace AT_NAME
          * @return Refract vector.
          */
         static AT_DEVICE_API aten::vec3 ComputeRefractVector(
-            const float ni, const float nt,
+            float ni, float nt,
             const aten::vec3& wi,
             const aten::vec3& n)
         {
             // NOTE:
             // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
             const auto w = -wi;
+            auto N = n;
 
-            const auto costheta = aten::abs(dot(w, n));
+            auto costheta = dot(w, n);
+
+            if (costheta < 0.0F) {
+                aten::swap(ni, nt);
+                costheta = -costheta;
+                N = -N;
+            }
+
             const auto sintheta_2 = 1.0F - costheta * costheta;
 
             const auto ni_nt = ni / nt;
             const auto ni_nt_2 = ni_nt * ni_nt;
 
-            auto wo = (ni_nt * costheta - aten::sqrt(1.0F - ni_nt_2 * sintheta_2)) * n - ni_nt * w;
+            auto wo = (ni_nt * costheta - aten::sqrt(1.0F - ni_nt_2 * sintheta_2)) * N - ni_nt * w;
             wo = normalize(wo);
 
             return wo;

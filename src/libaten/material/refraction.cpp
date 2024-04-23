@@ -106,11 +106,16 @@ namespace AT_NAME
         const auto cos_t_2 = 1.0F - (ni_nt * ni_nt * (1.0F - cos_i * cos_i));
 
         if (cos_t_2 < 0.0F) {
+#if 0
             // Relection.
             result.pdf = specular::ComputePDF();
             result.dir = specular::SampleDirection(wi, N);
             result.bsdf = specular::ComputeBRDF(result.dir, N);
             return;
+#else
+            aten::swap(ni, nt);
+            N = -N;
+#endif
         }
 
         auto wo = material::ComputeRefractVector(ni, nt, wi, N);

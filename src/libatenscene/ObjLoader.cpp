@@ -124,7 +124,7 @@ namespace aten
         for (int32_t p = 0; p < shapes.size(); p++) {
             const auto& shape = shapes[p];
 
-            if (obj && obj->getName() == nullptr) {
+            if (obj && obj->getName().empty()) {
                 obj->setName(shape.name.c_str());
             }
 
@@ -287,6 +287,7 @@ namespace aten
                                     aten::vec3(mtrl.diffuse[0], mtrl.diffuse[1], mtrl.diffuse[2]),
                                     mtrl.diffuse_texname,
                                     mtrl.bump_texname));
+                            asset_manager.registerMtrl(mtrl.name, new_mtrl);
                             dst_shape->SetMaterial(new_mtrl);
                         }
                         else {

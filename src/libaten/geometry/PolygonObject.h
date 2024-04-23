@@ -166,9 +166,9 @@ namespace AT_NAME
             name_.assign(name);
         }
 
-        const char* getName()
+        std::string getName() const
         {
-            return name_.empty() ? nullptr : name_.c_str();
+            return name_;
         }
 
     private:

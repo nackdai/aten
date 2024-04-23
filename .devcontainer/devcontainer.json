@@ -10,6 +10,9 @@
         "ms-vscode.cmake-tools",
         "twxs.cmake",
         "kriegalex.vscode-cudacpp",
-        "llvm-vs-code-extensions.vscode-clangd"
+        "llvm-vs-code-extensions.vscode-clangd",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy"
     ]
 }

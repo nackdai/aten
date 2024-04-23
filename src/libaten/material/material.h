@@ -303,6 +303,7 @@ namespace aten
 
     public:
         virtual bool edit(std::string_view name, float& param, float _min = 0.0F, float _max = 1.0F) = 0;
+        virtual bool edit(std::string_view name, bool& param) = 0;
         virtual bool edit(std::string_view name, vec3& param) = 0;
         virtual bool edit(std::string_view name, vec4& param) = 0;
 

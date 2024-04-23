@@ -15,7 +15,7 @@ namespace aten
         virtual ~MaterialParamExporter() {}
 
     public:
-        virtual bool edit(std::string_view name, real& param, real _min = real(0), real _max = real(1)) override final
+        virtual bool edit(std::string_view name, real& param, real _min, real _max) override final
         {
             char buf[32];
             snprintf(buf, AT_COUNTOF(buf), "%.3f", param);
@@ -25,6 +25,12 @@ namespace aten
             m_xmlElem->InsertEndChild(xmlMtrlAttribElem);
 
             return true;
+        }
+
+        bool edit(std::string_view name, bool& param) override final
+        {
+            AT_ASSERT(false);
+            return false;
         }
 
         virtual bool edit(std::string_view name, aten::vec3& param) override final

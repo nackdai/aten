@@ -174,11 +174,11 @@ namespace aten {
         for (uint32_t i = 0; i < triGroup.size(); i++) {
             const auto& tris = triGroup[i];
 
-            // TODO
-            // Write dummy group name...
-            fprintf(fp, "g %d\n", i);
-
             auto mtrl_name = func_get_mtrl_name(i);
+
+            // TODO
+            // Write material name as group name.
+            fprintf(fp, "g %s\n", mtrl_name);
 
             if (mtrl_name) {
                 fprintf(fp, "usemtl %s\n", mtrl_name);
@@ -266,7 +266,7 @@ namespace aten {
             writeLineFeed(fp);
 
             const auto obj_name = obj->getName();
-            if (obj_name) {
+            if (!obj_name.empty()) {
                 fprintf(fp, "g %s\n", obj_name);
             }
             else {

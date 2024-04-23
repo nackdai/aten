@@ -51,12 +51,13 @@ namespace AT_NAME
 
     bool refraction::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, real(0.01), real(10));
-        auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+        auto b0 = editor->edit("ior", m_param.standard.ior, 0.01F, 10.0F);
+        auto b1 = editor->edit("color", m_param.baseColor);
+        auto b2 = editor->edit("is_ideal_reflaction", m_param.isIdealRefraction);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
 
-        return b0 || b1;
+        return b0 || b1 || b2;
     }
 
     AT_DEVICE_API aten::vec3 refraction::ComputeBRDF(

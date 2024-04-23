@@ -12,8 +12,11 @@
 #include "atenscene.h"
 #include "idaten.h"
 
+#pragma optimize( "", off)
+
+
 #define GPU_RENDERING
-//#define WHITE_FURNACE_TEST
+#define WHITE_FURNACE_TEST
 
 #ifdef GPU_RENDERING
 constexpr int32_t WIDTH = 1280;
@@ -30,9 +33,14 @@ public:
     ~MaterialParamEditor() = default;
 
 public:
-    bool edit(std::string_view name, real& param, real _min = real(0), real _max = real(1)) override final
+    bool edit(std::string_view name, real& param, real _min, real _max) override final
     {
         return ImGui::SliderFloat(name.data(), &param, _min, _max);
+    }
+
+    bool edit(std::string_view name, bool& param) override final
+    {
+        return ImGui::Checkbox(name.data(), &param);
     }
 
     bool edit(std::string_view name, aten::vec3& param) override final
@@ -274,7 +282,6 @@ public:
                 progressive_accumulate_count_ += 1;
             }
 
-            auto mtrl = ctxt_.GetMaterialInstance(0);
             bool needUpdateMtrl = false;
 
             constexpr std::array mtrl_types = {
@@ -291,30 +298,39 @@ public:
                 "CarPaint",
                 "Disney",
             };
-            int32_t mtrlType = static_cast<int32_t>(mtrl->param().type);
-            if (ImGui::Combo("mode", &mtrlType, mtrl_types.data(), mtrl_types.size())) {
-                ctxt_.DeleteAllMaterialsAndClearList();
-                mtrl = CreateMaterial(static_cast<aten::MaterialType>(mtrlType));
-                mtrl->param().baseColor.set(1.0F);
-                needUpdateMtrl = true;
-            }
+            if (target_mtrl_) {
+                int32_t mtrlType = static_cast<int32_t>(target_mtrl_->param().type);
+                if (ImGui::Combo("mode", &mtrlType, mtrl_types.data(), mtrl_types.size())) {
+                    auto mtrl_param = target_mtrl_->param();
+                    ctxt_.DeleteAllMaterialsAndClearList();
+                    target_mtrl_ = CreateMaterial(static_cast<aten::MaterialType>(mtrlType));
+                    mtrl_param.type = static_cast<aten::MaterialType>(mtrlType);
+                    target_mtrl_->param() = mtrl_param;
+                    needUpdateMtrl = true;
+                }
 
-            {
                 bool b0 = ImGui::Checkbox("AlbedoMap", &enable_albedo_map_);
                 bool b1 = ImGui::Checkbox("NormalMap", &enable_normal_map_);
 
                 if (b0 || b1) {
-                    mtrl->setTextures(
+                    target_mtrl_->setTextures(
                         enable_albedo_map_ ? albedo_map_ : nullptr,
                         enable_normal_map_ ? normal_map_ : nullptr,
                         nullptr);
 
                     needUpdateMtrl = true;
                 }
-            }
 
-            if (mtrl->edit(&mtrl_param_editor_)) {
-                needUpdateMtrl = true;
+                if (target_mtrl_->edit(&mtrl_param_editor_)) {
+                    needUpdateMtrl = true;
+                }
+
+                if (needUpdateMtrl) {
+                    std::vector<aten::MaterialParameter> params(1);
+                    params[0] = target_mtrl_->param();
+                    renderer_.updateMaterial(params);
+                    need_renderer_reset = true;
+                }
             }
 
             {
@@ -323,13 +339,6 @@ public:
 
                 ImGui::Text("Pos (%f, %f, %f)", camPos.x, camPos.y, camPos.z);
                 ImGui::Text("At  (%f, %f, %f)", camAt.x, camAt.y, camAt.z);
-            }
-
-            if (needUpdateMtrl) {
-                std::vector<aten::MaterialParameter> params(1);
-                params[0] = mtrl->param();
-                renderer_.updateMaterial(params);
-                need_renderer_reset = true;
             }
 
             if (need_renderer_reset) {
@@ -357,6 +366,17 @@ public:
             0);
 
         visualizer_->renderPixelData(host_renderer_dst_.image().data(), camera_.needRevert());
+
+        {
+            auto screen_shot_file_name = aten::StringFormat("sc_%d.png", screen_shot_count_);
+
+            visualizer_->takeScreenshot(screen_shot_file_name);
+
+            will_take_screen_shot_ = false;
+            screen_shot_count_++;
+
+            AT_PRINTF("Take Screenshot[%s]\n", screen_shot_file_name.c_str());
+        }
 #endif
 
         return true;
@@ -498,15 +518,16 @@ private:
 
     void MakeScene(aten::scene* scene)
     {
+#if 0
         aten::MaterialParameter mtrlParam;
-        mtrlParam.type = aten::MaterialType::Velvet;
+        mtrlParam.type = aten::MaterialType::Microfacet_Refraction;
 #ifdef WHITE_FURNACE_TEST
         mtrlParam.baseColor = aten::vec3(1.0F);
 #else
         mtrlParam.baseColor = aten::vec3(0.580000f, 0.580000f, 0.580000f);
 #endif
-        mtrlParam.standard.ior = 1.5F;
-        mtrlParam.standard.roughness = 0.5F;
+        mtrlParam.standard.ior = 1.333F;
+        mtrlParam.standard.roughness = 0.011F;
 
         auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
             mtrlParam,
@@ -515,7 +536,7 @@ private:
 #if 0
         constexpr char* asset_path = "../../asset/suzanne/suzanne.obj";
         constexpr char* mtrl_in_asset = "Material.001";
-#elif 1
+#elif 0
         constexpr char* asset_path = "../../asset/teapot/teapot.obj";
         constexpr char* mtrl_in_asset = "m1";
 #else
@@ -523,6 +544,7 @@ private:
         constexpr char* mtrl_in_asset = "m1";
 #endif
 
+        target_mtrl_ = mtrl;
         asset_manager_.registerMtrl(mtrl_in_asset, mtrl);
 
         auto obj = aten::ObjLoader::LoadFirstObj(asset_path, ctxt_, asset_manager_);
@@ -534,6 +556,67 @@ private:
         //normal_map_ = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
 
         obj->getShapes()[0]->GetMaterial()->setTextures(albedo_map_, normal_map_, nullptr);
+#else
+        constexpr char* asset_path = "../../asset/cornellbox/bunny_in_box.obj";
+
+        aten::MaterialParameter mtrl_param;
+        mtrl_param.type = aten::MaterialType::Microfacet_Refraction;
+        mtrl_param.baseColor = aten::vec3(0.580000f, 0.580000f, 0.580000f);
+        mtrl_param.standard.ior = 1.333F;
+        mtrl_param.standard.roughness = 0.011F;
+
+        auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
+            mtrl_param,
+            nullptr, nullptr, nullptr);
+
+        target_mtrl_ = mtrl;
+        asset_manager_.registerMtrl("material_0", mtrl);
+
+        auto objs = aten::ObjLoader::load(asset_path, ctxt_, asset_manager_,
+            [&](std::string_view name, aten::context& ctxt,
+                aten::MaterialType type, const aten::vec3& mtrl_clr,
+                const std::string& albedo, const std::string& nml) -> auto {
+            (void)albedo;
+            (void)nml;
+
+            aten::MaterialParameter param;
+
+            if (name == "light") {
+                param.type = aten::MaterialType::Emissive;
+                param.baseColor = aten::vec3(1.0F);
+            }
+            else {
+                param.type = aten::MaterialType::Lambert;
+                param.baseColor = mtrl_clr;
+            }
+
+            auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(param, nullptr, nullptr, nullptr);
+            mtrl->setName(name.data());
+            return mtrl;
+        }, true, true);
+
+        auto it = std::find_if(objs.begin(), objs.end(), [](const decltype(objs)::value_type& o) { return o->getName() == "light"; });
+        if (it != objs.end()) {
+            auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
+                ctxt_,
+                *it,
+                aten::vec3(0.0f),
+                aten::vec3(0.0f),
+                aten::vec3(1.0f));
+            scene->add(light);
+
+            auto emit = asset_manager_.getMtrl("light");
+            auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 200.0f);
+            ctxt_.AddLight(areaLight);
+        }
+
+        for (const auto& obj : objs) {
+            if (obj->getName() != "light") {
+                auto tranformable = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt_, obj, aten::mat4::Identity);
+                scene->add(tranformable);
+            }
+        }
+#endif
     }
 
     std::shared_ptr<aten::material> CreateMaterial(aten::MaterialType type)
@@ -604,6 +687,7 @@ private:
     aten::context ctxt_;
 
     aten::AssetManager asset_manager_;
+    std::shared_ptr<aten::material> target_mtrl_;
 
     idaten::PathTracing renderer_;
 

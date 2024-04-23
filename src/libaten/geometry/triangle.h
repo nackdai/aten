@@ -3,13 +3,11 @@
 #include <atomic>
 
 #include "types.h"
-#include "material/material.h"
 #include "math/mat4.h"
 #include "geometry/geomparam.h"
 #include "geometry/transformable.h"
 #include "geometry/NoHitableMesh.h"
 #include "geometry/vertex.h"
-#include "scene/host_scene_context.h"
 
 namespace AT_NAME
 {

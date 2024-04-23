@@ -9,6 +9,7 @@
 #include "sampler/sampler.h"
 #include "texture/texture.h"
 #include "math/ray.h"
+#include "misc/misc.h"
 
 namespace AT_NAME {
     class Light;
@@ -27,12 +28,12 @@ namespace aten
         uint32_t isGlossy : 1;
     };
 
-    AT_DEVICE_API constexpr auto MaterialAttributeMicrofacet = aten::MaterialAttribute{false, false, false, true};
-    AT_DEVICE_API constexpr auto MaterialAttributeLambert = aten::MaterialAttribute{false, false, false, false};
-    AT_DEVICE_API constexpr auto MaterialAttributeEmissive = aten::MaterialAttribute{true,  false, false, false};
-    AT_DEVICE_API constexpr auto MaterialAttributeSpecular = aten::MaterialAttribute{false, true,  false, true};
-    AT_DEVICE_API constexpr auto MaterialAttributeRefraction = aten::MaterialAttribute{false, true,  true,  true};
-    AT_DEVICE_API constexpr auto MaterialAttributeTransmission = aten::MaterialAttribute{false, false, true,  false};
+    AT_DEVICE_API constexpr auto MaterialAttributeMicrofacet = aten::MaterialAttribute{ false, false, false, true };
+    AT_DEVICE_API constexpr auto MaterialAttributeLambert = aten::MaterialAttribute{ false, false, false, false };
+    AT_DEVICE_API constexpr auto MaterialAttributeEmissive = aten::MaterialAttribute{ true,  false, false, false };
+    AT_DEVICE_API constexpr auto MaterialAttributeSpecular = aten::MaterialAttribute{ false, true,  false, true };
+    AT_DEVICE_API constexpr auto MaterialAttributeRefraction = aten::MaterialAttribute{ false, true,  true,  true };
+    AT_DEVICE_API constexpr auto MaterialAttributeTransmission = aten::MaterialAttribute{ false, false, true,  false };
 
     enum class MaterialType : int32_t {
         Emissive,
@@ -40,11 +41,9 @@ namespace aten
         OrneNayar,
         Specular,
         Refraction,
-        Blinn,
         GGX,
         Beckman,
         Velvet,
-        Lambert_Refraction,
         Microfacet_Refraction,
         Retroreflective,
         CarPaint,
@@ -223,10 +222,9 @@ namespace aten
 
         MaterialAttribute attrib;
 
-        struct {
-            uint32_t id : 16;
-            uint32_t isIdealRefraction : 1;
-        };
+        uint16_t id;
+        bool isIdealRefraction{ false };
+        uint8_t padding{ 0 };
 
         struct {
             int32_t albedoMap;
@@ -305,7 +303,8 @@ namespace aten
         virtual ~IMaterialParamEditor() {}
 
     public:
-        virtual bool edit(std::string_view name, real& param, real _min = real(0), real _max = real(1)) = 0;
+        virtual bool edit(std::string_view name, float& param, float _min = 0.0F, float _max = 1.0F) = 0;
+        virtual bool edit(std::string_view name, bool& param) = 0;
         virtual bool edit(std::string_view name, vec3& param) = 0;
         virtual bool edit(std::string_view name, vec4& param) = 0;
 
@@ -350,9 +349,6 @@ namespace AT_NAME
         aten::vec3 dir;
         aten::vec3 bsdf;
         real pdf{ real(0) };
-        real fresnel{ real(1) };
-
-        real subpdf{ real(1) };
 
         AT_DEVICE_API MaterialSampling() {}
         AT_DEVICE_API MaterialSampling(const aten::vec3& d, const aten::vec3& b, real p)
@@ -514,7 +510,12 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& normal)
         {
-            const auto cosi = dot(normal, wi);
+            auto cosi = dot(normal, wi);
+            // Potentially flip interface orientation for Fresnel equations.
+            if (cosi < 0) {
+                aten::swap(ni, nt);
+                cosi = -cosi;
+            }
 
             const auto nnt = ni / nt;
             const auto sini2 = real(1.0) - cosi * cosi;
@@ -528,28 +529,103 @@ namespace AT_NAME
             return Rsp;
         }
 
-        static AT_DEVICE_API real computeFresnelShlick(
-            real ni, real nt,
+        /**
+         * @brief Compute schlick's fresnel.
+         * @param[in] ni Index of refraction of the media on the incident side.
+         * @param[in] nt Index of refraction of the media on the transmitted side.
+         * @param[in] w Direction to compute fresnel.
+         * @param[in] n Normal vector on surface.
+         * @return fresnel.
+         * @note If normal is half vector between incident vector and output vector,
+         *       this API can be accept whichever incident vector or output vector as `w`.
+         *       Because, dot(w, n) is computed in this API, if normal is half vector, result of dot is the same between both.
+         */
+        static inline AT_DEVICE_API float ComputeSchlickFresnel(
+            float ni, float nt,
+            const aten::vec3& w,
+            const aten::vec3& n)
+        {
+            auto costheta = dot(w, n);
+
+            // Potentially flip interface orientation for Fresnel equations.
+            if (costheta < 0) {
+                aten::swap(ni, nt);
+                costheta = -costheta;
+            }
+
+            // NOTE:
+            // https://qiita.com/emadurandal/items/76348ad118c36317ec5c#f%E3%83%95%E3%83%AC%E3%83%8D%E3%83%AB%E9%A0%85
+            // If normal is half vector between incident vectorand output vector,
+            // `w` is acceptable as whichever incident vector or output vector.
+            // Because, shkick fresnel use cos_theta, if normal is half vector, cos_theta is the same between dot(V, H) and dot(L, H).
+
+            // NOTE:
+            // http://d.hatena.ne.jp/hanecci/20130525/p3
+
+            // NOTE:
+            // F_schlick(v,h) ≒ f0 + (1 - f0)(1 - cos_theta)^5
+            // f0 = pow((1 - ior) / (1 + ior), 2)
+            // ior = nt / ni
+            // f0 = pow((1 - ior) / (1 + ior), 2)
+            //    = pow((1 - nt/ni) / (1 + nt/ni), 2)
+            //    = pow((ni - nt) / (ni + nt), 2)
+            auto f0 = (ni - nt) / (ni + nt);
+            f0 = f0 * f0;
+
+            const auto fresnel = f0 + (1 - f0) * aten::pow((1 - costheta), 5);
+            return fresnel;
+        }
+
+        /**
+         * @brief Compute ideal reflection vector.
+         * @param[in] wi Incident vector.
+         * @param[in] n Normal vector on surface.
+         * @return Ideal reflection vector.
+         */
+        static AT_DEVICE_API aten::vec3 ComputeReflectVector(
             const aten::vec3& wi,
             const aten::vec3& n)
         {
-            float F = 1;
-            {
-                // http://d.hatena.ne.jp/hanecci/20130525/p3
+            auto wo = wi - 2 * dot(wi, n) * n;
+            wo = normalize(wo);
+            return wo;
+        }
 
-                // NOTE
-                // Fschlick(v,h) ≒ R0 + (1 - R0)(1 - cosΘ)^5
-                // R0 = ((n1 - n2) / (n1 + n2))^2
+        /**
+         * @brief Compute refract vector.
+         * @param[in] ni Index of refraction of the media on the incident side.
+         * @param[in] nt Index of refraction of the media on the transmitted side.
+         * @param[in] wi Incident vector.
+         * @param[in] n Normal vector on surface.
+         * @return Refract vector.
+         */
+        static AT_DEVICE_API aten::vec3 ComputeRefractVector(
+            float ni, float nt,
+            const aten::vec3& wi,
+            const aten::vec3& n)
+        {
+            // NOTE:
+            // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
+            const auto w = -wi;
+            auto N = n;
 
-                float r0 = (ni - nt) / (ni + nt);
-                r0 = r0 * r0;
+            auto costheta = dot(w, n);
 
-                float c = aten::abs(dot(wi, n));
-
-                F = r0 + (1 - r0) * pow((1 - c), 5);
+            if (costheta < 0.0F) {
+                aten::swap(ni, nt);
+                costheta = -costheta;
+                N = -N;
             }
 
-            return F;
+            const auto sintheta_2 = 1.0F - costheta * costheta;
+
+            const auto ni_nt = ni / nt;
+            const auto ni_nt_2 = ni_nt * ni_nt;
+
+            auto wo = (ni_nt * costheta - aten::sqrt(1.0F - ni_nt_2 * sintheta_2)) * N - ni_nt * w;
+            wo = normalize(wo);
+
+            return wo;
         }
 
         static AT_DEVICE_API aten::vec4 sampleAlbedoMap(
@@ -572,17 +648,6 @@ namespace AT_NAME
             bool is_light_path = false);
 #endif
 
-        static AT_DEVICE_API void sampleMaterialWithExternalAlbedo(
-            AT_NAME::MaterialSampling* result,
-            const aten::MaterialParameter* dst_mtrl,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            real pre_sampled_r,
-            float u, float v,
-            const aten::vec4& externalAlbedo);
-
         static AT_DEVICE_API real samplePDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
@@ -590,29 +655,12 @@ namespace AT_NAME
             const aten::vec3& wo,
             real u, real v);
 
-        static AT_DEVICE_API aten::vec3 sampleDirection(
-            const aten::MaterialParameter* dst_mtrl,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            real u, real v,
-            aten::sampler* sampler,
-            real pre_sampled_r);
-
         static AT_DEVICE_API aten::vec3 sampleBSDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v,
-            real pre_sampled_r);
-
-        static AT_DEVICE_API aten::vec3 sampleBSDFWithExternalAlbedo(
-            const aten::MaterialParameter* dst_mtrl,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real u, real v,
-            const aten::vec4& externalAlbedo,
             real pre_sampled_r);
 
         static AT_DEVICE_API real applyNormal(

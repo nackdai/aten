@@ -303,9 +303,10 @@ namespace AT_NAME
             auto cosShadow = dot(hit_nml, dirToLight);
 
             real path_pdf{ AT_NAME::material::samplePDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v) };
-            auto bsdf{ AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, external_albedo, pre_sampled_r) };
+            auto bsdf{ AT_NAME::material::sampleBSDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, pre_sampled_r) };
 
             bsdf *= throughtput.throughput;
+            bsdf *= static_cast<aten::vec3>(external_albedo);
 
             // Get light color.
             const auto& emit{ sampleres.light_color };
@@ -546,21 +547,20 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::MaterialParameter& mtrl,
         const AT_NAME::MaterialSampling& sampling,
+        const aten::vec3& albedo,
         AT_NAME::Path& paths,
         aten::ray* rays)
     {
-        auto nextDir = normalize(sampling.dir);
-        auto pdfb = sampling.pdf;
-        auto bsdf = sampling.bsdf;
+        const auto next_dir = normalize(sampling.dir);
+        const auto pdfb = sampling.pdf;
+        const auto bsdf = sampling.bsdf;
 
-        // Get normal to add ray offset.
-        // In refraction material case, new ray direction might be computed with inverted normal.
-        // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
-        auto rayBasedNormal{ (!is_backfacing && mtrl.attrib.isTranslucent)
-            ? -normal
-            : normal };
+        auto ray_along_normal = rec.normal;
 
-        auto c = dot(rayBasedNormal, static_cast<aten::vec3>(nextDir));
+        // Adjust the surface normal to along with the same direction as the next ray.
+        ray_along_normal = dot(ray_along_normal, next_dir) >= 0.0f ? ray_along_normal : -ray_along_normal;
+
+        auto c = dot(ray_along_normal, static_cast<aten::vec3>(next_dir));
 
         if (pdfb > 0 && c > 0) {
             paths.throughput[idx].throughput *= bsdf * c / pdfb;
@@ -571,12 +571,13 @@ namespace AT_NAME
             return;
         }
 
+        paths.throughput[idx].throughput *= albedo;
         paths.throughput[idx].pdfb = pdfb;
         paths.attrib[idx].isSingular = mtrl.attrib.isSingular;
         paths.attrib[idx].mtrlType = mtrl.type;
 
         // Make next ray.
-        rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
+        rays[idx] = aten::ray(rec.p, next_dir, ray_along_normal);
     }
 
     template <class SCENE = void, bool ENABLE_ALPHA_TRANLUCENT=false>
@@ -686,6 +687,7 @@ namespace AT_NAME
             rec, isBackfacing, russianProb,
             orienting_normal,
             mtrl, sampling,
+            albedo,
             paths, rays);
     }
 }

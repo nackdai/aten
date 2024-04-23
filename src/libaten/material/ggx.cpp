@@ -11,19 +11,19 @@ namespace AT_NAME
     // NOTE
     // http://qiita.com/_Pheema_/items/f1ffb2e38cc766e6e668
 
-    AT_DEVICE_API real MicrofacetGGX::pdf(
+    AT_DEVICE_API float MicrofacetGGX::pdf(
         const aten::MaterialParameter* param,
-        const aten::vec3& normal,
+        const aten::vec3& n,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
         auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
             u, v,
             aten::vec4(param->standard.roughness));
 
-        auto ret = pdf(roughness.r, normal, wi, wo);
+        auto ret = ComputePDF(roughness.r, n, wi, wo);
         return ret;
     }
 
@@ -31,7 +31,7 @@ namespace AT_NAME
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
-        real u, real v,
+        float u, float v,
         aten::sampler* sampler)
     {
         auto roughness = AT_NAME::sampleTexture(
@@ -39,7 +39,7 @@ namespace AT_NAME
             u, v,
             aten::vec4(param->standard.roughness));
 
-        aten::vec3 dir = sampleDirection(roughness.r, normal, wi, sampler);
+        aten::vec3 dir = SampleDirection(roughness.r, normal, wi, sampler);
 
         return dir;
     }
@@ -49,296 +49,208 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
         auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
             u, v,
             aten::vec4(param->standard.roughness));
 
-        auto albedo = param->baseColor;
-        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
+        float ior = param->standard.ior;
 
-        real fresnel = 1;
-        real ior = param->standard.ior;
-
-        aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
+        aten::vec3 ret = ComputeBRDF(roughness.r, ior, normal, wi, wo);
         return ret;
     }
 
-    AT_DEVICE_API aten::vec3 MicrofacetGGX::bsdf(
+    AT_DEVICE_API void MicrofacetGGX::sample(
+        AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        const aten::vec4& externalAlbedo)
+        const aten::vec3& orgnormal,
+        aten::sampler* sampler,
+        float u, float v)
     {
         auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
             u, v,
             aten::vec4(param->standard.roughness));
 
-        auto albedo = param->baseColor;
-        albedo *= externalAlbedo;
+        result->dir = SampleDirection(roughness.r, wi, normal, sampler);
+        result->pdf = ComputePDF(roughness.r, normal, wi, result->dir);
 
-        real fresnel = 1;
-        real ior = param->standard.ior;
+        float ior = param->standard.ior;
 
-        aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
-        return ret;
+        result->bsdf = ComputeBRDF(roughness.r, ior, normal, wi, result->dir);
     }
 
-    AT_DEVICE_API real MicrofacetGGX::sampleGGX_D(
-        const aten::vec3& wh,    // half
-        const aten::vec3& n,    // normal
-        real roughness)
+    AT_DEVICE_API float MicrofacetGGX::ComputeDistribution(
+        const aten::vec3& m,
+        const aten::vec3& n,
+        float roughness)
     {
-        // NOTE
-        // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+        const auto a = roughness;
+        const auto a2 = a * a;
 
-        // NOTE
-        // ((a^2 - 1) * cos^2 + 1)^2
-        // (-> a^2 = a2, cos^2 = cos2)
-        // ((a2 - 1) * cos2 + 1)^2
-        //  = (a2cos2 + 1 - cos2)^2 = (a2cos2 + sin2)^2
-        // (-> sin = sqrt(1 - cos2), sin2 = 1 - cos2)
-        //  = a4 * cos4 + 2 * a2 * cos2 * sin2 + sin4
-        //  = cos4 * (a4 + 2 * a2 * (sin2 / cos2) + (sin4 / cos4))
-        //  = cos4 * (a4 + 2 * a2 * tan2 + tan4)
-        //  = cos4 * (a2 + tan2)^2
-        //  = (cos2 * (a2 + tan2))^2
-        // (tan = sin / cos -> tan2 = sin2 / cos2)
-        //  = (a2 * cos2 + sin2)^2
-        //  = (a2 * cos2 + (1 - cos2))^2
-        //  = ((a2 - 1) * cos2 + 1)^2
+        const auto costheta = aten::abs(dot(m, n));
+        const auto cos2 = costheta * costheta;
 
-        real a = roughness;
-        auto a2 = a * a;
+        const auto denom = (a2 - 1) * cos2 + 1.0f;
+        const auto denom2 = denom * denom;
 
-        auto costheta = aten::abs(dot(wh, n));
-        auto cos2 = costheta * costheta;
-
-        auto denom = aten::pow((a2 - 1) * cos2 + 1, 2);
-
-        auto D = denom > 0 ? a2 / (AT_MATH_PI * denom) : 0;
+        const auto D = denom > 0 ? a2 / (AT_MATH_PI * denom2) : 0;
 
         return D;
     }
 
-    AT_DEVICE_API real MicrofacetGGX::computeGGXSmithG1(real roughness, const aten::vec3& v, const aten::vec3& n)
+    AT_DEVICE_API float MicrofacetGGX::ComputeG2Smith(
+        float roughness,
+        const aten::vec3& view,
+        const aten::vec3& light,
+        const aten::vec3& n)
     {
-        // NOTE
-        // http://computergraphics.stackexchange.com/questions/2489/correct-form-of-the-ggx-geometry-term
-        // http://gregory-igehy.hatenadiary.com/entry/2015/02/26/154142
-
-        real a = roughness;
-
-        real costheta = aten::abs(dot(v, n));
-
-        real sintheta = aten::sqrt(1 - aten::clamp<real>(costheta * costheta, 0, 1));
-        real tan = costheta > 0 ? sintheta / costheta : 0;
-
-        real denom = aten::sqrt(1 + a * a * tan * tan);
-
-        real ret = 2 / (1 + denom);
-
-        return ret;
+        const auto lambda_wi = Lambda(roughness, view, n);
+        const auto lambda_wo = Lambda(roughness, light, n);
+        const auto g2 = 1.0f / (1.0f + lambda_wi + lambda_wo);
+        return g2;
     }
 
-    AT_DEVICE_API real MicrofacetGGX::pdf(
-        real roughness,
-        const aten::vec3& normal,
+    AT_DEVICE_API float MicrofacetGGX::Lambda(
+        float roughness,
+        const aten::vec3& w,
+        const aten::vec3& n)
+    {
+        // NOTE:
+        // https://jcgt.org/published/0003/02/03/paper.pdf
+        // 5.3.
+        const auto alpha = roughness;
+
+        const auto cos_theta = aten::abs(dot(w, n));
+        const auto cos2 = cos_theta * cos_theta;
+
+        const auto sin2 = 1.0f - cos2;
+        const auto tan2 = sin2 / cos2;
+
+        const auto a2 = 1.0f / (alpha * alpha * tan2);
+
+        const auto lambda = (-1.0f + aten::sqrt(1.0f + 1.0f / a2)) / 2.0f;
+
+        return lambda;
+    }
+
+    AT_DEVICE_API float  MicrofacetGGX::ComputePDF(
+        const float roughness,
+        const aten::vec3& n,
         const aten::vec3& wi,
         const aten::vec3& wo)
     {
-        // NOTE
-        // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
-        // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+        const auto wh = normalize(-wi + wo);
+        const auto pdf = ComputePDFWithHalfVector(roughness, n, wh, wo);
+        return pdf;
+    }
 
-        auto wh = normalize(-wi + wo);
+    AT_DEVICE_API float MicrofacetGGX::ComputePDFWithHalfVector(
+        const float roughness,
+        const aten::vec3& n,
+        const aten::vec3& m,
+        const aten::vec3& wo)
+    {
+        const auto D = ComputeDistribution(m, n, roughness);
 
-        auto costheta = aten::abs(dot(wh, normal));
+        const auto costheta = aten::abs(dot(m, n));
 
-        auto D = sampleGGX_D(wh, normal, roughness);
+        // For Jacobian |dwh/dwo|
+        const auto denom = 4 * aten::abs(dot(wo, m));
 
-        auto denom = 4 * aten::abs(dot(wo, wh));
-
-        auto pdf = denom > 0 ? (D * costheta) / denom : 0;
+        const auto pdf = denom > 0 ? (D * costheta) / denom : 0;
 
         return pdf;
     }
 
-    AT_DEVICE_API aten::vec3 MicrofacetGGX::sampleDirection(
-        real roughness,
-        const aten::vec3& in,
-        const aten::vec3& normal,
+    AT_DEVICE_API aten::vec3  MicrofacetGGX::SampleDirection(
+        const float roughness,
+        const aten::vec3& wi,
+        const aten::vec3& n,
         aten::sampler* sampler)
     {
-        const auto w = sampleNormal(roughness, normal, sampler);
+        const auto r1 = sampler->nextSample();
+        const auto r2 = sampler->nextSample();
 
-        auto dir = in - 2 * dot(in, w) * w;
+        const auto m = SampleMicrosurfaceNormal(roughness, n, r1, r2);
 
-        return dir;
+        // We can assume ideal reflection on each micro surface.
+        // So, compute ideal reflection vector based on micro surface normal.
+        const auto wo = material::ComputeReflectVector(wi, m);
+
+        return wo;
     }
 
-    AT_DEVICE_API aten::vec3 MicrofacetGGX::sampleNormal(
-        const real roughness,
-        const aten::vec3& normal,
-        aten::sampler* sampler)
+    AT_DEVICE_API aten::vec3  MicrofacetGGX::SampleMicrosurfaceNormal(
+        const float roughness,
+        const aten::vec3& n,
+        float r1, float r2)
     {
-        auto r1 = sampler->nextSample();
-        auto r2 = sampler->nextSample();
-
-        auto a = roughness;
+        const auto a = roughness;
 
         auto theta = aten::atan(a * aten::sqrt(r1 / (1 - r1)));
         theta = ((theta >= 0) ? theta : (theta + 2 * AT_MATH_PI));
 
-        auto phi = 2 * AT_MATH_PI * r2;
+        const auto phi = 2 * AT_MATH_PI * r2;
 
-        auto costheta = aten::cos(theta);
-        auto sintheta = aten::sqrt(1 - costheta * costheta);
+        const auto costheta = aten::cos(theta);
+        const auto sintheta = aten::sqrt(1 - costheta * costheta);
 
-        auto cosphi = aten::cos(phi);
-        auto sinphi = aten::sqrt(1 - cosphi * cosphi);
+        const auto cosphi = aten::cos(phi);
+        const auto sinphi = aten::sqrt(1 - cosphi * cosphi);
 
         // Ortho normal base.
-        auto n = normal;
-        auto t = aten::getOrthoVector(normal);
-        auto b = normalize(cross(n, t));
+        const auto t = aten::getOrthoVector(n);
+        const auto b = normalize(cross(n, t));
 
-        auto w = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
-        w = normalize(w);
+        auto m = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
+        m = normalize(m);
 
-        return w;
+        return m;
     }
 
-    AT_DEVICE_API aten::vec3 MicrofacetGGX::bsdf(
-        const aten::vec3& albedo,
-        const real roughness,
-        const real ior,
-        real& fresnel,
-        const aten::vec3& normal,
+    AT_DEVICE_API aten::vec3 MicrofacetGGX::ComputeBRDF(
+        const float roughness,
+        const float ior,
+        const aten::vec3& n,
         const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v)
+        const aten::vec3& wo)
     {
-        // レイが入射してくる側の物体の屈折率.
-        real ni = real(1);    // 真空
+        const auto V = -wi;
+        const auto L = wo;
+        const auto N = n;
 
-        real nt = ior;        // 物体内部の屈折率.
+        // We can assume ideal reflection on each micro surface.
+        // It means wo (= L) is computed as ideal reflection vector.
+        // Then, we can compute micro surface normal as the half vector between incident and output vector.
+        const auto H = normalize(L + V);
 
-        aten::vec3 V = -wi;
-        aten::vec3 L = wo;
-        aten::vec3 N = normal;
-        aten::vec3 H = normalize(L + V);
+        auto NL = aten::abs(dot(N, L));
+        auto NV = aten::abs(dot(N, V));
 
-        // TODO
-        // Desneyだとabsしてないが、AMDのはしている....
-        auto NdotH = aten::abs(dot(N, H));
-        auto VdotH = aten::abs(dot(V, H));
-        auto NdotL = aten::abs(dot(N, L));
-        auto NdotV = aten::abs(dot(N, V));
+        // Assume index of refraction of the media on the incident side is vacuum.
+        const auto ni = 1.0F;
+        const auto nt = ior;
 
-        // Compute D.
-        real D = sampleGGX_D(H, N, roughness);
+        const auto D = ComputeDistribution(H, N, roughness);
+        const auto G = ComputeG2Smith(roughness, V, L, N);
+        const auto F = material::ComputeSchlickFresnel(ni, nt, L, H);
 
-        // Compute G.
-        real G(1);
-        {
-            auto G1_lh = computeGGXSmithG1(roughness, L, N);
-            auto G1_vh = computeGGXSmithG1(roughness, V, N);
+        const auto denom = 4 * NL * NV;
 
-            G = G1_lh * G1_vh;
-        }
+        const auto bsdf = denom > AT_MATH_EPSILON ? F * G * D / denom : 0.0f;
 
-        real F(1);
-        {
-            // http://d.hatena.ne.jp/hanecci/20130525/p3
-
-            // NOTE
-            // Fschlick(v,h) ≒ R0 + (1 - R0)(1 - cosΘ)^5
-            // R0 = ((n1 - n2) / (n1 + n2))^2
-
-            auto r0 = (ni - nt) / (ni + nt);
-            r0 = r0 * r0;
-
-            auto LdotH = aten::abs(dot(L, H));
-
-            F = r0 + (1 - r0) * aten::pow((1 - LdotH), 5);
-        }
-
-        auto denom = 4 * NdotL * NdotV;
-
-        auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : aten::vec3(0);
-
-        fresnel = F;
-
-        return bsdf;
-    }
-
-    AT_DEVICE_API void MicrofacetGGX::sample(
-        AT_NAME::MaterialSampling* result,
-        const aten::MaterialParameter* param,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real u, real v,
-        bool isLightPath/*= false*/)
-    {
-        auto roughness = AT_NAME::sampleTexture(
-            param->roughnessMap,
-            u, v,
-            aten::vec4(param->standard.roughness));
-
-        result->dir = sampleDirection(roughness.r, wi, normal, sampler);
-        result->pdf = pdf(roughness.r, normal, wi, result->dir);
-
-        auto albedo = param->baseColor;
-        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
-
-        real fresnel = 1;
-        real ior = param->standard.ior;
-
-        result->bsdf = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, result->dir, u, v);
-        result->fresnel = fresnel;
-    }
-
-    AT_DEVICE_API void MicrofacetGGX::sample(
-        AT_NAME::MaterialSampling* result,
-        const aten::MaterialParameter* param,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real u, real v,
-        const aten::vec4& externalAlbedo,
-        bool isLightPath/*= false*/)
-    {
-        auto roughness = AT_NAME::sampleTexture(
-            param->roughnessMap,
-            u, v,
-            aten::vec4(param->standard.roughness));
-
-        result->dir = sampleDirection(roughness.r, wi, normal, sampler);
-        result->pdf = pdf(roughness.r, normal, wi, result->dir);
-
-        auto albedo = param->baseColor;
-        albedo *= externalAlbedo;
-
-        real fresnel = 1;
-        real ior = param->standard.ior;
-
-        result->bsdf = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, result->dir, u, v);
-        result->fresnel = fresnel;
+        return aten::vec3(bsdf);
     }
 
     bool MicrofacetGGX::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param.standard, roughness);
-        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, real(0.01), real(10));
+        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0.01F, 1.0F);
+        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, 0.01F, 10.0F);
         auto b2 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);

@@ -55,7 +55,7 @@ namespace AT_NAME
             const aten::vec3& wo,
             real u, real v)
         {
-            auto ret = lambert::bsdf(param, u, v);
+            auto ret = lambert::bsdf(param);
             return ret;
         }
 
@@ -63,7 +63,7 @@ namespace AT_NAME
             const aten::MaterialParameter* param,
             const aten::vec3& externalAlbedo)
         {
-            auto ret = lambert::bsdf(param, externalAlbedo);
+            auto ret = lambert::bsdf(param);
             return ret;
         }
 

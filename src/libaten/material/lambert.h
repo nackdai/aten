@@ -1,8 +1,6 @@
 #pragma once
 
 #include "material/material.h"
-#include "texture/texture.h"
-#include "material/sample_texture.h"
 
 namespace aten {
     class Values;
@@ -28,56 +26,18 @@ namespace AT_NAME
         virtual ~lambert() {}
 
     public:
-        static AT_HOST_DEVICE_API real pdf(
+        static AT_DEVICE_API real pdf(
             const aten::vec3& normal,
             const aten::vec3& wo)
         {
-            auto c = dot(normal, wo);
-            //AT_ASSERT(c >= 0);
-            c = aten::abs(c);
-
-            auto ret = c / AT_MATH_PI;
-
-            return ret;
+            return ComputePDF(normal, wo);
         }
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
             const aten::vec3& normal,
             real r1, real r2)
         {
-            // normalの方向を基準とした正規直交基底(w, u, v)を作る.
-            // この基底に対する半球内で次のレイを飛ばす.
-#if 1
-            auto n = normal;
-            auto t = aten::getOrthoVector(n);
-            auto b = cross(n, t);
-#else
-            aten::vec3 n, t, b;
-
-            n = normal;
-
-            // nと平行にならないようにする.
-            if (fabs(n.x) > AT_MATH_EPSILON) {
-                t = normalize(cross(aten::vec3(0.0, 1.0, 0.0), n));
-            }
-            else {
-                t = normalize(cross(aten::vec3(1.0, 0.0, 0.0), n));
-            }
-            b = cross(n, t);
-#endif
-
-            // コサイン項を使った重点的サンプリング.
-            r1 = 2 * AT_MATH_PI * r1;
-            const real r2s = sqrt(r2);
-
-            const real x = aten::cos(r1) * r2s;
-            const real y = aten::sin(r1) * r2s;
-            const real z = aten::sqrt(real(1) - r2);
-
-            aten::vec3 dir = normalize((t * x + b * y + n * z));
-            AT_ASSERT(dot(normal, dir) >= 0);
-
-            return dir;
+            return SampleDirection(normal, r1, r2);
         }
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
@@ -87,32 +47,12 @@ namespace AT_NAME
             const auto r1 = sampler->nextSample();
             const auto r2 = sampler->nextSample();
 
-            return sampleDirection(normal, r1, r2);
+            return SampleDirection(normal, r1, r2);
         }
 
-        static AT_DEVICE_API aten::vec3 bsdf(
-            const aten::MaterialParameter* param,
-            real u, real v)
+        static AT_DEVICE_API aten::vec3 bsdf(const aten::MaterialParameter* param)
         {
-            auto albedo = param->baseColor;
-            albedo *= sampleTexture(
-                param->albedoMap,
-                u, v,
-                aten::vec4(real(1)));
-
-            aten::vec3 ret = albedo / AT_MATH_PI;
-            return ret;
-        }
-
-        static AT_HOST_DEVICE_API aten::vec3 bsdf(
-            const aten::MaterialParameter* param,
-            const aten::vec3& externalAlbedo)
-        {
-            aten::vec3 albedo = param->baseColor;
-            albedo *= externalAlbedo;
-
-            aten::vec3 ret = albedo / AT_MATH_PI;
-            return ret;
+            return ComputeBRDF();
         }
 
         static AT_DEVICE_API void sample(
@@ -121,42 +61,13 @@ namespace AT_NAME
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            real u, real v,
-            bool isLightPath = false)
+            aten::sampler* sampler)
         {
             MaterialSampling ret;
 
             result->dir = sampleDirection(normal, sampler);
             result->pdf = pdf(normal, result->dir);
-            result->bsdf = bsdf(param, u, v);
-        }
-
-        static AT_DEVICE_API void sample(
-            AT_NAME::MaterialSampling* result,
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            const aten::vec3& externalAlbedo,
-            bool isLightPath = false)
-        {
-            MaterialSampling ret;
-
-            result->dir = sampleDirection(normal, sampler);
-            result->pdf = pdf(normal, result->dir);
-            result->bsdf = bsdf(param, externalAlbedo);
-        }
-
-        static AT_DEVICE_API real computeFresnel(
-            const aten::MaterialParameter* mtrl,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real outsideIor)
-        {
-            return real(1);
+            result->bsdf = bsdf(param);
         }
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final
@@ -165,6 +76,62 @@ namespace AT_NAME
             AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
 
             return AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+        }
+
+        /**
+         * @brief Compute probability to sample specified output vector.
+         * @param[in] n Surface normal.
+         * @param[in] wo Output vector.
+         * @return Probability to sample output vector.
+         */
+        static inline AT_DEVICE_API float ComputePDF(
+            const aten::vec3& n,
+            const aten::vec3& wo)
+        {
+            const auto c = aten::abs(dot(n, wo));
+            const auto ret = c / AT_MATH_PI;
+            return ret;
+        }
+
+        /**
+         * @brief Sample direction for reflection.
+         * @param[in] n Macrosurface normal.
+         * @param[in] r1 Rondam value by uniform sampleing.
+         * @param[in] r2 Rondam value by uniform sampleing.
+         * @return Reflect vector.
+         */
+        static inline AT_DEVICE_API aten::vec3 SampleDirection(
+            const aten::vec3& n,
+            float r1, float r2)
+        {
+            // Importance sampling with cosine factor.
+            const auto theta = aten::acos(aten::sqrt(1.0F - r1));
+            const auto phi = AT_MATH_PI_2 * r2;
+
+            const auto costheta = aten::cos(theta);
+            const auto sintheta = aten::sqrt(1 - costheta * costheta);
+
+            const auto cosphi = aten::cos(phi);
+            const auto sinphi = aten::sqrt(1 - cosphi * cosphi);
+
+            auto t = aten::getOrthoVector(n);
+            auto b = cross(n, t);
+
+            auto dir = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
+            dir = normalize(dir);
+
+            AT_ASSERT(dot(n, dir) >= 0);
+
+            return dir;
+        }
+
+        /**
+         * @brief Compute BRDF.
+         * @return BRDF.
+         */
+        static AT_DEVICE_API aten::vec3 ComputeBRDF()
+        {
+            return aten::vec3(1.0F) / AT_MATH_PI;
         }
     };
 }

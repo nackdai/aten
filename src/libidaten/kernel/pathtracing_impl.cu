@@ -91,7 +91,7 @@ namespace pt {
             rec.mtrlid,
             rec.isVoxel);
 
-        auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
+        auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, shMtrls[threadIdx.x].baseColor, bounce);
 
         // Apply normal map.
         int32_t normalMap = shMtrls[threadIdx.x].normalMap;
@@ -170,21 +170,21 @@ namespace pt {
 
         AT_NAME::MaterialSampling sampling;
 
-        AT_NAME::material::sampleMaterialWithExternalAlbedo(
+        AT_NAME::material::sampleMaterial(
             &sampling,
             &shMtrls[threadIdx.x],
             orienting_normal,
             ray.dir,
             rec.normal,
             &paths.sampler[idx], pre_sampled_r,
-            rec.u, rec.v,
-            albedo);
+            rec.u, rec.v);
 
         AT_NAME::PrepareForNextBounce(
             idx,
             rec, isBackfacing, russianProb,
             orienting_normal,
             shMtrls[threadIdx.x], sampling,
+            albedo,
             paths,
             rays);
     }
@@ -261,6 +261,34 @@ namespace pt {
                 ix * sizeof(float4), iy,
                 cudaBoundaryModeTrap);
         }
+    }
+
+    __global__ void DisplayAOV(
+        cudaSurfaceObject_t dst,
+        int32_t width, int32_t height,
+        const float4* __restrict__ aov_normal_depth,
+        const float4* __restrict__ aov_albedo_meshid)
+    {
+        auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+        auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+        if (ix >= width || iy >= height) {
+            return;
+        }
+
+        auto idx = getIdx(ix, iy, width);
+
+        float4 normal_depth = aov_normal_depth[idx];
+
+        // (-1, 1) -> (0, 1)
+        normal_depth = normal_depth * 0.5F + 0.5F;
+        normal_depth.w = 1.0F;
+
+        surf2Dwrite(
+            normal_depth,
+            dst,
+            ix * sizeof(float4), iy,
+            cudaBoundaryModeTrap);
     }
 }
 
@@ -352,5 +380,23 @@ namespace idaten
             width, height);
 
         checkCudaKernel(gather);
+    }
+
+    void PathTracingImplBase::DisplayAOV(
+        cudaSurfaceObject_t output_surface,
+        int32_t width, int32_t height)
+    {
+        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+        dim3 grid(
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
+
+        pt::DisplayAOV << <grid, block, 0, m_stream >> > (
+            output_surface,
+            width, height,
+            aov_.normal_depth().data(),
+            aov_.albedo_meshid().data());
+
+        checkCudaKernel(DisplayAOV);
     }
 }

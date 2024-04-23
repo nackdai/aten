@@ -53,9 +53,6 @@
     <ClInclude Include="..\src\libaten\material\beckman.h">
       <Filter>aten\material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\material\blinn.h">
-      <Filter>aten\material</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\emissive.h">
       <Filter>aten\material</Filter>
     </ClInclude>
@@ -197,9 +194,6 @@
       <Filter>kernel</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\material\velvet.h">
-      <Filter>aten\material</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\material\lambert_refraction.h">
       <Filter>aten\material</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\material\microfacet_refraction.h">
@@ -388,9 +382,6 @@
     <CudaCompile Include="..\src\libaten\material\beckman.cpp">
       <Filter>aten\material</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libaten\material\blinn.cpp">
-      <Filter>aten\material</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\ggx.cpp">
       <Filter>aten\material</Filter>
     </CudaCompile>
@@ -462,9 +453,6 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\StreamCompaction.cu">
       <Filter>kernel</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libaten\material\lambert_refraction.cpp">
-      <Filter>aten\material</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\microfacet_refraction.cpp">
       <Filter>aten\material</Filter>

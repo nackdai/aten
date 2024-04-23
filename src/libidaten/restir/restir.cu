@@ -188,7 +188,7 @@ __global__ void shade(
 
     AT_NAME::MaterialSampling sampling;
 
-    AT_NAME::material::sampleMaterialWithExternalAlbedo(
+    AT_NAME::material::sampleMaterial(
         &sampling,
         &shMtrls[threadIdx.x],
         orienting_normal,
@@ -196,14 +196,14 @@ __global__ void shade(
         rec.normal,
         &paths.sampler[idx],
         pre_sampled_r,
-        rec.u, rec.v,
-        albedo);
+        rec.u, rec.v);
 
     AT_NAME::PrepareForNextBounce(
         idx,
         rec, isBackfacing, russianProb,
         orienting_normal,
         shMtrls[threadIdx.x], sampling,
+        albedo,
         paths, rays);
 }
 

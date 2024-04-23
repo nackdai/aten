@@ -60,6 +60,10 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t maxSamples);
 
+        virtual void DisplayAOV(
+            cudaSurfaceObject_t output_surface,
+            int32_t width, int32_t height);
+
     protected:
         // AOV buffer
         using AOVHostBuffer = AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, AT_NAME::AOVBufferType::NumBasicAovBuffer>;
@@ -72,7 +76,7 @@ namespace idaten
     public:
         enum class Mode {
             PT,
-            AOVar,  // Arbitrary Output Variables.
+            AOV,    // Arbitrary Output Variables.
         };
 
         PathTracing() = default;
@@ -101,6 +105,15 @@ namespace idaten
 
         void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
         void updateLight(const std::vector<aten::LightParameter>& lights);
+
+        void SetRenderingMode(Mode mode)
+        {
+            m_mode = mode;
+        }
+        Mode GetRenderingMode() const
+        {
+            return m_mode;
+        }
 
     protected:
         void OnRender(

@@ -167,7 +167,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::A
         "Material.001",
         CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.2, 0.2, 0.7)));
 
-    auto obj = aten::ObjLoader::load("../../asset/suzanne/suzanne.obj", ctxt, asset_manager);
+    auto obj = aten::ObjLoader::LoadFirstObj("../../asset/suzanne/suzanne.obj", ctxt, asset_manager);
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
     aten::mat4 mtx_L2W;
@@ -301,12 +301,6 @@ void MtrlTestScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Ass
     aten::MaterialParameter mtrlParam;
 
     mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
-    mtrlParam.standard.shininess = 200.0f;
-    mtrlParam.standard.ior = 0.2f;
-    auto s_blinn = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-1.0f, 0.0f, 0.0f), 1.0f, createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
-    scene->add(s_blinn);
-
-    mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
     mtrlParam.standard.roughness = 0.2f;
     mtrlParam.standard.ior = 0.2f;
     auto s_ggx = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-3.0f, 0.0f, 0.0f), 1.0f, createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam));
@@ -338,18 +332,18 @@ void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Asset
 {
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
-    mtrlParam.standard.shininess = 200.0f;
+    mtrlParam.standard.roughness = 0.5f;
     mtrlParam.standard.ior = 0.2f;
 
     asset_manager.registerMtrl(
         "m1",
-        createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
+        createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam));
 
     asset_manager.registerMtrl(
         "Material.001",
-        createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
+        createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam));
 
-    auto obj = aten::ObjLoader::load("../../asset/suzanne/suzanne.obj", ctxt, asset_manager);
+    auto obj = aten::ObjLoader::LoadFirstObj("../../asset/suzanne/suzanne.obj", ctxt, asset_manager);
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
     aten::mat4 mtx_L2W;
@@ -610,11 +604,11 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Ass
     aten::MaterialParameter mtrlParam;
 
     mtrlParam.baseColor = clr;
-    mtrlParam.standard.shininess = 200.0f;
+    mtrlParam.standard.roughness = 0.5f;
     mtrlParam.standard.ior = 0.2f;
 
     auto blinn = createMaterialWithParamter(
-        ctxt, aten::MaterialType::Blinn, mtrlParam,
+        ctxt, aten::MaterialType::GGX, mtrlParam,
         albedo.get(), nml.get(), nullptr);
 
     auto s_blinn = aten::TransformableFactory::createSphere(
@@ -872,8 +866,7 @@ std::shared_ptr<aten::instance<aten::PolygonObject>> ObjCornellBoxScene::makeSce
         "light",
         emit);
 
-    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-    aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt, asset_manager,
+    auto objs = aten::ObjLoader::load("../../asset/cornellbox/orig.obj", ctxt, asset_manager,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
@@ -950,10 +943,8 @@ void ObjCornellBoxScene::getCameraPosAndAt(
 
 void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
 {
-    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-
-    aten::ObjLoader::load(
-        objs, "../../asset/sponza/sponza.obj", ctxt, asset_manager,
+    auto objs = aten::ObjLoader::load(
+        "../../asset/sponza/sponza.obj", ctxt, asset_manager,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
@@ -979,7 +970,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Asset
         int32_t offsetTriIdx = ctxt.GetTriangleNum();
 
         objs.clear();
-        aten::ObjLoader::load(objs, "../../asset/sponza/sponza_lod.obj", ctxt, asset_manager);
+        objs = aten::ObjLoader::load("../../asset/sponza/sponza_lod.obj", ctxt, asset_manager);
         objs[0]->importInternalAccelTree("../../asset/sponza/sponza_lod.sbvh", ctxt, offsetTriIdx);
         sponza->setLod(objs[0]);
     }
@@ -1009,15 +1000,12 @@ void BunnyScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetM
 {
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(0.7f, 0.7f, 0.7f);
-    mtrlParam.standard.ior = 1.3f;
 
     asset_manager.registerMtrl(
         "m1",
-        createMaterialWithParamter(ctxt, aten::MaterialType::Lambert_Refraction, mtrlParam));
+        createMaterialWithParamter(ctxt, aten::MaterialType::Lambert, mtrlParam));
 
-    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-
-    aten::ObjLoader::load(objs, "../../asset/teapot/teapot.obj", ctxt, asset_manager);
+    auto objs = aten::ObjLoader::load("../../asset/teapot/teapot.obj", ctxt, asset_manager);
     auto bunny = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[0], aten::mat4::Identity);
     scene->add(bunny);
 }
@@ -1092,9 +1080,7 @@ aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<a
             "rightWall",
             CreateMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.112000f, 0.360000f, 0.072800f)));
 
-        std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-
-        aten::ObjLoader::load(objs, "../../asset/cornellbox/box.obj", ctxt, asset_manager, nullptr, false);
+        auto objs = aten::ObjLoader::load("../../asset/cornellbox/box.obj", ctxt, asset_manager, nullptr, false);
 
         auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
             ctxt,
@@ -1181,8 +1167,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
         "tallBox",
         tall);
 
-    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-    aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt, asset_manager, nullptr, true, true);
+    auto objs = aten::ObjLoader::load("../../asset/cornellbox/orig.obj", ctxt, asset_manager, nullptr, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
         ctxt,
@@ -1215,10 +1200,8 @@ void AlphaBlendedObjCornellBoxScene::getCameraPosAndAt(
 
 void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
 {
-    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-
-    aten::ObjLoader::load(
-        objs, "../../asset/crytek_sponza/sponza.obj", ctxt, asset_manager,
+    auto objs = aten::ObjLoader::load(
+        "../../asset/crytek_sponza/sponza.obj", ctxt, asset_manager,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {

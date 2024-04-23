@@ -36,7 +36,7 @@ namespace AT_NAME
         // In order to align how to compute the ouput, we use N(normal) here as well.
         const auto fresnel = material::computeFresnel(ni, nt, V, N);
 
-        const auto beckmanPdf = MicrofacetBeckman::pdf(
+        const auto beckmanPdf = MicrofacetBeckman::ComputePDF(
             param->retrorelective.clearcoat_roughness,
             normal, wi, wo);
         const auto diffusePdf = lambert::pdf(N, wo);
@@ -51,7 +51,7 @@ namespace AT_NAME
 
             const auto costheta = aten::abs(dot(B, N));
 
-            const auto D = MicrofacetBeckman::sampleBeckman_D(B, N, param->retrorelective.retrorelective_roughness);
+            const auto D = MicrofacetBeckman::ComputeDistribution(B, N, param->retrorelective.retrorelective_roughness);
 
             const auto denom = 4 * aten::abs(dot(L, B));
 
@@ -102,7 +102,7 @@ namespace AT_NAME
         if (r0 < fresnel) {
             // Beckman
             r0 /= fresnel;
-            dir = MicrofacetBeckman::sampleDirection(
+            dir = MicrofacetBeckman::SampleDirection(
                 param->retrorelective.clearcoat_roughness,
                 wi, N,
                 r0, r1);
@@ -114,7 +114,7 @@ namespace AT_NAME
             if (r1 < era) {
                 // Retroreflective
                 r1 /= era;
-                dir = MicrofacetBeckman::sampleDirection(
+                dir = MicrofacetBeckman::SampleDirection(
                     param->retrorelective.retrorelective_roughness,
                     wi, N,
                     r0, r1);
@@ -246,23 +246,24 @@ namespace AT_NAME
         const auto era = getEffectiveRetroreflectiveArea(refract, N);
 
         // Beckman
-        const auto beckman = MicrofacetBeckman::bsdf(
-            param->retrorelective.clearcoat_color,
+        auto beckman = MicrofacetBeckman::ComputeBRDF(
             param->retrorelective.clearcoat_roughness,
             param->retrorelective.clearcoat_ior,
-            fresnel,
             normal, wi, wo,
-            u, v);
+            &fresnel);
+        beckman *= param->retrorelective.clearcoat_color;
 
         // Retroreflective
         aten::vec3 retroreflective;
         {
+            // Assume index of refraction of the medie on the incident side is vacuum.
+            const auto ni = 1.0F;
+            const auto nt = param->retrorelective.retrorelective_ior;
+
             const auto roughness = param->retrorelective.retrorelective_roughness;
-            const auto D = MicrofacetBeckman::sampleBeckman_D(B, N, roughness);
-            const auto G = MicrofacetBeckman::sampleBeckman_G(V, N, H, roughness) * MicrofacetBeckman::sampleBeckman_G(L, N, H, roughness);
-            const auto F = material::computeFresnelShlick(
-                ni, param->retrorelective.retrorelective_ior,
-                V, B);
+            const auto D = MicrofacetBeckman::ComputeDistribution(B, N, roughness);
+            const auto G = MicrofacetBeckman::ComputeG1(roughness, V, H, N) * MicrofacetBeckman::ComputeG1(roughness, L, H, N);
+            const auto F = material::ComputeSchlickFresnel(ni, nt, V, B);
             const auto denom = real(4) * dot(N, L) * dot(N, V);
 
             retroreflective = denom > AT_MATH_EPSILON ? aten::vec3(F * G * D / denom) : aten::vec3(0);

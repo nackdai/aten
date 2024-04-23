@@ -151,14 +151,6 @@ ReSTIR (1spp/5bounds/126point lights w/o environment map)
 
 ![ReSTIR](docs/gallery/compare_restir.png)
 
-CarPaint
-
-![CarPaint](docs/gallery/car_paint.png)
-
-Retroreflective
-
-![Retroreflective](docs/gallery/retroreflective.gif)
-
 AlphaBlending
 
 ![AlphaBlending](docs/gallery/alpha_blend.png)

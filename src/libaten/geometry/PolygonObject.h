@@ -7,7 +7,6 @@
 #include "geometry/triangle.h"
 #include "geometry/TriangleGroupMesh.h"
 #include "geometry/transformable.h"
-#include "scene/host_scene_context.h"
 
 namespace AT_NAME
 {
@@ -167,9 +166,9 @@ namespace AT_NAME
             name_.assign(name);
         }
 
-        const char* getName()
+        std::string getName() const
         {
-            return name_.empty() ? nullptr : name_.c_str();
+            return name_;
         }
 
     private:

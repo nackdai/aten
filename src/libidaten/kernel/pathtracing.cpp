@@ -123,8 +123,8 @@ namespace idaten
     {
         static const int32_t rrBounce = 3;
 
-        // Set bounce count to 1 forcibly, aov render mode.
-        maxBounce = (m_mode == Mode::AOVar ? 1 : maxBounce);
+        // Set bounce count to 1 forcibly, AOV rendering mode.
+        maxBounce = (m_mode == Mode::AOV ? 1 : maxBounce);
 
         auto time = AT_NAME::timer::getSystemTime();
 
@@ -134,7 +134,7 @@ namespace idaten
 
             generatePath(
                 width, height,
-                m_mode == Mode::AOVar,
+                m_mode == Mode::AOV,
                 i, maxBounce,
                 seed);
 
@@ -167,7 +167,8 @@ namespace idaten
         if (m_mode == Mode::PT) {
             onGather(outputSurf, width, height, maxSamples);
         }
-        else if (m_mode == Mode::AOVar) {
+        else if (m_mode == Mode::AOV) {
+            DisplayAOV(outputSurf, width, height);
         }
         else {
             AT_ASSERT(false);

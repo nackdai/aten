@@ -1,5 +1,5 @@
 #include "material/velvet.h"
-#include "math/math.h"
+#include "material/lambert.h"
 #include "material/sample_texture.h"
 
 namespace AT_NAME
@@ -8,14 +8,14 @@ namespace AT_NAME
     // Production Friendly Microfacet Sheen BRDF.
     // https://blog.selfshadow.com/publications/s2017-shading-course/imageworks/s2017_pbs_imageworks_sheen.pdf
 
-    AT_DEVICE_API real MicrofacetVelvet::pdf(
+    AT_DEVICE_API float MicrofacetVelvet::pdf(
         const aten::MaterialParameter* param,
-        const aten::vec3& normal,
+        const aten::vec3& n,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
-        auto ret = pdf(param->standard.roughness, normal, wi, wo);
+        const auto ret = ComputePDF(n, wo);
         return ret;
     }
 
@@ -23,10 +23,18 @@ namespace AT_NAME
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
-        real u, real v,
+        float u, float v,
         aten::sampler* sampler)
     {
-        aten::vec3 dir = sampleDirection(param->standard.roughness, normal, wi, sampler);
+        auto r1 = sampler->nextSample();
+        auto r2 = sampler->nextSample();
+
+        auto dir = SampleDirection(normal, r1, r2);
+        while (dot(normal, dir) >= 0) {
+            r1 = sampler->nextSample();
+            r2 = sampler->nextSample();
+            dir = SampleDirection(normal, r1, r2);
+        }
 
         return dir;
     }
@@ -36,199 +44,161 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
-        auto albedo = param->baseColor;
-        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
+        auto roughness = AT_NAME::sampleTexture(
+            param->roughnessMap,
+            u, v,
+            aten::vec4(param->standard.roughness));
 
-        real fresnel = 1;
-        real ior = param->standard.ior;
+        const float ior = param->standard.ior;
 
-        aten::vec3 ret = bsdf(albedo, param->standard.roughness, ior, fresnel, normal, wi, wo, u, v);
+        const auto ret = ComputeBRDF(roughness.r, ior, normal, wi, wo);
         return ret;
     }
 
-    AT_DEVICE_API aten::vec3 MicrofacetVelvet::bsdf(
-        const aten::MaterialParameter* param,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        const aten::vec4& externalAlbedo)
-    {
-        auto albedo = param->baseColor;
-        albedo *= externalAlbedo;
-
-        real fresnel = 1;
-        real ior = param->standard.ior;
-
-        aten::vec3 ret = bsdf(albedo, param->standard.roughness, ior, fresnel, normal, wi, wo, u, v);
-        return ret;
-    }
-
-    static AT_DEVICE_API inline real sampleVelvet_D(
-        const aten::vec3& h,
+    AT_DEVICE_API float MicrofacetVelvet::ComputeDistribution(
+        const aten::vec3& m,
         const aten::vec3& n,
-        real roughness)
+        const float roughness)
     {
-        real cosTheta = dot(n, h);
-        if (cosTheta < real(0)) {
-            return real(0);
-        }
+        const auto cos_theta = aten::abs(dot(m, n));
 
-        real inv_r = real(1) / roughness;
-        real sinTheta = aten::sqrt(aten::cmpMax(1 - cosTheta * cosTheta, real(0)));
+        const auto inv_r = 1.0F / roughness;
+        const auto sin_theta = aten::sqrt(aten::saturate(1 - cos_theta * cos_theta));
 
-        real D = ((real(2) + inv_r) * aten::pow(sinTheta, inv_r)) / (AT_MATH_PI_2);
+        const auto D = ((2.0F + inv_r) * aten::pow(sin_theta, inv_r)) / (AT_MATH_PI_2);
 
         return D;
     }
 
-    static AT_DEVICE_API inline real interpVelvetParam(int32_t i, real a)
+    AT_DEVICE_API inline float MicrofacetVelvet::InterpolateVelvetParam(const int32_t idx, float interp_factor)
     {
-        // NOTE
-        // a = (1 - r)^2
+        // NOTE:
+        // Interpolate factor : interp_factor = (1 - r)^2
 
-        static const real p0[] = { real(25.3245), real(3.32435), real(0.16801), real(-1.27393), real(-4.85967) };
-        static const real p1[] = { real(21.5473), real(3.82987), real(0.19823), real(-1.97760), real(-4.32054) };
+        constexpr std::array p0 = { 25.3245F, 3.32435F, 0.16801F, -1.27393F, -4.85967F };
+        constexpr std::array p1 = { 21.5473F, 3.82987F, 0.19823F, -1.97760F, -4.32054F };
 
-        // NOTE
+        // NOTE:
         // P = (1 − r)^2 * p0 + (1 − (1 − r)^2) * p1
-        // => P = a * p0 + (1 - a) * p1
+        // => P = interp_factor * p0 + (1 - interp_factor) * p1
 
-        real p = a * p0[i] + (1 - a) + p1[i];
+        float p = interp_factor * p0[idx] + (1 - interp_factor) + p1[idx];
 
         return p;
     }
 
-    static AT_DEVICE_API inline real computeVelvet_L(real x, real roughness)
+    AT_DEVICE_API float MicrofacetVelvet::ComputeVelvetLForLambda(const float x, const float roughness)
     {
-        real r = roughness;
-        real powOneMinusR = aten::pow(real(1) - r, real(2));
+        // NOTE:
+        // Interpolate factor : interp_factor = (1 - r)^2
+        const auto r = roughness;
+        const auto interp_factor = aten::pow(float(1) - r, float(2));
 
-        real a = interpVelvetParam(0, powOneMinusR);
-        real b = interpVelvetParam(1, powOneMinusR);
-        real c = interpVelvetParam(2, powOneMinusR);
-        real d = interpVelvetParam(3, powOneMinusR);
-        real e = interpVelvetParam(4, powOneMinusR);
+        const auto a = InterpolateVelvetParam(0, interp_factor);
+        const auto b = InterpolateVelvetParam(1, interp_factor);
+        const auto c = InterpolateVelvetParam(2, interp_factor);
+        const auto d = InterpolateVelvetParam(3, interp_factor);
+        const auto e = InterpolateVelvetParam(4, interp_factor);
 
-        // NOTE
+        // NOTE:
         // L(x) = a / (1 + b * x^c) + d * x + e
 
-        real L = a / (1 + b * aten::pow(x, c)) + d * x + e;
+        const auto L = a / (1 + b * aten::pow(x, c)) + d * x + e;
 
         return L;
     }
 
-    static AT_DEVICE_API inline real computeVelvet_Lambda(real cosTheta, real roughness)
+    AT_DEVICE_API float MicrofacetVelvet::ComputeVelvetLambda(
+        const float roughness,
+        const aten::vec3& w,
+        const aten::vec3& m)
     {
-        real r = roughness;
+        const auto r = roughness;
+        const auto cos_theta = aten::saturate(aten::abs(dot(w, m)));
 
-        if (cosTheta < real(0.5)) {
-            return aten::exp(computeVelvet_L(cosTheta, r));
+        if (cos_theta < 0.5F) {
+            return aten::exp(ComputeVelvetLForLambda(cos_theta, r));
         }
 
-        return aten::exp(2 * computeVelvet_L(0.5, r) - computeVelvet_L(1 - cosTheta, r));
+        return aten::exp(2.0F * ComputeVelvetLForLambda(0.5F, r) - ComputeVelvetLForLambda(1 - cos_theta, r));
     }
 
-    static AT_DEVICE_API inline real sampleVelvet_G(real cos_wi, real cos_wo, real r)
+    AT_DEVICE_API float MicrofacetVelvet::ComputeShadowingMaskingFunction(
+        const float roughness,
+        const aten::vec3& view,
+        const aten::vec3& light,
+        const aten::vec3& n)
     {
-        cos_wi = real(cos_wi <= real(0) ? 0 : 1);
-        cos_wo = real(cos_wo <= real(0) ? 0 : 1);
+        auto lambda_wi = ComputeVelvetLambda(roughness, view, n);
+        const auto lambda_wo = ComputeVelvetLambda(roughness, light, n);
 
-        real G = cos_wi * cos_wo / (1 + computeVelvet_Lambda(cos_wi, r) + computeVelvet_Lambda(cos_wo, r));
+        const auto cos_theta_wi = aten::saturate(aten::abs(dot(view, n)));
+        const auto cos_theta_wo = aten::saturate(aten::abs(dot(light, n)));
+
+        // For Terminator Softening
+        lambda_wi = aten::pow(lambda_wi, 1.0F + 2.0F * aten::pow(1.0F - cos_theta_wi, 8));
+
+        float G = 1.0F / (1.0F + lambda_wi + lambda_wo);
 
         return G;
     }
 
-    AT_DEVICE_API real MicrofacetVelvet::pdf(
-        real roughness,
-        const aten::vec3& normal,
+    AT_DEVICE_API float MicrofacetVelvet::ComputePDF(
+        const aten::vec3& n,
+        const aten::vec3& wo)
+    {
+        // NOTE:
+        // The papaer mentions "We found plain uniform sampling of the upper hemisphere to be more effective".
+        // So, sample based on hemisphere uniform sampling not importance sampling.
+        return lambert::ComputePDF(n, wo);
+    }
+
+    AT_DEVICE_API aten::vec3 MicrofacetVelvet::SampleDirection(
+        const aten::vec3& n,
+        float r1, float r2)
+    {
+        // NOTE:
+        // The papaer mentions "We found plain uniform sampling of the upper hemisphere to be more effective".
+        // So, sample based on hemisphere uniform sampling not importance sampling.
+        return lambert::SampleDirection(n, r1, r2);
+    }
+
+    AT_DEVICE_API aten::vec3 MicrofacetVelvet::ComputeBRDF(
+        const float roughness,
+        const float ior,
+        const aten::vec3& n,
         const aten::vec3& wi,
         const aten::vec3& wo)
     {
-        // NOTE
-        // "We found plain uniform sampling of the upper hemisphere to be more effective".
-        // とのことで、importance sampling でなく、uniform sampling がいいらしい...
+        const auto V = -wi;
+        const auto L = wo;
+        const auto N = n;
+        const auto H = normalize(L + V);
 
-        aten::vec3 V = -wi;
-        aten::vec3 N = normal;
+        auto NL = aten::abs(dot(N, L));
+        auto NV = aten::abs(dot(N, V));
 
-        auto cosTheta = dot(V, N);
+        // Assume index of refraction of the medie on the incident side is vacuum.
+        const auto ni = 1.0F;
+        const auto nt = ior;
 
-        if (cosTheta < real(0)) {
-            return real(0);
-        }
+        const auto D = ComputeDistribution(H, N, roughness);
+        const auto G = ComputeShadowingMaskingFunction(roughness, V, L, N);
 
-        return 1 / AT_MATH_PI_HALF;
-    }
+        // NOTE:
+        // https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_sheen/README.md
+        // The Fresnel term may be omitted, i.e., F = 1.
+        // https://dassaultsystemes-technology.github.io/EnterprisePBRShadingModel/spec-2022x.md.html#components/sheen
+        // Looks like fresnel term is omitted as well...
+        constexpr auto F = 1.0F;
 
-    AT_DEVICE_API aten::vec3 MicrofacetVelvet::sampleDirection(
-        real roughness,
-        const aten::vec3& in,
-        const aten::vec3& normal,
-        aten::sampler* sampler)
-    {
-        auto n = normal;
-        auto t = aten::getOrthoVector(n);
-        auto b = cross(n, t);
+        const auto denom = 4 * NL * NV;
 
-        // NOTE
-        // "We found plain uniform sampling of the upper hemisphere to be more effective".
-        // とのことで、importance sampling でなく、uniform sampling がいいらしい...
+        const auto bsdf = denom > AT_MATH_EPSILON ? F * G * D / denom : 0.0F;
 
-        auto r1 = sampler->nextSample();
-        auto r2 = sampler->nextSample();
-
-        // NOTE
-        // r2[0, 1] => phi[0, 2pi]
-        auto phi = AT_MATH_PI_2 * r2;
-
-        // NOTE
-        // r1[0, 1] => cos_theta[0, 1]
-        auto cosTheta = r1;
-        auto sinTheta = aten::sqrt(1 - cosTheta * cosTheta);
-
-        auto x = aten::cos(phi) * sinTheta;
-        auto y = aten::sin(phi) * sinTheta;
-        auto z = cosTheta;
-
-        aten::vec3 dir = normalize((t * x + b * y + n * z));
-
-        return dir;
-    }
-
-    AT_DEVICE_API aten::vec3 MicrofacetVelvet::bsdf(
-        const aten::vec3& albedo,
-        const real roughness,
-        const real ior,
-        real& fresnel,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v)
-    {
-        aten::vec3 V = -wi;
-        aten::vec3 L = wo;
-        aten::vec3 N = normal;
-        aten::vec3 H = normalize(L + V);
-
-        auto NdotL = aten::abs(dot(N, L));
-        auto NdotV = aten::abs(dot(N, V));
-
-        // Compute D.
-        real D = sampleVelvet_D(H, N, roughness);
-
-        // Compute G.
-        real G = sampleVelvet_G(NdotL, NdotV, roughness);
-
-        auto denom = 4 * NdotL * NdotV;
-
-        auto bsdf = denom > AT_MATH_EPSILON ? albedo * G * D / denom : aten::vec3(0);
-
-        fresnel = real(0);
-
-        return bsdf;
+        return aten::vec3(bsdf);
     }
 
     AT_DEVICE_API void MicrofacetVelvet::sample(
@@ -236,46 +206,23 @@ namespace AT_NAME
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
-        const aten::vec3& orgnormal,
         aten::sampler* sampler,
-        real u, real v,
-        bool isLightPath/*= false*/)
+        float u, float v)
     {
-        result->dir = sampleDirection(param->standard.roughness, wi, normal, sampler);
-        result->pdf = pdf(param->standard.roughness, normal, wi, result->dir);
+        const auto r1 = sampler->nextSample();
+        const auto r2 = sampler->nextSample();
 
-        auto albedo = param->baseColor;
-        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
+        result->dir = SampleDirection(normal, r1, r2);
+        result->pdf = ComputePDF(normal, result->dir);
 
-        real fresnel = 1;
-        real ior = param->standard.ior;
+        const auto roughness = AT_NAME::sampleTexture(
+            param->roughnessMap,
+            u, v,
+            aten::vec4(param->standard.roughness));
 
-        result->bsdf = bsdf(albedo, param->standard.roughness, ior, fresnel, normal, wi, result->dir, u, v);
-        result->fresnel = fresnel;
-    }
+        const auto ior = param->standard.ior;
 
-    AT_DEVICE_API void MicrofacetVelvet::sample(
-        AT_NAME::MaterialSampling* result,
-        const aten::MaterialParameter* param,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real u, real v,
-        const aten::vec4& externalAlbedo,
-        bool isLightPath/*= false*/)
-    {
-        result->dir = sampleDirection(param->standard.roughness, wi, normal, sampler);
-        result->pdf = pdf(param->standard.roughness, normal, wi, result->dir);
-
-        auto albedo = param->baseColor;
-        albedo *= externalAlbedo;
-
-        real fresnel = 1;
-        real ior = param->standard.ior;
-
-        result->bsdf = bsdf(albedo, param->standard.roughness, ior, fresnel, normal, wi, result->dir, u, v);
-        result->fresnel = fresnel;
+        result->bsdf = ComputeBRDF(roughness.r, ior, normal, wi, result->dir);
     }
 
     bool MicrofacetVelvet::edit(aten::IMaterialParamEditor* editor)

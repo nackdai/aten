@@ -68,9 +68,7 @@ int32_t main(int32_t argc, char* argv[])
     aten::AssetManager asset_manager;
     aten::context ctxt;
 
-    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-    aten::ObjLoader::load(
-        objs,
+    auto objs = aten::ObjLoader::load(
         "../../asset/mansion/interior_bundled4_chairmove_1163769_606486_2.obj",
         ctxt, asset_manager);
 

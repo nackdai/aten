@@ -26,7 +26,6 @@ namespace restir {
          * @param[in] mtrl Material on point.
          * @param[in] u U for texture coordinate on point.
          * @param[in] v V for texture coordinate on point.
-         * @param[in] albedo Albedo of material.
          * @param[in] pre_sampled_r Pre sampled random value for brdf calculation.
          * @return Radiance.
          */
@@ -37,7 +36,6 @@ namespace restir {
             const aten::vec3& ray_dir,
             const aten::MaterialParameter& mtrl,
             const float u, const float v,
-            const aten::vec4& albedo,
             real pre_sampled_r)
         {
             aten::vec3 nmlLight = lightsample.nml;
@@ -47,11 +45,10 @@ namespace restir {
             const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
             const auto dist2 = aten::squared_length(lightsample.dir);
 
-            auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(
+            auto brdf = AT_NAME::material::sampleBSDF(
                 &mtrl, normal,
                 ray_dir, dirToLight,
                 u, v,
-                albedo,
                 pre_sampled_r);
 
             const auto geometry_term = light_attrib.isSingular || light_attrib.isInfinite
@@ -92,14 +89,10 @@ namespace restir {
                 return 0.0f;
             }
 
-            // NOTE:
-            // Apply albedo at the final phase to compute pixel color.
-            // So, specify albedo color (1, 1, 1) temporarily.
             auto energy = ComputeRadiance(
                 lightsample, light_attrib,
                 normal, ray_dir, mtrl,
                 u, v,
-                aten::vec4(1.0f),
                 pre_sampled_r);
             energy /= pdf;
 
@@ -609,20 +602,15 @@ namespace restir {
             const auto cosLight = aten::abs(dot(nml_on_light, -point_to_light));
             const auto dist2 = distance_to_light * distance_to_light;
 
-            // TODO
-            // �v�Z�ς݂�albedo��^���Ă��邽��
-            // u,v �� samplePDF/sampleBSDF �����ł͗��p����Ă��Ȃ�
-            constexpr auto u = 0.0f;
-            constexpr auto v = 0.0f;
-
             const auto le = _detail::ComputeRadiance(
                 reservoir.light_sample_, light.attrib,
                 orienting_normal, restir_info.wi,
                 mtrl,
-                u, v, albedo,
+                restir_info.u, restir_info.v,
                 restir_info.pre_sampled_r);
 
             auto contrib = le * reservoir.W;
+            contrib *= static_cast<aten::vec3>(albedo);
 
             return contrib;
         }

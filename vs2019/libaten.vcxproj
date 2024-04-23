@@ -186,14 +186,12 @@
     <ClInclude Include="..\src\libaten\light\pointlight.h" />
     <ClInclude Include="..\src\libaten\light\spotlight.h" />
     <ClInclude Include="..\src\libaten\material\beckman.h" />
-    <ClInclude Include="..\src\libaten\material\blinn.h" />
     <ClInclude Include="..\src\libaten\material\car_paint.h" />
     <ClInclude Include="..\src\libaten\material\disney_brdf.h" />
     <ClInclude Include="..\src\libaten\material\emissive.h" />
     <ClInclude Include="..\src\libaten\material\FlakesNormal.h" />
     <ClInclude Include="..\src\libaten\material\ggx.h" />
     <ClInclude Include="..\src\libaten\material\lambert.h" />
-    <ClInclude Include="..\src\libaten\material\lambert_refraction.h" />
     <ClInclude Include="..\src\libaten\material\material.h" />
     <ClInclude Include="..\src\libaten\material\material_impl.h" />
     <ClInclude Include="..\src\libaten\material\microfacet_refraction.h" />
@@ -312,12 +310,10 @@
     <ClCompile Include="..\src\libaten\light\ibl.cpp" />
     <ClCompile Include="..\src\libaten\light\light_instantiate_from_value.cpp" />
     <ClCompile Include="..\src\libaten\material\beckman.cpp" />
-    <ClCompile Include="..\src\libaten\material\blinn.cpp" />
     <ClCompile Include="..\src\libaten\material\car_paint.cpp" />
     <ClCompile Include="..\src\libaten\material\disney_brdf.cpp" />
     <ClCompile Include="..\src\libaten\material\FlakesNormal.cpp" />
     <ClCompile Include="..\src\libaten\material\ggx.cpp" />
-    <ClCompile Include="..\src\libaten\material\lambert_refraction.cpp" />
     <ClCompile Include="..\src\libaten\material\material.cpp" />
     <ClCompile Include="..\src\libaten\material\material_instantiate_from_value.cpp" />
     <ClCompile Include="..\src\libaten\material\microfacet_refraction.cpp" />

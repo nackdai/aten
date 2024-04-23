@@ -28,7 +28,7 @@ namespace aten
         const aten::CameraParameter& camera,
         aten::hitrecord* first_hrec/*= nullptr*/)
     {
-        uint32_t depth = 0;
+        int32_t depth = 0;
 
         while (depth < m_maxDepth) {
             bool willContinue = true;
@@ -99,9 +99,9 @@ namespace aten
         int32_t maxDepth,
         camera* cam,
         scene* scene,
-        const background* bg)
+        const std::shared_ptr<background>& bg)
     {
-        uint32_t depth = 0;
+        int32_t depth = 0;
 
         const auto& ray = rays[idx];
         auto* sampler = &paths.sampler[idx];
@@ -315,7 +315,7 @@ namespace aten
             ctxt,
             rec.mtrlid, rec.isVoxel);
 
-        auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
+        auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, mtrl.baseColor, bounce);
 
         auto& shadow_ray = shadow_rays[idx];
         shadow_ray.isActive = false;
@@ -391,6 +391,7 @@ namespace aten
             rec, isBackfacing, russianProb,
             orienting_normal,
             mtrl, sampling,
+            albedo,
             paths, rays);
     }
 
@@ -400,7 +401,7 @@ namespace aten
         int32_t depth,
         Path& paths,
         const ray* rays,
-        const background* bg)
+        const std::shared_ptr<background>& bg)
     {
         const auto& ray = rays[idx];
 

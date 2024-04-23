@@ -35,11 +35,11 @@ namespace AT_NAME
             real(1), param->carpaint.clearcoat_ior,
             V, N);
 
-        auto beckman_pdf = MicrofacetBeckman::pdf(
+        auto beckman_pdf = MicrofacetBeckman::ComputePDF(
             param->carpaint.clearcoat_roughness,
             N, wi, wo);
 
-        auto flakes_beckman_pdf = MicrofacetBeckman::pdf(
+        auto flakes_beckman_pdf = MicrofacetBeckman::ComputePDF(
             real(1),  // TODO
             N, wi, wo);
 
@@ -81,7 +81,7 @@ namespace AT_NAME
 
         if (r0 < fresnel) {
             r0 /= fresnel;
-            dir = MicrofacetBeckman::sampleDirection(
+            dir = MicrofacetBeckman::SampleDirection(
                 param->carpaint.clearcoat_roughness,
                 wi, N,
                 r0, r1);
@@ -93,7 +93,7 @@ namespace AT_NAME
             if (r1 < flakes_density) {
                 // Flakes
                 r1 /= flakes_density;
-                dir = MicrofacetBeckman::sampleDirection(real(1), wi, N, r0, r1);
+                dir = MicrofacetBeckman::SampleDirection(real(1), wi, N, r0, r1);
             }
             else {
                 // Diffuse
@@ -139,14 +139,12 @@ namespace AT_NAME
         aten::vec3 bsdf;
 
         if (pre_sampled_r < fresnel) {
-            bsdf = MicrofacetBeckman::bsdf(
-                param->carpaint.clearcoat_color,
+            bsdf = MicrofacetBeckman::ComputeBRDF(
                 param->carpaint.clearcoat_roughness,
                 param->carpaint.clearcoat_ior,
-                fresnel,
                 N,
-                wi, wo,
-                u, v);
+                wi, wo);
+            bsdf *= param->carpaint.clearcoat_color;
         }
         else {
             const bool is_on_flakes = FlakesNormal::gen(
@@ -159,16 +157,12 @@ namespace AT_NAME
 
             if (is_on_flakes) {
                 // Flakes
-                real fresnel{ real(0) };
-
-                bsdf = MicrofacetBeckman::bsdf(
-                    param->carpaint.flakes_color * param->carpaint.flake_color_multiplier,
+                bsdf = MicrofacetBeckman::ComputeBRDF(
                     real(1),  // TODO
                     real(10),   // TODO
-                    fresnel,
                     N,
-                    wi, wo,
-                    u, v);
+                    wi, wo);
+                bsdf *= param->carpaint.flakes_color * param->carpaint.flake_color_multiplier;
             }
             else {
                 // Diffuse

@@ -3,7 +3,7 @@
 #include "AssetManager.h"
 
 namespace aten {
-    static constexpr std::array<char*, static_cast<size_t>(AssetManager::AssetType::Num)> AssetTypeName = {
+    static constexpr std::array<const char*, static_cast<size_t>(AssetManager::AssetType::Num)> AssetTypeName = {
         "Texture",
         "Material",
         "Object",

@@ -267,7 +267,7 @@ namespace aten {
 
             const auto obj_name = obj->getName();
             if (!obj_name.empty()) {
-                fprintf(fp, "g %s\n", obj_name);
+                fprintf(fp, "g %s\n", obj_name.c_str());
             }
             else {
                 fprintf(fp, "g %d\n", obj_idx++);
@@ -276,7 +276,7 @@ namespace aten {
             size_t tri_pos = 0;
 
             for (const auto& s : shapes) {
-                auto mtrl_name = s->GetMaterial()->name();
+                const auto* mtrl_name = s->GetMaterial()->name();
                 fprintf(fp, "usemtl %s\n", mtrl_name);
 
                 const auto& tris = s->GetTriangleList();

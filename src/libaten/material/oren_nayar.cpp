@@ -136,59 +136,17 @@ namespace AT_NAME {
         return bsdf;
     }
 
-    AT_DEVICE_API aten::vec3 OrenNayar::bsdf(
-        const aten::MaterialParameter* param,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        const aten::vec4& externalAlbedo)
-    {
-        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
-
-        auto albedo = param->baseColor;
-        albedo *= externalAlbedo;
-
-        auto bsdf = computeBsdf(
-            roughness.r,
-            albedo,
-            normal,
-            wi,
-            wo,
-            u, v);
-
-        return bsdf;
-    }
-
     AT_DEVICE_API void OrenNayar::sample(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
-        const aten::vec3& orgnormal,
         aten::sampler* sampler,
-        real u, real v,
-        bool isLightPath/*= false*/)
+        real u, real v)
     {
         result->dir = sampleDirection(param, normal, wi, u, v, sampler);
         result->pdf = pdf(param, normal, wi, result->dir, u, v);
         result->bsdf = bsdf(param, normal, wi, result->dir, u, v);
-    }
-
-    AT_DEVICE_API void OrenNayar::sample(
-        AT_NAME::MaterialSampling* result,
-        const aten::MaterialParameter* param,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real u, real v,
-        const aten::vec4& externalAlbedo,
-        bool isLightPath/*= false*/)
-    {
-        result->dir = sampleDirection(param, normal, wi, u, v, sampler);
-        result->pdf = pdf(param, normal, wi, result->dir, u, v);
-        result->bsdf = bsdf(param, normal, wi, result->dir, u, v, externalAlbedo);
     }
 
     bool OrenNayar::edit(aten::IMaterialParamEditor* editor)

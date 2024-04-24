@@ -50,10 +50,10 @@ namespace AT_NAME
             AT_NAME::emissive::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
             break;
         case aten::MaterialType::Lambert:
-            AT_NAME::lambert::sample(result, mtrl, normal, wi, orgnormal, sampler);
+            AT_NAME::lambert::sample(result, mtrl, normal, wi, sampler);
             break;
         case aten::MaterialType::OrneNayar:
-            AT_NAME::OrenNayar::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
+            AT_NAME::OrenNayar::sample(result, mtrl, normal, wi, sampler, u, v);
             break;
         case aten::MaterialType::Specular:
             AT_NAME::specular::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v);
@@ -84,7 +84,7 @@ namespace AT_NAME
             break;
         default:
             AT_ASSERT(false);
-            AT_NAME::lambert::sample(result, mtrl, normal, wi, orgnormal, sampler);
+            AT_NAME::lambert::sample(result, mtrl, normal, wi, sampler);
             break;
         }
     }

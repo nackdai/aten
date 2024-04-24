@@ -60,7 +60,6 @@ namespace AT_NAME
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
-            const aten::vec3& orgnormal,
             aten::sampler* sampler)
         {
             MaterialSampling ret;

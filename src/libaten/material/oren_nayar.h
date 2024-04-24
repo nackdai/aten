@@ -51,44 +51,13 @@ namespace AT_NAME
             const aten::vec3& wo,
             real u, real v);
 
-        static AT_DEVICE_API aten::vec3 bsdf(
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real u, real v,
-            const aten::vec4& externalAlbedo);
-
         static AT_DEVICE_API void sample(
             AT_NAME::MaterialSampling* result,
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
-            const aten::vec3& orgnormal,
             aten::sampler* sampler,
-            real u, real v,
-            bool isLightPath = false);
-
-        static AT_DEVICE_API void sample(
-            AT_NAME::MaterialSampling* result,
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            real u, real v,
-            const aten::vec4& externalAlbedo,
-            bool isLightPath = false);
-
-        static AT_DEVICE_API real computeFresnel(
-            const aten::MaterialParameter* mtrl,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real outsideIor)
-        {
-            return real(1);
-        }
+            real u, real v);
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
     };

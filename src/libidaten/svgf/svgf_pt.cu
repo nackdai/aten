@@ -151,7 +151,11 @@ namespace svgf_kernel {
             ray.dir,
             &paths.sampler[idx]);
 
-        auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
+        // NOTE:
+        // As SVGF algorithm, texture color will be appiled at the end of SVGF.
+        // For that, texture color is already stoerd as AoV.
+        // Then, we set only base material color here.
+        auto albedo = shMtrls[threadIdx.x].baseColor;
 
 #if 1
         // Explicit conection to light.

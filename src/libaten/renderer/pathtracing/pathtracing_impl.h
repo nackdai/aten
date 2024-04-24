@@ -555,7 +555,7 @@ namespace AT_NAME
         const auto pdfb = sampling.pdf;
         const auto bsdf = sampling.bsdf;
 
-        auto ray_along_normal = rec.normal;
+        auto ray_along_normal = normal;
 
         // Adjust the surface normal to along with the same direction as the next ray.
         ray_along_normal = dot(ray_along_normal, next_dir) >= 0.0f ? ray_along_normal : -ray_along_normal;

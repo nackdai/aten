@@ -74,7 +74,7 @@ namespace aten
                     ShadeMiss(
                         idx,
                         depth,
-                        sampleBG(rays_[idx], m_bg),
+                        bg_.bg_color,
                         path_host_.paths);
                 }
 
@@ -99,7 +99,7 @@ namespace aten
         int32_t maxDepth,
         camera* cam,
         scene* scene,
-        const std::shared_ptr<background>& bg)
+        aten::BackgroundResource& bg)
     {
         int32_t depth = 0;
 
@@ -262,7 +262,7 @@ namespace aten
                 }
 
                 if (!is_found_feature_line_point) {
-                    shadeMiss(idx, scene, depth, paths, rays, bg);
+                    shadeMiss(ctxt, idx, scene, depth, paths, rays, bg);
                     willContinue = false;
                 }
             }
@@ -396,36 +396,37 @@ namespace aten
     }
 
     void PathTracing::shadeMiss(
+        const aten::context& ctxt,
         int32_t idx,
         scene* scene,
         int32_t depth,
         Path& paths,
         const ray* rays,
-        const std::shared_ptr<background>& bg)
+        aten::BackgroundResource& bg)
     {
         const auto& ray = rays[idx];
 
         auto ibl = scene->getIBL();
-        aten::vec3 emit(real(0));
-        real misW = real(1);
+        aten::vec3 emit;
+        float misW = 1.0F;
 
         if (ibl) {
+            // TODO
+            // Sample IBL properly.
+            emit = AT_NAME::Background::SampleFromRay(ray, bg, ctxt);
+
             if (depth == 0) {
-                emit = ibl->getEnvMap()->sample(ray);
-                misW = real(1);
+                float misW = 1.0F;
                 paths.attrib[idx].isTerminate = true;
             }
             else {
-                emit = ibl->getEnvMap()->sample(ray);
-                auto pdfLight = ibl->samplePdf(ray);
+                auto pdfLight = ibl->samplePdf(ray, ctxt);
                 misW = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
             }
         }
         else {
-            emit = sampleBG(ray, bg);
-            misW = real(1);
+            emit = AT_NAME::Background::SampleFromRay(ray, bg, ctxt);
         }
-
         paths.contrib[idx].contrib += paths.throughput[idx].throughput * misW * emit;
     }
 
@@ -512,7 +513,7 @@ namespace aten
                                 m_rrDepth, m_maxDepth,
                                 camera,
                                 scene,
-                                bg());
+                                bg_);
                         }
                         else {
                             radiance(

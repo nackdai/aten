@@ -7,13 +7,12 @@
 // http://www.igorsklyar.com/system/documents/papers/4/fiscourse.comp.pdf
 
 namespace AT_NAME {
-    void ImageBasedLight::preCompute()
+    void ImageBasedLight::preCompute(const std::shared_ptr<aten::texture>& envmap)
     {
-        auto envmap = getEnvMap();
         AT_ASSERT(envmap);
 
-        auto width = envmap->GtTexture()->width();
-        auto height = envmap->GtTexture()->height();
+        auto width = envmap->width();
+        auto height = envmap->height();
 
         m_avgIllum = 0;
 
@@ -40,7 +39,7 @@ namespace AT_NAME {
 
         m_cdfU.resize(height);
 
-        for (uint32_t y = 0; y < height; y++) {
+        for (int32_t y = 0; y < height; y++) {
             // NOTE
             // 正距円筒は、緯度方向については極ほど歪むので、その補正.
             // 緯度方向は [0, pi].
@@ -54,11 +53,11 @@ namespace AT_NAME {
             // u方向のpdf.
             std::vector<real>& pdfU = m_cdfU[y];
 
-            for (uint32_t x = 0; x < width; x++) {
+            for (int32_t x = 0; x < width; x++) {
                 real u = (real)(x + 0.5) / width;
                 real v = (real)(y + 0.5) / height;
 
-                auto clr = envmap->sample(u, v);
+                auto clr = AT_NAME::Background::SampleFromUVWithTexture(u, v, bg_, envmap);
                 const auto illum = AT_NAME::color::luminance(clr);
 
                 m_avgIllum += illum * scale;
@@ -95,11 +94,11 @@ namespace AT_NAME {
 
         // For horizontal.
         {
-            for (uint32_t y = 0; y < height; y++) {
+            for (int32_t y = 0; y < height; y++) {
                 real sum = 0;
                 std::vector<real>& cdfU = m_cdfU[y];
 
-                for (uint32_t x = 0; x < width; x++) {
+                for (int32_t x = 0; x < width; x++) {
                     sum += cdfU[x];
                     if (x > 0) {
                         cdfU[x] += cdfU[x - 1];
@@ -108,7 +107,7 @@ namespace AT_NAME {
 
                 if (sum > 0) {
                     real invSum = 1 / sum;
-                    for (uint32_t x = 0; x < width; x++) {
+                    for (int32_t x = 0; x < width; x++) {
                         cdfU[x] *= invSum;
                         cdfU[x] = aten::clamp<real>(cdfU[x], 0, 1);
                     }
@@ -119,11 +118,12 @@ namespace AT_NAME {
         m_avgIllum /= totalWeight;
     }
 
-    real ImageBasedLight::samplePdf(const aten::ray& r) const
+    real ImageBasedLight::samplePdf(const aten::ray& r, const aten::context& ctxt) const
     {
-        auto envmap = getEnvMap();
+        AT_ASSERT(bg_.envmap_tex_idx >= 0);
+        auto envmap = ctxt.GetTexture(bg_.envmap_tex_idx);
 
-        auto clr = envmap->sample(r);
+        auto clr = AT_NAME::Background::SampleFromRayWithTexture(r, bg_, envmap);
 
         auto pdf = samplePdf(clr, m_avgIllum);
 
@@ -204,7 +204,7 @@ namespace AT_NAME {
         const aten::vec3& nml,
         aten::sampler* sampler) const
     {
-        auto envmap = getEnvMap();
+        auto envmap = ctxt.GetTexture(bg_.envmap_tex_idx);
 
         aten::LightSampleResult result;
 
@@ -218,8 +218,8 @@ namespace AT_NAME {
         int32_t y = samplePdfAndCdf(r1, m_cdfV, pdfV, cdfV);
         int32_t x = samplePdfAndCdf(r2, m_cdfU[y], pdfU, cdfU);
 
-        auto width = envmap->GtTexture()->width();
-        auto height = envmap->GtTexture()->height();
+        auto width = envmap->width();
+        auto height = envmap->height();
 
         real u = (real)(x + 0.5) / width;
         real v = (real)(y + 0.5) / height;
@@ -231,11 +231,12 @@ namespace AT_NAME {
         result.pdf = (pdfU * pdfV) * ((width * height) / (pi2 * aten::sin(theta)));
 
         // u, v -> direction.
-        result.dir = AT_NAME::envmap::convertUVToDirection(u, v);
+        result.dir = AT_NAME::Background::ConvertUVToDirection(u, v);
 
-        result.light_color = m_param.scale * envmap->sample(u, v);
+        result.light_color = AT_NAME::Background::SampleFromUVWithTexture(u, v, bg_, envmap);
+        result.light_color *= m_param.scale;
 #elif 0
-        auto uv = AT_NAME::envmap::convertDirectionToUV(nml);
+        auto uv = AT_NAME::envmap::ConvertDirectionToUV(nml);
 
         static const real radius = real(3);
 
@@ -246,8 +247,8 @@ namespace AT_NAME {
         r1 = r1 * 2 - 1;
         r2 = r2 * 2 - 1;
 
-        auto width = envmap->GtTexture()->width();
-        auto height = envmap->GtTexture()->height();
+        auto width = envmap->GetTexture()->width();
+        auto height = envmap->GetTexture()->height();
 
         r1 = r1 * radius / (real)width;
         r2 = r2 * radius / (real)height;
@@ -269,7 +270,7 @@ namespace AT_NAME {
         }
 
         // u, v -> direction.
-        result.dir = AT_NAME::envmap::convertUVToDirection(u, v);
+        result.dir = AT_NAME::envmap::ConvertUVToDirection(u, v);
 
         result.pdf = dot(nml, result.dir) / AT_MATH_PI;
 
@@ -294,7 +295,7 @@ namespace AT_NAME {
 
         result.pdf = dot(nml, result.dir) / AT_MATH_PI;
 
-        auto uv = AT_NAME::envmap::convertDirectionToUV(result.dir);
+        auto uv = AT_NAME::envmap::ConvertDirectionToUV(result.dir);
 
         result.le = envmap->sample(uv.x, uv.y);
         result.intensity = real(1);

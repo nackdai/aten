@@ -78,7 +78,7 @@ public:
         auto texNum = ctxt_.GetTextureNum();
 
         for (int32_t i = 0; i < texNum; i++) {
-            auto tex = ctxt_.GtTexture(i);
+            auto tex = ctxt_.GetTexture(i);
             tex->initAsGLTexture();
         }
 

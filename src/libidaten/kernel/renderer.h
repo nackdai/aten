@@ -6,17 +6,7 @@
 
 namespace idaten
 {
-    struct EnvmapResource {
-        int32_t idx{ -1 };
-        real avgIllum;
-        real multiplyer{ real(1) };
-
-        EnvmapResource() = default;
-
-        EnvmapResource(int32_t i, real illum, real mul = real(1))
-            : idx(i), avgIllum(illum), multiplyer(mul)
-        {}
-    };
+    
 
     class Renderer {
     protected:

@@ -400,7 +400,7 @@ namespace aten
          * @param[in] idx Index to the texture instance.
          * @return If the texture instance is found, returns it. Otherwise, returns nullptr.
          */
-        std::shared_ptr<texture> GtTexture(int32_t idx) const;
+        std::shared_ptr<texture> GetTexture(int32_t idx) const;
 
         /**
          * @brief Add a texture instance.

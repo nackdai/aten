@@ -106,6 +106,11 @@ namespace idaten {
         {
             return lightnum;
         }
+
+        __device__ cudaTextureObject_t GetTexture(int32_t idx) const noexcept
+        {
+            return textures[idx];
+        }
     };
 
     struct DeviceContextInHost {

@@ -311,7 +311,7 @@ namespace aten
         void editTex(std::string_view name, int32_t texid)
         {
             if (texid >= 0) {
-                /*auto tex = aten::texture::GtTexture(texid);
+                /*auto tex = aten::texture::GetTexture(texid);
                 if (tex) {
                     edit(name, tex->name());
                 }*/

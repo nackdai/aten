@@ -92,7 +92,7 @@ namespace AT_NAME
         if (func)
         {
             int32_t albedoTexId = mtrl_ ? mtrl_->param().albedoMap : -1;
-            const auto albedo = albedoTexId >= 0 ? ctxt.GtTexture(albedoTexId) : nullptr;
+            const auto albedo = albedoTexId >= 0 ? ctxt.GetTexture(albedoTexId) : nullptr;
 
             auto color = mtrl_ ? mtrl_->param().baseColor : vec4(1);
 

@@ -204,7 +204,7 @@ namespace AT_NAME
                 dir = camsample.r.dir;
             }
 
-            auto uv = AT_NAME::envmap::convertDirectionToUV(dir);
+            auto uv = AT_NAME::Background::ConvertDirectionToUV(dir);
 
 #ifdef __CUDACC__
             // envmapidx is index to array of textures in context.

@@ -231,7 +231,6 @@
     <ClInclude Include="..\src\libaten\renderer\ao\aorenderer.h" />
     <ClInclude Include="..\src\libaten\renderer\ao\aorenderer_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\background.h" />
-    <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\film.h" />
     <ClInclude Include="..\src\libaten\renderer\npr\feature_line.h" />
     <ClInclude Include="..\src\libaten\renderer\npr\npr_impl.h" />
@@ -341,7 +340,6 @@
     <ClCompile Include="..\src\libaten\os\windows\system_windows.cpp" />
     <ClCompile Include="..\src\libaten\proxy\DataCollector.cpp" />
     <ClCompile Include="..\src\libaten\renderer\ao\aorenderer.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\film.cpp" />
     <ClCompile Include="..\src\libaten\renderer\npr\feature_line.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing\pathtracing.cpp" />

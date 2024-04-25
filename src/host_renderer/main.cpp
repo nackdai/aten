@@ -78,10 +78,9 @@ public:
 #ifdef ENABLE_IBL
         envmap_ = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
 
-        bg_ = std::make_shared<aten::envmap>();
-        bg_->init(envmap_);
+        bg_ = AT_NAME::Background::CreateBackgroundResource(envmap_);
 
-        auto ibl = std::make_shared<aten::ImageBasedLight>(bg_);
+        auto ibl = std::make_shared<aten::ImageBasedLight>(bg_, ctxt_);
         scene_.addImageBasedLight(ctxt_, ibl);
 #endif
 
@@ -213,7 +212,7 @@ private:
 
     aten::AssetManager asset_manager_;
 
-    std::shared_ptr<aten::envmap> bg_;
+    aten::BackgroundResource bg_;
     std::shared_ptr<aten::texture> envmap_;
 
     aten::PathTracing renderer_;
@@ -224,8 +223,8 @@ private:
 
     std::shared_ptr<aten::instance<aten::PolygonObject>> movable_obj_;
 
-    //aten::FilmProgressive buffer_{ WIDTH, HEIGHT };
-    aten::Film buffer_{ WIDTH, HEIGHT };
+    aten::FilmProgressive buffer_{ WIDTH, HEIGHT };
+    //aten::Film buffer_{ WIDTH, HEIGHT };
 
     aten::FBO fbo_;
 

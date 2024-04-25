@@ -41,13 +41,13 @@ namespace aten {
                 fprintf(fp, "illum 2\n");
 
                 if (param.albedoMap >= 0) {
-                    auto albedo = ctxt.GtTexture(param.albedoMap);
+                    auto albedo = ctxt.GetTexture(param.albedoMap);
                     fprintf(fp, "map_Ka %s\n", albedo->name());
                     fprintf(fp, "map_Kd %s\n", albedo->name());
                 }
 
                 if (param.normalMap >= 0) {
-                    auto normal = ctxt.GtTexture(param.normalMap);
+                    auto normal = ctxt.GetTexture(param.normalMap);
                     fprintf(fp, "map_bump %s\n", normal->name());
                     fprintf(fp, "bump %s\n", normal->name());
                 }

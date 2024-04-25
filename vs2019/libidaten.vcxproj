@@ -57,7 +57,6 @@
     <ClInclude Include="..\src\libaten\misc\tuple.h" />
     <ClInclude Include="..\src\libaten\renderer\aov.h" />
     <ClInclude Include="..\src\libaten\renderer\ao\aorenderer_impl.h" />
-    <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\npr\feature_line.h" />
     <ClInclude Include="..\src\libaten\renderer\npr\npr_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_impl.h" />
@@ -158,7 +157,6 @@
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
     <ClCompile Include="..\src\libaten\misc\color.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <CudaCompile Include="..\src\libidaten\ao\ao.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>

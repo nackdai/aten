@@ -81,9 +81,7 @@ namespace aten
                     x, y,
                     width, height,
                     bounce,
-                    ibl->param().GetLightEnvmapId(),
-                    ibl->getAvgIlluminace(),
-                    real(1),
+                    bg_,
                     ctxt, camera,
                     path_host_.paths, rays_[idx],
                     aov_.GetNormalDepthAsSpan(),
@@ -93,7 +91,7 @@ namespace aten
                 ShadeMiss(
                     idx,
                     bounce,
-                    aten::vec3(),
+                    bg_.bg_color,
                     path_host_.paths,
                     aov_.GetNormalDepthAsSpan(),
                     aov_.GetAlbedoMeshIdAsSpan());

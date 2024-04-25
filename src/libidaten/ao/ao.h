@@ -32,7 +32,7 @@ namespace idaten
             uint32_t advanceVtxNum,
             const std::vector<aten::mat4>& mtxs,
             const std::vector<TextureResource>& texs,
-            const EnvmapResource& envmapRsc) override;
+            const aten::BackgroundResource& bg_resource) override;
 
         int32_t getNumRays() const
         {

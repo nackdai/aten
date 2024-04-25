@@ -64,9 +64,7 @@ namespace aten
                         ix, iy,
                         width, height,
                         depth,
-                        ibl->param().GetLightEnvmapId(),
-                        ibl->getAvgIlluminace(),
-                        real(1),
+                        bg_,
                         ctxt, camera,
                         path_host_.paths, rays_[idx]);
                 }
@@ -407,14 +405,12 @@ namespace aten
         const auto& ray = rays[idx];
 
         auto ibl = scene->getIBL();
-        aten::vec3 emit;
+        aten::vec3 emit = AT_NAME::Background::SampleFromRay(ray.dir, bg, ctxt);
         float misW = 1.0F;
 
         if (ibl) {
             // TODO
             // Sample IBL properly.
-            emit = AT_NAME::Background::SampleFromRay(ray, bg, ctxt);
-
             if (depth == 0) {
                 float misW = 1.0F;
                 paths.attrib[idx].isTerminate = true;
@@ -424,9 +420,7 @@ namespace aten
                 misW = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
             }
         }
-        else {
-            emit = AT_NAME::Background::SampleFromRay(ray, bg, ctxt);
-        }
+
         paths.contrib[idx].contrib += paths.throughput[idx].throughput * misW * emit;
     }
 

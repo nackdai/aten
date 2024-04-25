@@ -3,6 +3,7 @@
 #include "defs.h"
 #include "math/math.h"
 #include "math/vec3.h"
+#include "misc/type_traits.h"
 
 namespace aten {
     class vec4 {
@@ -33,6 +34,19 @@ namespace aten {
             v = _v.v;
             w = _v.w;
         }
+
+        template <
+            class V,
+            std::enable_if_t<std::is_class_v<V> && !std::is_same_v<V, vec4> && !std::is_same_v<V, vec3> && !aten::is_shared_ptr_v<V>>* = nullptr
+        >
+        AT_HOST_DEVICE_API vec4(const V& _v)
+        {
+            x = _v.x;
+            y = _v.y;
+            z = _v.z;
+            w = _v.w;
+        }
+
         AT_HOST_DEVICE_API vec4(real f)
         {
             x = y = z = w = f;

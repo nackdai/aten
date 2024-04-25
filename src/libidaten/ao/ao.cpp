@@ -22,7 +22,7 @@ namespace idaten {
         uint32_t advanceVtxNum,
         const std::vector<aten::mat4>& mtxs,
         const std::vector<TextureResource>& texs,
-        const EnvmapResource& envmapRsc)
+        const aten::BackgroundResource& bg_resource)
     {
         idaten::Renderer::update(
             gltex,
@@ -35,7 +35,7 @@ namespace idaten {
             prims, advancePrimNum,
             vtxs, advanceVtxNum,
             mtxs,
-            texs, envmapRsc);
+            texs, bg_resource);
 
         initSamplerParameter(width, height);
     }

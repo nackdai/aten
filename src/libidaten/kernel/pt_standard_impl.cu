@@ -323,6 +323,7 @@ namespace kernel {
         float4* aovNormalDepth,
         float4* aovAlbedoMeshid,
         idaten::Path paths,
+        const aten::BackgroundResource bg,
         int32_t width, int32_t height)
     {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -337,7 +338,7 @@ namespace kernel {
         AT_NAME::ShadeMiss(
             idx,
             bounce,
-            aten::vec3(1.0F),   // TODO
+            bg.bg_color,
             paths,
             aten::span(aovNormalDepth, width * height),
             aten::span(aovAlbedoMeshid, width * height));
@@ -349,9 +350,7 @@ namespace kernel {
         float4* aovNormalDepth,
         float4* aovAlbedoMeshid,
         const idaten::context ctxt,
-        int32_t envmap_idx,
-        real envmap_avg_illum,
-        real envmap_multiplyer,
+        const aten::BackgroundResource bg,
         idaten::Path paths,
         const aten::ray* __restrict__ rays,
         int32_t width, int32_t height)
@@ -370,9 +369,7 @@ namespace kernel {
             ix, iy,
             width, height,
             bounce,
-            envmap_idx,
-            envmap_avg_illum,
-            envmap_multiplyer,
+            bg,
             ctxt, camera,
             paths, rays[idx],
             aten::span(aovNormalDepth, width * height),
@@ -499,14 +496,14 @@ namespace idaten
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
-        if (m_enableEnvmap && m_envmapRsc.idx >= 0) {
+        if (m_enableEnvmap && bg_.envmap_tex_idx >= 0) {
             kernel::shadeMissWithEnvmap << <grid, block, 0, m_stream >> > (
                 bounce,
                 m_cam,
                 aovNormalDepth.data(),
                 aovTexclrMeshid.data(),
                 ctxt_host_.ctxt,
-                m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
+                bg_,
                 path_host_->paths,
                 m_rays.data(),
                 width, height);
@@ -517,6 +514,7 @@ namespace idaten
                 aovNormalDepth.data(),
                 aovTexclrMeshid.data(),
                 path_host_->paths,
+                bg_,
                 width, height);
         }
 

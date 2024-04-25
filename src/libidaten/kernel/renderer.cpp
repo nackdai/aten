@@ -15,7 +15,7 @@ namespace idaten {
         uint32_t advanceVtxNum,
         const std::vector<aten::mat4>& mtxs,
         const std::vector<TextureResource>& texs,
-        const EnvmapResource& envmapRsc)
+        const aten::BackgroundResource& bg_resource)
     {
 #if 0
         size_t size_stack = 0;
@@ -110,12 +110,9 @@ namespace idaten {
 #endif
             }
             ctxt_host_.tex.resize(texs.size());
-
-            //AT_ASSERT(envmapRsc.idx < texs.size());
-            if (envmapRsc.idx < texs.size()) {
-                m_envmapRsc = envmapRsc;
-            }
         }
+
+        bg_ = bg_resource;
     }
 
     void Renderer::updateBVH(

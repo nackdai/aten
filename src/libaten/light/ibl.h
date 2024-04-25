@@ -18,7 +18,7 @@ namespace AT_NAME {
         ImageBasedLight()
             : Light(aten::LightType::IBL, aten::LightAttributeIBL)
         {}
-        ImageBasedLight(const BackgroundResource& bg, const aten::context& ctxt)
+        ImageBasedLight(const aten::BackgroundResource& bg, const aten::context& ctxt)
             : Light(aten::LightType::IBL, aten::LightAttributeIBL)
         {
             SetBackground(bg, ctxt);
@@ -30,7 +30,7 @@ namespace AT_NAME {
 
     public:
         void SetBackground(
-            const BackgroundResource& bg,
+            const aten::BackgroundResource& bg,
             const aten::context& ctxt)
         {
             if (bg_.envmap_tex_idx != bg.envmap_tex_idx) {
@@ -125,7 +125,7 @@ namespace AT_NAME {
         void preCompute(const std::shared_ptr<aten::texture>& envmap);
 
     private:
-        BackgroundResource bg_;
+        aten::BackgroundResource bg_;
 
         real m_avgIllum{ real(0) };
 

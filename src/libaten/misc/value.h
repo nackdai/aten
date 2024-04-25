@@ -74,7 +74,7 @@ namespace aten {
             return *this;
         }
         template <class T>
-        PolymorphicValue& operator=(const std::shared_ptr<T> _p)
+        PolymorphicValue& operator=(const std::shared_ptr<T>& _p)
         {
             type_hash_ = typeid(T).hash_code();
             val_ = _p;

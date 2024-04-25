@@ -176,8 +176,7 @@ namespace AT_NAME
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,
         int32_t bounce,
-        int32_t envmap_idx,
-        float envmapAvgIllum, float envmapMultiplyer,
+        const aten::BackgroundResource bg,
         const AT_NAME::context& ctxt,
         const aten::CameraParameter& camera,
         AT_NAME::Path& paths,
@@ -204,16 +203,7 @@ namespace AT_NAME
                 dir = camsample.r.dir;
             }
 
-            auto uv = AT_NAME::Background::ConvertDirectionToUV(dir);
-
-#ifdef __CUDACC__
-            // envmapidx is index to array of textures in context.
-            // In GPU, sampleTexture requires texture id of CUDA. So, arguments is different.
-            const auto bg = tex2D<float4>(ctxt.textures[envmap_idx], uv.x, uv.y);
-#else
-            const auto bg = AT_NAME::sampleTexture(envmap_idx, uv.x, uv.y, aten::vec4(1));
-#endif
-            auto emit = aten::vec3(bg.x, bg.y, bg.z);
+            auto emit = AT_NAME::Background::SampleFromRay(dir, bg, ctxt);
 
             float misW = 1.0f;
             if (bounce == 0
@@ -226,14 +216,12 @@ namespace AT_NAME
                     // Export bg color to albedo buffer.
                     AT_NAME::FillBasicAOVsIfHitMiss(
                         aov_normal_depth[idx],
-                        aov_albedo_meshid[idx], bg);
+                        aov_albedo_meshid[idx], emit);
                 }
             }
             else {
-                auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);
+                auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, bg.avgIllum);
                 misW = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
-
-                emit *= envmapMultiplyer;
             }
 
             auto contrib = paths.throughput[idx].throughput * misW * emit;

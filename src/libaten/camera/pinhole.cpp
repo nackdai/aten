@@ -12,7 +12,7 @@ namespace AT_NAME {
         m_at = lookat;
         m_vfov = vfov;
 
-        real theta = Deg2Rad(vfov);
+        real theta = aten::Deg2Rad(vfov);
 
         m_param.aspect = width / (real)height;
 

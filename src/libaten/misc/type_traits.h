@@ -47,4 +47,15 @@ namespace aten {
     // But, even though the primary template is specified, the specialization is deduced firstly.
     template<template<class...>class Op, class ...Args>
     using is_detected = _detail::detector<void, Op, Args...>;
+
+    template <class T>
+    struct is_shared_ptr : std::false_type {};
+
+    // If is_shared_ptr is used with std::shared_ptr, like is_shared_ptr<std::shared_ptr<blah>>.
+    // Fall back to this template specialization.
+    template <class T>
+    struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
+
+    template <class T>
+    inline constexpr bool is_shared_ptr_v = is_shared_ptr<T>::value;
 }

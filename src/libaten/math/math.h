@@ -2,145 +2,113 @@
 
 #include <cmath>
 #include <algorithm>
+#include <limits>
 
 #include "types.h"
 #include "defs.h"
 
-#define AT_MATH_PI        real(3.14159265358979323846)
-#define AT_MATH_PI_2    real(AT_MATH_PI * 2)
-#define AT_MATH_PI_HALF    real(AT_MATH_PI * 0.5)
+constexpr auto AT_MATH_PI = 3.14159265358979323846F;
+constexpr auto AT_MATH_PI_2 = AT_MATH_PI * 2;
+constexpr auto AT_MATH_PI_HALF = AT_MATH_PI * 0.5F;
 
-#if 1
-#ifdef TYPE_DOUBLE
-    #define AT_MATH_INF                DBL_MAX
-    //#define AT_MATH_EPSILON        DBL_EPSILON
-    #define AT_MATH_EPSILON            (1e-6)
-#else
-    #define AT_MATH_INF                FLT_MAX
-    //#define AT_MATH_EPSILON        FLT_EPSILON
-    #define AT_MATH_EPSILON            (float)(1e-3)
-#endif
-#else
-#ifdef TYPE_DOUBLE
-    #define AT_MATH_INF                (1e64)
-    #define AT_MATH_EPSILON            (1e-6)
-    #define AT_MATH_EPSILIN_SQRT    (1e-3)
-#else
-    #define AT_MATH_INF                (float)(1e32)
-    #define AT_MATH_EPSILON            (float)(1e-3)
-#endif
-#endif
-
-#define Deg2Rad(d)   (AT_MATH_PI * (d) / real(180.0))
-#define Rad2Deg(r)   ((r) * real(180.0) / AT_MATH_PI)
-
-#ifdef TYPE_DOUBLE
-    #define AT_MATH_FUNC(func, v)    func(v)
-    #define AT_MATH_FUNC2(func, v0, v1)    func(v0, v1)
-#else
-    #define AT_MATH_FUNC(func, v)    func##f(v)
-    #define AT_MATH_FUNC2(func, v0, v1)    func##f(v0, v1)
-#endif
-
-#define AT_MATH_IS_IN_BOUND(x, a, b)    ((a) <= (x) && (x) <= (b))
+constexpr auto AT_MATH_INF = std::numeric_limits<float>::max();
+constexpr auto AT_MATH_EPSILON = 1e-3F;
 
 namespace aten {
-    inline AT_HOST_DEVICE_API real sqrt(real f)
+    constexpr inline AT_HOST_DEVICE_API float Deg2Rad(float d)
     {
-        return AT_MATH_FUNC(::sqrt, f);
+        return (AT_MATH_PI * (d) / 180.0F);
     }
 
-    inline AT_HOST_DEVICE_API real rsqrt(real f)
+    constexpr inline AT_HOST_DEVICE_API float Rad2Deg(float r)
+    {
+        return ((r) * 180.0F / AT_MATH_PI);
+    }
+
+    inline AT_HOST_DEVICE_API float sqrt(float f)
+    {
+        return std::sqrtf(f);
+    }
+
+    inline AT_HOST_DEVICE_API float rsqrt(float f)
     {
 #ifdef __CUDACC__
         return rsqrtf(f);
 #else
-        return real(1) / aten::sqrt(f);
+        return 1.0F / aten::sqrt(f);
 #endif
     }
 
-    inline AT_HOST_DEVICE_API real tan(real f)
+    inline AT_HOST_DEVICE_API float tan(float f)
     {
-        return AT_MATH_FUNC(::tan, f);
+        return std::tanf(f);
     }
 
-    inline AT_HOST_DEVICE_API real cos(real f)
+    inline AT_HOST_DEVICE_API float cos(float f)
     {
-        return AT_MATH_FUNC(::cos, f);
+        return std::cosf(f);
     }
 
-    inline AT_HOST_DEVICE_API real sin(real f)
+    inline AT_HOST_DEVICE_API float sin(float f)
     {
-        return AT_MATH_FUNC(::sin, f);
+        return std::sinf(f);
     }
 
-    inline AT_HOST_DEVICE_API real atan2(real y, real x)
+    inline AT_HOST_DEVICE_API float atan2(float y, float x)
     {
-        return AT_MATH_FUNC2(::atan2, y, x);
+        return std::atan2f(y, x);
     }
 
-    inline AT_HOST_DEVICE_API real atan(real f)
+    inline AT_HOST_DEVICE_API float atan(float f)
     {
-        return AT_MATH_FUNC(::atan, f);
+        return std::atanf(f);
     }
 
-    inline AT_HOST_DEVICE_API real asin(real f)
+    inline AT_HOST_DEVICE_API float asin(float f)
     {
-        return AT_MATH_FUNC(::asin, f);
+        return std::asinf(f);
     }
 
-    inline AT_HOST_DEVICE_API real acos(real f)
+    inline AT_HOST_DEVICE_API float acos(float f)
     {
-        return AT_MATH_FUNC(::acos, f);
+        return std::acosf(f);
     }
 
-    inline AT_HOST_DEVICE_API real log(real f)
+    inline AT_HOST_DEVICE_API float log(float f)
     {
-        return AT_MATH_FUNC(::log, f);
+        return std::logf(f);
     }
 
-    inline AT_HOST_DEVICE_API real exp(real f)
+    inline AT_HOST_DEVICE_API float exp(float f)
     {
-        return AT_MATH_FUNC(::exp, f);
+        return std::expf(f);
     }
 
-    inline AT_HOST_DEVICE_API real pow(real f, real v)
+    inline AT_HOST_DEVICE_API float pow(float f, float v)
     {
-        return AT_MATH_FUNC2(::pow, f, v);
+        return std::powf(f, v);
     }
 
     template <class T>
     inline AT_HOST_DEVICE_API T abs(T f)
     {
-        return static_cast<T>(abs<real>(static_cast<real>(f)));
+        return std::abs(f);
     }
 
     template <>
-    inline AT_HOST_DEVICE_API real abs(real f)
+    inline AT_HOST_DEVICE_API float abs(float f)
     {
-#ifdef TYPE_DOUBLE
-        return ::abs(f);
-#else
-        return ::fabsf(f);
-#endif
+        return std::fabsf(f);
     }
 
-    inline AT_HOST_DEVICE_API real floor(real f)
+    inline AT_HOST_DEVICE_API float floor(float f)
     {
-        return AT_MATH_FUNC(::floor, f);
+        return std::floorf(f);
     }
 
-    inline AT_HOST_DEVICE_API real ceil(real f)
+    inline AT_HOST_DEVICE_API float ceil(float f)
     {
-        return AT_MATH_FUNC(::ceil, f);
-    }
-
-    template <class T>
-    inline AT_HOST_DEVICE_API void swapVal(T& a, T& b)
-    {
-        T tmp = a;
-        a = b;
-        b = tmp;
+        return std::ceilf(f);
     }
 
 #ifdef __CUDACC__
@@ -195,19 +163,19 @@ namespace aten {
     }
 #endif
 
-    template <class _T>
-    inline AT_HOST_DEVICE_API _T clamp(_T f, _T a, _T b)
+    template <class T>
+    inline AT_HOST_DEVICE_API T clamp(T f, T a, T b)
     {
         return cmpMin(cmpMax(f, a), b);
     }
 
-    template <class _T>
-    inline AT_HOST_DEVICE_API auto saturate(_T f) -> std::enable_if_t<std::is_floating_point_v<_T>, _T>
+    template <class T>
+    inline AT_HOST_DEVICE_API auto saturate(T f) -> std::enable_if_t<std::is_floating_point_v<T>, T>
     {
-        return clamp(f, _T(0), _T(1));
+        return clamp(f, T(0), T(1));
     }
 
-    inline AT_HOST_DEVICE_API bool isInvalid(real f)
+    inline AT_HOST_DEVICE_API bool isInvalid(float f)
     {
 #ifdef __CUDACC__
         bool is_invalid = isnan(f) || isinf(f);
@@ -217,7 +185,7 @@ namespace aten {
         return is_invalid;
     }
 
-    inline AT_HOST_DEVICE_API bool isValid(real f)
+    inline AT_HOST_DEVICE_API bool isValid(float f)
     {
         return !isInvalid(f);
     }
@@ -304,8 +272,8 @@ namespace aten {
     }
 #endif
 
-    template <class TYPE>
-    inline AT_HOST_DEVICE_API TYPE mix(const TYPE& x, const TYPE& y, real a)
+    template <class T>
+    inline AT_HOST_DEVICE_API T mix(const T& x, const T& y, float a)
     {
         // Linear interpolation.
         // x(1-a)+y*a
@@ -313,7 +281,7 @@ namespace aten {
     }
 
     // Neary Equal.
-    inline AT_HOST_DEVICE_API bool isClose(real A, real B, int32_t maxUlps)
+    inline AT_HOST_DEVICE_API bool isClose(float A, float B, int32_t maxUlps)
     {
 #ifdef TYPE_DOUBLE
         // TODO
@@ -355,5 +323,11 @@ namespace aten {
 #else
         return std::isfinite(f);
 #endif
+    }
+
+    template <class T>
+    constexpr inline AT_HOST_DEVICE_API bool IsInRange(T x, T a, T b)
+    {
+        return a <= x && x <= b;
     }
 }

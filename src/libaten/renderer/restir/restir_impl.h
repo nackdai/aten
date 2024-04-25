@@ -353,8 +353,8 @@ namespace restir {
         int32_t px = (int32_t)(ix + motion_depth.x * width);
         int32_t py = (int32_t)(iy + motion_depth.y * height);
 
-        bool is_acceptable = AT_MATH_IS_IN_BOUND(px, 0, width - 1)
-            && AT_MATH_IS_IN_BOUND(py, 0, height - 1);
+        bool is_acceptable = aten::IsInRange(px, 0, width - 1)
+            && aten::IsInRange(py, 0, height - 1);
 
         if (is_acceptable)
         {
@@ -489,8 +489,8 @@ namespace restir {
             const int32_t xx = ix + offset_x[i];
             const int32_t yy = iy + offset_y[i];
 
-            bool is_acceptable = AT_MATH_IS_IN_BOUND(xx, 0, width - 1)
-                && AT_MATH_IS_IN_BOUND(yy, 0, height - 1);
+            bool is_acceptable = aten::IsInRange(xx, 0, width - 1)
+                && aten::IsInRange(yy, 0, height - 1);
 
             if (is_acceptable)
             {

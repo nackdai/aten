@@ -182,7 +182,7 @@ namespace AT_NAME {
 
             // Compute horizontal FoV.
             auto hfov = param.vfov * param.height / real(param.width);
-            hfov = Deg2Rad(hfov);
+            hfov = aten::Deg2Rad(hfov);
 
             auto half_width = aten::tan(hfov / 2) * distanceFromCamera;
             auto width = half_width * 2;

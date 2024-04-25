@@ -143,11 +143,7 @@ public:
             const auto& obj = objs_[i];
             auto mtrl_name = obj->getShapes()[0]->GetMaterial()->name();
 
-            const auto name_ptr = obj->getName();
-            std::string name;
-            if (name_ptr != nullptr) {
-                name = name_ptr;
-            }
+            auto name = obj->getName();
             name += mtrl_name;
 
             bool is_enable = obj_enables_.at(i);

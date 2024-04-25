@@ -115,9 +115,6 @@
     <ClInclude Include="..\src\libidaten\kernel\intersect_impl.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\envmap.h">
-      <Filter>aten\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\misc\color.h">
       <Filter>aten\misc</Filter>
     </ClInclude>
@@ -346,9 +343,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\cuda\cudaGLresource.cpp">
       <Filter>cuda</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\envmap.cpp">
-      <Filter>aten\renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\misc\color.cpp">
       <Filter>aten\misc</Filter>

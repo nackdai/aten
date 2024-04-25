@@ -118,13 +118,14 @@ public:
         MakeScene(&scene_);
         scene_.build(ctxt_);
 
-#ifndef WHITE_FURNACE_TEST
+#ifdef WHITE_FURNACE_TEST
+        auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr);
+#else
         // IBL
         scene_light_.is_envmap = true;
         scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
-        scene_light_.envmap = std::make_shared<aten::envmap>();
-        scene_light_.envmap->init(scene_light_.envmap_texture);
-        scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(scene_light_.envmap);
+        auto bg = AT_NAME::Background::CreateBackgroundResource(scene_light_.envmap_texture);
+        scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
         scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
 #endif
 
@@ -189,9 +190,7 @@ public:
             vtxparams, 0,
             mtxs,
             tex,
-            scene_light_.is_envmap
-            ? idaten::EnvmapResource(scene_light_.envmap_texture->id(), scene_light_.ibl->getAvgIlluminace(), real(1))
-            : idaten::EnvmapResource());
+            bg);
 
         renderer_.setEnableEnvmap(scene_light_.is_envmap);
 #endif
@@ -675,7 +674,6 @@ private:
         bool is_envmap{ false };
 
         std::shared_ptr<aten::texture> envmap_texture;
-        std::shared_ptr<aten::envmap> envmap;
         std::shared_ptr<aten::ImageBasedLight> ibl;
         std::shared_ptr<aten::PointLight> point_light;
     } scene_light_;

@@ -60,9 +60,7 @@ namespace aten
                         ix, iy,
                         width, height,
                         depth,
-                        ibl->param().GetLightEnvmapId(),
-                        ibl->getAvgIlluminace(),
-                        real(1),
+                        bg_,
                         ctxt, camera,
                         path_host_.paths, rays_[idx],
                         aov.GetNormalDepthAsSpan(),
@@ -72,7 +70,7 @@ namespace aten
                     ShadeMiss(
                         idx,
                         depth,
-                        aten::vec3(),
+                        bg_.bg_color,
                         path_host_.paths,
                         aov.GetNormalDepthAsSpan(),
                         aov.GetAlbedoMeshIdAsSpan());

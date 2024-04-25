@@ -118,6 +118,8 @@ public:
             camparam.znear = real(0.1);
             camparam.zfar = real(10000.0);
 
+            auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, aten::vec4(0));
+
             renderer_.update(
                 visualizer_->GetGLTextureHandle(),
                 WIDTH, HEIGHT,
@@ -130,7 +132,7 @@ public:
                 vtxparams, 0,
                 mtxs,
                 tex,
-                idaten::EnvmapResource());
+                bg);
 
             renderer_.SetGBuffer(
                 fbo_.GetGLTextureHandle(0),

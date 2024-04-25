@@ -101,6 +101,8 @@ public:
             camparam.znear = real(0.1);
             camparam.zfar = real(10000.0);
 
+            auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr);
+
             renderer_.update(
                 visualizer_->GetGLTextureHandle(),
                 WIDTH, HEIGHT,
@@ -112,7 +114,7 @@ public:
                 primparams, 0,
                 vtxparams, 0,
                 mtxs,
-                tex, idaten::EnvmapResource());
+                tex, bg);
         }
 
         return true;
@@ -310,9 +312,6 @@ protected:
     aten::context ctxt_;
 
     aten::AssetManager asset_manager;
-
-    std::shared_ptr<aten::envmap> bg_;
-    std::shared_ptr<aten::texture> envmap_;
 
     idaten::AORenderer renderer_;
 

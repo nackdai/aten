@@ -6,7 +6,7 @@
 
 namespace idaten
 {
-    
+
 
     class Renderer {
     protected:
@@ -33,7 +33,7 @@ namespace idaten
             uint32_t advanceVtxNum,
             const std::vector<aten::mat4>& mtxs,
             const std::vector<TextureResource>& texs,
-            const EnvmapResource& envmapRsc);
+            const aten::BackgroundResource& bg_resource);
 
         virtual void reset() {}
 
@@ -82,6 +82,6 @@ namespace idaten
         idaten::StreamCompaction m_compaction;
 
         aten::CameraParameter m_cam;
-        EnvmapResource m_envmapRsc;
+        aten::BackgroundResource bg_;
     };
 }

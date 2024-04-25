@@ -16,7 +16,7 @@
 #include "../common/scenedefs.h"
 
 #define ENABLE_ENVMAP
-#define ENABLE_NPR
+//#define ENABLE_NPR
 
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
@@ -77,11 +77,13 @@ public:
 
 #ifdef ENABLE_ENVMAP
         auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
-        auto bg = std::make_shared<aten::envmap>();
-        bg->init(envmap);
-        auto ibl = std::make_shared<aten::ImageBasedLight>(bg);
+        auto bg = AT_NAME::Background::CreateBackgroundResource(envmap);
+        auto ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
+        bg.avgIllum = ibl->getAvgIlluminace();
 
         scene_.addImageBasedLight(ctxt_, ibl);
+#else
+        auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr);
 #endif
 
         {
@@ -135,11 +137,7 @@ public:
                 vtxparams, 0,
                 mtxs,
                 tex,
-#ifdef ENABLE_ENVMAP
-                idaten::EnvmapResource(envmap->id(), ibl->getAvgIlluminace(), real(1)));
-#else
-                idaten::EnvmapResource());
-#endif
+                bg);
         }
 
         return true;

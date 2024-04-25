@@ -77,12 +77,14 @@ public:
 
 #ifdef ENABLE_IBL
         envmap_ = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
+        auto bg = AT_NAME::Background::CreateBackgroundResource(envmap_);
 
-        bg_ = AT_NAME::Background::CreateBackgroundResource(envmap_);
-
-        auto ibl = std::make_shared<aten::ImageBasedLight>(bg_, ctxt_);
+        auto ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
         scene_.addImageBasedLight(ctxt_, ibl);
+#else
+        auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr);
 #endif
+        renderer_.SetBG(bg);
 
 #ifdef ENABLE_FEATURE_LINE
         renderer_.enableFeatureLine(true);
@@ -212,7 +214,6 @@ private:
 
     aten::AssetManager asset_manager_;
 
-    aten::BackgroundResource bg_;
     std::shared_ptr<aten::texture> envmap_;
 
     aten::PathTracing renderer_;

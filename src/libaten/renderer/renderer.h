@@ -41,9 +41,9 @@ namespace aten
             frame_count_++;
         }
 
-        void setBG(const std::shared_ptr<background>& bg)
+        void SetBG(const BackgroundResource& bg)
         {
-            m_bg = bg;
+            bg_ = bg;
         }
 
         virtual void enableFeatureLine(bool e)
@@ -68,19 +68,6 @@ namespace aten
             scene* scene,
             camera* camera) = 0;
 
-        static vec3 sampleBG(const ray& inRay, const std::shared_ptr<background>& bg)
-        {
-            if (bg) {
-                return bg->sample(inRay);
-            }
-            return vec3(1.0F);
-        }
-
-        std::shared_ptr<background> bg()
-        {
-            return m_bg;
-        }
-
         static inline bool isInvalidColor(const vec3& v)
         {
             bool b = isInvalid(v);
@@ -94,7 +81,7 @@ namespace aten
         }
 
     protected:
-        std::shared_ptr<background> m_bg;
+        BackgroundResource bg_;
         uint32_t frame_count_{ 0 };
     };
 }

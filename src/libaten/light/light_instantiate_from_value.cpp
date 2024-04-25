@@ -24,13 +24,8 @@ namespace AT_NAME {
     ImageBasedLight::ImageBasedLight(aten::Values& val)
         : Light(aten::LightType::IBL, LightAttributeIBL, val)
     {
-        auto tex = val.get<texture>("envmap");
-        AT_ASSERT(tex);
-
-        auto bg = std::make_shared<AT_NAME::envmap>();
-        bg->init(tex);
-
-        setEnvMap(bg);
+        AT_ASSERT(false);
+        throw std::exception();
     }
 
     PointLight::PointLight(aten::Values& val)

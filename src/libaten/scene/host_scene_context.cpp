@@ -275,7 +275,7 @@ namespace aten
         return ret;
     }
 
-    std::shared_ptr<texture> context::GtTexture(int32_t idx) const
+    std::shared_ptr<texture> context::GetTexture(int32_t idx) const
     {
         AT_ASSERT(0 <= idx && idx < GetTextureNum());
         return textures_[idx];

@@ -12,7 +12,7 @@ namespace aten {
         s = aten::clamp<real>(s, 0, 1);
         t = aten::clamp<real>(t, 0, 1);
 
-        auto dir = envmap::convertUVToDirection(s, t);
+        auto dir = AT_NAME::Background::ConvertUVToDirection(s, t);
 
         CameraSampleResult result;
         result.posOnLens = m_origin + dir;

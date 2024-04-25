@@ -668,7 +668,7 @@ namespace aten
                 auto m = mtrls[i];
 
                 int32_t albedoTexId = m ? m->param().albedoMap : -1;
-                const auto &albedo = albedoTexId >= 0 ? ctxt.GtTexture(albedoTexId) : nullptr;
+                const auto &albedo = albedoTexId >= 0 ? ctxt.GetTexture(albedoTexId) : nullptr;
 
                 if (albedo)
                 {

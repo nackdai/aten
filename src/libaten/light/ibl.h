@@ -4,11 +4,12 @@
 
 #include "light/light.h"
 #include "misc/color.h"
-#include "renderer/envmap.h"
 #include "material/sample_texture.h"
+#include "renderer/background.h"
 
 namespace aten {
     class Values;
+    class texture;
 }
 
 namespace AT_NAME {
@@ -17,10 +18,10 @@ namespace AT_NAME {
         ImageBasedLight()
             : Light(aten::LightType::IBL, aten::LightAttributeIBL)
         {}
-        ImageBasedLight(const std::shared_ptr<AT_NAME::envmap>& envmap)
+        ImageBasedLight(const BackgroundResource& bg, const aten::context& ctxt)
             : Light(aten::LightType::IBL, aten::LightAttributeIBL)
         {
-            setEnvMap(envmap);
+            SetBackground(bg, ctxt);
         }
 
         ImageBasedLight(aten::Values& val);
@@ -28,22 +29,21 @@ namespace AT_NAME {
         virtual ~ImageBasedLight() = default;
 
     public:
-        void setEnvMap(const std::shared_ptr<AT_NAME::envmap>& envmap)
+        void SetBackground(
+            const BackgroundResource& bg,
+            const aten::context& ctxt)
         {
-            if (m_envmap != envmap) {
-                m_envmap = envmap;
-                m_param.envmapidx = envmap->GtTexture()->id();
+            if (bg_.envmap_tex_idx != bg.envmap_tex_idx) {
+                bg_ = bg;
+                m_param.envmapidx = bg.envmap_tex_idx;
 
-                preCompute();
+                AT_ASSERT(bg.envmap_tex_idx >= 0);
+                auto envmap = ctxt.GetTexture(bg.envmap_tex_idx);
+                preCompute(envmap);
             }
         }
 
-        std::shared_ptr<const AT_NAME::envmap> getEnvMap() const
-        {
-            return m_envmap;
-        }
-
-        real samplePdf(const aten::ray& r) const;
+        real samplePdf(const aten::ray& r, const aten::context& ctxt) const;
 
         static AT_HOST_DEVICE_API real samplePdf(const aten::vec3& clr, real avgIllum)
         {
@@ -94,7 +94,7 @@ namespace AT_NAME {
 
             result.dir = normalize(t * sintheta * cospsi + b * sintheta * sinpsi + n * costheta);
 
-            const auto uv = AT_NAME::envmap::convertDirectionToUV(result.dir);
+            const auto uv = AT_NAME::Background::ConvertDirectionToUV(result.dir);
             const auto u = uv.x;
             const auto v = uv.y;
 
@@ -122,10 +122,10 @@ namespace AT_NAME {
         }
 
     private:
-        void preCompute();
+        void preCompute(const std::shared_ptr<aten::texture>& envmap);
 
     private:
-        std::shared_ptr<envmap> m_envmap;
+        BackgroundResource bg_;
 
         real m_avgIllum{ real(0) };
 

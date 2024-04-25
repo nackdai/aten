@@ -84,7 +84,7 @@ namespace aten
             if (mtrl) {
                 const auto& mtrlParam = mtrl->param();
 
-                auto albedo = ctxt.GtTexture(mtrlParam.albedoMap);
+                auto albedo = ctxt.GetTexture(mtrlParam.albedoMap);
                 if (albedo) {
                     albedo->initAsGLTexture();
                     albedo->bindAsGLTexture(0, m_shd);

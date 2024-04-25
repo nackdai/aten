@@ -161,7 +161,7 @@ public:
             auto texNum = ctxt_.GetTextureNum();
 
             for (int32_t i = 0; i < texNum; i++) {
-                auto t = ctxt_.GtTexture(i);
+                auto t = ctxt_.GetTexture(i);
                 tex.push_back(
                     idaten::TextureResource(t->colors(), t->width(), t->height()));
             }

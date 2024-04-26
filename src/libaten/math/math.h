@@ -39,6 +39,11 @@ namespace aten {
 #endif
     }
 
+    inline AT_HOST_DEVICE_API float sqr(float f)
+    {
+        return f * f;
+    }
+
     inline AT_HOST_DEVICE_API float tan(float f)
     {
         return std::tanf(f);

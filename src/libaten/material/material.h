@@ -82,15 +82,15 @@ namespace aten
             roughness = 0.5;
             shininess = 1.0;
 
-            subsurface = 0.0;
-            metallic = 0.0;
+            subsurface = 0.5;
+            metallic = 0.5;
             specular = 0.5;
-            specularTint = 0.0;
-            anisotropic = 0.0;
-            sheen = 0.0;
+            specularTint = 0.5;
+            anisotropic = 0.5;
+            sheen = 0.5;
             sheenTint = 0.5;
-            clearcoat = 0.0;
-            clearcoatGloss = 1.0;
+            clearcoat = 0.5;
+            clearcoatGloss = 0.5;
         }
 
         AT_HOST_DEVICE_API StandardMaterialParameter()
@@ -572,7 +572,17 @@ namespace AT_NAME
             auto f0 = (ni - nt) / (ni + nt);
             f0 = f0 * f0;
 
-            const auto fresnel = f0 + (1 - f0) * aten::pow((1 - costheta), 5);
+            return ComputeSchlickFresnelWithF0AndCosTheta(f0, costheta);
+        }
+
+        template <class F0Type>
+        static inline AT_DEVICE_API F0Type ComputeSchlickFresnelWithF0AndCosTheta(
+            const F0Type& f0,
+            const float costheta)
+        {
+            const auto c = aten::saturate(1 - costheta);
+            const auto c5 = c * c * c * c * c;
+            const auto fresnel = f0 + (1.0F - f0) * c5;
             return fresnel;
         }
 

@@ -80,7 +80,7 @@ namespace AT_NAME
             AT_NAME::CarPaint::sample(result, mtrl, normal, wi, orgnormal, sampler, pre_sampled_r, u, v, is_light_path);
             break;
         case aten::MaterialType::Disney:
-            AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
+            AT_NAME::DisneyBRDF::sample(*result, *mtrl, normal, wi, sampler, u, v);
             break;
         default:
             AT_ASSERT(false);
@@ -133,7 +133,7 @@ namespace AT_NAME
             pdf = AT_NAME::CarPaint::pdf(mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::Disney:
-            pdf = AT_NAME::DisneyBRDF::pdf(mtrl, normal, wi, wo, u, v);
+            pdf = AT_NAME::DisneyBRDF::pdf(*mtrl, normal, wi, wo, u, v);
             break;
         default:
             AT_ASSERT(false);
@@ -176,7 +176,7 @@ namespace AT_NAME
         case aten::MaterialType::CarPaint:
             return AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, pre_sampled_r);
         case aten::MaterialType::Disney:
-            return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
+            return AT_NAME::DisneyBRDF::bsdf(*mtrl, normal, wi, wo, u, v);
         default:
             AT_ASSERT(false);
             return AT_NAME::lambert::bsdf(mtrl);

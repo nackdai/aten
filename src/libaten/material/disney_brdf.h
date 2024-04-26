@@ -32,16 +32,16 @@ namespace AT_NAME
             : material(aten::MaterialType::Disney, aten::MaterialAttributeMicrofacet, baseColor, 1)
         {
             m_param.baseColor = baseColor;
-            m_param.standard.subsurface = aten::clamp<real>(subsurface, 0, 1);
-            m_param.standard.metallic = aten::clamp<real>(metallic, 0, 1);
-            m_param.standard.specular = aten::clamp<real>(specular, 0, 1);
-            m_param.standard.specularTint = aten::clamp<real>(specularTint, 0, 1);
-            m_param.standard.roughness = aten::clamp<real>(roughness, 0, 1);
-            m_param.standard.anisotropic = aten::clamp<real>(anisotropic, 0, 1);
-            m_param.standard.sheen = aten::clamp<real>(sheen, 0, 1);
-            m_param.standard.sheenTint = aten::clamp<real>(sheenTint, 0, 1);
-            m_param.standard.clearcoat = aten::clamp<real>(clearcoat, 0, 1);
-            m_param.standard.clearcoatGloss = aten::clamp<real>(clearcoatGloss, 0, 1);
+            m_param.standard.subsurface = aten::saturate(subsurface);
+            m_param.standard.metallic = aten::saturate(metallic);
+            m_param.standard.specular = aten::saturate(specular);
+            m_param.standard.specularTint = aten::saturate(specularTint);
+            m_param.standard.roughness = aten::saturate(roughness);
+            m_param.standard.anisotropic = aten::saturate(anisotropic);
+            m_param.standard.sheen = aten::saturate(sheen);
+            m_param.standard.sheenTint = aten::saturate(sheenTint);
+            m_param.standard.clearcoat = aten::saturate(clearcoat);
+            m_param.standard.clearcoatGloss = aten::saturate(clearcoatGloss);
 
             m_param.standard.ior = ior;
 
@@ -56,16 +56,16 @@ namespace AT_NAME
             : material(aten::MaterialType::Disney, aten::MaterialAttributeMicrofacet, param.baseColor, 1)
         {
             m_param.baseColor = param.baseColor;
-            m_param.standard.subsurface = aten::clamp<real>(param.standard.subsurface, 0, 1);
-            m_param.standard.metallic = aten::clamp<real>(param.standard.metallic, 0, 1);
-            m_param.standard.specular = aten::clamp<real>(param.standard.specular, 0, 1);
-            m_param.standard.specularTint = aten::clamp<real>(param.standard.specularTint, 0, 1);
-            m_param.standard.roughness = aten::clamp<real>(param.standard.roughness, 0, 1);
-            m_param.standard.anisotropic = aten::clamp<real>(param.standard.anisotropic, 0, 1);
-            m_param.standard.sheen = aten::clamp<real>(param.standard.sheen, 0, 1);
-            m_param.standard.sheenTint = aten::clamp<real>(param.standard.sheenTint, 0, 1);
-            m_param.standard.clearcoat = aten::clamp<real>(param.standard.clearcoat, 0, 1);
-            m_param.standard.clearcoatGloss = aten::clamp<real>(param.standard.clearcoatGloss, 0, 1);
+            m_param.standard.subsurface = aten::saturate(param.standard.subsurface);
+            m_param.standard.metallic = aten::saturate(param.standard.metallic);
+            m_param.standard.specular = aten::saturate(param.standard.specular);
+            m_param.standard.specularTint = aten::saturate(param.standard.specularTint);
+            m_param.standard.roughness = aten::saturate(param.standard.roughness);
+            m_param.standard.anisotropic = aten::saturate(param.standard.anisotropic);
+            m_param.standard.sheen = aten::saturate(param.standard.sheen);
+            m_param.standard.sheenTint = aten::saturate(param.standard.sheenTint);
+            m_param.standard.clearcoat = aten::saturate(param.standard.clearcoat);
+            m_param.standard.clearcoatGloss = aten::saturate(param.standard.clearcoatGloss);
 
             m_param.standard.ior = param.standard.ior;
 
@@ -78,52 +78,71 @@ namespace AT_NAME
 
     public:
         static AT_DEVICE_API real pdf(
-            const aten::MaterialParameter* mtrl,
-            const aten::vec3& normal,
+            const aten::MaterialParameter& mtrl,
+            const aten::vec3& n,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v);
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
-            const aten::MaterialParameter* mtrl,
-            const aten::vec3& normal,
+            const aten::MaterialParameter& mtrl,
+            const aten::vec3& n,
             const aten::vec3& wi,
             real u, real v,
             aten::sampler* sampler);
 
         static AT_DEVICE_API aten::vec3 bsdf(
-            const aten::MaterialParameter* mtrl,
-            const aten::vec3& normal,
+            const aten::MaterialParameter& mtrl,
+            const aten::vec3& n,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v);
 
         static AT_DEVICE_API void sample(
-            AT_NAME::MaterialSampling* result,
-            const aten::MaterialParameter* mtrl,
-            const aten::vec3& normal,
+            AT_NAME::MaterialSampling& result,
+            const aten::MaterialParameter& mtrl,
+            const aten::vec3& n,
             const aten::vec3& wi,
-            const aten::vec3& orgnormal,
             aten::sampler* sampler,
-            real u, real v,
-            bool isLightPath);
-
-        virtual AT_DEVICE_API real computeFresnel(
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real outsideIor = 1) const final
-        {
-            return computeFresnel(&m_param, normal, wi, wo, outsideIor);
-        }
-
-        static AT_DEVICE_API real computeFresnel(
-            const aten::MaterialParameter* mtrl,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real outsideIor);
+            real u, real v);
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
+
+        enum Component {
+            Diffuse,
+            Sheen,
+            Specular,
+            Clearcoat,
+            Num = Clearcoat + 1,
+        };
+
+        static AT_DEVICE_API float ComputePDF(
+            const aten::MaterialParameter& param,
+            const aten::vec3& wi,
+            const aten::vec3& wo,
+            const aten::vec3& n);
+
+        static AT_DEVICE_API void ComputeWeights(
+            std::array<float, Component::Num>& weights,
+            const float metalic,
+            const float sheen,
+            const float specular,
+            const float clearcoat);
+
+        static AT_DEVICE_API void GetCDF(
+            const std::array<float, Component::Num>& weights,
+            std::array<float, Component::Num>& cdfs);
+
+        static AT_DEVICE_API aten::vec3 SampleDirection(
+            const float r1, const float r2, const float r3,
+            const aten::MaterialParameter& param,
+            const aten::vec3& wi,
+            const aten::vec3& n);
+
+        static AT_DEVICE_API aten::vec3 ComputeBRDF(
+            const aten::MaterialParameter& param,
+            const aten::vec3& n,
+            const aten::vec3& wi,
+            const aten::vec3& wo);
     };
 }

@@ -39,7 +39,10 @@ namespace AT_NAME
             u, v,
             aten::vec4(param->standard.roughness));
 
-        aten::vec3 dir = SampleDirection(roughness.r, normal, wi, sampler);
+        const auto r1 = sampler->nextSample();
+        const auto r2 = sampler->nextSample();
+
+        aten::vec3 dir = SampleDirection(r1, r2, roughness.r, normal, wi);
 
         return dir;
     }
@@ -76,7 +79,10 @@ namespace AT_NAME
             u, v,
             aten::vec4(param->standard.roughness));
 
-        result->dir = SampleDirection(roughness.r, wi, normal, sampler);
+        const auto r1 = sampler->nextSample();
+        const auto r2 = sampler->nextSample();
+
+        result->dir = SampleDirection(r1, r2, roughness.r, wi, normal);
         result->pdf = ComputePDF(roughness.r, normal, wi, result->dir);
 
         float ior = param->standard.ior;
@@ -168,14 +174,11 @@ namespace AT_NAME
     }
 
     AT_DEVICE_API aten::vec3  MicrofacetGGX::SampleDirection(
+        const float r1, const float r2,
         const float roughness,
         const aten::vec3& wi,
-        const aten::vec3& n,
-        aten::sampler* sampler)
+        const aten::vec3& n)
     {
-        const auto r1 = sampler->nextSample();
-        const auto r2 = sampler->nextSample();
-
         const auto m = SampleMicrosurfaceNormal(roughness, n, r1, r2);
 
         // We can assume ideal reflection on each micro surface.

@@ -142,17 +142,18 @@ namespace AT_NAME
 
         /**
          * @brief Sample direction for reflection.
+         * @param[in] r1 Rondam value by uniforma sampleing.
+         * @param[in] r2 Rondam value by uniforma sampleing.
          * @param[in] roughness Roughness parameter.
          * @param[in] wi Incident vector.
          * @param[in] n Macrosurface normal.
-         * @param[in, out] sampler Sampler to sample
          * @return Reflect vector.
          */
         static AT_DEVICE_API aten::vec3 SampleDirection(
+            const float r1, const float r2,
             const float roughness,
             const aten::vec3& wi,
-            const aten::vec3& n,
-            aten::sampler* sampler);
+            const aten::vec3& n);
 
         /**
          * @brief Sample microsurface normal.

@@ -171,7 +171,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::A
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
     aten::mat4 mtx_L2W;
-    mtx_L2W.asRotateByY(Deg2Rad(-25));
+    mtx_L2W.asRotateByY(aten::Deg2Rad(-25));
 
     aten::mat4 mtxT;
     mtxT.asTrans(aten::vec3(77, 16.5, 78));
@@ -347,7 +347,7 @@ void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Asset
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
     aten::mat4 mtx_L2W;
-    mtx_L2W.asRotateByZ(Deg2Rad(45.0f));
+    mtx_L2W.asRotateByZ(aten::Deg2Rad(45.0f));
 
     aten::mat4 mm;
     mm.asTrans(aten::vec3(-1.0f, 0.0f, 0.0f));
@@ -481,8 +481,8 @@ void SpotLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::As
         aten::vec3(0, -1, 0),
         aten::vec3(1.0f, 1.0f, 1.0f),
         400.0f,
-        real(Deg2Rad(30)),
-        real(Deg2Rad(60)));
+        real(aten::Deg2Rad(30)),
+        real(aten::Deg2Rad(60)));
 
     ctxt.AddLight(l);
 }
@@ -573,8 +573,8 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::As
         aten::vec3(0, -1, 0),
         aten::vec3(0.0f, 1.0f, 0.0f),
         400.0f,
-        real(Deg2Rad(30)),
-        real(Deg2Rad(60)));
+        real(aten::Deg2Rad(30)),
+        real(aten::Deg2Rad(60)));
 
     ctxt.AddLight(dir);
     ctxt.AddLight(spot);

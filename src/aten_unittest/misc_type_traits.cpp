@@ -38,4 +38,3 @@ TEST(misc_test, IsSharedPtr)
     constexpr auto b1 = aten::is_shared_ptr_v<int>;
     ASSERT_FALSE(b1);
 }
-

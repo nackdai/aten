@@ -27,7 +27,7 @@ namespace aten {
 
     inline AT_HOST_DEVICE_API float sqrt(float f)
     {
-        return std::sqrtf(f);
+        return std::sqrt(f);
     }
 
     inline AT_HOST_DEVICE_API float rsqrt(float f)
@@ -46,52 +46,52 @@ namespace aten {
 
     inline AT_HOST_DEVICE_API float tan(float f)
     {
-        return std::tanf(f);
+        return std::tan(f);
     }
 
     inline AT_HOST_DEVICE_API float cos(float f)
     {
-        return std::cosf(f);
+        return std::cos(f);
     }
 
     inline AT_HOST_DEVICE_API float sin(float f)
     {
-        return std::sinf(f);
+        return std::sin(f);
     }
 
     inline AT_HOST_DEVICE_API float atan2(float y, float x)
     {
-        return std::atan2f(y, x);
+        return std::atan2(y, x);
     }
 
     inline AT_HOST_DEVICE_API float atan(float f)
     {
-        return std::atanf(f);
+        return std::atan(f);
     }
 
     inline AT_HOST_DEVICE_API float asin(float f)
     {
-        return std::asinf(f);
+        return std::asin(f);
     }
 
     inline AT_HOST_DEVICE_API float acos(float f)
     {
-        return std::acosf(f);
+        return std::acos(f);
     }
 
     inline AT_HOST_DEVICE_API float log(float f)
     {
-        return std::logf(f);
+        return std::log(f);
     }
 
     inline AT_HOST_DEVICE_API float exp(float f)
     {
-        return std::expf(f);
+        return std::exp(f);
     }
 
     inline AT_HOST_DEVICE_API float pow(float f, float v)
     {
-        return std::powf(f, v);
+        return std::pow(f, v);
     }
 
     template <class T>
@@ -103,17 +103,17 @@ namespace aten {
     template <>
     inline AT_HOST_DEVICE_API float abs(float f)
     {
-        return std::fabsf(f);
+        return std::fabs(f);
     }
 
     inline AT_HOST_DEVICE_API float floor(float f)
     {
-        return std::floorf(f);
+        return std::floor(f);
     }
 
     inline AT_HOST_DEVICE_API float ceil(float f)
     {
-        return std::ceilf(f);
+        return std::ceil(f);
     }
 
 #ifdef __CUDACC__

@@ -172,8 +172,6 @@ add_library(
   renderer/ao/aorenderer_impl.h
   renderer/aov.h
   renderer/background.h
-  renderer/envmap.cpp
-  renderer/envmap.h
   renderer/film.cpp
   renderer/film.h
   renderer/npr/feature_line.cpp

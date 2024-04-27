@@ -9,7 +9,7 @@ namespace aten {
      */
     struct LightSampleResult {
         vec3 pos;           ///< Light position.
-        vec3 dir;           ///< Light direction from the position.
+        vec3 dir;           ///< Light direction to the position.
         vec3 nml;           ///< Light object surface normal.
         vec3 light_color;   ///< Light color.
         float pdf{ 0.0f };  ///< Light sampling pdf.

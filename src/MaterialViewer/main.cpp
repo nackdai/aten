@@ -15,8 +15,8 @@
 #pragma optimize( "", off)
 
 
-#define GPU_RENDERING
-#define WHITE_FURNACE_TEST
+//#define GPU_RENDERING
+//#define WHITE_FURNACE_TEST
 
 #ifdef GPU_RENDERING
 constexpr int32_t WIDTH = 1280;
@@ -193,6 +193,8 @@ public:
             bg);
 
         renderer_.setEnableEnvmap(scene_light_.is_envmap);
+#else
+        host_renderer_.SetBG(bg);
 #endif
         return true;
     }
@@ -366,6 +368,7 @@ public:
 
         visualizer_->renderPixelData(host_renderer_dst_.image().data(), camera_.needRevert());
 
+#if 0
         {
             auto screen_shot_file_name = aten::StringFormat("sc_%d.png", screen_shot_count_);
 
@@ -376,6 +379,7 @@ public:
 
             AT_PRINTF("Take Screenshot[%s]\n", screen_shot_file_name.c_str());
         }
+#endif
 #endif
 
         return true;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+#include "material/sample_texture.h"
 #include "math/vec3.h"
 #include "math/ray.h"
 #include "texture/texture.h"

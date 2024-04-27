@@ -107,8 +107,6 @@ cuda_add_library(
   ../libaten/os/linux/misc/timer_linux.cpp
   ../libaten/renderer/ao/aorenderer_impl.h
   ../libaten/renderer/aov.h
-  ../libaten/renderer/envmap.cpp
-  ../libaten/renderer/envmap.h
   ../libaten/renderer/npr/feature_line.h
   ../libaten/renderer/npr/npr_impl.h
   ../libaten/renderer/pathtracing/pathtracing_impl.h

@@ -563,7 +563,7 @@ namespace AT_NAME
             // http://d.hatena.ne.jp/hanecci/20130525/p3
 
             // NOTE:
-            // F_schlick(v,h) ≒ f0 + (1 - f0)(1 - cos_theta)^5
+            // F_schlick(v,h) = f0 + (1 - f0)(1 - cos_theta)^5
             // f0 = pow((1 - ior) / (1 + ior), 2)
             // ior = nt / ni
             // f0 = pow((1 - ior) / (1 + ior), 2)

@@ -7,6 +7,8 @@
 #include "atenscene.h"
 #include "MeasureEffectiveRetroreflectiveArea.h"
 
+//#pragma optimize( "", off)
+
 constexpr int32_t WIDTH = 512;
 constexpr int32_t HEIGHT = 512;
 constexpr char* TITLE = "MeasureEffectiveRetroreflectiveArea";
@@ -42,7 +44,7 @@ public:
         }
 
         if (!era_.IsValid()) {
-            aten::vec3 pos(0, 0, 3);
+            aten::vec3 pos(3, 3, 3);
             aten::vec3 at(0, 0, 0);
             float vfov = float(90);
 
@@ -53,7 +55,7 @@ public:
                 vfov,
                 WIDTH, HEIGHT);
 
-            era_.InitDraw(
+            era_.InitForDebugVisualizing(
                 WIDTH, HEIGHT,
                 "MeasureEffectiveRetroreflectiveArea_vs.glsl",
                 "MeasureEffectiveRetroreflectiveArea_fs.glsl");
@@ -74,7 +76,7 @@ public:
             is_camera_dirty_ = false;
         }
 
-        era_.draw(
+        era_.VisualizeForDebug(
             ctxt_,
             &camera_);
 
@@ -193,53 +195,71 @@ public:
 private:
     void ComputeERA()
     {
-        AT_PRINTF("\n");
-
         const int32_t Step = args_.step;
 
-        const float ThetaMin = 0.0f;
-        const float ThetaMax = AT_MATH_PI_HALF;
+        constexpr float ThetaMin = MeasureEffectiveRetroreflectiveArea::ThetaMin;
+        constexpr float ThetaMax = MeasureEffectiveRetroreflectiveArea::ThetaMax;
         const float ThetaStep = (ThetaMax - ThetaMin) / Step;
 
-        const float PhiMin = -AT_MATH_PI;
-        const float PhiMax = AT_MATH_PI;
+        constexpr float PhiMin = MeasureEffectiveRetroreflectiveArea::PhiMin;
+        constexpr float PhiMax = MeasureEffectiveRetroreflectiveArea::PhiMax;
         const float PhiStep = (PhiMax - PhiMin) / Step;
 
-        std::map<float, aten::vec2> AvgERA;
+        std::vector<aten::vec2> avg_ERA;
+        avg_ERA.resize(Step + 1);
 
-        for (int32_t phi_cnt = 0; phi_cnt < Step; phi_cnt++)
-        {
-            const auto phi = PhiMin + PhiStep * phi_cnt;
-            for (int32_t theta_cnt = 0; theta_cnt < Step; theta_cnt++)
-            {
-                const auto theta = ThetaMin + ThetaStep * theta_cnt;
+        // NOTE::
+        // Compute average for phi.
+
+        aten::OMPUtil::Lock writelock;
+        aten::OMPUtil::InitLock(&writelock);
+
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
+        for (int32_t theta_cnt = 0; theta_cnt <= Step; theta_cnt++) {
+            const auto theta = aten::clamp(ThetaMin + ThetaStep * theta_cnt, ThetaMin, ThetaMax);
+            const auto theta_deg = aten::Rad2Deg(theta);
+
+            for (int32_t phi_cnt = 0; phi_cnt <= Step; phi_cnt++) {
+                const auto phi = aten::clamp(PhiMin + PhiStep * phi_cnt, PhiMin, PhiMax);
+                const auto phi_deg = aten::Rad2Deg(phi);
 
                 auto hit_rate = era_.HitTest(theta, phi);
-                if (hit_rate > 0) {
-                    auto phi_deg = Rad2Deg(phi);
-                    auto theta_deg = Rad2Deg(theta);
-                    AT_PRINTF("%.3f, %.3f, %.3f\n", phi_deg, theta_deg, hit_rate);
 
-                    auto it = AvgERA.find(theta_deg);
-                    if (it == AvgERA.end()) {
-                        AvgERA.insert(std::pair<float, aten::vec2>(theta_deg, aten::vec2(hit_rate, 1)));
-                    }
-                    else {
-                        auto& v = it->second;
-                        v.x *= v.y;
-                        v.x += hit_rate;
-                        v.y++;
-                        v.x /= v.y;
-                    }
+                aten::OMPUtil::SetLock(&writelock);
+                {
+#ifndef ENABLE_OMP
+                    AT_PRINTF("%.3f, %.3f, %.3f,\n", phi_deg, theta_deg, hit_rate);
+#endif
+
+                    // Compute average on the fly.
+                    auto& v = avg_ERA[theta_cnt];
+                    v.x *= v.y;
+                    v.x += hit_rate;
+                    v.y++;
+                    v.x /= v.y;
                 }
+                aten::OMPUtil::UnsetLock(&writelock);
             }
         }
 
         AT_PRINTF("\n\n");
-        for (const auto it : AvgERA) {
-            const auto theta = it.first;
-            const auto hit_rate = it.second.x;
-            AT_PRINTF("{%.3ff, %.3ff},\n", theta, hit_rate);
+
+        if (args_.output_as_csv) {
+            AT_PRINTF("deg,E,\n");
+        }
+        for (size_t theta_cnt = 0; theta_cnt < avg_ERA.size(); theta_cnt++) {
+            const auto theta = ThetaMin + ThetaStep * theta_cnt;
+            const auto theta_deg = aten::Rad2Deg(theta);
+            const auto hit_rate = avg_ERA[theta_cnt].x;
+            if (args_.output_as_csv) {
+                AT_PRINTF("%.5f, %.5f,\n", theta_deg, hit_rate);
+            }
+            else {
+                AT_PRINTF("{aten::Deg2Rad(%.5fF), %.5fF},\n", theta_deg, hit_rate);
+            }
+
         }
     }
 
@@ -250,6 +270,7 @@ private:
         {
             cmd.add<int32_t>("step", 's', "Number of steps", false);
             cmd.add("gui", 'g', "GUI mode");
+            cmd.add("csv", 'c', "Output as csv");
 
             cmd.add("help", '?', "print usage");
         }
@@ -271,13 +292,15 @@ private:
         }
 
         args_.need_gui = cmd.exist("gui");
+        args_.output_as_csv = cmd.exist("csv");
 
         return true;
     }
 
     struct Args {
-        int32_t step{40};
+        int32_t step{100};
         bool need_gui{ false };
+        bool output_as_csv{ false };
     } args_;
 
     aten::context ctxt_;

@@ -10,16 +10,18 @@ namespace aten {
         ~OMPUtil() {}
 
     public:
-        static void setThreadNum(uint32_t num);
-
-        static uint32_t getThreadNum()
-        {
-            return g_threadnum;
-        }
-
+        static void setThreadNum(int32_t num);
+        static int32_t getThreadNum();
         static int32_t getThreadIdx();
 
-    private:
-        static uint32_t g_threadnum;
+#ifdef ENABLE_OMP
+        using Lock = omp_lock_t;
+#else
+        using Lock = int32_t;
+#endif
+
+        static void InitLock(Lock* lock);
+        static void SetLock(Lock* lock);
+        static void UnsetLock(Lock* lock);
     };
 }

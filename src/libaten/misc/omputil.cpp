@@ -2,21 +2,22 @@
 #include "math/math.h"
 
 namespace aten {
-    uint32_t OMPUtil::g_threadnum = 1;
-
-    void OMPUtil::setThreadNum(uint32_t num)
+    void OMPUtil::setThreadNum(int32_t num)
     {
 #ifdef ENABLE_OMP
         auto maxThreadnum = omp_get_max_threads();
-#else
-        auto maxThreadnum = 8;
+        const auto threadnum = aten::clamp<uint32_t>(num, 1, maxThreadnum);
+        omp_set_num_threads(threadnum);
 #endif
+    }
 
-        g_threadnum = aten::clamp<uint32_t>(num, 1, maxThreadnum);
-
+    int32_t OMPUtil::getThreadNum()
+    {
+        int32_t ret = 1;
 #ifdef ENABLE_OMP
-        omp_set_num_threads(g_threadnum);
+        ret = omp_get_thread_num();
 #endif
+        return ret;
     }
 
     int32_t OMPUtil::getThreadIdx()
@@ -26,5 +27,26 @@ namespace aten {
         idx = omp_get_thread_num();
 #endif
         return idx;
+    }
+
+    void OMPUtil::InitLock(Lock* lock)
+    {
+#ifdef ENABLE_OMP
+        omp_init_lock(lock);
+#endif
+    }
+
+    void OMPUtil::SetLock(Lock* lock)
+    {
+#ifdef ENABLE_OMP
+        omp_set_lock(lock);
+#endif
+    }
+
+    void OMPUtil::UnsetLock(Lock* lock)
+    {
+#ifdef ENABLE_OMP
+        omp_unset_lock(lock);
+#endif
     }
 }

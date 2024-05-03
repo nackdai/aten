@@ -10,15 +10,23 @@ public:
     MeasureEffectiveRetroreflectiveArea() = default;
     ~MeasureEffectiveRetroreflectiveArea() = default;
 
-public:
+    static constexpr float ThetaMin = 0.0F;
+    static constexpr float ThetaMax = AT_MATH_PI_HALF;
+
+    static constexpr float PhiMin = 0;
+    //static constexpr float PhiMax = AT_MATH_PI_2;
+    static constexpr float PhiMax = AT_MATH_PI;
+
+    static constexpr int32_t RayOrgNum = 100;
+
     void Init();
 
-    bool InitDraw(
+    bool InitForDebugVisualizing(
         int32_t width, int32_t height,
         std::string_view pathVS,
         std::string_view pathFS);
 
-    void draw(
+    void VisualizeForDebug(
         const aten::context& ctxt,
         const aten::camera* cam);
 
@@ -39,12 +47,12 @@ private:
     aten::GeomVertexBuffer m_vb_pts;
     aten::GeomIndexBuffer m_ib_pts;
 
+    // Axis x/y/z.
+    aten::GeomVertexBuffer vb_axis_[3];
+    aten::GeomIndexBuffer ib_axis_;
+
     int32_t width_{ 0 };
     int32_t height_{ 0 };
 
     std::vector<aten::vec4> ray_orgs_;
-
-    static constexpr int32_t RayOrgNum = 100;
-    static constexpr size_t VtxNum = 6;
-    static const std::array<aten::vec4, VtxNum> TriangleVtxs;
 };

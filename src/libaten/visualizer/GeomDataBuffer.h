@@ -41,39 +41,39 @@ namespace aten {
     public:
         void init(
             size_t stride,
-            uint32_t vtxNum,
-            uint32_t offset,
+            size_t vtxNum,
+            size_t offset,
             const void* data,
             bool isDynamic = false);
 
         void init(
             size_t stride,
-            uint32_t vtxNum,
-            uint32_t offset,
+            size_t vtxNum,
+            size_t offset,
             const VertexAttrib* attribs,
-            uint32_t attribNum,
+            size_t attribNum,
             const void* data,
             bool isDynamic = false);
 
         void initNoVAO(
             size_t stride,
-            uint32_t vtxNum,
-            uint32_t offset,
+            size_t vtxNum,
+            int32_t offset,
             const void* data);
 
         void createVAOByAttribName(
             const shader* shd,
             const VertexAttrib* attribs,
-            uint32_t attribNum);
+            size_t attribNum);
 
         void update(
-            uint32_t vtxNum,
+            size_t vtxNum,
             const void* data);
 
         void draw(
             Primitive mode,
-            uint32_t idxOffset,
-            uint32_t primNum);
+            int32_t idxOffset,
+            size_t primNum);
 
         void* beginRead()
         {
@@ -95,7 +95,7 @@ namespace aten {
 
         void clear();
 
-        uint32_t getVtxNum() const
+        size_t getVtxNum() const
         {
             return m_vtxNum;
         }
@@ -119,10 +119,10 @@ namespace aten {
         uint32_t m_vao{ 0 };
 
         size_t m_vtxStride{ 0 };
-        uint32_t m_vtxNum{ 0 };
-        uint32_t m_vtxOffset{ 0 };
+        size_t m_vtxNum{ 0 };
+        size_t m_vtxOffset{ 0 };
 
-        uint32_t m_initVtxNum{ 0 };
+        size_t m_initVtxNum{ 0 };
 
         bool m_isMapping{ false };
     };

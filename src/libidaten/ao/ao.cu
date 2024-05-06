@@ -97,7 +97,7 @@ namespace idaten {
         checkCudaKernel(shadeMiss);
     }
 
-    void AORenderer::onShade(
+    void AORenderer::ShadeAO(
         int32_t width, int32_t height,
         int32_t bounce, int32_t rrBounce)
     {

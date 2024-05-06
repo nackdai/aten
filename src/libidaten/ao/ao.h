@@ -57,7 +57,7 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t bounce) override;
 
-        void onShade(
+        void ShadeAO(
             int32_t width, int32_t height,
             int32_t bounce, int32_t rrBounce);
 

@@ -24,16 +24,16 @@ namespace idaten
 
     void CudaTextureResource::init(
         const aten::vec4* p,
-        uint32_t memberNumInItem,
-        uint32_t numOfContaints)
+        size_t memberNumInItem,
+        size_t numOfContaints)
     {
         onInit(p, memberNumInItem, numOfContaints);
     }
 
     void CudaTextureResource::onInit(
         const aten::vec4* p,
-        uint32_t memberNumInItem,
-        uint32_t numOfContaints)
+        size_t memberNumInItem,
+        size_t numOfContaints)
     {
         auto size = sizeof(float4) * memberNumInItem * numOfContaints;
 
@@ -95,9 +95,9 @@ namespace idaten
 
     void CudaTextureResource::update(
         const aten::vec4* p,
-        uint32_t memberNumInItem,
-        uint32_t numOfContaints,
-        uint32_t offsetCount/*= 0*/)
+        size_t memberNumInItem,
+        size_t numOfContaints,
+        int32_t offsetCount/*= 0*/)
     {
         AT_ASSERT(m_buffer);
 
@@ -108,7 +108,7 @@ namespace idaten
         checkCudaErrors(cudaMemcpyAsync(dst + offsetCount, p, size, cudaMemcpyDefault));
     }
 
-    void CudaTextureResource::read(void* p, uint32_t bytes)
+    void CudaTextureResource::read(void* p, size_t bytes)
     {
         AT_ASSERT(m_buffer);
         checkCudaErrors(cudaMemcpy(p, m_buffer, bytes, cudaMemcpyDefault));

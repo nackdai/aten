@@ -24,7 +24,7 @@ namespace AT_NAME
 
     private:
         Retroreflective(
-            aten::vec3& albedo = aten::vec3(0.5F),
+            aten::vec3 albedo = aten::vec3(0.5F),
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)

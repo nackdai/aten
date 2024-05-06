@@ -100,12 +100,6 @@ namespace aten {
         return std::abs(f);
     }
 
-    template <>
-    inline AT_HOST_DEVICE_API float abs(float f)
-    {
-        return std::fabs(f);
-    }
-
     inline AT_HOST_DEVICE_API float floor(float f)
     {
         return std::floor(f);

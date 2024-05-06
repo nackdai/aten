@@ -15,7 +15,7 @@
 #pragma optimize( "", off)
 
 
-//#define GPU_RENDERING
+#define GPU_RENDERING
 //#define WHITE_FURNACE_TEST
 
 #ifdef GPU_RENDERING
@@ -124,13 +124,10 @@ public:
         // IBL
         scene_light_.is_envmap = true;
         scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
-        auto bg = AT_NAME::Background::CreateBackgroundResource(scene_light_.envmap_texture);
+        auto bg = AT_NAME::Background::CreateBackgroundResource(scene_light_.envmap_texture, aten::vec4(0));
         scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
         scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
-#endif
 
-#ifdef GPU_RENDERING
-#ifndef WHITE_FURNACE_TEST
         // PointLight
         scene_light_.point_light = std::make_shared<aten::PointLight>(
             aten::vec3(0.0, 0.0, 50.0),
@@ -139,6 +136,7 @@ public:
         ctxt_.AddLight(scene_light_.point_light);
 #endif
 
+#ifdef GPU_RENDERING
         std::vector<aten::ObjectParameter> shapeparams;
         std::vector<aten::TriangleParameter> primparams;
         std::vector<aten::LightParameter> lightparams;
@@ -192,9 +190,10 @@ public:
             tex,
             bg);
 
-        renderer_.setEnableEnvmap(scene_light_.is_envmap);
+        renderer_.SetEnableEnvmap(scene_light_.is_envmap);
 #else
         host_renderer_.SetBG(bg);
+        host_renderer_.SetEnableEnvmap(scene_light_.is_envmap);
 #endif
         return true;
     }
@@ -514,28 +513,30 @@ private:
         aten::vec3& at,
         real& fov)
     {
-        pos = aten::vec3(0.f, 1.f, 10.f);
-        at = aten::vec3(0.f, 1.f, 0.f);
+        pos = aten::vec3(0.f, 0.f, 10.f);
+        at = aten::vec3(0.f, 0.f, 0.f);
         fov = 45;
     }
 
     void MakeScene(aten::scene* scene)
     {
-#if 0
-        aten::MaterialParameter mtrlParam;
-        mtrlParam.type = aten::MaterialType::Microfacet_Refraction;
+        aten::MaterialParameter mtrl_param;
+        mtrl_param.type = aten::MaterialType::Retroreflective;
 #ifdef WHITE_FURNACE_TEST
-        mtrlParam.baseColor = aten::vec3(1.0F);
+        mtrl_param.baseColor = aten::vec3(1.0F);
 #else
-        mtrlParam.baseColor = aten::vec3(0.580000f, 0.580000f, 0.580000f);
+        mtrl_param.baseColor = aten::vec3(0.580000f, 0.580000f, 0.580000f);
 #endif
-        mtrlParam.standard.ior = 1.333F;
-        mtrlParam.standard.roughness = 0.011F;
+        mtrl_param.standard.ior = 1.333F;
+        mtrl_param.standard.roughness = 0.011F;
 
         auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
-            mtrlParam,
+            mtrl_param,
             nullptr, nullptr, nullptr);
 
+        target_mtrl_ = mtrl;
+
+#if 1
 #if 0
         constexpr char* asset_path = "../../asset/suzanne/suzanne.obj";
         constexpr char* mtrl_in_asset = "Material.001";
@@ -547,7 +548,6 @@ private:
         constexpr char* mtrl_in_asset = "m1";
 #endif
 
-        target_mtrl_ = mtrl;
         asset_manager_.registerMtrl(mtrl_in_asset, mtrl);
 
         auto obj = aten::ObjLoader::LoadFirstObj(asset_path, ctxt_, asset_manager_);
@@ -562,17 +562,6 @@ private:
 #else
         constexpr char* asset_path = "../../asset/cornellbox/bunny_in_box.obj";
 
-        aten::MaterialParameter mtrl_param;
-        mtrl_param.type = aten::MaterialType::Microfacet_Refraction;
-        mtrl_param.baseColor = aten::vec3(0.580000f, 0.580000f, 0.580000f);
-        mtrl_param.standard.ior = 1.333F;
-        mtrl_param.standard.roughness = 0.011F;
-
-        auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
-            mtrl_param,
-            nullptr, nullptr, nullptr);
-
-        target_mtrl_ = mtrl;
         asset_manager_.registerMtrl("material_0", mtrl);
 
         auto objs = aten::ObjLoader::load(asset_path, ctxt_, asset_manager_,
@@ -670,7 +659,7 @@ private:
         MershallLightParameter(lightparams);
 
         renderer_.updateLight(lightparams);
-        renderer_.setEnableEnvmap(scene_light_.is_envmap);
+        renderer_.SetEnableEnvmap(scene_light_.is_envmap);
     }
 
 

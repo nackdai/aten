@@ -117,53 +117,6 @@ namespace aten
         }
     };
 
-    struct RetroreflectiveMaterialParameter {
-        aten::vec3 clearcoat_color;
-        real clearcoat_ior;
-
-        aten::vec3 retrorelective_color;
-        real clearcoat_roughness;
-
-        aten::vec3 diffuse_color;
-        real retrorelective_ior;
-
-        real retrorelective_roughness;
-        real padding[3];
-
-        AT_HOST_DEVICE_API void Init()
-        {
-            aten::set(clearcoat_color, real(1), real(1), real(1));
-            aten::set(retrorelective_color, real(1), real(1), real(1));
-            aten::set(diffuse_color, real(1), real(0), real(0));
-
-            clearcoat_ior = real(3.0);
-            clearcoat_roughness = real(0.25);
-
-            retrorelective_ior = real(3.0);
-            retrorelective_roughness = real(0.26);
-        }
-
-        AT_HOST_DEVICE_API RetroreflectiveMaterialParameter()
-        {
-            Init();
-        }
-
-        AT_HOST_DEVICE_API auto& operator=(const RetroreflectiveMaterialParameter& rhs)
-        {
-            clearcoat_color = rhs.clearcoat_color;
-            retrorelective_color = rhs.retrorelective_color;
-            diffuse_color = rhs.diffuse_color;
-
-            clearcoat_ior = rhs.clearcoat_ior;
-            clearcoat_roughness = rhs.clearcoat_roughness;
-
-            retrorelective_ior = rhs.retrorelective_ior;
-            retrorelective_roughness = rhs.retrorelective_roughness;
-
-            return *this;
-        }
-    };
-
     struct CarPaintMaterialParameter {
         aten::vec3 clearcoat_color;
         real clearcoat_ior;
@@ -235,7 +188,6 @@ namespace aten
         union {
             StandardMaterialParameter standard;
             CarPaintMaterialParameter carpaint;
-            RetroreflectiveMaterialParameter retrorelective;
         };
 
         AT_HOST_DEVICE_API void Init()
@@ -265,9 +217,6 @@ namespace aten
             if (type == MaterialType::CarPaint) {
                 carpaint.Init();
             }
-            else if (type == MaterialType::Retroreflective) {
-                retrorelective.Init();
-            }
         }
 
         AT_HOST_DEVICE_API auto& operator=(const MaterialParameter& rhs)
@@ -285,9 +234,6 @@ namespace aten
 
             if (type == MaterialType::CarPaint) {
                 carpaint = rhs.carpaint;
-            }
-            else if (type == MaterialType::Retroreflective) {
-                retrorelective = rhs.retrorelective;
             }
             else {
                 standard = rhs.standard;

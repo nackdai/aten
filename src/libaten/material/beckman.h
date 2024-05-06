@@ -198,13 +198,11 @@ namespace AT_NAME
          * @param[in] roughness Roughness parameter.
          * @param[in] v Target vector to be shadowed and masked.
          * @param[in] n Macrosurface normal.
-         * @param[in] m Microsurface normal.
          * @return G1 shadowing masking value.
          */
         static AT_DEVICE_API real ComputeG1(
             float roughness,
             const aten::vec3& v,
-            const aten::vec3& m,
             const aten::vec3& n)
         {
             const auto costheta = aten::abs(dot(v, n));
@@ -260,7 +258,7 @@ namespace AT_NAME
             const auto nt = ior;
 
             const auto D = ComputeDistribution(H, N, roughness);
-            const auto G2 = ComputeG1(roughness, V, H, N) * ComputeG1(roughness, L, H, N);
+            const auto G2 = ComputeG1(roughness, V, N) * ComputeG1(roughness, L, N);
             const auto F = material::ComputeSchlickFresnel(ni, nt, L, H);
 
             if (fresnel) {

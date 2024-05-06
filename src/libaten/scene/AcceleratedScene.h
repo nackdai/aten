@@ -50,10 +50,10 @@ namespace aten {
             const aten::ray& r,
             real t_min, real t_max,
             bool enableLod,
-            aten::Intersection& isect) const final
+            aten::Intersection& isect) const override final
         {
             isect.t = t_max;
-            auto isHit = m_accel.hit(ctxt, r, t_min, t_max, enableLod, isect);
+            auto isHit = m_accel.HitWithLod(ctxt, r, t_min, t_max, enableLod, isect);
 
             return isHit;
         }

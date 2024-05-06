@@ -976,10 +976,10 @@ namespace aten
         real t_min, real t_max,
         Intersection& isect) const
     {
-        return hit(ctxt, r, t_min, t_max, false, isect);
+        return HitWithLod(ctxt, r, t_min, t_max, false, isect);
     }
 
-    bool sbvh::hit(
+    bool sbvh::HitWithLod(
         const context& ctxt,
         const ray& r,
         real t_min, real t_max,
@@ -1390,7 +1390,7 @@ namespace aten
                         AT_ASSERT(mtrlid >= 0);
 
                         // Replace current material index.
-                        node.mtrlid = static_cast<int32_t>(mtrlid);
+                        node.mtrlid = static_cast<float>(mtrlid);
                     }
                 }
             }

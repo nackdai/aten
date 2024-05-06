@@ -74,7 +74,7 @@ namespace idaten {
             int32_t width, int32_t height,
             idaten::CudaGLSurface& gbuffer);
 
-        virtual void missShade(
+        virtual void MissShadeWithFillingAov(
             int32_t width, int32_t height,
             int32_t bounce,
             idaten::TypedCudaMemory<float4>& aovNormalDepth,

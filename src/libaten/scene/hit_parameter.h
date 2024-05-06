@@ -6,14 +6,14 @@
 namespace aten {
     struct hitrecord {
         vec3 p;
-        real area{ real(1) };
+        float area{ 0.0F };
 
         vec3 normal;
         int32_t mtrlid{ -1 };
 
         // texture coordinate.
-        real u{ real(0) };
-        real v{ real(0) };
+        float u{ 0.0F };
+        float v{ 0.0F };
 
         int32_t meshid{ -1 };
 
@@ -61,10 +61,10 @@ namespace aten {
     struct SamplePosNormalPdfResult {
         aten::vec3 pos; ///< Sampled position.
         aten::vec3 nml; ///< Normal at sampled position.
-        real area;      ///< Area of sampled triangle.
+        float area{ 0.0F }; ///< Area of sampled triangle.
 
-        real a; ///< Barycentric on sampled triangle.
-        real b; ///< Barycentric on sampled triangle.
+        float a{ 0.0F };    ///< Barycentric on sampled triangle.
+        float b{ 0.0F };    ///< Barycentric on sampled triangle.
         int32_t triangle_id{ -1 };  ///< Sampled triangle id.
     };
 }

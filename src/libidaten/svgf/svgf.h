@@ -162,13 +162,11 @@ namespace idaten
 
         void missShade(
             int32_t width, int32_t height,
-            int32_t bounce,
-            int32_t offsetX = -1,
-            int32_t offsetY = -1)
+            int32_t bounce) override
         {
             auto& curaov = params_.GetCurrAovBuffer();
 
-            StandardPT::missShade(
+            StandardPT::MissShadeWithFillingAov(
                 width, height,
                 bounce,
                 curaov.get<AT_NAME::SVGFAovBufferType::NormalDepth>(),

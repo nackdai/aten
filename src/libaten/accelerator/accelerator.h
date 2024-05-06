@@ -92,7 +92,7 @@ namespace aten {
         /**
          * @brief Test if a ray hits a object.
          */
-        virtual bool hit(
+        virtual bool HitWithLod(
             const context& ctxt,
             const ray& r,
             real t_min, real t_max,

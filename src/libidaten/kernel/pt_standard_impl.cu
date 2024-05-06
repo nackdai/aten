@@ -485,7 +485,7 @@ namespace idaten
         checkCudaKernel(hitTestPrimaryRayInScreenSpace);
     }
 
-    void StandardPT::missShade(
+    void StandardPT::MissShadeWithFillingAov(
         int32_t width, int32_t height,
         int32_t bounce,
         idaten::TypedCudaMemory<float4>& aovNormalDepth,

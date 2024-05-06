@@ -51,9 +51,7 @@ namespace AT_NAME
             u, v,
             aten::vec4(param->standard.roughness));
 
-        const float ior = param->standard.ior;
-
-        const auto ret = ComputeBRDF(roughness.r, ior, normal, wi, wo);
+        const auto ret = ComputeBRDF(roughness.r, normal, wi, wo);
         return ret;
     }
 
@@ -167,7 +165,6 @@ namespace AT_NAME
 
     AT_DEVICE_API aten::vec3 MicrofacetVelvet::ComputeBRDF(
         const float roughness,
-        const float ior,
         const aten::vec3& n,
         const aten::vec3& wi,
         const aten::vec3& wo)
@@ -179,10 +176,6 @@ namespace AT_NAME
 
         auto NL = aten::abs(dot(N, L));
         auto NV = aten::abs(dot(N, V));
-
-        // Assume index of refraction of the medie on the incident side is vacuum.
-        const auto ni = 1.0F;
-        const auto nt = ior;
 
         const auto D = ComputeDistribution(H, N, roughness);
         const auto G = ComputeShadowingMaskingFunction(roughness, V, L, N);
@@ -220,9 +213,7 @@ namespace AT_NAME
             u, v,
             aten::vec4(param->standard.roughness));
 
-        const auto ior = param->standard.ior;
-
-        result->bsdf = ComputeBRDF(roughness.r, ior, normal, wi, result->dir);
+        result->bsdf = ComputeBRDF(roughness.r, normal, wi, result->dir);
     }
 
     bool MicrofacetVelvet::edit(aten::IMaterialParamEditor* editor)

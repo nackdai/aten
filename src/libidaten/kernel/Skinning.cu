@@ -260,7 +260,7 @@ namespace idaten
         {
             auto willComputeWithTriangles = triangles_.num() > 0;
 
-            const auto vtxNum = vertices_.num();
+            const auto vtxNum = static_cast<uint32_t>(vertices_.num());
 
             dim3 block(512);
             dim3 grid((vtxNum + block.x - 1) / block.x);
@@ -275,7 +275,7 @@ namespace idaten
 
                 checkCudaKernel(computeSkinningWithTriangles);
 
-                const auto triNum = triangles_.num();
+                const auto triNum = static_cast<uint32_t>(triangles_.num());
 
                 grid = dim3((triNum + block.x - 1) / block.x);
 
@@ -302,15 +302,13 @@ namespace idaten
         // Get min/max.
         {
             auto src = dstPos;
-            auto num = vertices_.num();
+            auto num = static_cast<uint32_t>(vertices_.num());
 
             dim3 block(BLOCK_SIZE);
             dim3 grid((num + block.x - 1) / block.x);
 
             m_minBuf.resize(grid.x);
             m_maxBuf.resize(grid.x);
-
-            auto sharedMemSize = block.x * sizeof(aten::vertex) * 2;
 
             getMinMax << <grid, block >> > (
                 false,

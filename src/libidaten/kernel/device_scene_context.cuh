@@ -15,7 +15,8 @@ namespace idaten {
     // __restrict__ hint doesn't work within a struct as a kernel argument.
     // It works as a kernel argument.
 
-    struct context {
+    class context {
+    public:
         const aten::ObjectParameter* shapes{ nullptr };
 
         const aten::MaterialParameter* mtrls{ nullptr };

@@ -758,7 +758,7 @@ namespace svgf {
 
             float lum = AT_NAME::color::luminance(color.x, color.y, color.z);
 
-            float Wz = 3.0f * fabs(center_depth - depth) / (pixel_distance_ratio * u_length + 0.000001f);
+            float Wz = 3.0f * fabs(center_depth - depth) / (sigmaZ * (pixel_distance_ratio * u_length) + 0.000001f);
 
             float Wn = powf(aten::cmpMax(0.0f, dot(center_normal, normal)), sigmaN);
 

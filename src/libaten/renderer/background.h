@@ -10,7 +10,7 @@
 namespace aten
 {
     struct BackgroundResource {
-        aten::vec3 bg_color;
+        aten::vec3 bg_color{ 0.0F };
 
         int32_t envmap_tex_idx{ -1 };
         float avgIllum{ 1.0F };

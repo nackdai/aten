@@ -139,7 +139,6 @@ namespace AT_NAME
          * @brief Compute BRDF.
          * @param[in] albedo Albedo color.
          * @param[in] roughness Roughness parameter.
-         * @param[in] ior Refraction index.
          * @param[in] wi Incident vector.
          * @param[in] wo Output vector.
          * @param[in] n Macrosurface normal.
@@ -147,7 +146,6 @@ namespace AT_NAME
          */
         static AT_DEVICE_API aten::vec3 ComputeBRDF(
             const float roughness,
-            const float ior,
             const aten::vec3& n,
             const aten::vec3& wi,
             const aten::vec3& wo);

@@ -46,7 +46,7 @@ namespace aten {
             real t_min, real t_max,
             Intersection& isect) const override;
 
-        virtual bool hit(
+        virtual bool HitWithLod(
             const context& ctxt,
             const ray& r,
             real t_min, real t_max,

@@ -98,11 +98,6 @@ namespace aten {
             m_onNotifyChanged = onNotifyChanged;
         }
 
-        virtual void update()
-        {
-            // Nothing is done...
-        }
-
         virtual uint32_t getTriangleCount() const
         {
             return 0;

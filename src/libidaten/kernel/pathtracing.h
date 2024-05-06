@@ -38,7 +38,7 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t bounce)
         {
-            StandardPT::missShade(
+            StandardPT::MissShadeWithFillingAov(
                 width, height,
                 bounce,
                 aov_.normal_depth(),

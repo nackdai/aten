@@ -34,7 +34,7 @@ namespace idaten {
             m_hitDistLimit = d;
         }
 
-        void setEnableEnvmap(bool b)
+        void SetEnableEnvmap(bool b)
         {
             m_enableEnvmap = b;
         }

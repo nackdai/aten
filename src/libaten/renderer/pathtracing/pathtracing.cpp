@@ -58,7 +58,7 @@ namespace aten
             }
             else {
                 auto ibl = scene->getIBL();
-                if (ibl) {
+                if (ibl && enable_envmap_) {
                     ShadeMissWithEnvmap(
                         idx,
                         ix, iy,

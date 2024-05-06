@@ -385,6 +385,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\thrust;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -399,7 +400,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Include>
       </Include>
-      <AdditionalOptions>-Xcompiler "/wd 4819" --expt-relaxed-constexpr  --expt-extended-lambda -std=c++17 -Xcompiler "/std:c++17" --diag-suppress 20012 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-Xcompiler "/wd 4819" --expt-relaxed-constexpr  --expt-extended-lambda -std=c++17 -Xcompiler "/std:c++17" --diag-suppress 20012  --threads 4 %(AdditionalOptions)</AdditionalOptions>
       <CodeGeneration>compute_75,sm_75</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -413,6 +414,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\thrust;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -430,7 +432,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Include>
       </Include>
       <PtxAsOptionV>true</PtxAsOptionV>
-      <AdditionalOptions>-Xcompiler "/wd 4819" --expt-relaxed-constexpr  --expt-extended-lambda -std=c++17 -Xcompiler "/std:c++17" --diag-suppress 20012 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-Xcompiler "/wd 4819" --expt-relaxed-constexpr  --expt-extended-lambda -std=c++17 -Xcompiler "/std:c++17" --diag-suppress 20012  --threads 4 %(AdditionalOptions)</AdditionalOptions>
       <FastMath>true</FastMath>
       <CodeGeneration>compute_75,sm_75</CodeGeneration>
     </CudaCompile>
@@ -445,6 +447,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\thrust;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -462,7 +465,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Include>
       </Include>
       <PtxAsOptionV>true</PtxAsOptionV>
-      <AdditionalOptions>-Xcompiler "/wd 4819" --expt-relaxed-constexpr  --expt-extended-lambda -std=c++17 -Xcompiler "/std:c++17" --diag-suppress 20012 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-Xcompiler "/wd 4819" --expt-relaxed-constexpr  --expt-extended-lambda -std=c++17 -Xcompiler "/std:c++17" --diag-suppress 20012  --threads 4 %(AdditionalOptions)</AdditionalOptions>
       <GenerateLineInfo>true</GenerateLineInfo>
       <CodeGeneration>compute_75,sm_75</CodeGeneration>
     </CudaCompile>

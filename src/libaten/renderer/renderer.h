@@ -61,6 +61,11 @@ namespace aten
             // Nothing is done.
         }
 
+        void SetEnableEnvmap(bool b)
+        {
+            enable_envmap_ = b;
+        }
+
     protected:
         virtual void OnRender(
             const context& ctxt,
@@ -83,5 +88,6 @@ namespace aten
     protected:
         BackgroundResource bg_;
         uint32_t frame_count_{ 0 };
+        bool enable_envmap_{ true };
     };
 }

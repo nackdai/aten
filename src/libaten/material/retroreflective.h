@@ -24,11 +24,24 @@ namespace AT_NAME
 
     private:
         Retroreflective(
+            aten::vec3& albedo = aten::vec3(0.5F),
+            aten::texture* albedoMap = nullptr,
+            aten::texture* normalMap = nullptr,
+            aten::texture* roughnessMap = nullptr)
+            : material(aten::MaterialType::Retroreflective, aten::MaterialAttributeMicrofacet, albedo, 0)
+        {
+            setTextures(albedoMap, normalMap, roughnessMap);
+        }
+
+        Retroreflective(
+            const aten::MaterialParameter& param,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
             : material(aten::MaterialType::Retroreflective, aten::MaterialAttributeMicrofacet)
         {
+            m_param.baseColor = param.baseColor;
+            m_param.standard = param.standard;
             setTextures(albedoMap, normalMap, roughnessMap);
         }
 
@@ -38,59 +51,69 @@ namespace AT_NAME
 
     public:
         static AT_DEVICE_API real pdf(
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
+            const aten::MaterialParameter& param,
+            const aten::vec3& n,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v);
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
+            const aten::MaterialParameter& param,
+            const aten::vec3& n,
             const aten::vec3& wi,
             real u, real v,
             aten::sampler* sampler);
 
         static AT_DEVICE_API aten::vec3 bsdf(
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
+            const aten::MaterialParameter& param,
+            const aten::vec3& n,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v);
 
-        static AT_DEVICE_API aten::vec3 bsdf(
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real u, real v,
-            const aten::vec3& externalAlbedo);
-
         static AT_DEVICE_API void sample(
-            AT_NAME::MaterialSampling* result,
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
+            AT_NAME::MaterialSampling& result,
+            const aten::MaterialParameter& param,
+            const aten::vec3& n,
             const aten::vec3& wi,
-            const aten::vec3& orgnormal,
             aten::sampler* sampler,
-            real u, real v,
-            bool isLightPath = false);
-
-        static AT_DEVICE_API void sample(
-            AT_NAME::MaterialSampling* result,
-            const aten::MaterialParameter* param,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            real u, real v,
-            const aten::vec3& externalAlbedo,
-            bool isLightPath = false);
+            real u, real v);
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
 
-        static AT_DEVICE_API real getEffectiveRetroreflectiveArea(
-            const aten::vec3& into_prismatic_sheet_dir,
-            const aten::vec3& normal);
+        enum Component {
+            SurfaceReflection,
+            RetroReflection,
+            Diffuse,
+            Num = Diffuse + 1,
+        };
+
+        static AT_DEVICE_API void ComputeWeights(
+            std::array<float, Component::Num>& weights,
+            const float ni, const float nt,
+            const aten::vec3& wi,
+            const aten::vec3& n);
+
+        static AT_DEVICE_API void GetCDF(
+            const std::array<float, Component::Num>& weights,
+            std::array<float, Component::Num>& cdf);
+
+        static AT_DEVICE_API float ComputePDF(
+            const aten::MaterialParameter& param,
+            const aten::vec3& wi,
+            const aten::vec3& wo,
+            const aten::vec3& n);
+
+        static AT_DEVICE_API aten::vec3 SampleDirection(
+            const float r1, const float r2, const float r3,
+            const aten::MaterialParameter& param,
+            const aten::vec3& wi,
+            const aten::vec3& n);
+
+        static AT_DEVICE_API aten::vec3 ComputeBRDF(
+            const aten::MaterialParameter& param,
+            const aten::vec3& n,
+            const aten::vec3& wi,
+            const aten::vec3& wo);
     };
 }

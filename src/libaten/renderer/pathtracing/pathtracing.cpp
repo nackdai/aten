@@ -111,9 +111,9 @@ namespace aten
         constexpr size_t SampleRayNum = 8;
 
         // TODO: These value should be configurable.
-        constexpr real feature_line_width = 1;
-        constexpr real albedo_threshold = 0.1f;
-        constexpr real normal_threshold = 0.1f;
+        constexpr float feature_line_width = 1;
+        constexpr float albedo_threshold = 0.1f;
+        constexpr float normal_threshold = 0.1f;
         static const aten::vec3 LineColor(0, 1, 0);
 
         std::array<AT_NAME::npr::FeatureLine::SampleRayDesc, SampleRayNum> sample_ray_descs;
@@ -131,12 +131,12 @@ namespace aten
             Intersection isect;
 
             // Current closest distance to feature line point.
-            auto closest_feature_line_point_distance = std::numeric_limits<real>::max();
+            auto closest_feature_line_point_distance = std::numeric_limits<float>::max();
 
             // Whether the feature line point has been found.
             bool is_found_feature_line_point = false;
 
-            real hit_point_distance = 0;
+            float hit_point_distance = 0;
 
             if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
                 const auto& obj = ctxt.GetObject(isect.objid);
@@ -301,7 +301,7 @@ namespace aten
         aten::hitrecord rec;
         AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
 
-        bool isBackfacing = dot(rec.normal, -ray.dir) < real(0);
+        bool isBackfacing = dot(rec.normal, -ray.dir) < float(0);
 
         // 交差位置の法線.
         // 物体からのレイの入出を考慮.
@@ -532,7 +532,7 @@ namespace aten
                         }
                     }
 
-                    col /= (real)cnt;
+                    col /= (float)cnt;
 
 #if 0
                     if (hrec.mtrlid >= 0) {
@@ -550,8 +550,8 @@ namespace aten
                     dst.buffer->put(x, y, vec4(col, 1));
 
                     if (dst.variance) {
-                        col2 /= (real)cnt;
-                        dst.variance->put(x, y, vec4(col2 - col * col, real(1)));
+                        col2 /= (float)cnt;
+                        dst.variance->put(x, y, vec4(col2 - col * col, float(1)));
                     }
                 }
             }

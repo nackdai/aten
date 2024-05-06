@@ -30,9 +30,9 @@ public:
         const aten::context& ctxt,
         const aten::camera* cam);
 
-    aten::vec3 GenRay(real theta, real phi);
+    aten::vec3 GenRay(float theta, float phi);
 
-    real HitTest(real theta, real phi);
+    float HitTest(float theta, float phi);
 
     bool IsValid() const
     {

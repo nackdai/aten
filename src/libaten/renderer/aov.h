@@ -178,7 +178,7 @@ namespace AT_NAME
         aovAlbedoMeshId.x = albedo.x;
         aovAlbedoMeshId.y = albedo.y;
         aovAlbedoMeshId.z = albedo.z;
-        aovAlbedoMeshId.w = static_cast<real>(isect.meshid);
+        aovAlbedoMeshId.w = static_cast<float>(isect.meshid);
     }
 
     template <class BUFFER_VALUE_TYPE, class TBg>
@@ -187,9 +187,9 @@ namespace AT_NAME
         BUFFER_VALUE_TYPE& aovAlbedoMeshId,
         const TBg& bg)
     {
-        aovNormalDepth.x = real(0);
-        aovNormalDepth.y = real(0);
-        aovNormalDepth.z = real(0);
+        aovNormalDepth.x = float(0);
+        aovNormalDepth.y = float(0);
+        aovNormalDepth.z = float(0);
         aovNormalDepth.w = -1;
 
         aovAlbedoMeshId.x = bg.x;
@@ -205,14 +205,14 @@ namespace AT_NAME
     {
         aovBuffer.x = isect.a;
         aovBuffer.y = isect.b;
-        aovBuffer.z = real(1) - isect.a - isect.b;
+        aovBuffer.z = float(1) - isect.a - isect.b;
     }
 
     template <class BUFFER_VALUE_TYPE>
     inline AT_HOST_DEVICE_API void FillBaryCentricAOVIfHitMiss(BUFFER_VALUE_TYPE& aovBuffer)
     {
-        aovBuffer.x = real(0);
-        aovBuffer.y = real(0);
-        aovBuffer.z = real(0);
+        aovBuffer.x = float(0);
+        aovBuffer.y = float(0);
+        aovBuffer.z = float(0);
     }
 }

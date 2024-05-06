@@ -104,7 +104,7 @@ AT_INLINE_RELEASE __device__ bool intersectSBVH(
     float3 boxmin;
     float3 boxmax;
 
-    real t = AT_MATH_INF;
+    float t = AT_MATH_INF;
 
     cudaTextureObject_t node = ctxt->nodes[0];
     aten::ray transformedRay = r;

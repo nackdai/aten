@@ -14,21 +14,21 @@ namespace aten {
             camera& camera,
             int32_t x1, int32_t y1,
             int32_t x2, int32_t y2,
-            real scale = real(1));
+            float scale = float(1));
 
         static void moveForward(
             camera& camera,
-            real offset);
+            float offset);
         static void moveRight(
             camera& camera,
-            real offset);
+            float offset);
         static void moveUp(
             camera& camera,
-            real offset);
+            float offset);
 
         static void dolly(
             camera& camera,
-            real scale);
+            float scale);
 
         static void rotate(
             camera& camera,

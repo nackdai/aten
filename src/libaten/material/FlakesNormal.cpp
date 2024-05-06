@@ -117,13 +117,13 @@ namespace AT_NAME
     }
 
     AT_DEVICE_API aten::vec4 FlakesNormal::gen(
-        real u, real v,
-        real flake_scale/*= real(50.0)*/,
-        real flake_size/*= real(0.5)*/,
-        real flake_size_variance/*= real(0.7)*/,
-        real flake_normal_orientation/*= real(0.5)*/)
+        float u, float v,
+        float flake_scale/*= float(50.0)*/,
+        float flake_size/*= float(0.5)*/,
+        float flake_size_variance/*= float(0.7)*/,
+        float flake_normal_orientation/*= float(0.5)*/)
     {
-        float safe_flake_size_variance = aten::clamp(flake_size_variance, real(0.1), real(1.0));
+        float safe_flake_size_variance = aten::clamp(flake_size_variance, float(0.1), float(1.0));
 
         const aten::vec3 cellCenters[9] = {
             aten::vec3(0.5, 0.5, 0.0),
@@ -148,11 +148,11 @@ namespace AT_NAME
         for (int32_t cellIndex = 0; cellIndex < 9; ++cellIndex) {
             aten::vec3 cellCenter = base + cellCenters[cellIndex];
 
-            aten::vec3 centerOffset = cellnoise(cellCenter) * real(2.0) - real(1.0);
+            aten::vec3 centerOffset = cellnoise(cellCenter) * float(2.0) - float(1.0);
             centerOffset[2] *= safe_flake_size_variance;
             centerOffset = normalize(centerOffset);
 
-            cellCenter += real(0.5) * centerOffset;
+            cellCenter += float(0.5) * centerOffset;
             float cellDistance = distance(position, cellCenter);
 
             if (cellDistance < flake_size && cellCenter[2] < nearestCell[2]) {
@@ -162,14 +162,14 @@ namespace AT_NAME
         }
 
         auto result = aten::vec3(0.5, 0.5, 1.0);
-        real alpha = 0.0;
+        float alpha = 0.0;
 
         aten::vec3 I(0, 0, 1);
 
         if (nearestCellIndex != -1) {
 
             aten::vec3 randomNormal = cellnoise(base + cellCenters[nearestCellIndex] + aten::vec3(0.0, 0.0, 1.5));
-            randomNormal = real(2.0) * randomNormal - real(1.0);
+            randomNormal = float(2.0) * randomNormal - float(1.0);
             randomNormal = faceforward(randomNormal, I, randomNormal);
             randomNormal = normalize(aten::mix(randomNormal, aten::vec3(0.0, 0.0, 1.0), flake_normal_orientation));
 

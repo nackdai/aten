@@ -29,7 +29,7 @@ namespace aten {
             m_scramble = scramble;
         }
 
-        AT_VIRTUAL_OVERRIDE(AT_HOST_DEVICE_API real nextSample())
+        AT_VIRTUAL_OVERRIDE(AT_HOST_DEVICE_API float nextSample())
         {
             vec2 r = sample2D();
             m_dimension++;

@@ -73,7 +73,7 @@ namespace ao {
             auto nextDir = AT_NAME::lambert::sampleDirection(orienting_normal, &paths.sampler[idx]);
             auto pdfb = AT_NAME::lambert::pdf(orienting_normal, nextDir);
 
-            real c = dot(orienting_normal, nextDir);
+            float c = dot(orienting_normal, nextDir);
 
             auto ao_ray = aten::ray(rec.p, nextDir, orienting_normal);
 

@@ -20,7 +20,7 @@ namespace aten
             x = y = z = w = FType(0);
         }
 
-        quaternion(real _x, real _y, real _z, real _w = 1.0f)
+        quaternion(float _x, float _y, float _z, float _w = 1.0f)
         {
             x = _x; y = _y; z = _z; w = _w;
         }
@@ -79,22 +79,22 @@ namespace aten
             *this = *this * _v;
             return *this;
         }
-        quaternion& operator*=(real f)
+        quaternion& operator*=(float f)
         {
             *this = *this * f;
             return *this;
         }
-        quaternion& operator/=(real f)
+        quaternion& operator/=(float f)
         {
             *this = *this / f;
             return *this;
         }
 
         // クオータニオンの大きさ(絶対値)を計算する
-        real length()
+        float length()
         {
-            real q = x * x + y * y + z * z + w * w;
-            real ret = aten::sqrt(q);
+            float q = x * x + y * y + z * z + w * w;
+            float ret = aten::sqrt(q);
             return ret;
         }
 
@@ -120,7 +120,7 @@ namespace aten
         quaternion& invert()
         {
             // |q|^2
-            real s = x * x + y * y + z * z + w * w;
+            float s = x * x + y * y + z * z + w * w;
 
             // conjugate(q)
             conjugate();
@@ -135,7 +135,7 @@ namespace aten
         static quaternion slerp(
             const quaternion& quat1,
             const quaternion& quat2,
-            real t)
+            float t)
         {
             // NOTE
             // http://www.f-sp.com/entry/2017/06/30/221124#%E7%90%83%E9%9D%A2%E7%B7%9A%E5%BD%A2%E8%A3%9C%E9%96%93
@@ -147,17 +147,17 @@ namespace aten
             q2.normalize();
 
             auto c = q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
-            c = aten::clamp(c, real(-1), real(1));
+            c = aten::clamp(c, float(-1), float(1));
 
             auto theta = aten::acos(c);
 
             auto sdiv = aten::sin(theta);
 
-            if (sdiv == real(0)) {
+            if (sdiv == float(0)) {
                 return quat1;
             }
 
-            auto s0 = aten::sin((real(1) - t) * theta);
+            auto s0 = aten::sin((float(1) - t) * theta);
             auto s1 = aten::sin(t * theta);
 
             quaternion ret = s0 / sdiv * quat1 + s1 / sdiv * quat2;
@@ -166,13 +166,13 @@ namespace aten
         }
 
         // 角度と任意軸からクオータニオンを設定する
-        quaternion& setQuatFromRadAxis(real rad, const aten::vec4& vAxis)
+        quaternion& setQuatFromRadAxis(float rad, const aten::vec4& vAxis)
         {
             // 念のため
             auto v = aten::normalize(vAxis);
 
-            auto c = aten::cos(rad * real(0.5));
-            auto s = aten::sin(rad * real(0.5));
+            auto c = aten::cos(rad * float(0.5));
+            auto s = aten::sin(rad * float(0.5));
 
             x = s * v.x;
             y = s * v.y;
@@ -189,15 +189,15 @@ namespace aten
 
 #if 1
             // ベタに計算するとこうなる
-            const real xx2 = 2.0f * x * x;
-            const real yy2 = 2.0f * y * y;
-            const real zz2 = 2.0f * z * z;
-            const real xy2 = 2.0f * x * y;
-            const real xz2 = 2.0f * x * z;
-            const real wz2 = 2.0f * w * z;
-            const real wy2 = 2.0f * w * y;
-            const real yz2 = 2.0f * y * z;
-            const real wx2 = 2.0f * w * x;
+            const float xx2 = 2.0f * x * x;
+            const float yy2 = 2.0f * y * y;
+            const float zz2 = 2.0f * z * z;
+            const float xy2 = 2.0f * x * y;
+            const float xz2 = 2.0f * x * z;
+            const float wz2 = 2.0f * w * z;
+            const float wy2 = 2.0f * w * y;
+            const float yz2 = 2.0f * y * z;
+            const float wx2 = 2.0f * w * x;
 
             mtx.m[0][0] = 1.0f - yy2 - zz2;
             mtx.m[0][1] = xy2 + wz2;
@@ -246,11 +246,11 @@ namespace aten
         quaternion& fromMatrix(const mat4& mtx)
         {
             // 最大値を探す
-            real value[4] = {
-                mtx.m[0][0] - mtx.m[1][1] - mtx.m[2][2] + real(1),
-                -mtx.m[0][0] + mtx.m[1][1] - mtx.m[2][2] + real(1),
-                -mtx.m[0][0] - mtx.m[1][1] + mtx.m[2][2] + real(1),
-                mtx.m[0][0] + mtx.m[1][1] + mtx.m[2][2] + real(1),
+            float value[4] = {
+                mtx.m[0][0] - mtx.m[1][1] - mtx.m[2][2] + float(1),
+                -mtx.m[0][0] + mtx.m[1][1] - mtx.m[2][2] + float(1),
+                -mtx.m[0][0] - mtx.m[1][1] + mtx.m[2][2] + float(1),
+                mtx.m[0][0] + mtx.m[1][1] + mtx.m[2][2] + float(1),
             };
 
             uint32_t nMaxValIdx = 0;
@@ -260,13 +260,13 @@ namespace aten
                 }
             }
 
-            AT_ASSERT(value[nMaxValIdx] > real(0));
+            AT_ASSERT(value[nMaxValIdx] > float(0));
 
-            real v = sqrtf(value[nMaxValIdx]) * real(0.5);
+            float v = sqrtf(value[nMaxValIdx]) * float(0.5);
 
             // NOTE
             // 1 / (4 * v)
-            real div = real(0.25) / v;
+            float div = float(0.25) / v;
 
             switch (nMaxValIdx) {
             case 0:    // x
@@ -304,7 +304,7 @@ namespace aten
         }
 
         // オイラー角からクオータニオンを計算する
-        quaternion& fromEuler(real x, real y, real z)
+        quaternion& fromEuler(float x, float y, float z)
         {
             // Q1 = (x1, y1, z1, w1) = x1i + y1j + z1k + w1
             // Q2 = (x2, y2, z2, w2) = x2i + y2j + z2k + w2
@@ -336,16 +336,16 @@ namespace aten
             //                      + (CyCpSr - SySpCr)k
 
             // Yaw
-            real cosY = aten::cos(y * real(0.5));
-            real sinY = aten::sin(y * real(0.5));
+            float cosY = aten::cos(y * float(0.5));
+            float sinY = aten::sin(y * float(0.5));
 
             // Pitch
-            real cosX = aten::cos(x * real(0.5));
-            real sinX = aten::sin(x * real(0.5));
+            float cosX = aten::cos(x * float(0.5));
+            float sinX = aten::sin(x * float(0.5));
 
             // Roll
-            real cosZ = aten::cos(z * real(0.5));
-            real sinZ = aten::sin(z * real(0.5));
+            float cosZ = aten::cos(z * float(0.5));
+            float sinZ = aten::sin(z * float(0.5));
 
             x = cosZ * sinX * cosY + sinZ * cosX * sinY;
             y = cosZ * cosX * sinY - sinZ * sinX * cosY;
@@ -375,16 +375,16 @@ namespace aten
 
             vec4 axis = cross(v0, v1);
 
-            real cosine = dot(v0, v1);
-            real angle = acosf(cosine);
+            float cosine = dot(v0, v1);
+            float angle = acosf(cosine);
 
-            real s = aten::sin(angle * real(0.5));
+            float s = aten::sin(angle * float(0.5));
 
             quaternion ret;
             ret.x = axis.x * s;
             ret.y = axis.y * s;
             ret.z = axis.z * s;
-            ret.w = aten::cos(angle * real(0.5));
+            ret.w = aten::cos(angle * float(0.5));
 
             return ret;
         }
@@ -403,8 +403,8 @@ namespace aten
             // m[2][0] = CxSy           m[2][1] = -Sx  m[2][2] = CxCy           m[2][3] = 0
             // m[3][0] = 0              m[3][1] = 0    m[3][2] = 0              m[3][3] = 1
 
-            real Sx = -mtx.m[2][1];
-            real Cx = aten::sqrt(real(1) - Sx * Sx);
+            float Sx = -mtx.m[2][1];
+            float Cx = aten::sqrt(float(1) - Sx * Sx);
 
             vec3 angle;
 
@@ -412,12 +412,12 @@ namespace aten
             {
                 angle.x = ::acosf(Cx);
 
-                real Sy = mtx.m[2][0] / Cx;
-                real Cy = mtx.m[2][2] / Cx;
+                float Sy = mtx.m[2][0] / Cx;
+                float Cy = mtx.m[2][2] / Cx;
                 angle.y = ::atan2f(Sy, Cy);
 
-                real Sz = mtx.m[0][1] / Cx;
-                real Cz = mtx.m[1][1] / Cx;
+                float Sz = mtx.m[0][1] / Cx;
+                float Cz = mtx.m[1][1] / Cx;
                 angle.z = ::atan2f(Sz, Cz);
             }
             else
@@ -435,8 +435,8 @@ namespace aten
 
                 angle.y = 0.0f;
 
-                real Cz = mtx.m[0][0];
-                real Sz = -mtx.m[1][0];
+                float Cz = mtx.m[0][0];
+                float Sz = -mtx.m[1][0];
                 angle.z = ::atan2f(Sz, Cz);
             }
 
@@ -473,25 +473,25 @@ namespace aten
     }
 
     template <class FType>
-    inline quaternion<FType> operator*(const quaternion<FType>& v, real t)
+    inline quaternion<FType> operator*(const quaternion<FType>& v, float t)
     {
         quaternion<FType> ret(t * v.x, t * v.y, t * v.z, t * v.w);
         return ret;
     }
 
     template <class FType>
-    inline quaternion<FType> operator*(real t, const quaternion<FType>& v)
+    inline quaternion<FType> operator*(float t, const quaternion<FType>& v)
     {
         quaternion<FType> ret(t * v.x, t * v.y, t * v.z, t * v.w);
         return ret;
     }
 
     template <class FType>
-    inline quaternion<FType> operator/(const quaternion<FType>& v, real t)
+    inline quaternion<FType> operator/(const quaternion<FType>& v, float t)
     {
         quaternion<FType> ret(v.x / t, v.y / t, v.z / t, v.w / t);
         return ret;
     }
 
-    using quat = quaternion<real>;
+    using quat = quaternion<float>;
 }

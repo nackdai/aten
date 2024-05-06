@@ -21,7 +21,7 @@ namespace AT_NAME
 {
     inline AT_DEVICE_API aten::vec4 material::sampleAlbedoMap(
         const aten::MaterialParameter* mtrl,
-        real u, real v,
+        float u, float v,
         uint32_t lod/*= 0*/)
     {
         return sampleTexture(mtrl->albedoMap, u, v, mtrl->baseColor, lod);
@@ -34,7 +34,7 @@ namespace AT_NAME
         const aten::vec3& wi,
         const aten::vec3& orgnormal,
         aten::sampler* sampler,
-        real pre_sampled_r,
+        float pre_sampled_r,
 #ifdef __CUDACC__
         float u, float v)
 #else
@@ -89,14 +89,14 @@ namespace AT_NAME
         }
     }
 
-    inline AT_DEVICE_API real material::samplePDF(
+    inline AT_DEVICE_API float material::samplePDF(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
-        real pdf = real(0);
+        float pdf = float(0);
 
         switch (mtrl->type) {
         case aten::MaterialType::Emissive:
@@ -149,8 +149,8 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v,
-        real pre_sampled_r)
+        float u, float v,
+        float pre_sampled_r)
     {
         switch (mtrl->type) {
         case aten::MaterialType::Emissive:
@@ -185,12 +185,12 @@ namespace AT_NAME
         return aten::vec3();
     }
 
-    inline AT_DEVICE_API real material::applyNormal(
+    inline AT_DEVICE_API float material::applyNormal(
         const aten::MaterialParameter* mtrl,
         const int32_t normalMapIdx,
         const aten::vec3& orgNml,
         aten::vec3& newNml,
-        real u, real v,
+        float u, float v,
         const aten::vec3& wi,
         aten::sampler* sampler)
     {
@@ -204,7 +204,7 @@ namespace AT_NAME
         }
         else {
             AT_NAME::applyNormalMap(normalMapIdx, orgNml, newNml, u, v);
-            return real(-1);
+            return float(-1);
         }
     }
 

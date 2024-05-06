@@ -8,12 +8,12 @@ namespace AT_NAME
     // http://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
     // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
-    AT_DEVICE_API real MicrofacetBeckman::pdf(
+    AT_DEVICE_API float MicrofacetBeckman::pdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
         auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
         auto ret = ComputePDF(roughness.r, normal, wi, wo);
@@ -24,7 +24,7 @@ namespace AT_NAME
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
-        real u, real v,
+        float u, float v,
         aten::sampler* sampler)
     {
         auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
@@ -37,21 +37,21 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
         auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
 
         auto albedo = param->baseColor;
-        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
+        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(float(1)));
 
-        real ior = param->standard.ior;
+        float ior = param->standard.ior;
 
         aten::vec3 ret = ComputeBRDF(roughness.r, ior, normal, wi, wo);
         return ret;
     }
 
     AT_DEVICE_API aten::vec3 MicrofacetBeckman::sampleDirection(
-        const real roughness,
+        const float roughness,
         const aten::vec3& in,
         const aten::vec3& normal,
         aten::sampler* sampler)
@@ -69,7 +69,7 @@ namespace AT_NAME
         const aten::vec3& wi,
         const aten::vec3& orgnormal,
         aten::sampler* sampler,
-        real u, real v)
+        float u, float v)
     {
         auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
@@ -79,7 +79,7 @@ namespace AT_NAME
         result->dir = sampleDirection(roughness.r, wi, normal, sampler);
         result->pdf = ComputePDF(roughness.r, normal, wi, result->dir);
 
-        real ior = param->standard.ior;
+        float ior = param->standard.ior;
 
         result->bsdf = ComputeBRDF(roughness.r, ior, normal, wi, result->dir);
     }

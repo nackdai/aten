@@ -114,7 +114,7 @@ namespace aten {
     bool bvh::hit(
         const context& ctxt,
         const ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         Intersection& isect) const
     {
         bool isHit = onHit(ctxt, m_root.get(), r, t_min, t_max, isect);
@@ -144,7 +144,7 @@ namespace aten {
         const context& ctxt,
         const bvhnode* root,
         const ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         Intersection& isect)
     {
         // NOTE
@@ -251,14 +251,14 @@ namespace aten {
         }
 
         // Triangleとrayのヒットにかかる処理時間の見積もり.
-        static const real T_tri = 1;  // 適当.
+        static const float T_tri = 1;  // 適当.
 
         // AABBとrayのヒットにかかる処理時間の見積もり.
-        static const real T_aabb = 1;  // 適当.
+        static const float T_aabb = 1;  // 適当.
 
         // 領域分割をせず、polygons を含む葉ノードを構築する場合を暫定の bestCost にする.
         //auto bestCost = T_tri * num;
-        real bestCost = std::numeric_limits<real>::max();    // 限界まで分割したいので、適当に大きい値にしておく.
+        float bestCost = std::numeric_limits<float>::max();    // 限界まで分割したいので、適当に大きい値にしておく.
 
         // 分割に最も良い軸 (0:x, 1:y, 2:z)
         int32_t bestAxis = -1;
@@ -275,8 +275,8 @@ namespace aten {
 
             // AABBの表面積リスト。s1SA[i], s2SA[i] は、
             // 「S1側にi個、S2側に(polygons.size()-i)個ポリゴンがあるように分割」したときの表面積
-            std::vector<real> s1SurfaceArea(num + 1, AT_MATH_INF);
-            std::vector<real> s2SurfaceArea(num + 1, AT_MATH_INF);
+            std::vector<float> s1SurfaceArea(num + 1, AT_MATH_INF);
+            std::vector<float> s2SurfaceArea(num + 1, AT_MATH_INF);
 
             // 分割された2つの領域.
             std::vector<hitable*> s1;                    // 右側.
@@ -455,10 +455,10 @@ namespace aten {
 #endif
 
             // Triangleとrayのヒットにかかる処理時間の見積もり.
-            static const real T_tri = 1;  // 適当.
+            static const float T_tri = 1;  // 適当.
 
             // AABBとrayのヒットにかかる処理時間の見積もり.
-            static const real T_aabb = 1;  // 適当.
+            static const float T_aabb = 1;  // 適当.
 
             // 領域分割をせず、polygons を含む葉ノードを構築する場合を暫定の bestCost にする.
             //auto bestCost = T_tri * num;
@@ -479,8 +479,8 @@ namespace aten {
 
                 // AABBの表面積リスト。s1SA[i], s2SA[i] は、
                 // 「S1側にi個、S2側に(polygons.size()-i)個ポリゴンがあるように分割」したときの表面積
-                std::vector<real> s1SurfaceArea(info.num + 1, AT_MATH_INF);
-                std::vector<real> s2SurfaceArea(info.num + 1, AT_MATH_INF);
+                std::vector<float> s1SurfaceArea(info.num + 1, AT_MATH_INF);
+                std::vector<float> s2SurfaceArea(info.num + 1, AT_MATH_INF);
 
                 // 分割された2つの領域.
                 std::vector<hitable*> s1;                    // 右側.

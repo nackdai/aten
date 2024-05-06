@@ -15,7 +15,7 @@ namespace aten {
             vec3 origin, vec3 lookat, vec3 up,
             int32_t width, int32_t height)
         {
-            auto aspect = width / (real)height;
+            auto aspect = width / (float)height;
             AT_ASSERT(aspect == 2);
 
             m_origin = origin;
@@ -27,8 +27,8 @@ namespace aten {
 
             // 値を保持.
             m_at = lookat;
-            width_ = (real)width;
-            height_ = (real)height;
+            width_ = (float)width;
+            height_ = (float)height;
         }
 
         virtual void update() override final
@@ -39,7 +39,7 @@ namespace aten {
         }
 
         virtual CameraSampleResult sample(
-            real s, real t,
+            float s, float t,
             sampler* sampler) const override final;
 
         virtual const vec3& getPos() const override final
@@ -76,7 +76,7 @@ namespace aten {
         vec3 m_up;
 
         vec3 m_at;
-        real width_;
-        real height_;
+        float width_;
+        float height_;
     };
 }

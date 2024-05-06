@@ -11,14 +11,14 @@ namespace AT_NAME {
         gettimeofday(&m_begin, NULL);
     }
 
-    real timer::end()
+    float timer::end()
     {
         timeval end;
         gettimeofday(&end, NULL);
 
         long sec = end.tv_sec - m_begin.tv_sec;
         long usec = end.tv_usec - m_begin.tv_usec;
-        real msec = sec * real(1000.0) + (real)usec / real(1000.0);
+        float msec = sec * float(1000.0) + (float)usec / float(1000.0);
         return msec;
     }
 

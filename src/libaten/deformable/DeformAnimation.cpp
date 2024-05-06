@@ -114,7 +114,7 @@ namespace aten
         float time)
     {
         uint32_t updateFlag = 0;
-        vec4 param(real(0));
+        vec4 param(float(0));
 
         // 姿勢情報更新開始.
         skl->beginUpdatePose(jointIdx);

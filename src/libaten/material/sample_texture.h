@@ -11,7 +11,7 @@
 #include "cuda/helper_math.h"
 
 namespace AT_NAME {
-    AT_DEVICE_API aten::vec4 sampleTexture(const int32_t texid, real u, real v, const aten::vec4& defaultValue, int32_t lod = 0);
+    AT_DEVICE_API aten::vec4 sampleTexture(const int32_t texid, float u, float v, const aten::vec4& defaultValue, int32_t lod = 0);
 
 #ifndef __AT_DEBUG__
 #include "kernel/sample_texture_impl.cuh"
@@ -22,7 +22,7 @@ namespace AT_NAME {
 #include "scene/host_scene_context.h"
 
 namespace AT_NAME {
-    inline AT_DEVICE_API aten::vec4 sampleTexture(const int32_t texid, real u, real v, const aten::vec4& defaultValue, int32_t lod = 0)
+    inline AT_DEVICE_API aten::vec4 sampleTexture(const int32_t texid, float u, float v, const aten::vec4& defaultValue, int32_t lod = 0)
     {
         aten::vec4 ret = defaultValue;
 
@@ -45,11 +45,11 @@ namespace AT_NAME {
         const int32_t normalMapIdx,
         const aten::vec3& orgNml,
         aten::vec3& newNml,
-        real u, real v)
+        float u, float v)
     {
         if (normalMapIdx >= 0) {
-            auto nml = aten::vec3(sampleTexture(normalMapIdx, u, v, aten::vec4(real(0))));
-            nml = real(2) * nml - aten::vec3(1);    // [0, 1] -> [-1, 1].
+            auto nml = aten::vec3(sampleTexture(normalMapIdx, u, v, aten::vec4(float(0))));
+            nml = float(2) * nml - aten::vec3(1);    // [0, 1] -> [-1, 1].
             nml = normalize(nml);
 
             aten::vec3 n = normalize(orgNml);

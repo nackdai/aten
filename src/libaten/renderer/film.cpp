@@ -62,7 +62,7 @@ namespace aten
     {
         auto& curValue = m_image[i];
 
-        auto n = static_cast<real>(static_cast<int32_t>(curValue.w));
+        auto n = static_cast<float>(static_cast<int32_t>(curValue.w));
 
         curValue = n * curValue + v;
         curValue /= (n + 1);

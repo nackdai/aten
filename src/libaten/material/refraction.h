@@ -18,7 +18,7 @@ namespace AT_NAME
     private:
         refraction(
             const aten::vec3& albedo = aten::vec3(0.5),
-            real ior = real(1),
+            float ior = float(1),
             bool isIdealRefraction = false,
             aten::texture* normalMap = nullptr)
             : material(aten::MaterialType::Refraction, aten::MaterialAttributeRefraction, albedo, ior)
@@ -32,18 +32,18 @@ namespace AT_NAME
         virtual ~refraction() {}
 
     public:
-        static AT_DEVICE_API real pdf(
+        static AT_DEVICE_API float pdf(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v);
+            float u, float v);
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
-            real u, real v,
+            float u, float v,
             aten::sampler* sampler);
 
         static AT_DEVICE_API aten::vec3 bsdf(
@@ -51,7 +51,7 @@ namespace AT_NAME
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v);
+            float u, float v);
 
         static AT_DEVICE_API void sample(
             AT_NAME::MaterialSampling* result,

@@ -12,7 +12,7 @@ namespace aten
         virtual ~TonemapPreProc() {}
 
     public:
-        static std::tuple<real, real> computeAvgAndMaxLum(
+        static std::tuple<float, float> computeAvgAndMaxLum(
             int32_t width, int32_t height,
             const vec4* src);
 

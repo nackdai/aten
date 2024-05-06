@@ -60,20 +60,20 @@ namespace aten
         // - eta
         //   屈折率の比.
         //   ex) eta = 1.0 / 1.4  : air/glass's index of refraction.
-        real ior;               // 屈折率.
+        float ior;               // 屈折率.
 
-        real roughness;         // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
+        float roughness;         // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
 
-        real shininess;
-        real subsurface;        // 表面下の近似を用いてディフューズ形状を制御する.
-        real metallic;          // 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
-        real specular;          // 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
-        real specularTint;      // 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
-        real anisotropic;       // 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
-        real sheen;             // 追加的なグレージングコンポーネント，主に布に対して意図している.
-        real sheenTint;         // 基本色に向かう光沢色合いの量.
-        real clearcoat;         // 第二の特別な目的のスペキュラーローブ.
-        real clearcoatGloss;    // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
+        float shininess;
+        float subsurface;        // 表面下の近似を用いてディフューズ形状を制御する.
+        float metallic;          // 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
+        float specular;          // 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
+        float specularTint;      // 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
+        float anisotropic;       // 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
+        float sheen;             // 追加的なグレージングコンポーネント，主に布に対して意図している.
+        float sheenTint;         // 基本色に向かう光沢色合いの量.
+        float clearcoat;         // 第二の特別な目的のスペキュラーローブ.
+        float clearcoatGloss;    // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
 
         AT_HOST_DEVICE_API void Init()
         {
@@ -119,33 +119,33 @@ namespace aten
 
     struct CarPaintMaterialParameter {
         aten::vec3 clearcoat_color;
-        real clearcoat_ior;
+        float clearcoat_ior;
 
         aten::vec3 flakes_color;
-        real clearcoat_roughness;
+        float clearcoat_roughness;
 
         aten::vec3 diffuse_color;
-        real flake_scale;
+        float flake_scale;
 
-        real flake_size;
-        real flake_size_variance;
-        real flake_normal_orientation;
-        real flake_color_multiplier;
+        float flake_size;
+        float flake_size_variance;
+        float flake_normal_orientation;
+        float flake_color_multiplier;
 
         AT_HOST_DEVICE_API void Init()
         {
-            aten::set(clearcoat_color, real(1), real(1), real(1));
-            aten::set(flakes_color, real(1), real(1), real(0));
-            aten::set(diffuse_color, real(1), real(0), real(1));
+            aten::set(clearcoat_color, float(1), float(1), float(1));
+            aten::set(flakes_color, float(1), float(1), float(0));
+            aten::set(diffuse_color, float(1), float(0), float(1));
 
-            clearcoat_ior = real(3.0);
-            clearcoat_roughness = real(0.25);
+            clearcoat_ior = float(3.0);
+            clearcoat_roughness = float(0.25);
 
-            flake_scale = real(400.0);
-            flake_size = real(0.25);
-            flake_size_variance = real(0.7);
-            flake_normal_orientation = real(0.5);
-            flake_color_multiplier = real(1.0);
+            flake_scale = float(400.0);
+            flake_size = float(0.25);
+            flake_size_variance = float(0.7);
+            flake_normal_orientation = float(0.5);
+            flake_color_multiplier = float(1.0);
         }
 
         AT_HOST_DEVICE_API CarPaintMaterialParameter()
@@ -197,7 +197,7 @@ namespace aten
 
         AT_HOST_DEVICE_API MaterialParameter()
         {
-            baseColor.set(real(0), real(0), real(0), real(1));
+            baseColor.set(float(0), float(0), float(0), float(1));
             isIdealRefraction = false;
             albedoMap = -1;
             normalMap = -1;
@@ -294,10 +294,10 @@ namespace AT_NAME
     struct MaterialSampling {
         aten::vec3 dir;
         aten::vec3 bsdf;
-        real pdf{ real(0) };
+        float pdf{ float(0) };
 
         AT_DEVICE_API MaterialSampling() {}
-        AT_DEVICE_API MaterialSampling(const aten::vec3& d, const aten::vec3& b, real p)
+        AT_DEVICE_API MaterialSampling(const aten::vec3& d, const aten::vec3& b, float p)
             : dir(d), bsdf(b), pdf(p)
         {}
     };
@@ -322,7 +322,7 @@ namespace AT_NAME
             aten::MaterialType type,
             const aten::MaterialAttribute& attrib,
             const aten::vec3& clr,
-            real ior = 1)
+            float ior = 1)
             : material(type, attrib)
         {
             m_param.baseColor = clr;
@@ -376,7 +376,7 @@ namespace AT_NAME
             bool isGlossy = m_param.attrib.isGlossy;
 
             if (isGlossy) {
-                isGlossy = (m_param.standard.roughness == real(1) ? false : true);
+                isGlossy = (m_param.standard.roughness == float(1) ? false : true);
                 if (!isGlossy) {
                     isGlossy = (m_param.standard.shininess == 0 ? false : true);
                 }
@@ -400,7 +400,7 @@ namespace AT_NAME
             aten::texture* normalMap,
             aten::texture* roughnessMap);
 
-        real ior() const
+        float ior() const
         {
             return m_param.standard.ior;
         }
@@ -445,14 +445,14 @@ namespace AT_NAME
 
         static AT_DEVICE_API bool isTranslucentByAlpha(
             const aten::MaterialParameter& param,
-            real u, real v);
+            float u, float v);
 
-        static AT_DEVICE_API real getTranslucentAlpha(
+        static AT_DEVICE_API float getTranslucentAlpha(
             const aten::MaterialParameter& param,
-            real u, real v);
+            float u, float v);
 
-        static AT_DEVICE_API real computeFresnel(
-            real ni, real nt,
+        static AT_DEVICE_API float computeFresnel(
+            float ni, float nt,
             const aten::vec3& wi,
             const aten::vec3& normal)
         {
@@ -464,14 +464,14 @@ namespace AT_NAME
             }
 
             const auto nnt = ni / nt;
-            const auto sini2 = real(1.0) - cosi * cosi;
+            const auto sini2 = float(1.0) - cosi * cosi;
             const auto sint2 = nnt * nnt * sini2;
-            const auto cost = aten::sqrt(aten::cmpMax(real(0.0), real(1.0) - sint2));
+            const auto cost = aten::sqrt(aten::cmpMax(float(0.0), float(1.0) - sint2));
 
             const auto rp = (nt * cosi - ni * cost) / (nt * cosi + ni * cost);
             const auto rs = (ni * cosi - nt * cost) / (ni * cosi + nt * cost);
 
-            const auto Rsp = (rp * rp + rs * rs) * real(0.5);
+            const auto Rsp = (rp * rp + rs * rs) * float(0.5);
             return Rsp;
         }
 
@@ -586,7 +586,7 @@ namespace AT_NAME
 
         static AT_DEVICE_API aten::vec4 sampleAlbedoMap(
             const aten::MaterialParameter* mtrl,
-            real u, real v,
+            float u, float v,
             uint32_t lod = 0);
 
         static AT_DEVICE_API void sampleMaterial(
@@ -596,7 +596,7 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& orgnormal,
             aten::sampler* sampler,
-            real pre_sampled_r,
+            float pre_sampled_r,
 #ifdef __CUDACC__
             float u, float v);
 #else
@@ -604,27 +604,27 @@ namespace AT_NAME
             bool is_light_path = false);
 #endif
 
-        static AT_DEVICE_API real samplePDF(
+        static AT_DEVICE_API float samplePDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v);
+            float u, float v);
 
         static AT_DEVICE_API aten::vec3 sampleBSDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v,
-            real pre_sampled_r);
+            float u, float v,
+            float pre_sampled_r);
 
-        static AT_DEVICE_API real applyNormal(
+        static AT_DEVICE_API float applyNormal(
             const aten::MaterialParameter* mtrl,
             const int32_t normalMapIdx,
             const aten::vec3& orgNml,
             aten::vec3& newNml,
-            real u, real v,
+            float u, float v,
             const aten::vec3& wi,
             aten::sampler* sampler);
 

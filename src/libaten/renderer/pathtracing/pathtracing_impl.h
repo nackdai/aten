@@ -119,7 +119,7 @@ namespace AT_NAME
         }
 
         template <class T = _detail::v3>
-        inline AT_DEVICE_API T MakeVec3(real x, real y, real z)
+        inline AT_DEVICE_API T MakeVec3(float x, float y, float z)
         {
             if constexpr (std::is_same_v<T, aten::vec3>) {
                 return { x, y, z };
@@ -130,7 +130,7 @@ namespace AT_NAME
         }
 
         template <class T = _detail::v4>
-        inline AT_DEVICE_API T MakeVec4(real x, real y, real z, real w)
+        inline AT_DEVICE_API T MakeVec4(float x, float y, float z, float w)
         {
             if constexpr (std::is_same_v<T, aten::vec4>) {
                 return { x, y, z, w };
@@ -232,7 +232,7 @@ namespace AT_NAME
     }
 
     namespace _detail {
-        inline AT_DEVICE_API real ComputeBalanceHeuristic(real f, real g)
+        inline AT_DEVICE_API float ComputeBalanceHeuristic(float f, float g)
         {
             return f / (f + g);
         }
@@ -248,9 +248,9 @@ namespace AT_NAME
         const aten::ray& ray,
         const aten::vec3& hit_pos,
         const aten::vec3& hit_nml,
-        real hit_u, real hit_v,
+        float hit_u, float hit_v,
         const aten::vec4& external_albedo,
-        real pre_sampled_r = real(0))
+        float pre_sampled_r = float(0))
     {
         shadow_ray.isActive = false;
 
@@ -273,7 +273,7 @@ namespace AT_NAME
 
         const auto& posLight = sampleres.pos;
         const auto& nmlLight = sampleres.nml;
-        real pdfLight = sampleres.pdf;
+        float pdfLight = sampleres.pdf;
 
         auto dirToLight = normalize(sampleres.dir);
         auto distToLight = length(posLight - hit_pos);
@@ -290,7 +290,7 @@ namespace AT_NAME
         {
             auto cosShadow = dot(hit_nml, dirToLight);
 
-            real path_pdf{ AT_NAME::material::samplePDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v) };
+            float path_pdf{ AT_NAME::material::samplePDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v) };
             auto bsdf{ AT_NAME::material::sampleBSDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, pre_sampled_r) };
 
             bsdf *= throughtput.throughput;
@@ -302,11 +302,11 @@ namespace AT_NAME
             auto cosLight = dot(nmlLight, -dirToLight);
 
             auto dist2 = aten::squared_length(sampleres.dir);
-            dist2 = (light.attrib.isInfinite || light.attrib.isSingular) ? real{ 1 } : dist2;
+            dist2 = (light.attrib.isInfinite || light.attrib.isSingular) ? float{ 1 } : dist2;
 
             if (cosShadow >= 0 && cosLight >= 0
                 && dist2 > 0
-                && path_pdf > real(0) && pdfLight > real(0))
+                && path_pdf > float(0) && pdfLight > float(0))
             {
                 // NOTE:
                 // Regarding punctual light, nothing to sample.
@@ -370,7 +370,7 @@ namespace AT_NAME
             ? &ctxt.GetObject(static_cast<uint32_t>(light.arealight_objid))
             : nullptr);
 
-        real distHitObjToRayOrg = AT_MATH_INF;
+        float distHitObjToRayOrg = AT_MATH_INF;
 
         // Ray aim to the area light.
         // So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
@@ -469,7 +469,7 @@ namespace AT_NAME
 
     inline AT_DEVICE_API bool CheckMaterialTranslucentByAlpha(
         const aten::MaterialParameter& mtrl,
-        real u, real v,
+        float u, float v,
         const aten::vec3& hit_pos,
         const aten::vec3& hit_nml,
         aten::ray& ray,
@@ -531,7 +531,7 @@ namespace AT_NAME
         int32_t idx,
         const aten::hitrecord& rec,
         bool is_backfacing,
-        real russian_prob,
+        float russian_prob,
         const aten::vec3& normal,
         const aten::MaterialParameter& mtrl,
         const AT_NAME::MaterialSampling& sampling,
@@ -589,7 +589,7 @@ namespace AT_NAME
         aten::hitrecord rec;
         AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
 
-        bool isBackfacing = dot(rec.normal, -ray.dir) < real(0);
+        bool isBackfacing = dot(rec.normal, -ray.dir) < float(0);
 
         aten::vec3 orienting_normal = rec.normal;
 

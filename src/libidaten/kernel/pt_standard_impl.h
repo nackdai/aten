@@ -96,7 +96,7 @@ namespace idaten {
         idaten::TypedCudaMemory<ShadowRay> m_shadowRays;
 
         // Distance limitation to kill path.
-        real m_hitDistLimit{ AT_MATH_INF };
+        float m_hitDistLimit{ AT_MATH_INF };
 
         idaten::TypedCudaMemory<uint32_t> m_sobolMatrices;
         idaten::TypedCudaMemory<uint32_t> m_random;

@@ -41,7 +41,7 @@ namespace AT_NAME {
 
             // TODO
             // Light should be located at sphere to cover entire scene.
-            result.pos = org + real(100000) * real(0.5) * result.dir;
+            result.pos = org + float(100000) * float(0.5) * result.dir;
 
             result.light_color = param.light_color * param.scale * param.luminance;
         }

@@ -80,7 +80,7 @@ namespace aten
         m_body->m_pos->bindAsGLTexture(2, this);
 
         int32_t stepScale = 1 << m_idx;
-        float clrSigmaScale = pow(2.0f, static_cast<real>(m_idx));
+        float clrSigmaScale = pow(2.0f, static_cast<float>(m_idx));
 
         auto hStepScale = this->getHandle("stepScale");
         CALL_GL_API(::glUniform1i(hStepScale, stepScale));

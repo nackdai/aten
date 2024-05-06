@@ -9,8 +9,8 @@ namespace aten
     }
 
     Timeline::Timeline(
-        real duration,
-        real delay)
+        float duration,
+        float delay)
     {
         m_Duration = duration;
         m_Delay = delay;
@@ -18,8 +18,8 @@ namespace aten
 
     // 初期化
     void Timeline::init(
-        real duration,
-        real delay)
+        float duration,
+        float delay)
     {
         m_Duration = duration;
         m_Delay = delay;
@@ -45,14 +45,14 @@ namespace aten
     // リセット
     void Timeline::reset()
     {
-        m_Time = real(0);
-        m_DelayTime = real(0);
-        m_OverTime = real(0);
+        m_Time = float(0);
+        m_DelayTime = float(0);
+        m_OverTime = float(0);
         m_isForward = true;
     }
 
     // 進行
-    void Timeline::advance(real delta)
+    void Timeline::advance(float delta)
     {
         if (isPaused()) {
             // ポーズ中なので何もしない
@@ -128,19 +128,19 @@ namespace aten
         m_TimeOverHandler = handler;
     }
 
-    real Timeline::getTime() const
+    float Timeline::getTime() const
     {
         return m_Time;
     }
 
-    real Timeline::getDuration() const
+    float Timeline::getDuration() const
     {
         return m_Duration;
     }
 
-    real Timeline::getNormalized() const
+    float Timeline::getNormalized() const
     {
-        real ret = (m_Duration != 0.0f ? m_Time / m_Duration : 0.0f);
+        float ret = (m_Duration != 0.0f ? m_Time / m_Duration : 0.0f);
         return ret;
     }
 
@@ -175,7 +175,7 @@ namespace aten
     }
 
     // Override current time forcibly.
-    void Timeline::overrideTimeForcibly(real t)
+    void Timeline::overrideTimeForcibly(float t)
     {
         m_Time = t;
         m_OverTime = 0.0f;
@@ -186,17 +186,17 @@ namespace aten
         m_isForward = !m_isForward;
     }
 
-    void Timeline::setDuration(real duration)
+    void Timeline::setDuration(float duration)
     {
         m_Duration = duration;
     }
 
-    real Timeline::getOverTime()
+    float Timeline::getOverTime()
     {
         return m_OverTime;
     }
 
-    void Timeline::setOverTime(real over)
+    void Timeline::setOverTime(float over)
     {
         m_OverTime = over;
     }

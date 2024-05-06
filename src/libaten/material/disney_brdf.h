@@ -15,17 +15,17 @@ namespace AT_NAME
     private:
         DisneyBRDF(
             aten::vec3 baseColor = aten::vec3(0.5),
-            real subsurface = real(0.5),
-            real metallic = real(0.5),
-            real specular = real(0.5),
-            real specularTint = real(0.5),
-            real roughness = real(0.5),
-            real anisotropic = real(0.5),
-            real sheen = real(0.5),
-            real sheenTint = real(0.5),
-            real clearcoat = real(0.5),
-            real clearcoatGloss = real(0.5),
-            real ior = real(0.5),
+            float subsurface = float(0.5),
+            float metallic = float(0.5),
+            float specular = float(0.5),
+            float specularTint = float(0.5),
+            float roughness = float(0.5),
+            float anisotropic = float(0.5),
+            float sheen = float(0.5),
+            float sheenTint = float(0.5),
+            float clearcoat = float(0.5),
+            float clearcoatGloss = float(0.5),
+            float ior = float(0.5),
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
@@ -77,18 +77,18 @@ namespace AT_NAME
         virtual ~DisneyBRDF() {}
 
     public:
-        static AT_DEVICE_API real pdf(
+        static AT_DEVICE_API float pdf(
             const aten::MaterialParameter& mtrl,
             const aten::vec3& n,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v);
+            float u, float v);
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
             const aten::MaterialParameter& mtrl,
             const aten::vec3& n,
             const aten::vec3& wi,
-            real u, real v,
+            float u, float v,
             aten::sampler* sampler);
 
         static AT_DEVICE_API aten::vec3 bsdf(
@@ -96,7 +96,7 @@ namespace AT_NAME
             const aten::vec3& n,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v);
+            float u, float v);
 
         static AT_DEVICE_API void sample(
             AT_NAME::MaterialSampling& result,
@@ -104,7 +104,7 @@ namespace AT_NAME
             const aten::vec3& n,
             const aten::vec3& wi,
             aten::sampler* sampler,
-            real u, real v);
+            float u, float v);
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
 

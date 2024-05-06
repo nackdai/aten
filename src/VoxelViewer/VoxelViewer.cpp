@@ -112,8 +112,8 @@ void VoxelViewer::draw(
     auto camparam = cam->param();
 
     // TODO
-    camparam.znear = real(0.1);
-    camparam.zfar = real(10000.0);
+    camparam.znear = float(0.1);
+    camparam.zfar = float(10000.0);
 
     aten::mat4 mtx_W2V;
     aten::mat4 mtx_V2C;
@@ -166,7 +166,7 @@ void VoxelViewer::draw(
 
             mtx_L2W = mtxTrans * mtxScale;
 
-            aten::vec3 color(real(0));
+            aten::vec3 color(float(0));
 
             const auto mtrl = ctxt.GetMaterialInstance(voxel.mtrlid);
 

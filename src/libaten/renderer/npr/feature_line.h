@@ -49,10 +49,10 @@ namespace npr {
         struct Disc
         {
             aten::vec3 center;    ///< Disc center position (Query ray hit point).
-            real radius{real(0)}; ///< Disc radius.
+            float radius{float(0)}; ///< Disc radius.
 
             aten::vec3 normal;            ///< Normal of disc.
-            real accumulated_distance{0}; ///< Accumulated distance at disc.
+            float accumulated_distance{0}; ///< Accumulated distance at disc.
         };
 
         /**
@@ -66,8 +66,8 @@ namespace npr {
          */
         static inline AT_DEVICE_API Disc GenerateDisc(
             const aten::ray &query_ray,
-            real line_width,
-            real pixel_width)
+            float line_width,
+            float pixel_width)
         {
             // Compute plane at distance 1 from camera based on camera direction.
             aten::hitrecord hrec;
@@ -103,9 +103,9 @@ namespace npr {
         static inline AT_DEVICE_API Disc ComputeDiscAtQueryRayHitPoint(
             const aten::vec3 &query_ray_hit_pos,
             const aten::vec3 &query_ray_dir,
-            real previous_disc_radius,
-            real current_hit_distance,
-            real accumulatedDistanceFromCameraWithout_current_hit_distance)
+            float previous_disc_radius,
+            float current_hit_distance,
+            float accumulatedDistanceFromCameraWithout_current_hit_distance)
         {
             Disc disc;
 
@@ -128,19 +128,19 @@ namespace npr {
          */
         struct SampleRayDesc
         {
-            real u{0};                 ///< U on disc coordinate.
-            real v{0};                 ///< V on disc coordinate.
+            float u{0};                 ///< U on disc coordinate.
+            float v{0};                 ///< V on disc coordinate.
             bool is_terminated{false}; ///< Flag if ray is termanted.
             uint8_t padding_0[3]{0, 0, 0};
 
             aten::vec3 prev_ray_hit_pos; ///< Hit point in previous bounce.
-            real ray_org_x;              ///< Origin X of sample ray.
+            float ray_org_x;              ///< Origin X of sample ray.
 
             aten::vec3 prev_ray_hit_nml; ///< Normal at hit point in previous bounce.
-            real ray_org_y;              ///< Origin Y of sample ray.
+            float ray_org_y;              ///< Origin Y of sample ray.
 
             aten::vec3 ray_dir; ///< Direction of sample ray.
-            real ray_org_z;     ///< Origin Z of sample ray.
+            float ray_org_z;     ///< Origin Z of sample ray.
         };
 
         /**
@@ -267,7 +267,7 @@ namespace npr {
          * @return Hit position by ray on disc.
          */
         static inline AT_DEVICE_API aten::vec4 ComputeHitPositionOnDisc(
-            const real u, const real v,
+            const float u, const float v,
             const Disc &disc)
         {
             // theta 0 is based on X-axis.
@@ -367,7 +367,7 @@ namespace npr {
          * @param[out] hit_point Storage to set projected point on ray. If this value is null, point can't be stored.
          * @return Distance between projected point and ray.
          */
-        static inline AT_DEVICE_API real ProjectPointOnRay(
+        static inline AT_DEVICE_API float ProjectPointOnRay(
             const aten::vec3 &point,
             const aten::ray &ray,
             aten::vec3 *hit_point)
@@ -405,7 +405,7 @@ namespace npr {
          * @param[in] ray Ray which point is projected on.
          * @return Distance between projected point on the ray and origin of the ray.
          */
-        static inline AT_DEVICE_API real ComputeDistanceBetweenProjectedPositionOnRayAndRayOrigin(
+        static inline AT_DEVICE_API float ComputeDistanceBetweenProjectedPositionOnRayAndRayOrigin(
             const aten::vec3 &point,
             const aten::ray &ray)
         {
@@ -437,11 +437,11 @@ namespace npr {
             const aten::hitrecord &hrec_sample,
             const aten::vec4 &albedo_q,
             const aten::vec4 &albedo_s,
-            const real depth_q,
-            const real depth_s,
-            const real threshold_albedo,
-            const real threshold_normal,
-            const real scale_factor_threshold_depth)
+            const float depth_q,
+            const float depth_s,
+            const float threshold_albedo,
+            const float threshold_normal,
+            const float scale_factor_threshold_depth)
         {
             // NOTE
             // Combine metrics by taking their max term (i.e. if any metric would return true the combined metric returns true).
@@ -486,7 +486,7 @@ namespace npr {
          * @return If metric is valid, return true. Otherwise, return false.
          */
         static inline AT_DEVICE_API bool EvaluateAlbedoMetric(
-            const real threshold_albedo,
+            const float threshold_albedo,
             const aten::vec4 &albedo_q,
             const aten::vec4 &albedo_s)
         {
@@ -505,11 +505,11 @@ namespace npr {
          * @return If metric is valid, return true. Otherwise, return false.
          */
         static inline AT_DEVICE_API bool EvaluateNormalMetric(
-            const real threshold_normal,
+            const float threshold_normal,
             const aten::vec3 &normal_query,
             const aten::vec3 &normal_sample)
         {
-            const auto is_normal = (real(1) - dot(normal_query, normal_sample)) > threshold_normal;
+            const auto is_normal = (float(1) - dot(normal_query, normal_sample)) > threshold_normal;
             return is_normal;
         }
 
@@ -526,11 +526,11 @@ namespace npr {
          */
         static inline AT_DEVICE_API bool EvaluateDepthMetric(
             const aten::vec3 &p,
-            const real scale_factor,
+            const float scale_factor,
             const aten::hitrecord &hrec_query,
             const aten::hitrecord &hrec_sample,
-            const real depth_q,
-            const real depth_s)
+            const float depth_q,
+            const float depth_s)
         {
             const auto depth_threshold = ComputeDepthThreshold(
                 p,
@@ -552,13 +552,13 @@ namespace npr {
          * @param[in] depth_s Depth at sample ray hit point.
          * @return Threshold for depth.
          */
-        static inline AT_DEVICE_API real ComputeDepthThreshold(
+        static inline AT_DEVICE_API float ComputeDepthThreshold(
             const aten::vec3 &p,
-            const real scale_factor,
+            const float scale_factor,
             const aten::hitrecord &hrec_query,
             const aten::hitrecord &hrec_sample,
-            const real depth_q,
-            const real depth_s)
+            const float depth_q,
+            const float depth_s)
         {
             // NOTE:
             // t_depth = b * max(dq, ds) * lengh(ps - pq) / abs(dot(pq, n_closest)
@@ -580,7 +580,7 @@ namespace npr {
             const auto max_depth = std::max(depth_q, depth_s);
             const auto div = aten::abs(dot(p_q, n_closest));
 
-            if (div == real(0))
+            if (div == float(0))
             {
                 return FLT_MAX;
             }
@@ -601,11 +601,11 @@ namespace npr {
          * @return If feature line width in 3D is valid based on line width in 2D, return true. Otherwise, return false.
          */
         static inline AT_DEVICE_API bool IsInLineWidth(
-            const real screen_line_width,
+            const float screen_line_width,
             const aten::ray &query_ray,
             const aten::vec3 &sample_hit_point,
-            const real accumulatedDistance,
-            const real pixelWidth)
+            const float accumulatedDistance,
+            const float pixelWidth)
         {
             // NOTE:
             // Wscaled = d * Pw * Wscreen

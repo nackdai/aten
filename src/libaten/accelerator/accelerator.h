@@ -95,7 +95,7 @@ namespace aten {
         virtual bool HitWithLod(
             const context& ctxt,
             const ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             bool enableLod,
             Intersection& isect) const = 0;
 

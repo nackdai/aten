@@ -130,7 +130,7 @@ namespace aten
 
     void deformable::update(
         const mat4& mtx_L2W,
-        real time,
+        float time,
         DeformAnimation* anm)
     {
         if (anm) {
@@ -254,8 +254,8 @@ namespace aten
             auto camparam = cam->param();
 
             // TODO
-            camparam.znear = real(0.1);
-            camparam.zfar = real(10000.0);
+            camparam.znear = float(0.1);
+            camparam.zfar = float(10000.0);
 
             mat4 mtx_W2V;
             mat4 mtx_V2C;

@@ -30,14 +30,14 @@ namespace AT_NAME {
         virtual bool hit(
             const aten::context& ctxt,
             const aten::ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             bool enableLod,
             aten::Intersection& isect) const = 0;
 
         bool hit(
             const aten::context& ctxt,
             const aten::ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             aten::Intersection& isect) const
         {
             return hit(ctxt, r, t_min, t_max, false, isect);
@@ -65,9 +65,9 @@ namespace AT_NAME {
             bool isHit,
             aten::LightAttribute attrib,
             const void* lightobj,
-            real distToLight,
-            real distHitObjToRayOrg,
-            const real hitt,
+            float distToLight,
+            float distHitObjToRayOrg,
+            const float hitt,
             const void* hitobj)
         {
 #if 0
@@ -138,7 +138,7 @@ namespace AT_NAME {
             const aten::vec3& org,
             const aten::vec3& nml,
             aten::sampler* sampler,
-            real& selectPdf,
+            float& selectPdf,
             aten::LightSampleResult& sampleRes);
 
         std::shared_ptr<Light> sampleLightWithReservoir(
@@ -147,7 +147,7 @@ namespace AT_NAME {
             const aten::vec3& nml,
             std::function<aten::vec3(const aten::vec3&)> compute_brdf,
             aten::sampler* sampler,
-            real& selectPdf,
+            float& selectPdf,
             aten::LightSampleResult& sampleRes);
 
         void render(

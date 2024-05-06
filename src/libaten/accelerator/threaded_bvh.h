@@ -68,7 +68,7 @@ namespace aten
         virtual bool hit(
             const context& ctxt,
             const ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             Intersection& isect) const override;
 
         /**
@@ -77,7 +77,7 @@ namespace aten
         virtual bool HitWithLod(
             const context& ctxt,
             const ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             bool enableLod,
             Intersection& isect) const override
         {
@@ -190,7 +190,7 @@ namespace aten
             int32_t exid,
             const std::vector<std::vector<ThreadedBvhNode>>& listThreadedBvhNode,
             const ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             Intersection& isect) const;
 
         /**

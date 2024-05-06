@@ -14,7 +14,7 @@ namespace AT_NAME
     private:
         specular(
             const aten::vec3& albedo = aten::vec3(0.5),
-            real ior = real(0),
+            float ior = float(0),
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
             : material(aten::MaterialType::Specular, aten::MaterialAttributeSpecular, albedo, ior)
@@ -27,18 +27,18 @@ namespace AT_NAME
         virtual ~specular() {}
 
     public:
-        static AT_DEVICE_API real pdf(
+        static AT_DEVICE_API float pdf(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v);
+            float u, float v);
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
-            real u, real v,
+            float u, float v,
             aten::sampler* sampler);
 
         static AT_DEVICE_API aten::vec3 bsdf(
@@ -46,7 +46,7 @@ namespace AT_NAME
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v);
+            float u, float v);
 
         static AT_DEVICE_API void sample(
             AT_NAME::MaterialSampling* result,
@@ -55,7 +55,7 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& orgnormal,
             aten::sampler* sampler,
-            real u, real v);
+            float u, float v);
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
 

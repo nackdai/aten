@@ -27,12 +27,12 @@ namespace AT_NAME
 
     public:
 
-        static AT_DEVICE_API real pdf(
+        static AT_DEVICE_API float pdf(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v)
+            float u, float v)
         {
             auto ret = lambert::pdf(normal, wo);
             return ret;
@@ -42,7 +42,7 @@ namespace AT_NAME
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
-            real u, real v,
+            float u, float v,
             aten::sampler* sampler)
         {
             return lambert::sampleDirection(normal, sampler);
@@ -53,7 +53,7 @@ namespace AT_NAME
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v)
+            float u, float v)
         {
             auto ret = lambert::bsdf(param);
             return ret;
@@ -74,7 +74,7 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& orgnormal,
             aten::sampler* sampler,
-            real u, real v,
+            float u, float v,
             bool isLightPath = false)
         {
             result->dir = sampleDirection(param, normal, wi, u, v, sampler);
@@ -89,7 +89,7 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& orgnormal,
             aten::sampler* sampler,
-            real u, real v,
+            float u, float v,
             const aten::vec3& externalAlbedo,
             bool isLightPath = false)
         {
@@ -98,14 +98,14 @@ namespace AT_NAME
             result->bsdf = bsdf(param, externalAlbedo);
         }
 
-        static AT_DEVICE_API real computeFresnel(
+        static AT_DEVICE_API float computeFresnel(
             const aten::MaterialParameter* mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real outsideIor)
+            float outsideIor)
         {
-            return real(1);
+            return float(1);
         }
     };
 }

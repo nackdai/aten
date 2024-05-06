@@ -30,7 +30,7 @@ namespace aten
          * - Instance: Not used.
          * - Sphere: Area of sphere.
          */
-        real area{ real(0) };
+        float area{ float(0) };
 
         /**
          * @brief Own index.
@@ -50,8 +50,8 @@ namespace aten
         int32_t padding{ 0 };
 
         struct {
-            vec3 center{ real(0) }; ///< Center of sphere.
-            real radius{ 0 };       ///< Radius of sphere.
+            vec3 center{ float(0) }; ///< Center of sphere.
+            float radius{ 0 };       ///< Radius of sphere.
             int32_t mtrl_id{ -1 };  ///< Index of material.
         } sphere;
 
@@ -68,7 +68,7 @@ namespace aten
             aten::vec4 v0;
             struct {
                 int32_t idx[3];     ///< Vertex index.
-                real area;          ///< Triangle area.
+                float area;          ///< Triangle area.
             };
         };
 
@@ -78,7 +78,7 @@ namespace aten
                 int32_t needNormal; ///< Flag to describe if normal needs to be computed online.
                 int32_t mtrlid;     ///< Material id.
                 int32_t mesh_id;    ///< Mesh id. (Mesh = Triangle group to have same material).
-                real padding;
+                float padding;
             };
         };
 

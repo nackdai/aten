@@ -13,7 +13,7 @@ namespace AT_NAME
         friend class TransformableFactory;
 
     public:
-        sphere(const aten::vec3& center, real radius, std::shared_ptr<AT_NAME::material> mtrl)
+        sphere(const aten::vec3& center, float radius, std::shared_ptr<AT_NAME::material> mtrl)
             : aten::transformable(aten::ObjectType::Sphere)
         {
             mtrl_ = mtrl;
@@ -33,13 +33,13 @@ namespace AT_NAME
         virtual bool hit(
             const aten::context& ctxt,
             const aten::ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             aten::Intersection& isect) const override final;
 
         static AT_HOST_DEVICE_API bool hit(
             const aten::ObjectParameter* param,
             const aten::ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             aten::Intersection* isect);
 
         static AT_HOST_DEVICE_API void EvaluateHitResult(
@@ -53,7 +53,7 @@ namespace AT_NAME
             return m_param.sphere.center;
         }
 
-        real radius() const
+        float radius() const
         {
             return m_param.sphere.radius;
         }

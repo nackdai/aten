@@ -76,7 +76,7 @@ namespace AT_NAME
     bool PolygonObject::hit(
         const context& ctxt,
         const aten::ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         aten::Intersection& isect) const
     {
         bool isHit = m_accel->HitWithLod(ctxt, r, t_min, t_max, false, isect);

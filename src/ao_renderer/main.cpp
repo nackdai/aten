@@ -47,7 +47,7 @@ public:
         visualizer_->addPostProc(&blitter_);
 
         aten::vec3 pos, at;
-        real vfov;
+        float vfov;
         Scene::getCameraPosAndAt(pos, at, vfov);
 
         camera_.init(
@@ -98,8 +98,8 @@ public:
         }
 
             auto camparam = camera_.param();
-            camparam.znear = real(0.1);
-            camparam.zfar = real(10000.0);
+            camparam.znear = float(0.1);
+            camparam.zfar = float(10000.0);
 
             auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr);
 
@@ -127,8 +127,8 @@ public:
             camera_.update();
 
             auto camparam = camera_.param();
-            camparam.znear = real(0.1);
-            camparam.zfar = real(10000.0);
+            camparam.znear = float(0.1);
+            camparam.zfar = float(10000.0);
 
             renderer_.updateCamera(camparam);
             is_camera_dirty_ = false;
@@ -220,7 +220,7 @@ public:
                 camera_,
                 prev_mouse_pos_x_, prev_mouse_pos_y_,
                 x, y,
-                real(0.001));
+                float(0.001));
             is_camera_dirty_ = true;
         }
 
@@ -230,13 +230,13 @@ public:
 
     void OnMouseWheel(int32_t delta)
     {
-        aten::CameraOperator::dolly(camera_, delta * real(0.1));
+        aten::CameraOperator::dolly(camera_, delta * float(0.1));
         is_camera_dirty_ = true;
     }
 
     void OnKey(bool press, aten::Key key)
     {
-        static const real offset = real(0.1);
+        static const float offset = float(0.1);
 
         if (press)
         {
@@ -281,7 +281,7 @@ public:
             case aten::Key::Key_R:
             {
                 aten::vec3 pos, at;
-                real vfov;
+                float vfov;
                 Scene::getCameraPosAndAt(pos, at, vfov);
 
                 camera_.init(

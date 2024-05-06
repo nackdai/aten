@@ -14,13 +14,13 @@ namespace aten
     // HDR
     // http://t-pot.com/program/123_ToneMapping/index.html
 
-    std::tuple<real, real> TonemapPreProc::computeAvgAndMaxLum(
+    std::tuple<float, float> TonemapPreProc::computeAvgAndMaxLum(
         int32_t width, int32_t height,
         const vec4* src)
     {
         auto threadnum = OMPUtil::getThreadNum();
-        std::vector<real> sumY(threadnum);
-        std::vector<real> maxLum(threadnum);
+        std::vector<float> sumY(threadnum);
+        std::vector<float> maxLum(threadnum);
 
 #ifdef ENABLE_OMP
 #pragma omp parallel
@@ -44,9 +44,9 @@ namespace aten
                         aten::sqrt(s.g),
                         aten::sqrt(s.b));
 
-                    real lum = color::RGBtoY(col);
+                    float lum = color::RGBtoY(col);
 
-                    if (lum > real(0)) {
+                    if (lum > float(0)) {
                         sumY[idx] += aten::log(lum);
 
                         if (lum > maxLum[idx]) {
@@ -64,8 +64,8 @@ namespace aten
         }
 
         int32_t cnt = 0;
-        real retSumY = 0;
-        real retMaxLum = 0;
+        float retSumY = 0;
+        float retMaxLum = 0;
 
         for (int32_t i = 0; i < threadnum; i++) {
             if (sumY[i] != 0) {
@@ -81,7 +81,7 @@ namespace aten
 
         AT_PRINTF("SumY[%f] MaxLum[%f]\n", retSumY, retMaxLum);
 
-        std::tuple<real, real> result = std::make_tuple(retSumY, retMaxLum);
+        std::tuple<float, float> result = std::make_tuple(retSumY, retMaxLum);
         return result;
     }
 
@@ -97,10 +97,10 @@ namespace aten
         auto lum = std::get<0>(result);
         auto maxlum = std::get<1>(result);
 
-        static const real middleGrey = real(0.18);
+        static const float middleGrey = float(0.18);
 
-        const real coeff = middleGrey / aten::exp(lum);
-        const real l_max = coeff * maxlum;
+        const float coeff = middleGrey / aten::exp(lum);
+        const float l_max = coeff * maxlum;
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for

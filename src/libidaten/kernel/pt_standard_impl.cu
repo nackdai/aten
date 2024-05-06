@@ -293,9 +293,9 @@ namespace kernel {
             float4 p1 = tex1Dfetch<float4>(ctxt.vtxPos, prim.idx[1]);
             float4 p2 = tex1Dfetch<float4>(ctxt.vtxPos, prim.idx[2]);
 
-            real a = data.z;
-            real b = data.w;
-            real c = 1 - a - b;
+            float a = data.z;
+            float b = data.w;
+            float c = 1 - a - b;
 
             // barycentric coordinates.
             // p = (1 - a - b)*v0 + a*v1 + b*v2

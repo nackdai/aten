@@ -46,8 +46,8 @@ namespace aten {
 
         AT_HOST_DEVICE_API bool hit(
             const ray& r,
-            real t_min, real t_max,
-            real* t_result = nullptr) const
+            float t_min, float t_max,
+            float* t_result = nullptr) const
         {
             return hit(
                 r,
@@ -60,10 +60,10 @@ namespace aten {
         static AT_HOST_DEVICE_API bool hit(
             const ray& r,
             const T& _min, const T& _max,
-            real t_min, real t_max,
-            real* t_result = nullptr)
+            float t_min, float t_max,
+            float* t_result = nullptr)
         {
-            aten::vec3 invdir(real(1) / (r.dir + aten::vec3(real(1e-6))));
+            aten::vec3 invdir(float(1) / (r.dir + aten::vec3(float(1e-6))));
 
             auto oxinvdir = -r.org * invdir;
 
@@ -87,8 +87,8 @@ namespace aten {
         static AT_HOST_DEVICE_API bool hit(
             const ray& r,
             const T& _min, const T& _max,
-            real t_min, real t_max,
-            real& t_result,
+            float t_min, float t_max,
+            float& t_result,
             aten::vec3& nml)
         {
             bool isHit = hit(r, _min, _max, t_min, t_max, &t_result);
@@ -97,8 +97,8 @@ namespace aten {
             // https://www.gamedev.net/forums/topic/551816-finding-the-aabb-surface-normal-from-an-intersection-point-on-aabb/
 
             auto point = r.org + t_result * r.dir;
-            auto center = real(0.5) * (_min + _max);
-            auto extent = real(0.5) * (_max - _min);
+            auto center = float(0.5) * (_min + _max);
+            auto extent = float(0.5) * (_max - _min);
 
             // NOTE:
             // I can't overload glm::vec3::operator -=. So, extract -= to each element subtraction.
@@ -107,11 +107,11 @@ namespace aten {
             point.z -= center.z;
 
             aten::vec3 sign(
-                point.x < real(0) ? real(-1) : real(1),
-                point.y < real(0) ? real(-1) : real(1),
-                point.z < real(0) ? real(-1) : real(1));
+                point.x < float(0) ? float(-1) : float(1),
+                point.y < float(0) ? float(-1) : float(1),
+                point.z < float(0) ? float(-1) : float(1));
 
-            real minDist = AT_MATH_INF;
+            float minDist = AT_MATH_INF;
 
             auto dist = aten::abs(extent.x - aten::abs(point.x));
             if (dist < minDist) {
@@ -173,7 +173,7 @@ namespace aten {
 
         vec3 getCenter() const
         {
-            vec3 center = (m_min + m_max) * real(0.5);
+            vec3 center = (m_min + m_max) * float(0.5);
             return center;
         }
 
@@ -193,7 +193,7 @@ namespace aten {
             return computeFaceSurfaceArea(m_max, m_min);
         }
 
-        static real computeSurfaceArea(
+        static float computeSurfaceArea(
             const vec3& vMin,
             const vec3& vMax)
         {
@@ -210,7 +210,7 @@ namespace aten {
             return area;
         }
 
-        real computeSurfaceArea() const
+        float computeSurfaceArea() const
         {
             return computeSurfaceArea(m_min, m_max);
         }
@@ -231,7 +231,7 @@ namespace aten {
             return (aten::cmpGEQ(m_min, m_max) & 0x07) == 0;
         }
 
-        AT_HOST_DEVICE_API real getDiagonalLenght() const
+        AT_HOST_DEVICE_API float getDiagonalLenght() const
         {
             auto ret = length(m_max - m_min);
             return ret;
@@ -251,7 +251,7 @@ namespace aten {
             m_max = _max;
         }
 
-        real volume() const
+        float volume() const
         {
             auto dx = aten::abs(m_max.x - m_min.x);
             auto dy = aten::abs(m_max.y - m_min.y);
@@ -260,7 +260,7 @@ namespace aten {
             return dx * dy * dz;
         }
 
-        real computeRatio(const aabb& box)
+        float computeRatio(const aabb& box)
         {
             auto v0 = volume();
             auto v1 = box.volume();

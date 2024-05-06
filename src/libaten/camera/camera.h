@@ -15,7 +15,7 @@ namespace aten {
     struct CameraParameter {
         vec3 origin;        ///< Camera origin.
 
-        real aspect{ 0 };   ///< Aspect of screen size.
+        float aspect{ 0 };   ///< Aspect of screen size.
         vec3 center;        ///< origin + dir.
 
         vec3 u;             ///< Axis (right) of screen.
@@ -25,13 +25,13 @@ namespace aten {
         vec3 right;         ///< Camera right vector (x).
         vec3 up;            ///< Camera up vector(y).
 
-        real dist{ 0 };     ///< Distance to the clip plane.
-        real vfov{ 0 };     ///< Vertical Field of View.
+        float dist{ 0 };     ///< Distance to the clip plane.
+        float vfov{ 0 };     ///< Vertical Field of View.
         int32_t width{ 0 };     ///< Screen width.
         int32_t height{ 0 };    ///< Screen height.
 
-        real znear{ 0 };    ///< Z Near plane.
-        real zfar{ 0 };     ///< Z Far plane.
+        float znear{ 0 };    ///< Z Near plane.
+        float zfar{ 0 };     ///< Z Far plane.
     };
 };
 
@@ -45,8 +45,8 @@ namespace AT_NAME {
         aten::vec3 posOnLens;               ///< Position on the lens.
         aten::vec3 nmlOnLens;               ///< Normal at the position on the lens.
         aten::vec3 posOnObjectplane;        ///< Position on the obhect plane.
-        real pdfOnImageSensor{ real(1) };   ///< PDF to sample the image sensor.
-        real pdfOnLens{ real(1) };          ///< PDF to sample the image lens.
+        float pdfOnImageSensor{ float(1) };   ///< PDF to sample the image sensor.
+        float pdfOnLens{ float(1) };          ///< PDF to sample the image lens.
     };
 
     /**
@@ -66,38 +66,38 @@ namespace AT_NAME {
          * @brief Sample camera.
          */
         virtual CameraSampleResult sample(
-            real s, real t,
+            float s, float t,
             aten::sampler* sampler) const = 0;
 
-        virtual real convertImageSensorPdfToScenePdf(
-            real pdfImage,
+        virtual float convertImageSensorPdfToScenePdf(
+            float pdfImage,
             const aten::vec3& hitPoint,
             const aten::vec3& hitpointNml,
             const aten::vec3& posOnImageSensor,
             const aten::vec3& posOnLens,
             const aten::vec3& posOnObjectPlane) const
         {
-            return real(1);
+            return float(1);
         }
 
-        virtual real getSensitivity(
+        virtual float getSensitivity(
             const aten::vec3& posOnImagesensor,
             const aten::vec3& posOnLens) const
         {
-            return real(1);
+            return float(1);
         }
 
-        virtual real getWdash(
+        virtual float getWdash(
             const aten::vec3& hitPoint,
             const aten::vec3& hitpointNml,
             const aten::vec3& posOnImageSensor,
             const aten::vec3& posOnLens,
             const aten::vec3& posOnObjectPlane) const
         {
-            return real(1);
+            return float(1);
         }
 
-        virtual real hitOnLens(
+        virtual float hitOnLens(
             const aten::ray& r,
             aten::vec3& posOnLens,
             aten::vec3& posOnObjectPlane,
@@ -150,14 +150,14 @@ namespace AT_NAME {
             const aten::ray& ray,
             int32_t& px, int32_t& py) const = 0;
 
-        virtual real getImageSensorWidth() const
+        virtual float getImageSensorWidth() const
         {
-            return real(1);
+            return float(1);
         }
 
-        virtual real getImageSensorHeight() const
+        virtual float getImageSensorHeight() const
         {
-            return real(1);
+            return float(1);
         }
 
         virtual const aten::CameraParameter& param() const
@@ -167,26 +167,26 @@ namespace AT_NAME {
             return tmp;
         }
 
-        virtual real computePixelWidthAtDistance(real distanceFromCamera) const
+        virtual float computePixelWidthAtDistance(float distanceFromCamera) const
         {
             AT_ASSERT(false);
-            return real(0);
+            return float(0);
         }
 
-        static AT_HOST_DEVICE_API real computePixelWidthAtDistance(
+        static AT_HOST_DEVICE_API float computePixelWidthAtDistance(
             const aten::CameraParameter& param,
-            real distanceFromCamera)
+            float distanceFromCamera)
         {
-            AT_ASSERT(distanceFromCamera > real(0));
+            AT_ASSERT(distanceFromCamera > float(0));
             distanceFromCamera = aten::abs(distanceFromCamera);
 
             // Compute horizontal FoV.
-            auto hfov = param.vfov * param.height / real(param.width);
+            auto hfov = param.vfov * param.height / float(param.width);
             hfov = aten::Deg2Rad(hfov);
 
             auto half_width = aten::tan(hfov / 2) * distanceFromCamera;
             auto width = half_width * 2;
-            auto pixel_width = width / real(param.width);
+            auto pixel_width = width / float(param.width);
             return pixel_width;
         }
 
@@ -207,7 +207,7 @@ namespace AT_NAME {
                 param.aspect);
         }
 
-        static real ComputeScreenDistance(
+        static float ComputeScreenDistance(
             const aten::CameraParameter& param,
             const int32_t height)
         {

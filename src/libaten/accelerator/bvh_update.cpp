@@ -58,17 +58,17 @@ namespace aten
         } while (propagate && node != nullptr);
     }
 
-    inline real computeSurfaceArea(const bvhnode* node)
+    inline float computeSurfaceArea(const bvhnode* node)
     {
         if (!node) {
-            return real(0);
+            return float(0);
         }
 
         auto ret = node->getBoundingbox().computeSurfaceArea();
         return ret;
     }
 
-    inline real computeSurfaceArea(const std::shared_ptr<bvhnode>& node)
+    inline float computeSurfaceArea(const std::shared_ptr<bvhnode>& node)
     {
         return computeSurfaceArea(node.get());
     }
@@ -139,11 +139,11 @@ namespace aten
         };
 
         struct Opt {
-            real sah;
+            float sah;
             Rot rot;
 
             Opt() {}
-            Opt(real _sah, Rot _rot) : sah(_sah), rot(_rot) {}
+            Opt(float _sah, Rot _rot) : sah(_sah), rot(_rot) {}
         };
 
         // For each rotation, check that there are grandchildren as necessary (aka not a leaf)
@@ -302,7 +302,7 @@ namespace aten
 
             auto s = (sa - bestRot.sah) / sa;
 
-            if (s < real(0.3)) {
+            if (s < float(0.3)) {
                 // The benefit is not worth the cost
                 return;
             }

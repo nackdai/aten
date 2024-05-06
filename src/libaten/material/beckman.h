@@ -15,15 +15,15 @@ namespace AT_NAME
     private:
         MicrofacetBeckman(
             const aten::vec3& albedo = aten::vec3(0.5),
-            real roughness = real(0.5),
-            real ior = real(1),
+            float roughness = float(0.5),
+            float ior = float(1),
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
             : material(aten::MaterialType::Beckman, aten::MaterialAttributeMicrofacet, albedo, ior)
         {
             setTextures(albedoMap, normalMap, roughnessMap);
-            m_param.standard.roughness = aten::clamp<real>(roughness, 0, 1);
+            m_param.standard.roughness = aten::clamp<float>(roughness, 0, 1);
         }
 
         MicrofacetBeckman(aten::Values& val);
@@ -31,18 +31,18 @@ namespace AT_NAME
         virtual ~MicrofacetBeckman() {}
 
     public:
-        static AT_DEVICE_API real pdf(
+        static AT_DEVICE_API float pdf(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v);
+            float u, float v);
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
-            real u, real v,
+            float u, float v,
             aten::sampler* sampler);
 
         static AT_DEVICE_API aten::vec3 bsdf(
@@ -50,7 +50,7 @@ namespace AT_NAME
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v);
+            float u, float v);
 
         static AT_DEVICE_API void sample(
             AT_NAME::MaterialSampling* result,
@@ -59,12 +59,12 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& orgnormal,
             aten::sampler* sampler,
-            real u, real v);
+            float u, float v);
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
-            const real roughness,
+            const float roughness,
             const aten::vec3& in,
             const aten::vec3& normal,
             aten::sampler* sampler);
@@ -200,7 +200,7 @@ namespace AT_NAME
          * @param[in] n Macrosurface normal.
          * @return G1 shadowing masking value.
          */
-        static AT_DEVICE_API real ComputeG1(
+        static AT_DEVICE_API float ComputeG1(
             float roughness,
             const aten::vec3& v,
             const aten::vec3& n)

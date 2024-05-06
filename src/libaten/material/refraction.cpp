@@ -5,12 +5,12 @@
 
 namespace AT_NAME
 {
-    AT_DEVICE_API real refraction::pdf(
+    AT_DEVICE_API float refraction::pdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
         AT_ASSERT(false);
         return 1.0F;
@@ -20,7 +20,7 @@ namespace AT_NAME
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
-        real u, real v,
+        float u, float v,
         aten::sampler* sampler)
     {
         AT_ASSERT(false);
@@ -32,7 +32,7 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
         AT_ASSERT(false);
         return aten::vec3();

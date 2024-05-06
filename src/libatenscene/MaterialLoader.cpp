@@ -92,7 +92,7 @@ namespace aten {
     }
 
     template <>
-    aten::PolymorphicValue getValue<real>(picojson::value& val)
+    aten::PolymorphicValue getValue<float>(picojson::value& val)
     {
         aten::PolymorphicValue v;
         v.val.f = val.get<double>();
@@ -144,7 +144,7 @@ namespace aten {
 
         aten::vec4 v;
         for (int32_t i = 0; i < std::min<int32_t>(num, 3); i++) {
-            v[i] = (real)atof(values[i].c_str());
+            v[i] = (float)atof(values[i].c_str());
         }
 
         val = v;
@@ -153,10 +153,10 @@ namespace aten {
     }
 
     template <>
-    aten::PolymorphicValue getValue<real>(const tinyxml2::XMLElement* e, aten::context& ctxt, aten::AssetManager& asset_manager)
+    aten::PolymorphicValue getValue<float>(const tinyxml2::XMLElement* e, aten::context& ctxt, aten::AssetManager& asset_manager)
     {
         aten::PolymorphicValue v;
-        v = (real)e->DoubleText();
+        v = (float)e->DoubleText();
         return v;
     }
 
@@ -189,7 +189,7 @@ namespace aten {
     static std::array<GetValueFromFile, static_cast<size_t>(MtrlParamType::Num)> g_funcGetValueFromFile = {
         getValue<vec3>,
         getValue<texture*>,
-        getValue<real>,
+        getValue<float>,
     };
 
     std::map<std::string, MtrlParamType> g_paramtypes = {

@@ -133,7 +133,7 @@ namespace aten {
         return handle;
     }
 
-    void shader::setUniformFloat(std::string_view name, real f)
+    void shader::setUniformFloat(std::string_view name, float f)
     {
         auto handle = getHandle(name);
         if (handle >= 0) {

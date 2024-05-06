@@ -59,7 +59,7 @@ public:
 
         aten::vec3 lookfrom;
         aten::vec3 lookat;
-        real fov;
+        float fov;
 
         Scene::getCameraPosAndAt(lookfrom, lookat, fov);
 
@@ -68,7 +68,7 @@ public:
             lookat,
             aten::vec3(0, 1, 0),
             fov,
-            real(0.1), real(10000.0),
+            float(0.1), float(10000.0),
             WIDTH, HEIGHT);
 
         MakeScene<Scene>(movable_obj_, ctxt_, &scene_, asset_manager_);

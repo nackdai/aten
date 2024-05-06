@@ -14,38 +14,38 @@ namespace aten {
         void init(
             int32_t width, int32_t height,
             vec3 lookfrom, vec3 lookat, vec3 vup,
-            real imageSensorSize,
-            real imageSensorToLensDistance,
-            real lensToObjectplaneDistance,
-            real lensRadius,
-            real W_scale);
+            float imageSensorSize,
+            float imageSensorToLensDistance,
+            float lensToObjectplaneDistance,
+            float lensRadius,
+            float W_scale);
 
         virtual void update() override final;
 
         virtual CameraSampleResult sample(
-            real s, real t,
+            float s, float t,
             sampler* sampler) const override final;
 
-        virtual real hitOnLens(
+        virtual float hitOnLens(
             const ray& r,
             vec3& posOnLens,
             vec3& posOnObjectPlane,
             vec3& posOnImageSensor,
             int32_t& x, int32_t& y) const override final;
 
-        virtual real convertImageSensorPdfToScenePdf(
-            real pdfImage,
+        virtual float convertImageSensorPdfToScenePdf(
+            float pdfImage,
             const vec3& hitPoint,
             const vec3& hitpointNml,
             const vec3& posOnImageSensor,
             const vec3& posOnLens,
             const vec3& posOnObjectPlane) const override final;
 
-        virtual real getSensitivity(
+        virtual float getSensitivity(
             const vec3& posOnImagesensor,
             const vec3& posOnLens) const override final;
 
-        virtual real getWdash(
+        virtual float getWdash(
             const vec3& hitPoint,
             const vec3& hitpointNml,
             const vec3& posOnImageSensor,
@@ -84,12 +84,12 @@ namespace aten {
             const ray& ray,
             int32_t& px, int32_t& py) const override final;
 
-        virtual real getImageSensorWidth() const final
+        virtual float getImageSensorWidth() const final
         {
             return m_imagesensor.width;
         }
 
-        virtual real getImageSensorHeight() const final
+        virtual float getImageSensorHeight() const final
         {
             return m_imagesensor.height;
         }
@@ -107,13 +107,13 @@ namespace aten {
             vec3 u;
             vec3 v;
             vec3 lower_left;
-            real width;
-            real height;
+            float width;
+            float height;
         } m_imagesensor;
 
         // 物理的なピクセルサイズ.
-        real m_pixelWidth;
-        real m_pixelHeight;
+        float m_pixelWidth;
+        float m_pixelHeight;
 
         // レンズ.
         struct Lens {
@@ -121,7 +121,7 @@ namespace aten {
             vec3 u;
             vec3 v;
             vec3 normal;
-            real radius;
+            float radius;
         } m_lens;
 
         struct ObjectPlane {
@@ -132,14 +132,14 @@ namespace aten {
             vec3 lower_left;
         } m_objectplane;
 
-        real m_imageSensorToLensDistance;
-        real m_lensToObjectplaneDistance;
+        float m_imageSensorToLensDistance;
+        float m_lensToObjectplaneDistance;
 
         // イメージセンサの感度
-        real m_W;
+        float m_W;
 
         vec3 m_at;    // 注視点.
         vec3 m_vup;
-        real m_Wscale;
+        float m_Wscale;
     };
 }

@@ -22,7 +22,7 @@ namespace aten {
     };
 
     struct Intersection {
-        real t{ AT_MATH_INF };
+        float t{ AT_MATH_INF };
 
         int32_t objid{ -1 };
 
@@ -34,13 +34,13 @@ namespace aten {
             // For triangle.
             struct {
                 int32_t triangle_id;    ///< Hit triangle id.
-                real a, b;              ///< Barycentric on hit triangle.
+                float a, b;              ///< Barycentric on hit triangle.
             };
             // Fox voxel.
             struct {
-                real nml_x;
-                real nml_y;
-                real nml_z;
+                float nml_x;
+                float nml_y;
+                float nml_z;
             };
         };
 
@@ -49,9 +49,9 @@ namespace aten {
         AT_HOST_DEVICE_API Intersection()
         {
             triangle_id = -1;
-            a = b = real(0);
+            a = b = float(0);
 
-            nml_x = nml_y = nml_z = real(0);
+            nml_x = nml_y = nml_z = float(0);
         }
     };
 

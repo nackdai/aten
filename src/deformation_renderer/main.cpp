@@ -51,7 +51,7 @@ public:
     virtual bool hit(
         const aten::context& ctxt,
         const aten::ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         aten::Intersection& isect) const override final
     {
         AT_ASSERT(false);
@@ -61,7 +61,7 @@ public:
     virtual bool HitWithLod(
         const aten::context& ctxt,
         const aten::ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         bool enableLod,
         aten::Intersection& isect) const override final
     {
@@ -136,7 +136,7 @@ public:
 #endif
 
         aten::vec3 pos, at;
-        real vfov;
+        float vfov;
         Scene::getCameraPosAndAt(pos, at, vfov);
 
         camera_.init(
@@ -192,7 +192,7 @@ public:
             advanceTriNum = deformTris.size();
 
             if (defrom_anm_) {
-                timeline_.init(defrom_anm_->getDesc().time, real(0));
+                timeline_.init(defrom_anm_->getDesc().time, float(0));
                 timeline_.enableLoop(true);
                 timeline_.start();
             }
@@ -240,8 +240,8 @@ public:
 #endif
 
             auto camparam = camera_.param();
-            camparam.znear = real(0.1);
-            camparam.zfar = real(10000.0);
+            camparam.znear = float(0.1);
+            camparam.zfar = float(10000.0);
 
             renderer_.update(
                 visualizer_->GetGLTextureHandle(),
@@ -341,8 +341,8 @@ public:
             camera_.update();
 
             auto camparam = camera_.param();
-            camparam.znear = real(0.1);
-            camparam.zfar = real(10000.0);
+            camparam.znear = float(0.1);
+            camparam.zfar = float(10000.0);
 
             renderer_.updateCamera(camparam);
             is_camera_dirty_ = false;
@@ -411,7 +411,7 @@ public:
         {
             ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", renderer_.frame(), 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Text("cuda : %.3f ms (avg : %.3f ms)", cudaelapsed, avg_cuda_time_);
-            ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * max_samples_) / real(1000 * 1000) * (real(1000) / cudaelapsed));
+            ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * max_samples_) / float(1000 * 1000) * (float(1000) / cudaelapsed));
 
             if (aten::GLProfiler::isEnabled()) {
                 ImGui::Text("GL : [rasterizer %.3f ms] [visualizer %.3f ms]", rasterizerTime, visualizerTime);
@@ -516,7 +516,7 @@ public:
                 camera_,
                 prev_mouse_pos_x_, prev_mouse_pos_y_,
                 x, y,
-                real(0.001));
+                float(0.001));
             is_camera_dirty_ = true;
         }
 
@@ -526,13 +526,13 @@ public:
 
     void OnMouseWheel(int32_t delta)
     {
-        aten::CameraOperator::dolly(camera_, delta * real(0.1));
+        aten::CameraOperator::dolly(camera_, delta * float(0.1));
         is_camera_dirty_ = true;
     }
 
     void OnKey(bool press, aten::Key key)
     {
-        const real offset = real(0.5);
+        const float offset = float(0.5);
 
         if (press) {
             if (key == aten::Key::Key_F1) {
@@ -588,7 +588,7 @@ public:
             case aten::Key::Key_R:
             {
                 aten::vec3 pos, at;
-                real vfov;
+                float vfov;
                 Scene::getCameraPosAndAt(pos, at, vfov);
 
                 camera_.init(

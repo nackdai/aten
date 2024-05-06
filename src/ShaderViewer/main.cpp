@@ -36,8 +36,8 @@ public:
             camera_.update();
 
             auto camparam = camera_.param();
-            camparam.znear = real(0.1);
-            camparam.zfar = real(10000.0);
+            camparam.znear = float(0.1);
+            camparam.zfar = float(10000.0);
 
             is_camera_dirty_ = false;
         }
@@ -80,7 +80,7 @@ public:
             // TODO
             aten::vec3 pos(0.f, 0.0f, 30.0f);
             aten::vec3 at(0.f, 0.f, 0.f);
-            real vfov = real(45);
+            float vfov = float(45);
 
             camera_.init(
                 pos,
@@ -189,7 +189,7 @@ public:
                 camera_,
                 prev_mouse_pos_x_, prev_mouse_pos_y_,
                 x, y,
-                real(0.001));
+                float(0.001));
             is_camera_dirty_ = true;
         }
 
@@ -199,13 +199,13 @@ public:
 
     void OnMouseWheel(int32_t delta)
     {
-        aten::CameraOperator::dolly(camera_, delta * real(0.1));
+        aten::CameraOperator::dolly(camera_, delta * float(0.1));
         is_camera_dirty_ = true;
     }
 
     void OnKey(bool press, aten::Key key)
     {
-        static const real offset_base = real(0.1);
+        static const float offset_base = float(0.1);
 
         if (press)
         {

@@ -11,12 +11,12 @@ namespace aten {
         union {
             vec3 v;
             struct {
-                real x, y, z, w;
+                float x, y, z, w;
             };
             struct {
-                real r, g, b, a;
+                float r, g, b, a;
             };
-            real p[4];
+            float p[4];
         };
 
         AT_HOST_DEVICE_API vec4()
@@ -47,18 +47,18 @@ namespace aten {
             w = _v.w;
         }
 
-        AT_HOST_DEVICE_API vec4(real f)
+        AT_HOST_DEVICE_API vec4(float f)
         {
             x = y = z = w = f;
         }
-        AT_HOST_DEVICE_API vec4(real _x, real _y, real _z, real _w)
+        AT_HOST_DEVICE_API vec4(float _x, float _y, float _z, float _w)
         {
             x = _x;
             y = _y;
             z = _z;
             w = _w;
         }
-        AT_HOST_DEVICE_API vec4(const vec3& _v, real _w)
+        AT_HOST_DEVICE_API vec4(const vec3& _v, float _w)
         {
             v = _v;
             w = _w;
@@ -66,19 +66,19 @@ namespace aten {
         AT_HOST_DEVICE_API vec4(const vec3& _v)
         {
             v = _v;
-            w = real(0);
+            w = float(0);
         }
 
         inline AT_HOST_DEVICE_API operator vec3() const
         {
             return v;
         }
-        inline AT_HOST_DEVICE_API real operator[](uint32_t i) const
+        inline AT_HOST_DEVICE_API float operator[](uint32_t i) const
         {
             AT_ASSERT(i < 4);
             return p[i];
         }
-        inline AT_HOST_DEVICE_API real& operator[](uint32_t i)
+        inline AT_HOST_DEVICE_API float& operator[](uint32_t i)
         {
             AT_ASSERT(i < 4);
             return p[i];
@@ -97,7 +97,7 @@ namespace aten {
             return *this;
         }
 
-        inline AT_HOST_DEVICE_API const vec4& set(real _x, real _y, real _z, real _w)
+        inline AT_HOST_DEVICE_API const vec4& set(float _x, float _y, float _z, float _w)
         {
             x = _x;
             y = _y;
@@ -105,7 +105,7 @@ namespace aten {
             w = _w;
             return *this;
         }
-        inline AT_HOST_DEVICE_API const vec4& set(real f)
+        inline AT_HOST_DEVICE_API const vec4& set(float f)
         {
             x = f;
             y = f;
@@ -113,7 +113,7 @@ namespace aten {
             w = f;
             return *this;
         }
-        inline AT_HOST_DEVICE_API const vec4& set(const vec3& _v, real _w)
+        inline AT_HOST_DEVICE_API const vec4& set(const vec3& _v, float _w)
         {
             v = _v;
             w = _w;
@@ -169,7 +169,7 @@ namespace aten {
             w /= _v.w;
             return *this;
         }
-        inline AT_HOST_DEVICE_API vec4& operator*=(const real t)
+        inline AT_HOST_DEVICE_API vec4& operator*=(const float t)
         {
             x *= t;
             y *= t;
@@ -177,7 +177,7 @@ namespace aten {
             w *= t;
             return *this;
         }
-        inline AT_HOST_DEVICE_API vec4& operator/=(const real t)
+        inline AT_HOST_DEVICE_API vec4& operator/=(const float t)
         {
             x /= t;
             y /= t;
@@ -186,12 +186,12 @@ namespace aten {
             return *this;
         }
 
-        inline AT_HOST_DEVICE_API real length() const
+        inline AT_HOST_DEVICE_API float length() const
         {
             auto ret = aten::sqrt(x * x + y * y + z * z);
             return ret;
         }
-        inline AT_HOST_DEVICE_API real squared_length() const
+        inline AT_HOST_DEVICE_API float squared_length() const
         {
             auto ret = x * x + y * y + z * z;
             return ret;
@@ -210,7 +210,7 @@ namespace aten {
         return ret;
     }
 
-    inline AT_HOST_DEVICE_API vec4 operator+(const vec4 v1, real f)
+    inline AT_HOST_DEVICE_API vec4 operator+(const vec4 v1, float f)
     {
         vec4 ret(v1.x + f, v1.y + f, v1.z + f, v1.w + f);
         return ret;
@@ -222,7 +222,7 @@ namespace aten {
         return ret;
     }
 
-    inline AT_HOST_DEVICE_API vec4 operator-(const vec4& v1, real f)
+    inline AT_HOST_DEVICE_API vec4 operator-(const vec4& v1, float f)
     {
         vec4 ret(v1.x - f, v1.y - f, v1.z - f, v1.w - f);
         return ret;
@@ -240,25 +240,25 @@ namespace aten {
         return ret;
     }
 
-    inline AT_HOST_DEVICE_API vec4 operator*(real t, const vec4& v)
+    inline AT_HOST_DEVICE_API vec4 operator*(float t, const vec4& v)
     {
         vec4 ret(t * v.x, t * v.y, t * v.z, t * v.w);
         return ret;
     }
 
-    inline AT_HOST_DEVICE_API vec4 operator*(const vec4& v, real t)
+    inline AT_HOST_DEVICE_API vec4 operator*(const vec4& v, float t)
     {
         vec4 ret(t * v.x, t * v.y, t * v.z, t * v.w);
         return ret;
     }
 
-    inline AT_HOST_DEVICE_API vec4 operator/(const vec4& v, real t)
+    inline AT_HOST_DEVICE_API vec4 operator/(const vec4& v, float t)
     {
         vec4 ret(v.x / t, v.y / t, v.z / t, v.w / t);
         return ret;
     }
 
-    inline AT_HOST_DEVICE_API real dot(const vec4& v1, const vec4& v2)
+    inline AT_HOST_DEVICE_API float dot(const vec4& v1, const vec4& v2)
     {
         auto ret = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w;
         return ret;

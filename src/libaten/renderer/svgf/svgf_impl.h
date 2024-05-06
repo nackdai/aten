@@ -74,7 +74,7 @@ namespace svgf {
                 aov_texclr_meshid[idx], texcolor, isect);
 
             if constexpr (NeedOverrideMeshIdByMtrlId) {
-                aov_texclr_meshid[idx].w = static_cast<real>(isect.mtrlid);
+                aov_texclr_meshid[idx].w = static_cast<float>(isect.mtrlid);
             }
 
             if constexpr (IsExternalAlbedo) {
@@ -143,7 +143,7 @@ namespace svgf {
      * @return Tuple for the excracted center pixle data, normal, depth, mesh id, contribution.
      */
     template <bool WillDivideContribByW = true, class Span_v4>
-    inline AT_DEVICE_API aten::tuple<AT_NAME::_detail::v3, real, int32_t, AT_NAME::_detail::v4> ExtractCenterPixel(
+    inline AT_DEVICE_API aten::tuple<AT_NAME::_detail::v3, float, int32_t, AT_NAME::_detail::v4> ExtractCenterPixel(
         int32_t idx,
         const aten::const_span<AT_NAME::_detail::v4>& contribs,
         Span_v4& aov_normal_depth,
@@ -501,7 +501,7 @@ namespace svgf {
                         auto moment{ AT_NAME::_detail::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z) };
                         moment /= moment.z;
 
-                        const auto uv_length = aten::sqrt(static_cast<real>(u * u + v * v));
+                        const auto uv_length = aten::sqrt(static_cast<float>(u * u + v * v));
 
                         const float Wz = aten::abs(sample_depth - center_depth) / (pixel_distance_ratio * uv_length + 1e-2f);
                         const float Wn = aten::pow(aten::cmpMax(0.0f, dot(sample_nml, center_normal)), 128.0f);
@@ -741,7 +741,7 @@ namespace svgf {
             int32_t xx = clamp(ix + scaled_offset_x, 0, width - 1);
             int32_t yy = clamp(iy + scaled_offset_y, 0, height - 1);
 
-            const auto u_length = aten::sqrt(static_cast<real>(scaled_offset_x * scaled_offset_x + scaled_offset_y * scaled_offset_y));
+            const auto u_length = aten::sqrt(static_cast<float>(scaled_offset_x * scaled_offset_x + scaled_offset_y * scaled_offset_y));
 
             const int32_t qidx = _detail::GetIdx(xx, yy, width);
 

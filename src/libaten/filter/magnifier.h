@@ -30,8 +30,8 @@ namespace aten {
 
         virtual void setParam(aten::Values& values) override final
         {
-            screen_res_.x = static_cast<real>(getOutWidth());
-            screen_res_.y = static_cast<real>(getOutHeight());
+            screen_res_.x = static_cast<float>(getOutWidth());
+            screen_res_.y = static_cast<float>(getOutHeight());
 
             const auto center_pos = values.get("center_pos", aten::vec4(0));
             center_pos_.x = center_pos.x;

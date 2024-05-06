@@ -28,7 +28,7 @@ namespace AT_NAME
             rec.isVoxel = true;
         }
         else {
-            // Get real object. If the object is instance, we need to get real one.
+            // Get float object. If the object is instance, we need to get float one.
             const auto& real_obj = obj.object_id >= 0 ? ctxt.GetObject(obj.object_id) : obj;
             const auto mtx_id = obj.object_id >= 0 ? obj.mtx_id : real_obj.mtx_id;
 
@@ -71,7 +71,7 @@ namespace AT_NAME
         const CONTEXT& ctxt,
         aten::sampler* sampler)
     {
-        // Get real object. If the object is instance, we need to get real one.
+        // Get float object. If the object is instance, we need to get float one.
         const auto& real_obj = obj.object_id >= 0 ? ctxt.GetObject(obj.object_id) : obj;
         const auto mtx_id = obj.object_id >= 0 ? obj.mtx_id : real_obj.mtx_id;
 

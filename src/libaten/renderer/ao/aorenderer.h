@@ -33,7 +33,7 @@ namespace aten
         PathHost path_host_;
 
         uint32_t m_numAORays{ 1 };
-        real m_AORadius{ real(1) };
+        float m_AORadius{ float(1) };
 
         int32_t max_depth_{ 1 };
     };

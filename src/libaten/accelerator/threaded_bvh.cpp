@@ -340,7 +340,7 @@ namespace aten
     bool ThreadedBVH::hit(
         const context& ctxt,
         const ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         Intersection& isect) const
     {
         return hit(ctxt, 0, m_listThreadedBvhNode, r, t_min, t_max, isect);
@@ -351,10 +351,10 @@ namespace aten
         int32_t exid,
         const std::vector<std::vector<ThreadedBvhNode>>& listThreadedBvhNode,
         const ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         Intersection& isect) const
     {
-        real hitt = AT_MATH_INF;
+        float hitt = AT_MATH_INF;
 
         int32_t nodeid = 0;
 

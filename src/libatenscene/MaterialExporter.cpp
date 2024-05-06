@@ -15,7 +15,7 @@ namespace aten
         virtual ~MaterialParamExporter() {}
 
     public:
-        virtual bool edit(std::string_view name, real& param, real _min, real _max) override final
+        virtual bool edit(std::string_view name, float& param, float _min, float _max) override final
         {
             char buf[32];
             snprintf(buf, AT_COUNTOF(buf), "%.3f", param);

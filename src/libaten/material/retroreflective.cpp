@@ -5,12 +5,12 @@
 
 namespace AT_NAME
 {
-    AT_DEVICE_API real Retroreflective::pdf(
+    AT_DEVICE_API float Retroreflective::pdf(
         const aten::MaterialParameter& param,
         const aten::vec3& n,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
         const auto pdf = ComputePDF(param, wi, wo, n);
         return pdf;
@@ -20,7 +20,7 @@ namespace AT_NAME
         const aten::MaterialParameter& param,
         const aten::vec3& n,
         const aten::vec3& wi,
-        real u, real v,
+        float u, float v,
         aten::sampler* sampler)
     {
         const auto r1 = sampler->nextSample();
@@ -36,7 +36,7 @@ namespace AT_NAME
         const aten::vec3& n,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
         const auto bsdf = ComputeBRDF(param, n, wi, wo);
         return bsdf;
@@ -48,7 +48,7 @@ namespace AT_NAME
         const aten::vec3& n,
         const aten::vec3& wi,
         aten::sampler* sampler,
-        real u, real v)
+        float u, float v)
     {
         const auto r1 = sampler->nextSample();
         const auto r2 = sampler->nextSample();
@@ -227,9 +227,9 @@ namespace AT_NAME
 
             const auto idx = static_cast<size_t>(theta / Step);
 
-            real a = 0.0F;
-            real b = 0.0F;
-            real t = 0.0F;
+            float a = 0.0F;
+            float b = 0.0F;
+            float t = 0.0F;
 
             if (idx >= ERATable.size()) {
                 return 0.0F;

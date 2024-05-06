@@ -78,7 +78,7 @@ namespace idaten {
             m_maxSampleNum = computeMaxSampleNum(maxBounceNum);
         }
 
-        AT_HOST_DEVICE_API real nextSample()
+        AT_HOST_DEVICE_API float nextSample()
         {
             float r = sample();
             return r;
@@ -104,8 +104,8 @@ namespace idaten {
             p.y &= m_noiseResH - 1;
             p.z &= m_noiseTexNum - 1;
 
-            real u = p.x / (real)m_noiseResW;
-            real v = p.y / (real)m_noiseResH;
+            float u = p.x / (float)m_noiseResW;
+            float v = p.y / (float)m_noiseResH;
 
             m_sampleCount++;
 
@@ -113,7 +113,7 @@ namespace idaten {
             float4 ret = tex2DLayered<float4>(m_noise, u, v, p.z);
             return aten::cmpMin(ret.x, 0.9999999999999f);
 #else
-            return real(1.0f);
+            return float(1.0f);
 #endif
         }
 

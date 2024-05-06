@@ -177,26 +177,26 @@ namespace aten
                 vtx.pos.x = attrib.vertices[idx.vertex_index * 3 + 0];
                 vtx.pos.y = attrib.vertices[idx.vertex_index * 3 + 1];
                 vtx.pos.z = attrib.vertices[idx.vertex_index * 3 + 2];
-                vtx.pos.w = real(0);
+                vtx.pos.w = float(0);
 
                 // NOTE
                 // If vtx.uv.z == 1, normal will be computed during rendering.
 
                 if (idx.normal_index < 0) {
                     // Flag not to specify normal.
-                    vtx.uv.z = real(1);
+                    vtx.uv.z = float(1);
                 }
                 else {
                     vtx.nml.x = attrib.normals[idx.normal_index * 3 + 0];
                     vtx.nml.y = attrib.normals[idx.normal_index * 3 + 1];
                     vtx.nml.z = attrib.normals[idx.normal_index * 3 + 2];
-                    vtx.uv.z = needComputeNormalOntime ? real(1) : real(0);
+                    vtx.uv.z = needComputeNormalOntime ? float(1) : float(0);
                 }
 
                 if (std::isnan(vtx.nml.x) || std::isnan(vtx.nml.y) || std::isnan(vtx.nml.z))
                 {
                     // If one of normal elements is NaN, normal will be computed during rendering.
-                    vtx.nml = aten::vec4(real(0), real(1), real(0), 1);
+                    vtx.nml = aten::vec4(float(0), float(1), float(0), 1);
                 }
 
                 if (idx.texcoord_index >= 0) {
@@ -205,7 +205,7 @@ namespace aten
                 }
                 else {
                     // Specify not have texture coordinates.
-                    vtx.uv.z = real(-1);
+                    vtx.uv.z = float(-1);
                 }
 
                 ctxt.AddVertex(vtx);
@@ -371,9 +371,9 @@ namespace aten
                 const auto& v1 = ctxt.GetVertex(face_param.idx[1]);
                 const auto& v2 = ctxt.GetVertex(face_param.idx[2]);
 
-                if (v0.uv.z == real(1)
-                    || v1.uv.z == real(1)
-                    || v2.uv.z == real(1))
+                if (v0.uv.z == float(1)
+                    || v1.uv.z == float(1)
+                    || v2.uv.z == float(1))
                 {
                     face_param.needNormal = 1;
                 }

@@ -21,9 +21,9 @@ namespace aten {
         }
 
         // [0, 1]
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_HOST_DEVICE_API real nextSample())
+        AT_VIRTUAL_OVERRIDE_FINAL(AT_HOST_DEVICE_API float nextSample())
         {
-            auto ret = static_cast<real>(next(m_seed) / UINT_MAX);
+            auto ret = static_cast<float>(next(m_seed) / UINT_MAX);
             m_seed += 1;
             return ret;
         }

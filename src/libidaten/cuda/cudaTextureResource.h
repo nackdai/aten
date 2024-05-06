@@ -16,19 +16,19 @@ namespace idaten
     public:
         void init(
             const aten::vec4* p,
-            uint32_t memberNumInItem,
-            uint32_t numOfContaints);
+            size_t memberNumInItem,
+            size_t numOfContaints);
 
         virtual cudaTextureObject_t bind();
         void unbind();
 
         void update(
             const aten::vec4* p,
-            uint32_t memberNumInItem,
-            uint32_t numOfContaints,
-            uint32_t offsetCount = 0);
+            size_t memberNumInItem,
+            size_t numOfContaints,
+            int32_t offsetCount = 0);
 
-        void read(void* p, uint32_t bytes);
+        void read(void* p, size_t bytes);
 
         size_t size() const
         {
@@ -38,8 +38,8 @@ namespace idaten
     private:
         void onInit(
             const aten::vec4* p,
-            uint32_t memberNumInItem,
-            uint32_t numOfContaints);
+            size_t memberNumInItem,
+            size_t numOfContaints);
 
     protected:
         void* m_buffer{ nullptr };

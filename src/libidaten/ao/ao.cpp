@@ -101,7 +101,7 @@ namespace idaten {
                     m_hitbools,
                     nullptr);
 
-                onShade(
+                ShadeAO(
                     width, height,
                     bounce, rrBounce);
 

@@ -16,7 +16,7 @@ namespace aten {
 
         if (num > 0) {
             const auto r = sampler->nextSample();
-            const auto idx = static_cast<int32_t>(aten::clamp<float>(r * num, 0, num - 1));
+            const auto idx = static_cast<int32_t>(aten::clamp<size_t>(static_cast<size_t>(r * num), 0, num - 1));
             const auto light = ctxt.GetLightInstance(idx);
 
             const auto& light_param = light->param();

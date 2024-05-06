@@ -56,12 +56,12 @@ namespace idaten
     {
         AT_ASSERT(keys.size() == values.size());
 
-        uint32_t num = (uint32_t)keys.size();
+        const auto num = keys.size();
 
         thrust::host_vector<uint32_t> hostKeys(num);
         thrust::host_vector<uint32_t> hostValues(num);
 
-        for (uint32_t i = 0; i < num; i++) {
+        for (size_t i = 0; i < num; i++) {
             hostKeys[i] = keys[i];
             hostValues[i] = values[i];
         }
@@ -74,14 +74,14 @@ namespace idaten
 
         if (resultHostKeys) {
             thrust::host_vector<uint32_t> hostKeys = deviceKeys;
-            for (int32_t i = 0; i < num; i++) {
+            for (size_t i = 0; i < num; i++) {
                 resultHostKeys->push_back(hostKeys[i]);
             }
         }
 
         if (resultHostValues) {
             thrust::host_vector<uint32_t> hostValues = deviceValues;
-            for (int32_t i = 0; i < num; i++) {
+            for (size_t i = 0; i < num; i++) {
                 resultHostValues->push_back(hostValues[i]);
             }
         }

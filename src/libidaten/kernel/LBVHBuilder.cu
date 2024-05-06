@@ -904,10 +904,10 @@ namespace idaten
         std::vector<uint32_t> v;
         RadixSort::sort(keys, values, sortedKeys, sortedValue, &k, &v);
 
-        uint32_t numOfElems = values.size();
+        uint32_t numOfElems = static_cast<uint32_t>(values.size());
 
-        uint32_t numInternalNode = numOfElems - 1;
-        uint32_t numLeaves = numOfElems;
+        const auto numInternalNode = numOfElems - 1;
+        const auto numLeaves = numOfElems;
 
         TypedCudaMemory<LBVHNode> nodesLbvh;
         nodesLbvh.resize(numInternalNode + numLeaves);

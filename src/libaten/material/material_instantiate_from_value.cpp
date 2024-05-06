@@ -31,7 +31,7 @@ namespace AT_NAME {
         : material(aten::MaterialType::Beckman, MaterialAttributeMicrofacet, val)
     {
         m_param.standard.roughness = val.get("roughness", m_param.standard.roughness);
-        m_param.standard.roughness = aten::clamp<real>(m_param.standard.roughness, 0, 1);
+        m_param.standard.roughness = aten::clamp<float>(m_param.standard.roughness, 0, 1);
 
         auto roughnessMap = val.get<texture>("roughnessmap");
         m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
@@ -65,7 +65,7 @@ namespace AT_NAME {
         : material(aten::MaterialType::GGX, MaterialAttributeMicrofacet, val)
     {
         m_param.standard.roughness = val.get("roughness", m_param.standard.roughness);
-        m_param.standard.roughness = aten::clamp<real>(m_param.standard.roughness, 0, 1);
+        m_param.standard.roughness = aten::clamp<float>(m_param.standard.roughness, 0, 1);
 
         auto roughnessMap = val.get<texture>("roughnessmap");
         m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
@@ -83,7 +83,7 @@ namespace AT_NAME {
         : material(aten::MaterialType::OrneNayar, MaterialAttributeLambert, val)
     {
         m_param.standard.roughness = val.get("roughness", m_param.standard.roughness);
-        m_param.standard.roughness = aten::clamp<real>(m_param.standard.roughness, 0, 1);
+        m_param.standard.roughness = aten::clamp<float>(m_param.standard.roughness, 0, 1);
 
         auto roughnessMap = val.get<texture>("roughnessmap");
         m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
@@ -103,6 +103,6 @@ namespace AT_NAME {
         : material(aten::MaterialType::Velvet, MaterialAttributeMicrofacet, val)
     {
         m_param.standard.roughness = val.get("roughness", m_param.standard.roughness);
-        m_param.standard.roughness = aten::clamp<real>(m_param.standard.roughness, 0, 1);
+        m_param.standard.roughness = aten::clamp<float>(m_param.standard.roughness, 0, 1);
     }
 }

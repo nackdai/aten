@@ -208,7 +208,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::A
 void CornellBoxScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(50.0, 52.0, 295.6);
     at = aten::vec3(50.0, 40.8, 119.0);
@@ -287,7 +287,7 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Asset
 void RandomScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(13, 2, 3);
     at = aten::vec3(0, 0, 0);
@@ -319,7 +319,7 @@ void MtrlTestScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Ass
 void MtrlTestScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(0.0f, 0.0f, 13.0f);
     at = aten::vec3(0.0f, 0.0f, 0.0f);
@@ -362,7 +362,7 @@ void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Asset
 void ObjectScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(0.0f, 0.0f, 10.0f);
     //pos = aten::vec3(0.0, 0.0, 60.0);
@@ -402,7 +402,7 @@ void PointLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::A
 void PointLightScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(0.5f, 0.52f, 2.95f);
     at = aten::vec3(0.5f, 0.408f, 1.19f);
@@ -441,7 +441,7 @@ void DirectionalLightScene::makeScene(aten::context& ctxt, aten::scene* scene, a
 void DirectionalLightScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(50.0f, 52.0f, 295.6f);
     at = aten::vec3(50.0f, 40.8f, 119.0f);
@@ -481,8 +481,8 @@ void SpotLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::As
         aten::vec3(0, -1, 0),
         aten::vec3(1.0f, 1.0f, 1.0f),
         400.0f,
-        real(aten::Deg2Rad(30)),
-        real(aten::Deg2Rad(60)));
+        float(aten::Deg2Rad(30)),
+        float(aten::Deg2Rad(60)));
 
     ctxt.AddLight(l);
 }
@@ -490,7 +490,7 @@ void SpotLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::As
 void SpotLightScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(0.5f, 0.52f, 2.956f);
     at = aten::vec3(0.5f, 0.408f, 1.19f);
@@ -573,8 +573,8 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::As
         aten::vec3(0, -1, 0),
         aten::vec3(0.0f, 1.0f, 0.0f),
         400.0f,
-        real(aten::Deg2Rad(30)),
-        real(aten::Deg2Rad(60)));
+        float(aten::Deg2Rad(30)),
+        float(aten::Deg2Rad(60)));
 
     ctxt.AddLight(dir);
     ctxt.AddLight(spot);
@@ -584,7 +584,7 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::As
 void ManyLightScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(13, 2, 3);
     at = aten::vec3(0, 0, 0);
@@ -687,7 +687,7 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Ass
 void TexturesScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(0.0f, 0.0f, 13.0f);
     at = aten::vec3(0.0f, 0.0f, 0.0f);
@@ -784,7 +784,7 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::As
 void HideLightScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(50.0f, 52.0f, 295.6f);
     at = aten::vec3(50.0f, 40.8f, 119.0f);
@@ -849,7 +849,7 @@ void DisneyMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene,
 void DisneyMaterialTestScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(0.0f, 0.0f, 13.0f);
     at = aten::vec3(0.0f, 0.0f, 0.0f);
@@ -932,7 +932,7 @@ std::shared_ptr<aten::instance<aten::PolygonObject>> ObjCornellBoxScene::makeSce
 void ObjCornellBoxScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(0.f, 1.f, 3.f);
     at = aten::vec3(0.f, 1.f, 0.f);
@@ -982,7 +982,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Asset
 void SponzaScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
 #if 1
     pos = aten::vec3(0.f, 1.f, 3.f);
@@ -1013,7 +1013,7 @@ void BunnyScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetM
 void BunnyScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(0.f, 1.f, 100.f);
     at = aten::vec3(0.f, 1.f, 0.f);
@@ -1045,7 +1045,7 @@ aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<a
 void DeformScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(0.f, 1.f, 3.f);
     at = aten::vec3(0.f, 1.f, 0.f);
@@ -1118,7 +1118,7 @@ aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<a
 void DeformInBoxScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(0.f, 1.f, 3.f);
     at = aten::vec3(0.f, 1.f, 0.f);
@@ -1189,7 +1189,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
 void AlphaBlendedObjCornellBoxScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(0.f, 1.f, 3.f);
     at = aten::vec3(0.f, 1.f, 0.f);
@@ -1228,7 +1228,7 @@ void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene, aten
 void CryteckSponzaScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
 #if 0
     pos = aten::vec3(0.f, 1.f, 3.f);
@@ -1306,7 +1306,7 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
 void ManyLightCryteckSponzaScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
-    real& fov)
+    float& fov)
 {
     pos = aten::vec3(-354.4f, 359.6f, -41.2f);
     at = aten::vec3(-353.4f, 359.4f, -41.2f);

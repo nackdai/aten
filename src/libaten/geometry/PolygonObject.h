@@ -26,7 +26,7 @@ namespace AT_NAME
         virtual bool hit(
             const aten::context& ctxt,
             const aten::ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             aten::Intersection& isect) const override final;
 
         template <class CONTEXT>
@@ -46,11 +46,11 @@ namespace AT_NAME
             auto p1{ ctxt.GetPositionAsVec4(faceParam.idx[1]) };
             auto p2{ ctxt.GetPositionAsVec4(faceParam.idx[2]) };
 
-            p0.w = p1.w = p2.w = real(1);
+            p0.w = p1.w = p2.w = float(1);
 
-            real orignalLen = length(p1.v - p0.v);
+            float orignalLen = length(p1.v - p0.v);
 
-            real scaledLen = 0;
+            float scaledLen = 0;
             {
                 auto _p0 = mtx_L2W.apply(p0);
                 auto _p1 = mtx_L2W.apply(p1);
@@ -58,7 +58,7 @@ namespace AT_NAME
                 scaledLen = length(_p1.v - _p0.v);
             }
 
-            real ratio = scaledLen / orignalLen;
+            float ratio = scaledLen / orignalLen;
             ratio = ratio * ratio;
 
             rec.area = obj.area * ratio;
@@ -123,11 +123,11 @@ namespace AT_NAME
             auto v1{ ctxt.GetPositionAsVec4(tri_param.idx[1]) };
             auto v2{ ctxt.GetPositionAsVec4(tri_param.idx[2]) };
 
-            v0.w = v1.w = v2.w = real(1);
+            v0.w = v1.w = v2.w = float(1);
 
-            real orignalLen = (v1 - v0).length();
+            float orignalLen = (v1 - v0).length();
 
-            real scaledLen = 0;
+            float scaledLen = 0;
             {
                 auto p0 = mtx_L2W.apply(v0);
                 auto p1 = mtx_L2W.apply(v1);
@@ -135,7 +135,7 @@ namespace AT_NAME
                 scaledLen = length(p1.v - p0.v);
             }
 
-            real ratio = scaledLen / orignalLen;
+            float ratio = scaledLen / orignalLen;
             ratio = ratio * ratio;
 
             auto area = param.area * ratio;

@@ -40,7 +40,7 @@ namespace aten
 
         void update(
             const mat4& mtx_L2W,
-            real time,
+            float time,
             DeformAnimation* anm);
 
         void build();
@@ -89,7 +89,7 @@ namespace aten
         virtual bool hit(
             const context& ctxt,
             const ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             Intersection& isect) const override final
         {
             // Not support.

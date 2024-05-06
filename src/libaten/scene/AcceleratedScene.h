@@ -48,7 +48,7 @@ namespace aten {
         virtual bool hit(
             const aten::context& ctxt,
             const aten::ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             bool enableLod,
             aten::Intersection& isect) const override final
         {

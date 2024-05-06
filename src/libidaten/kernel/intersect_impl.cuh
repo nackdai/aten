@@ -86,9 +86,9 @@ AT_INLINE_RELEASE __device__ int32_t hit4Triangles1Ray(
     auto v_y = r_z * e1_x - r_x * e1_z;
     auto v_z = r_x * e1_y - r_y * e1_x;
 
-    // inv = real(1) / dot(u, e1)
+    // inv = float(1) / dot(u, e1)
     auto divisor = u_x * e1_x + u_y * e1_y + u_z * e1_z;
-    auto inv = real(1) / (divisor + real(1e-6));
+    auto inv = float(1) / (divisor + float(1e-6));
 
     // t = dot(v, e2) * inv
     auto t = (v_x * e2_x + v_y * e2_y + v_z * e2_z) * inv;

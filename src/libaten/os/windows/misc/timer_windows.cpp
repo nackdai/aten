@@ -28,7 +28,7 @@ namespace AT_NAME {
         m_begin = b.QuadPart;
     }
 
-    real timer::end()
+    float timer::end()
     {
         LARGE_INTEGER cur;
         QueryPerformanceCounter(&cur);

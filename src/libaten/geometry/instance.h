@@ -64,7 +64,7 @@ namespace aten
         virtual bool hit(
             const context& ctxt,
             const ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             Intersection& isect) const override final
         {
             vec3 org = r.org;

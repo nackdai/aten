@@ -18,7 +18,7 @@ namespace npr {
 
         constexpr auto M = 24;
         constexpr auto N = 2;
-        constexpr auto radius = real(2.0);
+        constexpr auto radius = float(2.0);
 
         uint32_t edge_strengh_measurement = 0;
 
@@ -29,8 +29,8 @@ namespace npr {
                 const auto stencil_pos_x = radius * (N - n) * aten::cos(theta);
                 const auto stencil_pos_y = radius * (N - n) * aten::sin(theta);
 
-                const auto u = (x + stencil_pos_x) / real(width);
-                const auto v = (y + stencil_pos_y) / real(height);
+                const auto u = (x + stencil_pos_x) / float(width);
+                const auto v = (y + stencil_pos_y) / float(height);
 
                 // TODO
                 // Specify sampler as nullptr forcibly at this moment...
@@ -48,7 +48,7 @@ namespace npr {
                     }
                     else {
                         const auto d = dot(hrec.normal, hrec_stencil.normal);
-                        if (d < real(0.25)) {
+                        if (d < float(0.25)) {
                             edge_strengh_measurement++;
                         }
                     }
@@ -57,9 +57,9 @@ namespace npr {
         }
 
         auto edge_strengh = aten::clamp(
-            1.0f - aten::abs(edge_strengh_measurement - M * real(0.5)) / (M * real(0.5)),
+            1.0f - aten::abs(edge_strengh_measurement - M * float(0.5)) / (M * float(0.5)),
             0.0f, 1.0f);
-        const auto result = color * (real(1) - edge_strengh);
+        const auto result = color * (float(1) - edge_strengh);
         return result;
     }
 }

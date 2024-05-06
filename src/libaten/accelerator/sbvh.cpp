@@ -18,7 +18,7 @@ namespace aten
     inline bool checkAABBOverlap(
         const aabb& box0,
         const aabb& box1,
-        real& overlap)
+        float& overlap)
     {
         aabb delta = aabb(
             aten::vmax(box0.minPos(), box1.minPos()),
@@ -227,7 +227,7 @@ namespace aten
         auto rootSurfaceArea = rootBox.computeSurfaceArea();
 
         // TODO
-        const real areaAlpha = real(1e-5);
+        const float areaAlpha = float(1e-5);
 
         struct SBVHEntry {
             SBVHEntry() = default;
@@ -263,7 +263,7 @@ namespace aten
                 continue;
             }
 
-            real objCost = 0.0f;
+            float objCost = 0.0f;
             aabb objLeftBB;
             aabb objRightBB;
             int32_t sahBin = -1;
@@ -272,7 +272,7 @@ namespace aten
 
             // check whether the object split produces overlapping nodes
             // if so, check whether we are close enough to the root so that the spatial split makes sense.
-            real overlapCost = real(0);
+            float overlapCost = float(0);
             bool needComputeSpatial = false;
 
             // Check if the surface area of merged AABBs is bigger than the specified cost.
@@ -283,10 +283,10 @@ namespace aten
                 needComputeSpatial = (overlapCost / rootSurfaceArea) >= areaAlpha;
             }
 
-            real spatialCost = AT_MATH_INF;
+            float spatialCost = AT_MATH_INF;
             aabb spatialLeftBB;
             aabb spatialRightBB;
-            real spatialSplitPlane = real(0);
+            float spatialSplitPlane = float(0);
             int32_t spatialDimension = -1;
             int32_t leftCnt = 0;
             int32_t rightCnt = 0;
@@ -416,16 +416,16 @@ namespace aten
         AT_ASSERT(m_nodes.size() == numNodes);
     }
 
-    inline real evalPreSplitCost(
-        real leftBoxArea, int32_t numLeft,
-        real rightBoxArea, int32_t numRight)
+    inline float evalPreSplitCost(
+        float leftBoxArea, int32_t numLeft,
+        float rightBoxArea, int32_t numRight)
     {
         return leftBoxArea * numLeft + rightBoxArea * numRight;
     }
 
     void sbvh::findObjectSplit(
         SBVHNode& node,
-        real& cost,
+        float& cost,
         aabb& leftBB,
         aabb& rightBB,
         int32_t& splitBinPos,
@@ -460,7 +460,7 @@ namespace aten
                 continue;
             }
 
-            const real invLen = real(1) / (centroidMax[dim] - centroidMin[dim]);
+            const float invLen = float(1) / (centroidMax[dim] - centroidMin[dim]);
 
             // clear bins;
             for (uint32_t i = 0; i < m_numBins; i++) {
@@ -543,13 +543,13 @@ namespace aten
 
     void sbvh::findSpatialSplit(
         SBVHNode& node,
-        real& cost,
+        float& cost,
         int32_t& retLeftCount,
         int32_t& retRightCount,
         aabb& leftBB,
         aabb& rightBB,
         int32_t& bestAxis,
-        real& splitPlane)
+        float& splitPlane)
     {
         cost = AT_MATH_INF;
         splitPlane = -1;
@@ -568,11 +568,11 @@ namespace aten
         {
             const auto segmentLength = boxMax[dim] - boxMin[dim];
 
-            if (segmentLength == real(0)) {
+            if (segmentLength == float(0)) {
                 continue;
             }
 
-            const auto invLen = real(1) / segmentLength;
+            const auto invLen = float(1) / segmentLength;
 
             // 分割情報当たりの軸の長さ.
             const auto lenghthPerBin = segmentLength / (float)m_numBins;
@@ -649,10 +649,10 @@ namespace aten
 
                 AT_ASSERT(leftBox.maxPos()[dim] <= bins[n + 1].bbox.minPos()[dim]);
 
-                real leftArea = leftBox.computeSurfaceArea();
-                real rightArea = bins[n + 1].accum.computeSurfaceArea();
+                float leftArea = leftBox.computeSurfaceArea();
+                float rightArea = bins[n + 1].accum.computeSurfaceArea();
 
-                const real splitCost = evalPreSplitCost(leftArea, leftCount, rightArea, rightCount);
+                const float splitCost = evalPreSplitCost(leftArea, leftCount, rightArea, rightCount);
 
                 if (splitCost < cost) {
                     cost = splitCost;
@@ -672,9 +672,9 @@ namespace aten
 
     void sbvh::spatialSort(
         SBVHNode& node,
-        real splitPlane,
+        float splitPlane,
         int32_t axis,
-        real splitCost,
+        float splitCost,
         int32_t leftCnt,
         int32_t rightCnt,
         aabb& leftBB,
@@ -684,8 +684,8 @@ namespace aten
     {
         std::vector<Bin> bins(m_numBins);
 
-        real rightSurfaceArea = rightBB.computeSurfaceArea();
-        real leftSurfaceArea = leftBB.computeSurfaceArea();
+        float rightSurfaceArea = rightBB.computeSurfaceArea();
+        float leftSurfaceArea = leftBB.computeSurfaceArea();
 
         uint32_t refNum = (uint32_t)node.refIds.size();
 
@@ -718,13 +718,13 @@ namespace aten
 
                 aabb leftUnsplitBB = leftBB;
                 leftUnsplitBB.expand(ref.bbox);
-                const real leftUnsplitBBArea = leftUnsplitBB.computeSurfaceArea();
-                const real unsplitLeftCost = leftUnsplitBBArea * leftCnt + rightSurfaceArea * (rightCnt - 1);
+                const float leftUnsplitBBArea = leftUnsplitBB.computeSurfaceArea();
+                const float unsplitLeftCost = leftUnsplitBBArea * leftCnt + rightSurfaceArea * (rightCnt - 1);
 
                 aabb rightUnsplitBB = rightBB;
                 rightUnsplitBB.expand(ref.bbox);
-                const real rightUnsplitBBArea = rightUnsplitBB.computeSurfaceArea();
-                const real unsplitRightCost = leftSurfaceArea * (leftCnt - 1) + rightUnsplitBBArea * rightCnt;
+                const float rightUnsplitBBArea = rightUnsplitBB.computeSurfaceArea();
+                const float unsplitRightCost = leftSurfaceArea * (leftCnt - 1) + rightUnsplitBBArea * rightCnt;
 
                 if (unsplitLeftCost < splitCost && unsplitLeftCost <= unsplitRightCost) {
                     // put only into left only.
@@ -794,7 +794,7 @@ namespace aten
             bbCentroid.expand(centroid);
         }
 
-        const auto invLen = real(1) / (bbCentroid.maxPos()[axis] - bbCentroid.minPos()[axis]);
+        const auto invLen = float(1) / (bbCentroid.maxPos()[axis] - bbCentroid.minPos()[axis]);
 
         // distribute to left and right based on the provided split bin
         for (int32_t i = 0; i < refNum; i++) {
@@ -973,7 +973,7 @@ namespace aten
     bool sbvh::hit(
         const context& ctxt,
         const ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         Intersection& isect) const
     {
         return HitWithLod(ctxt, r, t_min, t_max, false, isect);
@@ -982,13 +982,13 @@ namespace aten
     bool sbvh::HitWithLod(
         const context& ctxt,
         const ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         bool enableLod,
         Intersection& isect) const
     {
         const auto& topLayerBvhNode = m_bvh.getNodes()[0];
 
-        real hitt = AT_MATH_INF;
+        float hitt = AT_MATH_INF;
 
         int32_t nodeid = 0;
 
@@ -1082,11 +1082,11 @@ namespace aten
         const context& ctxt,
         int32_t exid,
         const ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         Intersection& isect,
         bool enableLod) const
     {
-        real hitt = AT_MATH_INF;
+        float hitt = AT_MATH_INF;
 
         int32_t nodeid = 0;
 
@@ -1146,7 +1146,7 @@ namespace aten
             {
                 int32_t voxeldepth = static_cast<int32_t>(AT_GET_VOXEL_DEPTH(node->voxeldepth));
 
-                real t_result = 0.0f;
+                float t_result = 0.0f;
                 aten::vec3 nml;
                 isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, t_result, nml);
 

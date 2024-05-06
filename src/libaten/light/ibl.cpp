@@ -35,7 +35,7 @@ namespace AT_NAME {
         // 　pdfU_00 = a, pdfU_01 = b, ...
         // 　pdfU_10 = h, pdfU_11 = i, ...
 
-        real totalWeight = 0;
+        float totalWeight = 0;
 
         m_cdfU.resize(height);
 
@@ -45,17 +45,17 @@ namespace AT_NAME {
             // 緯度方向は [0, pi].
             // 0.5 足すのは、ピクセル中心点をサンプルするのと、ゼロにならないようにするため.
             // sin(0) = 0 で scale値がゼロになるのを避けるため.
-            real scale = aten::sin(AT_MATH_PI * (real)(y + 0.5) / height);
+            float scale = aten::sin(AT_MATH_PI * (float)(y + 0.5) / height);
 
             // v方向のpdf.
-            real pdfV = 0;
+            float pdfV = 0;
 
             // u方向のpdf.
-            std::vector<real>& pdfU = m_cdfU[y];
+            std::vector<float>& pdfU = m_cdfU[y];
 
             for (int32_t x = 0; x < width; x++) {
-                real u = (real)(x + 0.5) / width;
-                real v = (real)(y + 0.5) / height;
+                float u = (float)(x + 0.5) / width;
+                float v = (float)(y + 0.5) / height;
 
                 auto clr = AT_NAME::Background::SampleFromUVWithTexture(u, v, bg_, envmap);
                 const auto illum = AT_NAME::color::luminance(clr);
@@ -76,7 +76,7 @@ namespace AT_NAME {
 
         // For vertical.
         {
-            real sum = 0;
+            float sum = 0;
             for (int32_t i = 0; i < m_cdfV.size(); i++) {
                 sum += m_cdfV[i];
                 if (i > 0) {
@@ -84,10 +84,10 @@ namespace AT_NAME {
                 }
             }
             if (sum > 0) {
-                real invSum = 1 / sum;
+                float invSum = 1 / sum;
                 for (int32_t i = 0; i < m_cdfV.size(); i++) {
                     m_cdfV[i] *= invSum;
-                    m_cdfV[i] = aten::clamp<real>(m_cdfV[i], 0, 1);
+                    m_cdfV[i] = aten::clamp<float>(m_cdfV[i], 0, 1);
                 }
             }
         }
@@ -95,8 +95,8 @@ namespace AT_NAME {
         // For horizontal.
         {
             for (int32_t y = 0; y < height; y++) {
-                real sum = 0;
-                std::vector<real>& cdfU = m_cdfU[y];
+                float sum = 0;
+                std::vector<float>& cdfU = m_cdfU[y];
 
                 for (int32_t x = 0; x < width; x++) {
                     sum += cdfU[x];
@@ -106,10 +106,10 @@ namespace AT_NAME {
                 }
 
                 if (sum > 0) {
-                    real invSum = 1 / sum;
+                    float invSum = 1 / sum;
                     for (int32_t x = 0; x < width; x++) {
                         cdfU[x] *= invSum;
-                        cdfU[x] = aten::clamp<real>(cdfU[x], 0, 1);
+                        cdfU[x] = aten::clamp<float>(cdfU[x], 0, 1);
                     }
                 }
             }
@@ -118,7 +118,7 @@ namespace AT_NAME {
         m_avgIllum /= totalWeight;
     }
 
-    real ImageBasedLight::samplePdf(const aten::ray& r, const aten::context& ctxt) const
+    float ImageBasedLight::samplePdf(const aten::ray& r, const aten::context& ctxt) const
     {
         AT_ASSERT(bg_.envmap_tex_idx >= 0);
         auto envmap = ctxt.GetTexture(bg_.envmap_tex_idx);
@@ -131,10 +131,10 @@ namespace AT_NAME {
     }
 
     static int32_t samplePdfAndCdf(
-        real r,
-        const std::vector<real>& cdf,
-        real& outPdf,
-        real& outCdf)
+        float r,
+        const std::vector<float>& cdf,
+        float& outPdf,
+        float& outCdf)
     {
         outPdf = 0;
         outCdf = 0;
@@ -212,8 +212,8 @@ namespace AT_NAME {
         const auto r1 = sampler->nextSample();
         const auto r2 = sampler->nextSample();
 
-        real pdfU, pdfV;
-        real cdfU, cdfV;
+        float pdfU, pdfV;
+        float cdfU, cdfV;
 
         int32_t y = samplePdfAndCdf(r1, m_cdfV, pdfV, cdfV);
         int32_t x = samplePdfAndCdf(r2, m_cdfU[y], pdfU, cdfU);
@@ -221,8 +221,8 @@ namespace AT_NAME {
         auto width = envmap->width();
         auto height = envmap->height();
 
-        real u = (real)(x + 0.5) / width;
-        real v = (real)(y + 0.5) / height;
+        float u = (float)(x + 0.5) / width;
+        float v = (float)(y + 0.5) / height;
 
         // NOTE
         // p(w) = p(u, v) * (w * h) / (2π^2 * sin(θ))
@@ -238,7 +238,7 @@ namespace AT_NAME {
 #elif 0
         auto uv = AT_NAME::envmap::ConvertDirectionToUV(nml);
 
-        static const real radius = real(3);
+        static const float radius = float(3);
 
         auto r1 = sampler->nextSample();
         auto r2 = sampler->nextSample();
@@ -250,23 +250,23 @@ namespace AT_NAME {
         auto width = envmap->GetTexture()->width();
         auto height = envmap->GetTexture()->height();
 
-        r1 = r1 * radius / (real)width;
-        r2 = r2 * radius / (real)height;
+        r1 = r1 * radius / (float)width;
+        r2 = r2 * radius / (float)height;
 
-        real u = uv.x + r1;
-        if (u < real(0)) {
-            u += real(1);
+        float u = uv.x + r1;
+        if (u < float(0)) {
+            u += float(1);
         }
-        else if (u > real(1)) {
-            u = real(1) - (u - real(1));
+        else if (u > float(1)) {
+            u = float(1) - (u - float(1));
         }
 
-        real v = uv.y + r2;
-        if (v < real(0)) {
-            v += real(1);
+        float v = uv.y + r2;
+        if (v < float(0)) {
+            v += float(1);
         }
-        else if (v > real(1)) {
-            v = real(1) - (v - real(1));
+        else if (v > float(1)) {
+            v = float(1) - (v - float(1));
         }
 
         // u, v -> direction.
@@ -275,20 +275,20 @@ namespace AT_NAME {
         result.pdf = dot(nml, result.dir) / AT_MATH_PI;
 
         result.le = envmap->sample(u, v);
-        result.intensity = real(1);
+        result.intensity = float(1);
         result.finalColor = result.le * result.intensity;
 #else
         auto n = nml;
         auto t = aten::getOrthoVector(nml);
         auto b = normalize(cross(n, t));
 
-        real r1 = sampler->nextSample();
-        real r2 = sampler->nextSample();
+        float r1 = sampler->nextSample();
+        float r2 = sampler->nextSample();
 
-        real sinpsi = aten::sin(2 * AT_MATH_PI * r1);
-        real cospsi = aten::cos(2 * AT_MATH_PI * r1);
-        real costheta = aten::pow(1 - r2, 0.5);
-        real sintheta = aten::sqrt(1 - costheta * costheta);
+        float sinpsi = aten::sin(2 * AT_MATH_PI * r1);
+        float cospsi = aten::cos(2 * AT_MATH_PI * r1);
+        float costheta = aten::pow(1 - r2, 0.5);
+        float sintheta = aten::sqrt(1 - costheta * costheta);
 
         // returnTo the result
         result.dir = normalize(t * sintheta * cospsi + b * sintheta * sinpsi + n * costheta);
@@ -298,7 +298,7 @@ namespace AT_NAME {
         auto uv = AT_NAME::envmap::ConvertDirectionToUV(result.dir);
 
         result.le = envmap->sample(uv.x, uv.y);
-        result.intensity = real(1);
+        result.intensity = float(1);
         result.finalColor = result.le * result.intensity;
 #endif
 

@@ -29,7 +29,7 @@ namespace AT_NAME
         virtual bool hit(
             const aten::context& ctxt,
             const aten::ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             aten::Intersection& isect) const override;
 
         template <class CONTEXT>
@@ -90,9 +90,9 @@ namespace AT_NAME
             // NOTE
             // http://d.hatena.ne.jp/Zellij/20131207/p1
 
-            real a = isect->a;
-            real b = isect->b;
-            real c = 1 - a - b;
+            float a = isect->a;
+            float b = isect->b;
+            float c = 1 - a - b;
 
             // 重心座標系(barycentric coordinates).
             // v0基準.
@@ -107,7 +107,7 @@ namespace AT_NAME
                 auto e01 = p1 - p0;
                 auto e02 = p2 - p0;
 
-                e01.w = e02.w = real(0);
+                e01.w = e02.w = float(0);
 
                 rec->normal = normalize(cross(e01, e02));
             }
@@ -130,11 +130,11 @@ namespace AT_NAME
             const auto n1{ ctxt.GetNormalAsVec4(tri.idx[1]) };
             const auto n2{ ctxt.GetNormalAsVec4(tri.idx[2]) };
 
-            real r0 = sampler->nextSample();
-            real r1 = sampler->nextSample();
+            float r0 = sampler->nextSample();
+            float r1 = sampler->nextSample();
 
-            real a = aten::sqrt(r0) * (real(1) - r1);
-            real b = aten::sqrt(r0) * r1;
+            float a = aten::sqrt(r0) * (float(1) - r1);
+            float b = aten::sqrt(r0) * r1;
 
             // 重心座標系(barycentric coordinates).
             // v0基準.
@@ -147,7 +147,7 @@ namespace AT_NAME
             // 三角形の面積 = ２辺の外積の長さ / 2;
             auto e0 = p1 - p0;
             auto e1 = p2 - p0;
-            auto area = real(0.5) * cross(e0, e1).length();
+            auto area = float(0.5) * cross(e0, e1).length();
 
             result->pos = p;
             result->nml = n;

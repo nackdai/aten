@@ -39,7 +39,7 @@ namespace aten {
             return (m_program > 0);
         }
 
-        void setUniformFloat(std::string_view name, real f);
+        void setUniformFloat(std::string_view name, float f);
         void setUniformInt(std::string_view name, int32_t i);
         void setUniformBool(std::string_view name, bool b)
         {

@@ -26,12 +26,12 @@ namespace idaten
             is_enable_feature_line_ = b;
         }
 
-        real getFeatureLineWidth() const
+        float getFeatureLineWidth() const
         {
             return feature_line_width_;
         }
 
-        void setFeatureLineWidth(real w)
+        void setFeatureLineWidth(float w)
         {
             feature_line_width_ = std::max(w, 1.0f);
         }
@@ -49,7 +49,7 @@ namespace idaten
 
     protected:
         idaten::TypedCudaMemory<SampleRayInfo> sample_ray_infos_;
-        real feature_line_width_{ real(1) };
+        float feature_line_width_{ float(1) };
         bool is_enable_feature_line_{ false };
     };
 }

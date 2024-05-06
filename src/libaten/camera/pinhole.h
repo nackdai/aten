@@ -23,15 +23,15 @@ namespace AT_NAME
             const aten::vec3 &origin,
             const aten::vec3 &lookat,
             const aten::vec3 &up,
-            real vfov, // vertical fov.
+            float vfov, // vertical fov.
             int32_t width, int32_t height);
 
         void Initalize(
             const aten::vec3& origin,
             const aten::vec3& lookat,
             const aten::vec3& up,
-            real vfov,
-            real z_near, real z_far,
+            float vfov,
+            float z_near, float z_far,
             int32_t width, int32_t height);
 
         /**
@@ -43,7 +43,7 @@ namespace AT_NAME
          * @brief Sample camera.
          */
         virtual CameraSampleResult sample(
-            real s, real t,
+            float s, float t,
             aten::sampler *sampler) const override final;
 
         /**
@@ -52,7 +52,7 @@ namespace AT_NAME
         static AT_HOST_DEVICE_API void sample(
             CameraSampleResult *result,
             const aten::CameraParameter *param,
-            real s, real t);
+            float s, float t);
 
         /**
          * @brief Return camera's origin.
@@ -91,7 +91,7 @@ namespace AT_NAME
             return m_param;
         }
 
-        virtual real computePixelWidthAtDistance(real distanceFromCamera) const override
+        virtual float computePixelWidthAtDistance(float distanceFromCamera) const override
         {
             return camera::computePixelWidthAtDistance(m_param, distanceFromCamera);
         }
@@ -100,22 +100,22 @@ namespace AT_NAME
             const aten::ray &ray,
             int32_t &px, int32_t &py) const override final;
 
-        virtual real convertImageSensorPdfToScenePdf(
-            real pdfImage, // Not used.
+        virtual float convertImageSensorPdfToScenePdf(
+            float pdfImage, // Not used.
             const aten::vec3 &hitPoint,
             const aten::vec3 &hitpointNml,
             const aten::vec3 &posOnImageSensor,
             const aten::vec3 &posOnLens,
             const aten::vec3 &posOnObjectPlane) const override final;
 
-        virtual real getWdash(
+        virtual float getWdash(
             const aten::vec3 &hitPoint,
             const aten::vec3 &hitpointNml,
             const aten::vec3 &posOnImageSensor,
             const aten::vec3 &posOnLens,
             const aten::vec3 &posOnObjectPlane) const override final;
 
-        virtual real hitOnLens(
+        virtual float hitOnLens(
             const aten::ray &r,
             aten::vec3 &posOnLens,
             aten::vec3 &posOnObjectPlane,
@@ -125,6 +125,6 @@ namespace AT_NAME
     private:
         aten::CameraParameter m_param;
         aten::vec3 m_at;
-        real m_vfov;
+        float m_vfov;
     };
 }

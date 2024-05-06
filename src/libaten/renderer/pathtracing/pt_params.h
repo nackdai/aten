@@ -23,7 +23,7 @@ namespace AT_NAME {
 
     struct PathThroughput {
         aten::vec3 throughput;
-        real pdfb;
+        float pdfb;
     };
 
     struct PathContrib {
@@ -172,7 +172,7 @@ namespace AT_NAME {
 
     struct ShadowRay {
         aten::vec3 rayorg;
-        real distToLight;
+        float distToLight;
 
         aten::vec3 raydir;
         struct {

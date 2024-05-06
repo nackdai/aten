@@ -40,7 +40,7 @@ namespace aten {
         int32_t width,
         int32_t height,
         int32_t channel,
-        real norm)
+        float norm)
     {
         int32_t skipChannel = channel;
 
@@ -98,7 +98,7 @@ namespace aten {
 
         std::shared_ptr<texture> tex;
 
-        real* dst = nullptr;
+        float* dst = nullptr;
         int32_t width = 0;
         int32_t height = 0;
         int32_t channels = 0;
@@ -107,7 +107,7 @@ namespace aten {
             auto src = stbi_loadf(fullpath.c_str(), &width, &height, &channels, 0);
             if (src) {
                 tex = ctxt.CreateTexture(width, height, channels, texname.c_str());
-                real norm = real(1);
+                float norm = float(1);
                 read<float>(src, tex.get(), width, height, channels, norm);
 
                 STBI_FREE(src);
@@ -127,11 +127,11 @@ namespace aten {
                 tex = ctxt.CreateTexture(width, height, channels, texname.c_str());
 
                 if (fmt == ImgFormat::Fmt8Bit) {
-                    real norm = real(1) / real(255);
+                    float norm = float(1) / float(255);
                     read<stbi_uc>((stbi_uc*)src, tex.get(), width, height, channels, norm);
                 }
                 else {
-                    real norm = real(1) / real(65535);
+                    float norm = float(1) / float(65535);
                     read<uint16_t>((uint16_t*)src, tex.get(), width, height, channels, norm);
                 }
 

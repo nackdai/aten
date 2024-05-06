@@ -8,7 +8,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class RandomScene {
@@ -18,7 +18,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class MtrlTestScene {
@@ -28,7 +28,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class ObjectScene {
@@ -38,7 +38,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class PointLightScene {
@@ -48,7 +48,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 
 };
 
@@ -59,7 +59,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 
 };
 
@@ -70,7 +70,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 
 };
 
@@ -81,7 +81,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 
 };
 
@@ -92,7 +92,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class HideLightScene {
@@ -102,7 +102,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class DisneyMaterialTestScene {
@@ -112,7 +112,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class ObjCornellBoxScene {
@@ -125,7 +125,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class SponzaScene {
@@ -135,7 +135,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class BunnyScene {
@@ -145,7 +145,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class DeformScene {
@@ -157,7 +157,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class DeformInBoxScene {
@@ -169,7 +169,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class AlphaBlendedObjCornellBoxScene {
@@ -179,7 +179,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class CryteckSponzaScene {
@@ -189,7 +189,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 class ManyLightCryteckSponzaScene {
@@ -199,7 +199,7 @@ public:
     static void getCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov);
+        float& fov);
 };
 
 namespace _detail {

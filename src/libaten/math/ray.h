@@ -18,11 +18,11 @@ namespace aten
         {
             dir = normalize(d);
 
-            AT_ASSERT(dot(dir, normal) >= real(0.0));
+            AT_ASSERT(dot(dir, normal) >= float(0.0));
 
-            static constexpr real origin = real(1.0) / real(32.0);
-            static constexpr real float_scale = real(1.0) / real(65536.0);
-            static constexpr real int_scale = real(256.0);
+            static constexpr float origin = float(1.0) / float(32.0);
+            static constexpr float float_scale = float(1.0) / float(65536.0);
+            static constexpr float int_scale = float(256.0);
 
             // A Fast and Robust Method for Avoiding  Self-Intersection
             // Capter 6 in RayTracing Gems
@@ -58,9 +58,9 @@ namespace aten
             // つまり、int32_tとfloatで負の数の増え方の取り扱いが異なる.
             // 下ではfloatをint32_tとして計算するため、負の数の場合に値が小さくなるような計算をする.
             vec3 p_i(
-                intAsFloat(floatAsInt(o.x) + (o.x < real(0) ? -of_ix : of_ix)),
-                intAsFloat(floatAsInt(o.y) + (o.y < real(0) ? -of_iy : of_iy)),
-                intAsFloat(floatAsInt(o.z) + (o.z < real(0) ? -of_iz : of_iz)));
+                intAsFloat(floatAsInt(o.x) + (o.x < float(0) ? -of_ix : of_ix)),
+                intAsFloat(floatAsInt(o.y) + (o.y < float(0) ? -of_iy : of_iy)),
+                intAsFloat(floatAsInt(o.z) + (o.z < float(0) ? -of_iz : of_iz)));
 
             org = vec3(
                 aten::abs(o.x) < origin ? org.x = o.x + float_scale * normal.x : p_i.x,

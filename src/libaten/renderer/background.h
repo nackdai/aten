@@ -129,12 +129,12 @@ namespace AT_NAME
             auto r = length(dir);
 
             // Account for discontinuity
-            auto phi = (real)((temp >= 0) ? temp : (temp + 2 * AT_MATH_PI));
+            auto phi = (float)((temp >= 0) ? temp : (temp + 2 * AT_MATH_PI));
             auto theta = aten::acos(dir.y / r);
 
             // Map to [0,1]x[0,1] range and reverse Y axis
-            real u = phi / (2 * AT_MATH_PI);
-            real v = 1 - theta / AT_MATH_PI;
+            float u = phi / (2 * AT_MATH_PI);
+            float v = 1 - theta / AT_MATH_PI;
 
             aten::vec3 uv = aten::vec3(u, v, 0);
 

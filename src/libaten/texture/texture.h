@@ -28,7 +28,7 @@ namespace aten
     public:
         void init(int32_t width, int32_t height, int32_t channels);
 
-        vec4 at(real u, real v) const
+        vec4 at(float u, float v) const
         {
             int32_t iu = static_cast<int32_t>(u * (width_ - 1));
             int32_t iv = static_cast<int32_t>(v * (height_ - 1));
@@ -64,7 +64,7 @@ namespace aten
             return ret;
         }
 
-        real& operator()(int32_t x, int32_t y, int32_t c)
+        float& operator()(int32_t x, int32_t y, int32_t c)
         {
             x = std::min(x, width_ - 1);
             y = std::min(y, height_ - 1);

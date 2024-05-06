@@ -68,18 +68,18 @@ namespace aten {
         vec3 u = cross(d, e2);
         vec3 v = cross(r, e1);
 
-        real inv = real(1) / dot(u, e1);
+        float inv = float(1) / dot(u, e1);
 
-        real t = dot(v, e2) * inv;
-        real beta = dot(u, r) * inv;
-        real gamma = dot(v, d) * inv;
+        float t = dot(v, e2) * inv;
+        float beta = dot(u, r) * inv;
+        float gamma = dot(v, d) * inv;
 
         intersectResult result;
 
-        result.isIntersect = ((beta >= real(0) && beta <= real(1))
-            && (gamma >= real(0) && gamma <= real(1))
-            && (beta + gamma <= real(1))
-            && t >= real(0));
+        result.isIntersect = ((beta >= float(0) && beta <= float(1))
+            && (gamma >= float(0) && gamma <= float(1))
+            && (beta + gamma <= float(1))
+            && t >= float(0));
 
         result.a = beta;
         result.b = gamma;
@@ -100,16 +100,16 @@ namespace aten {
         int32_t ky = (kx + 1) % 3;
 
         // swap kx and ky dimension to preserve windin direction of triangles.
-        if (ray.dir[kz] < real(0)) {
+        if (ray.dir[kz] < float(0)) {
             int32_t tmp = kx;
             kx = ky;
             ky = tmp;
         }
 
         // calculate shear constants.
-        real Sx = ray.dir[kx] / ray.dir[kz];
-        real Sy = ray.dir[ky] / ray.dir[kz];
-        real Sz = real(1) / ray.dir[kz];
+        float Sx = ray.dir[kx] / ray.dir[kz];
+        float Sy = ray.dir[ky] / ray.dir[kz];
+        float Sz = float(1) / ray.dir[kz];
 
         // calculate vertices relative to ray origin.
         const auto A = v0 - ray.org;
@@ -117,51 +117,51 @@ namespace aten {
         const auto C = v2 - ray.org;
 
         // perform shear and scale of vertices.
-        const real Ax = A[kx] - Sx * A[kz];
-        const real Ay = A[ky] - Sy * A[kz];
-        const real Bx = B[kx] - Sx * B[kz];
-        const real By = B[ky] - Sy * B[kz];
-        const real Cx = C[kx] - Sx * C[kz];
-        const real Cy = C[ky] - Sy * C[kz];
+        const float Ax = A[kx] - Sx * A[kz];
+        const float Ay = A[ky] - Sy * A[kz];
+        const float Bx = B[kx] - Sx * B[kz];
+        const float By = B[ky] - Sy * B[kz];
+        const float Cx = C[kx] - Sx * C[kz];
+        const float Cy = C[ky] - Sy * C[kz];
 
         // calculate scaled barycentric coordinates.
-        real U = Cx * By - Cy * Bx;
-        real V = Ax * Cy - Ay * Cx;
-        real W = Bx * Ay - By * Ax;
+        float U = Cx * By - Cy * Bx;
+        float V = Ax * Cy - Ay * Cx;
+        float W = Bx * Ay - By * Ax;
 
         // Peform edge tests.
         // Moving this test before
         // and the end of the previous conditional gives higher performance.
-        if ((U < real(0) || V < real(0) || W < real(0))
-            && (U > real(0) || V > real(0) || W > real(0)))
+        if ((U < float(0) || V < float(0) || W < float(0))
+            && (U > float(0) || V > float(0) || W > float(0)))
         {
             return result;;
         }
 
         // calculate dterminant.
-        real det = U + V + W;
+        float det = U + V + W;
 
-        if (det == real(0)) {
+        if (det == float(0)) {
             return result;;
         }
 
         // Calculate scaled z-coordinated of vertice
         // and use them to calculate the hit distance.
-        const real Az = Sz * A[kz];
-        const real Bz = Sz * B[kz];
-        const real Cz = Sz * C[kz];
-        const real T = U * Az + V * Bz + W * Cz;
+        const float Az = Sz * A[kz];
+        const float Bz = Sz * B[kz];
+        const float Cz = Sz * C[kz];
+        const float T = U * Az + V * Bz + W * Cz;
 
-        const real rcpDet = real(1) / det;
+        const float rcpDet = float(1) / det;
 
-        const real beta = U * rcpDet;
-        const real gamma = V * rcpDet;
-        const real t = T * rcpDet;
+        const float beta = U * rcpDet;
+        const float gamma = V * rcpDet;
+        const float t = T * rcpDet;
 
-        result.isIntersect = ((beta >= real(0) && beta <= real(1))
-            && (gamma >= real(0) && gamma <= real(1))
-            && (beta + gamma <= real(1))
-            && t >= real(0));
+        result.isIntersect = ((beta >= float(0) && beta <= float(1))
+            && (gamma >= float(0) && gamma <= float(1))
+            && (beta + gamma <= float(1))
+            && t >= float(0));
 
         result.a = beta;
         result.b = gamma;

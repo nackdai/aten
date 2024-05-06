@@ -176,7 +176,7 @@ bool JointChunk::exportJoint(
                 float angle = sTransform.param[3];
 
                 aten::quat quat;
-                quat.setQuatFromRadAxis(angle, aten::vec4(x, y, z, real(0)));
+                quat.setQuatFromRadAxis(angle, aten::vec4(x, y, z, float(0)));
 
                 auto mtx = quat.getMatrix();
 

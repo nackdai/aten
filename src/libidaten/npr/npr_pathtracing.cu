@@ -20,8 +20,8 @@ namespace npr_kernel {
         const aten::ray* __restrict__ rays,
         const int32_t* __restrict__ hitindices,
         int32_t* hitnum,
-        real feature_line_width,
-        real pixel_width)
+        float feature_line_width,
+        float pixel_width)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -42,8 +42,8 @@ namespace npr_kernel {
 
     __global__ void shadeSampleRay(
         aten::vec3 line_color,  // TODO
-        real feature_line_width,
-        real pixel_width,
+        float feature_line_width,
+        float pixel_width,
         idaten::NPRPathTracing::SampleRayInfo* sample_ray_infos,
         int32_t depth,
         const int32_t* __restrict__ hitindices,
@@ -89,20 +89,20 @@ namespace npr_kernel {
         constexpr auto SampleRayNum = aten::array_size<decltype(idaten::NPRPathTracing::SampleRayInfo::descs)>::size;
 
         // TODO: These value should be configurable.
-        constexpr real albedo_threshold = 0.1f;
-        constexpr real normal_threshold = 0.1f;
+        constexpr float albedo_threshold = 0.1f;
+        constexpr float normal_threshold = 0.1f;
 
         auto& sample_ray_info = sample_ray_infos[idx];
         auto& sample_ray_descs = sample_ray_info.descs;
         auto& disc = sample_ray_info.disc;
 
         // Current closest distance to feature line point.
-        auto closest_feature_line_point_distance = std::numeric_limits<real>::max();
+        auto closest_feature_line_point_distance = std::numeric_limits<float>::max();
 
         // Whether the feature line point has been found.
         bool is_found_feature_line_point = false;
 
-        real hit_point_distance = 0;
+        float hit_point_distance = 0;
 
         const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
         AT_NAME::evaluate_hit_result(hrec_query, obj, ctxt, query_ray, isect);
@@ -183,8 +183,8 @@ namespace npr_kernel {
     __global__ void shadeMissSampleRay(
         int32_t width, int32_t height,
         aten::vec3 line_color,  // TODO
-        real feature_line_width,
-        real pixel_width,
+        float feature_line_width,
+        float pixel_width,
         idaten::NPRPathTracing::SampleRayInfo* sample_ray_infos,
         int32_t depth,
         const int32_t* __restrict__ hitindices,
@@ -228,9 +228,9 @@ namespace npr_kernel {
         auto& sample_ray_descs = sample_ray_info.descs;
         auto& disc = sample_ray_info.disc;
 
-        auto closest_feature_line_point_distance = std::numeric_limits<real>::max();
+        auto closest_feature_line_point_distance = std::numeric_limits<float>::max();
         bool is_found_feature_line_point = false;
-        real hit_point_distance = 0;
+        float hit_point_distance = 0;
 
         // NOTE:
         // In order to compute sample ray, previous disc and next disc are necessary.

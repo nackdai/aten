@@ -11,15 +11,15 @@ namespace AT_NAME
 
     public:
         static AT_DEVICE_API aten::vec4 gen(
-            real u, real v,
-            real flake_scale = real(400.0),             // Smaller values zoom into the flake map, larger values zoom out.
-            real flake_size = real(0.25),               // Relative size of the flakes
-            real flake_size_variance = real(0.7),       // 0.0 makes all flakes the same size, 1.0 assigns random size between 0 and the given flake size
-            real flake_normal_orientation = real(0.5)); // Blend between the flake normals (0.0) and the surface normal (1.0)
+            float u, float v,
+            float flake_scale = float(400.0),             // Smaller values zoom into the flake map, larger values zoom out.
+            float flake_size = float(0.25),               // Relative size of the flakes
+            float flake_size_variance = float(0.7),       // 0.0 makes all flakes the same size, 1.0 assigns random size between 0 and the given flake size
+            float flake_normal_orientation = float(0.5)); // Blend between the flake normals (0.0) and the surface normal (1.0)
 
-        static inline AT_DEVICE_API real computeFlakeDensity(
-            real flake_size,
-            real flakeMapAspect)
+        static inline AT_DEVICE_API float computeFlakeDensity(
+            float flake_size,
+            float flakeMapAspect)
         {
             // NOTE
             // size : mapサイズの長辺に占める割合.
@@ -44,10 +44,10 @@ namespace AT_NAME
 
             // TODO
             // aspect = w / h の前提なので、h / w を取得したいため逆数にする.
-            auto aspect = real(1) / flakeMapAspect;
+            auto aspect = float(1) / flakeMapAspect;
 
             auto D = AT_MATH_PI * flake_size * flake_size * aspect;
-            D = aten::cmpMin(D, real(1));
+            D = aten::cmpMin(D, float(1));
 
             return D;
         }

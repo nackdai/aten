@@ -234,9 +234,9 @@ namespace aten
             for (int32_t x = 0; x < width_; x++) {
                 int32_t yy = height_ - 1 - y;
 
-                dst[yy * width_ + x].r() = (uint8_t)aten::clamp(m_colors[y * width_ + x].x * real(255), real(0), real(255));
-                dst[yy * width_ + x].g() = (uint8_t)aten::clamp(m_colors[y * width_ + x].y * real(255), real(0), real(255));
-                dst[yy * width_ + x].b() = (uint8_t)aten::clamp(m_colors[y * width_ + x].z * real(255), real(0), real(255));
+                dst[yy * width_ + x].r() = (uint8_t)aten::clamp(m_colors[y * width_ + x].x * float(255), float(0), float(255));
+                dst[yy * width_ + x].g() = (uint8_t)aten::clamp(m_colors[y * width_ + x].y * float(255), float(0), float(255));
+                dst[yy * width_ + x].b() = (uint8_t)aten::clamp(m_colors[y * width_ + x].z * float(255), float(0), float(255));
             }
         }
 

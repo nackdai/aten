@@ -134,7 +134,7 @@ namespace aten
                         }
                     }
 
-                    col /= (real)cnt;
+                    col /= (float)cnt;
                     dst.buffer->put(x, y, vec4(col, 1));
                 }
             }

@@ -36,7 +36,7 @@ namespace restir {
             const aten::vec3& ray_dir,
             const aten::MaterialParameter& mtrl,
             const float u, const float v,
-            real pre_sampled_r)
+            float pre_sampled_r)
         {
             aten::vec3 nmlLight = lightsample.nml;
             aten::vec3 dirToLight = normalize(lightsample.dir);
@@ -79,7 +79,7 @@ namespace restir {
             const aten::vec3& ray_dir,
             const aten::MaterialParameter& mtrl,
             const float u, const float v,
-            real pre_sampled_r)
+            float pre_sampled_r)
         {
             aten::vec3 dirToLight = normalize(lightsample.dir);
 
@@ -128,7 +128,7 @@ namespace restir {
         const aten::vec3& ray_dir,
         float u, float v,
         aten::sampler* sampler,
-        real pre_sampled_r,
+        float pre_sampled_r,
         int32_t lod = 0)
     {
         const auto light_num = ctxt.GetLightNum();
@@ -137,9 +137,9 @@ namespace restir {
 
         reservoir.clear();
 
-        real candidate_target_pdf = real(0);
+        float candidate_target_pdf = float(0);
 
-        real light_select_prob = real(1) / max_light_num;
+        float light_select_prob = float(1) / max_light_num;
 
         for (auto i = 0; i < light_cnt; i++) {
             // Sample light.

@@ -37,10 +37,10 @@ namespace aten {
             m_points[0] = org;
 
             // TODO
-            m_points[1] = org + dir[0] * real(10000.0);
-            m_points[2] = org + dir[1] * real(10000.0);
-            m_points[3] = org + dir[2] * real(10000.0);
-            m_points[4] = org + dir[3] * real(10000.0);
+            m_points[1] = org + dir[0] * float(10000.0);
+            m_points[2] = org + dir[1] * float(10000.0);
+            m_points[3] = org + dir[2] * float(10000.0);
+            m_points[4] = org + dir[3] * float(10000.0);
 
             m_dir[0] = dir[0];
             m_dir[1] = dir[1];
@@ -88,9 +88,9 @@ namespace aten {
             for (int32_t i = 0; i < AT_COUNTOF(m_plane); i++) {
                 const vec4& p = m_plane[i];
 
-                int32_t px = (p.x > real(0.0));
-                int32_t py = (p.y > real(0.0));
-                int32_t pz = (p.z > real(0.0));
+                int32_t px = (p.x > float(0.0));
+                int32_t py = (p.y > float(0.0));
+                int32_t pz = (p.z > float(0.0));
 
                 vec3 vmax(b[px].x, b[py].y, b[pz].z);
                 vec3 vmin(b[1 - px].x, b[1 - py].y, b[1 - pz].z);
@@ -115,7 +115,7 @@ namespace aten {
             // この方法では intersectingとinsideの違いを判定できないと思われる...
 
             if (intersecting) {
-                auto center = (minbox + maxbox) * real(0.5);
+                auto center = (minbox + maxbox) * float(0.5);
 
                 vec3 diff[] = {
                     (vec3)m_points[0] - center,
@@ -131,9 +131,9 @@ namespace aten {
 
                 auto size = maxbox - minbox;
                 vec3 axis[] = {
-                    vec3(size.x * real(0.5), real(0), real(0)),
-                    vec3(real(0), size.y * real(0.5), real(0)),
-                    vec3(real(0), real(0), size.z * real(0.5)),
+                    vec3(size.x * float(0.5), float(0), float(0)),
+                    vec3(float(0), size.y * float(0.5), float(0)),
+                    vec3(float(0), float(0), size.z * float(0.5)),
                 };
 
                 for (int32_t i = 0; i < 3; i++) {
@@ -144,7 +144,7 @@ namespace aten {
                     int32_t out1 = 0;
                     int32_t out2 = 0;
 
-                    if (axisLengthSquared == real(0)) {
+                    if (axisLengthSquared == float(0)) {
                         continue;
                     }
 

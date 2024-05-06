@@ -201,7 +201,7 @@ namespace aten {
     bool StacklessBVH::hit(
         const context& ctxt,
         const ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         Intersection& isect) const
     {
         return hit(ctxt, 0, m_listStacklessBvhNode, r, t_min, t_max, isect);
@@ -212,10 +212,10 @@ namespace aten {
         int32_t exid,
         const std::vector<std::vector<StacklessBvhNode>>& listStacklessBvhNode,
         const ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         Intersection& isect) const
     {
-        real hitt = AT_MATH_INF;
+        float hitt = AT_MATH_INF;
 
         int32_t nodeid = 0;
         uint32_t bitstack = 0;
@@ -284,7 +284,7 @@ namespace aten {
                 }
             }
             else {
-                real t[2];
+                float t[2];
                 bool hit[2];
 
                 hit[0] = aten::aabb::hit(r, node->boxmin_0, node->boxmax_0, t_min, t_max, &t[0]);

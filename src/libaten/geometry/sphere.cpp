@@ -2,7 +2,7 @@
 
 namespace AT_NAME
 {
-    static inline AT_HOST_DEVICE_API void getUV(real& u, real& v, const aten::vec3& p)
+    static inline AT_HOST_DEVICE_API void getUV(float& u, float& v, const aten::vec3& p)
     {
         auto phi = aten::asin(p.y);
         auto theta = aten::atan(p.x / p.z);
@@ -14,7 +14,7 @@ namespace AT_NAME
     bool sphere::hit(
         const aten::context& ctxt,
         const aten::ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         aten::Intersection& isect) const
     {
         bool isHit = hit(&m_param, r, t_min, t_max, &isect);
@@ -30,7 +30,7 @@ namespace AT_NAME
     bool AT_HOST_DEVICE_API sphere::hit(
         const aten::ObjectParameter* param,
         const aten::ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         aten::Intersection* isect)
     {
         // NOTE
@@ -38,18 +38,18 @@ namespace AT_NAME
         // p52 - p58
 
         const aten::vec3 p_o = param->sphere.center - r.org;
-        const real b = dot(p_o, r.dir);
+        const float b = dot(p_o, r.dir);
 
         // 判別式.
-        const real D4 = b * b - dot(p_o, p_o) + param->sphere.radius * param->sphere.radius;
+        const float D4 = b * b - dot(p_o, p_o) + param->sphere.radius * param->sphere.radius;
 
-        if (D4 < real(0)) {
+        if (D4 < float(0)) {
             return false;
         }
 
-        const real sqrt_D4 = aten::sqrt(D4);
-        const real t1 = b - sqrt_D4;
-        const real t2 = b + sqrt_D4;
+        const float sqrt_D4 = aten::sqrt(D4);
+        const float t1 = b - sqrt_D4;
+        const float t2 = b + sqrt_D4;
 
 #if 0
         if (t1 > AT_MATH_EPSILON) {
@@ -119,7 +119,7 @@ namespace AT_NAME
 
         auto r = param.sphere.radius;
 
-        auto z = real(2) * r1 - real(1); // [0,1] -> [-1, 1]
+        auto z = float(2) * r1 - float(1); // [0,1] -> [-1, 1]
 
         auto sin_theta = aten::sqrt(1 - z * z);
         auto phi = 2 * AT_MATH_PI * r2;
@@ -136,7 +136,7 @@ namespace AT_NAME
 
         result->nml = normalize(result->pos - param.sphere.center);
 
-        result->area = real(1);
+        result->area = float(1);
         {
             auto tmp = param.sphere.center + aten::vec3(param.sphere.radius, 0, 0);
 

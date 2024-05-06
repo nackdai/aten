@@ -186,17 +186,17 @@ namespace AT_NAME
 
     AT_DEVICE_API bool material::isTranslucentByAlpha(
         const aten::MaterialParameter& param,
-        real u, real v)
+        float u, float v)
     {
         auto alpha = getTranslucentAlpha(param, u, v);
-        return alpha < real(1);
+        return alpha < float(1);
     }
 
-    AT_DEVICE_API real material::getTranslucentAlpha(
+    AT_DEVICE_API float material::getTranslucentAlpha(
         const aten::MaterialParameter& param,
-        real u, real v)
+        float u, float v)
     {
-        auto albedo{ AT_NAME::sampleTexture(param.albedoMap, u, v, aten::vec4(real(1))) };
+        auto albedo{ AT_NAME::sampleTexture(param.albedoMap, u, v, aten::vec4(float(1))) };
         albedo *= param.baseColor;
         return albedo.a;
     }

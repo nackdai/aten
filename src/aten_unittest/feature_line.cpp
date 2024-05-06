@@ -5,8 +5,8 @@
 
 TEST(feature_line_test, GenerateDisc)
 {
-    constexpr real line_width = real(2);
-    constexpr real pixel_width = real(3);
+    constexpr float line_width = float(2);
+    constexpr float pixel_width = float(3);
 
     const aten::ray query_ray(
         aten::vec3(0, 0, 0),
@@ -147,14 +147,14 @@ TEST(feature_line_test, ComputeRayHitPositionOnPlane)
 
 TEST(feature_line_test, GenerateSampleRay)
 {
-    constexpr auto sampler_r0 = real(0.5);
-    constexpr auto sampler_r1 = real(0.6);
+    constexpr auto sampler_r0 = float(0.5);
+    constexpr auto sampler_r1 = float(0.6);
 
     class TestSampler : public aten::sampler {
     public:
         TestSampler() = default;
         virtual ~TestSampler() = default;
-        virtual AT_HOST_DEVICE_API real nextSample() override final { return real(0); }
+        virtual AT_HOST_DEVICE_API float nextSample() override final { return float(0); }
 
         virtual AT_HOST_DEVICE_API aten::vec2 nextSample2D() override final
         {
@@ -168,7 +168,7 @@ TEST(feature_line_test, GenerateSampleRay)
     AT_NAME::npr::FeatureLine::Disc disc;
     disc.center = aten::vec3(0, 1, -1);
     disc.normal = aten::vec3(0, 0, 1);
-    disc.radius = real(1);
+    disc.radius = float(1);
 
     auto expected_u = sampler_r0;
     auto expected_v = sampler_r1;
@@ -202,12 +202,12 @@ TEST(feature_line_test, GenerateSampleRay)
 TEST(feature_line_test, ComputeNextSampleRay)
 {
     AT_NAME::npr::FeatureLine::Disc disc;
-    disc.radius = real(1);
+    disc.radius = float(1);
     disc.center = aten::vec3(0, 0, 1);
     disc.normal = aten::vec3(0, 0, -1);
 
     AT_NAME::npr::FeatureLine::Disc next_disc;
-    next_disc.radius = real(2);
+    next_disc.radius = float(2);
     next_disc.center = aten::vec3(0, 0, 2);
     next_disc.normal = aten::vec3(0, 0, 1);
 
@@ -247,12 +247,12 @@ TEST(feature_line_test, ComputeNextSampleRay)
 TEST(feature_line_test, ComputeHitPositionOnDisc)
 {
     AT_NAME::npr::FeatureLine::Disc disc;
-    disc.radius = real(1);
+    disc.radius = float(1);
     disc.center = aten::vec3(1, 2, 3);
     disc.normal = aten::vec3(0, 1, 0);
 
-    constexpr real u = real(0.5);
-    constexpr real v = real(0.5);
+    constexpr float u = float(0.5);
+    constexpr float v = float(0.5);
 
     aten::vec4 expected_pos(u, v, 0, 1);
     expected_pos *= disc.radius;
@@ -308,16 +308,16 @@ TEST(feature_line_test, ComputeDepthThreshold)
         hrec_q.p = aten::vec3(10, 10, 0);
         hrec_q.normal = normalize(aten::vec3(0, -1, 0));
     }
-    const real depth_q = 10;
+    const float depth_q = 10;
 
     aten::hitrecord hrec_s;
     {
         hrec_s.p = aten::vec3(-1, 1, 0);
         hrec_s.normal = normalize(aten::vec3(1, 0, 0));
     }
-    const real depth_s = 1;
+    const float depth_s = 1;
 
-    const real scale_factor = real(2);
+    const float scale_factor = float(2);
 
     const auto p_q = hrec_q.p - p;
     const auto p_s = hrec_s.p - p;
@@ -352,18 +352,18 @@ TEST(feature_line_test, EvaluateFeatureLineMetrics)
     EXPECT_FALSE(is_mesh);
 
     // Albedo.
-    auto is_albedo = AT_NAME::npr::FeatureLine::EvaluateAlbedoMetric(real(0.01), aten::vec4(1, 0, 0, 0), aten::vec4(0, 1, 0, 0));
+    auto is_albedo = AT_NAME::npr::FeatureLine::EvaluateAlbedoMetric(float(0.01), aten::vec4(1, 0, 0, 0), aten::vec4(0, 1, 0, 0));
     EXPECT_TRUE(is_albedo);
-    is_albedo = AT_NAME::npr::FeatureLine::EvaluateAlbedoMetric(real(0.01), aten::vec4(1, 0, 0, 0), aten::vec4(1, 0, 0, 0));
+    is_albedo = AT_NAME::npr::FeatureLine::EvaluateAlbedoMetric(float(0.01), aten::vec4(1, 0, 0, 0), aten::vec4(1, 0, 0, 0));
     EXPECT_FALSE(is_albedo);
 
     // Normal.
     auto is_normal = AT_NAME::npr::FeatureLine::EvaluateNormalMetric(
-        real(0.01),
+        float(0.01),
         normalize(aten::vec3(1, 1, 0)), normalize(aten::vec3(1, 0, 0)));
     EXPECT_TRUE(is_normal);
     is_normal = AT_NAME::npr::FeatureLine::EvaluateNormalMetric(
-        real(0.01),
+        float(0.01),
         normalize(aten::vec3(1, 0, 0)), normalize(aten::vec3(1, 0, 0)));
     EXPECT_FALSE(is_normal);
 
@@ -375,16 +375,16 @@ TEST(feature_line_test, EvaluateFeatureLineMetrics)
         hrec_q.p = aten::vec3(10, 10, 0);
         hrec_q.normal = normalize(aten::vec3(0, -1, 0));
     }
-    const real depth_q = 3;
+    const float depth_q = 3;
 
     aten::hitrecord hrec_s;
     {
         hrec_s.p = aten::vec3(-1, 1, 0);
         hrec_s.normal = normalize(aten::vec3(1, 0, 0));
     }
-    const real depth_s = 1;
+    const float depth_s = 1;
 
-    const real scale_factor = real(0.01);
+    const float scale_factor = float(0.01);
 
     auto is_depth = AT_NAME::npr::FeatureLine::EvaluateDepthMetric(
         p,
@@ -409,14 +409,14 @@ TEST(feature_line_test, IsInLineWidth)
         aten::vec3(1, 0, 0));
     const aten::vec3 point(1, 1, 0);
 
-    real screen_line_width = real(100);
-    const real accumulatedDistance = real(2);
-    const real pixelWidth = real(0.5);
+    float screen_line_width = float(100);
+    const float accumulatedDistance = float(2);
+    const float pixelWidth = float(0.5);
 
     auto is_in_line_width = AT_NAME::npr::FeatureLine::IsInLineWidth(screen_line_width, ray, point, accumulatedDistance, pixelWidth);
     EXPECT_TRUE(is_in_line_width);
 
-    screen_line_width = real(0.0001);
+    screen_line_width = float(0.0001);
     is_in_line_width = AT_NAME::npr::FeatureLine::IsInLineWidth(screen_line_width, ray, point, accumulatedDistance, pixelWidth);
     EXPECT_FALSE(is_in_line_width);
 }

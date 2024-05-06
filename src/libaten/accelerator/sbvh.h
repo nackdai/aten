@@ -94,7 +94,7 @@ namespace aten
         virtual bool hit(
             const context& ctxt,
             const ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             Intersection& isect) const override;
 
         /**
@@ -103,7 +103,7 @@ namespace aten
         virtual bool HitWithLod(
             const context& ctxt,
             const ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             bool enableLod,
             Intersection& isect) const override;
 
@@ -194,7 +194,7 @@ namespace aten
             const context& ctxt,
             int32_t exid,
             const ray& r,
-            real t_min, real t_max,
+            float t_min, float t_max,
             Intersection& isect,
             bool enableLod) const;
 
@@ -280,7 +280,7 @@ namespace aten
          */
         void findObjectSplit(
             SBVHNode& node,
-            real& cost,
+            float& cost,
             aabb& leftBB,
             aabb& rightBB,
             int32_t& splitBinPos,
@@ -299,13 +299,13 @@ namespace aten
         */
         void findSpatialSplit(
             SBVHNode& node,
-            real& cost,
+            float& cost,
             int32_t& leftCount,
             int32_t& rightCount,
             aabb& leftBB,
             aabb& rightBB,
             int32_t& bestAxis,
-            real& splitPlane);
+            float& splitPlane);
 
         /**
          * @biref Do the binned sah split actually with the result of findSpatialSplit.
@@ -323,9 +323,9 @@ namespace aten
          */
         void spatialSort(
             SBVHNode& node,
-            real splitPlane,
+            float splitPlane,
             int32_t axis,
-            real splitCost,
+            float splitCost,
             int32_t leftCnt,
             int32_t rightCnt,
             aabb& leftBB,

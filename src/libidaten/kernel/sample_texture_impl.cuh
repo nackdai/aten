@@ -2,7 +2,7 @@
 
 AT_INLINE_RELEASE AT_DEVICE_API aten::vec4 sampleTexture(
     const int32_t texid,
-    real u, real v,
+    float u, float v,
     const aten::vec4& defaultValue,
     int32_t lod/*= 0*/)
 {

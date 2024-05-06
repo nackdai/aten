@@ -9,20 +9,20 @@ namespace aten {
         const vec3& org,
         const vec3& nml,
         sampler* sampler,
-        real& selectPdf,
+        float& selectPdf,
         LightSampleResult& sampleRes)
     {
         auto num = ctxt.GetLightNum();
 
         if (num > 0) {
             const auto r = sampler->nextSample();
-            const auto idx = static_cast<int32_t>(aten::clamp<real>(r * num, 0, num - 1));
+            const auto idx = static_cast<int32_t>(aten::clamp<float>(r * num, 0, num - 1));
             const auto light = ctxt.GetLightInstance(idx);
 
             const auto& light_param = light->param();
 
             Light::sample(sampleRes, light_param, ctxt, org, nml, sampler);
-            selectPdf = real(1) / num;
+            selectPdf = float(1) / num;
 
             return light;
         }
@@ -69,7 +69,7 @@ namespace aten {
         const aten::vec3& nml,
         std::function<aten::vec3(const aten::vec3&)> compute_brdf,
         aten::sampler* sampler,
-        real& selectPdf,
+        float& selectPdf,
         aten::LightSampleResult& sampleRes)
     {
         // Resampled Importance Sampling.
@@ -82,9 +82,9 @@ namespace aten {
         Reservoir reservoir;
         reservoir.clear();
 
-        real selected_target_density = real(0);
+        float selected_target_density = float(0);
 
-        real lightSelectProb = real(1) / max_light_num;
+        float lightSelectProb = float(1) / max_light_num;
 
         for (auto i = 0U; i < light_cnt; i++) {
             const auto r_light = sampler->nextSample();

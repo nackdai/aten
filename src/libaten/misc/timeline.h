@@ -13,8 +13,8 @@ namespace aten
     public:
         Timeline();
         Timeline(
-            real duration,
-            real delay);
+            float duration,
+            float delay);
 
         ~Timeline() {}
 
@@ -22,8 +22,8 @@ namespace aten
         /** Initialize timeline.
          */
         void init(
-            real duration,
-            real delay);
+            float duration,
+            float delay);
 
         /** Start timeline.
          */
@@ -43,7 +43,7 @@ namespace aten
 
         /** Advance timeline by specified delta time.
          */
-        void advance(real delta);
+        void advance(float delta);
 
         /** Rewind timeline.
          */
@@ -57,15 +57,15 @@ namespace aten
 
         /** Get current time.
          */
-        real getTime() const;
+        float getTime() const;
 
         /** Get duration.
          */
-        real getDuration() const;
+        float getDuration() const;
 
         /** Get normalized time.
          */
-        real getNormalized() const;
+        float getNormalized() const;
 
         /** Set if timeline is loop.
          */
@@ -93,24 +93,24 @@ namespace aten
 
         /** Override current time forcibly.
          */
-        void overrideTimeForcibly(real t);
+        void overrideTimeForcibly(float t);
 
     private:
         void toggleDirection();
 
-        void setDuration(real duration);
+        void setDuration(float duration);
 
-        real getOverTime();
-        void setOverTime(real over);
+        float getOverTime();
+        void setOverTime(float over);
 
     protected:
-        real m_Time{ real(0) };        // 時間
-        real m_DelayTime{ real(0) };
+        float m_Time{ float(0) };        // 時間
+        float m_DelayTime{ float(0) };
 
-        real m_Duration{ real(0) };    // 期間
-        real m_Delay{ real(0) };       // 遅延
+        float m_Duration{ float(0) };    // 期間
+        float m_Delay{ float(0) };       // 遅延
 
-        real m_OverTime{ real(0) };
+        float m_OverTime{ float(0) };
 
         bool m_isLoop{ false };    // ループするか
         bool m_isReverse{ false };    // 逆回転するかどうか

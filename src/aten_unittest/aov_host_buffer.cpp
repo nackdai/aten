@@ -62,28 +62,28 @@ TEST(aov_test, AOVHostBufferTest)
     });
 
     ASSERT_EQ(aov.normal_depth().size(), 1);
-    ASSERT_EQ(aov.normal_depth()[0].x, static_cast<real>(0));
-    ASSERT_EQ(aov.get<aten::AOVBufferType::NormalDepth>()[0].x, static_cast<real>(0));
+    ASSERT_EQ(aov.normal_depth()[0].x, static_cast<float>(0));
+    ASSERT_EQ(aov.get<aten::AOVBufferType::NormalDepth>()[0].x, static_cast<float>(0));
 
     ASSERT_EQ(aov.albedo_meshid().size(), 1);
-    ASSERT_EQ(aov.albedo_meshid()[0].x, static_cast<real>(1));
-    ASSERT_EQ(aov.get<aten::AOVBufferType::AlbedoMeshId>()[0].x, static_cast<real>(1));
+    ASSERT_EQ(aov.albedo_meshid()[0].x, static_cast<float>(1));
+    ASSERT_EQ(aov.get<aten::AOVBufferType::AlbedoMeshId>()[0].x, static_cast<float>(1));
 }
 
 TEST(aov_test, FillBasicAOVsTest)
 {
     aten::vec4 aovNormalDepth;
 
-    aten::vec3 normal(real(1), real(2), real(3));
+    aten::vec3 normal(float(1), float(2), float(3));
 
     aten::hitrecord rec;
-    rec.p = aten::vec4(real(1));
+    rec.p = aten::vec4(float(1));
 
     aten::mat4 mtx_W2C;
 
     aten::vec4 aovAlbedoMeshId;
 
-    aten::vec4 albedo(real(4), real(5), real(6), real(7));
+    aten::vec4 albedo(float(4), float(5), float(6), float(7));
 
     aten::Intersection isect;
     isect.meshid = 2;
@@ -114,22 +114,22 @@ TEST(aov_test, FillBasicAOVsIfHitMissTest)
     aten::vec4 aovNormalDepth;
     aten::vec4 aovAlbedoMeshId;
 
-    aten::vec4 bg(real(4), real(5), real(6), real(7));
+    aten::vec4 bg(float(4), float(5), float(6), float(7));
 
     aten::FillBasicAOVsIfHitMiss(
         aovNormalDepth,
         aovAlbedoMeshId,
         bg);
 
-    ASSERT_EQ(aovNormalDepth.x, real(0));
-    ASSERT_EQ(aovNormalDepth.y, real(0));
-    ASSERT_EQ(aovNormalDepth.z, real(0));
-    ASSERT_EQ(aovNormalDepth.w, real(-1));
+    ASSERT_EQ(aovNormalDepth.x, float(0));
+    ASSERT_EQ(aovNormalDepth.y, float(0));
+    ASSERT_EQ(aovNormalDepth.z, float(0));
+    ASSERT_EQ(aovNormalDepth.w, float(-1));
 
     ASSERT_EQ(aovAlbedoMeshId.x, bg.x);
     ASSERT_EQ(aovAlbedoMeshId.y, bg.y);
     ASSERT_EQ(aovAlbedoMeshId.z, bg.z);
-    ASSERT_EQ(aovAlbedoMeshId.w, real(-1));
+    ASSERT_EQ(aovAlbedoMeshId.w, float(-1));
 }
 
 TEST(aov_test, FillBaryCentricAOVTest)
@@ -137,14 +137,14 @@ TEST(aov_test, FillBaryCentricAOVTest)
     aten::vec4 aovBuffer;
 
     aten::Intersection isect;
-    isect.a = real(0.1);
-    isect.b = real(0.2);
+    isect.a = float(0.1);
+    isect.b = float(0.2);
 
     FillBaryCentricAOV(aovBuffer, isect);
 
     ASSERT_FLOAT_EQ(aovBuffer.x, isect.a);
     ASSERT_FLOAT_EQ(aovBuffer.y, isect.b);
-    ASSERT_FLOAT_EQ(aovBuffer.z, real(1) - isect.a - isect.b);
+    ASSERT_FLOAT_EQ(aovBuffer.z, float(1) - isect.a - isect.b);
 }
 
 TEST(aov_test, FillBaryCentricAOVIfHitMissTest)
@@ -153,7 +153,7 @@ TEST(aov_test, FillBaryCentricAOVIfHitMissTest)
 
     FillBaryCentricAOVIfHitMiss(aovBuffer);
 
-    ASSERT_EQ(aovBuffer.x, real(0));
-    ASSERT_EQ(aovBuffer.y, real(0));
-    ASSERT_EQ(aovBuffer.z, real(0));
+    ASSERT_EQ(aovBuffer.x, float(0));
+    ASSERT_EQ(aovBuffer.y, float(0));
+    ASSERT_EQ(aovBuffer.z, float(0));
 }

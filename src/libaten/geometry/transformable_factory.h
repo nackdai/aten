@@ -23,7 +23,7 @@ namespace aten
         static std::shared_ptr<sphere> createSphere(
             context& ctxt,
             const aten::vec3& center,
-            real radius,
+            float radius,
             const std::shared_ptr<material>& mtrl)
         {
             auto ret = std::make_shared<AT_NAME::sphere>(center, radius, mtrl);

@@ -122,7 +122,7 @@ namespace aten
         aten::hitrecord rec;
         AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
 
-        bool isBackfacing = dot(rec.normal, -ray.dir) < real(0);
+        bool isBackfacing = dot(rec.normal, -ray.dir) < float(0);
 
         vec3 orienting_normal = rec.normal;
 

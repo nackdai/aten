@@ -49,37 +49,37 @@ namespace AT_NAME
         virtual ~CarPaint() {}
 
     public:
-        static AT_DEVICE_API real pdf(
+        static AT_DEVICE_API float pdf(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v);
+            float u, float v);
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
-            real u, real v,
+            float u, float v,
             aten::sampler* sampler,
-            real pre_sampled_r);
+            float pre_sampled_r);
 
         static AT_DEVICE_API aten::vec3 bsdf(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v,
-            real pre_sampled_r);
+            float u, float v,
+            float pre_sampled_r);
 
         static AT_DEVICE_API aten::vec3 bsdf(
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v,
+            float u, float v,
             const aten::vec3& externalAlbedo,
-            real pre_sampled_r);
+            float pre_sampled_r);
 
         static AT_DEVICE_API void sample(
             AT_NAME::MaterialSampling* result,
@@ -88,8 +88,8 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& orgnormal,
             aten::sampler* sampler,
-            real pre_sampled_r,
-            real u, real v,
+            float pre_sampled_r,
+            float u, float v,
             bool isLightPath = false);
 
         static AT_DEVICE_API void sample(
@@ -99,16 +99,16 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& orgnormal,
             aten::sampler* sampler,
-            real pre_sampled_r,
-            real u, real v,
+            float pre_sampled_r,
+            float u, float v,
             const aten::vec3& externalAlbedo,
             bool isLightPath = false);
 
-        static AT_DEVICE_API real applyNormalMap(
+        static AT_DEVICE_API float applyNormalMap(
             const aten::MaterialParameter* param,
             const aten::vec3& orgNml,
             aten::vec3& newNml,
-            real u, real v,
+            float u, float v,
             const aten::vec3& wi,
             aten::sampler* sampler);
 

@@ -110,7 +110,7 @@ namespace aten
 
             auto& sbvhNode = m_nodes[treelet.idxInBvhTree];
 
-            std::map<int32_t, real> mtrlMap;
+            std::map<int32_t, float> mtrlMap;
 
             for (const auto tid : treelet.tris) {
                 const auto tri = ctxt.GetTriangleInstance(tid);
@@ -127,7 +127,7 @@ namespace aten
             }
 
             int32_t mtrlCandidateId = -1;
-            real maxArea = real(-1);
+            float maxArea = float(-1);
 
             for (auto it : mtrlMap) {
                 auto mtrlid = it.first;

@@ -67,7 +67,7 @@ namespace aten
             mtrl_param.baseColor = vec3(emissive.r, emissive.g, emissive.b);
 
             // If emmsive color is invalid, the material is treated as emissive.
-            is_emissive = dot((vec3)mtrl_param.baseColor, (vec3)mtrl_param.baseColor) > real(0);
+            is_emissive = dot((vec3)mtrl_param.baseColor, (vec3)mtrl_param.baseColor) > float(0);
 
             if (is_emissive) {
                 mtrl_param.type = MaterialType::Emissive;
@@ -190,9 +190,9 @@ namespace aten
                     vertex vtx;
 
                     const auto& pos = assimp_mesh->mVertices[v_idx];
-                    vtx.pos = aten::vec4(pos.x, pos.y, pos.z, real(1));
+                    vtx.pos = aten::vec4(pos.x, pos.y, pos.z, float(1));
                     vtx.pos = mtx.apply(vtx.pos);
-                    vtx.pos.w = real(0);
+                    vtx.pos.w = float(0);
 
                     if (assimp_mesh->HasNormals()) {
                         const auto& nml = assimp_mesh->mNormals[v_idx];
@@ -202,7 +202,7 @@ namespace aten
                     }
                     else {
                         // Flag not to specify normal.
-                        vtx.uv.z = real(1);
+                        vtx.uv.z = float(1);
                     }
 
                     if (assimp_mesh->HasTextureCoords(0)) {
@@ -211,7 +211,7 @@ namespace aten
                     }
                     else {
                         // Specify not have texture coordinates.
-                        vtx.uv.z = real(-1);
+                        vtx.uv.z = float(-1);
                     }
 
                     ctxt.AddVertex(vtx);
@@ -258,9 +258,9 @@ namespace aten
                     const auto& v1 = ctxt.GetVertex(face_param.idx[1]);
                     const auto& v2 = ctxt.GetVertex(face_param.idx[2]);
 
-                    if (v0.uv.z == real(1)
-                        || v1.uv.z == real(1)
-                        || v2.uv.z == real(1))
+                    if (v0.uv.z == float(1)
+                        || v1.uv.z == float(1)
+                        || v2.uv.z == float(1))
                     {
                         face_param.needNormal = 1;
                     }

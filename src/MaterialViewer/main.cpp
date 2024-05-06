@@ -33,7 +33,7 @@ public:
     ~MaterialParamEditor() = default;
 
 public:
-    bool edit(std::string_view name, real& param, real _min, real _max) override final
+    bool edit(std::string_view name, float& param, float _min, float _max) override final
     {
         return ImGui::SliderFloat(name.data(), &param, _min, _max);
     }
@@ -104,7 +104,7 @@ public:
         visualizer_->addPostProc(&gamma_);
 
         aten::vec3 pos, at;
-        real vfov;
+        float vfov;
         GetCameraPosAndAt(pos, at, vfov);
 
         camera_.Initalize(
@@ -112,7 +112,7 @@ public:
             at,
             aten::vec3(0, 1, 0),
             vfov,
-            real(0.1), real(10000.0),
+            float(0.1), float(10000.0),
             WIDTH, HEIGHT);
 
         MakeScene(&scene_);
@@ -169,8 +169,8 @@ public:
         MershallLightParameter(lightparams);
 
         auto camparam = camera_.param();
-        camparam.znear = real(0.1);
-        camparam.zfar = real(10000.0);
+        camparam.znear = float(0.1);
+        camparam.zfar = float(10000.0);
 
         renderer_.getCompaction().init(
             WIDTH * HEIGHT,
@@ -207,8 +207,8 @@ public:
             camera_.update();
 
             auto camparam = camera_.param();
-            camparam.znear = real(0.1);
-            camparam.zfar = real(10000.0);
+            camparam.znear = float(0.1);
+            camparam.zfar = float(10000.0);
 
             renderer_.updateCamera(camparam);
             is_camera_dirty_ = false;
@@ -420,7 +420,7 @@ public:
                 camera_,
                 prev_mouse_pos_x_, prev_mouse_pos_y_,
                 x, y,
-                real(0.001));
+                float(0.001));
             is_camera_dirty_ = true;
         }
 
@@ -430,13 +430,13 @@ public:
 
     void OnMouseWheel(int32_t delta)
     {
-        aten::CameraOperator::dolly(camera_, delta * real(0.1));
+        aten::CameraOperator::dolly(camera_, delta * float(0.1));
         is_camera_dirty_ = true;
     }
 
     void OnKey(bool press, aten::Key key)
     {
-        static const real offset_base = real(0.1);
+        static const float offset_base = float(0.1);
 
         if (press)
         {
@@ -483,7 +483,7 @@ public:
             case aten::Key::Key_R:
             {
                 aten::vec3 pos, at;
-                real vfov;
+                float vfov;
                 GetCameraPosAndAt(pos, at, vfov);
 
                 camera_.init(
@@ -511,7 +511,7 @@ private:
     void GetCameraPosAndAt(
         aten::vec3& pos,
         aten::vec3& at,
-        real& fov)
+        float& fov)
     {
         pos = aten::vec3(0.f, 0.f, 10.f);
         at = aten::vec3(0.f, 0.f, 0.f);

@@ -25,7 +25,7 @@ namespace AT_NAME
     bool triangle::hit(
         const context& ctxt,
         const aten::ray& r,
-        real t_min, real t_max,
+        float t_min, float t_max,
         aten::Intersection& isect) const
     {
         bool isHit = hit(
@@ -70,7 +70,7 @@ namespace AT_NAME
         // 三角形の面積 = ２辺の外積の長さ / 2;
         auto e0 = v1.pos - v0.pos;
         auto e1 = v2.pos - v0.pos;
-        param_.area = real(0.5) * cross(e0, e1).length();
+        param_.area = float(0.5) * cross(e0, e1).length();
 
         param_.mtrlid = mtrlid;
         param_.mesh_id = geomid;

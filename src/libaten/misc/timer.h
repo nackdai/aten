@@ -24,7 +24,7 @@ namespace AT_NAME {
         static void init();
 
         void begin();
-        real end();
+        float end();
 
         static SystemTime getSystemTime();
 

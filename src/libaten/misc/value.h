@@ -17,7 +17,7 @@ namespace aten {
         PolymorphicValue() = default;
         ~PolymorphicValue() = default;
 
-        PolymorphicValue(real f)
+        PolymorphicValue(float f)
         {
             *this = f;
         }
@@ -53,7 +53,7 @@ namespace aten {
         PolymorphicValue& operator=(const PolymorphicValue& rhs) = delete;
         PolymorphicValue& operator=(PolymorphicValue&& rhs) = delete;
 
-        PolymorphicValue& operator=(real f)
+        PolymorphicValue& operator=(float f)
         {
             val_ = f;
             return *this;
@@ -109,8 +109,8 @@ namespace aten {
         auto getAs() const -> std::enable_if_t<!is_shared_ptr<T>::value, T>
         {
             //return static_cast<T>(*this);
-            if constexpr (std::is_same_v<T, real>) {
-                return this->operator real();
+            if constexpr (std::is_same_v<T, float>) {
+                return this->operator float();
             }
             else if constexpr (std::is_same_v<T, bool>) {
                 return this->operator bool();
@@ -127,7 +127,7 @@ namespace aten {
         }
 
     private:
-        std::variant<real, int32_t, bool, vec4, std::shared_ptr<void>> val_;
+        std::variant<float, int32_t, bool, vec4, std::shared_ptr<void>> val_;
         std::size_t type_hash_{ 0 };
     };
 

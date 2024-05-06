@@ -23,7 +23,7 @@ namespace aten {
         {
             // Nothing is done...
         }
-        virtual AT_HOST_DEVICE_API real nextSample() = 0;
+        virtual AT_HOST_DEVICE_API float nextSample() = 0;
 
         virtual AT_HOST_DEVICE_API vec2 nextSample2D()
         {
@@ -43,8 +43,8 @@ namespace aten {
     const std::vector<uint32_t>& getRandom();
     uint32_t getRandom(uint32_t idx);
 
-    inline real drand48()
+    inline float drand48()
     {
-        return static_cast<real>(::rand() / RAND_MAX);
+        return static_cast<float>(::rand() / RAND_MAX);
     }
 }

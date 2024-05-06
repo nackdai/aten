@@ -32,8 +32,8 @@ namespace npr {
         AT_NAME::npr::FeatureLine::Disc& disc,
         const aten::ray& query_ray,
         aten::sampler& sampler,
-        const real feature_line_width,
-        const real pixel_width)
+        const float feature_line_width,
+        const float pixel_width)
     {
         disc = AT_NAME::npr::FeatureLine::GenerateDisc(query_ray, feature_line_width, pixel_width);
 
@@ -58,12 +58,12 @@ namespace npr {
      */
     template <size_t SampleRayNum>
     inline AT_DEVICE_API void ComputeFeatureLineContribution(
-        real closest_feature_line_point_distance,
+        float closest_feature_line_point_distance,
         AT_NAME::Path& paths,
         int32_t idx,
         const aten::vec3& line_color)
     {
-        constexpr auto PdfSampleRay = real(1) / SampleRayNum;
+        constexpr auto PdfSampleRay = float(1) / SampleRayNum;
         auto pdf_feature_line = PdfSampleRay * (closest_feature_line_point_distance * closest_feature_line_point_distance);
 
         const auto pdfb = paths.throughput[idx].pdfb;
@@ -134,15 +134,15 @@ namespace npr {
         const aten::vec3& cam_org,
         const aten::ray& query_ray,
         const aten::hitrecord& hrec_query,
-        const real distance_query_ray_hit,
+        const float distance_query_ray_hit,
         const aten::Intersection& isect_sample_ray,
         const AT_NAME::npr::FeatureLine::Disc& disc,
         bool is_found_feature_line_point,
-        real closest_feature_line_point_distance,
-        const real feature_line_width,
-        const real pixel_width,
-        const real albedo_threshold,
-        const real normal_threshold)
+        float closest_feature_line_point_distance,
+        const float feature_line_width,
+        const float pixel_width,
+        const float albedo_threshold,
+        const float normal_threshold)
     {
         // Query ray hit and then sample ray's hit.
 
@@ -228,13 +228,13 @@ namespace npr {
         AT_NAME::npr::FeatureLine::SampleRayDesc& sample_ray_desc,
         const aten::ray& query_ray,
         const aten::hitrecord& hrec_query,
-        const real distance_query_ray_hit,
+        const float distance_query_ray_hit,
         const aten::ray& sample_ray,
         const AT_NAME::npr::FeatureLine::Disc& disc,
         bool is_found_feature_line_point,
-        real closest_feature_line_point_distance,
-        const real feature_line_width,
-        const real pixel_width)
+        float closest_feature_line_point_distance,
+        const float feature_line_width,
+        const float pixel_width)
     {
         // Query ray hits but sample ray doesn't hit anything.
 
@@ -297,9 +297,9 @@ namespace npr {
      * @param[in] disc Current disc.
      * @return Distance between the dummy hit point and query ray origin.
      */
-    inline AT_DEVICE_API real CreateNextDiscByDummyQueryRayHitPoint(
+    inline AT_DEVICE_API float CreateNextDiscByDummyQueryRayHitPoint(
         int32_t depth,
-        real hit_point_distance,
+        float hit_point_distance,
         const aten::ray& query_ray,
         FeatureLine::Disc& prev_disc,
         FeatureLine::Disc& disc)
@@ -307,7 +307,7 @@ namespace npr {
         if (depth > 0) {
             // Query ray doesn't hit anything, so there is no specific hit point.
             // So, in order to compute next sample ray, make dummy hit point.
-            const auto dummy_query_hit_pos = query_ray.org + real(100) * query_ray.dir;
+            const auto dummy_query_hit_pos = query_ray.org + float(100) * query_ray.dir;
 
             // Current disc center = query ray origin. So, we can use whichever.
             hit_point_distance = length(dummy_query_hit_pos - disc.center);
@@ -343,9 +343,9 @@ namespace npr {
         const aten::Intersection& isect_sample_ray,
         AT_NAME::npr::FeatureLine::Disc& disc,
         bool is_found_feature_line_point,
-        real closest_feature_line_point_distance,
-        const real feature_line_width,
-        const real pixel_width)
+        float closest_feature_line_point_distance,
+        const float feature_line_width,
+        const float pixel_width)
     {
         // Query ray doesn't hit, but sample ray hits.
 

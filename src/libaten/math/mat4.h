@@ -13,14 +13,14 @@ namespace aten {
         static const mat4 Zero;
 
         union {
-            real a[16];
-            real m[4][4];
+            float a[16];
+            float m[4][4];
             vec4 v[4];
             struct {
-                real m00, m01, m02, m03;
-                real m10, m11, m12, m13;
-                real m20, m21, m22, m23;
-                real m30, m31, m32, m33;
+                float m00, m01, m02, m03;
+                float m10, m11, m12, m13;
+                float m20, m21, m22, m23;
+                float m30, m31, m32, m33;
             };
         };
 
@@ -33,10 +33,10 @@ namespace aten {
             *this = rhs;
         }
         AT_HOST_DEVICE_API mat4(
-            real _m00, real _m01, real _m02, real _m03,
-            real _m10, real _m11, real _m12, real _m13,
-            real _m20, real _m21, real _m22, real _m23,
-            real _m30, real _m31, real _m32, real _m33)
+            float _m00, float _m01, float _m02, float _m03,
+            float _m10, float _m11, float _m12, float _m13,
+            float _m20, float _m21, float _m22, float _m23,
+            float _m30, float _m31, float _m32, float _m33)
         {
             m00 = _m00; m01 = _m01; m02 = _m02; m03 = _m03;
             m10 = _m10; m11 = _m11; m12 = _m12; m13 = _m13;
@@ -79,7 +79,7 @@ namespace aten {
             return *this;
         }
 
-        inline const real* data() const
+        inline const float* data() const
         {
             return a;
         }
@@ -108,15 +108,15 @@ namespace aten {
             return ret;
         }
 
-        inline AT_HOST_DEVICE_API real* operator[](int32_t i)
+        inline AT_HOST_DEVICE_API float* operator[](int32_t i)
         {
             return m[i];
         }
-        inline AT_HOST_DEVICE_API real operator()(int32_t i, int32_t j) const
+        inline AT_HOST_DEVICE_API float operator()(int32_t i, int32_t j) const
         {
             return m[i][j];
         }
-        inline AT_HOST_DEVICE_API real& operator()(int32_t i, int32_t j)
+        inline AT_HOST_DEVICE_API float& operator()(int32_t i, int32_t j)
         {
             return m[i][j];
         }
@@ -154,7 +154,7 @@ namespace aten {
             return *this;
         }
 
-        inline AT_HOST_DEVICE_API mat4& operator*=(const real t)
+        inline AT_HOST_DEVICE_API mat4& operator*=(const float t)
         {
             m00 *= t; m01 *= t; m02 *= t; m03 *= t;
             m10 *= t; m11 *= t; m12 *= t; m13 *= t;
@@ -162,7 +162,7 @@ namespace aten {
             m30 *= t; m31 *= t; m32 *= t; m33 *= t;
             return *this;
         }
-        inline AT_HOST_DEVICE_API mat4& operator/=(const real t)
+        inline AT_HOST_DEVICE_API mat4& operator/=(const float t)
         {
             *this *= 1 / t;
             return *this;
@@ -243,7 +243,7 @@ namespace aten {
             for (int32_t i = 0; i < 4; ++i) {
                 // ピボット選択.
                 // NOTE: 対象となる列中の最大値が対角値になるように行を入れ替える.
-                real f = aten::abs(mtx.m[i][i]);
+                float f = aten::abs(mtx.m[i][i]);
                 for (int32_t j = i + 1; j < 4; ++j) {
                     if (f < aten::abs(mtx.m[j][i])) {
                         f = aten::abs(mtx.m[j][i]);
@@ -260,7 +260,7 @@ namespace aten {
                 // 対象とならない列の値を 0 にする.
                 for (int32_t j = 0; j < 4; ++j) {
                     if (j != i) {
-                        real temp = mtx.m[j][i];
+                        float temp = mtx.m[j][i];
 
                         vec4 v1 = scale(mtx.v[i], temp);
                         vec4 v2 = scale(dst.v[i], temp);
@@ -301,12 +301,12 @@ namespace aten {
             return *this;
         }
 
-        inline AT_HOST_DEVICE_API mat4& asTrans(real x, real y, real z)
+        inline AT_HOST_DEVICE_API mat4& asTrans(float x, float y, float z)
         {
             return asTrans(vec3(x, y, z));
         }
 
-        inline AT_HOST_DEVICE_API mat4& asScale(real s)
+        inline AT_HOST_DEVICE_API mat4& asScale(float s)
         {
             identity();
 
@@ -317,10 +317,10 @@ namespace aten {
             return *this;
         }
 
-        inline AT_HOST_DEVICE_API mat4& asRotateByX(real r)
+        inline AT_HOST_DEVICE_API mat4& asRotateByX(float r)
         {
-            const real c = aten::cos(r);
-            const real s = aten::sin(r);
+            const float c = aten::cos(r);
+            const float s = aten::sin(r);
 
             m00 = 1; m01 = 0; m02 = 0;  m03 = 0;
             m10 = 0; m11 = c; m12 = -s; m13 = 0;
@@ -330,10 +330,10 @@ namespace aten {
             return *this;
         }
 
-        inline AT_HOST_DEVICE_API mat4& asRotateByY(real r)
+        inline AT_HOST_DEVICE_API mat4& asRotateByY(float r)
         {
-            const real c = aten::cos(r);
-            const real s = aten::sin(r);
+            const float c = aten::cos(r);
+            const float s = aten::sin(r);
 
             m00 = c;  m01 = 0; m02 = s; m03 = 0;
             m10 = 0;  m11 = 1; m12 = 0; m13 = 0;
@@ -343,10 +343,10 @@ namespace aten {
             return *this;
         }
 
-        inline AT_HOST_DEVICE_API mat4& asRotateByZ(real r)
+        inline AT_HOST_DEVICE_API mat4& asRotateByZ(float r)
         {
-            const real c = aten::cos(r);
-            const real s = aten::sin(r);
+            const float c = aten::cos(r);
+            const float s = aten::sin(r);
 
             m00 = c; m01 = -s; m02 = 0; m03 = 0;
             m10 = s; m11 = c;  m12 = 0; m13 = 0;
@@ -356,17 +356,17 @@ namespace aten {
             return *this;
         }
 
-        mat4& asRotateByAxis(real r, const vec3& axis)
+        mat4& asRotateByAxis(float r, const vec3& axis)
         {
             // NOTE
             // http://www.cg.info.hiroshima-cu.ac.jp/~miyazaki/knowledge/tech07.html
 
-            const real x = axis.x;
-            const real y = axis.y;
-            const real z = axis.z;
+            const float x = axis.x;
+            const float y = axis.y;
+            const float z = axis.z;
 
-            const real c = aten::cos(r);
-            const real s = aten::sin(r);
+            const float c = aten::cos(r);
+            const float s = aten::sin(r);
 
             m00 = x * x * (1 - c) + c;
             m01 = x * y * (1 - c) - z * s;
@@ -400,10 +400,10 @@ namespace aten {
                 // UPベクトルとの外積を計算できないので、
                 // 新しいUPベクトルをでっちあげる・・・
                 if (up.y > 0.0f) {
-                    vup = vec3(real(0), real(0), -vz.y);
+                    vup = vec3(float(0), float(0), -vz.y);
                 }
                 else {
-                    vup = vec3(real(0), real(0), vz.y);
+                    vup = vec3(float(0), float(0), vz.y);
                 }
             }
 
@@ -415,22 +415,22 @@ namespace aten {
             m00 = vx.x;
             m01 = vx.y;
             m02 = vx.z;
-            m03 = real(0);
+            m03 = float(0);
 
             m10 = vy.x;
             m11 = vy.y;
             m12 = vy.z;
-            m13 = real(0);
+            m13 = float(0);
 
             m20 = vz.x;
             m21 = vz.y;
             m22 = vz.z;
-            m23 = real(0);
+            m23 = float(0);
 
-            m30 = real(0);
-            m31 = real(0);
-            m32 = real(0);
-            m33 = real(1);
+            m30 = float(0);
+            m31 = float(0);
+            m32 = float(0);
+            m33 = float(1);
 
             return *this;
         }
@@ -445,7 +445,7 @@ namespace aten {
             return *this;
         }
 
-        inline mat4& asScale(real x, real y, real z)
+        inline mat4& asScale(float x, float y, float z)
         {
             return asScale(vec3(x, y, z));
         }
@@ -473,9 +473,9 @@ namespace aten {
         }
 
         mat4& perspective(
-            real znear, real zfar,
-            real vfov,
-            real aspect)
+            float znear, float zfar,
+            float vfov,
+            float aspect)
         {
             /*
             * D3DXMatrixPerspectiveFovIRI
@@ -491,8 +491,8 @@ namespace aten {
             */
 
             // Use Vertical FOV
-            const real fH = 1 / aten::tan(Deg2Rad(vfov) * 0.5f);
-            const real fW = fH / aspect;
+            const float fH = 1 / aten::tan(Deg2Rad(vfov) * 0.5f);
+            const float fW = fH / aspect;
 
             m[0][0] = fW;
             m[1][1] = fH;
@@ -508,8 +508,8 @@ namespace aten {
         }
 
         mat4& ortho(
-            real width, real height,
-            real znear, real zfar)
+            float width, float height,
+            float znear, float zfar)
         {
             /*
             * D3DXMatrixOrthoIRI
@@ -520,10 +520,10 @@ namespace aten {
             *  0    0       0         1
             */
 
-            m[0][0] = real(2) / width;
-            m[1][1] = real(2) / height;
+            m[0][0] = float(2) / width;
+            m[1][1] = float(2) / height;
 
-            m[2][2] = real(1) / (znear - zfar);
+            m[2][2] = float(1) / (znear - zfar);
             m[2][3] = znear / (znear - zfar);
 
             m[3][3] = 1.0f;
@@ -540,7 +540,7 @@ namespace aten {
         }
 
     private:
-        vec4 scale(const vec4& v, real f)
+        vec4 scale(const vec4& v, float f)
         {
             vec4 ret = v;
             ret[0] *= f;
@@ -596,20 +596,20 @@ namespace aten {
         return ret;
     }
 
-    inline AT_HOST_DEVICE_API mat4 operator*(real t, const mat4& m)
+    inline AT_HOST_DEVICE_API mat4 operator*(float t, const mat4& m)
     {
         mat4 ret = m;
         ret *= t;
         return ret;
     }
 
-    inline AT_HOST_DEVICE_API mat4 operator*(const mat4& m, real t)
+    inline AT_HOST_DEVICE_API mat4 operator*(const mat4& m, float t)
     {
         mat4 ret = t * m;
         return ret;
     }
 
-    inline AT_HOST_DEVICE_API mat4 operator/(const mat4& m, real t)
+    inline AT_HOST_DEVICE_API mat4 operator/(const mat4& m, float t)
     {
         mat4 ret = m * (1 / t);
         return ret;

@@ -5,8 +5,8 @@
 
 namespace aten {
     struct vec2 {
-        real x;
-        real y;
+        float x;
+        float y;
 
         AT_HOST_DEVICE_API vec2()
         {
@@ -17,11 +17,11 @@ namespace aten {
             x = _v.x;
             y = _v.y;
         }
-        AT_HOST_DEVICE_API vec2(real f)
+        AT_HOST_DEVICE_API vec2(float f)
         {
             x = y = f;
         }
-        AT_HOST_DEVICE_API vec2(real _x, real _y)
+        AT_HOST_DEVICE_API vec2(float _x, float _y)
         {
             x = _x;
             y = _y;

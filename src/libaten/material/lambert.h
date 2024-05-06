@@ -26,7 +26,7 @@ namespace AT_NAME
         virtual ~lambert() {}
 
     public:
-        static AT_DEVICE_API real pdf(
+        static AT_DEVICE_API float pdf(
             const aten::vec3& normal,
             const aten::vec3& wo)
         {
@@ -35,7 +35,7 @@ namespace AT_NAME
 
         static AT_DEVICE_API aten::vec3 sampleDirection(
             const aten::vec3& normal,
-            real r1, real r2)
+            float r1, float r2)
         {
             return SampleDirection(normal, r1, r2);
         }

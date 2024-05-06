@@ -6,7 +6,7 @@
 #include "math/vec3.h"
 
 #define AT_COLOR_RGBA(r, g, b, a) ((b) | ((g) << 8) | ((r) << 16) | ((a) << 24))
-#define AT_COLOR_NORMALIZE(c)    ((c) / real(255))
+#define AT_COLOR_NORMALIZE(c)    ((c) / float(255))
 
 namespace AT_NAME {
     template <class _T, int32_t N>
@@ -59,15 +59,15 @@ namespace AT_NAME {
         static const aten::vec3 YCbCr2G;
         static const aten::vec3 YCbCr2B;
 
-        static inline AT_HOST_DEVICE_API real luminance(const aten::vec3& v)
+        static inline AT_HOST_DEVICE_API float luminance(const aten::vec3& v)
         {
-            real ret = luminance(v.r, v.g, v.b);
+            float ret = luminance(v.r, v.g, v.b);
             return ret;
         }
 
-        static inline AT_HOST_DEVICE_API real luminance(real r, real g, real b)
+        static inline AT_HOST_DEVICE_API float luminance(float r, float g, float b)
         {
-            real ret = real(0.2126) * r + real(0.7152) * g + real(0.0722) * b;
+            float ret = float(0.2126) * r + float(0.7152) * g + float(0.0722) * b;
             return ret;
         }
 
@@ -82,7 +82,7 @@ namespace AT_NAME {
             return ycbcr;
         }
 
-        static real RGBtoY(const aten::vec3& rgb)
+        static float RGBtoY(const aten::vec3& rgb)
         {
             auto y = dot(RGB2Y, rgb);
             return y;
@@ -102,9 +102,9 @@ namespace AT_NAME {
         // RGB -> sRGB
         static aten::vec3 RGBtoXYZ(const aten::vec3& rgb)
         {
-            static const aten::vec3 _RGB2X = aten::vec3(real(0.412391), real(0.357584), real(0.180481));
-            static const aten::vec3 _RGB2Y = aten::vec3(real(0.212639), real(0.715169), real(0.072192));
-            static const aten::vec3 _RGB2Z = aten::vec3(real(0.019331), real(0.119195), real(0.950532));
+            static const aten::vec3 _RGB2X = aten::vec3(float(0.412391), float(0.357584), float(0.180481));
+            static const aten::vec3 _RGB2Y = aten::vec3(float(0.212639), float(0.715169), float(0.072192));
+            static const aten::vec3 _RGB2Z = aten::vec3(float(0.019331), float(0.119195), float(0.950532));
 
             auto x = dot(_RGB2X, rgb);
             auto y = dot(_RGB2Y, rgb);

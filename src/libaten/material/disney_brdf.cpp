@@ -14,12 +14,12 @@ namespace AT_NAME
     // Physically-Based Shading at Disney
     // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 
-    AT_DEVICE_API real DisneyBRDF::pdf(
+    AT_DEVICE_API float DisneyBRDF::pdf(
         const aten::MaterialParameter& mtrl,
         const aten::vec3& n,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
         const auto pdf = ComputePDF(mtrl, wi, wo, n);
         return pdf;
@@ -29,7 +29,7 @@ namespace AT_NAME
         const aten::MaterialParameter& mtrl,
         const aten::vec3& n,
         const aten::vec3& wi,
-        real u, real v,
+        float u, float v,
         aten::sampler* sampler)
     {
         const auto r1 = sampler->nextSample();
@@ -45,7 +45,7 @@ namespace AT_NAME
         const aten::vec3& n,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v)
+        float u, float v)
     {
         const auto bsdf = ComputeBRDF(mtrl, n, wi, wo);
         return bsdf;
@@ -57,7 +57,7 @@ namespace AT_NAME
         const aten::vec3& n,
         const aten::vec3& wi,
         aten::sampler* sampler,
-        real u, real v)
+        float u, float v)
     {
         const auto r1 = sampler->nextSample();
         const auto r2 = sampler->nextSample();
@@ -82,7 +82,7 @@ namespace AT_NAME
         bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, sheenTint, 0, 1);
         bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, clearcoat, 0, 1);
         bool b9 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, clearcoatGloss, 0, 1);
-        bool b10 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, real(0.01), real(10));
+        bool b10 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, float(0.01), float(10));
         bool b11 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);

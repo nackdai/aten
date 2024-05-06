@@ -7,24 +7,24 @@ namespace aten {
         camera& camera,
         int32_t x1, int32_t y1,
         int32_t x2, int32_t y2,
-        real scale/*= real(1)*/)
+        float scale/*= float(1)*/)
     {
         auto& pos = camera.getPos();
         auto& at = camera.getAt();
 
-        real offsetX = (real)(x1 - x2);
+        float offsetX = (float)(x1 - x2);
         offsetX *= scale;
 
-        real offsetY = (real)(y1 - y2);
+        float offsetY = (float)(y1 - y2);
         offsetY *= scale;
 
         // 移動ベクトル.
-        aten::vec3 offset(offsetX, offsetY, real(0));
+        aten::vec3 offset(offsetX, offsetY, float(0));
 
         // カメラの回転を考慮する.
         aten::vec3 dir = at - pos;
         dir = normalize(dir);
-        dir.y = real(0);
+        dir.y = float(0);
 
         aten::mat4 mtxRot;
         mtxRot.asRotateFromVector(dir, aten::vec3(0, 1, 0));
@@ -37,7 +37,7 @@ namespace aten {
 
     void CameraOperator::moveForward(
         camera& camera,
-        real offset)
+        float offset)
     {
         // カメラの向いている方向(Z軸)に沿って移動.
 
@@ -53,7 +53,7 @@ namespace aten {
 
     void CameraOperator::moveRight(
         camera& camera,
-        real offset)
+        float offset)
     {
         // カメラの向いている方向の右軸(-X軸(右手座標なので))に沿って移動.
         auto vz = camera.getDir();
@@ -62,14 +62,14 @@ namespace aten {
         if (aten::abs(vz.x) < AT_MATH_EPSILON && aten::abs(vz.z) < AT_MATH_EPSILON) {
             // UPベクトルとの外積を計算できないので、
             // 新しいUPベクトルをでっちあげる・・・
-            vup = vec3(real(0), real(0), -vz.y);
+            vup = vec3(float(0), float(0), -vz.y);
         }
 
         auto vx = cross(vup, vz);
         vx = normalize(vx);
 
         vx *= offset;
-        vx *= real(-1);    // -X軸に変換.
+        vx *= float(-1);    // -X軸に変換.
 
         auto& pos = camera.getPos();
         auto& at = camera.getAt();
@@ -80,7 +80,7 @@ namespace aten {
 
     void CameraOperator::moveUp(
         camera& camera,
-        real offset)
+        float offset)
     {
         // カメラの向いている方向の右軸(Y軸)に沿って移動.
         auto vz = camera.getDir();
@@ -89,7 +89,7 @@ namespace aten {
         if (aten::abs(vz.x) < AT_MATH_EPSILON && aten::abs(vz.z) < AT_MATH_EPSILON) {
             // UPベクトルとの外積を計算できないので、
             // 新しいUPベクトルをでっちあげる・・・
-            vup = vec3(real(0), real(0), -vz.y);
+            vup = vec3(float(0), float(0), -vz.y);
         }
 
         auto vx = cross(vup, vz);
@@ -108,13 +108,13 @@ namespace aten {
 
     void CameraOperator::dolly(
         camera& camera,
-        real scale)
+        float scale)
     {
         auto& pos = camera.getPos();
         auto& at = camera.getAt();
 
         // 視点と注視点の距離.
-        real len = length(pos - at);
+        float len = length(pos - at);
 
         // 視点から注視点への方向.
         auto dir = pos - at;
@@ -129,17 +129,17 @@ namespace aten {
         pos += dir;
     }
 
-    static inline real projectionToSphere(
-        real radius,
-        real x,
-        real y)
+    static inline float projectionToSphere(
+        float radius,
+        float x,
+        float y)
     {
-        real z = real(0);
-        real dist = aten::sqrt(x * x + y * y);
+        float z = float(0);
+        float dist = aten::sqrt(x * x + y * y);
 
         // r * 1/√2 の点で双曲線と接する内側と外側
 
-        if (dist < radius * real(0.70710678118654752440)) {
+        if (dist < radius * float(0.70710678118654752440)) {
             // 内側
 
             // NOTE
@@ -149,22 +149,22 @@ namespace aten {
         }
         else {
             // 外側
-            real t = radius * radius * 0.5f;
+            float t = radius * radius * 0.5f;
             z = t / dist;
         }
 
         return z;
     }
 
-    static inline real normalizeHorizontal(int32_t x, real width)
+    static inline float normalizeHorizontal(int32_t x, float width)
     {
-        real ret = (real(2) * x - width) / width;
+        float ret = (float(2) * x - width) / width;
         return ret;
     }
 
-    static inline real normalizeVertical(int32_t y, real height)
+    static inline float normalizeVertical(int32_t y, float height)
     {
-        real ret = (height - real(2) * y) / height;
+        float ret = (height - float(2) * y) / height;
         return ret;
     }
 
@@ -174,13 +174,13 @@ namespace aten {
         int32_t _x1, int32_t _y1,
         int32_t _x2, int32_t _y2)
     {
-        static const real radius = real(0.8);
+        static const float radius = float(0.8);
 
-        real x1 = normalizeHorizontal(_x1, (real)width);
-        real y1 = normalizeVertical(_y1, (real)height);
+        float x1 = normalizeHorizontal(_x1, (float)width);
+        float y1 = normalizeVertical(_y1, (float)height);
 
-        real x2 = normalizeHorizontal(_x2, (real)width);
-        real y2 = normalizeVertical(_y2, (real)height);
+        float x2 = normalizeHorizontal(_x2, (float)width);
+        float y2 = normalizeVertical(_y2, (float)height);
 
         // スクリーン上の２点からトラックボール上の点を計算する.
         // GLUTと同じ方法.
@@ -211,7 +211,7 @@ namespace aten {
         // V1・V2 = |V1||V2|cosθ = cosθ (|V1| = |V2| = 1)
         // θ = acos(cosθ)
         // => θ = acos(cosθ) = acos(V1・V2)
-        real theta = aten::acos(dot(v1, v2));
+        float theta = aten::acos(dot(v1, v2));
 
         // 回転.
         aten::mat4 mtxRot;

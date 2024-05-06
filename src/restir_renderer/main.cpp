@@ -66,7 +66,7 @@ public:
             true);
 
         aten::vec3 pos, at;
-        real vfov;
+        float vfov;
         Scene::getCameraPosAndAt(pos, at, vfov);
 
         camera_.init(
@@ -115,8 +115,8 @@ public:
             }
 
             auto camparam = camera_.param();
-            camparam.znear = real(0.1);
-            camparam.zfar = real(10000.0);
+            camparam.znear = float(0.1);
+            camparam.zfar = float(10000.0);
 
             auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, aten::vec4(0));
 
@@ -173,8 +173,8 @@ public:
             camera_.update();
 
             auto camparam = camera_.param();
-            camparam.znear = real(0.1);
-            camparam.zfar = real(10000.0);
+            camparam.znear = float(0.1);
+            camparam.zfar = float(10000.0);
 
             renderer_.updateCamera(camparam);
             is_camera_dirty_ = false;
@@ -243,7 +243,7 @@ public:
             ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", renderer_.frame(), 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Text("cuda : %.3f ms (avg : %.3f ms)", cudaelapsed, avg_cuda_time_);
             ImGui::Text("update : %.3f ms (avg : %.3f ms)", updateTime, avg_update_time_);
-            ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * max_samples_) / real(1000 * 1000) * (real(1000) / cudaelapsed));
+            ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * max_samples_) / float(1000 * 1000) * (float(1000) / cudaelapsed));
 
             if (aten::GLProfiler::isEnabled())
             {
@@ -348,7 +348,7 @@ public:
                 camera_,
                 prev_mouse_pos_x_, prev_mouse_pos_y_,
                 x, y,
-                real(0.001));
+                float(0.001));
             is_camera_dirty_ = true;
         }
 
@@ -358,13 +358,13 @@ public:
 
     void OnMouseWheel(int32_t delta)
     {
-        aten::CameraOperator::dolly(camera_, delta * real(0.1));
+        aten::CameraOperator::dolly(camera_, delta * float(0.1));
         is_camera_dirty_ = true;
     }
 
     void OnKey(bool press, aten::Key key)
     {
-        static const real offset_base = real(0.1);
+        static const float offset_base = float(0.1);
 
         if (press)
         {
@@ -429,7 +429,7 @@ public:
             case aten::Key::Key_R:
             {
                 aten::vec3 pos, at;
-                real vfov;
+                float vfov;
                 Scene::getCameraPosAndAt(pos, at, vfov);
 
                 camera_.init(

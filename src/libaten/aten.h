@@ -35,7 +35,6 @@
 #include "misc/key.h"
 #include "misc/omputil.h"
 #include "misc/span.h"
-#include "misc/stream.h"
 #include "misc/thread.h"
 #include "misc/timeline.h"
 #include "misc/timer.h"

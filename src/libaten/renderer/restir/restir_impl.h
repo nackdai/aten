@@ -81,7 +81,6 @@ namespace restir {
             const float u, const float v,
             real pre_sampled_r)
         {
-            aten::vec3 nmlLight = lightsample.nml;
             aten::vec3 dirToLight = normalize(lightsample.dir);
 
             auto pdf = AT_NAME::material::samplePDF(&mtrl, normal, ray_dir, dirToLight, u, v);
@@ -600,7 +599,6 @@ namespace restir {
 
             const auto cosShadow = aten::abs(dot(orienting_normal, point_to_light));
             const auto cosLight = aten::abs(dot(nml_on_light, -point_to_light));
-            const auto dist2 = distance_to_light * distance_to_light;
 
             const auto le = _detail::ComputeRadiance(
                 reservoir.light_sample_, light.attrib,

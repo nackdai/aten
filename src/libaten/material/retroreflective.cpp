@@ -512,9 +512,6 @@ namespace AT_NAME
         std::array<float, Component::Num> cdf;
         GetCDF(weights, cdf);
 
-        const auto V = -wi;
-        const auto N = n;
-
         aten::vec3 wo;
 
         if (r3 < cdf[Component::SurfaceReflection]) {

@@ -83,7 +83,6 @@ namespace npr_kernel {
         const auto& isect = isects[idx];
 
         const auto& query_ray = rays[idx];
-        auto* sampler = &paths.sampler[idx];
 
         const auto& cam_org = camera.origin;
 
@@ -221,19 +220,9 @@ namespace npr_kernel {
         ctxt.matrices = matrices;
 
         // Query ray doesn't hit anything, but evaluate a possibility that sample ray might hit something.
-
-        const auto& isect = isects[idx];
-
         const auto& query_ray = rays[idx];
-        auto* sampler = &paths.sampler[idx];
-
-        const auto& cam_org = camera.origin;
 
         constexpr auto SampleRayNum = aten::array_size<decltype(idaten::NPRPathTracing::SampleRayInfo::descs)>::size;
-
-        // TODO: These value should be configurable.
-        constexpr real albedo_threshold = 0.1f;
-        constexpr real normal_threshold = 0.1f;
 
         auto& sample_ray_info = sample_ray_infos[idx];
         auto& sample_ray_descs = sample_ray_info.descs;

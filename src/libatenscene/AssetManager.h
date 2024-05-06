@@ -83,7 +83,7 @@ namespace aten {
                 }
             }
 
-            Asset(Asset&& rhs)
+            Asset(Asset&& rhs) noexcept
             {
                 type = rhs.type;
 

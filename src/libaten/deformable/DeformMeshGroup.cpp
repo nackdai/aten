@@ -160,7 +160,7 @@ namespace aten
             const auto end = idx.size();
             AT_ASSERT((end - begin) % 3 == 0);
 
-            for (uint32_t n = begin; n < end; n += 3) {
+            for (size_t n = begin; n < end; n += 3) {
                 tris.push_back(aten::TriangleParameter());
                 auto& tri = tris.back();
 

@@ -147,7 +147,7 @@ namespace aten
             AT_NAME::FillBasicAOVs(
                 aov_normal_depth[idx], orienting_normal, rec, mtx_W2C,
                 aov_albedo_meshid[idx], texcolor, isect);
-            aov_albedo_meshid[idx].w = isect.mtrlid;
+            aov_albedo_meshid[idx].w = static_cast<float>(isect.mtrlid);
 
             // For exporting separated albedo.
             mtrl.albedoMap = -1;

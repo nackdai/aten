@@ -79,7 +79,7 @@ namespace AT_NAME
         real t_min, real t_max,
         aten::Intersection& isect) const
     {
-        bool isHit = m_accel->hit(ctxt, r, t_min, t_max, false, isect);
+        bool isHit = m_accel->HitWithLod(ctxt, r, t_min, t_max, false, isect);
 
         if (isHit) {
             auto f = ctxt.GetTriangleInstance(isect.objid);

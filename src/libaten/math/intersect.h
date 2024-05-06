@@ -14,16 +14,17 @@ namespace aten {
         // 重心座標系(barycentric coordinates).
         // v0基準.
         // p = (1 - a - b)*v0 + a*v1 + b*v2
-        real a, b;
+        float a{ 0.0F };
+        float b{ 0.0F };
 
-        real t;
+        float t{ 0.0F };
     };
 
     inline AT_HOST_DEVICE_API int32_t maxDim(const vec3& v)
     {
-        uint32_t x = (uint32_t)aten::abs(v.x);
-        uint32_t y = (uint32_t)aten::abs(v.y);
-        uint32_t z = (uint32_t)aten::abs(v.z);
+        const auto x = static_cast<int32_t>(aten::abs(v.x));
+        const auto y = static_cast<int32_t>(aten::abs(v.y));
+        const auto z = static_cast<int32_t>(aten::abs(v.z));
 
         if (x > y) {
             if (x > z) {

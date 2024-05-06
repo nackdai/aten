@@ -63,11 +63,11 @@ namespace aten
             }
         }
 
-        uint32_t cnt = 0;
+        int32_t cnt = 0;
         real retSumY = 0;
         real retMaxLum = 0;
 
-        for (uint32_t i = 0; i < threadnum; i++) {
+        for (int32_t i = 0; i < threadnum; i++) {
             if (sumY[i] != 0) {
                 retSumY += sumY[i];
                 cnt++;

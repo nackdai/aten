@@ -244,9 +244,9 @@ namespace AT_NAME
                     std::is_integral_v<std::remove_pointer_t<decltype(CONTEXT::textures)>>,
                     "context::textures has to be integral");
                 if constexpr (std::is_integral_v<std::remove_pointer_t<decltype(CONTEXT::textures)>>) {
-                    dst_mtrl.albedoMap = (int)(dst_mtrl.albedoMap >= 0 ? ctxt.textures[dst_mtrl.albedoMap] : -1);
-                    dst_mtrl.normalMap = (int)(dst_mtrl.normalMap >= 0 ? ctxt.textures[dst_mtrl.normalMap] : -1);
-                    dst_mtrl.roughnessMap = (int)(dst_mtrl.roughnessMap >= 0 ? ctxt.textures[dst_mtrl.roughnessMap] : -1);
+                    dst_mtrl.albedoMap = static_cast<int32_t>(dst_mtrl.albedoMap >= 0 ? ctxt.textures[dst_mtrl.albedoMap] : -1);
+                    dst_mtrl.normalMap = static_cast<int32_t>(dst_mtrl.normalMap >= 0 ? ctxt.textures[dst_mtrl.normalMap] : -1);
+                    dst_mtrl.roughnessMap = static_cast<int32_t>(dst_mtrl.roughnessMap >= 0 ? ctxt.textures[dst_mtrl.roughnessMap] : -1);
                 }
             }
         }

@@ -58,7 +58,7 @@ public:
         return false;
     }
 
-    virtual bool hit(
+    virtual bool HitWithLod(
         const aten::context& ctxt,
         const aten::ray& r,
         real t_min, real t_max,
@@ -327,6 +327,8 @@ public:
         renderer_.SetAOVMode((aten::SVGFAovMode)curr_aov_mode_);
         //renderer_.SetCanSSRTHitTest(false);
 #endif
+
+        return true;
     }
 
     bool Run()

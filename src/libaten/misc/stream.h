@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+#include <fstream>
 #include <string>
 
 #include "defs.h"
@@ -15,48 +17,46 @@ namespace aten
             close();
         }
 
-        FileInputStream(std::string_view path, std::string_view mode)
+        FileInputStream(std::string_view path)
         {
-            open(path, mode);
+            open(path);
         }
 
     public:
-        bool open(std::string_view path, std::string_view mode)
+        bool open(std::string_view path)
         {
-            m_fp = fopen(path.data(), mode.data());
-            return (m_fp != nullptr);
+            ifs_.open(path.data(), std::ios_base::in | std::ios_base::binary);
+            bool is_failed = !ifs_;
+            return !is_failed;
         }
 
         void close()
         {
-            if (m_fp) {
-                fclose(m_fp);
-                m_fp = nullptr;
+            if (ifs_) {
+                ifs_.close();
             }
         }
 
-        uint32_t read(void* p, uint32_t size)
+        size_t read(void* p, size_t size)
         {
-            AT_ASSERT(m_fp);
-            auto ret = fread(p, size, 1, m_fp);
+            AT_ASSERT(ifs_);
+            const auto before_read_pos = ifs_.tellg();
+            ifs_.read(reinterpret_cast<char*>(p), size);
+            const auto after_read_pos = ifs_.tellg();
+            const auto read_size = after_read_pos - before_read_pos;
 
-            ret *= size;
-
-            m_curPos = (uint32_t)ftell(m_fp);
-
-            return (uint32_t)ret;
+            return read_size;
         }
 
-        uint32_t curPos()
+        size_t tell()
         {
-            AT_ASSERT(m_fp);
-            AT_ASSERT(m_curPos == (uint32_t)ftell(m_fp));
-            return m_curPos;
+            AT_ASSERT(ifs_);
+            const auto pos = ifs_.tellg();
+            return pos;
         }
 
     private:
-        FILE* m_fp{ nullptr };
-        uint32_t m_curPos{ 0 };
+        std::ifstream ifs_;
     };
 }
 

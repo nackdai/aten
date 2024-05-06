@@ -15,7 +15,7 @@ namespace aten
     bool deformable::read(std::string_view path)
     {
         FileInputStream file;
-        AT_VRETURN_FALSE(file.open(path.data(), "rb"));
+        AT_VRETURN_FALSE(file.open(path.data()));
 
         FileInputStream* stream = &file;
 
@@ -35,7 +35,7 @@ namespace aten
             }
         }
 
-        auto pos = stream->curPos();
+        auto pos = stream->tell();
 
         // Skeleton.
         {

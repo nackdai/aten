@@ -6,7 +6,7 @@ namespace aten
     bool DeformAnimation::read(std::string_view path)
     {
         FileInputStream file;
-        AT_VRETURN_FALSE(file.open(path, "rb"));
+        AT_VRETURN_FALSE(file.open(path));
 
         return read(&file);
     }

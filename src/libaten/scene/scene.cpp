@@ -74,7 +74,7 @@ namespace aten {
     {
         // Resampled Importance Sampling.
 
-        static constexpr auto MaxLightCount = 32U;
+        static constexpr auto MaxLightCount = 32;
 
         const auto max_light_num = static_cast<decltype(MaxLightCount)>(ctxt.GetLightNum());
         const auto light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
@@ -86,9 +86,11 @@ namespace aten {
 
         float lightSelectProb = float(1) / max_light_num;
 
-        for (auto i = 0U; i < light_cnt; i++) {
+        for (auto i = 0; i < light_cnt; i++) {
             const auto r_light = sampler->nextSample();
-            const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
+            const auto light_pos = aten::clamp<decltype(max_light_num)>(
+                static_cast<int32_t>(r_light * max_light_num),
+                0, max_light_num - 1);
 
             const auto light = ctxt.GetLightInstance(light_pos);
             const auto& light_param = light->param();

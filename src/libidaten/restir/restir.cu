@@ -408,7 +408,7 @@ namespace idaten
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
             aov_.albedo_meshid().data(),
-            ctxt_host_.lightparam.data(), ctxt_host_.lightparam.num(),
+            ctxt_host_.lightparam.data(), static_cast<int32_t>(ctxt_host_.lightparam.num()),
             ctxt_host_.mtrlparam.data(),
             ctxt_host_.tex.data(),
             m_shadowRays.data());

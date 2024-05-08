@@ -255,7 +255,7 @@ public:
 
             constexpr std::array light_types = { "IBL", "PointLight" };
             int32_t lighttype = scene_light_.is_envmap ? 0 : 1;
-            if (ImGui::Combo("light", &lighttype, light_types.data(), light_types.size())) {
+            if (ImGui::Combo("light", &lighttype, light_types.data(), static_cast<int32_t>(light_types.size()))) {
                 auto next_is_envmap = lighttype == 0;
                 if (scene_light_.is_envmap != next_is_envmap) {
                     scene_light_.is_envmap = next_is_envmap;
@@ -301,7 +301,7 @@ public:
             };
             if (mtrl) {
                 int32_t mtrlType = static_cast<int32_t>(mtrl->param().type);
-                if (ImGui::Combo("mode", &mtrlType, mtrl_types.data(), mtrl_types.size())) {
+                if (ImGui::Combo("mode", &mtrlType, mtrl_types.data(), static_cast<int32_t>(mtrl_types.size()))) {
                     auto mtrl_param = mtrl->param();
                     mtrl_param.type = static_cast<aten::MaterialType>(mtrlType);
 

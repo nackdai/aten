@@ -282,6 +282,7 @@ public:
                 progressive_accumulate_count_ += 1;
             }
 
+            auto mtrl = ctxt_.GetMaterialInstance(0);
             bool needUpdateMtrl = false;
 
             constexpr std::array mtrl_types = {
@@ -298,14 +299,15 @@ public:
                 "CarPaint",
                 "Disney",
             };
-            if (target_mtrl_) {
-                int32_t mtrlType = static_cast<int32_t>(target_mtrl_->param().type);
+            if (mtrl) {
+                int32_t mtrlType = static_cast<int32_t>(mtrl->param().type);
                 if (ImGui::Combo("mode", &mtrlType, mtrl_types.data(), mtrl_types.size())) {
-                    auto mtrl_param = target_mtrl_->param();
-                    ctxt_.DeleteAllMaterialsAndClearList();
-                    target_mtrl_ = CreateMaterial(static_cast<aten::MaterialType>(mtrlType));
+                    auto mtrl_param = mtrl->param();
                     mtrl_param.type = static_cast<aten::MaterialType>(mtrlType);
-                    target_mtrl_->param() = mtrl_param;
+
+                    ctxt_.DeleteAllMaterialsAndClearList();
+                    mtrl = CreateMaterial(mtrl_param);
+
                     needUpdateMtrl = true;
                 }
 
@@ -313,7 +315,7 @@ public:
                 bool b1 = ImGui::Checkbox("NormalMap", &enable_normal_map_);
 
                 if (b0 || b1) {
-                    target_mtrl_->setTextures(
+                    mtrl->setTextures(
                         enable_albedo_map_ ? albedo_map_ : nullptr,
                         enable_normal_map_ ? normal_map_ : nullptr,
                         nullptr);
@@ -321,13 +323,13 @@ public:
                     needUpdateMtrl = true;
                 }
 
-                if (target_mtrl_->edit(&mtrl_param_editor_)) {
+                if (mtrl->edit(&mtrl_param_editor_)) {
                     needUpdateMtrl = true;
                 }
 
                 if (needUpdateMtrl) {
                     std::vector<aten::MaterialParameter> params(1);
-                    params[0] = target_mtrl_->param();
+                    params[0] = mtrl->param();
                     renderer_.updateMaterial(params);
                     need_renderer_reset = true;
                 }
@@ -534,8 +536,6 @@ private:
             mtrl_param,
             nullptr, nullptr, nullptr);
 
-        target_mtrl_ = mtrl;
-
 #if 1
 #if 0
         constexpr char* asset_path = "../../asset/suzanne/suzanne.obj";
@@ -611,16 +611,13 @@ private:
 #endif
     }
 
-    std::shared_ptr<aten::material> CreateMaterial(aten::MaterialType type)
+    std::shared_ptr<aten::material> CreateMaterial(aten::MaterialParameter& mtrl_param)
     {
-        auto mtrl = ctxt_.CreateMaterialWithDefaultValue(type);
-
-        if (mtrl) {
-            mtrl->setTextures(
-                enable_albedo_map_ ? albedo_map_ : nullptr,
-                enable_normal_map_ ? normal_map_ : nullptr,
-                nullptr);
-        }
+        auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
+            mtrl_param,
+            enable_albedo_map_ ? albedo_map_ : nullptr,
+            enable_normal_map_ ? normal_map_ : nullptr,
+            nullptr);
 
         return mtrl;
     }
@@ -678,7 +675,6 @@ private:
     aten::context ctxt_;
 
     aten::AssetManager asset_manager_;
-    std::shared_ptr<aten::material> target_mtrl_;
 
     idaten::PathTracing renderer_;
 

@@ -96,17 +96,19 @@ namespace aten {
                 for (size_t i = 0; i < tex_num; i++) {
                     CALL_GL_API(glFramebufferTexture2D(
                         GL_FRAMEBUFFER,
-                        GL_COLOR_ATTACHMENT0 + i,
+                        static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i),
                         GL_TEXTURE_2D,
                         texture_handles_[i],
                         0));
 
-                    target_buffer_attachment_list_.push_back(GL_COLOR_ATTACHMENT0 + i);
+                    target_buffer_attachment_list_.push_back(static_cast<uint32_t>(GL_COLOR_ATTACHMENT0 + i));
                 }
             }
         }
 
-        CALL_GL_API(glDrawBuffers(target_buffer_attachment_list_.size(), target_buffer_attachment_list_.data()));
+        CALL_GL_API(glDrawBuffers(
+            static_cast<GLsizei>(target_buffer_attachment_list_.size()),
+            target_buffer_attachment_list_.data()));
 
         if (need_depth) {
             AT_ASSERT(depth_buffer_handle_ > 0);

@@ -179,11 +179,11 @@ namespace idaten
     {
         AT_ASSERT(dst.num() <= m_maxInputNum);
 
-        int32_t blockPerGrid = (dst.num() - 1) / blocksize + 1;
+        int32_t blockPerGrid = static_cast<int32_t>(dst.num() - 1) / blocksize + 1;
 
         exclusiveScan << <blockPerGrid, blocksize / 2, blocksize * sizeof(int32_t), m_stream >> > (
             dst.data(),
-            dst.num(),
+            static_cast<int32_t>(dst.num()),
             blocksize,
             src.data());
 
@@ -199,7 +199,7 @@ namespace idaten
 
         computeBlockCount << <tmpBlockPerGrid, tmpBlockSize, 0, m_stream >> > (
             m_increments.data(),
-            m_increments.num(),
+            static_cast<int32_t>(m_increments.num()),
             blocksize,
             src.data(),
             dst.data());
@@ -225,7 +225,7 @@ namespace idaten
 
             exclusiveScan << <innerBlockPerGrid, blocksize / 2, blocksize * sizeof(int32_t), m_stream >> >(
                 m_work.data(),
-                m_work.num(),
+                static_cast<int32_t>(m_work.num()),
                 blocksize,
                 input->data());
 
@@ -242,7 +242,7 @@ namespace idaten
 
             computeBlockCount << <innerTmpBlockPerGrid, innerTmpBlockSize, 0, m_stream >> > (
                 output->data(),
-                output->num(),
+                static_cast<int32_t>(output->num()),
                 blocksize,
                 input->data(),
                 m_work.data());
@@ -266,11 +266,11 @@ namespace idaten
             // blocks per grid.
             auto bpg = stackBlockPerGrid[i];
 
-            auto threadPerBlock = (output->num() + bpg - 1) / bpg;
+            auto threadPerBlock = static_cast<int32_t>(output->num() + bpg - 1) / bpg;
 
             incrementBlocks << <bpg, threadPerBlock, 0, m_stream >> > (
                 output->data(),
-                output->num(),
+                static_cast<int32_t>(output->num()),
                 input->data());
 
             checkCudaKernel(iterate_incrementBlocks);
@@ -286,7 +286,7 @@ namespace idaten
 
         incrementBlocks << <blockPerGrid, blocksize, 0, m_stream >> > (
             dst.data(),
-            dst.num(),
+            static_cast<int32_t>(dst.num()),
             incrResult->data());
 
         checkCudaKernel(incrementBlocks);
@@ -299,13 +299,13 @@ namespace idaten
     {
         scan(m_blockSize, bools, m_indices);
 
-        int32_t num = dst.num();
-        int32_t blockPerGrid = (num - 1) / m_blockSize + 1;
+        const auto num = static_cast<int32_t>(dst.num());
+        const auto blockPerGrid = (num - 1) / m_blockSize + 1;
 
         scatter << <blockPerGrid, m_blockSize, 0, m_stream >> > (
             dst.data(),
             m_counts.data(),
-            dst.num(),
+            static_cast<int32_t>(dst.num()),
             bools.data(),
             m_indices.data(),
             m_iota.data());

@@ -522,7 +522,7 @@ namespace aten
             return;
         }
 
-        int32_t order = nodes.size();
+        int32_t order = static_cast<int32_t>(nodes.size());
         node->setTraversalOrder(order);
 
         mat4 mtx_L2W;

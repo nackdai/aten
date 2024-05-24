@@ -315,6 +315,9 @@ namespace AT_NAME
                 if (!light.attrib.isSingular || !light.attrib.isIBL) {
                     // Convert path PDF to NEE PDF.
                     // i.e. Convert solid angle PDF to area PDF.
+                    // NEE samples the point on the light, and the point sampling means the PDF is area.
+                    // Sampling the direction towards the light point means the PDF is solid angle.
+                    // To align the path PDF to NEE PDF, converting solid angl PDF to area PDF is necessary.
                     path_pdf = path_pdf * cosLight / dist2;
                 }
 

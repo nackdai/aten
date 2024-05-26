@@ -202,6 +202,7 @@ namespace aten {
         using OnMouseMoveFunc = std::function<void(int32_t x, int32_t y)>;
         using OnMouseWheelFunc = std::function<void(int32_t delta)>;
         using OnKeyFunc = std::function<void(bool press, Key key)>;
+        using OnDropFileFunc = std::function<void(std::string_view path)>;
 
         int32_t Create(
             int32_t width, int32_t height, std::string_view title,
@@ -210,11 +211,12 @@ namespace aten {
             OnMouseBtnFunc onMouseBtn = nullptr,
             OnMouseMoveFunc onMouseMove = nullptr,
             OnMouseWheelFunc onMouseWheel = nullptr,
-            OnKeyFunc onKey = nullptr)
+            OnKeyFunc onKey = nullptr,
+            OnDropFileFunc onDropFile = nullptr)
         {
             return CreateImpl(
                 width, height, title, false,
-                onRun, onClose, onMouseBtn, onMouseMove, onMouseWheel, onKey);
+                onRun, onClose, onMouseBtn, onMouseMove, onMouseWheel, onKey, onDropFile);
         }
 
         int32_t Create(
@@ -251,7 +253,8 @@ namespace aten {
             OnMouseBtnFunc _onMouseBtn = nullptr,
             OnMouseMoveFunc _onMouseMove = nullptr,
             OnMouseWheelFunc _onMouseWheel = nullptr,
-            OnKeyFunc _onKey = nullptr);
+            OnKeyFunc _onKey = nullptr,
+            OnDropFileFunc _onDrop = nullptr);
 
         std::shared_ptr<_detail::WindowImpl> FindWindowByNativeHandle(GLFWwindow* w);
         std::shared_ptr<_detail::WindowImpl> FindWindowById(int32_t id);
@@ -262,6 +265,7 @@ namespace aten {
         void MouseMotion(GLFWwindow* window, double xpos, double ypos);
         void MouseWheel(GLFWwindow* window, double xoffset, double yoffset);
         void FocusWindow(GLFWwindow* window, int32_t focused);
+        void DropFile(GLFWwindow* window, int count, const char** paths);
 
         static void OnClose(GLFWwindow* window)
         {
@@ -299,6 +303,12 @@ namespace aten {
                 OnFocusWindowCallback(window, focused);
             }
         }
+        static void OnDropFile(GLFWwindow* window, int count, const char** paths)
+        {
+            if (OnDropFileCallback) {
+                OnDropFileCallback(window, count, paths);
+            }
+        }
 
         static std::function<void(GLFWwindow*)> OnCloseCallback;
         static std::function<void(GLFWwindow*, int32_t, int32_t, int32_t, int32_t)> OnKeyCallback;
@@ -306,6 +316,7 @@ namespace aten {
         static std::function<void(GLFWwindow*, double, double)> OnMouseMotionCallback;
         static std::function<void(GLFWwindow*, double, double)> OnMouseWheelCallback;
         static std::function<void(GLFWwindow*, int32_t)> OnFocusWindowCallback;
+        static std::function<void(GLFWwindow*, int, const char**)> OnDropFileCallback;
 
         void* imgui_ctxt_{ nullptr };
 

@@ -8,8 +8,6 @@
 
 namespace aten
 {
-    bool RasterizeRenderer::s_isInitGlobalVB = false;
-
     void RasterizeRenderer::clearBuffer(
         uint32_t clear_buffer_mask,
         aten::vec4 &clear_color,
@@ -424,11 +422,7 @@ namespace aten
         CALL_GL_API(::glEnable(GL_DEPTH_TEST));
         CALL_GL_API(::glEnable(GL_CULL_FACE));
 
-        if (!s_isInitGlobalVB)
-        {
-            ctxt.build();
-            s_isInitGlobalVB = true;
-        }
+        ctxt.build();
 
         auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
         auto hColor = m_shader.getHandle("color");
@@ -505,11 +499,7 @@ namespace aten
         CALL_GL_API(::glEnable(GL_DEPTH_TEST));
         CALL_GL_API(::glEnable(GL_CULL_FACE));
 
-        if (!s_isInitGlobalVB)
-        {
-            ctxt.build();
-            s_isInitGlobalVB = true;
-        }
+        ctxt.build();
 
         auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
         auto hColor = m_shader.getHandle("color");

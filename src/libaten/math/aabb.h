@@ -341,6 +341,13 @@ namespace aten {
             return ret;
         }
 
+        float ComputeSphereRadiusToCover() const
+        {
+            const auto center = getCenter();
+            const auto radius = length(m_max - center);
+            return radius;
+        }
+
     private:
         vec3 m_min;
         vec3 m_max;

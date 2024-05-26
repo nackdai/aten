@@ -5,6 +5,10 @@
 #include "math/vec3.h"
 #include "math/math.h"
 
+namespace aten {
+    class aabb;
+}
+
 namespace AT_NAME
 {
     /**
@@ -121,6 +125,8 @@ namespace AT_NAME
             aten::vec3 &posOnObjectPlane,
             aten::vec3 &posOnImageSensor,
             int32_t &x, int32_t &y) const override final;
+
+        void FitBoundingBox(const aten::aabb& bounding_box);
 
     private:
         aten::CameraParameter m_param;

@@ -65,6 +65,15 @@ namespace aten
                 }
             }
 
+            void OnDropFile(int32_t count, const char** paths)
+            {
+                // NOTE:
+                // Support only 1 file.
+                if (on_drop_file_) {
+                    on_drop_file_(paths[0]);
+                }
+            }
+
             auto GetMousePos() const
             {
                 return std::tie(mouse_x_, mouse_y_);
@@ -120,6 +129,7 @@ namespace aten
             window::OnMouseMoveFunc on_mouse_move_{ nullptr };
             window::OnMouseWheelFunc on_mouse_wheel_{ nullptr };
             window::OnKeyFunc on_key_{ nullptr };
+            window::OnDropFileFunc on_drop_file_{ nullptr };
         };
     }
 
@@ -129,6 +139,7 @@ namespace aten
     std::function<void(GLFWwindow*, double, double)> window::OnMouseMotionCallback;
     std::function<void(GLFWwindow*, double, double)> window::OnMouseWheelCallback;
     std::function<void(GLFWwindow*, int32_t)> window::OnFocusWindowCallback;
+    std::function<void(GLFWwindow*, int, const char**)> window::OnDropFileCallback;
 
     std::shared_ptr<_detail::WindowImpl> window::FindWindowByNativeHandle(GLFWwindow* w)
     {
@@ -319,6 +330,14 @@ namespace aten
         }
     }
 
+    void window::DropFile(GLFWwindow* window, int count, const char** paths)
+    {
+        auto wnd = FindWindowByNativeHandle(window);
+        if (wnd) {
+            wnd->OnDropFile(count, paths);
+        }
+    }
+
     int32_t window::CreateImpl(
         int32_t width, int32_t height, std::string_view title,
         bool is_offscreen,
@@ -327,7 +346,8 @@ namespace aten
         OnMouseBtnFunc onMouseBtn/*= nullptr*/,
         OnMouseMoveFunc onMouseMove/*= nullptr*/,
         OnMouseWheelFunc onMouseWheel/*= nullptr*/,
-        OnKeyFunc onKey/*= nullptr*/)
+        OnKeyFunc onKey/*= nullptr*/,
+        OnDropFileFunc onDrop/*= nullptr*/)
     {
         auto result = ::glfwInit();
         if (!result) {
@@ -373,22 +393,25 @@ namespace aten
         SetCurrentDirectoryFromExe();
 
         if (!OnCloseCallback) {
-            OnCloseCallback = std::bind(&window::Close, this, std::placeholders::_1);
+            OnCloseCallback = [this](GLFWwindow* window) { this->Close(window); };
         }
         if (!OnKeyCallback) {
-            OnKeyCallback = std::bind(&window::Key, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
+            OnKeyCallback = [this](GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods) { this->Key(window, key, scancode, action, mods); };
         }
         if (!OnMouseBtnCallback) {
-            OnMouseBtnCallback = std::bind(&window::MouseBtn, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+            OnMouseBtnCallback = [this](GLFWwindow* window, int32_t button, int32_t action, int32_t mods) { this->MouseBtn(window, button, action, mods); };
         }
         if (!OnMouseMotionCallback) {
-            OnMouseMotionCallback = std::bind(&window::MouseMotion, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+            OnMouseMotionCallback = [this](GLFWwindow* window, double xpos, double ypos) { this->MouseMotion(window, xpos, ypos); };
         }
         if (!OnMouseWheelCallback) {
-            OnMouseWheelCallback = std::bind(&window::MouseWheel, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+            OnMouseWheelCallback = [this](GLFWwindow* window, double xoffset, double yoffset) { this->MouseWheel(window, xoffset, yoffset); };
         }
         if (!OnFocusWindowCallback) {
-            OnFocusWindowCallback = std::bind(&window::FocusWindow, this, std::placeholders::_1, std::placeholders::_2);
+            OnFocusWindowCallback = [this](GLFWwindow* window, int32_t focused) { this->FocusWindow(window, focused); };
+        }
+        if (!OnDropFileCallback) {
+            OnDropFileCallback = [this](GLFWwindow* window, int count, const char** paths) { this->DropFile(window, count, paths); };
         }
 
         ::glfwSetWindowCloseCallback(glfwWindow, &window::OnClose);
@@ -397,6 +420,7 @@ namespace aten
         ::glfwSetCursorPosCallback(glfwWindow, &window::OnMouseMotion);
         ::glfwSetScrollCallback(glfwWindow, &window::OnMouseWheel);
         ::glfwSetWindowFocusCallback(glfwWindow, &window::OnFocusWindow);
+        ::glfwSetDropCallback(glfwWindow, &window::OnDropFile);
 
         // For imgui.
         ::glfwSetCharCallback(glfwWindow, ImGui_ImplGlfw_CharCallback);
@@ -439,6 +463,7 @@ namespace aten
             wnd->on_mouse_move_ = onMouseMove;
             wnd->on_mouse_wheel_ = onMouseWheel;
             wnd->on_key_ = onKey;
+            wnd->on_drop_file_ = onDrop;
 
             wnd->imgui_ctxt_ = ImGui::GetCurrentContext();
         }

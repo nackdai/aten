@@ -15,8 +15,6 @@ namespace aten {
     class accelerator;
 
     class RasterizeRenderer {
-        static bool s_isInitGlobalVB;
-
     public:
         RasterizeRenderer() = default;
         ~RasterizeRenderer() = default;
@@ -119,11 +117,6 @@ namespace aten {
             const camera* cam);
 
         void setColor(const vec4& color);
-
-        static void reset()
-        {
-            s_isInitGlobalVB = false;
-        }
 
         shader& getShader()
         {

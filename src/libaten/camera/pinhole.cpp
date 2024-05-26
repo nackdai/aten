@@ -1,4 +1,5 @@
 #include "camera/pinhole.h"
+#include "math/aabb.h"
 
 namespace AT_NAME {
     void PinholeCamera::init(
@@ -214,5 +215,25 @@ namespace AT_NAME {
         }
 
         return -AT_MATH_INF;
+    }
+
+    void PinholeCamera::FitBoundingBox(const aten::aabb& bounding_box)
+    {
+        // https://stackoverflow.com/questions/2866350/move-camera-to-fit-3d-scene
+        const auto bbox_center = bounding_box.getCenter();
+        const auto radius = bounding_box.ComputeSphereRadiusToCover();
+
+        // r / d = tan(t/2) <=> d = r / tan(t/2)
+        auto distance = radius / tan(m_vfov / 2);
+
+        auto dir = normalize(m_param.origin - bbox_center);
+        auto origin = bbox_center + dir * distance;
+
+        Initalize(
+            origin, bbox_center,
+            aten::vec3(0, 1, 0),
+            m_vfov,
+            m_param.znear, m_param.zfar,
+            m_param.width, m_param.height);
     }
 }

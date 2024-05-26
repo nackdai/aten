@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -74,7 +75,7 @@ namespace aten {
     {
         auto display_str = aten::StringFormat(format, std::forward<Args>(args) ...);
         ::OutputDebugString(display_str.c_str());
-        printf("%s", display_str.c_str());
+        std::cout << display_str;
     }
 
     using AT_TIME = int64_t;

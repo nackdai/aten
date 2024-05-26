@@ -471,6 +471,18 @@ namespace aten
             return is_window_initialized_;
         }
 
+        void CleanAll()
+        {
+            vertices_.clear();
+            vertex_buffer_.clear();
+            materials_.clear();
+            triangles_.clear();
+            transformables_.clear();
+            textures_.clear();
+            matrices_.clear();
+            lights_.clear();
+        }
+
     private:
         static const context* s_pinnedCtxt;
 

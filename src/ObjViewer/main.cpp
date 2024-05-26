@@ -26,28 +26,6 @@ public:
             return false;
         }
 
-        LoadObj(args_.input, "");
-
-        obj_enables_.resize(objs_.size(), true);
-
-        ctxt_.InitAllTextureAsGLTexture();
-
-        for (auto& obj : objs_) {
-            obj->buildForRasterizeRendering(ctxt_);
-        }
-
-        rasterizer_.init(
-            WIDTH, HEIGHT,
-            "../shader/drawobj_vs.glsl",
-            "../shader/drawobj_fs.glsl");
-
-        auto texNum = ctxt_.GetTextureNum();
-
-        for (int32_t i = 0; i < texNum; i++) {
-            auto tex = ctxt_.GetTexture(i);
-            tex->initAsGLTexture();
-        }
-
         // TODO
         aten::vec3 pos(0.f, 100.0f, 300.0f);
         aten::vec3 at(0.f, 0.f, 0.f);
@@ -60,7 +38,38 @@ public:
             vfov,
             WIDTH, HEIGHT);
 
+        Load(args_.input);
+
+        rasterizer_.init(
+            WIDTH, HEIGHT,
+            "../shader/drawobj_vs.glsl",
+            "../shader/drawobj_fs.glsl");
+
         return true;
+    }
+
+    void Load(std::string_view path)
+    {
+        ctxt_.CleanAll();
+
+        LoadObj(path, "");
+
+        obj_enables_.resize(objs_.size(), true);
+
+        ctxt_.InitAllTextureAsGLTexture();
+
+        for (auto& obj : objs_) {
+            obj->buildForRasterizeRendering(ctxt_);
+        }
+
+        auto texNum = ctxt_.GetTextureNum();
+
+        for (int32_t i = 0; i < texNum; i++) {
+            auto tex = ctxt_.GetTexture(i);
+            tex->initAsGLTexture();
+        }
+
+        camera_.FitBoundingBox(obj_aabb_);
     }
 
     bool Run()
@@ -392,12 +401,13 @@ int32_t main(int32_t argc, char* argv[])
 
     auto id = wnd->Create(
         WIDTH, HEIGHT, TITLE,
-        std::bind(&ObjViewerApp::Run, app),
-        std::bind(&ObjViewerApp::OnClose, app),
-        std::bind(&ObjViewerApp::OnMouseBtn, app, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4),
-        std::bind(&ObjViewerApp::OnMouseMove, app, std::placeholders::_1, std::placeholders::_2),
-        std::bind(&ObjViewerApp::OnMouseWheel, app, std::placeholders::_1),
-        std::bind(&ObjViewerApp::OnKey, app, std::placeholders::_1, std::placeholders::_2));
+        [&app]() { return app->Run(); },
+        [&app]() { app->OnClose(); },
+        [&app](bool left, bool press, int32_t x, int32_t y) { app->OnMouseBtn(left, press, x, y); },
+        [&app](int32_t x, int32_t y) { app->OnMouseMove(x, y); },
+        [&app](int32_t delta) {app->OnMouseWheel(delta); },
+        [&app](bool press, aten::Key key) { app->OnKey(press, key); },
+        [&app](std::string_view path) { app->Load(path); });
 
     if (id >= 0) {
         app->GetContext().SetIsWindowInitialized(true);

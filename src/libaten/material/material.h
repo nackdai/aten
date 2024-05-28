@@ -339,8 +339,6 @@ namespace AT_NAME
             aten::MaterialType type,
             aten::Values& value);
 
-        static std::shared_ptr<material> CreateMaterialWithDefaultValue(aten::MaterialType type);
-
         static std::shared_ptr<material> CreateMaterialWithMaterialParameter(
             const aten::MaterialParameter& param,
             aten::texture* albedoMap,

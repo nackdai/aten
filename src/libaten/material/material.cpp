@@ -67,13 +67,6 @@ namespace AT_NAME
             param, albedoMap.get(), normalMap.get(), roughnessMap.get());
     }
 
-    std::shared_ptr<material> material::CreateMaterialWithDefaultValue(aten::MaterialType type)
-    {
-        AT_ASSERT(material::isValidMaterialType(type));
-        std::shared_ptr<material> ret(mtrl_type_info[static_cast<size_t>(type)].func());
-        return ret;
-    }
-
     std::shared_ptr<material> material::CreateMaterialWithMaterialParameter(
         const aten::MaterialParameter& param,
         aten::texture* albedoMap,

@@ -51,18 +51,6 @@ namespace aten
         return mtrl;
     }
 
-    std::shared_ptr<AT_NAME::material> context::CreateMaterialWithDefaultValue(aten::MaterialType type)
-    {
-        auto mtrl = material::CreateMaterialWithDefaultValue(type);
-        AT_ASSERT(mtrl);
-
-        if (mtrl) {
-            AddMaterial(mtrl);
-        }
-
-        return mtrl;
-    }
-
     std::shared_ptr<AT_NAME::material> context::CreateMaterialWithMaterialParameter(
         const aten::MaterialParameter& param,
         aten::texture* albedoMap,

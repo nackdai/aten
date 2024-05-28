@@ -223,14 +223,6 @@ namespace aten
 
         /**
          * @brief Create a material with the default parameter value and then add it to the scene context.
-         * @param[in] type Material type.
-         * @return Created material.
-         */
-        std::shared_ptr<AT_NAME::material> CreateMaterialWithDefaultValue(
-            aten::MaterialType type);
-
-        /**
-         * @brief Create a material with the default parameter value and then add it to the scene context.
          * @param[in] param Material parameter.
          * @param[in] albedoMap Albedo map texture.
          * @param[in] normalMap Normal map texture.

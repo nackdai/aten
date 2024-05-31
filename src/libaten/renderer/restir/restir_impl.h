@@ -6,7 +6,6 @@
 #include "material/material.h"
 #include "math/mat4.h"
 #include "misc/span.h"
-#include "misc/const_span.h"
 #include "misc/tuple.h"
 #include "renderer/pathtracing/pathtracing_impl.h"
 #include "renderer/pathtracing/pt_params.h"

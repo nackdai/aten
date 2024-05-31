@@ -216,7 +216,6 @@
     <ClInclude Include="..\src\libaten\math\vec4.h" />
     <ClInclude Include="..\src\libaten\misc\bitflag.h" />
     <ClInclude Include="..\src\libaten\misc\color.h" />
-    <ClInclude Include="..\src\libaten\misc\const_span.h" />
     <ClInclude Include="..\src\libaten\misc\stack.h" />
     <ClInclude Include="..\src\libaten\misc\type_traits.h" />
     <ClInclude Include="..\src\libaten\misc\key.h" />

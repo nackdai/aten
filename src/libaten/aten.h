@@ -34,6 +34,7 @@
 #include "misc/color.h"
 #include "misc/key.h"
 #include "misc/omputil.h"
+#include "misc/stack.h"
 #include "misc/span.h"
 #include "misc/thread.h"
 #include "misc/timeline.h"

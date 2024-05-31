@@ -41,7 +41,6 @@
 #include "misc/timer.h"
 #include "misc/type_traits.h"
 #include "misc/value.h"
-#include "misc/const_span.h"
 
 #include "light/light.h"
 #include "light/pointlight.h"

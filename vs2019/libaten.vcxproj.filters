@@ -505,9 +505,6 @@
     <ClInclude Include="..\src\libaten\misc\type_traits.h">
       <Filter>misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\misc\const_span.h">
-      <Filter>misc</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\restir\restir_impl.h">
       <Filter>renderer\restir</Filter>
     </ClInclude>

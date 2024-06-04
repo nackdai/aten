@@ -53,14 +53,7 @@ namespace aten
     };
 
     struct StandardMaterialParameter {
-        // NOTE
-        // https://www.cs.uaf.edu/2012/spring/cs481/section/0/lecture/02_14_refraction.html
-        // - Index Of Refraction
-        //     Water's index of refraction is a mild 1.3; diamond's is a high 2.4.
-        // - eta
-        //   屈折率の比.
-        //   ex) eta = 1.0 / 1.4  : air/glass's index of refraction.
-        float ior;               // 屈折率.
+        float ior;               // Index of refraction.
 
         float roughness;         // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
 
@@ -169,6 +162,14 @@ namespace aten
         }
     };
 
+    struct MediumParameter {
+        float phase_function_g{ 0.0F };
+        float sigma_a{ 0.0F };
+        float sigma_s{ 0.0F };
+        float padding{ 0.0F };
+        aten::vec3 le;
+    };
+
     struct MaterialParameter {
         aten::vec4 baseColor;   // サーフェイスカラー，通常テクスチャマップによって供給される.
         MaterialType type;
@@ -177,17 +178,16 @@ namespace aten
 
         uint16_t id;
         bool isIdealRefraction{ false };
-        uint8_t padding{ 0 };
+        bool is_medium{ false };
 
-        struct {
-            int32_t albedoMap;
-            int32_t normalMap;
-            int32_t roughnessMap;
-        };
+        int32_t albedoMap{ -1 };
+        int32_t normalMap{ -1 };
+        int32_t roughnessMap{ -1 };
 
         union {
             StandardMaterialParameter standard;
             CarPaintMaterialParameter carpaint;
+            MediumParameter medium;
         };
 
         AT_HOST_DEVICE_API void Init()
@@ -198,10 +198,6 @@ namespace aten
         AT_HOST_DEVICE_API MaterialParameter()
         {
             baseColor.set(float(0), float(0), float(0), float(1));
-            isIdealRefraction = false;
-            albedoMap = -1;
-            normalMap = -1;
-            roughnessMap = -1;
 
             Init();
         }
@@ -221,6 +217,7 @@ namespace aten
 
         AT_HOST_DEVICE_API auto& operator=(const MaterialParameter& rhs)
         {
+            id = rhs.id;
             baseColor = rhs.baseColor;
 
             type = rhs.type;
@@ -228,15 +225,22 @@ namespace aten
             attrib = rhs.attrib;
 
             isIdealRefraction = rhs.isIdealRefraction;
+            is_medium = rhs.is_medium;
+
             albedoMap = rhs.albedoMap;
             normalMap = rhs.normalMap;
             roughnessMap = rhs.roughnessMap;
 
-            if (type == MaterialType::CarPaint) {
-                carpaint = rhs.carpaint;
+            if (is_medium) {
+                medium = rhs.medium;
             }
             else {
-                standard = rhs.standard;
+                if (type == MaterialType::CarPaint) {
+                    carpaint = rhs.carpaint;
+                }
+                else {
+                    standard = rhs.standard;
+                }
             }
 
             return *this;
@@ -346,47 +350,7 @@ namespace AT_NAME
             aten::texture* roughnessMap);
 
         material() = default;
-        virtual ~material() = default;
-
-        bool isEmissive() const
-        {
-            return m_param.attrib.isEmissive;
-        }
-
-        bool isSingular() const
-        {
-            return m_param.attrib.isSingular;
-        }
-
-        bool isTranslucent() const
-        {
-            return m_param.attrib.isTranslucent;
-        }
-
-        bool isSingularOrTranslucent() const
-        {
-            return isSingular() || isTranslucent();
-        }
-
-        // TODO
-        virtual bool isGlossy() const
-        {
-            bool isGlossy = m_param.attrib.isGlossy;
-
-            if (isGlossy) {
-                isGlossy = (m_param.standard.roughness == float(1) ? false : true);
-                if (!isGlossy) {
-                    isGlossy = (m_param.standard.shininess == 0 ? false : true);
-                }
-            }
-
-            return isGlossy;
-        }
-
-        const aten::vec4& color() const
-        {
-            return m_param.baseColor;
-        }
+        ~material() = default;
 
         int32_t id() const
         {
@@ -397,11 +361,6 @@ namespace AT_NAME
             aten::texture* albedoMap,
             aten::texture* normalMap,
             aten::texture* roughnessMap);
-
-        float ior() const
-        {
-            return m_param.standard.ior;
-        }
 
         const aten::MaterialParameter& param() const
         {

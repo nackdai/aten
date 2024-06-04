@@ -113,9 +113,8 @@ namespace AT_NAME
             mtrl = new AT_NAME::DisneyBRDF(param, albedoMap, normalMap, roughnessMap);
             break;
         default:
-            AT_ASSERT(false);
-            AT_PRINTF("No material type [%s(%d)]\n", __FILE__, __LINE__);
-            mtrl = new AT_NAME::lambert();
+            mtrl = new AT_NAME::material();
+            mtrl->m_param = param;
             break;
         }
 

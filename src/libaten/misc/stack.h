@@ -26,12 +26,12 @@ namespace aten
             return size_;
         }
 
-        T& front()
+        T& top()
         {
             AT_ASSERT(size_ > 0);
             return queue_.front();
         }
-        const T& front() const
+        const T& top() const
         {
             AT_ASSERT(size_ > 0);
             return queue_.front();

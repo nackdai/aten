@@ -247,6 +247,8 @@
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf.h" />
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf_types.h" />
+    <ClInclude Include="..\src\libaten\renderer\volume\volume_pathtracing.h" />
+    <ClInclude Include="..\src\libaten\renderer\volume\volume_pathtracing_impl.h" />
     <ClInclude Include="..\src\libaten\sampler\cmj.h" />
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
     <ClInclude Include="..\src\libaten\sampler\samplerinterface.h" />
@@ -269,6 +271,8 @@
     <ClInclude Include="..\src\libaten\visualizer\shader.h" />
     <ClInclude Include="..\src\libaten\visualizer\visualizer.h" />
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
+    <ClInclude Include="..\src\libaten\volume\medium.h" />
+    <ClInclude Include="..\src\libaten\volume\phase_function.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\3rdparty\imgui\backends\imgui_impl_glfw.cpp" />
@@ -348,6 +352,7 @@
     <ClCompile Include="..\src\libaten\renderer\pathtracing\pathtracing.cpp" />
     <ClCompile Include="..\src\libaten\renderer\restir\restir.cpp" />
     <ClCompile Include="..\src\libaten\renderer\svgf\svgf.cpp" />
+    <ClCompile Include="..\src\libaten\renderer\volume\volume_pathtracing.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sampler.cpp" />
     <ClCompile Include="..\src\libaten\scene\hitable.cpp" />
     <ClCompile Include="..\src\libaten\scene\host_scene_context.cpp" />

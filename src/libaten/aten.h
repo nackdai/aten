@@ -98,5 +98,8 @@
 #include "renderer/ao/aorenderer.h"
 #include "renderer/restir/restir.h"
 #include "renderer/svgf/svgf.h"
+#include "renderer/volume/volume_pathtracing.h"
 
 #include "os/system.h"
+
+#include "volume/medium.h"

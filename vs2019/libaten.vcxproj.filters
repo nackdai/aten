@@ -103,6 +103,12 @@
     <Filter Include="renderer\restir">
       <UniqueIdentifier>{fc29292e-ce9f-4868-9779-be83ddf06b5a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="volume">
+      <UniqueIdentifier>{956e231b-1de3-4a5b-b91b-bb7965dbde32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderer\volume">
+      <UniqueIdentifier>{592da6ff-7b67-47b9-8682-e24a543c0c8e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -517,6 +523,18 @@
     <ClInclude Include="..\src\libaten\misc\stack.h">
       <Filter>misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\volume\medium.h">
+      <Filter>volume</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\volume\phase_function.h">
+      <Filter>volume</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\volume\volume_pathtracing.h">
+      <Filter>renderer\volume</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\volume\volume_pathtracing_impl.h">
+      <Filter>renderer\volume</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -767,6 +785,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\restir\restir.cpp">
       <Filter>renderer\restir</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\volume\volume_pathtracing.cpp">
+      <Filter>renderer\volume</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

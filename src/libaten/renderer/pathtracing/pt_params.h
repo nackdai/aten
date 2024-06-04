@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stack>
+
 #include "material/material.h"
 #include "math/vec3.h"
 #include "math/vec4.h"
@@ -25,7 +27,10 @@ namespace AT_NAME {
     struct PathThroughput {
         aten::vec3 throughput;
         float pdfb;
-        aten::stack<int32_t, 4> mediums;
+
+        static constexpr size_t MedisumStackSize = 8;
+        aten::stack<int32_t, MedisumStackSize> mediums;
+        //std::stack<int32_t> mediums;
     };
 
     struct PathContrib {

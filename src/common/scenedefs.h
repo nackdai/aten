@@ -207,6 +207,16 @@ namespace _detail {
     using IsMovableObjectScene = decltype(std::declval<T>().IsMovableObjectScene);
 }
 
+class VolumeObjCornellBoxScene {
+public:
+    static void makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager);
+
+    static void getCameraPosAndAt(
+        aten::vec3& pos,
+        aten::vec3& at,
+        float& fov);
+};
+
 template <class SCENE, class T>
 void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
 {
@@ -238,4 +248,5 @@ void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene, aten::AssetMana
 //#define Scene DeformInBoxScene
 //#define Scene AlphaBlendedObjCornellBoxScene
 //#define Scene CryteckSponzaScene
-#define Scene ManyLightCryteckSponzaScene
+//#define Scene ManyLightCryteckSponzaScene
+#define Scene VolumeObjCornellBoxScene

@@ -7,7 +7,7 @@ constexpr int32_t WIDTH = 512;
 constexpr int32_t HEIGHT = 512;
 constexpr const char* TITLE = "app";
 
-#define ENABLE_IBL
+//#define ENABLE_IBL
 // #define ENABLE_EVERY_FRAME_SC
 //#define ENABLE_FEATURE_LINE
 
@@ -216,7 +216,7 @@ private:
 
     std::shared_ptr<aten::texture> envmap_;
 
-    aten::PathTracing renderer_;
+    aten::VolumePathTracing renderer_;
     //aten::SVGFRenderer renderer_;
     //aten::ReSTIRRenderer renderer_;
 

@@ -3,6 +3,7 @@
 #include "material/material.h"
 #include "math/vec3.h"
 #include "math/vec4.h"
+#include "misc/stack.h"
 #include "sampler/sampler.h"
 
 #ifdef __AT_CUDA__
@@ -24,6 +25,7 @@ namespace AT_NAME {
     struct PathThroughput {
         aten::vec3 throughput;
         float pdfb;
+        aten::stack<int32_t, 4> mediums;
     };
 
     struct PathContrib {
@@ -60,40 +62,12 @@ namespace AT_NAME {
     };
 
     struct PathAttribute {
-        union {
-            _detail::v4 v;
-            struct {
-                bool isHit;
-                bool isTerminate;
-                bool isSingular;
-                bool isKill;
+        bool isHit{ false };
+        bool isTerminate{ false };
+        bool isSingular{ false };
+        bool isKill{ false };
 
-                aten::MaterialType mtrlType;
-            };
-        };
-
-#ifndef __AT_CUDA__
-        PathAttribute() : isHit(false), isTerminate(false), isSingular(false), isKill(false), mtrlType(aten::MaterialType::Lambert) {}
-        PathAttribute(const PathAttribute& rhs)
-        {
-            v = rhs.v;
-        }
-        PathAttribute(PathAttribute&& rhs) noexcept
-        {
-            v = rhs.v;
-        }
-        PathAttribute& operator=(const PathAttribute& rhs)
-        {
-            v = rhs.v;
-            return *this;
-        }
-        PathAttribute& operator=(PathAttribute&& rhs) noexcept
-        {
-            v = rhs.v;
-            return *this;
-        }
-        ~PathAttribute() = default;
-#endif
+        aten::MaterialType mtrlType{ aten::MaterialType::Lambert };
     };
 
     struct Path {

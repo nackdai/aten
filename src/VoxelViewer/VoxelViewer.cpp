@@ -171,7 +171,7 @@ void VoxelViewer::draw(
             const auto mtrl = ctxt.GetMaterialInstance(voxel.mtrlid);
 
             if (mtrl) {
-                color = mtrl->color();
+                color = mtrl->param().baseColor;
             }
 
             CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtx_L2W.a[0]));

@@ -197,9 +197,9 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::A
     scene->add(glass);
 
 #if 1
-    auto l = std::make_shared<aten::AreaLight>(light, emit->color(), 400.0f);
+    auto l = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 400.0f);
 #else
-    auto l = std::make_shared<aten::AreaLight>(glass, emit->color(), 400.0f);
+    auto l = std::make_shared<aten::AreaLight>(glass, emit->param().baseColor, 400.0f);
 #endif
 
     ctxt.AddLight(l);
@@ -775,7 +775,7 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::As
     scene->add(glass);
 #endif
 
-    auto l = std::make_shared<aten::AreaLight>(light, emit->color(), 400.0f);
+    auto l = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 400.0f);
 
     ctxt.AddLight(l);
 #endif

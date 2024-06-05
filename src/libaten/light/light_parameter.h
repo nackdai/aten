@@ -5,23 +5,24 @@
 
 namespace aten {
     /**
-     * @brief Data package for the result to sample light.
-     */
-    struct LightSampleResult {
-        vec3 pos;           ///< Light position.
-        vec3 dir;           ///< Light direction to the position.
-        vec3 nml;           ///< Light object surface normal.
-        vec3 light_color;   ///< Light color.
-        float pdf{ 0.0f };  ///< Light sampling pdf.
-    };
-
-    /**
      * @brief Description for attributes of light.
      */
     struct LightAttribute {
         uint32_t isSingular : 1;    ///< Singular light.
         uint32_t isInfinite : 1;    ///< Inifinite light.
         uint32_t isIBL : 1;         ///< Image Based Light.
+    };
+
+    /**
+     * @brief Data package for the result to sample light.
+     */
+    struct LightSampleResult {
+        vec3 pos;               ///< Light position.
+        vec3 dir;               ///< Light direction to the position.
+        vec3 nml;               ///< Light object surface normal.
+        vec3 light_color;       ///< Light color.
+        float pdf{ 0.0f };      ///< Light sampling pdf.
+        LightAttribute attrib;  ///< Light attribute.
     };
 
     AT_DEVICE_API constexpr auto LightAttributeArea = aten::LightAttribute{ false, false, false };

@@ -39,5 +39,7 @@ namespace AT_NAME
             AT_ASSERT(false);
             break;
         }
+
+        result.attrib = param.attrib;
     }
 }

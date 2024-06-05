@@ -38,6 +38,9 @@ namespace AT_NAME {
             result.pdf = 1 / hrec.area;
 
             result.dir = hrec.p - org;
+            result.dist_to_light = length(result.dir);
+            result.dir = normalize(result.dir);
+
             result.nml = hrec.normal;
 
             // Convert intenstiy[W/sr] to luminance[W/(sr * m^2)]

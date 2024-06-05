@@ -17,12 +17,13 @@ namespace aten {
      * @brief Data package for the result to sample light.
      */
     struct LightSampleResult {
-        vec3 pos;               ///< Light position.
-        vec3 dir;               ///< Light direction to the position.
-        vec3 nml;               ///< Light object surface normal.
-        vec3 light_color;       ///< Light color.
-        float pdf{ 0.0f };      ///< Light sampling pdf.
-        LightAttribute attrib;  ///< Light attribute.
+        vec3 pos;                       ///< Light position.
+        vec3 dir;                       ///< Light direction to the position.
+        float dist_to_light{ 0.0F };    ///< Distnace to light position.
+        vec3 nml;                       ///< Light object surface normal.
+        vec3 light_color;               ///< Light color.
+        float pdf{ 0.0F };              ///< Light sampling pdf.
+        LightAttribute attrib;          ///< Light attribute.
     };
 
     AT_DEVICE_API constexpr auto LightAttributeArea = aten::LightAttribute{ false, false, false };

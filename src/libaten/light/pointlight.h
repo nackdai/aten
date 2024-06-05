@@ -39,11 +39,13 @@ namespace AT_NAME {
             result.pdf = 1.0f;
 
             result.dir = ((aten::vec3)param.pos) - org;
+            result.dist_to_light = length(result.dir);
+            result.dir = normalize(result.dir);
 
             result.pos = param.pos;
             result.nml = normalize(-result.dir);
 
-            auto dist2 = aten::squared_length(result.dir);
+            auto dist2 = aten::sqr(result.dist_to_light);
 
             auto luminance = param.scale * param.intensity / dist2;
             result.light_color = param.light_color * luminance;

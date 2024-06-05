@@ -38,11 +38,11 @@ namespace restir {
             float pre_sampled_r)
         {
             aten::vec3 nmlLight = lightsample.nml;
-            aten::vec3 dirToLight = normalize(lightsample.dir);
+            aten::vec3 dirToLight = lightsample.dir;
 
             const auto cosShadow = aten::abs(dot(normal, dirToLight));
             const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
-            const auto dist2 = aten::squared_length(lightsample.dir);
+            const auto dist2 = aten::sqr(lightsample.dist_to_light);
 
             auto brdf = AT_NAME::material::sampleBSDF(
                 &mtrl, normal,
@@ -80,7 +80,7 @@ namespace restir {
             const float u, const float v,
             float pre_sampled_r)
         {
-            aten::vec3 dirToLight = normalize(lightsample.dir);
+            aten::vec3 dirToLight = lightsample.dir;
 
             auto pdf = AT_NAME::material::samplePDF(&mtrl, normal, ray_dir, dirToLight, u, v);
             if (pdf == 0.0f) {
@@ -151,11 +151,11 @@ namespace restir {
             AT_NAME::Light::sample(lightsample, light, ctxt, org, normal, sampler, lod);
 
             aten::vec3 nmlLight = lightsample.nml;
-            aten::vec3 dirToLight = normalize(lightsample.dir);
+            aten::vec3 dirToLight = lightsample.dir;
 
             const auto cosShadow = aten::abs(dot(normal, dirToLight));
             const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
-            const auto dist2 = aten::squared_length(lightsample.dir);
+            const auto dist2 = aten::sqr(lightsample.dist_to_light);
 
             // NOTE:
             // Regarding punctual light, nothing to sample.

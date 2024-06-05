@@ -7,6 +7,7 @@
 #include "light/light_impl.h"
 #include "math/ray.h"
 #include "material/material.h"
+#include "misc/tuple.h"
 #include "misc/type_traits.h"
 #include "renderer/aov.h"
 #include "scene/scene.h"
@@ -238,6 +239,34 @@ namespace AT_NAME
         }
     }
 
+    inline AT_DEVICE_API aten::tuple<aten::LightSampleResult, float, int32_t> SampleLight(
+        const AT_NAME::context& ctxt,
+        const aten::MaterialParameter& mtrl,
+        int32_t bounce,
+        aten::sampler& sampler,
+        const aten::vec3& org,
+        const aten::vec3& nml)
+    {
+        aten::LightSampleResult light_sample;
+        float light_select_prob = 0.0F;
+        int target_light_idx = -1;
+
+        const auto lightnum = static_cast<int32_t>(ctxt.GetLightNum());
+
+        if (lightnum <= 0 || mtrl.attrib.isSingular || mtrl.attrib.isTranslucent) {
+            return aten::make_tuple(light_sample, light_select_prob, target_light_idx);
+        }
+
+        target_light_idx = aten::cmpMin<decltype(lightnum)>(
+            static_cast<decltype(lightnum)>(sampler.nextSample() * lightnum), lightnum - 1);
+        light_select_prob = 1.0f / lightnum;
+
+        const auto& light = ctxt.GetLight(target_light_idx);
+        AT_NAME::Light::sample(light_sample, light, ctxt, org, nml, &sampler, bounce);
+
+        return aten::make_tuple(light_sample, light_select_prob, target_light_idx);
+    }
+
     inline AT_DEVICE_API void FillShadowRay(
         AT_NAME::ShadowRay& shadow_ray,
         const AT_NAME::context& ctxt,
@@ -254,22 +283,16 @@ namespace AT_NAME
     {
         shadow_ray.isActive = false;
 
-        const auto lightnum = static_cast<int32_t>(ctxt.GetLightNum());
+        aten::LightSampleResult sampleres;
+        float lightSelectPdf = 0.0F;
+        int32_t target_light_idx = -1;
+        aten::tie(sampleres, lightSelectPdf, target_light_idx) = SampleLight(ctxt, mtrl, bounce, sampler, hit_pos, hit_nml);
 
-        if (lightnum <= 0 || mtrl.attrib.isSingular || mtrl.attrib.isTranslucent) {
+        if (target_light_idx < 0) {
             return;
         }
 
-        const auto target_light_idx = aten::cmpMin<decltype(lightnum)>(
-            static_cast<decltype(lightnum)>(sampler.nextSample() * lightnum), lightnum - 1);
-        const auto lightSelectPdf = 1.0f / lightnum;
-
-        const auto& light = ctxt.GetLight(target_light_idx);
-
         bool isShadowRayActive = false;
-
-        aten::LightSampleResult sampleres;
-        AT_NAME::Light::sample(sampleres, light, ctxt, hit_pos, hit_nml, &sampler, bounce);
 
         const auto& posLight = sampleres.pos;
         const auto& nmlLight = sampleres.nml;
@@ -302,7 +325,7 @@ namespace AT_NAME
             auto cosLight = dot(nmlLight, -dirToLight);
 
             auto dist2 = aten::squared_length(sampleres.dir);
-            dist2 = (light.attrib.isInfinite || light.attrib.isSingular) ? float{ 1 } : dist2;
+            dist2 = (sampleres.attrib.isInfinite || sampleres.attrib.isSingular) ? float{ 1 } : dist2;
 
             if (cosShadow >= 0 && cosLight >= 0
                 && dist2 > 0
@@ -312,7 +335,7 @@ namespace AT_NAME
                 // Regarding punctual light, nothing to sample.
                 // It means there is nothing to convert pdf.
                 // TODO: IBL...
-                if (!light.attrib.isSingular || !light.attrib.isIBL) {
+                if (!sampleres.attrib.isSingular || !sampleres.attrib.isIBL) {
                     // Convert path PDF to NEE PDF.
                     // i.e. Convert solid angle PDF to area PDF.
                     // NEE samples the point on the light, and the point sampling means the PDF is area.
@@ -321,11 +344,11 @@ namespace AT_NAME
                     path_pdf = path_pdf * cosLight / dist2;
                 }
 
-                auto misW = light.attrib.isSingular
+                auto misW = sampleres.attrib.isSingular
                     ? 1.0f
                     : _detail::ComputeBalanceHeuristic(pdfLight * lightSelectPdf, path_pdf);
 
-                const auto G = light.attrib.isSingular || light.attrib.isInfinite
+                const auto G = sampleres.attrib.isSingular || sampleres.attrib.isInfinite
                     ? cosShadow * cosLight
                     : cosShadow * cosLight / dist2;
 

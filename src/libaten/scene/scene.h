@@ -133,23 +133,6 @@ namespace AT_NAME {
 #endif
         }
 
-        std::shared_ptr<Light> sampleLight(
-            const aten::context& ctxt,
-            const aten::vec3& org,
-            const aten::vec3& nml,
-            aten::sampler* sampler,
-            float& selectPdf,
-            aten::LightSampleResult& sampleRes);
-
-        std::shared_ptr<Light> sampleLightWithReservoir(
-            const aten::context& ctxt,
-            const aten::vec3& org,
-            const aten::vec3& nml,
-            std::function<aten::vec3(const aten::vec3&)> compute_brdf,
-            aten::sampler* sampler,
-            float& selectPdf,
-            aten::LightSampleResult& sampleRes);
-
         void render(
             aten::hitable::FuncPreDraw func,
             std::function<bool(const std::shared_ptr<aten::hitable>&)> funcIfDraw,

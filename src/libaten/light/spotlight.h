@@ -52,10 +52,13 @@ namespace AT_NAME {
         {
             result.pdf = 1.0f;
             result.pos = param.pos;
-            result.dir = ((aten::vec3)param.pos) - org;
             result.nml = param.dir;   // already normalized
 
-            auto dir_to_light = -normalize(result.dir);
+            result.dir = ((aten::vec3)param.pos) - org;
+            result.dist_to_light = length(result.dir);
+            result.dir = normalize(result.dir);
+
+            auto dir_to_light = -result.dir;
 
             auto rho = dot((aten::vec3)param.dir, dir_to_light);
 
@@ -66,7 +69,7 @@ namespace AT_NAME {
                 auto angle_attenuation = (rho - cosHalfOuter) / (cosHalfInner - cosHalfOuter);
                 angle_attenuation = aten::clamp<float>(angle_attenuation, 0.0f, 1.0f);
 
-                auto dist2 = aten::squared_length(result.dir);
+                auto dist2 = aten::sqr(result.dist_to_light);
 
                 auto luminance = param.scale * param.intensity / dist2 / AT_MATH_PI;
                 result.light_color = param.light_color * luminance;

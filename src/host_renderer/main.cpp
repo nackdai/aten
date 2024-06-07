@@ -7,6 +7,8 @@ constexpr int32_t WIDTH = 512;
 constexpr int32_t HEIGHT = 512;
 constexpr const char* TITLE = "app";
 
+const aten::vec4 BGColor(0.0F);
+
 //#define ENABLE_IBL
 // #define ENABLE_EVERY_FRAME_SC
 //#define ENABLE_FEATURE_LINE
@@ -82,7 +84,7 @@ public:
         auto ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
         scene_.addImageBasedLight(ctxt_, ibl);
 #else
-        auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr);
+        auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, BGColor);
 #endif
         renderer_.SetBG(bg);
 
@@ -216,7 +218,7 @@ private:
 
     std::shared_ptr<aten::texture> envmap_;
 
-    aten::VolumePathTracing renderer_;
+    aten::PathTracing renderer_;
     //aten::SVGFRenderer renderer_;
     //aten::ReSTIRRenderer renderer_;
 

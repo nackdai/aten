@@ -324,7 +324,7 @@ namespace AT_NAME
 
             auto cosLight = dot(nmlLight, -dirToLight);
 
-            auto dist2 = aten::squared_length(sampleres.dir);
+            auto dist2 = aten::sqr(sampleres.dist_to_light);
             dist2 = (sampleres.attrib.isInfinite || sampleres.attrib.isSingular) ? float{ 1 } : dist2;
 
             if (cosShadow >= 0 && cosLight >= 0

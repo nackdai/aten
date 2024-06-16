@@ -105,7 +105,8 @@ namespace aten
             const ray& r,
             float t_min, float t_max,
             bool enableLod,
-            Intersection& isect) const override;
+            Intersection& isect,
+            aten::HitStopType hit_stop_type = aten::HitStopType::Closest) const override;
 
         /**
          * @brief Export the built structure data.

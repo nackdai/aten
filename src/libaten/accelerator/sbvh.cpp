@@ -984,7 +984,8 @@ namespace aten
         const ray& r,
         float t_min, float t_max,
         bool enableLod,
-        Intersection& isect) const
+        Intersection& isect,
+        aten::HitStopType hit_stop_type/*= aten::HitStopType::Closest*/) const
     {
         const auto& topLayerBvhNode = m_bvh.getNodes()[0];
 
@@ -1056,10 +1057,20 @@ namespace aten
                 }
 
                 if (isHit) {
-                    if (isectTmp.t < isect.t) {
+                    float tmp_t_max = hit_stop_type == aten::HitStopType::Any
+                        ? AT_MATH_INF
+                        : t_max;
+
+                    if (isectTmp.t < tmp_t_max) {
                         isect = isectTmp;
                         isect.objid = s->id();
                         t_max = isect.t;
+
+                        if (hit_stop_type == aten::HitStopType::Any
+                            || hit_stop_type == aten::HitStopType::Closer)
+                        {
+                            break;
+                        }
                     }
                 }
             }

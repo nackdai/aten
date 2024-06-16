@@ -32,15 +32,17 @@ namespace AT_NAME {
             const aten::ray& r,
             float t_min, float t_max,
             bool enableLod,
-            aten::Intersection& isect) const = 0;
+            aten::Intersection& isect,
+            aten::HitStopType hit_stop_type = aten::HitStopType::Closest) const = 0;
 
         bool hit(
             const aten::context& ctxt,
             const aten::ray& r,
             float t_min, float t_max,
-            aten::Intersection& isect) const
+            aten::Intersection& isect,
+            aten::HitStopType hit_stop_type = aten::HitStopType::Closest) const
         {
-            return hit(ctxt, r, t_min, t_max, false, isect);
+            return hit(ctxt, r, t_min, t_max, false, isect, hit_stop_type);
         }
 
         void addImageBasedLight(

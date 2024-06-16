@@ -21,7 +21,7 @@ namespace AT_NAME {
         {
             const auto sigma_a = medium.sigma_a;
             const auto sigma_s = medium.sigma_s;
-            const auto sigma_t = sigma_a + sigma_s;
+            const auto sigma_t = HomogeniousMedium::sigma_t(medium);
 
             const auto r1 = sampler.nextSample();
 
@@ -65,8 +65,21 @@ namespace AT_NAME {
             return aten::make_tuple(true, next_ray);
         }
 
+        static AT_DEVICE_API float sigma_t(const AT_NAME::MediumParameter& medium)
+        {
+            return medium.sigma_a + medium.sigma_s;
+        }
+
         static AT_DEVICE_API float Transmittance(const float sigma_t, const float distance)
         {
+            return aten::exp(-sigma_t * distance);
+        }
+
+        static AT_DEVICE_API float Transmittance(
+            const float sigma_t,
+            const aten::vec3& p1, const aten::vec3& p2)
+        {
+            const auto distance = length(p1 - p2);
             return aten::exp(-sigma_t * distance);
         }
 

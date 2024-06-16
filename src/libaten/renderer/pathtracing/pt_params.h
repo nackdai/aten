@@ -24,13 +24,13 @@ namespace AT_NAME {
 #endif
     };
 
+    static constexpr size_t MedisumStackSize = 8;
+    using MedisumStack = aten::stack<int32_t, MedisumStackSize>;
+
     struct PathThroughput {
         aten::vec3 throughput;
         float pdfb;
-
-        static constexpr size_t MedisumStackSize = 8;
-        aten::stack<int32_t, MedisumStackSize> mediums;
-        //std::stack<int32_t> mediums;
+        MedisumStack mediums;
     };
 
     struct PathContrib {

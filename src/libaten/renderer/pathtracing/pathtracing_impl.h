@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "defs.h"
 #include "camera/camera.h"
 #include "camera/pinhole.h"
@@ -26,8 +28,8 @@
 namespace AT_NAME
 {
 #ifndef __CUDACC__
-    inline aten::vec3 make_float3(float x, float y, float z) { return {x, y, z}; }
-    inline aten::vec4 make_float4(float x, float y, float z, float w) { return {x, y, z, w}; }
+    inline aten::vec3 make_float3(float x, float y, float z) { return { x, y, z }; }
+    inline aten::vec4 make_float4(float x, float y, float z, float w) { return { x, y, z, w }; }
 #endif
 
     inline AT_DEVICE_API void GeneratePath(
@@ -267,6 +269,63 @@ namespace AT_NAME
         return aten::make_tuple(light_sample, light_select_prob, target_light_idx);
     }
 
+    inline AT_DEVICE_API std::optional<aten::vec3> ComputeRadianceNEE(
+        const aten::ray& ray,
+        const aten::vec3& surface_nml,
+        const aten::MaterialParameter& surface_mtrl,
+        const float pre_sampled_random,
+        float hit_u, float hit_v,
+        const float light_select_prob,
+        const aten::LightSampleResult& light_sample)
+    {
+        auto cosShadow = dot(surface_nml, light_sample.dir);
+
+        float path_pdf{ AT_NAME::material::samplePDF(&surface_mtrl, surface_nml, ray.dir, light_sample.dir, hit_u, hit_v) };
+        auto bsdf{ AT_NAME::material::sampleBSDF(&surface_mtrl, surface_nml, ray.dir, light_sample.dir, hit_u, hit_v, pre_sampled_random) };
+
+        // Get light color.
+        const auto& emit{ light_sample.light_color };
+
+        auto cosLight = dot(light_sample.nml, -light_sample.dir);
+
+        auto dist2 = aten::sqr(light_sample.dist_to_light);
+        dist2 = (light_sample.attrib.isInfinite || light_sample.attrib.isSingular) ? float{ 1 } : dist2;
+
+        if (cosShadow >= 0 && cosLight >= 0
+            && dist2 > 0
+            && path_pdf > float(0) && light_sample.pdf > float(0))
+        {
+            // NOTE:
+            // Regarding punctual light, nothing to sample.
+            // It means there is nothing to convert pdf.
+            // TODO: IBL...
+            if (!light_sample.attrib.isSingular || !light_sample.attrib.isIBL) {
+                // Convert path PDF to NEE PDF.
+                // i.e. Convert solid angle PDF to area PDF.
+                // NEE samples the point on the light, and the point sampling means the PDF is area.
+                // Sampling the direction towards the light point means the PDF is solid angle.
+                // To align the path PDF to NEE PDF, converting solid angl PDF to area PDF is necessary.
+                path_pdf = path_pdf * cosLight / dist2;
+            }
+
+            auto misW = light_sample.attrib.isSingular
+                ? 1.0f
+                : _detail::ComputeBalanceHeuristic(light_sample.pdf * light_select_prob, path_pdf);
+
+            const auto G = light_sample.attrib.isSingular || light_sample.attrib.isInfinite
+                ? cosShadow * cosLight
+                : cosShadow * cosLight / dist2;
+
+            // NOTE:
+            // 3point rendering equation.
+            // Compute as area PDF.
+            const auto contrib = (misW * bsdf * emit * G / light_sample.pdf) / light_select_prob;
+            return contrib;
+        }
+
+        return std::nullopt;
+    }
+
     inline AT_DEVICE_API void FillShadowRay(
         AT_NAME::ShadowRay& shadow_ray,
         const AT_NAME::context& ctxt,
@@ -310,56 +369,15 @@ namespace AT_NAME
         shadow_ray.targetLightId = target_light_idx;
         shadow_ray.distToLight = distToLight;
         shadow_ray.lightcontrib = aten::vec3(0);
-        {
-            auto cosShadow = dot(hit_nml, dirToLight);
 
-            float path_pdf{ AT_NAME::material::samplePDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v) };
-            auto bsdf{ AT_NAME::material::sampleBSDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, pre_sampled_r) };
-
-            bsdf *= throughtput.throughput;
-            bsdf *= static_cast<aten::vec3>(external_albedo);
-
-            // Get light color.
-            const auto& emit{ sampleres.light_color };
-
-            auto cosLight = dot(nmlLight, -dirToLight);
-
-            auto dist2 = aten::sqr(sampleres.dist_to_light);
-            dist2 = (sampleres.attrib.isInfinite || sampleres.attrib.isSingular) ? float{ 1 } : dist2;
-
-            if (cosShadow >= 0 && cosLight >= 0
-                && dist2 > 0
-                && path_pdf > float(0) && pdfLight > float(0))
-            {
-                // NOTE:
-                // Regarding punctual light, nothing to sample.
-                // It means there is nothing to convert pdf.
-                // TODO: IBL...
-                if (!sampleres.attrib.isSingular || !sampleres.attrib.isIBL) {
-                    // Convert path PDF to NEE PDF.
-                    // i.e. Convert solid angle PDF to area PDF.
-                    // NEE samples the point on the light, and the point sampling means the PDF is area.
-                    // Sampling the direction towards the light point means the PDF is solid angle.
-                    // To align the path PDF to NEE PDF, converting solid angl PDF to area PDF is necessary.
-                    path_pdf = path_pdf * cosLight / dist2;
-                }
-
-                auto misW = sampleres.attrib.isSingular
-                    ? 1.0f
-                    : _detail::ComputeBalanceHeuristic(pdfLight * lightSelectPdf, path_pdf);
-
-                const auto G = sampleres.attrib.isSingular || sampleres.attrib.isInfinite
-                    ? cosShadow * cosLight
-                    : cosShadow * cosLight / dist2;
-
-                // NOTE:
-                // 3point rendering equation.
-                // Compute as area PDF.
-                shadow_ray.lightcontrib =
-                    (misW * bsdf * emit * G / pdfLight) / lightSelectPdf;
-
-                isShadowRayActive = true;
-            }
+        auto radiance = ComputeRadianceNEE(
+            ray, hit_nml,
+            mtrl, pre_sampled_r, hit_u, hit_v,
+            lightSelectPdf, sampleres);
+        if (radiance.has_value()) {
+            const auto& r = radiance.value();
+            shadow_ray.lightcontrib = throughtput.throughput * r * static_cast<aten::vec3>(external_albedo);
+            isShadowRayActive = true;
         }
 
         shadow_ray.isActive = isShadowRayActive;
@@ -485,7 +503,7 @@ namespace AT_NAME
         // In the previous bounce, (bsdf * cos / path_pdf) has been computed and multiplied to path_throughput.throughput.
         // Therefore, no need to compute it again here.
 
-        auto contrib{ path_throughput.throughput * weight * static_cast<aten::vec3>(hit_target_mtrl.baseColor)};
+        auto contrib{ path_throughput.throughput * weight * static_cast<aten::vec3>(hit_target_mtrl.baseColor) };
         _detail::AddVec3(path_contrib.contrib, contrib);
 
         // When ray hit the light, tracing will finish.
@@ -594,7 +612,7 @@ namespace AT_NAME
         rays[idx] = aten::ray(rec.p, next_dir, ray_along_normal);
     }
 
-    template <class SCENE = void, bool ENABLE_ALPHA_TRANLUCENT=false>
+    template <class SCENE = void, bool ENABLE_ALPHA_TRANLUCENT = false>
     inline AT_DEVICE_API void ShadePathTracing(
         int32_t idx,
         const AT_NAME::context& ctxt,

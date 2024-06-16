@@ -51,9 +51,11 @@ namespace aten {
             const ray& r,
             float t_min, float t_max,
             bool enableLod,
-            Intersection& isect) const override
+            Intersection& isect,
+            aten::HitStopType hit_stop_type = aten::HitStopType::Closest) const override
         {
-            return hit(ctxt, r, t_min, t_max, isect);
+            bool isHit = onHit(ctxt, m_root.get(), r, t_min, t_max, isect, hit_stop_type);
+            return isHit;
         }
 
         /**
@@ -100,7 +102,8 @@ namespace aten {
             const bvhnode* root,
             const ray& r,
             float t_min, float t_max,
-            Intersection& isect);
+            Intersection& isect,
+            aten::HitStopType hit_stop_type = aten::HitStopType::Closest);
 
         /**
          * @brief Build the tree with Sufrace Area Heuristic.

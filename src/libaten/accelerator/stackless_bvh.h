@@ -51,9 +51,10 @@ namespace aten {
             const ray& r,
             float t_min, float t_max,
             bool enableLod,
-            Intersection& isect) const override
+            Intersection& isect,
+            aten::HitStopType hit_stop_type = aten::HitStopType::Closest) const override
         {
-            return hit(ctxt, r, t_min, t_max, isect);
+            return hit(ctxt, 0, m_listStacklessBvhNode, r, t_min, t_max, isect, hit_stop_type);
         }
 
         std::vector<std::vector<StacklessBvhNode>>& getNodes()
@@ -93,7 +94,8 @@ namespace aten {
             const std::vector<std::vector<StacklessBvhNode>>& listGpuBvhNode,
             const ray& r,
             float t_min, float t_max,
-            Intersection& isect) const;
+            Intersection& isect,
+            aten::HitStopType hit_stop_type = aten::HitStopType::Closest) const;
 
     private:
         bvh m_bvh;

@@ -145,7 +145,8 @@ namespace aten {
         const bvhnode* root,
         const ray& r,
         float t_min, float t_max,
-        Intersection& isect)
+        Intersection& isect,
+        aten::HitStopType hit_stop_type/*= aten::HitStopType::Closest*/)
     {
         // NOTE
         // https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-ii-tree-traversal-gpu/
@@ -166,9 +167,19 @@ namespace aten {
             if (node->isLeaf()) {
                 Intersection isectTmp;
                 if (node->hit(ctxt, r, t_min, t_max, isectTmp)) {
-                    if (isectTmp.t < isect.t) {
+                    float tmp_t_max = hit_stop_type == aten::HitStopType::Any
+                        ? AT_MATH_INF
+                        : t_max;
+
+                    if (isectTmp.t < tmp_t_max) {
                         isect = isectTmp;
                         t_max = isect.t;
+
+                        if (hit_stop_type == aten::HitStopType::Any
+                            || hit_stop_type == aten::HitStopType::Closer)
+                        {
+                            break;
+                        }
                     }
                 }
             }

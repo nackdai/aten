@@ -352,7 +352,8 @@ namespace aten
         const std::vector<std::vector<ThreadedBvhNode>>& listThreadedBvhNode,
         const ray& r,
         float t_min, float t_max,
-        Intersection& isect) const
+        Intersection& isect,
+        aten::HitStopType hit_stop_type/*= aten::HitStopType::Closest*/) const
     {
         float hitt = AT_MATH_INF;
 
@@ -424,9 +425,19 @@ namespace aten
                 }
 
                 if (isHit) {
-                    if (isectTmp.t < isect.t) {
+                    float tmp_t_max = hit_stop_type == aten::HitStopType::Any
+                        ? AT_MATH_INF
+                        : t_max;
+
+                    if (isectTmp.t < tmp_t_max) {
                         isect = isectTmp;
                         t_max = isect.t;
+
+                        if (hit_stop_type == aten::HitStopType::Any
+                            || hit_stop_type == aten::HitStopType::Closer)
+                        {
+                            break;
+                        }
                     }
                 }
             }

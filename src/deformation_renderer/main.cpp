@@ -63,7 +63,8 @@ public:
         const aten::ray& r,
         float t_min, float t_max,
         bool enableLod,
-        aten::Intersection& isect) const override final
+        aten::Intersection& isect,
+        aten::HitStopType hit_stop_type = aten::HitStopType::Closest) const override final
     {
         AT_ASSERT(false);
         return false;

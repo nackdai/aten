@@ -23,6 +23,15 @@ namespace aten {
     };
 
     /**
+     * @brief Type when stop hit test.
+     */
+    enum class HitStopType {
+        Closest,    ///< Not stop until hit most closest one.
+        Closer,     ///< Stop when hit to closer one.
+        Any,        ///< Stop when hit to anything.
+    };
+
+    /**
      * @brief Base class for acceleration structure.
      */
     class accelerator : public hitable {
@@ -97,7 +106,8 @@ namespace aten {
             const ray& r,
             float t_min, float t_max,
             bool enableLod,
-            Intersection& isect) const = 0;
+            Intersection& isect,
+            aten::HitStopType hit_stop_type = aten::HitStopType::Closest) const = 0;
 
         /**
          * @brief Update the structure tree.

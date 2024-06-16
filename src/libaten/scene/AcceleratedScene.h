@@ -50,10 +50,11 @@ namespace aten {
             const aten::ray& r,
             float t_min, float t_max,
             bool enableLod,
-            aten::Intersection& isect) const override final
+            aten::Intersection& isect,
+            aten::HitStopType hit_stop_type = aten::HitStopType::Closest) const override final
         {
             isect.t = t_max;
-            auto isHit = m_accel.HitWithLod(ctxt, r, t_min, t_max, enableLod, isect);
+            auto isHit = m_accel.HitWithLod(ctxt, r, t_min, t_max, enableLod, isect, hit_stop_type);
 
             return isHit;
         }

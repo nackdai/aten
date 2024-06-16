@@ -30,7 +30,7 @@ namespace aten
         int32_t loop_count = 0;
 
         while (depth < m_maxDepth) {
-            if (loop_count >= aten::PathThroughput::MedisumStackSize) {
+            if (loop_count >= aten::MedisumStackSize) {
                 path_host_.attrib[idx].isTerminate = true;
                 break;
             }
@@ -131,8 +131,8 @@ namespace aten
         bool is_scattered = false;
         aten::ray next_ray(rec.p, ray.dir);
 
-        if (AT_NAME::HasMedium(paths.throughput[idx])) {
-            const auto curr_medium_idx = AT_NAME::GetCurrentMediumIdx(paths.throughput[idx]);
+        if (AT_NAME::HasMedium(paths.throughput[idx].mediums)) {
+            const auto curr_medium_idx = AT_NAME::GetCurrentMediumIdx(paths.throughput[idx].mediums);
             const auto& medium = ctxt.GetMaterial(curr_medium_idx).medium;
             aten::tie(is_scattered, next_ray) = AT_NAME::HomogeniousMedium::Sample(
                 paths.throughput[idx],
@@ -206,7 +206,7 @@ namespace aten
                 is_reflected_or_refracted = true;
             }
 
-            AT_NAME::UpdateMedium(curr_ray, rays[idx].dir, orienting_normal, mtrl, paths.throughput[idx]);
+            AT_NAME::UpdateMedium(curr_ray, rays[idx].dir, orienting_normal, mtrl, paths.throughput[idx].mediums);
         }
 
         bool will_update_depth = is_scattered || is_reflected_or_refracted;

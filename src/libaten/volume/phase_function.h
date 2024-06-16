@@ -10,7 +10,7 @@ namespace AT_NAME {
         ~HenyeyGreensteinPhaseFunction() = delete;
 
     public:
-        static inline AT_DEVICE_API float Evaludate(
+        static inline AT_DEVICE_API float Evaluate(
             float g,
             const aten::vec3& wi,
             const aten::vec3& wo)
@@ -29,7 +29,7 @@ namespace AT_NAME {
             const aten::vec3& wi,
             const aten::vec3& wo)
         {
-            return Evaludate(g, wi, wo);
+            return Evaluate(g, wi, wo);
         }
 
         static inline AT_DEVICE_API aten::vec3 SampleDirection(

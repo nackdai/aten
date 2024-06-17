@@ -83,6 +83,22 @@ namespace AT_NAME {
             return aten::exp(-sigma_t * distance);
         }
 
+        static AT_DEVICE_API float TransmittanceFromMediumParam(
+            const aten::MediumParameter& medium,
+            const aten::vec3& p1, const aten::vec3& p2)
+        {
+            const auto sigma_t = HomogeniousMedium::sigma_t(medium);
+            return Transmittance(sigma_t, p1, p2);
+        }
+
+        static AT_DEVICE_API float TransmittanceFromMediumParam(
+            const aten::MediumParameter& medium,
+            const float distance)
+        {
+            const auto sigma_t = HomogeniousMedium::sigma_t(medium);
+            return Transmittance(sigma_t, distance);
+        }
+
         static AT_DEVICE_API AT_NAME::MaterialParameter CreateMaterialParameter(
             const float g,
             const float sigma_a,

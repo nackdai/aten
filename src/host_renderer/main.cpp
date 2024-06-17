@@ -134,7 +134,7 @@ public:
         {
             dst.width = WIDTH;
             dst.height = HEIGHT;
-            dst.maxDepth = 3;
+            dst.maxDepth = 5;
             dst.russianRouletteDepth = 3;
             dst.sample = 1;
             dst.buffer = &buffer_;
@@ -218,7 +218,7 @@ private:
 
     std::shared_ptr<aten::texture> envmap_;
 
-    aten::PathTracing renderer_;
+    aten::VolumePathTracing renderer_;
     //aten::SVGFRenderer renderer_;
     //aten::ReSTIRRenderer renderer_;
 

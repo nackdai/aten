@@ -98,7 +98,7 @@ tomli==2.0.1
 tornado==6.4
 traitlets==5.14.1
 typing-extensions==4.9.0
-urllib3==2.2.0
+urllib3==2.2.2
 wcwidth==0.2.13
 webencodings==0.5.1
 websocket-client==1.7.0

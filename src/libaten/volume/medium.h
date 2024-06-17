@@ -47,9 +47,14 @@ namespace AT_NAME {
             next_ray.org += next_ray.dir * s;
 
             if (r2 < Pa) {
-                // Absorb inernal emission.
+                // Absorb internal emission.
+#if 0
                 const auto medium_throughput = tr * (sigma_a * medium.le / Pa) / pdf;
                 throughput.throughput *= medium_throughput;
+#else
+                // As the optimization, just multiplying internal emission Le is enough.
+                throughput.throughput *= medium.le;
+#endif
             }
             else {
                 // Sample next direction by phase function.
@@ -57,9 +62,12 @@ namespace AT_NAME {
                 const auto r4 = sampler.nextSample();
                 next_ray.dir = HenyeyGreensteinPhaseFunction::SampleDirection(r3, r4, medium.phase_function_g, -curr_ray.dir);
                 next_ray.dir = normalize(next_ray.dir);
-
+#if 0
                 const auto medium_throughput = tr * (sigma_s / Ps) / pdf;
                 throughput.throughput *= medium_throughput;
+#else
+                // As the optimization, nothing to multiply to throughput.
+#endif
             }
 
             return aten::make_tuple(true, next_ray);

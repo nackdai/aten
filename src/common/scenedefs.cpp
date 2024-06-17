@@ -1333,7 +1333,7 @@ void VolumeObjCornellBoxScene::makeScene(
         if (name == "medium") {
             auto mtrl_param = AT_NAME::HomogeniousMedium::CreateMaterialParameter(
                 -0.4F,
-                0.2F, 0.5F,
+                0.0F, 0.5F,
                 aten::vec3(1.0F, 0.0F, 0.0F));
 
             auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
@@ -1361,7 +1361,7 @@ void VolumeObjCornellBoxScene::makeScene(
         aten::vec3(1.0f));
     scene->add(light);
 
-    auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 200.0f);
+    auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 20.0f);
     ctxt.AddLight(areaLight);
 
     for (int32_t i = 1; i < objs.size(); i++) {

@@ -19,6 +19,7 @@ namespace aten
             scene* scene,
             camera* camera) override;
 
+    protected:
         static bool shade(
             int32_t idx,
             aten::Path& paths,
@@ -29,7 +30,16 @@ namespace aten
             int32_t rrDepth,
             int32_t bounce);
 
-    protected:
+        static bool nee(
+            int32_t idx,
+            aten::Path& paths,
+            const context& ctxt,
+            ray* rays,
+            const aten::Intersection& isect,
+            scene* scene,
+            int32_t rrDepth,
+            int32_t bounce);
+
         void radiance(
             int32_t idx,
             int32_t ix, int32_t iy,

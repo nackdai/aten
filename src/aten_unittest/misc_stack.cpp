@@ -71,14 +71,14 @@ TEST(stack_test, StackPushWithMove)
     ASSERT_FALSE(data.construtor_by_moving);
 }
 
-TEST(stack_test, StackFrontBack)
+TEST(stack_test, StackTopBack)
 {
     aten::stack<int32_t, 5> stack;
 
     stack.push(1);
     ASSERT_EQ(stack.size(), 1);
 
-    auto n = stack.front();
+    auto n = stack.top();
     ASSERT_EQ(stack.size(), 1);
     ASSERT_EQ(n, 1);
 
@@ -87,7 +87,7 @@ TEST(stack_test, StackFrontBack)
 
     // front just returns the top value not pop.
     // So, stack size is the same.
-    n = stack.front();
+    n = stack.top();
     ASSERT_EQ(stack.size(), 2);
     ASSERT_EQ(n, 1);
 

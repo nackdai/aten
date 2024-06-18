@@ -45,11 +45,6 @@ namespace AT_NAME
         }
     }
 
-    inline AT_DEVICE_API int32_t GetCurrentMediumIdx(const aten::MedisumStack& mediums)
-    {
-        return mediums.top();
-    }
-
     inline AT_DEVICE_API const aten::MediumParameter& GetCurrentMedium(
         const AT_NAME::context& ctxt,
         const aten::MedisumStack& mediums)

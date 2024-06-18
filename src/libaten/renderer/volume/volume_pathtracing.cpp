@@ -130,8 +130,7 @@ namespace aten
         aten::ray next_ray(rec.p, ray.dir);
 
         if (AT_NAME::HasMedium(paths.throughput[idx].mediums)) {
-            const auto curr_medium_idx = AT_NAME::GetCurrentMediumIdx(paths.throughput[idx].mediums);
-            const auto& medium = ctxt.GetMaterial(curr_medium_idx).medium;
+            const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
             aten::tie(is_scattered, next_ray) = AT_NAME::HomogeniousMedium::Sample(
                 paths.throughput[idx],
                 paths.sampler[idx],
@@ -253,8 +252,7 @@ namespace aten
         aten::ray next_ray(rec.p, ray.dir);
 
         if (AT_NAME::HasMedium(paths.throughput[idx].mediums)) {
-            const auto curr_medium_idx = AT_NAME::GetCurrentMediumIdx(paths.throughput[idx].mediums);
-            const auto& medium = ctxt.GetMaterial(curr_medium_idx).medium;
+            const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
             aten::tie(is_scattered, next_ray) = AT_NAME::HomogeniousMedium::Sample(
                 paths.throughput[idx],
                 paths.sampler[idx],

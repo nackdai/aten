@@ -27,7 +27,7 @@ namespace AT_NAME
         aten::MedisumStack& mediums)
     {
         const auto wi = -ray.dir;
-        const auto is_trasmitted = dot(wo, wi) < 0;
+        const auto is_trasmitted = dot(wo, surface_normal) < 0 != dot(wi, surface_normal) < 0;
         const auto is_enter = dot(wi, surface_normal) > 0;
 
         if (is_trasmitted) {
@@ -68,7 +68,7 @@ namespace AT_NAME
     {
         float transmittance = 1.0F;
 
-        const auto nml = dot(light_sample.dir, surface_nml) > 0
+        auto nml = dot(light_sample.dir, surface_nml) > 0
             ? surface_nml
             : -surface_nml;
         aten::ray ray(start_point, light_sample.dir, nml);
@@ -103,8 +103,13 @@ namespace AT_NAME
                     transmittance *= tr;
                 }
 
+                UpdateMedium(ray, ray.dir, hrec.normal, mtrl, medium_stack);
+
                 // Advance ray.
-                ray.org = hrec.p;
+                nml = dot(ray.dir, hrec.normal) > 0
+                    ? hrec.normal
+                    : -hrec.normal;
+                ray = aten::ray(hrec.p, ray.dir, nml);
                 t_max -= isect.t;
             }
             else {

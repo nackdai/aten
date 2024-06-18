@@ -547,28 +547,22 @@ namespace AT_NAME
 
     inline AT_DEVICE_API float ComputeRussianProbability(
         int32_t bounce,
-        int32_t rrBounce,
+        int32_t rr_bounce,
         AT_NAME::PathAttribute& path_attrib,
         AT_NAME::PathThroughput& path_throughput,
         aten::sampler& sampler)
     {
-        float russianProb = 1.0f;
+        float russian_prob = 1.0f;
 
-        if (bounce > rrBounce) {
-            auto t = normalize(path_throughput.throughput);
-            auto p = aten::cmpMax(t.r, aten::cmpMax(t.g, t.b));
-
-            russianProb = sampler.nextSample();
-
-            if (russianProb >= p) {
-                path_attrib.isTerminate = true;
-            }
-            else {
-                russianProb = aten::cmpMax(p, 0.01f);
+        if (bounce > rr_bounce) {
+            if (aten::squared_length(path_throughput.throughput) > 0) {
+                russian_prob = aten::max_from_vec3(path_throughput.throughput);
+                auto p = sampler.nextSample();
+                path_attrib.isTerminate = (p >= russian_prob);
             }
         }
 
-        return russianProb;
+        return russian_prob;
     }
 
     inline AT_DEVICE_API void PrepareForNextBounce(

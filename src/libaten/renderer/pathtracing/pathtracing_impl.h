@@ -247,7 +247,8 @@ namespace AT_NAME
         int32_t bounce,
         aten::sampler& sampler,
         const aten::vec3& org,
-        const aten::vec3& nml)
+        const aten::vec3& nml,
+        bool is_on_surface = true)
     {
         aten::LightSampleResult light_sample;
         float light_select_prob = 0.0F;
@@ -255,7 +256,9 @@ namespace AT_NAME
 
         const auto lightnum = static_cast<int32_t>(ctxt.GetLightNum());
 
-        if (lightnum <= 0 || mtrl.attrib.isSingular || mtrl.attrib.isTranslucent) {
+        bool is_invalid_mtrl = is_on_surface && (mtrl.attrib.isSingular || mtrl.attrib.isTranslucent);
+
+        if (lightnum <= 0 || is_invalid_mtrl) {
             return aten::make_tuple(light_sample, light_select_prob, target_light_idx);
         }
 

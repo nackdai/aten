@@ -58,6 +58,11 @@ namespace AT_NAME
         return !mediums.empty();
     }
 
+    inline AT_DEVICE_API bool IsSubsurface(const aten::MaterialParameter& mtrl)
+    {
+        return mtrl.type != aten::MaterialType::MaterialTypeMax && mtrl.is_medium;
+    }
+
     inline AT_DEVICE_API aten::tuple<bool, float> TraverseShadowRay(
         const AT_NAME::context& ctxt,
         const aten::LightSampleResult& light_sample,
@@ -88,7 +93,7 @@ namespace AT_NAME
 
                 const auto& mtrl = ctxt.GetMaterial(hrec.mtrlid);
 
-                if (!mtrl.is_medium) {
+                if (!mtrl.is_medium || IsSubsurface(mtrl)) {
                     // Hit surface to occlude light.
                     return aten::make_tuple(false, transmittance);
                 }

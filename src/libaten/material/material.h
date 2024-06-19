@@ -187,8 +187,9 @@ namespace aten
         union {
             StandardMaterialParameter standard;
             CarPaintMaterialParameter carpaint;
-            MediumParameter medium;
         };
+
+        MediumParameter medium;
 
         AT_HOST_DEVICE_API void Init()
         {
@@ -231,17 +232,14 @@ namespace aten
             normalMap = rhs.normalMap;
             roughnessMap = rhs.roughnessMap;
 
-            if (is_medium) {
-                medium = rhs.medium;
+            if (type == MaterialType::CarPaint) {
+                carpaint = rhs.carpaint;
             }
             else {
-                if (type == MaterialType::CarPaint) {
-                    carpaint = rhs.carpaint;
-                }
-                else {
-                    standard = rhs.standard;
-                }
+                standard = rhs.standard;
             }
+
+            medium = rhs.medium;
 
             return *this;
         }

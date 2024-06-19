@@ -147,12 +147,12 @@ add_library(
   misc/bitflag.h
   misc/color.cpp
   misc/color.h
-  misc/const_span.h
   misc/key.h
   misc/misc.h
   misc/omputil.cpp
   misc/omputil.h
   misc/span.h
+  misc/stack.h
   misc/stream.h
   misc/thread.cpp
   misc/thread.h
@@ -190,6 +190,9 @@ add_library(
   renderer/svgf/svgf.h
   renderer/svgf/svgf_impl.h
   renderer/svgf/svgf_types.h
+  renderer/volume/volume_pathtracing.cpp
+  renderer/volume/volume_pathtracing.h
+  renderer/volume/volume_pathtracing_impl.h
   sampler/cmj.h
   sampler/sampler.cpp
   sampler/sampler.h
@@ -225,7 +228,9 @@ add_library(
   visualizer/visualizer.cpp
   visualizer/visualizer.h
   visualizer/window.cpp
-  visualizer/window.h)
+  visualizer/window.h
+  volume/medium.h
+  volume/phase_function.h)
 
 target_include_directories(
   ${PROJECT_NAME}

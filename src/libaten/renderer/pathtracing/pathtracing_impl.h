@@ -357,8 +357,6 @@ namespace AT_NAME
         bool isShadowRayActive = false;
 
         const auto& posLight = sampleres.pos;
-        const auto& nmlLight = sampleres.nml;
-        float pdfLight = sampleres.pdf;
 
         auto dirToLight = normalize(sampleres.dir);
         auto distToLight = length(posLight - hit_pos);

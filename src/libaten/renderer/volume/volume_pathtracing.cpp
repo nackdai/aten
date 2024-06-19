@@ -160,7 +160,7 @@ namespace aten
 
             const auto curr_ray = ray;
 
-            if (mtrl.is_medium) {
+            if (mtrl.is_medium && !AT_NAME::IsSubsurface(mtrl)) {
                 auto ray_base_nml = dot(ray.dir, orienting_normal) > 0
                     ? orienting_normal
                     : -orienting_normal;
@@ -269,7 +269,8 @@ namespace aten
                 aten::tie(light_sample, light_select_prob, target_light_idx) = AT_NAME::SampleLight(
                     ctxt, mtrl, bounce,
                     paths.sampler[idx],
-                    next_ray.org, nml);
+                    next_ray.org, nml,
+                    false);
 
                 if (target_light_idx >= 0) {
                     float transmittance = 1.0F;
@@ -323,7 +324,7 @@ namespace aten
 
             const auto curr_ray = ray;
 
-            if (mtrl.is_medium) {
+            if (mtrl.is_medium && !AT_NAME::IsSubsurface(mtrl)) {
                 auto ray_base_nml = dot(ray.dir, orienting_normal) > 0
                     ? orienting_normal
                     : -orienting_normal;

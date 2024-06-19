@@ -1315,7 +1315,7 @@ void ManyLightCryteckSponzaScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void VolumeObjCornellBoxScene::makeScene(
+void CornellBoxSmokeScene::makeScene(
     aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
 {
     auto emit = CreateMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
@@ -1370,7 +1370,166 @@ void VolumeObjCornellBoxScene::makeScene(
     }
 }
 
-void VolumeObjCornellBoxScene::getCameraPosAndAt(
+void CornellBoxSmokeScene::getCameraPosAndAt(
+    aten::vec3& pos,
+    aten::vec3& at,
+    float& fov)
+{
+    pos = aten::vec3(0.f, 1.f, 3.f);
+    at = aten::vec3(0.f, 1.f, 0.f);
+    fov = 45.0f;
+}
+
+/////////////////////////////////////////////////////
+
+void CornellBoxHomogeneousMediumScene::makeScene(
+    aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+{
+    auto emit = CreateMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
+    asset_manager.registerMtrl(
+        "light",
+        emit);
+
+    auto objs = aten::ObjLoader::load("../../asset/cornellbox/orig.obj", ctxt, asset_manager,
+        [&](std::string_view name, aten::context& ctxt,
+            aten::MaterialType type, const aten::vec3& mtrl_clr,
+            const std::string& albedo, const std::string& nml) -> auto {
+        (void)albedo;
+        (void)nml;
+
+        if (name == "shortBox") {
+            auto mtrl_param = AT_NAME::HomogeniousMedium::CreateMaterialParameter(
+                -0.4F,
+                0.5F, 0.5F,
+                aten::vec3(1.0F, 0.0F, 0.0F));
+
+            auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
+                mtrl_param,
+                nullptr, nullptr, nullptr);
+            mtrl->setName(name.data());
+            ctxt.AddMaterial(mtrl);
+            asset_manager.registerMtrl(name, mtrl);
+            return mtrl;
+        }
+        else if (name == "tallBox") {
+            auto mtrl_param = AT_NAME::HomogeniousMedium::CreateMaterialParameter(
+                -0.4F,
+                0.5F, 0.5F,
+                aten::vec3(0.0F, 1.0F, 0.0F));
+
+            auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
+                mtrl_param,
+                nullptr, nullptr, nullptr);
+            mtrl->setName(name.data());
+            ctxt.AddMaterial(mtrl);
+            asset_manager.registerMtrl(name, mtrl);
+            return mtrl;
+        }
+        else {
+            auto mtrl = CreateMaterial(ctxt, type, mtrl_clr);
+            mtrl->setName(name.data());
+            asset_manager.registerMtrl(name, mtrl);
+            return mtrl;
+        }
+    },
+        true, true);
+
+    auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
+        ctxt,
+        objs[0],
+        aten::vec3(0.0f),
+        aten::vec3(0.0f),
+        aten::vec3(1.0f));
+    scene->add(light);
+
+    auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 20.0f);
+    ctxt.AddLight(areaLight);
+
+    for (int32_t i = 1; i < objs.size(); i++) {
+        auto obj = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[i], aten::mat4::Identity);
+        scene->add(obj);
+    }
+}
+
+void CornellBoxHomogeneousMediumScene::getCameraPosAndAt(
+    aten::vec3& pos,
+    aten::vec3& at,
+    float& fov)
+{
+    pos = aten::vec3(0.f, 1.f, 3.f);
+    at = aten::vec3(0.f, 1.f, 0.f);
+    fov = 45.0f;
+}
+
+/////////////////////////////////////////////////////
+
+void HomogeneousMediumRefractionBunnyScene::makeScene(
+    aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+{
+    auto emit = CreateMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
+    asset_manager.registerMtrl(
+        "light",
+        emit);
+
+    auto objs = aten::ObjLoader::load("../../asset/cornellbox/bunny_in_box.obj", ctxt, asset_manager,
+        [&](std::string_view name, aten::context& ctxt,
+            aten::MaterialType type, const aten::vec3& mtrl_clr,
+            const std::string& albedo, const std::string& nml) -> auto {
+        (void)albedo;
+        (void)nml;
+
+        if (name == "material_0") {
+            aten::MaterialParameter mtrl_param;
+            mtrl_param.type = aten::MaterialType::Refraction;
+#ifdef WHITE_FURNACE_TEST
+            mtrl_param.baseColor = aten::vec3(1.0F);
+#else
+            mtrl_param.baseColor = aten::vec3(0.580000f, 0.580000f, 0.580000f);
+#endif
+            mtrl_param.standard.ior = 1.333F;
+
+            auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
+                mtrl_param,
+                nullptr, nullptr, nullptr);
+
+            mtrl->param().is_medium = true;
+            mtrl->param().medium.phase_function_g = 0.4F;
+            mtrl->param().medium.sigma_a = 0.0F;
+            mtrl->param().medium.sigma_s = 0.9F;
+            mtrl->param().medium.le = aten::vec3(0.8F);
+
+            mtrl->setName(name.data());
+            ctxt.AddMaterial(mtrl);
+            asset_manager.registerMtrl(name, mtrl);
+            return mtrl;
+        }
+        else {
+            auto mtrl = CreateMaterial(ctxt, type, mtrl_clr);
+            mtrl->setName(name.data());
+            asset_manager.registerMtrl(name, mtrl);
+            return mtrl;
+        }
+    },
+        true, true);
+
+    auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
+        ctxt,
+        objs[0],
+        aten::vec3(0.0f),
+        aten::vec3(0.0f),
+        aten::vec3(1.0f));
+    scene->add(light);
+
+    auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 20.0f);
+    ctxt.AddLight(areaLight);
+
+    for (int32_t i = 1; i < objs.size(); i++) {
+        auto obj = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[i], aten::mat4::Identity);
+        scene->add(obj);
+    }
+}
+
+void HomogeneousMediumRefractionBunnyScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
     float& fov)

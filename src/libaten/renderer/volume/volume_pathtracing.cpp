@@ -147,6 +147,7 @@ namespace aten
         else {
             // Implicit conection to light.
             auto is_hit_implicit_light = AT_NAME::HitImplicitLight(
+                ctxt, isect.objid,
                 isBackfacing,
                 bounce,
                 paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
@@ -311,6 +312,7 @@ namespace aten
         else {
             // Implicit conection to light.
             auto is_hit_implicit_light = AT_NAME::HitImplicitLight(
+                ctxt, isect.objid,
                 isBackfacing,
                 bounce,
                 paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],

@@ -463,6 +463,8 @@ namespace AT_NAME
     }
 
     inline AT_DEVICE_API bool HitImplicitLight(
+        const aten::context& ctxt,
+        int32_t hit_obj_id,
         bool is_back_facing,
         int32_t bounce,
         AT_NAME::PathContrib& path_contrib,
@@ -481,6 +483,10 @@ namespace AT_NAME
         if (is_back_facing) {
             return false;
         }
+
+        const auto& obj = ctxt.GetObject(hit_obj_id);
+        const auto& light = ctxt.GetLight(obj.light_id);
+        const auto light_color = AT_NAME::AreaLight::ComputeLightColor(light, hit_area);
 
         float weight = 1.0f;
 
@@ -504,7 +510,7 @@ namespace AT_NAME
         // In the previous bounce, (bsdf * cos / path_pdf) has been computed and multiplied to path_throughput.throughput.
         // Therefore, no need to compute it again here.
 
-        auto contrib{ path_throughput.throughput * weight * static_cast<aten::vec3>(hit_target_mtrl.baseColor) };
+        auto contrib{ path_throughput.throughput * weight * light_color };
         _detail::AddVec3(path_contrib.contrib, contrib);
 
         // When ray hit the light, tracing will finish.

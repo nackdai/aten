@@ -43,9 +43,14 @@ namespace AT_NAME {
 
             result.nml = hrec.normal;
 
+            result.light_color = ComputeLightColor(param, hrec.area);
+        }
+
+        static AT_HOST_DEVICE_API aten::vec3 ComputeLightColor(const aten::LightParameter& param, float area)
+        {
             // Convert intenstiy[W/sr] to luminance[W/(sr * m^2)]
-            auto luminance = param.scale * param.intensity / hrec.area;
-            result.light_color = param.light_color * luminance;
+            auto luminance = param.scale * param.intensity / area;
+            return param.light_color* luminance;
         }
 
         template <class CONTEXT>

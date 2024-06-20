@@ -289,6 +289,18 @@ namespace aten
     void context::AddLight(const std::shared_ptr<Light>& light)
     {
         lights_.emplace_back(light);
+
+        // Assigne light id to object of light.
+        if (light->param().arealight_objid >= 0) {
+            const auto light_id = lights_.size() - 1;
+            auto obj = transformables_.at(light->param().arealight_objid);
+            obj->GetParam().light_id = light_id;
+
+            if (obj->GetParam().type == aten::ObjectType::Instance) {
+                obj = transformables_.at(obj->GetParam().object_id);
+                obj->GetParam().light_id = light_id;
+            }
+        }
     }
 
     std::shared_ptr<Light> context::GetLightInstance(uint32_t idx) const

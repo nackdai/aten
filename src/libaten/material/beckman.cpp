@@ -161,7 +161,7 @@ namespace AT_NAME
         const auto phi = AT_MATH_PI_2 * r2;
 
         const auto costheta = aten::cos(theta);
-        const auto sintheta = aten::sqrt(1.0F - costheta * costheta);
+        const auto sintheta = aten::sin(theta);
 
         const auto cosphi = aten::cos(phi);
         const auto sinphi = aten::sin(phi);

@@ -48,14 +48,15 @@ namespace AT_NAME {
                 costheta = 1 / (2 * g) * (1 + g2 - aten::sqr((1 - g2) / (1 - g + 2 * g * r1)));
             }
 
-            const auto phi = AT_MATH_PI_2 * r2;
             const auto sintheta = aten::sqrt(1 - costheta * costheta);
 
+            const auto phi = AT_MATH_PI_2 * r2;
             const auto cosphi = aten::cos(phi);
-            const auto sinphi = aten::sqrt(1 - cosphi * cosphi);
+            const auto sinphi = aten::sin(phi);
 
             auto t = aten::getOrthoVector(w);
             auto b = cross(w, t);
+            t = cross(b, w);
 
             auto dir = t * sintheta * cosphi + b * sintheta * sinphi + w * costheta;
             dir = normalize(dir);

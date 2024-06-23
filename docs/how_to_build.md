@@ -18,7 +18,7 @@ git submodule update --init --recursive
     - The second argument can accept `Community`, `Enterprise`, `BuildTools` etc.
     - Default is `Release` and `Communitiy`
 1. Launch `aten/vs2019/aten.sln`
-1. Build porjects with `x64` (not support `x86`)
+1. Build projects with `x64` (not support `x86`)
 
 The confirmed environment is `Visual Studio 2019` on `Windows10`.
 
@@ -38,7 +38,7 @@ The confirmed environment is `Ubuntu 20.04`.
 
 ### What is RunCMake.sh
 
-`RunCMake.sh` is a scirpt to help you to build `aten` with CMake.
+`RunCMake.sh` is a script to help you to build `aten` with CMake.
 It is located in `scripts` directory. If you would like to use it.
 Copy it to the build directory you want.
 
@@ -46,7 +46,7 @@ It needs 2 arguments like the followings:
 
 1. Build Type: `Debug` or `Release`
 1. Compute Capability: It depends on your GPU. But, you need to specify it
-without `.`. For example, if `Comnpute Capability` is `7.5`, please specify
+without `.`. For example, if `Compute Capability` is `7.5`, please specify
 like `75`.
 
 Example to run `RunCMake.sh` is the following:
@@ -55,9 +55,9 @@ Example to run `RunCMake.sh` is the following:
 ./RunCMake.sh Release 75
 ```
 
-You can get `Comnpute Capability` with running `get_cuda_sm.sh`.
-If you don't specify `Comnpute Capability`, while configuring `CMakeLists.txt`,
-`get_cuda_sm.sh` run and `Comnpute Capability` is specified.
+You can get `Compute Capability` with running `get_cuda_sm.sh`.
+If you don't specify `Compute Capability`, while configuring `CMakeLists.txt`,
+`get_cuda_sm.sh` run and `Compute Capability` is specified.
 
 ## Docker (on Linux)
 

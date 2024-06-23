@@ -186,17 +186,11 @@ public:
 
         visualizer_->renderPixelData(buffer_.image().data(), camera_.needRevert());
 
-#if 0
-        g_rasterizerAABB.drawAABB(
-            &g_camera,
-            g_scene.getAccel());
-#endif
-
 #ifdef ENABLE_EVERY_FRAME_SC
         {
-            const auto tmp = aten::StringFormat("sc_%d.png", g_frameNo);
-
-            g_visualizer->takeScreenshot(tmp);
+            const auto frame = renderer_.GetFrameCount();
+            const auto file_name = aten::StringFormat("sc_%d.png", frame);
+            visualizer_->takeScreenshot(file_name);
         }
 #endif
 

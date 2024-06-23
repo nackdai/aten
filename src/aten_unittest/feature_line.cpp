@@ -257,8 +257,10 @@ TEST(feature_line_test, ComputeHitPositionOnDisc)
     aten::vec4 expected_pos(u, v, 0, 1);
     expected_pos *= disc.radius;
     aten::vec3 n = disc.normal;
-    const auto t = aten::getOrthoVector(n);
-    const auto b = cross(n, t);
+
+    aten::vec3 t, b;
+    aten::tie(t, b) = aten::GetTangentCoordinate(n);
+
     aten::mat4 mtx_axes(t, b, n);
     expected_pos = mtx_axes.applyXYZ(expected_pos);
     expected_pos = static_cast<aten::vec3>(expected_pos) + disc.center;

@@ -75,8 +75,10 @@ namespace AT_NAME {
         // NTB座標系において、v = (x, y, z) = (sinφ、cosφ、cosθ).
 
         auto n = normal;
-        auto t = aten::getOrthoVector(n);
-        auto b = cross(n, t);
+
+        aten::vec3 t, b;
+        aten::tie(t, b) = aten::GetTangentCoordinate(n);
+
         auto localV = (-wi.x * t + -wi.y * b + -wi.z * n);
 
         float cosAzimuth = (wo.x * localV.x + wo.y * localV.y);

@@ -53,8 +53,9 @@ namespace AT_NAME {
             nml = normalize(nml);
 
             aten::vec3 n = normalize(orgNml);
-            aten::vec3 t = aten::getOrthoVector(n);
-            aten::vec3 b = cross(n, t);
+
+            aten::vec3 t, b;
+            aten::tie(t, b) = aten::GetTangentCoordinate(n);
 
             newNml = nml.z * n + nml.x * t + nml.y * b;
             newNml = normalize(newNml);

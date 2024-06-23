@@ -111,9 +111,8 @@ namespace AT_NAME
             const auto cosphi = aten::cos(phi);
             const auto sinphi = aten::sin(phi);
 
-            auto t = aten::getOrthoVector(n);
-            auto b = cross(n, t);
-            t = cross(b, n);
+            aten::vec3 t, b;
+            aten::tie(t, b) = aten::GetTangentCoordinate(n);
 
             auto dir = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
             dir = normalize(dir);

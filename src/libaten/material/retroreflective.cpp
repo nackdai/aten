@@ -360,8 +360,8 @@ namespace AT_NAME
             const auto theta = aten::atan(aten::sqrt(-a2 * aten::log(1.0F - r1 * 0.99F)));
             const auto phi = AT_MATH_PI_2 * r2;
 
-            const auto t = aten::getOrthoVector(uo);
-            const auto b = normalize(aten::cross(uo, t));
+            aten::vec3 t, b;
+            aten::tie(t, b) = aten::GetTangentCoordinate(uo);
 
             const auto costheta = aten::cos(theta);
             const auto sintheta = aten::sin(theta);

@@ -8,6 +8,7 @@
 
 #include "defs.h"
 #include "math/math.h"
+#include "misc/tuple.h"
 
 namespace aten {
 #if 0
@@ -286,10 +287,9 @@ namespace aten {
         return res.f;
     }
 
-    // 直行ベクトルを計算.
-    inline AT_HOST_DEVICE_API vec3 getOrthoVector(const vec3& n)
+    static inline AT_HOST_DEVICE_API aten::vec3 GetOrthoVector(const aten::vec3& n)
     {
-        vec3 p;
+        aten::vec3 p;
 
         // NOTE
         // dotを計算したときにゼロになるようなベクトル.
@@ -326,6 +326,14 @@ namespace aten {
 #endif
 
         return p;
+    }
+
+    static inline AT_HOST_DEVICE_API aten::tuple<aten::vec3, aten::vec3> GetTangentCoordinate(const aten::vec3& n)
+    {
+        auto t = GetOrthoVector(n);
+        auto b = cross(n, t);
+        t = cross(b, n);
+        return aten::make_tuple(t, b);
     }
 
     inline AT_HOST_DEVICE_API bool isInvalid(const vec3& v)

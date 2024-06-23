@@ -14,8 +14,9 @@ namespace AT_NAME
     inline AT_DEVICE_API void applyTangentSpaceCoord(const aten::vec3& nml, const aten::vec3& src, aten::vec3& dst)
     {
         aten::vec3 n = normalize(nml);
-        aten::vec3 t = aten::getOrthoVector(n);
-        aten::vec3 b = cross(n, t);
+
+        aten::vec3 t, b;
+        aten::tie(t, b) = aten::GetTangentCoordinate(n);
 
         dst = src.z * n + src.x * t + src.y * b;
         dst = normalize(dst);

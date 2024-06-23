@@ -279,8 +279,9 @@ namespace AT_NAME {
         result.finalColor = result.le * result.intensity;
 #else
         auto n = nml;
-        auto t = aten::getOrthoVector(nml);
-        auto b = normalize(cross(n, t));
+
+        aten::vec3 t, b;
+        aten::tie(t, b) = aten::GetTangentCoordinate(n);
 
         float r1 = sampler->nextSample();
         float r2 = sampler->nextSample();

@@ -87,12 +87,14 @@ namespace AT_NAME {
             const float r1 = sampler->nextSample();
             const float r2 = sampler->nextSample();
 
-            const float sinpsi = aten::sin(2 * AT_MATH_PI * r1);
-            const float cospsi = aten::cos(2 * AT_MATH_PI * r1);
-            const float costheta = aten::pow(1 - r2, 0.5);
-            const float sintheta = aten::sqrt(1 - costheta * costheta);
+            const auto costheta = aten::sqrt(1 - r1);
+            const auto sintheta = aten::sqrt(r1);
 
-            result.dir = normalize(t * sintheta * cospsi + b * sintheta * sinpsi + n * costheta);
+            const auto phi = AT_MATH_PI_2 * r2;
+            const auto cosphi = aten::cos(phi);
+            const auto sinphi = aten::sin(phi);
+
+            result.dir = normalize(t * sintheta * cosphi + b * sintheta * sinphi + n * costheta);
 
             const auto uv = AT_NAME::Background::ConvertDirectionToUV(result.dir);
             const auto u = uv.x;

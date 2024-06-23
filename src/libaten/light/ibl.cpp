@@ -285,10 +285,12 @@ namespace AT_NAME {
         float r1 = sampler->nextSample();
         float r2 = sampler->nextSample();
 
-        float sinpsi = aten::sin(2 * AT_MATH_PI * r1);
-        float cospsi = aten::cos(2 * AT_MATH_PI * r1);
-        float costheta = aten::pow(1 - r2, 0.5);
-        float sintheta = aten::sqrt(1 - costheta * costheta);
+        const auto costheta = aten::sqrt(1 - r1);
+        const auto sintheta = aten::sqrt(r1);
+
+        const auto phi = AT_MATH_PI_2 * r2;
+        const auto cosphi = aten::cos(phi);
+        const auto sinphi = aten::sin(phi);
 
         // returnTo the result
         result.dir = normalize(t * sintheta * cospsi + b * sintheta * sinpsi + n * costheta);

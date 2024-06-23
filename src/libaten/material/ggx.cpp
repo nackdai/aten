@@ -201,10 +201,10 @@ namespace AT_NAME
         const auto phi = 2 * AT_MATH_PI * r2;
 
         const auto costheta = aten::cos(theta);
-        const auto sintheta = aten::sqrt(1 - costheta * costheta);
+        const auto sintheta = aten::sin(theta);
 
         const auto cosphi = aten::cos(phi);
-        const auto sinphi = aten::sqrt(1 - cosphi * cosphi);
+        const auto sinphi = aten::sin(phi);
 
         // Ortho normal base.
         const auto t = aten::getOrthoVector(n);

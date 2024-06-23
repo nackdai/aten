@@ -463,7 +463,7 @@ namespace AT_NAME
     }
 
     inline AT_DEVICE_API bool HitImplicitLight(
-        const aten::context& ctxt,
+        const AT_NAME::context& ctxt,
         int32_t hit_obj_id,
         bool is_back_facing,
         int32_t bounce,
@@ -649,6 +649,7 @@ namespace AT_NAME
 
         // Implicit conection to light.
         auto is_hit_implicit_light = AT_NAME::HitImplicitLight(
+            ctxt, isect.objid,
             isBackfacing,
             bounce,
             paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],

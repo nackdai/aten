@@ -18,7 +18,7 @@ And Idanten includes characters of aten, "id**aten**"
 
 - Rendering algorithms
   - Next Event Estimation Path Tracing
-- Acceralation
+- Acceleration
   - BVH
   - SBVH
   - TopLayer, BottomLayer
@@ -28,12 +28,10 @@ And Idanten includes characters of aten, "id**aten**"
   - Lambert
   - Specular
   - Refraction
-  - Microfacet Blinn
   - Microfacet Beckman
   - Microfacet GGX
   - OrenNayar
   - Disney BRDF
-  - CarPaint (Experimental)
   - Retroreflective (Experimental)
 - Lights
   - Polygonal Light(Area Light)
@@ -42,8 +40,6 @@ And Idanten includes characters of aten, "id**aten**"
   - Directional Light
   - Image Based Lighting
 - Quasi Monte Carlo
-  - Halton
-  - Sobol
   - CMJ(Correllated Multi Jittered)
 - Rendering shapes
   - Polygon(.obj file)
@@ -52,14 +48,11 @@ And Idanten includes characters of aten, "id**aten**"
   - Albedo
   - Normal
   - Roughness
-- Denoise filter
-  - Non Local Mean
 - PostEffect
-  - Simple Bloom
   - Reinherd Tone Mapping
 - Camera
   - Pinhole
-  - 360 view
+  - Equirect
 - Others
   - Instancing
   - Deformation
@@ -71,9 +64,9 @@ with dynamic direct lighting](https://research.nvidia.com/sites/default/files/pu
 
 ## Limitations
 
-- Not optimisation by SIMD
-  - This should be easy, simple, to avoid difficult to understand, so not use SIMD.
-- There are some Japanese comments...
+- Not optimized by SIMD
+  - To keep easy, simple, to avoid difficult to understand, so not use SIMD.
+- There are still some Japanese comments...
 
 ## How To Build
 

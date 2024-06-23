@@ -278,8 +278,9 @@ namespace npr {
 
             // Coordinate based on normal of next disc.
             const auto n = disc.normal;
-            const auto t = aten::getOrthoVector(n);
-            const auto b = cross(n, t);
+
+            aten::vec3 t, b;
+            aten::tie(t, b) = aten::GetTangentCoordinate(n);
 
             // Make matrix from n, t, b
             aten::mat4 mtx_axes(t, b, n);

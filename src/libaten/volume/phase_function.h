@@ -54,9 +54,8 @@ namespace AT_NAME {
             const auto cosphi = aten::cos(phi);
             const auto sinphi = aten::sin(phi);
 
-            auto t = aten::getOrthoVector(w);
-            auto b = cross(w, t);
-            t = cross(b, w);
+            aten::vec3 t, b;
+            aten::tie(t, b) = aten::GetTangentCoordinate(w);
 
             auto dir = t * sintheta * cosphi + b * sintheta * sinphi + w * costheta;
             dir = normalize(dir);

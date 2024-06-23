@@ -81,8 +81,9 @@ namespace AT_NAME {
             uint32_t lod)
         {
             const auto& n = nml;
-            const auto t = aten::getOrthoVector(n);
-            const auto b = normalize(cross(n, t));
+
+            aten::vec3 t, b;
+            aten::tie(t, b) = aten::GetTangentCoordinate(n);
 
             const float r1 = sampler->nextSample();
             const float r2 = sampler->nextSample();

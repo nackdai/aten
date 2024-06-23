@@ -167,8 +167,8 @@ namespace AT_NAME
         const auto sinphi = aten::sin(phi);
 
         // Ortho normal base.
-        const auto t = aten::getOrthoVector(n);
-        const auto b = normalize(cross(n, t));
+        aten::vec3 t, b;
+        aten::tie(t, b) = aten::GetTangentCoordinate(n);
 
         auto m = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
         m = normalize(m);

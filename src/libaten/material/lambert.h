@@ -104,17 +104,16 @@ namespace AT_NAME
             float r1, float r2)
         {
             // Importance sampling with cosine factor.
-            const auto theta = aten::acos(aten::sqrt(1.0F - r1));
+            const auto costheta = aten::sqrt(1 - r1);
+            const auto sintheta = aten::sqrt(r1);
+
             const auto phi = AT_MATH_PI_2 * r2;
-
-            const auto costheta = aten::cos(theta);
-            const auto sintheta = aten::sqrt(1 - costheta * costheta);
-
             const auto cosphi = aten::cos(phi);
-            const auto sinphi = aten::sqrt(1 - cosphi * cosphi);
+            const auto sinphi = aten::sin(phi);
 
             auto t = aten::getOrthoVector(n);
             auto b = cross(n, t);
+            t = cross(b, n);
 
             auto dir = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
             dir = normalize(dir);

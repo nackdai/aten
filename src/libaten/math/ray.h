@@ -20,9 +20,9 @@ namespace aten
 
             AT_ASSERT(dot(dir, normal) >= float(0.0));
 
-            static constexpr float origin = float(1.0) / float(32.0);
-            static constexpr float float_scale = float(1.0) / float(65536.0);
-            static constexpr float int_scale = float(256.0);
+            constexpr float origin = float(1.0) / float(32.0);
+            constexpr float float_scale = float(1.0) / float(65536.0);
+            constexpr float int_scale = float(256.0);
 
             // A Fast and Robust Method for Avoiding  Self-Intersection
             // Capter 6 in RayTracing Gems
@@ -48,9 +48,9 @@ namespace aten
             //         小数点から上の暗黙の1 + 小数点以下の上位 e (=1) bit
             //         つまり、11 = 3
             // int32_t i = (int32_t)ff = 3
-            auto of_ix = (int32_t)(int_scale * normal.x);
-            auto of_iy = (int32_t)(int_scale * normal.y);
-            auto of_iz = (int32_t)(int_scale * normal.z);
+            auto of_ix = static_cast<int32_t>(int_scale * normal.x);
+            auto of_iy = static_cast<int32_t>(int_scale * normal.y);
+            auto of_iz = static_cast<int32_t>(int_scale * normal.z);
 
             // NOTE
             // int32_tの場合：負の数は２進数でみたときに値が小さいほどint32_tとしての値が大きくなる（２の補数）.
@@ -63,9 +63,9 @@ namespace aten
                 intAsFloat(floatAsInt(o.z) + (o.z < float(0) ? -of_iz : of_iz)));
 
             org = vec3(
-                aten::abs(o.x) < origin ? org.x = o.x + float_scale * normal.x : p_i.x,
-                aten::abs(o.y) < origin ? org.y = o.y + float_scale * normal.y : p_i.y,
-                aten::abs(o.z) < origin ? org.z = o.z + float_scale * normal.z : p_i.z);
+                aten::abs(o.x) < origin ? o.x + float_scale * normal.x : p_i.x,
+                aten::abs(o.y) < origin ? o.y + float_scale * normal.y : p_i.y,
+                aten::abs(o.z) < origin ? o.z + float_scale * normal.z : p_i.z);
         }
 
         vec3 org;

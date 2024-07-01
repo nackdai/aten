@@ -70,20 +70,28 @@ int32_t main(int32_t argc, char* argv[])
 
     aten::context ctxt;
 
-    // TODO
-    // Specify material by command line...
-    aten::MaterialParameter mtrlParam;
-    mtrlParam.type = aten::MaterialType::Emissive;
-    mtrlParam.baseColor = aten::vec3(1);
-
     aten::AssetManager asset_manager;
 
-    auto emit = ctxt.CreateMaterialWithMaterialParameter(
-        mtrlParam,
-        nullptr, nullptr, nullptr);
-    asset_manager.registerMtrl("light", emit);
+    auto objs = aten::ObjLoader::load(opt.input, ctxt, asset_manager,
+        [&](std::string_view name, aten::context& ctxt,
+            aten::MaterialType type, const aten::vec3& mtrl_clr,
+            const std::string& albedo, const std::string& nml) -> auto {
+        (void)albedo;
+        (void)nml;
 
-    auto objs = aten::ObjLoader::load(opt.input, ctxt, asset_manager);
+        aten::MaterialParameter param;
+        param.type = type;
+        param.baseColor = mtrl_clr;
+
+        auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
+            param,
+            nullptr, nullptr, nullptr);
+        mtrl->setName(name.data());
+        asset_manager.registerMtrl(name, mtrl);
+        return mtrl;
+    },
+        true, true);
+
 
     if (objs.empty()) {
         // TODO

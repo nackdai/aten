@@ -93,7 +93,13 @@ namespace AT_NAME
 
                 const auto& mtrl = ctxt.GetMaterial(hrec.mtrlid);
 
-                if (!mtrl.is_medium || IsSubsurface(mtrl)) {
+                // NOTE:
+                // In the case that meidum is filled within the surface (i.e. sub surface),
+                // if the ray goes out from the surface, it can be treated as it's still in the medium and continue to traverse.
+                // To check whether it's the above case, we need to check whether the ray enters the surface.
+                bool is_enter = dot(-ray.dir, hrec.normal) > 0;
+
+                if (!mtrl.is_medium || is_enter) {
                     // Hit surface to occlude light.
                     return aten::make_tuple(false, transmittance);
                 }

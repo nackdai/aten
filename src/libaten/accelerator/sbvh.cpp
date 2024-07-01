@@ -1,4 +1,7 @@
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
 #include <iterator>
 #include <numeric>
 
@@ -348,8 +351,8 @@ namespace aten
                         node.refIds.begin(),
                         node.refIds.end(),
                         [bestAxis, this](const uint32_t a, const uint32_t b) {
-                        return m_refs[a].bbox.getCenter()[bestAxis] < m_refs[b].bbox.getCenter()[bestAxis];
-                    });
+                            return m_refs[a].bbox.getCenter()[bestAxis] < m_refs[b].bbox.getCenter()[bestAxis];
+                        });
 
                     // 分割AABBの大きさをリセット.
                     objLeftBB.empty();
@@ -1337,16 +1340,23 @@ namespace aten
         std::string_view path,
         int32_t offsetTriIdx)
     {
-        FILE* fp = fopen(path.data(), "rb");
-        if (!fp) {
-            // TODO
-            // through exception...
+        std::filesystem::path p = path;
+
+        if (!std::filesystem::exists(p)) {
             AT_ASSERT(false);
+            AT_PRINTF("%s doesn't exist.", path);
+            return false;
+        }
+
+        std::ifstream ifs(path, std::ios_base::in | std::ios_base::binary);
+        if (!ifs) {
+            AT_ASSERT(false);
+            AT_PRINTF("Can't open %s.", path);
             return false;
         }
 
         SbvhFileHeader header;
-        fread(&header, sizeof(header), 1, fp);
+        ifs.read(reinterpret_cast<char*>(&header), sizeof(header));
 
         // TODO
         // Check magic number.
@@ -1355,32 +1365,32 @@ namespace aten
         std::map<int32_t, std::string> mtrlMap;
         {
             // TODO
-            static char tmpbuf[128] = { 0 };
+            static std::array<char, 128> tmpbuf = { 0 };
 
             for (int32_t i = 0; i < header.cntMtrlForVoxel; i++)
             {
                 // id.
                 int32_t mtrlid = -1;
-                fread(&mtrlid, sizeof(mtrlid), 1, fp);
+                ifs.read(reinterpret_cast<char*>(&mtrlid), sizeof(mtrlid));
 
                 // String size.
                 int32_t len = 0;
-                fread(&len, sizeof(len), 1, fp);
+                ifs.read(reinterpret_cast<char*>(&len), sizeof(len));
 
-                AT_ASSERT(0 < len && len < AT_COUNTOF(tmpbuf));
+                AT_ASSERT(0 < len && len < tmpbuf.size());
 
                 // String.
-                fread(tmpbuf, 1, len, fp);
+                ifs.read(tmpbuf.data(), len);
                 tmpbuf[len] = 0;    // Add termination.
 
-                mtrlMap.insert(std::make_pair(mtrlid, std::string(tmpbuf)));
+                mtrlMap.insert(std::make_pair(mtrlid, std::string(tmpbuf.data())));
             }
         }
 
         m_threadedNodes.resize(1);
         m_threadedNodes[0].resize(header.nodeNum);
 
-        fread(&m_threadedNodes[0][0], sizeof(ThreadedSbvhNode), header.nodeNum, fp);
+        ifs.read(reinterpret_cast<char*>(m_threadedNodes[0].data()), sizeof(ThreadedSbvhNode) * header.nodeNum);
 
         if (offsetTriIdx > 0 || !mtrlMap.empty())
         {

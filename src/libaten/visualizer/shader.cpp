@@ -1,4 +1,8 @@
 #include <string.h>
+
+#include <filesystem>
+#include <fstream>
+#include <iostream>
 #include <vector>
 
 #include "visualizer/atengl.h"
@@ -7,23 +11,33 @@
 namespace aten {
     GLuint createShader(std::string_view path, GLenum type)
     {
-        FILE* fp = fopen(path.data(), "rb");
-        AT_ASSERT(fp != nullptr);
+        std::filesystem::path p = path;
 
-        fseek(fp, 0, SEEK_END);
-        auto size = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
+        if (!std::filesystem::exists(p)) {
+            AT_ASSERT(false);
+            AT_PRINTF("%s doesn't exist.", path);
+            return 0;
+        }
+
+        const auto size = std::filesystem::file_size(p);
+
+        std::ifstream ifs(path, std::ios_base::in);
+        if (!ifs) {
+            AT_ASSERT(false);
+            AT_PRINTF("Can't open %s.", path);
+            return 0;
+        }
 
         std::vector<char> program(size + 1);
-        fread(&program[0], 1, size, fp);
+        ifs.read(program.data(), size);
 
-        fclose(fp);
+        ifs.close();
 
         CALL_GL_API(auto shader = ::glCreateShader(type));
         AT_ASSERT(shader != 0);
 
-        const auto p = &program[0];
-        const auto pp = &p;
+        const auto program_ptr = program.data();
+        const auto pp = &program_ptr;
 
         CALL_GL_API(::glShaderSource(
             shader,

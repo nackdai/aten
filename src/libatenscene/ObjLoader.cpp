@@ -21,11 +21,11 @@ namespace aten
         std::string_view path,
         context& ctxt,
         aten::AssetManager& asset_manager,
-        ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
+        ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
         auto objs = load(
-            path, ctxt, asset_manager, callback_crate_mtrl, needComputeNormalOntime);
+            path, ctxt, asset_manager, callback_create_mtrl, needComputeNormalOntime);
 
         return (!objs.empty() ? objs[0] : nullptr);
     }
@@ -35,11 +35,11 @@ namespace aten
         std::string_view path,
         context& ctxt,
         aten::AssetManager& asset_manager,
-        ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
+        ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
         auto objs = LoadAndStoreToAssetManagerWithTag(
-            tag, path, ctxt, asset_manager, callback_crate_mtrl, needComputeNormalOntime);
+            tag, path, ctxt, asset_manager, callback_create_mtrl, needComputeNormalOntime);
 
         return (!objs.empty() ? objs[0] : nullptr);
     }
@@ -48,7 +48,7 @@ namespace aten
         std::string_view path,
         context& ctxt,
         aten::AssetManager& asset_manager,
-        ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
+        ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
     {
@@ -70,7 +70,7 @@ namespace aten
         }
 
         return LoadAndStoreToAssetManagerWithTag(
-            filename, fullpath, ctxt, asset_manager, callback_crate_mtrl, willSeparate, needComputeNormalOntime);
+            filename, fullpath, ctxt, asset_manager, callback_create_mtrl, willSeparate, needComputeNormalOntime);
     }
 
     std::vector<std::shared_ptr<aten::PolygonObject>> ObjLoader::LoadAndStoreToAssetManagerWithTag(
@@ -78,7 +78,7 @@ namespace aten
         std::string_view path,
         context& ctxt,
         aten::AssetManager& asset_manager,
-        ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
+        ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
     {
@@ -244,7 +244,16 @@ namespace aten
                 if (m < 0 && !dst_shape) {
                     // If a material doesn't exist.
                     dst_shape = std::make_shared<aten::TriangleGroupMesh>();
-                    dst_shape->SetMaterial(asset_manager.getMtrlByIdx(0));
+
+                    auto regireterd_mtrl = asset_manager.getMtrlByIdx(0);
+                    if (!regireterd_mtrl && callback_create_mtrl) {
+                        regireterd_mtrl = callback_create_mtrl(
+                            "", ctxt, MaterialType::Lambert, aten::vec3(1), "", "");
+                    }
+
+                    AT_ASSERT(regireterd_mtrl);
+
+                    dst_shape->SetMaterial(regireterd_mtrl);
                 }
                 else if (prev_mtrl_idx != m) {
                     // If different material appear.
@@ -278,9 +287,9 @@ namespace aten
 
                         auto aten_mtrl = asset_manager.getMtrl(mtrl.name);
 
-                        if (!aten_mtrl && callback_crate_mtrl) {
+                        if (!aten_mtrl && callback_create_mtrl) {
                             std::shared_ptr<material> new_mtrl(
-                                callback_crate_mtrl(
+                                callback_create_mtrl(
                                     mtrl.name,
                                     ctxt,
                                     MaterialType::Lambert,
@@ -303,8 +312,8 @@ namespace aten
 
                         std::shared_ptr<aten::material> mtrl;
 
-                        if (callback_crate_mtrl) {
-                            mtrl = callback_crate_mtrl(
+                        if (callback_create_mtrl) {
+                            mtrl = callback_create_mtrl(
                                     objmtrl.name,
                                     ctxt,
                                     MaterialType::Lambert,

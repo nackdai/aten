@@ -32,12 +32,12 @@ if not %errorlevel%==0 (
 rem glfw =============================
 
 cmake -S glfw -B glfw\x64 -D GLFW_BUILD_DOCS=FALSE -D GLFW_BUILD_EXAMPLES=FALSE -D GLFW_BUILD_TESTS=FALSE
-cmake --build glfw\x64 --config=%CONFIG%
+cmake --build glfw\x64 --config=%CONFIG% -j 4
 
 rem glew =============================
 
 cmake -S glew\build\cmake -B glew\build\vc16 -D BUILD_UTILS=FALSE
-cmake --build glew\build\vc16 --config=%CONFIG%
+cmake --build glew\build\vc16 --config=%CONFIG% -j 4
 
 set BUILD_DIR=glew\build\vc16
 xcopy /Y /D %BUILD_DIR%\lib\%CONFIG% glew\lib\%CONFIG%\%PLATFORM%\
@@ -46,17 +46,17 @@ xcopy /Y /D %BUILD_DIR%\bin\%CONFIG% glew\bin\%CONFIG%\%PLATFORM%\
 rem tinyobjloader ====================
 
 cmake -S tinyobjloader -B tinyobjloader\build
-cmake --build tinyobjloader\build --config=%CONFIG%
+cmake --build tinyobjloader\build --config=%CONFIG% -j 4
 
 rem assimp ==========================
 
 cmake -S assimp -B assimp\build -D ASSIMP_BUILD_TESTS=FALSE -D ASSIMP_INSTALL=FALSE -D ASSIMP_INSTALL_PDB=FALSE -D LIBRARY_SUFFIX= -D CMAKE_DEBUG_POSTFIX= -D ASSIMP_BUILD_ASSIMP_TOOLS=FALSE
-cmake --build assimp\build --config=%CONFIG%
+cmake --build assimp\build --config=%CONFIG% -j 4
 
 rem googletest =======================
 
 cmake -S googletest -B googletest\build -D BUILD_SHARED_LIBS=TRUE
-cmake --build googletest\build --config=%CONFIG%
+cmake --build googletest\build --config=%CONFIG% -j 4
 
 rem Copy files for Profile configuration ==============================
 if %CONFIG% == Release (

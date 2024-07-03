@@ -88,5 +88,5 @@ jobs:
           CONFIG: Release
           PLATFORM: x64
         run: |
-          msbuild .\vs2019\libaten.vcxproj /t:${{ env.TARGET }} /p:Configuration=${{ env.CONFIG }} /p:Platform=${{ env.PLATFORM }}
-          msbuild .\vs2019\libidaten.vcxproj /t:${{ env.TARGET }} /p:Configuration=${{ env.CONFIG }} /p:Platform=${{ env.PLATFORM }}
+          msbuild .\vs2019\libaten.vcxproj /t:${{ env.TARGET }} /p:Configuration=${{ env.CONFIG }} /p:Platform=${{ env.PLATFORM }} /m:4 /p:BuildInParallel=true
+          msbuild .\vs2019\libidaten.vcxproj /t:${{ env.TARGET }} /p:Configuration=${{ env.CONFIG }} /p:Platform=${{ env.PLATFORM }} /m:4 /p:BuildInParallel=true

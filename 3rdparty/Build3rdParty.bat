@@ -31,85 +31,32 @@ if not %errorlevel%==0 (
 
 rem glfw =============================
 
-set BUILD_DIR=glfw\x64
-
-if not exist %BUILD_DIR% (
-    mkdir %BUILD_DIR%
-)
-
-if not exist %BUILD_DIR%\GLFW.sln (
-    cd %BUILD_DIR%
-    cmake -D GLFW_BUILD_DOCS=FALSE -D GLFW_BUILD_EXAMPLES=FALSE -D GLFW_BUILD_TESTS=FALSE -G %VS% ..\
-    cd %BASEDIR%
-)
-
-MSBuild %BUILD_DIR%\GLFW.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
+cmake -S glfw -B glfw\x64 -D GLFW_BUILD_DOCS=FALSE -D GLFW_BUILD_EXAMPLES=FALSE -D GLFW_BUILD_TESTS=FALSE
+cmake --build glfw\x64 --config=%CONFIG%
 
 rem glew =============================
 
+cmake -S glew\build\cmake -B glew\build\vc16 -D BUILD_UTILS=FALSE
+cmake --build glew\build\vc16 --config=%CONFIG%
+
 set BUILD_DIR=glew\build\vc16
-
-if not exist %BUILD_DIR% (
-    mkdir %BUILD_DIR%
-)
-
-if not exist %BUILD_DIR%\glew.sln (
-    cd %BUILD_DIR%
-    cmake -D BUILD_UTILS=FALSE -G %VS% ..\cmake
-    cd %BASEDIR%
-)
-
-MSBuild %BUILD_DIR%\glew.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
 xcopy /Y /D %BUILD_DIR%\lib\%CONFIG% glew\lib\%CONFIG%\%PLATFORM%\
 xcopy /Y /D %BUILD_DIR%\bin\%CONFIG% glew\bin\%CONFIG%\%PLATFORM%\
 
 rem tinyobjloader ====================
 
-set BUILD_DIR=tinyobjloader\build
-
-if not exist %BUILD_DIR% (
-    mkdir %BUILD_DIR%
-)
-
-if not exist %BUILD_DIR%\tinyobjloader.sln (
-    cd %BUILD_DIR%
-    cmake -G %VS% ..\
-    cd %BASEDIR%
-)
-
-MSBuild %BUILD_DIR%\tinyobjloader.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
+cmake -S tinyobjloader -B tinyobjloader\build
+cmake --build tinyobjloader\build --config=%CONFIG%
 
 rem assimp ==========================
 
-set BUILD_DIR=assimp\build
-
-if not exist %BUILD_DIR% (
-    mkdir %BUILD_DIR%
-)
-
-if not exist %BUILD_DIR%\Assimp.sln (
-    cd %BUILD_DIR%
-    cmake -D ASSIMP_BUILD_TESTS=FALSE -D ASSIMP_INSTALL=FALSE -D ASSIMP_INSTALL_PDB=FALSE -D LIBRARY_SUFFIX= -D CMAKE_DEBUG_POSTFIX= -D ASSIMP_BUILD_ASSIMP_TOOLS=FALSE -G %VS% ..\
-    cd %BASEDIR%
-)
-
-MSBuild %BUILD_DIR%\Assimp.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
+cmake -S assimp -B assimp\build -D ASSIMP_BUILD_TESTS=FALSE -D ASSIMP_INSTALL=FALSE -D ASSIMP_INSTALL_PDB=FALSE -D LIBRARY_SUFFIX= -D CMAKE_DEBUG_POSTFIX= -D ASSIMP_BUILD_ASSIMP_TOOLS=FALSE
+cmake --build assimp\build --config=%CONFIG%
 
 rem googletest =======================
 
-set BUILD_DIR=googletest\build
-
-if not exist %BUILD_DIR% (
-    mkdir %BUILD_DIR%
-)
-
-if not exist %BUILD_DIR%\googletest-distribution.sln (
-    cd %BUILD_DIR%
-    cmake -D BUILD_SHARED_LIBS=TRUE -G %VS% ..\
-    cd %BASEDIR%
-)
-
-MSBuild %BUILD_DIR%\googletest-distribution.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
+cmake -S googletest -B googletest\build -D BUILD_SHARED_LIBS=TRUE
+cmake --build googletest\build --config=%CONFIG%
 
 rem Copy files for Profile configuration ==============================
 if %CONFIG% == Release (

@@ -6,6 +6,9 @@ set BASEDIR=%~dp0
 
 cd /d %BASEDIR%
 
+rem if reconfiguration is necessary, enable the following line.
+rem set EXTRA_CMAKE_OPTION="--fresh"
+
 set TARGET=Build
 
 set CONFIG=%1
@@ -31,12 +34,12 @@ if not %errorlevel%==0 (
 
 rem glfw =============================
 
-cmake -S glfw -B glfw\x64 -D GLFW_BUILD_DOCS=FALSE -D GLFW_BUILD_EXAMPLES=FALSE -D GLFW_BUILD_TESTS=FALSE
+cmake %EXTRA_CMAKE_OPTION -S glfw -B glfw\x64 -A %PLATFORM% -DGLFW_BUILD_DOCS=FALSE -DGLFW_BUILD_EXAMPLES=FALSE -DGLFW_BUILD_TESTS=FALSE
 cmake --build glfw\x64 --config=%CONFIG% -j 4
 
 rem glew =============================
 
-cmake -S glew\build\cmake -B glew\build\vc16 -D BUILD_UTILS=FALSE
+cmake %EXTRA_CMAKE_OPTION% -S glew\build\cmake -B glew\build\vc16 -A %PLATFORM% -DBUILD_UTILS=FALSE
 cmake --build glew\build\vc16 --config=%CONFIG% -j 4
 
 set BUILD_DIR=glew\build\vc16
@@ -45,17 +48,17 @@ xcopy /Y /D %BUILD_DIR%\bin\%CONFIG% glew\bin\%CONFIG%\%PLATFORM%\
 
 rem tinyobjloader ====================
 
-cmake -S tinyobjloader -B tinyobjloader\build
+cmake %EXTRA_CMAKE_OPTION% -S tinyobjloader -B tinyobjloader\build -A %PLATFORM%
 cmake --build tinyobjloader\build --config=%CONFIG% -j 4
 
 rem assimp ==========================
 
-cmake -S assimp -B assimp\build -D ASSIMP_BUILD_TESTS=FALSE -D ASSIMP_INSTALL=FALSE -D ASSIMP_INSTALL_PDB=FALSE -D LIBRARY_SUFFIX= -D CMAKE_DEBUG_POSTFIX= -D ASSIMP_BUILD_ASSIMP_TOOLS=FALSE
+cmake %EXTRA_CMAKE_OPTION% -S assimp -B assimp\build -A %PLATFORM% -DASSIMP_BUILD_TESTS=FALSE -DASSIMP_INSTALL=FALSE -DASSIMP_INSTALL_PDB=FALSE -DLIBRARY_SUFFIX= -DCMAKE_DEBUG_POSTFIX= -DASSIMP_BUILD_ASSIMP_TOOLS=FALSE
 cmake --build assimp\build --config=%CONFIG% -j 4
 
 rem googletest =======================
 
-cmake -S googletest -B googletest\build -D BUILD_SHARED_LIBS=TRUE
+cmake %EXTRA_CMAKE_OPTION% -S googletest -B googletest\build -A %PLATFORM% -DBUILD_SHARED_LIBS=TRUE
 cmake --build googletest\build --config=%CONFIG% -j 4
 
 rem Copy files for Profile configuration ==============================

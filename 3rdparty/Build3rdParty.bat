@@ -61,6 +61,12 @@ rem googletest =======================
 cmake %EXTRA_CMAKE_OPTION% -S googletest -B googletest\build -A %PLATFORM% -DBUILD_SHARED_LIBS=TRUE
 cmake --build googletest\build --config=%CONFIG% -j 4
 
+rem openvdb ==========================
+rem Nanovdb is header only. There is nothing to build as Debug. Tools are also unnecessary. So, just installing is enough.
+
+cmake %EXTRA_CMAKE_OPTION% -S openvdb -B openvdb\build -A %PLATFORM% -DUSE_NANOVDB=ON -DNANOVDB_BUILD_TOOLS=OFF -DOPENVDB_BUILD_CORE=OFF -DOPENVDB_BUILD_BINARIES=OFF -DNANOVDB_USE_TBB=OFF -DNANOVDB_USE_BLOSC=OFF -DNANOVDB_USE_ZLIB=OFF -DNANOVDB_USE_CUDA=ON -DCMAKE_INSTALL_PREFIX=openvdb\build
+cmake --install openvdb\build --config Release
+
 rem Copy files for Profile configuration ==============================
 if %CONFIG% == Release (
    cd /d %BASEDIR%

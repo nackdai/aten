@@ -179,11 +179,13 @@ namespace aten
                 vtx.pos.z = attrib.vertices[idx.vertex_index * 3 + 2];
                 vtx.pos.w = float(0);
 
-                // NOTE
+                // NOTE:
                 // If vtx.uv.z == 1, normal will be computed during rendering.
 
+                // TODO:
+                // Even if 1.0 is applied to uv.z, it might be overwritten with -1 at L210.
+
                 if (idx.normal_index < 0) {
-                    // Flag not to specify normal.
                     vtx.uv.z = float(1);
                 }
                 else {
@@ -382,7 +384,8 @@ namespace aten
 
                 if (v0.uv.z == float(1)
                     || v1.uv.z == float(1)
-                    || v2.uv.z == float(1))
+                    || v2.uv.z == float(1)
+                    || needComputeNormalOntime)
                 {
                     face_param.needNormal = 1;
                 }

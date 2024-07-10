@@ -69,7 +69,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\openvdb\nanovdb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
@@ -89,7 +89,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\openvdb\nanovdb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
@@ -112,7 +112,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\openvdb\nanovdb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
@@ -271,6 +271,7 @@
     <ClInclude Include="..\src\libaten\visualizer\shader.h" />
     <ClInclude Include="..\src\libaten\visualizer\visualizer.h" />
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
+    <ClInclude Include="..\src\libaten\volume\grid.h" />
     <ClInclude Include="..\src\libaten\volume\medium.h" />
     <ClInclude Include="..\src\libaten\volume\phase_function.h" />
   </ItemGroup>
@@ -367,6 +368,7 @@
     <ClCompile Include="..\src\libaten\visualizer\shader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />
+    <ClCompile Include="..\src\libaten\volume\grid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\atrous_final_fs.glsl" />

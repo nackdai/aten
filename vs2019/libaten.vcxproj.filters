@@ -535,6 +535,9 @@
     <ClInclude Include="..\src\libaten\renderer\volume\volume_pathtracing_impl.h">
       <Filter>renderer\volume</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\volume\grid.h">
+      <Filter>volume</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -788,6 +791,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\volume\volume_pathtracing.cpp">
       <Filter>renderer\volume</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\volume\grid.cpp">
+      <Filter>volume</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

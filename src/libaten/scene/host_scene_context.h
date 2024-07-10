@@ -8,13 +8,14 @@
 #include <tuple>
 #include <vector>
 
+#include "geometry/geomparam.h"
 #include "geometry/vertex.h"
+#include "light/light_parameter.h"
+#include "material/material.h"
+#include "math/mat4.h"
 #include "texture/texture.h"
 #include "visualizer/GeomDataBuffer.h"
-#include "material/material.h"
-#include "light/light_parameter.h"
-#include "geometry/geomparam.h"
-#include "math/mat4.h"
+
 
 namespace AT_NAME {
     class triangle;
@@ -24,6 +25,7 @@ namespace AT_NAME {
 namespace aten
 {
     class transformable;
+    class Grid;
 
     /**
      * @brief Scene context.
@@ -120,6 +122,19 @@ namespace aten
         const aten::MaterialParameter& GetMaterial(uint32_t idx) const noexcept
         {
             return GetMaterialInstance(idx)->param();
+        }
+
+        /**
+         * @brief Get the volumetric grid.
+         * @param[in] idx Indexto the voumetric grid.
+         * @return Voumetric grid.
+         */
+        const aten::Grid* GetGrid(int32_t idx) const noexcept
+        {
+            if (0 <= idx && idx < grids_.size()) {
+                return grids_[idx];
+            }
+            return nullptr;
         }
 
         /**
@@ -488,6 +503,7 @@ namespace aten
         std::vector<std::shared_ptr<aten::texture>> textures_;
         std::vector<std::shared_ptr<aten::mat4>> matrices_;
         std::vector<std::shared_ptr<AT_NAME::Light>> lights_;
+        std::vector<aten::Grid*> grids_;
 
         bool is_window_initialized_{ false };
     };

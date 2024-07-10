@@ -166,7 +166,7 @@ namespace aten
         float phase_function_g{ 0.0F };
         float sigma_a{ 0.0F };
         float sigma_s{ 0.0F };
-        float padding{ 0.0F };
+        int32_t grid_idx{ -1 };
         aten::vec3 le;
     };
 

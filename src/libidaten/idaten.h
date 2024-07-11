@@ -17,3 +17,5 @@
 #include "restir/restir.h"
 
 #include "npr/npr_pathtracing.h"
+
+#include "volume/volume_rendering.h"

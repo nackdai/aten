@@ -277,6 +277,9 @@
     <ClInclude Include="..\src\libaten\renderer\restir\restir_impl.h">
       <Filter>restir</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\volume\volume_rendering.h">
+      <Filter>volume</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -332,6 +335,9 @@
     </Filter>
     <Filter Include="npr">
       <UniqueIdentifier>{db67bb99-c664-43cc-bfcd-148039fcd272}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="volume">
+      <UniqueIdentifier>{fcbb20a5-d6b8-4409-89d4-5b0ecf5436a6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -483,6 +489,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\npr\npr_pathtracing.cu">
       <Filter>npr</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\volume\simple_grid_rendering.cu">
+      <Filter>volume</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

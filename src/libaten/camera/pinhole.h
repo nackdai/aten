@@ -38,6 +38,14 @@ namespace AT_NAME
             float z_near, float z_far,
             int32_t width, int32_t height);
 
+        static aten::CameraParameter CreateCameraParam(
+            const aten::vec3& origin,
+            const aten::vec3& lookat,
+            const aten::vec3& up,
+            float vfov,
+            float z_near, float z_far,
+            int32_t width, int32_t height);
+
         /**
          * @brief Update transformed camera parmaters.
          */
@@ -128,9 +136,12 @@ namespace AT_NAME
 
         void FitBoundingBox(const aten::aabb& bounding_box);
 
+        static aten::vec3 FitBoundingBox(
+            const aten::CameraParameter& param,
+            const aten::aabb& bounding_box);
+
     private:
         aten::CameraParameter m_param;
         aten::vec3 m_at;
-        float m_vfov;
     };
 }

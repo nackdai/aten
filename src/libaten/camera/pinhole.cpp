@@ -11,33 +11,12 @@ namespace AT_NAME {
     {
         // 値を保持.
         m_at = lookat;
-        m_vfov = vfov;
 
-        float theta = aten::Deg2Rad(vfov);
-
-        m_param.aspect = width / (float)height;
-
-        float half_height = aten::tan(theta / 2);
-        float half_width = m_param.aspect * half_height;
-
-        m_param.origin = origin;
-
-        // カメラ座標ベクトル.
-        m_param.dir = normalize(lookat - origin);
-        m_param.right = normalize(cross(m_param.dir, up));
-        m_param.up = cross(m_param.right, m_param.dir);
-
-        m_param.center = origin + m_param.dir;
-
-        // スクリーンのUVベクトル.
-        m_param.u = half_width * m_param.right;
-        m_param.v = half_height * m_param.up;
-
-        m_param.dist = height / (float(2.0) * aten::tan(theta / 2));
-
-        m_param.vfov = vfov;
-        m_param.width = width;
-        m_param.height = height;
+        m_param = CreateCameraParam(
+            origin, lookat, up,
+            vfov,
+            0.0F, 0.0F,
+            width, height);
     }
 
     void PinholeCamera::Initalize(
@@ -48,13 +27,53 @@ namespace AT_NAME {
         float z_near, float z_far,
         int32_t width, int32_t height)
     {
-        init(
+        m_param = CreateCameraParam(
             origin, lookat, up,
             vfov,
+            z_near, z_far,
             width, height);
+    }
 
-        m_param.znear = z_near;
-        m_param.zfar = z_far;
+    aten::CameraParameter PinholeCamera::CreateCameraParam(
+        const aten::vec3& origin,
+        const aten::vec3& lookat,
+        const aten::vec3& up,
+        float vfov,
+        float z_near, float z_far,
+        int32_t width, int32_t height)
+    {
+        aten::CameraParameter param;
+
+        float theta = aten::Deg2Rad(vfov);
+
+        param.aspect = width / (float)height;
+
+        float half_height = aten::tan(theta / 2);
+        float half_width = param.aspect * half_height;
+
+        param.origin = origin;
+
+        // カメラ座標ベクトル.
+        param.dir = normalize(lookat - origin);
+        param.right = normalize(cross(param.dir, up));
+        param.up = cross(param.right, param.dir);
+
+        param.center = origin + param.dir;
+
+        // スクリーンのUVベクトル.
+        param.u = half_width * param.right;
+        param.v = half_height * param.up;
+
+        param.dist = height / (float(2.0) * aten::tan(theta / 2));
+
+        param.vfov = vfov;
+        param.width = width;
+        param.height = height;
+
+        param.znear = std::min(z_near, z_far);
+        param.zfar = std::max(z_near, z_far);
+
+        return param;
     }
 
     void PinholeCamera::update()
@@ -63,7 +82,7 @@ namespace AT_NAME {
             m_param.origin,
             m_at,
             m_param.up,
-            m_vfov,
+            m_param.vfov,
             m_param.width,
             m_param.height);
     }
@@ -219,21 +238,33 @@ namespace AT_NAME {
 
     void PinholeCamera::FitBoundingBox(const aten::aabb& bounding_box)
     {
+        const auto origin = PinholeCamera::FitBoundingBox(m_param, bounding_box);
+
+        const auto bbox_center = bounding_box.getCenter();
+
+        Initalize(
+            origin, bbox_center,
+            aten::vec3(0, 1, 0),
+            m_param.vfov,
+            m_param.znear, m_param.zfar,
+            m_param.width, m_param.height);
+    }
+
+    aten::vec3 PinholeCamera::FitBoundingBox(
+        const aten::CameraParameter& param,
+        const aten::aabb& bounding_box)
+    {
         // https://stackoverflow.com/questions/2866350/move-camera-to-fit-3d-scene
         const auto bbox_center = bounding_box.getCenter();
         const auto radius = bounding_box.ComputeSphereRadiusToCover();
 
         // r / d = tan(t/2) <=> d = r / tan(t/2)
-        auto distance = radius / tan(m_vfov / 2);
+        const float theta = aten::Deg2Rad(param.vfov);
+        auto distance = radius / tan(theta / 2);
 
-        auto dir = normalize(m_param.origin - bbox_center);
+        auto dir = normalize(param.origin - bbox_center);
         auto origin = bbox_center + dir * distance;
 
-        Initalize(
-            origin, bbox_center,
-            aten::vec3(0, 1, 0),
-            m_vfov,
-            m_param.znear, m_param.zfar,
-            m_param.width, m_param.height);
+        return origin;
     }
 }

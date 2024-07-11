@@ -6,8 +6,6 @@
 
 namespace idaten
 {
-
-
     class Renderer {
     protected:
         Renderer() {}

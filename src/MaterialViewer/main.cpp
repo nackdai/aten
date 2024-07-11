@@ -12,9 +12,6 @@
 #include "atenscene.h"
 #include "idaten.h"
 
-#pragma optimize( "", off)
-
-
 #define GPU_RENDERING
 //#define WHITE_FURNACE_TEST
 

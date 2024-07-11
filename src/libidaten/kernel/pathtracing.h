@@ -131,9 +131,5 @@ namespace idaten
 
     protected:
         Mode m_mode{ Mode::PT };
-
-        // To export to GL.
-        idaten::TypedCudaMemory<cudaSurfaceObject_t> gl_surface_cuda_rscs_;
-        std::vector<idaten::CudaGLSurface> gl_surfaces_;
     };
 }

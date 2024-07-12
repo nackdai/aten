@@ -14,6 +14,7 @@ namespace aten {
      */
     struct CameraParameter {
         vec3 origin;        ///< Camera origin.
+        vec3 lookat;        ///< Camera lookat.
 
         float aspect{ 0 };   ///< Aspect of screen size.
         vec3 center;        ///< origin + dir.

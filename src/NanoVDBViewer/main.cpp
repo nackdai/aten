@@ -43,7 +43,7 @@ public:
             "../shader/fullscreen_vs.glsl",
             "../shader/fullscreen_fs.glsl");
 
-        auto bbox = renderer_.LoadNanoVDB("../../asset/vdb/cube.nvdb");
+        auto bbox = renderer_.LoadNanoVDB("../../asset/vdb/smoke.nvdb");
         if (!bbox) {
             return false;
         }

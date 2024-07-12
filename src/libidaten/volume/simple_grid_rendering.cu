@@ -50,6 +50,7 @@ namespace idaten
         nanovdb::GridHandle<nanovdb::CudaDeviceBuffer> handle_;
         const nanovdb::FloatGrid* gpu_grid_{ nullptr };
         aten::aabb grid_bbox_;
+        bool is_density_grid_{ false };
     };
 
     bool VolumeRendering::SimpleGridRenderer::LoadNanoVDB(std::string_view nvdb, cudaStream_t stream)
@@ -63,6 +64,16 @@ namespace idaten
         }
 
         try {
+            auto list = nanovdb::io::readGridMetaData(nvdb.data());
+            if (list.size() != 1) {
+                // TODO
+                // Support only one grid.
+                AT_PRINTF("Support only one grid\n");
+                return false;
+            }
+
+            is_density_grid_ = list[0].gridName == "density";
+
             handle_ = nanovdb::io::readGrid<nanovdb::CudaDeviceBuffer>(nvdb.data());
             handle_.deviceUpload(stream, true);
             gpu_grid_ = handle_.deviceGrid<float>();
@@ -87,6 +98,7 @@ namespace idaten
     __global__ void RenderSimpleGrid(
         cudaSurfaceObject_t dst,
         const nanovdb::FloatGrid* grid,
+        bool is_density_grid,
         int32_t width, int32_t height,
         const aten::CameraParameter camera,
         const aten::vec3 bg_color)
@@ -102,7 +114,7 @@ namespace idaten
 
 #if 1
         // Get accessor.
-        auto acc = grid->tree().getAccessor();
+        auto accessor = grid->tree().getAccessor();
 
         using Vec3F = nanovdb::Vec3<float>;
         using RayF = nanovdb::Ray<float>;
@@ -120,16 +132,38 @@ namespace idaten
 
         RayF index_ray = world_ray.worldToIndexF(*grid);
 
-        // Intersect.
-        float  t0{ 0.0F };
-        nanovdb::Coord ijk;
-        float  v{ 0.0F };
+        if (is_density_grid) {
+            const auto tree_index_bbox = grid->tree().bbox();
 
-        if (nanovdb::ZeroCrossing(index_ray, acc, ijk, v, t0)) {
-            // Render distance to surface as the uniform color with the assumption it is a uniform voxel.
-            float wT0 = t0 * static_cast<float>(grid->voxelSize()[0]);
-            //float t = (wT0 - camera.znear) / (camera.zfar - camera.znear);
-            color = make_float4(wT0, wT0, wT0, 1.0F);
+            // Clip to bounds.
+            if (index_ray.clip(tree_index_bbox)) {
+                // Integrate.
+
+                // TODO
+                constexpr float dt = 0.5F;
+
+                float transmittance = 1.0f;
+                for (float t = index_ray.t0(); t < index_ray.t1(); t += dt) {
+                    const auto sigma = accessor.getValue(nanovdb::Coord::Floor(index_ray(t))) * 0.1f;
+                    transmittance *= 1.0F - sigma * dt;
+                }
+
+                const auto tr = 1.0F - transmittance;
+                color = make_float4(tr, tr, tr, 1.0F);
+            }
+        }
+        else {
+            // Intersect.
+            float  t0{ 0.0F };
+            nanovdb::Coord ijk;
+            float  v{ 0.0F };
+
+            if (nanovdb::ZeroCrossing(index_ray, accessor, ijk, v, t0)) {
+                // Render distance to surface as the uniform color with the assumption it is a uniform voxel.
+                float wT0 = t0 * static_cast<float>(grid->voxelSize()[0]);
+                //float t = (wT0 - camera.znear) / (camera.zfar - camera.znear);
+                color = make_float4(wT0, wT0, wT0, 1.0F);
+            }
         }
 #endif
 
@@ -153,7 +187,9 @@ namespace idaten
             (height + block.y - 1) / block.y);
 
         RenderSimpleGrid << <grid, block, 0, stream >> > (
-            dst, gpu_grid_, width, height, camera, bg_color);
+            dst,
+            gpu_grid_, is_density_grid_,
+            width, height, camera, bg_color);
 
         checkCudaKernel(RenderSimpleGrid);
     }

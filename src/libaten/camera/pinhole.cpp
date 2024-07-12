@@ -9,9 +9,6 @@ namespace AT_NAME {
         float vfov,    // vertical fov.
         int32_t width, int32_t height)
     {
-        // 値を保持.
-        m_at = lookat;
-
         m_param = CreateCameraParam(
             origin, lookat, up,
             vfov,
@@ -52,6 +49,7 @@ namespace AT_NAME {
         float half_width = param.aspect * half_height;
 
         param.origin = origin;
+        param.lookat = lookat;
 
         // カメラ座標ベクトル.
         param.dir = normalize(lookat - origin);
@@ -80,7 +78,7 @@ namespace AT_NAME {
     {
         init(
             m_param.origin,
-            m_at,
+            m_param.lookat,
             m_param.up,
             m_param.vfov,
             m_param.width,
@@ -238,19 +236,18 @@ namespace AT_NAME {
 
     void PinholeCamera::FitBoundingBox(const aten::aabb& bounding_box)
     {
-        const auto origin = PinholeCamera::FitBoundingBox(m_param, bounding_box);
-
-        const auto bbox_center = bounding_box.getCenter();
+        aten::vec3 origin, lookat;
+        aten::tie(origin, lookat) = PinholeCamera::FitBoundingBox(m_param, bounding_box);
 
         Initalize(
-            origin, bbox_center,
+            origin, lookat,
             aten::vec3(0, 1, 0),
             m_param.vfov,
             m_param.znear, m_param.zfar,
             m_param.width, m_param.height);
     }
 
-    aten::vec3 PinholeCamera::FitBoundingBox(
+    aten::tuple<aten::vec3, aten::vec3> PinholeCamera::FitBoundingBox(
         const aten::CameraParameter& param,
         const aten::aabb& bounding_box)
     {
@@ -262,9 +259,12 @@ namespace AT_NAME {
         const float theta = aten::Deg2Rad(param.vfov);
         auto distance = radius / tan(theta / 2);
 
-        auto dir = normalize(param.origin - bbox_center);
-        auto origin = bbox_center + dir * distance;
+        const aten::vec3 tmp_origin(bbox_center.x, bbox_center.y, bbox_center.z * 2);
+        const auto dir = normalize(tmp_origin - bbox_center);
 
-        return origin;
+        const auto origin = bbox_center + dir * distance;
+        const auto lookat = bbox_center;
+
+        return aten::make_tuple(origin, lookat);
     }
 }

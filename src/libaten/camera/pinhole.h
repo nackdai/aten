@@ -4,6 +4,7 @@
 #include "math/ray.h"
 #include "math/vec3.h"
 #include "math/math.h"
+#include "misc/tuple.h"
 
 namespace aten {
     class aabb;
@@ -95,7 +96,7 @@ namespace AT_NAME
          */
         virtual aten::vec3 &getAt() override final
         {
-            return m_at;
+            return m_param.lookat;
         }
 
         virtual const aten::CameraParameter &param() const override final
@@ -136,12 +137,11 @@ namespace AT_NAME
 
         void FitBoundingBox(const aten::aabb& bounding_box);
 
-        static aten::vec3 FitBoundingBox(
+        static aten::tuple<aten::vec3, aten::vec3> FitBoundingBox(
             const aten::CameraParameter& param,
             const aten::aabb& bounding_box);
 
     private:
         aten::CameraParameter m_param;
-        aten::vec3 m_at;
     };
 }

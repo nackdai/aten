@@ -1344,14 +1344,14 @@ namespace aten
 
         if (!std::filesystem::exists(p)) {
             AT_ASSERT(false);
-            AT_PRINTF("%s doesn't exist.", path);
+            AT_PRINTF("%s doesn't exist.", path.data());
             return false;
         }
 
-        std::ifstream ifs(path, std::ios_base::in | std::ios_base::binary);
+        std::ifstream ifs(path.data(), std::ios_base::in | std::ios_base::binary);
         if (!ifs) {
             AT_ASSERT(false);
-            AT_PRINTF("Can't open %s.", path);
+            AT_PRINTF("Can't open %s.", path.data());
             return false;
         }
 

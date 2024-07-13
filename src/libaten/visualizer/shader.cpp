@@ -15,16 +15,16 @@ namespace aten {
 
         if (!std::filesystem::exists(p)) {
             AT_ASSERT(false);
-            AT_PRINTF("%s doesn't exist.", path);
+            AT_PRINTF("%s doesn't exist.", path.data());
             return 0;
         }
 
         const auto size = std::filesystem::file_size(p);
 
-        std::ifstream ifs(path, std::ios_base::in);
+        std::ifstream ifs(path.data(), std::ios_base::in);
         if (!ifs) {
             AT_ASSERT(false);
-            AT_PRINTF("Can't open %s.", path);
+            AT_PRINTF("Can't open %s.", path.data());
             return 0;
         }
 

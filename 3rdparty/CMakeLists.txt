@@ -11,6 +11,8 @@ set(tinyxml2_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_SOURCE_DIR}/tinyxml2 CACHE PATH "tinyxml2 path")
 set(glew_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_SOURCE_DIR}/glew/include CACHE PATH "glew path")
+set(nanovdb_INCLUDE_DIRECTORIES
+  ${CMAKE_CURRENT_SOURCE_DIR}/openvdb/nanovdb CACHE PATH "nanovdb path")
 
 add_subdirectory(glew/build/cmake)
 # https://www.glfw.org/docs/latest/compile_guide.html#compile_deps_x11

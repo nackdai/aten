@@ -229,6 +229,8 @@ add_library(
   visualizer/visualizer.h
   visualizer/window.cpp
   visualizer/window.h
+  volume/grid.cpp
+  volume/grid.h
   volume/medium.h
   volume/phase_function.h)
 
@@ -236,7 +238,7 @@ target_include_directories(
   ${PROJECT_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   PRIVATE ${glew_INCLUDE_DIRECTORIES} ${stb_INCLUDE_DIRECTORIES}
-          ${imgui_INCLUDE_DIRECTORIES})
+          ${imgui_INCLUDE_DIRECTORIES} ${nanovdb_INCLUDE_DIRECTORIES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw glew glm)
 

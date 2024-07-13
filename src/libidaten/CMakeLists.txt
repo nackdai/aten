@@ -18,6 +18,7 @@ set(CUDA_NVCC_FLAGS
     -rdc=true
     -use_fast_math
     --expt-relaxed-constexpr
+    --extended-lambda
     -std=c++17
     -gencode
     arch=compute_${CUDA_TARGET_COMPUTE_CAPABILITY},code=sm_${CUDA_TARGET_COMPUTE_CAPABILITY}
@@ -189,12 +190,16 @@ cuda_add_library(
   svgf/svgf_atrous.cu
   svgf/svgf_debug.cu
   svgf/svgf_pt.cu
-  svgf/svgf_tp.cu)
+  svgf/svgf_tp.cu
+  volume/simple_grid_rendering.cu
+  volume/volume_rendering.h)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
 target_include_directories(
-  ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+  ${PROJECT_NAME}
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  PRIVATE ${nanovdb_INCLUDE_DIRECTORIES})
 
 target_link_libraries(${PROJECT_NAME} aten glm)
 

@@ -89,8 +89,7 @@ namespace aten {
 
         std::string texname = filename + extname;
 
-        auto stored_tex = asset_manager.getTex(tag);
-
+        auto stored_tex = ctxt.GetTextureByName(tag);
         if (stored_tex) {
             AT_PRINTF("There is same tag texture. [%s]\n", tag.c_str());
             return stored_tex;
@@ -139,20 +138,12 @@ namespace aten {
             }
         }
 
-        if (tex) {
-            // Store as shared_ptr
-            asset_manager.registerTex(tag, tex);
-        }
-        else {
+        if (!tex) {
             AT_ASSERT(false);
             AT_PRINTF("Failed load texture. [%s]\n", fullpath.c_str());
             return nullptr;
         }
 
-        // Get as shared_ptr
-        auto ret = asset_manager.getTex(tag);
-        AT_ASSERT(ret);
-
-        return ret;
+        return tex;
     }
 }

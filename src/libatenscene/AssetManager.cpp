@@ -82,20 +82,6 @@ namespace aten {
         return nullptr;
     }
 
-    bool AssetManager::registerTex(std::string_view name, const std::shared_ptr<texture>& tex)
-    {
-        return AssetRegister::Register(*this, name, tex, AssetType::Texture);
-    }
-
-    std::shared_ptr<texture> AssetManager::getTex(const std::string& name)
-    {
-        auto asset = getAsset(name, AssetType::Texture);
-        if (asset) {
-            return asset.value().tex;
-        }
-        return nullptr;
-    }
-
     bool AssetManager::registerObj(std::string_view name, const std::shared_ptr<aten::PolygonObject>& obj)
     {
         return AssetRegister::Register(*this, name, obj, AssetType::Object);
@@ -108,11 +94,5 @@ namespace aten {
             return asset.value().obj;
         }
         return nullptr;
-    }
-
-    uint32_t AssetManager::getAssetNum(AssetManager::AssetType type)
-    {
-        auto& assets = assets_[static_cast<int32_t>(type)];
-        return static_cast<uint32_t>(assets.size());
     }
 }

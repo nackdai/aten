@@ -209,8 +209,8 @@ namespace aten
 
         void init_matrices(context& ctxt)
         {
-            std::tie(m_param.mtx_id, m_mtx_L2W) = ctxt.CreateMatrix();
-            std::tie(std::ignore, m_mtx_W2L) = ctxt.CreateMatrix();
+            aten::tie(m_param.mtx_id, m_mtx_L2W) = ctxt.CreateMatrix();
+            aten::tie(std::ignore, m_mtx_W2L) = ctxt.CreateMatrix();
         }
 
     private:

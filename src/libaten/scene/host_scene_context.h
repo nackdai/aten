@@ -5,7 +5,7 @@
 #include <iterator>
 #include <limits>
 #include <memory>
-#include <tuple>
+#include <variant>
 #include <vector>
 
 #include "geometry/geomparam.h"
@@ -13,6 +13,8 @@
 #include "light/light_parameter.h"
 #include "material/material.h"
 #include "math/mat4.h"
+#include "misc/tuple.h"
+#include "misc/type_traits.h"
 #include "texture/texture.h"
 #include "visualizer/GeomDataBuffer.h"
 
@@ -410,12 +412,6 @@ namespace aten
         std::shared_ptr<texture> GetTexture(int32_t idx) const;
 
         /**
-         * @brief Add a texture instance.
-         * @param[in] tex Texture instance to be added.
-         */
-        void AddTexture(const std::shared_ptr<texture>& tex);
-
-        /**
          * @brief Initialize all registered texture instances as OpenGL texture.
          */
         void InitAllTextureAsGLTexture();
@@ -441,12 +437,12 @@ namespace aten
          * @brief Create an empty matrix and then add it to the scene context.
          * @return Tuple to store the index to the created matrix and the created matrix instance.
          */
-        std::tuple<uint32_t, std::shared_ptr<aten::mat4>> CreateMatrix()
+        aten::tuple<uint32_t, std::shared_ptr<aten::mat4>> CreateMatrix()
         {
             size_t idx = matrices_.size();
             matrices_.reserve(idx + 1);
             matrices_.push_back(std::make_shared<aten::mat4>());
-            return std::make_tuple(static_cast<uint32_t>(idx), matrices_[idx]);
+            return aten::make_tuple(static_cast<uint32_t>(idx), matrices_[idx]);
         }
 
         /**
@@ -490,6 +486,23 @@ namespace aten
             lights_.clear();
         }
 
+        /**
+         * @brief Get the texture instance by name.
+         * @param[in] name Name of the texture instance.
+         * @return If the texture instance is found, returns it. Otherwise, returns nullptr.
+         */
+        std::shared_ptr<texture> GetTextureByName(std::string_view name)
+        {
+            return GetAsset<std::shared_ptr<texture>>(name);
+        }
+
+    private:
+        /**
+         * @brief Add a texture instance.
+         * @param[in] tex Texture instance to be added.
+         */
+        void AddTexture(const std::shared_ptr<texture>& tex);
+
     private:
         static const context* s_pinnedCtxt;
 
@@ -506,5 +519,32 @@ namespace aten
         std::vector<aten::Grid*> grids_;
 
         bool is_window_initialized_{ false };
+
+        using Asset = std::variant< std::shared_ptr<AT_NAME::material>, std::shared_ptr<aten::texture>, std::shared_ptr<aten::transformable>>;
+        std::unordered_map<std::string, Asset> assets_;
+
+        template <class T>
+        auto GetAsset(std::string_view name) -> std::enable_if_t<aten::is_shared_ptr_v<T>, T>
+        {
+            if (name.empty()) {
+                return nullptr;
+            }
+
+            auto found = std::find_if(
+                assets_.begin(), assets_.end(),
+                [name](const auto& t) {
+                    if (t.first == name) {
+                        return true;
+                    }
+                    return false;
+                });
+            if (found != assets_.end()) {
+                const auto& asset = found->second;
+                if (std::holds_alternative<T>(asset)) {
+                    return std::get<T>(asset);
+                }
+            }
+            return nullptr;
+        }
     };
 }

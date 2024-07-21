@@ -331,7 +331,7 @@ namespace aten
 
                             // Albedo map.
                             if (!objmtrl.diffuse_texname.empty()) {
-                                auto tex = asset_manager.getTex(objmtrl.diffuse_texname.c_str());
+                                auto tex = ctxt.GetTextureByName(objmtrl.diffuse_texname);
 
                                 if (tex) {
                                     albedoMap = tex.get();
@@ -345,7 +345,7 @@ namespace aten
 
                             // Normal map.
                             if (!objmtrl.bump_texname.empty()) {
-                                auto tex = asset_manager.getTex(objmtrl.bump_texname.c_str());
+                                auto tex = ctxt.GetTextureByName(objmtrl.bump_texname);
 
                                 if (tex) {
                                     normalMap = tex.get();

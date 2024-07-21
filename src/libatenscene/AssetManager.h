@@ -34,13 +34,8 @@ namespace aten {
         std::shared_ptr<material> getMtrl(std::string_view name);
         std::shared_ptr<material> getMtrlByIdx(uint32_t idx);
 
-        bool registerTex(std::string_view name, const std::shared_ptr<texture>& tex);
-        std::shared_ptr<texture> getTex(const std::string& name);
-
         bool registerObj(std::string_view name, const std::shared_ptr<aten::PolygonObject>& obj);
         std::shared_ptr<aten::PolygonObject> getObj(std::string_view name);
-
-        uint32_t getAssetNum(AssetType type);
 
     private:
         struct Asset {

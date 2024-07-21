@@ -255,12 +255,19 @@ namespace aten
         uint32_t channels,
         std::string_view name)
     {
-        auto ret = texture::create(width, height, channels, name);
-        AT_ASSERT(ret);
+        auto tex = GetTextureByName(name);
+        if (!tex) {
+            tex = texture::create(width, height, channels, name);
+            AT_ASSERT(tex);
 
-        AddTexture(ret);
+            AddTexture(tex);
 
-        return ret;
+            if (!name.empty()) {
+                assets_.try_emplace(name.data(), tex);
+            }
+        }
+
+        return tex;
     }
 
     std::shared_ptr<texture> context::GetTexture(int32_t idx) const

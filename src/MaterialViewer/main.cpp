@@ -612,7 +612,7 @@ private:
 
     std::shared_ptr<aten::material> CreateMaterial(aten::MaterialParameter& mtrl_param)
     {
-        ctxt_.RemoveMaterialByName("");
+        ctxt_.DeleteAllMaterialsAndClearList();
 
         auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
             "",

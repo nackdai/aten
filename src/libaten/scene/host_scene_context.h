@@ -257,18 +257,6 @@ namespace aten
             aten::texture* roughnessMap);
 
         /**
-         * @brief Add a material to the scene.
-         * @param[in] mtrl The material to be added.
-         */
-        void AddMaterial(std::shared_ptr<AT_NAME::material> mtrl)
-        {
-            AT_ASSERT(mtrl);
-            materials_.push_back(mtrl);
-            AT_ASSERT(materials_.size() < std::numeric_limits<decltype(MaterialParameter::id)>::max());
-            mtrl->param().id = static_cast<uint16_t>(materials_.size() - 1);
-        }
-
-        /**
          * @brief Get the actual material instance by index.
          * @param[in] idx Index to the actual material instance.
          * @return Actual material instance.
@@ -500,27 +488,24 @@ namespace aten
             return GetAsset<std::shared_ptr<texture>>(name);
         }
 
-        bool RemoveMaterialByName(std::string_view name)
-        {
-            const auto found = std::find_if(
-                materials_.begin(), materials_.end(),
-                [name](const std::shared_ptr<AT_NAME::material>& mtrl) {
-                    return name == mtrl->name();
-                }
-            );
-            if (found != materials_.end()) {
-                materials_.erase(found);
-                return true;
-            }
-            return false;
-        }
-
     private:
         /**
          * @brief Add a texture instance.
          * @param[in] tex Texture instance to be added.
          */
         void AddTexture(const std::shared_ptr<texture>& tex);
+
+        /**
+         * @brief Add a material to the scene.
+         * @param[in] mtrl The material to be added.
+         */
+        void AddMaterial(std::shared_ptr<AT_NAME::material> mtrl)
+        {
+            AT_ASSERT(mtrl);
+            materials_.push_back(mtrl);
+            AT_ASSERT(materials_.size() < std::numeric_limits<decltype(MaterialParameter::id)>::max());
+            mtrl->param().id = static_cast<uint16_t>(materials_.size() - 1);
+        }
 
     private:
         static const context* s_pinnedCtxt;

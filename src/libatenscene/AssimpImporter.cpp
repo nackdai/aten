@@ -51,7 +51,7 @@ namespace aten
         std::string mtrl_name(name.C_Str());
         AT_PRINTF("%s\n", mtrl_name.c_str());
 
-        auto stored_mtrl = asset_manager.getMtrl(mtrl_name);
+        auto stored_mtrl = ctxt.FindMaterialByName(mtrl_name);
         if (stored_mtrl) {
             // The specified material already exists
             return std::string(stored_mtrl->name());
@@ -106,21 +106,12 @@ namespace aten
         auto albedo_tex_name(std::move(getTextureName(aiTextureType::aiTextureType_DIFFUSE, assimp_mtrl)));
         auto normal_tex_name(std::move(getTextureName(aiTextureType::aiTextureType_NORMALS, assimp_mtrl)));
 
-#if 0
-        auto mtrl = MaterialFactory::CreateMaterialWithMaterialParameter(
-            mtrl_param,
-            nullptr, nullptr, nullptr);
-
-        AssetManager::registerMtrl(mtrl_name, mtrl);
-#else
         auto mtrl = func_create_mtrl(mtrl_name, ctxt, mtrl_param, albedo_tex_name, normal_tex_name);
         if (mtrl) {
-            asset_manager.registerMtrl(mtrl_name, mtrl);
             return mtrl_name;
         }
 
         return std::string();
-#endif
     }
 
     bool createObject(
@@ -230,7 +221,7 @@ namespace aten
                 AT_ASSERT(assimp_mesh->mMaterialIndex < mtrl_list.size());
                 const auto mtrl_name = mtrl_list[assimp_mesh->mMaterialIndex];
 
-                auto mtrl = asset_manager.getMtrl(mtrl_name);
+                auto mtrl = ctxt.FindMaterialByName(mtrl_name);
                 if (!mtrl) {
                     AT_ASSERT(false);
                     AT_PRINTF("Not found material [%s]\n", mtrl_name.c_str());

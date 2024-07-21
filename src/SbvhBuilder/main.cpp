@@ -84,10 +84,10 @@ int32_t main(int32_t argc, char* argv[])
         param.baseColor = mtrl_clr;
 
         auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
+            name,
             param,
             nullptr, nullptr, nullptr);
-        mtrl->setName(name.data());
-        asset_manager.registerMtrl(name, mtrl);
+
         return mtrl;
     },
         true, true);

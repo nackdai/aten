@@ -310,9 +310,9 @@ private:
             param.baseColor = aten::vec3(1, 1, 1);;
 
             auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
+                "dummy",
                 param,
                 nullptr, nullptr, nullptr);
-            asset_manager_.registerMtrl("dummy", mtrl);
         }
         else {
             aten::MaterialLoader::load(mtrlpath, ctxt_, asset_manager_);

@@ -265,10 +265,9 @@ private:
         mtrlParam.standard.roughness = 0.2;
 
         auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
+            "m",
             mtrlParam,
             nullptr, nullptr, nullptr);
-
-        asset_manager_.registerMtrl("m", mtrl);
 
         objs_ = aten::ObjLoader::load(args_.input, ctxt_, asset_manager_);
 

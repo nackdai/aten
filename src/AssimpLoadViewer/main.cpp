@@ -242,9 +242,9 @@ private:
             param.baseColor = aten::vec3(1, 1, 1);;
 
             auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
+                "dummy",
                 param,
                 nullptr, nullptr, nullptr);
-            asset_manager_.registerMtrl("dummy", mtrl);
         }
         else {
             aten::MaterialLoader::load(mtrlpath, ctxt_, asset_manager_);
@@ -261,7 +261,7 @@ private:
                 const std::string& albedo,
                 const std::string& nml)
             {
-                auto mtrl = asset_manager_.getMtrl(name);
+                auto mtrl = ctxt.FindMaterialByName(name);
                 if (!mtrl) {
                     auto albedo_map = albedo.empty()
                         ? nullptr
@@ -271,11 +271,11 @@ private:
                         : aten::ImageLoader::load(pathname + nml, ctxt, asset_manager_);
 
                     mtrl = ctxt.CreateMaterialWithMaterialParameter(
+                        name,
                         mtrl_param,
                         albedo_map.get(),
                         nml_map.get(),
                         nullptr);
-                    mtrl->setName(name);
                 }
 
                 return mtrl;

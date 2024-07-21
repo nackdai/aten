@@ -50,38 +50,6 @@ namespace aten {
         return it->second;
     }
 
-    bool AssetManager::registerMtrl(std::string_view name, const std::shared_ptr<material>& mtrl)
-    {
-        mtrl->setName(name);
-
-        return AssetRegister::Register(*this, name, mtrl, AssetType::Material);
-    }
-
-    std::shared_ptr<material> AssetManager::getMtrl(std::string_view name)
-    {
-        auto asset = getAsset(name, AssetType::Material);
-        if (asset) {
-            return asset.value().mtrl;
-        }
-        return nullptr;
-    }
-
-    std::shared_ptr<material> AssetManager::getMtrlByIdx(uint32_t idx)
-    {
-        const auto& assets = assets_[static_cast<int32_t>(AssetType::Material)];
-        if (idx < assets.size()) {
-            uint32_t pos = 0;
-            for (auto it = assets.begin(); it != assets.end(); it++, pos++) {
-                if (pos == idx) {
-                    return it->second.mtrl;
-                }
-            }
-        }
-
-        AT_ASSERT(false);
-        return nullptr;
-    }
-
     bool AssetManager::registerObj(std::string_view name, const std::shared_ptr<aten::PolygonObject>& obj)
     {
         return AssetRegister::Register(*this, name, obj, AssetType::Object);

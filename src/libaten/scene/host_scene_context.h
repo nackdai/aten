@@ -230,16 +230,19 @@ namespace aten
 
         /**
          * @brief Create a material and then add it to the scene context.
+         * @param[in] name Material name.
          * @param[in] type Material type.
          * @param[in] value Parameter value for the material.
          * @return Created material.
          */
         std::shared_ptr<AT_NAME::material> CreateMaterial(
+            std::string_view name,
             aten::MaterialType type,
             aten::Values& value);
 
         /**
          * @brief Create a material with the default parameter value and then add it to the scene context.
+         * @param[in] name Material name.
          * @param[in] param Material parameter.
          * @param[in] albedoMap Albedo map texture.
          * @param[in] normalMap Normal map texture.
@@ -247,22 +250,11 @@ namespace aten
          * @return Created material.
          */
         std::shared_ptr<AT_NAME::material> CreateMaterialWithMaterialParameter(
+            std::string_view name,
             const aten::MaterialParameter& param,
             aten::texture* albedoMap,
             aten::texture* normalMap,
             aten::texture* roughnessMap);
-
-        /**
-         * @brief Add a material to the scene.
-         * @param[in] mtrl The material to be added.
-         */
-        void AddMaterial(std::shared_ptr<AT_NAME::material> mtrl)
-        {
-            AT_ASSERT(mtrl);
-            materials_.push_back(mtrl);
-            AT_ASSERT(materials_.size() < std::numeric_limits<decltype(MaterialParameter::id)>::max());
-            mtrl->param().id = static_cast<uint16_t>(materials_.size() - 1);
-        }
 
         /**
          * @brief Get the actual material instance by index.
@@ -291,7 +283,7 @@ namespace aten
          * @param[in] name Name of the material instance.
          * @return If the material instance is found, return it. Otherwise, returns nullptr.
          */
-        std::shared_ptr<const AT_NAME::material> FindMaterialByName(std::string_view name) const;
+        std::shared_ptr<AT_NAME::material> FindMaterialByName(std::string_view name) const;
 
         /**
          * @brief Find the index to the material instance by name.
@@ -502,6 +494,18 @@ namespace aten
          * @param[in] tex Texture instance to be added.
          */
         void AddTexture(const std::shared_ptr<texture>& tex);
+
+        /**
+         * @brief Add a material to the scene.
+         * @param[in] mtrl The material to be added.
+         */
+        void AddMaterial(std::shared_ptr<AT_NAME::material> mtrl)
+        {
+            AT_ASSERT(mtrl);
+            materials_.push_back(mtrl);
+            AT_ASSERT(materials_.size() < std::numeric_limits<decltype(MaterialParameter::id)>::max());
+            mtrl->param().id = static_cast<uint16_t>(materials_.size() - 1);
+        }
 
     private:
         static const context* s_pinnedCtxt;

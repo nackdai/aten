@@ -38,34 +38,46 @@ namespace aten
     }
 
     std::shared_ptr<AT_NAME::material> context::CreateMaterial(
+        std::string_view name,
         aten::MaterialType type,
         aten::Values& value)
     {
-        auto mtrl = material::CreateMaterial(type, value);
-        AT_ASSERT(mtrl);
+        auto mtrl = FindMaterialByName(name);
 
-        if (mtrl) {
-            AddMaterial(mtrl);
+        if (!mtrl) {
+            mtrl = material::CreateMaterial(type, value);
+            AT_ASSERT(mtrl);
+
+            if (mtrl) {
+                AddMaterial(mtrl);
+                mtrl->setName(name);
+            }
         }
 
         return mtrl;
     }
 
     std::shared_ptr<AT_NAME::material> context::CreateMaterialWithMaterialParameter(
+        std::string_view name,
         const aten::MaterialParameter& param,
         aten::texture* albedoMap,
         aten::texture* normalMap,
         aten::texture* roughnessMap)
     {
-        auto mtrl = material::CreateMaterialWithMaterialParameter(
-            param,
-            albedoMap,
-            normalMap,
-            roughnessMap);
-        AT_ASSERT(mtrl);
+        auto mtrl = FindMaterialByName(name);
 
-        if (mtrl) {
-            AddMaterial(mtrl);
+        if (!mtrl) {
+            mtrl = material::CreateMaterialWithMaterialParameter(
+                param,
+                albedoMap,
+                normalMap,
+                roughnessMap);
+            AT_ASSERT(mtrl);
+
+            if (mtrl) {
+                AddMaterial(mtrl);
+                mtrl->setName(name);
+            }
         }
 
         return mtrl;
@@ -83,7 +95,7 @@ namespace aten
         }
     }
 
-    std::shared_ptr<const AT_NAME::material> context::FindMaterialByName(std::string_view name) const
+    std::shared_ptr<AT_NAME::material> context::FindMaterialByName(std::string_view name) const
     {
         std::string strname(name);
 

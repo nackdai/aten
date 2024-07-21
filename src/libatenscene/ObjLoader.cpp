@@ -247,7 +247,7 @@ namespace aten
                     // If a material doesn't exist.
                     dst_shape = std::make_shared<aten::TriangleGroupMesh>();
 
-                    auto regireterd_mtrl = asset_manager.getMtrlByIdx(0);
+                    auto regireterd_mtrl = ctxt.GetMaterialInstance(0);
                     if (!regireterd_mtrl && callback_create_mtrl) {
                         regireterd_mtrl = callback_create_mtrl(
                             "", ctxt, MaterialType::Lambert, aten::vec3(1), "", "");
@@ -287,7 +287,7 @@ namespace aten
                         // Apply new materil to the shape.
                         const auto& mtrl = mtrls[prev_mtrl_idx];
 
-                        auto aten_mtrl = asset_manager.getMtrl(mtrl.name);
+                        auto aten_mtrl = ctxt.FindMaterialByName(mtrl.name);
 
                         if (!aten_mtrl && callback_create_mtrl) {
                             std::shared_ptr<material> new_mtrl(
@@ -298,7 +298,6 @@ namespace aten
                                     aten::vec3(mtrl.diffuse[0], mtrl.diffuse[1], mtrl.diffuse[2]),
                                     mtrl.diffuse_texname,
                                     mtrl.bump_texname));
-                            asset_manager.registerMtrl(mtrl.name, new_mtrl);
                             dst_shape->SetMaterial(new_mtrl);
                         }
                         else {
@@ -362,17 +361,14 @@ namespace aten
                             mtrlParam.baseColor = diffuse;
 
                             mtrl = ctxt.CreateMaterialWithMaterialParameter(
+                                objmtrl.name,
                                 mtrlParam,
                                 albedoMap,
                                 normalMap,
                                 nullptr);
                         }
 
-                        mtrl->setName(objmtrl.name.c_str());
-
                         dst_shape->SetMaterial(mtrl);
-
-                        asset_manager.registerMtrl(mtrl->name(), mtrl);
                     }
                 }
 

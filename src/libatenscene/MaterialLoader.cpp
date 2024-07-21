@@ -9,34 +9,11 @@
 #include "utility.h"
 
 namespace aten {
-    std::map<std::string, MaterialLoader::MaterialCreator> g_creators;
-
     static std::string g_base;
 
     void MaterialLoader::setBasePath(const std::string& base)
     {
         g_base = removeTailPathSeparator(base);
-    }
-
-    bool MaterialLoader::addCreator(std::string type, MaterialCreator creator)
-    {
-        // Check if type is as same as default type.
-        bool isDefaultMaterialName = aten::material::isDefaultMaterialName(type);
-
-        if (isDefaultMaterialName) {
-            AT_ASSERT(false);
-            AT_PRINTF("Same as default type [%s]\n", type.c_str());
-            return false;
-        }
-
-        auto it = g_creators.find(type);
-
-        if (it == g_creators.end()) {
-            g_creators.insert(std::pair<std::string, MaterialCreator>(type, creator));
-            return true;
-        }
-
-        return false;
     }
 
 #ifdef USE_JSON
@@ -250,7 +227,7 @@ namespace aten {
                 auto mtrlName = it->first;
 
                 // Check if there is same name material.
-                auto mtrl = asset_manager.getMtrl(mtrlName);
+                auto mtrl = ctxt.FindMaterialByName(mtrlName);
 
                 if (mtrl) {
                     AT_PRINTF("There is same tag material. [%s]\n", mtrlName.c_str());
@@ -297,12 +274,9 @@ namespace aten {
                     }
 
                     // Create material;
-                    mtrl = create(mtrlType, mtrlValues);
+                    mtrl = create(mtrlName, mtrlType, mtrlValues);
 
-                    if (mtrl) {
-                        asset_manager.registerMtrl(mtrlName, mtrl);
-                    }
-                    else {
+                    if (!mtrl) {
                         AT_ASSERT(false);
                         AT_PRINTF("Failed to create material : type[%s] name[%s]\n", mtrlType.c_str(), mtrlName.c_str());
                     }
@@ -396,7 +370,7 @@ namespace aten {
                     mtrlName = child->GetText();
 
                     // Check if there is same name material.
-                    mtrl = asset_manager.getMtrl(mtrlName);
+                    mtrl = ctxt.FindMaterialByName(mtrlName);
 
                     if (mtrl) {
                         AT_PRINTF("There is same tag material. [%s]\n", mtrlName.c_str());
@@ -429,12 +403,9 @@ namespace aten {
                 }
 
                 // Create material;
-                mtrl = create(mtrlType, ctxt, mtrlValues);
+                mtrl = create(mtrlName, mtrlType, ctxt, mtrlValues);
 
-                if (mtrl) {
-                    asset_manager.registerMtrl(mtrlName, mtrl);
-                }
-                else {
+                if (!mtrl) {
                     AT_ASSERT(false);
                     AT_PRINTF("Failed to create material : type[%s] name[%s]\n", mtrlType.c_str(), mtrlName.c_str());
                 }
@@ -444,6 +415,7 @@ namespace aten {
 #endif
 
     std::shared_ptr<material> MaterialLoader::create(
+        std::string_view name,
         const std::string& type,
         context& ctxt,
         Values& values)
@@ -455,17 +427,7 @@ namespace aten {
             auto mtrlType = aten::material::getMaterialTypeFromMaterialTypeName(type);
 
             if (aten::material::isValidMaterialType(mtrlType)) {
-                mtrl = ctxt.CreateMaterial(mtrlType, values);
-            }
-        }
-        else {
-            auto it = g_creators.find(type);
-
-            if (it != g_creators.end()) {
-                auto creator = it->second;
-                mtrl.reset(creator(values));
-
-                ctxt.AddMaterial(mtrl);
+                mtrl = ctxt.CreateMaterial(name, mtrlType, values);
             }
         }
 

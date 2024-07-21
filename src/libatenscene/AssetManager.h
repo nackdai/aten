@@ -30,10 +30,6 @@ namespace aten {
         AssetManager& operator=(const AssetManager&) = delete;
         AssetManager& operator=(AssetManager&&) = delete;
 
-        bool registerMtrl(std::string_view name, const std::shared_ptr<material>& mtrl);
-        std::shared_ptr<material> getMtrl(std::string_view name);
-        std::shared_ptr<material> getMtrlByIdx(uint32_t idx);
-
         bool registerObj(std::string_view name, const std::shared_ptr<aten::PolygonObject>& obj);
         std::shared_ptr<aten::PolygonObject> getObj(std::string_view name);
 

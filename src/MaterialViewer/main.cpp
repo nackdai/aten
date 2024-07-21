@@ -529,10 +529,6 @@ private:
         mtrl_param.standard.ior = 1.333F;
         mtrl_param.standard.roughness = 0.011F;
 
-        auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
-            mtrl_param,
-            nullptr, nullptr, nullptr);
-
 #if 1
 #if 0
         constexpr char* asset_path = "../../asset/suzanne/suzanne.obj";
@@ -545,7 +541,10 @@ private:
         constexpr char* mtrl_in_asset = "m1";
 #endif
 
-        asset_manager_.registerMtrl(mtrl_in_asset, mtrl);
+        auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
+            mtrl_in_asset,
+            mtrl_param,
+            nullptr, nullptr, nullptr);
 
         auto obj = aten::ObjLoader::LoadFirstObj(asset_path, ctxt_, asset_manager_);
         auto poly_obj = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt_, obj, aten::mat4::Identity);
@@ -559,7 +558,10 @@ private:
 #else
         constexpr char* asset_path = "../../asset/cornellbox/bunny_in_box.obj";
 
-        asset_manager_.registerMtrl("material_0", mtrl);
+        auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
+            "material_0",
+            mtrl_param,
+            nullptr, nullptr, nullptr);
 
         auto objs = aten::ObjLoader::load(asset_path, ctxt_, asset_manager_,
             [&](std::string_view name, aten::context& ctxt,
@@ -594,7 +596,7 @@ private:
                 aten::vec3(1.0f));
             scene->add(light);
 
-            auto emit = asset_manager_.getMtrl("light");
+            auto emit = ctxt_.FindMaterialByName("light");
             auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 200.0f);
             ctxt_.AddLight(areaLight);
         }
@@ -610,7 +612,10 @@ private:
 
     std::shared_ptr<aten::material> CreateMaterial(aten::MaterialParameter& mtrl_param)
     {
+        ctxt_.RemoveMaterialByName("");
+
         auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
+            "",
             mtrl_param,
             enable_albedo_map_ ? albedo_map_ : nullptr,
             enable_normal_map_ ? normal_map_ : nullptr,

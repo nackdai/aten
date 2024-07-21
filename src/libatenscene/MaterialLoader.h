@@ -19,14 +19,13 @@ namespace aten {
 
         static void setBasePath(const std::string& base);
 
-        static bool addCreator(std::string type, MaterialCreator creator);
-
         static bool load(
             std::string_view path,
             context& ctxt,
             aten::AssetManager& asset_manager);
 
         static std::shared_ptr<material> create(
+            std::string_view name,
             const std::string& type,
             context& ctxt,
             Values& values);

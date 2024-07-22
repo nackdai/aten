@@ -20,12 +20,11 @@ namespace aten
     std::shared_ptr<aten::PolygonObject> ObjLoader::LoadFirstObj(
         std::string_view path,
         context& ctxt,
-        aten::AssetManager& asset_manager,
         ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
         auto objs = load(
-            path, ctxt, asset_manager, callback_create_mtrl, needComputeNormalOntime);
+            path, ctxt, callback_create_mtrl, needComputeNormalOntime);
 
         return (!objs.empty() ? objs[0] : nullptr);
     }
@@ -34,12 +33,11 @@ namespace aten
         std::string_view tag,
         std::string_view path,
         context& ctxt,
-        aten::AssetManager& asset_manager,
         ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
         auto objs = LoadAndStoreToAssetManagerWithTag(
-            tag, path, ctxt, asset_manager, callback_create_mtrl, needComputeNormalOntime);
+            tag, path, ctxt, callback_create_mtrl, needComputeNormalOntime);
 
         return (!objs.empty() ? objs[0] : nullptr);
     }
@@ -47,7 +45,6 @@ namespace aten
     std::vector<std::shared_ptr<aten::PolygonObject>> ObjLoader::load(
         std::string_view path,
         context& ctxt,
-        aten::AssetManager& asset_manager,
         ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
@@ -70,14 +67,13 @@ namespace aten
         }
 
         return LoadAndStoreToAssetManagerWithTag(
-            filename, fullpath, ctxt, asset_manager, callback_create_mtrl, willSeparate, needComputeNormalOntime);
+            filename, fullpath, ctxt, callback_create_mtrl, willSeparate, needComputeNormalOntime);
     }
 
     std::vector<std::shared_ptr<aten::PolygonObject>> ObjLoader::LoadAndStoreToAssetManagerWithTag(
         std::string_view tag,
         std::string_view path,
         context& ctxt,
-        aten::AssetManager& asset_manager,
         ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
@@ -333,7 +329,7 @@ namespace aten
                                 }
                                 else {
                                     std::string texname = pathname + "/" + objmtrl.diffuse_texname;
-                                    auto loaded_img = aten::ImageLoader::load(texname, ctxt, asset_manager);
+                                    auto loaded_img = aten::ImageLoader::load(texname, ctxt);
                                     albedoMap = loaded_img.get();
                                 }
                             }
@@ -347,7 +343,7 @@ namespace aten
                                 }
                                 else {
                                     std::string texname = pathname + "/" + objmtrl.bump_texname;
-                                    auto loaded_img = aten::ImageLoader::load(texname, ctxt, asset_manager);
+                                    auto loaded_img = aten::ImageLoader::load(texname, ctxt);
                                     normalMap = loaded_img.get();
                                 }
                             }

@@ -70,9 +70,7 @@ int32_t main(int32_t argc, char* argv[])
 
     aten::context ctxt;
 
-    aten::AssetManager asset_manager;
-
-    auto objs = aten::ObjLoader::load(opt.input, ctxt, asset_manager,
+    auto objs = aten::ObjLoader::load(opt.input, ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {

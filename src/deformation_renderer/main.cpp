@@ -148,13 +148,11 @@ public:
             WIDTH, HEIGHT);
 
         aten::accelerator::setUserDefsInternalAccelCreator(Lbvh::create);
-
-        aten::AssetManager asset_manager;
-        aten::tie(deform_mdl_, defrom_anm_) = Scene::makeScene(ctxt_, &scene_, asset_manager);
+        aten::tie(deform_mdl_, defrom_anm_) = Scene::makeScene(ctxt_, &scene_);
         scene_.build(ctxt_);
 
 #ifdef ENABLE_ENVMAP
-        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager);
+        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
         auto bg = AT_NAME::Background::CreateBackgroundResource(envmap);
 
         auto ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);

@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\libatenscene\AssetManager.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libatenscene\ImageLoader.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -44,9 +41,6 @@
     <ClInclude Include="..\src\libatenscene\atenscene.h" />
     <ClInclude Include="..\3rdparty\picojson\picojson.h">
       <Filter>picojson</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libatenscene\AssetManager.h">
-      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libatenscene\ImageLoader.h">
       <Filter>include</Filter>

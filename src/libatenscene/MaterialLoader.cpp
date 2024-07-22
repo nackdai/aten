@@ -102,7 +102,7 @@ namespace aten {
     using GetValueFromFile = std::function<aten::PolymorphicValue(picojson::value&)>;
 #else
     template <class TYPE>
-    aten::PolymorphicValue getValue(const tinyxml2::XMLElement* e, aten::context& ctxt, aten::AssetManager& asset_manager)
+    aten::PolymorphicValue getValue(const tinyxml2::XMLElement* e, aten::context& ctxt)
     {
         AT_ASSERT(false);
         PolymorphicValue ret;
@@ -110,7 +110,7 @@ namespace aten {
     }
 
     template <>
-    aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLElement* e, aten::context& ctxt, aten::AssetManager& asset_manager)
+    aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLElement* e, aten::context& ctxt)
     {
         aten::PolymorphicValue val;
 
@@ -130,7 +130,7 @@ namespace aten {
     }
 
     template <>
-    aten::PolymorphicValue getValue<float>(const tinyxml2::XMLElement* e, aten::context& ctxt, aten::AssetManager& asset_manager)
+    aten::PolymorphicValue getValue<float>(const tinyxml2::XMLElement* e, aten::context& ctxt)
     {
         aten::PolymorphicValue v;
         v = (float)e->DoubleText();
@@ -138,7 +138,7 @@ namespace aten {
     }
 
     template <>
-    aten::PolymorphicValue getValue<texture*>(const tinyxml2::XMLElement* e, aten::context& ctxt, aten::AssetManager& asset_manager)
+    aten::PolymorphicValue getValue<texture*>(const tinyxml2::XMLElement* e, aten::context& ctxt)
     {
         auto s = e->GetText();
 
@@ -152,7 +152,7 @@ namespace aten {
             extname,
             filename);
 
-        auto tex = ImageLoader::load(s, ctxt, asset_manager);
+        auto tex = ImageLoader::load(s, ctxt);
 
         aten::PolymorphicValue v;
         v = tex;
@@ -160,7 +160,7 @@ namespace aten {
         return v;
     }
 
-    using GetValueFromFile = std::function<aten::PolymorphicValue(const tinyxml2::XMLElement*, aten::context&, aten::AssetManager&)>;
+    using GetValueFromFile = std::function<aten::PolymorphicValue(const tinyxml2::XMLElement*, aten::context&)>;
 #endif
 
     static std::array<GetValueFromFile, static_cast<size_t>(MtrlParamType::Num)> g_funcGetValueFromFile = {
@@ -319,8 +319,7 @@ namespace aten {
 
     bool MaterialLoader::load(
         std::string_view path,
-        context& ctxt,
-        aten::AssetManager& asset_manager)
+        context& ctxt)
     {
         std::string fullpath(path);
         if (!g_base.empty()) {
@@ -338,7 +337,7 @@ namespace aten {
 
         auto root = xml.FirstChildElement("root");
         if (root) {
-            onLoad(root, ctxt, asset_manager);
+            onLoad(root, ctxt);
         }
         else {
             // TODO
@@ -352,8 +351,7 @@ namespace aten {
 
     void MaterialLoader::onLoad(
         const void* xmlRoot,
-        context& ctxt,
-        aten::AssetManager& asset_manager)
+        context& ctxt)
     {
         const tinyxml2::XMLElement* root = (const tinyxml2::XMLElement*)xmlRoot;
 
@@ -389,7 +387,7 @@ namespace aten {
                         auto funcGetValue = g_funcGetValueFromFile[(int32_t)paramType];
 
                         // Get value from json.
-                        auto value = funcGetValue(child, ctxt, asset_manager);
+                        auto value = funcGetValue(child, ctxt);
 
                         mtrlValues.add(paramName, value);
                     }

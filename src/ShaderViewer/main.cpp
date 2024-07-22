@@ -278,10 +278,10 @@ private:
                 nullptr, nullptr, nullptr);
         }
         else {
-            aten::MaterialLoader::load(mtrlpath, ctxt_, asset_manager_);
+            aten::MaterialLoader::load(mtrlpath, ctxt_);
         }
 
-        objs_ = aten::ObjLoader::load(objpath, ctxt_, asset_manager_, nullptr, true);
+        objs_ = aten::ObjLoader::load(objpath, ctxt_, nullptr, true);
     }
 
     bool ParseArguments(int32_t argc, char* argv[])
@@ -311,8 +311,6 @@ private:
 
 
     aten::context ctxt_;
-
-    aten::AssetManager asset_manager_;
 
     aten::RasterizeRenderer rasterizer_;
 

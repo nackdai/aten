@@ -71,7 +71,7 @@ public:
 
         aten::ImageLoader::setBasePath(args_.tex_dir.c_str());
 
-        if (!aten::MaterialLoader::load(args_.mtrl.c_str(), ctxt_, asset_manager_)) {
+        if (!aten::MaterialLoader::load(args_.mtrl.c_str(), ctxt_)) {
             return 0;
         }
 
@@ -330,8 +330,6 @@ private:
     } args_;
 
     aten::context ctxt_;
-
-    aten::AssetManager asset_manager_;
 
     idaten::Skinning skinning_;
 

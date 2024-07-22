@@ -75,7 +75,7 @@ static std::shared_ptr<aten::material> createMaterialWithParamter(
         roughnessMap);
 }
 
-void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     auto emit = CreateMaterial("emit", ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
 
@@ -170,7 +170,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::A
     CreateMaterial("m1", ctxt, aten::MaterialType::Lambert, aten::vec3(0.2, 0.2, 0.7));
     CreateMaterial("Material.001", ctxt, aten::MaterialType::Lambert, aten::vec3(0.2, 0.2, 0.7));
 
-    auto obj = aten::ObjLoader::LoadFirstObj("../../asset/suzanne/suzanne.obj", ctxt, asset_manager);
+    auto obj = aten::ObjLoader::LoadFirstObj("../../asset/suzanne/suzanne.obj", ctxt);
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
     aten::mat4 mtx_L2W;
@@ -220,7 +220,7 @@ void CornellBoxScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     auto s = aten::TransformableFactory::createSphere(
         ctxt,
@@ -301,7 +301,7 @@ void RandomScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void MtrlTestScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void MtrlTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     aten::MaterialParameter mtrlParam;
 
@@ -333,7 +333,7 @@ void MtrlTestScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
@@ -343,7 +343,7 @@ void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Asset
     createMaterialWithParamter("m1", ctxt, aten::MaterialType::GGX, mtrlParam);
     createMaterialWithParamter("Material.001", ctxt, aten::MaterialType::GGX, mtrlParam);
 
-    auto obj = aten::ObjLoader::LoadFirstObj("../../asset/suzanne/suzanne.obj", ctxt, asset_manager);
+    auto obj = aten::ObjLoader::LoadFirstObj("../../asset/suzanne/suzanne.obj", ctxt);
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
     aten::mat4 mtx_L2W;
@@ -372,7 +372,7 @@ void ObjectScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void PointLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void PointLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     constexpr auto r = 1e3f;
 
@@ -411,7 +411,7 @@ void PointLightScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void DirectionalLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void DirectionalLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     constexpr auto r = 1e5f;
 
@@ -450,7 +450,7 @@ void DirectionalLightScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void SpotLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void SpotLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     constexpr auto r = 1e3f;
 
@@ -499,7 +499,7 @@ void SpotLightScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     auto s = aten::TransformableFactory::createSphere(
         ctxt,
@@ -595,12 +595,12 @@ void ManyLightScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto albedo = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_D.tga", ctxt, asset_manager);
-    auto nml = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_N.tga", ctxt, asset_manager);
-    auto rough = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_R.tga", ctxt, asset_manager);
-    auto nml_2 = aten::ImageLoader::load("../../asset/normalmap.png", ctxt, asset_manager);
+    auto albedo = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_D.tga", ctxt);
+    auto nml = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_N.tga", ctxt);
+    auto rough = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_R.tga", ctxt);
+    auto nml_2 = aten::ImageLoader::load("../../asset/normalmap.png", ctxt);
     aten::vec3 clr = aten::vec3(1, 1, 1);
 
     aten::MaterialParameter mtrlParam;
@@ -703,7 +703,7 @@ void TexturesScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     auto emit = CreateMaterial("emit", ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
 
@@ -801,11 +801,11 @@ void HideLightScene::getCameraPosAndAt(
 /////////////////////////////////////////////////////
 
 std::shared_ptr<aten::instance<aten::PolygonObject>> ObjCornellBoxScene::makeScene(
-    aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+    aten::context& ctxt, aten::scene* scene)
 {
     auto emit = CreateMaterial("light", ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
 
-    auto objs = aten::ObjLoader::load("../../asset/cornellbox/orig.obj", ctxt, asset_manager,
+    auto objs = aten::ObjLoader::load("../../asset/cornellbox/orig.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
@@ -874,19 +874,19 @@ void ObjCornellBoxScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     auto objs = aten::ObjLoader::load(
-        "../../asset/sponza/sponza.obj", ctxt, asset_manager,
+        "../../asset/sponza/sponza.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
                 auto albedo_map = albedo.empty()
                     ? nullptr
-                    : aten::ImageLoader::load("../../asset/sponza/" + albedo, ctxt, asset_manager);
+                    : aten::ImageLoader::load("../../asset/sponza/" + albedo, ctxt);
                 auto nml_map = nml.empty()
                     ? nullptr
-                    : aten::ImageLoader::load("../../asset/sponza/" + nml, ctxt, asset_manager);
+                    : aten::ImageLoader::load("../../asset/sponza/" + nml, ctxt);
 
                 auto mtrl = CreateMaterial(name, ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
                 return mtrl;
@@ -901,7 +901,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::Asset
         int32_t offsetTriIdx = ctxt.GetTriangleNum();
 
         objs.clear();
-        objs = aten::ObjLoader::load("../../asset/sponza/sponza_lod.obj", ctxt, asset_manager);
+        objs = aten::ObjLoader::load("../../asset/sponza/sponza_lod.obj", ctxt);
         objs[0]->importInternalAccelTree("../../asset/sponza/sponza_lod.sbvh", ctxt, offsetTriIdx);
         sponza->setLod(objs[0]);
     }
@@ -927,14 +927,14 @@ void SponzaScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void BunnyScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void BunnyScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(0.7f, 0.7f, 0.7f);
 
     createMaterialWithParamter("m1", ctxt, aten::MaterialType::Lambert, mtrlParam);
 
-    auto objs = aten::ObjLoader::load("../../asset/teapot/teapot.obj", ctxt, asset_manager);
+    auto objs = aten::ObjLoader::load("../../asset/teapot/teapot.obj", ctxt);
     auto bunny = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[0], aten::mat4::Identity);
     scene->add(bunny);
 }
@@ -952,13 +952,13 @@ void BunnyScene::getCameraPosAndAt(
 /////////////////////////////////////////////////////
 
 aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<aten::DeformAnimation>> DeformScene::makeScene(
-    aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+    aten::context& ctxt, aten::scene* scene)
 {
     auto mdl = aten::TransformableFactory::createDeformable(ctxt);
     mdl->read("../../asset/converted_unitychan/unitychan_gpu.mdl");
 
     aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
-    aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt, asset_manager);
+    aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt);
 
     auto deformMdl = aten::TransformableFactory::createInstance<aten::deformable>(ctxt, mdl, aten::mat4::Identity);
     scene->add(deformMdl);
@@ -983,7 +983,7 @@ void DeformScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<aten::DeformAnimation>> DeformInBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<aten::DeformAnimation>> DeformInBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
 #if 1
     {
@@ -995,7 +995,7 @@ aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<a
         CreateMaterial("leftWall", ctxt, aten::MaterialType::Lambert, aten::vec3(0.504000f, 0.052000f, 0.040000f));
         CreateMaterial("rightWall", ctxt, aten::MaterialType::Lambert, aten::vec3(0.112000f, 0.360000f, 0.072800f));
 
-        auto objs = aten::ObjLoader::load("../../asset/cornellbox/box.obj", ctxt, asset_manager, nullptr, false);
+        auto objs = aten::ObjLoader::load("../../asset/cornellbox/box.obj", ctxt, nullptr, false);
 
         auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
             ctxt,
@@ -1017,7 +1017,7 @@ aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<a
     mdl->read("../../asset/converted_unitychan/unitychan_gpu.mdl");
 
     aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
-    aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt, asset_manager);
+    aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt);
 
     auto deformMdl = aten::TransformableFactory::createInstance<aten::deformable>(ctxt, mdl, aten::mat4::Identity);
     scene->add(deformMdl);
@@ -1042,7 +1042,7 @@ void DeformInBoxScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     auto back = CreateMaterial("backWall", ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000f, 0.568000f, 0.544000f));
     back->param().baseColor.a = 0.0f;
@@ -1061,7 +1061,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
     auto tall = CreateMaterial("tallBox", ctxt, aten::MaterialType::Lambert, aten::vec3(0.0000f, 0.000f, 1.0000f));
     tall->param().baseColor.a = 0.25f;
 
-    auto objs = aten::ObjLoader::load("../../asset/cornellbox/orig.obj", ctxt, asset_manager, nullptr, true, true);
+    auto objs = aten::ObjLoader::load("../../asset/cornellbox/orig.obj", ctxt, nullptr, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
         ctxt,
@@ -1092,19 +1092,19 @@ void AlphaBlendedObjCornellBoxScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     auto objs = aten::ObjLoader::load(
-        "../../asset/crytek_sponza/sponza.obj", ctxt, asset_manager,
+        "../../asset/crytek_sponza/sponza.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
                 auto albedo_map = albedo.empty()
                     ? nullptr
-                    : aten::ImageLoader::load("../../asset/crytek_sponza/" + albedo, ctxt, asset_manager);
+                    : aten::ImageLoader::load("../../asset/crytek_sponza/" + albedo, ctxt);
                 auto nml_map = nml.empty()
                     ? nullptr
-                    : aten::ImageLoader::load("../../asset/crytek_sponza/" + nml, ctxt, asset_manager);
+                    : aten::ImageLoader::load("../../asset/crytek_sponza/" + nml, ctxt);
 
                 auto mtrl = CreateMaterial(name, ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
                 return mtrl;
@@ -1134,9 +1134,9 @@ void CryteckSponzaScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    CryteckSponzaScene::makeScene(ctxt, scene, asset_manager);
+    CryteckSponzaScene::makeScene(ctxt, scene);
 
     constexpr int32_t step = 5;
 
@@ -1208,11 +1208,11 @@ void ManyLightCryteckSponzaScene::getCameraPosAndAt(
 /////////////////////////////////////////////////////
 
 void CornellBoxSmokeScene::makeScene(
-    aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+    aten::context& ctxt, aten::scene* scene)
 {
     auto emit = CreateMaterial("light", ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
 
-    auto objs = aten::ObjLoader::load("../../asset/cornellbox/box_smoke.obj", ctxt, asset_manager,
+    auto objs = aten::ObjLoader::load("../../asset/cornellbox/box_smoke.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
@@ -1268,11 +1268,11 @@ void CornellBoxSmokeScene::getCameraPosAndAt(
 /////////////////////////////////////////////////////
 
 void CornellBoxHomogeneousMediumScene::makeScene(
-    aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+    aten::context& ctxt, aten::scene* scene)
 {
     auto emit = CreateMaterial("light", ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
 
-    auto objs = aten::ObjLoader::load("../../asset/cornellbox/orig.obj", ctxt, asset_manager,
+    auto objs = aten::ObjLoader::load("../../asset/cornellbox/orig.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
@@ -1340,11 +1340,11 @@ void CornellBoxHomogeneousMediumScene::getCameraPosAndAt(
 /////////////////////////////////////////////////////
 
 void HomogeneousMediumRefractionBunnyScene::makeScene(
-    aten::context& ctxt, aten::scene* scene, aten::AssetManager& asset_manager)
+    aten::context& ctxt, aten::scene* scene)
 {
     auto emit = CreateMaterial("light", ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
 
-    auto objs = aten::ObjLoader::load("../../asset/cornellbox/bunny_in_box.obj", ctxt, asset_manager,
+    auto objs = aten::ObjLoader::load("../../asset/cornellbox/bunny_in_box.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {

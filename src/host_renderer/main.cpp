@@ -73,12 +73,12 @@ public:
             float(0.1), float(10000.0),
             WIDTH, HEIGHT);
 
-        MakeScene<Scene>(movable_obj_, ctxt_, &scene_, asset_manager_);
+        MakeScene<Scene>(movable_obj_, ctxt_, &scene_);
 
         scene_.build(ctxt_);
 
 #ifdef ENABLE_IBL
-        envmap_ = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
+        envmap_ = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
         auto bg = AT_NAME::Background::CreateBackgroundResource(envmap_);
 
         auto ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
@@ -207,8 +207,6 @@ private:
 
     aten::AcceleratedScene<aten::sbvh> scene_;
     aten::context ctxt_;
-
-    aten::AssetManager asset_manager_;
 
     std::shared_ptr<aten::texture> envmap_;
 

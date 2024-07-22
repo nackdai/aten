@@ -17,7 +17,6 @@ namespace aten {
     std::shared_ptr<texture> ImageLoader::load(
         const std::string& path,
         context& ctxt,
-        aten::AssetManager& asset_manager,
         ImgFormat fmt/*= ImgFormat::Fmt8Bit*/)
     {
         std::string pathname;
@@ -30,7 +29,7 @@ namespace aten {
             extname,
             filename);
 
-        return load(filename, path, ctxt, asset_manager, fmt);
+        return load(filename, path, ctxt, fmt);
     }
 
     template <class TYPE>
@@ -69,7 +68,6 @@ namespace aten {
         const std::string& tag,
         const std::string& path,
         context& ctxt,
-        aten::AssetManager& asset_manager,
         ImgFormat fmt/*= ImgFormat::Fmt8Bit*/)
     {
         std::string fullpath = path;

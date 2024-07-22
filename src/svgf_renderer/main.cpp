@@ -83,11 +83,11 @@ public:
             vfov,
             WIDTH, HEIGHT);
 
-        MakeScene<Scene>(movable_obj_, ctxt_, &scene_, asset_manager_);
+        MakeScene<Scene>(movable_obj_, ctxt_, &scene_);
         scene_.build(ctxt_);
 
 #ifdef ENABLE_ENVMAP
-        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
+        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
         auto bg = AT_NAME::Background::CreateBackgroundResource(envmap);
         auto ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
 
@@ -540,8 +540,6 @@ private:
 
     aten::AcceleratedScene<aten::GPUBvh> scene_;
     aten::context ctxt_;
-
-    aten::AssetManager asset_manager_;
 
     std::shared_ptr<aten::instance<aten::deformable>> deform_mdl_;
     std::shared_ptr<aten::DeformAnimation> defrom_anm_;

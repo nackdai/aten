@@ -16,7 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\3rdparty\tinyxml2\tinyxml2.cpp" />
-    <ClCompile Include="..\src\libatenscene\AssetManager.cpp" />
     <ClCompile Include="..\src\libatenscene\AssimpImporter.cpp" />
     <ClCompile Include="..\src\libatenscene\ImageLoader.cpp" />
     <ClCompile Include="..\src\libatenscene\MaterialExporter.cpp" />
@@ -27,7 +26,6 @@
   <ItemGroup>
     <ClInclude Include="..\3rdparty\picojson\picojson.h" />
     <ClInclude Include="..\3rdparty\tinyxml2\tinyxml2.h" />
-    <ClInclude Include="..\src\libatenscene\AssetManager.h" />
     <ClInclude Include="..\src\libatenscene\AssimpImporter.h" />
     <ClInclude Include="..\src\libatenscene\atenscene.h" />
     <ClInclude Include="..\src\libatenscene\ImageLoader.h" />

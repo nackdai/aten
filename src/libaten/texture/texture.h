@@ -105,6 +105,11 @@ namespace aten
             return m_name.c_str();
         }
 
+        const std::string& nameString() const
+        {
+            return m_name;
+        }
+
         bool initAsGLTexture();
         bool initAsGLTexture(int32_t width, int32_t height);
         void bindAsGLTexture(uint8_t stage, shader* shd) const;

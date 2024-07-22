@@ -95,25 +95,6 @@ namespace aten
         }
     }
 
-    std::shared_ptr<AT_NAME::material> context::FindMaterialByName(std::string_view name) const
-    {
-        std::string strname(name);
-
-        auto found = std::find_if(
-            materials_.begin(), materials_.end(),
-            [&](const std::shared_ptr<AT_NAME::material> mtrl) {
-                return mtrl->nameString() == strname;
-            }
-        );
-
-        if (found != materials_.end()) {
-            const auto& mtrl = *found;
-            return mtrl;
-        }
-
-        return nullptr;
-    }
-
     int32_t context::FindMaterialIdxByName(std::string_view name) const
     {
         auto mtrl = FindMaterialByName(name);
@@ -273,10 +254,6 @@ namespace aten
             AT_ASSERT(tex);
 
             AddTexture(tex);
-
-            if (!name.empty()) {
-                assets_.try_emplace(name.data(), tex);
-            }
         }
 
         return tex;

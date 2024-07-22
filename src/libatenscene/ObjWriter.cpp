@@ -265,7 +265,7 @@ namespace aten {
 
             writeLineFeed(fp);
 
-            const auto obj_name = obj->getName();
+            const auto& obj_name = obj->getName();
             if (!obj_name.empty()) {
                 fprintf(fp, "g %s\n", obj_name.c_str());
             }

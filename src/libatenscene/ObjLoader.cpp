@@ -84,12 +84,8 @@ namespace aten
     {
         std::vector<std::shared_ptr<aten::PolygonObject>> objs;
 
-        auto asset_obj = asset_manager.getObj(tag);
-        if (asset_obj) {
-            AT_PRINTF("There is same tag object. [%s]\n", tag.data());
-            objs.push_back(asset_obj);
-            return objs;
-        }
+        // TODO
+        // Should we check if the same tagged object exists?
 
         std::string pathname;
         std::string extname;
@@ -432,7 +428,7 @@ namespace aten
             obj->setBoundingBox(aten::aabb(shapemin, shapemax));
 
             // TODO
-            asset_manager.registerObj(tag, obj);
+            // If we need to manager if the same tagged object exist, should we register it here?
 
             objs.push_back(std::move(obj));
         }

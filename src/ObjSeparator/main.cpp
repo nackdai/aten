@@ -65,12 +65,11 @@ int32_t main(int32_t argc, char* argv[])
 
     aten::SetCurrentDirectoryFromExe();
 
-    aten::AssetManager asset_manager;
     aten::context ctxt;
 
     auto objs = aten::ObjLoader::load(
         "../../asset/mansion/interior_bundled4_chairmove_1163769_606486_2.obj",
-        ctxt, asset_manager);
+        ctxt);
 
     if (objs.empty()) {
         // TODO

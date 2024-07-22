@@ -12,11 +12,10 @@ namespace aten
         std::string_view path,
         std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
         context& ctxt,
-        aten::AssetManager& asset_manager,
         FuncCreateMaterial func_create_mtrl)
     {
         AssimpImporter importer;
-        return importer.loadModel(path, objs, ctxt, asset_manager, func_create_mtrl);
+        return importer.loadModel(path, objs, ctxt, func_create_mtrl);
     }
 
     std::string getTextureName(aiTextureType texture_type, const aiMaterial* assimp_mtrl) {
@@ -41,7 +40,6 @@ namespace aten
 
     const std::string CreateMaterial(
         context& ctxt,
-        aten::AssetManager& asset_manager,
         const aiMaterial* assimp_mtrl,
         AssimpImporter::FuncCreateMaterial func_create_mtrl)
     {
@@ -116,7 +114,6 @@ namespace aten
 
     bool createObject(
         context& ctxt,
-        aten::AssetManager& asset_manager,
         std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
         const aiNode* assimp_node,
         const aiScene* assimp_scene,
@@ -282,7 +279,7 @@ namespace aten
 
         for (uint32_t child_idx = 0; child_idx < assimp_node->mNumChildren; child_idx++) {
             const auto child = assimp_node->mChildren[child_idx];
-            if (!createObject(ctxt, asset_manager, objs, assimp_node, assimp_scene, mtrl_list)) {
+            if (!createObject(ctxt, objs, assimp_node, assimp_scene, mtrl_list)) {
                 return false;
             }
         }
@@ -294,7 +291,6 @@ namespace aten
         std::string_view path,
         std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
         context& ctxt,
-        aten::AssetManager& asset_manager,
         FuncCreateMaterial func_create_mtrl)
     {
         uint32_t assimp_flags = aiProcessPreset_TargetRealtime_MaxQuality |
@@ -323,14 +319,14 @@ namespace aten
 
         for (uint32_t i = 0; i < assimp_scene->mNumMaterials; i++) {
             const auto assimp_mtrl = assimp_scene->mMaterials[i];
-            auto mtrl_name = CreateMaterial(ctxt, asset_manager, assimp_mtrl, func_create_mtrl);
+            auto mtrl_name = CreateMaterial(ctxt, assimp_mtrl, func_create_mtrl);
             if (!mtrl_name.empty()) {
                 mtrl_list_.push_back(std::move(mtrl_name));
             }
         }
 
         auto root_node = assimp_scene->mRootNode;
-        if (!createObject(ctxt, asset_manager, objs, root_node, assimp_scene, mtrl_list_)) {
+        if (!createObject(ctxt, objs, root_node, assimp_scene, mtrl_list_)) {
             return false;
         }
 

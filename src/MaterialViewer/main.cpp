@@ -120,7 +120,7 @@ public:
 #else
         // IBL
         scene_light_.is_envmap = true;
-        scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
+        scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
         auto bg = AT_NAME::Background::CreateBackgroundResource(scene_light_.envmap_texture, aten::vec4(0));
         scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
         scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
@@ -546,7 +546,7 @@ private:
             mtrl_param,
             nullptr, nullptr, nullptr);
 
-        auto obj = aten::ObjLoader::LoadFirstObj(asset_path, ctxt_, asset_manager_);
+        auto obj = aten::ObjLoader::LoadFirstObj(asset_path, ctxt_);
         auto poly_obj = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt_, obj, aten::mat4::Identity);
         scene->add(poly_obj);
 
@@ -563,7 +563,7 @@ private:
             mtrl_param,
             nullptr, nullptr, nullptr);
 
-        auto objs = aten::ObjLoader::load(asset_path, ctxt_, asset_manager_,
+        auto objs = aten::ObjLoader::load(asset_path, ctxt_,
             [&](std::string_view name, aten::context& ctxt,
                 aten::MaterialType type, const aten::vec3& mtrl_clr,
                 const std::string& albedo, const std::string& nml) -> auto {
@@ -675,8 +675,6 @@ private:
 
     aten::AcceleratedScene<aten::GPUBvh> scene_;
     aten::context ctxt_;
-
-    aten::AssetManager asset_manager_;
 
     idaten::PathTracing renderer_;
 

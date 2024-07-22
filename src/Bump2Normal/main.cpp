@@ -18,7 +18,7 @@ public:
 
     bool Init()
     {
-        bump_map_ = aten::ImageLoader::load(args_.input, ctxt_, asset_manager_);
+        bump_map_ = aten::ImageLoader::load(args_.input, ctxt_);
 
         if (!bump_map_) {
             AT_ASSERT(false);
@@ -203,8 +203,6 @@ private:
     };
 
     Normal2BumpBlitter blitter_;
-
-    aten::AssetManager asset_manager_;
 
     bool will_take_screenshot_{ false };
 };

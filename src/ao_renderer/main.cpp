@@ -57,9 +57,7 @@ public:
             vfov,
             WIDTH, HEIGHT);
 
-        aten::AssetManager asset_manager;
-
-        Scene::makeScene(ctxt_, &scene_, asset_manager);
+        Scene::makeScene(ctxt_, &scene_);
         scene_.build(ctxt_);
 
         renderer_.getCompaction().init(
@@ -310,8 +308,6 @@ protected:
 
     aten::AcceleratedScene<aten::GPUBvh> scene_;
     aten::context ctxt_;
-
-    aten::AssetManager asset_manager;
 
     idaten::AORenderer renderer_;
 

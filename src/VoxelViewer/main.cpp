@@ -269,7 +269,7 @@ private:
             mtrlParam,
             nullptr, nullptr, nullptr);
 
-        objs_ = aten::ObjLoader::load(args_.input, ctxt_, asset_manager_);
+        objs_ = aten::ObjLoader::load(args_.input, ctxt_);
 
         for (auto& obj : objs_) {
             auto instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt_, obj, aten::mat4::Identity);
@@ -285,8 +285,6 @@ private:
     } args_;
 
     aten::context ctxt_;
-
-    aten::AssetManager asset_manager_;
 
     std::vector<std::shared_ptr<aten::PolygonObject>> objs_;
     aten::AcceleratedScene<aten::sbvh> scene_;

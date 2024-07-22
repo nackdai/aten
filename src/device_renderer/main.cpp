@@ -1,4 +1,3 @@
-#include "AssetManager.h"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
@@ -71,12 +70,12 @@ public:
             vfov,
             WIDTH, HEIGHT);
 
-        MakeScene<Scene>(movable_obj_, ctxt_, &scene_, asset_manager_);
+        MakeScene<Scene>(movable_obj_, ctxt_, &scene_);
 
         scene_.build(ctxt_);
 
 #ifdef ENABLE_ENVMAP
-        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_, asset_manager_);
+        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
         auto bg = AT_NAME::Background::CreateBackgroundResource(envmap);
         auto ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
         bg.avgIllum = ibl->getAvgIlluminace();
@@ -495,8 +494,6 @@ private:
 
     aten::AcceleratedScene<aten::GPUBvh> scene_;
     aten::context ctxt_;
-
-    aten::AssetManager asset_manager_;
 
 #ifdef ENABLE_NPR
     idaten::NPRPathTracing renderer_;

@@ -4,8 +4,6 @@
 
 #include "aten.h"
 
-#include "AssetManager.h"
-
 namespace aten {
     class MaterialLoader {
         friend class SceneLoader;
@@ -21,8 +19,7 @@ namespace aten {
 
         static bool load(
             std::string_view path,
-            context& ctxt,
-            aten::AssetManager& asset_manager);
+            context& ctxt);
 
         static std::shared_ptr<material> create(
             std::string_view name,
@@ -36,8 +33,7 @@ namespace aten {
 #else
         static void onLoad(
             const void* xmlRoot,
-            context& ctxt,
-            aten::AssetManager& asset_manager);
+            context& ctxt);
 #endif
     };
 }

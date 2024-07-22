@@ -247,14 +247,14 @@ private:
                 nullptr, nullptr, nullptr);
         }
         else {
-            aten::MaterialLoader::load(mtrlpath, ctxt_, asset_manager_);
+            aten::MaterialLoader::load(mtrlpath, ctxt_);
         }
 
         std::vector<std::shared_ptr<aten::PolygonObject>> objs;
         aten::AssimpImporter::load(
             objpath,
             objs,
-            ctxt_, asset_manager_,
+            ctxt_,
             [&](std::string_view name,
                 aten::context& ctxt,
                 const aten::MaterialParameter& mtrl_param,
@@ -265,10 +265,10 @@ private:
                 if (!mtrl) {
                     auto albedo_map = albedo.empty()
                         ? nullptr
-                        : aten::ImageLoader::load(pathname + albedo, ctxt, asset_manager_);
+                        : aten::ImageLoader::load(pathname + albedo, ctxt);
                     auto nml_map = nml.empty()
                         ? nullptr
-                        : aten::ImageLoader::load(pathname + nml, ctxt, asset_manager_);
+                        : aten::ImageLoader::load(pathname + nml, ctxt);
 
                     mtrl = ctxt.CreateMaterialWithMaterialParameter(
                         name,
@@ -320,8 +320,6 @@ private:
     } args_;
 
     aten::context ctxt_;
-
-    aten::AssetManager asset_manager_;
 
     aten::RasterizeRenderer rasterizer_;
     std::shared_ptr<aten::PolygonObject> obj_;

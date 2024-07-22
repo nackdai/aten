@@ -161,21 +161,9 @@ namespace AT_NAME
             return m_shapes;
         }
 
-        void setName(std::string_view name)
-        {
-            name_.assign(name);
-        }
-
-        std::string getName() const
-        {
-            return name_;
-        }
-
     private:
         std::vector<std::shared_ptr<TriangleGroupMesh>> m_shapes;
 
         std::shared_ptr<aten::accelerator> m_accel;
-
-        std::string name_;
     };
 }

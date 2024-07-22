@@ -50,6 +50,16 @@ namespace aten
             return m_id;
         }
 
+        void setName(std::string_view name)
+        {
+            name_.assign(name);
+        }
+
+        const std::string& getName() const
+        {
+            return name_;
+        }
+
         virtual void collectTriangles(std::vector<aten::TriangleParameter>& triangles) const
         {
             // Nothing is done...
@@ -67,5 +77,7 @@ namespace aten
         int32_t m_id{ -1 };
 
         ObjectParameter m_param;
+
+        std::string name_;
     };
 }

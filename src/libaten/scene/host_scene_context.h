@@ -283,7 +283,10 @@ namespace aten
          * @param[in] name Name of the material instance.
          * @return If the material instance is found, return it. Otherwise, returns nullptr.
          */
-        std::shared_ptr<AT_NAME::material> FindMaterialByName(std::string_view name) const;
+        std::shared_ptr<AT_NAME::material> FindMaterialByName(std::string_view name) const
+        {
+            return GetAsset(materials_, name);
+        }
 
         /**
          * @brief Find the index to the material instance by name.
@@ -483,9 +486,9 @@ namespace aten
          * @param[in] name Name of the texture instance.
          * @return If the texture instance is found, returns it. Otherwise, returns nullptr.
          */
-        std::shared_ptr<texture> GetTextureByName(std::string_view name)
+        std::shared_ptr<texture> GetTextureByName(std::string_view name) const
         {
-            return GetAsset<std::shared_ptr<texture>>(name);
+            return GetAsset(textures_, name);
         }
 
     private:
@@ -524,29 +527,23 @@ namespace aten
 
         bool is_window_initialized_{ false };
 
-        using Asset = std::variant< std::shared_ptr<AT_NAME::material>, std::shared_ptr<aten::texture>, std::shared_ptr<aten::transformable>>;
-        std::unordered_map<std::string, Asset> assets_;
-
         template <class T>
-        auto GetAsset(std::string_view name) -> std::enable_if_t<aten::is_shared_ptr_v<T>, T>
+        static auto GetAsset(const std::vector<T>& assets, std::string_view name) -> std::enable_if_t<aten::is_shared_ptr_v<T>, T>
         {
             if (name.empty()) {
                 return nullptr;
             }
 
             auto found = std::find_if(
-                assets_.begin(), assets_.end(),
+                assets.begin(), assets.end(),
                 [name](const auto& t) {
-                    if (t.first == name) {
+                    if (t->nameString() == name) {
                         return true;
                     }
                     return false;
                 });
-            if (found != assets_.end()) {
-                const auto& asset = found->second;
-                if (std::holds_alternative<T>(asset)) {
-                    return std::get<T>(asset);
-                }
+            if (found != assets.end()) {
+                return *found;
             }
             return nullptr;
         }

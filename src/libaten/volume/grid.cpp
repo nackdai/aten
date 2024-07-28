@@ -1,123 +1,122 @@
+#include <nanovdb/NanoVDB.h>
+
+#include "geometry/transformable_factory.h"
+#include "scene/host_scene_context.h"
 #include "volume/grid.h"
 
-#include "scene/host_scene_context.h"
-
 namespace aten {
-    void ConvertGridToMeshes(
+    std::shared_ptr<aten::PolygonObject> GenerateTrianglesFromGridBoundingBox(
         aten::context& ctxt,
-        const Grid* grid)
+        const int32_t target_mtrl_id,
+        const nanovdb::FloatGrid* grid)
     {
-        const auto bbox = grid->worldBBox();
-        const auto& bbox_min = bbox.min();
-        const auto& bbox_max = bbox.max();
-
         constexpr int32_t IndicesPerTriangle = 3;
         constexpr int32_t TrianglesPerCubeFace = 2;
         constexpr int32_t FacesInCube = 6;
         constexpr int32_t IndicesInCube = IndicesPerTriangle * TrianglesPerCubeFace * FacesInCube;
         constexpr int32_t VerticesInCube = 8;
 
+        const auto grid_bbox = grid->worldBBox();
+        const auto& bbox_min = grid_bbox.min();
+        const auto& bbox_max = grid_bbox.max();
+
+        const auto triangle_index_offset = ctxt.GetVertexNum();
+
         /*
-             4------------6
-            /|           /|
-           / |          / |
-          5------------7  |
-          |  0---------|--1
-          | /          | /
-          |/           |/
-          2------------3
-            +y
-             |
-             |
-             +---> +x
-            /
-           +z
-        */
+         *     4------------6
+         *    /|           /|
+         *   / |          / |
+         *  5------------7  |
+         *  |  0---------|--1
+         *  | /          | /
+         *  |/           |/
+         *  2------------3
+         *    +y
+         *     |
+         *     |
+         *     +---> +x
+         *    /
+         *   +z
+         */
 
         // Create triangles from bounding box
-        std::vector<aten::vertex> vertices;
-        vertices.reserve(VerticesInCube);
         {
             // Compute normal on the fly.
             // To do it, specify -1 at uv.z;
             aten::vertex v0{ aten::vec4(bbox_min[0], bbox_min[1], bbox_min[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
             aten::vertex v1{ aten::vec4(bbox_max[0], bbox_min[1], bbox_min[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
-            aten::vertex v2{ aten::vec4(bbox_min[0], bbox_min[1], bbox_max[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
-            aten::vertex v3{ aten::vec4(bbox_max[0], bbox_min[1], bbox_max[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v2{ aten::vec4(bbox_max[0], bbox_max[1], bbox_min[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v3{ aten::vec4(bbox_min[0], bbox_max[1], bbox_min[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
 
-            aten::vertex v4{ aten::vec4(bbox_min[0], bbox_max[1], bbox_min[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
-            aten::vertex v5{ aten::vec4(bbox_min[0], bbox_max[1], bbox_max[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
-            aten::vertex v6{ aten::vec4(bbox_max[0], bbox_max[1], bbox_min[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v4{ aten::vec4(bbox_max[0], bbox_min[1], bbox_max[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v5{ aten::vec4(bbox_min[0], bbox_min[1], bbox_max[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v6{ aten::vec4(bbox_min[0], bbox_max[1], bbox_max[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
             aten::vertex v7{ aten::vec4(bbox_max[0], bbox_max[1], bbox_max[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
 
-            vertices.emplace_back(v0);
-            vertices.emplace_back(v1);
-            vertices.emplace_back(v2);
-            vertices.emplace_back(v3);
-            vertices.emplace_back(v4);
-            vertices.emplace_back(v5);
-            vertices.emplace_back(v6);
-            vertices.emplace_back(v7);
+            ctxt.AddVertex(v0);
+            ctxt.AddVertex(v1);
+            ctxt.AddVertex(v2);
+            ctxt.AddVertex(v3);
+            ctxt.AddVertex(v4);
+            ctxt.AddVertex(v5);
+            ctxt.AddVertex(v6);
+            ctxt.AddVertex(v7);
         }
 
-        std::vector<int32_t> indices;
-        indices.reserve(IndicesInCube);
-        {
-            // bottom.
-            indices.emplace_back(0);
-            indices.emplace_back(3);
-            indices.emplace_back(1);
-
-            indices.emplace_back(0);
-            indices.emplace_back(1);
-            indices.emplace_back(2);
-
-            // front.
-            indices.emplace_back(2);
-            indices.emplace_back(3);
-            indices.emplace_back(7);
-
-            indices.emplace_back(2);
-            indices.emplace_back(7);
-            indices.emplace_back(5);
+        constexpr std::array TriangleIndices = {
+            // back.
+            0, 2, 1,
+            0, 3, 2,
 
             // right.
-            indices.emplace_back(0);
-            indices.emplace_back(2);
-            indices.emplace_back(5);
+            1, 7, 4,
+            1, 2, 7,
 
-            indices.emplace_back(0);
-            indices.emplace_back(5);
-            indices.emplace_back(4);
+            // front.
+            4, 7, 6,
+            4, 6, 5,
 
             // left.
-            indices.emplace_back(3);
-            indices.emplace_back(1);
-            indices.emplace_back(6);
+            5, 3, 0,
+            5, 6, 3,
 
-            indices.emplace_back(3);
-            indices.emplace_back(6);
-            indices.emplace_back(7);
-
-            // back.
-            indices.emplace_back(1);
-            indices.emplace_back(0);
-            indices.emplace_back(4);
-
-            indices.emplace_back(1);
-            indices.emplace_back(4);
-            indices.emplace_back(6);
+            // floor.
+            0, 1, 4,
+            0, 4, 5,
 
             // top.
-            indices.emplace_back(5);
-            indices.emplace_back(7);
-            indices.emplace_back(6);
+            3, 7, 2,
+            3, 6, 7,
+        };
 
-            indices.emplace_back(5);
-            indices.emplace_back(6);
-            indices.emplace_back(4);
+        auto mesh = std::make_shared<aten::TriangleGroupMesh>();
+
+        const auto mtrl = ctxt.GetMaterialInstance(target_mtrl_id);
+        mesh->SetMaterial(mtrl);
+
+        for (size_t i = 0; i < TriangleIndices.size(); i += 3)
+        {
+            aten::TriangleParameter tri;
+            tri.idx[0] = TriangleIndices[i] + triangle_index_offset;
+            tri.idx[1] = TriangleIndices[i + 1] + triangle_index_offset;
+            tri.idx[2] = TriangleIndices[i + 2] + triangle_index_offset;
+            tri.mtrlid = target_mtrl_id;
+            tri.mesh_id = mesh->get_mesh_id();
+            tri.needNormal = true;
+
+            auto face = ctxt.CreateTriangle(tri);
+
+            mesh->AddFace(face);
         }
 
+        auto obj = aten::TransformableFactory::createObject(ctxt);
+        obj->appendShape(mesh);
 
+        aten::aabb bbox(
+            aten::vec3(bbox_min[0], bbox_min[1], bbox_min[2]),
+            aten::vec3(bbox_max[0], bbox_max[1], bbox_max[2]));
+        obj->setBoundingBox(bbox);
+
+        return obj;
     }
 }

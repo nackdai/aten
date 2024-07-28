@@ -18,6 +18,11 @@
 #include "texture/texture.h"
 #include "visualizer/GeomDataBuffer.h"
 
+#ifndef NANOVDB_NANOVDB_H_HAS_BEEN_INCLUDED
+namespace nanovdb {
+    class FloatGrid;
+}
+#endif
 
 namespace AT_NAME {
     class triangle;
@@ -27,7 +32,6 @@ namespace AT_NAME {
 namespace aten
 {
     class transformable;
-    class Grid;
 
     /**
      * @brief Scene context.
@@ -117,6 +121,15 @@ namespace aten
         const aten::ObjectParameter& GetObject(uint32_t idx) const noexcept;
 
         /**
+         * @brief Get number of registered objects.
+         * @return Number of registered objects.
+         */
+        size_t GetObjectNum() const
+        {
+            return transformables_.size();
+        }
+
+        /**
          * @brief Get the material parameter by index.
          * @param[in] idx Index to the material parameter.
          * @return Material parameter.
@@ -127,17 +140,27 @@ namespace aten
         }
 
         /**
+         * @brief Get number of registered materials.
+         * @return Number of registered materials.
+         */
+        size_t GetMaterialNum() const noexcept
+        {
+            return materials_.size();
+        }
+
+        /**
          * @brief Get the volumetric grid.
-         * @param[in] idx Indexto the voumetric grid.
+         * @param[in] idx Index to the voumetric grid.
          * @return Voumetric grid.
          */
-        const aten::Grid* GetGrid(int32_t idx) const noexcept
-        {
-            if (0 <= idx && idx < grids_.size()) {
-                return grids_[idx];
-            }
-            return nullptr;
-        }
+        nanovdb::FloatGrid* GetGrid(int32_t idx) const noexcept;
+
+        /**
+         * @brief Registerd the volumetric grid.
+         * @param[in] grid Volumetric grid to be registered.
+         * @return Index to the registered volumetric grid.
+         */
+        int32_t AddGrid(nanovdb::FloatGrid* grid);
 
         /**
          * @brief Get the triangle parameter by index.
@@ -479,6 +502,7 @@ namespace aten
             textures_.clear();
             matrices_.clear();
             lights_.clear();
+            grids_.clear();
         }
 
         /**
@@ -523,7 +547,7 @@ namespace aten
         std::vector<std::shared_ptr<aten::texture>> textures_;
         std::vector<std::shared_ptr<aten::mat4>> matrices_;
         std::vector<std::shared_ptr<AT_NAME::Light>> lights_;
-        std::vector<aten::Grid*> grids_;
+        std::vector<nanovdb::FloatGrid*> grids_;
 
         bool is_window_initialized_{ false };
 

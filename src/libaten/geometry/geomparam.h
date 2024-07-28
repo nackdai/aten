@@ -50,9 +50,9 @@ namespace aten
         int32_t light_id{ -1 };     ///< If there is an associated light, index to light.
 
         struct {
-            vec3 center{ float(0) }; ///< Center of sphere.
-            float radius{ 0 };       ///< Radius of sphere.
-            int32_t mtrl_id{ -1 };  ///< Index of material.
+            vec3 center{ float(0) };    ///< Center of sphere.
+            float radius{ 0 };          ///< Radius of sphere.
+            int32_t mtrl_id{ -1 };      ///< Index of material.
         } sphere;
 
         ObjectParameter() = default;
@@ -67,15 +67,15 @@ namespace aten
         union {
             aten::vec4 v0;
             struct {
-                int32_t idx[3];     ///< Vertex index.
-                float area;          ///< Triangle area.
+                int32_t idx[3]; ///< Vertex index.
+                float area;     ///< Triangle area.
             };
         };
 
         union {
             aten::vec4 v1;
             struct{
-                int32_t needNormal; ///< Flag to describe if normal needs to be computed online.
+                int32_t needNormal; ///< Flag to describe if normal needs to be computed on the fly.
                 int32_t mtrlid;     ///< Material id.
                 int32_t mesh_id;    ///< Mesh id. (Mesh = Triangle group to have same material).
                 float padding;

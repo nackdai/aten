@@ -1,5 +1,7 @@
 #include <type_traits>
 
+#include <nanovdb/NanoVDB.h>
+
 #include "scene/host_scene_context.h"
 #include "geometry/triangle.h"
 #include "geometry/transformable.h"
@@ -307,5 +309,20 @@ namespace aten
     size_t context::GetLightNum() const
     {
         return lights_.size();
+    }
+
+    nanovdb::FloatGrid* context::GetGrid(int32_t idx) const noexcept
+    {
+        if (0 <= idx && idx < grids_.size()) {
+            return grids_[idx];
+        }
+        return nullptr;
+    }
+
+    int32_t context::AddGrid(nanovdb::FloatGrid* grid)
+    {
+        grids_.emplace_back(grid);
+        int32_t ret = static_cast<int32_t>(grids_.size() - 1);
+        return ret;
     }
 }

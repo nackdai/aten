@@ -424,7 +424,7 @@ namespace aten
             obj->setBoundingBox(aten::aabb(shapemin, shapemax));
 
             // TODO
-            // If we need to manager if the same tagged object exist, should we register it here?
+            // If we need to manage if the same tagged object exist, should we register it here?
 
             objs.push_back(std::move(obj));
         }

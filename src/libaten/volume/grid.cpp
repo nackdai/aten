@@ -1,4 +1,10 @@
+#pragma warning(push)
+#pragma warning(disable:4146)
 #include <nanovdb/NanoVDB.h>
+#include <nanovdb/util/HDDA.h>
+#include <nanovdb/util/IO.h>
+#include <nanovdb/util/Ray.h>
+#pragma warning(pop)
 
 #include "geometry/transformable_factory.h"
 #include "scene/host_scene_context.h"
@@ -118,5 +124,40 @@ namespace aten {
         obj->setBoundingBox(bbox);
 
         return obj;
+    }
+
+    namespace _aten_nvdb_detail {
+        using Vec3F = nanovdb::Vec3<float>;
+        using RayF = nanovdb::Ray<float>;
+    }
+
+    AT_DEVICE_API std::optional<aten::tuple<float, float>> Grid::ClipRayByGridBoundingBox(
+        const aten::ray& ray,
+        const nanovdb::FloatGrid* grid)
+    {
+        _aten_nvdb_detail::RayF world_ray(
+            _aten_nvdb_detail::Vec3F(ray.org.x, ray.org.y, ray.org.z),
+            _aten_nvdb_detail::Vec3F(ray.dir.x, ray.dir.y, ray.dir.z));
+
+        _aten_nvdb_detail::RayF index_ray = world_ray.worldToIndexF(*grid);
+
+        const auto tree_index_bbox = grid->tree().bbox();
+
+        // Clip to bounds.
+        if (index_ray.clip(tree_index_bbox)) {
+            return aten::make_tuple(index_ray.t0(), index_ray.t1());
+        }
+
+        return std::nullopt;
+    }
+
+    AT_DEVICE_API float Grid::GetValueInGrid(const aten::vec3& p, const nanovdb::FloatGrid* grid)
+    {
+        // TODO:
+        // tri linear sampling etc...
+        const auto index = grid->worldToIndexF(_aten_nvdb_detail::Vec3F(p.x, p.y, p.z));
+        auto accessor = grid->tree().getAccessor();
+        const auto value = accessor.getValue(nanovdb::Coord::Floor(index));
+        return value;
     }
 }

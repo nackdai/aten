@@ -167,6 +167,7 @@ namespace aten
         float sigma_a{ 0.0F };
         float sigma_s{ 0.0F };
         int32_t grid_idx{ -1 };
+        float majorant{ -1.0F };
         aten::vec3 le;
     };
 

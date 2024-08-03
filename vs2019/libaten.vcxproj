@@ -369,6 +369,7 @@
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />
     <ClCompile Include="..\src\libaten\volume\grid.cpp" />
+    <ClCompile Include="..\src\libaten\volume\medium.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\atrous_final_fs.glsl" />

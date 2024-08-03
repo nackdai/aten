@@ -1,8 +1,10 @@
 #pragma once
 
-#include <vector>
+#include <optional>
 
 #include "defs.h"
+#include "misc/tuple.h"
+#include "geometry/PolygonObject.h"
 
 #ifndef NANOVDB_NANOVDB_H_HAS_BEEN_INCLUDED
 namespace nanovdb {
@@ -25,4 +27,15 @@ namespace aten {
         aten::context& ctxt,
         const int32_t target_mtrl_id,
         const nanovdb::FloatGrid* grid);
+}
+
+namespace AT_NAME {
+    class Grid {
+    public:
+        static AT_DEVICE_API std::optional<aten::tuple<float, float>> ClipRayByGridBoundingBox(
+            const aten::ray& ray,
+            const nanovdb::FloatGrid* grid);
+
+        static AT_DEVICE_API float GetValueInGrid(const aten::vec3& p, const nanovdb::FloatGrid* grid);
+    };
 }

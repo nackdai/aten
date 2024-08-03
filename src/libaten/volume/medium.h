@@ -9,10 +9,24 @@
 #include "sampler/sampler.h"
 #include "volume/phase_function.h"
 
+#ifndef NANOVDB_NANOVDB_H_HAS_BEEN_INCLUDED
+namespace nanovdb {
+    class FloatGrid;
+}
+#endif
+
 namespace AT_NAME {
     class HomogeniousMedium {
     public:
-        static AT_DEVICE_API std::tuple<bool, aten::ray> Sample(
+        HomogeniousMedium() = delete;
+        ~HomogeniousMedium() = delete;
+
+        HomogeniousMedium(const HomogeniousMedium&) = delete;
+        HomogeniousMedium(HomogeniousMedium&&) = delete;
+        HomogeniousMedium& operator=(const HomogeniousMedium&) = delete;
+        HomogeniousMedium& operator=(HomogeniousMedium&&) = delete;
+
+        static AT_DEVICE_API aten::tuple<bool, aten::ray> Sample(
             AT_NAME::PathThroughput& throughput,
             AT_NAME::sampler& sampler,
             const aten::ray& curr_ray,
@@ -131,5 +145,39 @@ namespace AT_NAME {
 
             return mtrl;
         }
+    };
+
+    class HeterogeneousMedium {
+    public:
+        HeterogeneousMedium() = delete;
+        ~HeterogeneousMedium() = delete;
+
+        HeterogeneousMedium(const HeterogeneousMedium&) = delete;
+        HeterogeneousMedium(HeterogeneousMedium&&) = delete;
+        HeterogeneousMedium& operator=(const HeterogeneousMedium&) = delete;
+        HeterogeneousMedium& operator=(HeterogeneousMedium&&) = delete;
+
+        template <template<class> class NanoVdbBuildTraits, class NanoVdbHandle>
+        static auto EvalMajorant(
+            NanoVdbHandle& handle,
+            nanovdb::FloatGrid* grid,
+            const float sigma_a, const float sigma_s)
+            -> std::enable_if_t<NanoVdbBuildTraits<typename NanoVdbHandle::BufferType>::hasDeviceDual, float>
+        {
+            return EvalMajorant(grid, sigma_a, sigma_s);
+        }
+
+        static AT_DEVICE_API aten::tuple<bool, aten::ray> Sample(
+            AT_NAME::PathThroughput& throughput,
+            AT_NAME::sampler& sampler,
+            const aten::ray& curr_ray,
+            const aten::MediumParameter& param,
+            nanovdb::FloatGrid* grid,
+            const float min_s, const float max_s);
+
+    private:
+        static float EvalMajorant(
+            nanovdb::FloatGrid* grid,
+            const float sigma_a, const float sigma_s);
     };
 }

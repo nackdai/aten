@@ -795,6 +795,9 @@
     <ClCompile Include="..\src\libaten\volume\grid.cpp">
       <Filter>volume</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\volume\medium.cpp">
+      <Filter>volume</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\tonemap_fs.glsl">

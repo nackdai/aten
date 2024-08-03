@@ -2,7 +2,9 @@
 
 #include <stack>
 
+#include "camera/camera.h"
 #include "material/material.h"
+#include "math/mat4.h"
 #include "math/vec3.h"
 #include "math/vec4.h"
 #include "misc/stack.h"

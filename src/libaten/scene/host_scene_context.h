@@ -17,12 +17,7 @@
 #include "misc/type_traits.h"
 #include "texture/texture.h"
 #include "visualizer/GeomDataBuffer.h"
-
-#ifndef NANOVDB_NANOVDB_H_HAS_BEEN_INCLUDED
-namespace nanovdb {
-    class FloatGrid;
-}
-#endif
+#include "volume/aten_nanovdb_defs.h"
 
 namespace AT_NAME {
     class triangle;

@@ -9,11 +9,7 @@
 #include "sampler/sampler.h"
 #include "volume/phase_function.h"
 
-#ifndef NANOVDB_NANOVDB_H_HAS_BEEN_INCLUDED
-namespace nanovdb {
-    class FloatGrid;
-}
-#endif
+#include "aten_nanovdb_defs.h"
 
 namespace AT_NAME {
     class HomogeniousMedium {
@@ -157,15 +153,9 @@ namespace AT_NAME {
         HeterogeneousMedium& operator=(const HeterogeneousMedium&) = delete;
         HeterogeneousMedium& operator=(HeterogeneousMedium&&) = delete;
 
-        template <template<class> class NanoVdbBuildTraits, class NanoVdbHandle>
-        static auto EvalMajorant(
-            NanoVdbHandle& handle,
+        static float EvalMajorant(
             nanovdb::FloatGrid* grid,
-            const float sigma_a, const float sigma_s)
-            -> std::enable_if_t<NanoVdbBuildTraits<typename NanoVdbHandle::BufferType>::hasDeviceDual, float>
-        {
-            return EvalMajorant(grid, sigma_a, sigma_s);
-        }
+            const float sigma_a, const float sigma_s);
 
         static AT_DEVICE_API aten::tuple<bool, aten::ray> Sample(
             AT_NAME::PathThroughput& throughput,
@@ -174,10 +164,5 @@ namespace AT_NAME {
             const aten::MediumParameter& param,
             nanovdb::FloatGrid* grid,
             const float min_s, const float max_s);
-
-    private:
-        static float EvalMajorant(
-            nanovdb::FloatGrid* grid,
-            const float sigma_a, const float sigma_s);
     };
 }

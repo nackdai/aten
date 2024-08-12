@@ -6,11 +6,7 @@
 #include "misc/tuple.h"
 #include "geometry/PolygonObject.h"
 
-#ifndef NANOVDB_NANOVDB_H_HAS_BEEN_INCLUDED
-namespace nanovdb {
-    class FloatGrid;
-}
-#endif
+#include "aten_nanovdb_defs.h"
 
 namespace aten {
     class context;

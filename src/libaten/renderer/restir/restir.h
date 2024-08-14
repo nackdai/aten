@@ -29,7 +29,7 @@ namespace aten
             scene* scene,
             camera* camera) override;
 
-        void SetMotionDepthBuffer(aten::FBO& fbo, int32_t idx) override;
+        void SetMotionDepthBuffer(aten::FBO& fbo, int32_t idx);
 
     private:
         void Initialize(

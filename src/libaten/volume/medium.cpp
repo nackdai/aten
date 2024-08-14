@@ -60,9 +60,16 @@ namespace AT_NAME {
         AT_NAME::sampler& sampler,
         const aten::ray& ray,
         const aten::MediumParameter& param,
-        nanovdb::FloatGrid* grid,
-        const float min_s, const float max_s)
+        nanovdb::FloatGrid* grid)
     {
+        auto clip_info = aten::Grid::ClipRayByGridBoundingBox(ray, grid);
+        if (!clip_info.has_value()) {
+            return aten::make_tuple(false, ray);
+        }
+
+        float min_s, max_s;
+        aten::tie(min_s, max_s) = clip_info.value();
+
         AT_ASSERT(param.majorant > 0.0F);
 
         // TODO

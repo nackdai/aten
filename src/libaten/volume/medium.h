@@ -162,7 +162,6 @@ namespace AT_NAME {
             AT_NAME::sampler& sampler,
             const aten::ray& curr_ray,
             const aten::MediumParameter& param,
-            nanovdb::FloatGrid* grid,
-            const float min_s, const float max_s);
+            nanovdb::FloatGrid* grid);
     };
 }

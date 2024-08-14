@@ -56,11 +56,6 @@ namespace aten
             return frame_count_;
         }
 
-        virtual void SetMotionDepthBuffer(aten::FBO& fbo, int32_t idx)
-        {
-            // Nothing is done.
-        }
-
         void SetEnableEnvmap(bool b)
         {
             enable_envmap_ = b;

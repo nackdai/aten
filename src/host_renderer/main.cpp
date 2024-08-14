@@ -30,6 +30,9 @@ public:
     HostRendererApp operator=(const HostRendererApp&) = delete;
     HostRendererApp operator=(HostRendererApp&&) = delete;
 
+    template <class T>
+    using HasMemberFunc = decltype(std::declval<T>().SetMotionDepthBuffer);
+
     bool Init()
     {
         visualizer_ = aten::visualizer::init(WIDTH, HEIGHT);
@@ -51,7 +54,7 @@ public:
             "../shader/simple3d_vs.glsl",
             "../shader/simple3d_fs.glsl");
 
-        if constexpr (std::is_member_function_pointer_v<decltype(&decltype(renderer_)::SetMotionDepthBuffer)>) {
+        if constexpr (aten::is_detected<HasMemberFunc, decltype(renderer_)>::value) {
             fbo_.asMulti(2);
             fbo_.init(
                 WIDTH, HEIGHT,
@@ -124,6 +127,21 @@ public:
         }
     }
 
+    template <class Renderer>
+    void SetMotionDepthBuffer()
+    {
+        if constexpr (aten::is_detected<HasMemberFunc, decltype(renderer_)>::value) {
+            rasterizer_.drawSceneForGBuffer(
+                renderer_.GetFrameCount(),
+                ctxt_,
+                &scene_,
+                &camera_,
+                fbo_);
+
+            renderer_.SetMotionDepthBuffer(fbo_, 1);
+        }
+    }
+
     bool Run()
     {
         // update();
@@ -140,16 +158,7 @@ public:
             dst.buffer = &buffer_;
         }
 
-        if constexpr (std::is_member_function_pointer_v<decltype(&decltype(renderer_)::SetMotionDepthBuffer)>) {
-            rasterizer_.drawSceneForGBuffer(
-                renderer_.GetFrameCount(),
-                ctxt_,
-                &scene_,
-                &camera_,
-                fbo_);
-
-            renderer_.SetMotionDepthBuffer(fbo_, 1);
-        }
+        SetMotionDepthBuffer<decltype(renderer_)>();
 
         const auto frame_cnt = renderer_.GetFrameCount();
 
@@ -210,7 +219,8 @@ private:
 
     std::shared_ptr<aten::texture> envmap_;
 
-    aten::VolumePathTracing renderer_;
+    aten::PathTracing renderer_;
+    //aten::VolumePathTracing renderer_;
     //aten::SVGFRenderer renderer_;
     //aten::ReSTIRRenderer renderer_;
 

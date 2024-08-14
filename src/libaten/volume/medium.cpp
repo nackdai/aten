@@ -25,23 +25,26 @@ namespace AT_NAME {
     }
 
     namespace _nanovdb_detail {
-        inline AT_DEVICE_API float GetValueFromGrid(nanovdb::FloatGrid* grid, const aten::ray& ray)
+        inline AT_DEVICE_API float GetValueInGrid(nanovdb::FloatGrid* grid, const aten::ray& ray, float t)
         {
-            using Vec3F = nanovdb::Vec3<float>;
-            using RayF = nanovdb::Ray<float>;
+            // TODO
+            // If the advanced ray can be passed, no need to advance the ray with t.
 
-            RayF world_ray(
-                Vec3F(ray.org.x, ray.org.y, ray.org.z),
-                Vec3F(ray.dir.x, ray.dir.y, ray.dir.z));
+            nanovdb::Ray<float> world_ray(
+                nanovdb::Vec3f(ray.org.x, ray.org.y, ray.org.z),
+                nanovdb::Vec3f(ray.dir.x, ray.dir.y, ray.dir.z));
 
-            RayF index_ray = world_ray.worldToIndexF(*grid);
+            auto world_pos = world_ray(t);
 
-            auto accessor = grid->tree().getAccessor();
+            auto index_pos = grid->worldToIndexF(world_pos);
 
-            // NOTE:
-            // It is assumed that "ray" is already advanced to the position to get the value.
-            // It means no need to advance anymore. So, specify 0 to get the current position from "index_ray".
-            const auto value = accessor.getValue(nanovdb::Coord::Floor(index_ray(0)));
+            auto accessor = grid->getAccessor();
+
+            // TODO
+            // Tri linear sampling.
+            //nanovdb::TrilinearSampler<decltype(accessor)> sampler(accessor);
+
+            const auto value = accessor.getValue(nanovdb::Coord::Floor(index_pos));
             return value;
         }
 
@@ -62,12 +65,17 @@ namespace AT_NAME {
     {
         AT_ASSERT(param.majorant > 0.0F);
 
+        // TODO
+        // Not support absorption yet.
+        AT_ASSERT(param.sigma_a == 0.0F);
+
         auto curr_ray = ray;
         auto sample_s = min_s;
 
         while (true) {
             const auto u = sampler.nextSample();
-            sample_s += -aten::log(1.0F - u) / param.majorant;
+            const auto ds = -aten::log(1.0F - u) / param.majorant;
+            sample_s += ds;
 
             // Hit volume boundary.
             if (sample_s >= max_s) {
@@ -77,11 +85,13 @@ namespace AT_NAME {
                 return aten::make_tuple(false, next_ray);
             }
 
+            // Compute based on the current ray in every loop.
+            // So, it's ok to adovance the ray origin with sampled s not delta s.
             aten::ray next_ray{ curr_ray };
             next_ray.org += next_ray.dir * sample_s;
 
             // Compute sigma_a, sigma_s, sigma_n at this position.
-            const auto density = _nanovdb_detail::GetValueFromGrid(grid, next_ray);
+            const auto density = _nanovdb_detail::GetValueInGrid(grid, curr_ray, sample_s);
             const auto sigma_a_at = param.sigma_a * density;
             const auto sigma_s_at = param.sigma_s * density;
             const auto sigma_n = param.majorant - sigma_a_at - sigma_s_at;
@@ -110,7 +120,7 @@ namespace AT_NAME {
                 }
             }
 
-            const auto tr = HomogeniousMedium::Transmittance(param.majorant, sample_s);
+            const auto tr = HomogeniousMedium::Transmittance(param.majorant, ds);
             const auto pdf = param.majorant * tr;
 
             if (track_mode == _nanovdb_detail::TrackMode::Absorption) {

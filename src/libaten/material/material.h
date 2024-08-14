@@ -49,6 +49,9 @@ namespace aten
         CarPaint,
         Disney,
 
+        // TODO:
+        // Currently, if MaterialTypeMax is specified, it is treated as non subsurface volumetric material.
+        // We may need to introduce the specific enum value.
         MaterialTypeMax,
     };
 

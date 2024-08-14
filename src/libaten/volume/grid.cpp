@@ -126,26 +126,24 @@ namespace aten {
         return obj;
     }
 
-    namespace _aten_nvdb_detail {
-        using Vec3F = nanovdb::Vec3<float>;
-        using RayF = nanovdb::Ray<float>;
-    }
-
     AT_DEVICE_API std::optional<aten::tuple<float, float>> Grid::ClipRayByGridBoundingBox(
         const aten::ray& ray,
         const nanovdb::FloatGrid* grid)
     {
-        _aten_nvdb_detail::RayF world_ray(
-            _aten_nvdb_detail::Vec3F(ray.org.x, ray.org.y, ray.org.z),
-            _aten_nvdb_detail::Vec3F(ray.dir.x, ray.dir.y, ray.dir.z));
+        nanovdb::Ray<float> world_ray(
+            nanovdb::Vec3f(ray.org.x, ray.org.y, ray.org.z),
+            nanovdb::Vec3f(ray.dir.x, ray.dir.y, ray.dir.z));
 
-        _aten_nvdb_detail::RayF index_ray = world_ray.worldToIndexF(*grid);
+        nanovdb::BBoxR test_bbox(nanovdb::Vec3d(-10, -10, -10), nanovdb::Vec3d(10, 10, 10));
+        nanovdb::Ray<float> test_ray(
+            nanovdb::Vec3f(0, 0, 9),
+            nanovdb::Vec3f(0, 0, -1));
+        test_ray.clip(test_bbox);
 
-        const auto tree_index_bbox = grid->tree().bbox();
-
+        const auto bbox = grid->worldBBox();
         // Clip to bounds.
-        if (index_ray.clip(tree_index_bbox)) {
-            return aten::make_tuple(index_ray.t0(), index_ray.t1());
+        if (world_ray.clip(bbox)) {
+            return aten::make_tuple(world_ray.t0(), world_ray.t1());
         }
 
         return std::nullopt;
@@ -155,8 +153,8 @@ namespace aten {
     {
         // TODO:
         // tri linear sampling etc...
-        const auto index = grid->worldToIndexF(_aten_nvdb_detail::Vec3F(p.x, p.y, p.z));
-        auto accessor = grid->tree().getAccessor();
+        const auto index = grid->worldToIndexF(nanovdb::Vec3f(p.x, p.y, p.z));
+        auto accessor = grid->getAccessor();
         const auto value = accessor.getValue(nanovdb::Coord::Floor(index));
         return value;
     }

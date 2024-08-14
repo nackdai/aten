@@ -302,7 +302,7 @@ namespace AT_NAME
             // Regarding punctual light, nothing to sample.
             // It means there is nothing to convert pdf.
             // TODO: IBL...
-            if (!light_sample.attrib.isSingular || !light_sample.attrib.isIBL) {
+            if (!light_sample.attrib.isInfinite) {
                 // Convert path PDF to NEE PDF.
                 // i.e. Convert solid angle PDF to area PDF.
                 // NEE samples the point on the light, and the point sampling means the PDF is area.
@@ -315,7 +315,7 @@ namespace AT_NAME
                 ? 1.0f
                 : _detail::ComputeBalanceHeuristic(light_sample.pdf * light_select_prob, path_pdf);
 
-            const auto G = light_sample.attrib.isSingular || light_sample.attrib.isInfinite
+            const auto G = light_sample.attrib.isInfinite
                 ? cosShadow * cosLight
                 : cosShadow * cosLight / dist2;
 

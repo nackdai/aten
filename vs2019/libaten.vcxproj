@@ -355,6 +355,7 @@
     <ClCompile Include="..\src\libaten\renderer\restir\restir.cpp" />
     <ClCompile Include="..\src\libaten\renderer\svgf\svgf.cpp" />
     <ClCompile Include="..\src\libaten\renderer\volume\volume_pathtracing.cpp" />
+    <ClCompile Include="..\src\libaten\renderer\volume\volume_pathtracing_grid.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sampler.cpp" />
     <ClCompile Include="..\src\libaten\scene\hitable.cpp" />
     <ClCompile Include="..\src\libaten\scene\host_scene_context.cpp" />

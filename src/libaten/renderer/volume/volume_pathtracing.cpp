@@ -46,11 +46,22 @@ namespace aten
             if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
                 path_host_.paths.attrib[idx].isHit = true;
 
-                can_update_depth = nee(
-                    idx,
-                    path_host_.paths, ctxt, rays_.data(),
-                    isect, scene,
-                    m_rrDepth, depth);
+                can_update_depth = true;
+
+                if (is_render_grid_) {
+                    can_update_depth = ShadeWithGrid(
+                        idx,
+                        path_host_.paths, ctxt, rays_.data(),
+                        isect, scene,
+                        m_rrDepth, depth);
+                }
+                else {
+                    can_update_depth = nee(
+                        idx,
+                        path_host_.paths, ctxt, rays_.data(),
+                        isect, scene,
+                        m_rrDepth, depth);
+                }
 
                 willContinue = !path_host_.paths.attrib[idx].isTerminate;
             }

@@ -59,23 +59,19 @@ namespace aten
         bool is_scattered = false;
         aten::ray next_ray(rec.p, ray.dir);
 
-        auto* grid = (mtrl.is_medium && mtrl.medium.grid_idx >= 0)
-            ? ctxt.GetGrid(mtrl.medium.grid_idx)
-            : nullptr;
+        if (AT_NAME::HasMedium(paths.throughput[idx].mediums)) {
+            const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
+            auto* grid = (mtrl.is_medium && mtrl.medium.grid_idx >= 0)
+                ? ctxt.GetGrid(mtrl.medium.grid_idx)
+                : nullptr;
 
-        if (grid) {
-            auto clip_info = aten::Grid::ClipRayByGridBoundingBox(ray, grid);
-            if (clip_info.has_value()) {
-                float t0, t1;
-                aten::tie(t0, t1) = clip_info.value();
-
+            if (grid) {
                 aten::tie(is_scattered, next_ray) = AT_NAME::HeterogeneousMedium::Sample(
                     paths.throughput[idx],
                     paths.sampler[idx],
                     ray,
                     mtrl.medium,
-                    grid,
-                    t0, t1);
+                    grid);
 
                 ray = next_ray;
             }

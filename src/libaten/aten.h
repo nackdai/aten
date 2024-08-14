@@ -102,4 +102,5 @@
 
 #include "os/system.h"
 
+#include "volume/grid.h"
 #include "volume/medium.h"

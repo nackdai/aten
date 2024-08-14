@@ -19,6 +19,11 @@ namespace aten
             scene* scene,
             camera* camera) override;
 
+        void EnableRenderGrid(bool enable)
+        {
+            is_render_grid_ = enable;
+        }
+
     protected:
         static bool shade(
             int32_t idx,
@@ -75,5 +80,7 @@ namespace aten
 
         // Depth to compute russinan roulette.
         int32_t m_rrDepth{ 1 };
+
+        bool is_render_grid_{ false };
     };
 }

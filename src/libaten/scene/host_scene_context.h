@@ -5,6 +5,7 @@
 #include <iterator>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <variant>
 #include <vector>
 
@@ -22,6 +23,7 @@
 namespace AT_NAME {
     class triangle;
     class Light;
+    class scene;
 }
 
 namespace aten
@@ -510,6 +512,14 @@ namespace aten
             return GetAsset(textures_, name);
         }
 
+        void UpdateSceneBoundingBox(const AT_NAME::scene& scene);
+
+        const aten::aabb& GetSceneBoundingBox() const
+        {
+            AT_ASSERT(scene_bounding_box_.IsValid());
+            return scene_bounding_box_;
+        }
+
     private:
         /**
          * @brief Add a texture instance.
@@ -543,6 +553,8 @@ namespace aten
         std::vector<std::shared_ptr<aten::mat4>> matrices_;
         std::vector<std::shared_ptr<AT_NAME::Light>> lights_;
         std::vector<nanovdb::FloatGrid*> grids_;
+
+        aten::aabb scene_bounding_box_;
 
         bool is_window_initialized_{ false };
 

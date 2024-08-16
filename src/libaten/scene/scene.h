@@ -22,8 +22,6 @@ namespace AT_NAME {
 
         void add(const std::shared_ptr<aten::hitable>& s)
         {
-            m_aabb.merge(s->getBoundingbox());
-
             m_list.push_back(s);
         }
 
@@ -140,16 +138,11 @@ namespace AT_NAME {
             std::function<bool(const std::shared_ptr<aten::hitable>&)> funcIfDraw,
             const aten::context& ctxt) const;
 
-        const aten::aabb& getBoundingBox() const
-        {
-            return m_aabb;
-        }
+        virtual const aten::aabb& GetBoundingBox() const = 0;
 
     protected:
         std::vector<std::shared_ptr<aten::hitable>> m_list;
 
         std::shared_ptr<ImageBasedLight> m_ibl;
-
-        aten::aabb m_aabb;
     };
 }

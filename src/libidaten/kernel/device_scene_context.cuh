@@ -36,6 +36,8 @@ namespace idaten {
         cudaTextureObject_t* textures{ nullptr };
         int32_t envmapIdx{ -1 };
 
+        aten::aabb scene_bounding_box;
+
         __device__ const float4 GetPosition(uint32_t idx) const noexcept
         {
 #ifdef __CUDA_ARCH__
@@ -111,6 +113,11 @@ namespace idaten {
         __device__ cudaTextureObject_t GetTexture(int32_t idx) const noexcept
         {
             return textures[idx];
+        }
+
+        __device__ const aten::aabb& GetSceneBoundingBox() const
+        {
+            return scene_bounding_box;
         }
     };
 

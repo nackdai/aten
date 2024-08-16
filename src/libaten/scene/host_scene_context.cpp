@@ -6,6 +6,7 @@
 #include "geometry/triangle.h"
 #include "geometry/transformable.h"
 #include "light/light.h"
+#include "scene/scene.h"
 
 namespace aten
 {
@@ -309,6 +310,11 @@ namespace aten
     size_t context::GetLightNum() const
     {
         return lights_.size();
+    }
+
+    void context::UpdateSceneBoundingBox(const AT_NAME::scene& scene)
+    {
+        scene_bounding_box_ = scene.GetBoundingBox();
     }
 
     nanovdb::FloatGrid* context::GetGrid(int32_t idx) const noexcept

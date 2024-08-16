@@ -1140,7 +1140,7 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
 
     constexpr int32_t step = 5;
 
-    const auto& aabb = scene->getBoundingBox();
+    const auto& aabb = scene->GetBoundingBox();
     const auto& min_pos = aabb.minPos();
     const auto& max_pos = aabb.maxPos();
 

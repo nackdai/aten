@@ -146,6 +146,8 @@ public:
     {
         // update();
 
+        ctxt_.UpdateSceneBoundingBox(scene_);
+
         camera_.update();
 
         aten::Destination dst;

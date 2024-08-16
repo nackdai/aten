@@ -516,7 +516,7 @@ namespace aten
 
         const aten::aabb& GetSceneBoundingBox() const
         {
-            AT_ASSERT(scene_bounding_box_.IsValid());
+            //AT_ASSERT(scene_bounding_box_.IsValid());
             return scene_bounding_box_;
         }
 

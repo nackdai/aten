@@ -88,6 +88,13 @@ namespace AT_NAME {
             const float r1 = sampler->nextSample();
             const float r2 = sampler->nextSample();
 
+            // TODO
+            float scene_radius = 10000.0F;
+            const auto& scene_bbox = ctxt.GetSceneBoundingBox();
+            if (scene_bbox.IsValid()) {
+                scene_radius = scene_bbox.ComputeDistanceToCoverBoundingSphere(aten::Deg2Rad(30.0F));
+            }
+
             const auto costheta = aten::sqrt(1 - r1);
             const auto sintheta = aten::sqrt(r1);
 
@@ -101,9 +108,7 @@ namespace AT_NAME {
             const auto u = uv.x;
             const auto v = uv.y;
 
-            // TODO
-            // Sphere size should cover entire scene.
-            result.pos = org + float(100000) * result.dir;
+            result.pos = org + scene_radius * result.dir;
 
             // NOTE:
             // Sphere uniform sampling.

@@ -64,6 +64,11 @@ namespace aten {
             return &m_accel;
         }
 
+        const aten::aabb& GetBoundingBox() const override
+        {
+            return m_accel.GetBoundingBox();
+        }
+
     private:
         ACCEL m_accel;
         std::vector<aten::hitable*> m_tmp;

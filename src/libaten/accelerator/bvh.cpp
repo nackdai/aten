@@ -615,4 +615,9 @@ namespace aten {
             }
         }
     }
+
+    aten::aabb bvh::GetBoundingBox() const
+    {
+        return m_root->getBoundingbox();
+    }
 }

@@ -138,6 +138,12 @@ namespace aten
             aten::hitable::FuncDrawAABB func,
             const aten::mat4& mtx_L2W) override final;
 
+        aten::aabb GetBoundingBox() const override
+        {
+            const auto& root = m_threadedNodes[0][0];
+            return aten::aabb(root.boxmin, root.boxmax);
+        }
+
         /**
          * @brief Update the structure tree.
          */

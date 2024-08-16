@@ -127,6 +127,12 @@ namespace aten {
             AT_ASSERT(false);
         }
 
+        virtual aten::aabb GetBoundingBox() const
+        {
+            AT_ASSERT(false);
+            return aten::aabb();
+        }
+
         struct ResultIntersectTestByFrustum {
             int32_t ep{ -1 };   ///< Entry Point.
             int32_t ex{ -1 };   ///< Layer Id.

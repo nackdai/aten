@@ -44,6 +44,12 @@ namespace AT_NAME {
             result.pos = org + float(100000) * float(0.5) * result.dir;
 
             result.light_color = param.light_color * param.scale * param.luminance;
+
+            // NOTE:
+            // Theoretically this has to be inf.
+            // But, to compute the geometry term with divinding the squared distance without checking the light type,
+            // that the distance to light is 1.0 is helpful.
+            result.dist_to_light = 1.0F;
         }
     };
 }

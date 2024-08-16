@@ -115,6 +115,12 @@ namespace AT_NAME {
             // Sample one point on sphere.
             result.pdf = 1.0f / (4.0f * AT_MATH_PI);
 
+            // NOTE:
+            // Theoretically this has to be inf.
+            // But, to compute the geometry term with divinding the squared distance without checking the light type,
+            // that the distance to light is 1.0 is helpful.
+            result.dist_to_light = 1.0F;
+
             // envmapidx is index to array of textures in context.
             // In GPU, sampleTexture requires texture id of CUDA. So, arguments is different.
             auto envmapidx =

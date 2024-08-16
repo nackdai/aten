@@ -68,6 +68,12 @@ namespace aten
                 aten::abs(o.z) < origin ? o.z + float_scale * normal.z : p_i.z);
         }
 
+        vec3 operator()(const float t) const
+        {
+            auto ret = org + t * dir;
+            return ret;
+        }
+
         vec3 org;
         vec3 dir;
     };

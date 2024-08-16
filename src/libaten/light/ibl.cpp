@@ -310,6 +310,12 @@ namespace AT_NAME {
         result.pos = aten::vec3();
         result.nml = aten::vec3();
 
+        // NOTE:
+        // Theoretically this has to be inf.
+        // But, to compute the geometry term with divinding the squared distance without checking the light type,
+        // that the distance to light is 1.0 is helpful.
+        result.dist_to_light = 1.0F;
+
         return result;
     }
 }

@@ -63,8 +63,21 @@ namespace AT_NAME
         return mtrl.type != aten::MaterialType::MaterialTypeMax && mtrl.is_medium;
     }
 
+    namespace _detail {
+        inline AT_DEVICE_API nanovdb::FloatGrid* GetGrid(
+            const AT_NAME::context& ctxt,
+            const aten::MediumParameter& medium)
+        {
+            auto* grid = medium.grid_idx >= 0
+                ? ctxt.GetGrid(medium.grid_idx)
+                : nullptr;
+            return grid;
+        }
+    }
+
     inline AT_DEVICE_API aten::tuple<bool, float> TraverseShadowRay(
         const AT_NAME::context& ctxt,
+        aten::sampler& sampler,
         const aten::LightSampleResult& light_sample,
         const aten::vec3& start_point,
         const aten::vec3& surface_nml,
@@ -78,9 +91,14 @@ namespace AT_NAME
             : -surface_nml;
         aten::ray ray(start_point, light_sample.dir, nml);
 
+        auto distance_to_light = light_sample.dist_to_light;
+        if (light_sample.attrib.isInfinite) {
+            distance_to_light = length(light_sample.pos - start_point);
+        }
+
         // Need to check if hitting to something closer than light.
         // So, set shorter distance to light.
-        auto t_max = light_sample.dist_to_light - AT_MATH_EPSILON;
+        auto t_max = distance_to_light - AT_MATH_EPSILON;
 
         while (true) {
             aten::Intersection isect;
@@ -108,9 +126,22 @@ namespace AT_NAME
 
                 if (HasMedium(medium_stack)) {
                     const auto& medium = GetCurrentMedium(ctxt, medium_stack);
-                    const auto tr = AT_NAME::HomogeniousMedium::TransmittanceFromMediumParam(
-                        medium,
-                        ray.org, hrec.p);
+                    auto* grid = _detail::GetGrid(ctxt, medium);
+
+                    float tr = 1.0F;
+
+                    if (grid) {
+                        tr = AT_NAME::HeterogeneousMedium::EvaluateTransmittance(
+                            grid, sampler,
+                            medium,
+                            ray.org, hrec.p);
+                    }
+                    else {
+                        tr = AT_NAME::HomogeniousMedium::EvaluateTransmittance(
+                            medium,
+                            ray.org, hrec.p);
+                    }
+
                     transmittance *= tr;
                 }
 
@@ -127,8 +158,22 @@ namespace AT_NAME
                 // Nothing to occlude to light.
                 if (HasMedium(medium_stack)) {
                     const auto& medium = GetCurrentMedium(ctxt, medium_stack);
-                    const auto tr = AT_NAME::HomogeniousMedium::TransmittanceFromMediumParam(
-                        medium, t_max);
+                    auto* grid = _detail::GetGrid(ctxt, medium);
+
+                    const auto end_p = ray(t_max);
+                    float tr = 1.0F;
+
+                    if (grid) {
+                        tr = AT_NAME::HeterogeneousMedium::EvaluateTransmittance(
+                            grid, sampler,
+                            medium,
+                            ray.org, end_p);
+                    }
+                    else {
+                        tr = AT_NAME::HomogeniousMedium::EvaluateTransmittance(
+                            medium,
+                            ray.org, end_p);
+                    }
                     transmittance *= tr;
                 }
 

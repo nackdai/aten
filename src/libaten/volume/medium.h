@@ -50,7 +50,7 @@ namespace AT_NAME {
 
             const auto Pa = sigma_a / sigma_t;
             const auto Ps = 1.0F - Pa;
-            const auto tr = Transmittance(sigma_t, s);
+            const auto tr = EvaluateTransmittance(sigma_t, s);
             const auto pdf = sigma_t * tr;
 
             aten::ray next_ray{ curr_ray };
@@ -88,12 +88,12 @@ namespace AT_NAME {
             return medium.sigma_a + medium.sigma_s;
         }
 
-        static AT_DEVICE_API float Transmittance(const float sigma_t, const float distance)
+        static AT_DEVICE_API float EvaluateTransmittance(const float sigma_t, const float distance)
         {
             return aten::exp(-sigma_t * distance);
         }
 
-        static AT_DEVICE_API float Transmittance(
+        static AT_DEVICE_API float EvaluateTransmittance(
             const float sigma_t,
             const aten::vec3& p1, const aten::vec3& p2)
         {
@@ -101,20 +101,20 @@ namespace AT_NAME {
             return aten::exp(-sigma_t * distance);
         }
 
-        static AT_DEVICE_API float TransmittanceFromMediumParam(
+        static AT_DEVICE_API float EvaluateTransmittance(
             const aten::MediumParameter& medium,
             const aten::vec3& p1, const aten::vec3& p2)
         {
             const auto sigma_t = HomogeniousMedium::sigma_t(medium);
-            return Transmittance(sigma_t, p1, p2);
+            return EvaluateTransmittance(sigma_t, p1, p2);
         }
 
-        static AT_DEVICE_API float TransmittanceFromMediumParam(
+        static AT_DEVICE_API float EvaluateTransmittance(
             const aten::MediumParameter& medium,
             const float distance)
         {
             const auto sigma_t = HomogeniousMedium::sigma_t(medium);
-            return Transmittance(sigma_t, distance);
+            return EvaluateTransmittance(sigma_t, distance);
         }
 
         static AT_DEVICE_API AT_NAME::MaterialParameter CreateMaterialParameter(
@@ -163,5 +163,11 @@ namespace AT_NAME {
             const aten::ray& curr_ray,
             const aten::MediumParameter& param,
             nanovdb::FloatGrid* grid);
+
+        static AT_DEVICE_API float EvaluateTransmittance(
+            nanovdb::FloatGrid* grid,
+            AT_NAME::sampler& sampler,
+            const aten::MediumParameter& medium,
+            const aten::vec3& p1, const aten::vec3& p2);
     };
 }

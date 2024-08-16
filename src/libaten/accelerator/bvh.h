@@ -80,6 +80,8 @@ namespace aten {
             aten::hitable::FuncDrawAABB func,
             const aten::mat4& mtx_L2W) override;
 
+        aten::aabb GetBoundingBox() const override;
+
         /**
          * @brief Update the tree.
          */

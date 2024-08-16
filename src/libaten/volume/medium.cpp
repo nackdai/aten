@@ -127,7 +127,7 @@ namespace AT_NAME {
                 }
             }
 
-            const auto tr = HomogeniousMedium::Transmittance(param.majorant, ds);
+            const auto tr = HomogeniousMedium::EvaluateTransmittance(param.majorant, ds);
             const auto pdf = param.majorant * tr;
 
             if (track_mode == _nanovdb_detail::TrackMode::Absorption) {
@@ -148,5 +148,56 @@ namespace AT_NAME {
                 return aten::make_tuple(true, next_ray);
             }
         }
+    }
+
+    AT_DEVICE_API float HeterogeneousMedium::EvaluateTransmittance(
+        nanovdb::FloatGrid* grid,
+        AT_NAME::sampler& sampler,
+        const aten::MediumParameter& medium,
+        const aten::vec3& p1, const aten::vec3& p2)
+    {
+        aten::ray ray(p1, p2 - p1);
+
+        auto clip_info = aten::Grid::ClipRayByGridBoundingBox(ray, grid);
+        if (!clip_info.has_value()) {
+            return 1.0F;
+        }
+
+        float min_s, max_s;
+        aten::tie(min_s, max_s) = clip_info.value();
+
+        float sample_s = min_s;
+        float transmittance = 1.0F;
+
+        while (true) {
+            const auto u = sampler.nextSample();
+            const auto ds = -aten::log(1.0F - u) / medium.majorant;
+            sample_s += ds;
+
+            if (sample_s > max_s) {
+                break;
+            }
+
+            // Compute based on the current ray in every loop.
+            // So, it's ok to adovance the ray origin with sampled s not delta s.
+            aten::ray next_ray{ ray };
+            next_ray.org += next_ray.dir * sample_s;
+
+            // Compute sigma_a, sigma_s, sigma_n at this position.
+            const auto density = _nanovdb_detail::GetValueInGrid(grid, ray, sample_s);
+            const auto sigma_a_at = medium.sigma_a * density;
+            const auto sigma_s_at = medium.sigma_s * density;
+            const auto sigma_n = medium.majorant - sigma_a_at - sigma_s_at;
+
+            const auto r = sampler.nextSample();
+
+            if (r >= sigma_n / medium.majorant) {
+                return 0.0F;
+            }
+
+            transmittance *= (sigma_n / medium.majorant);
+        }
+
+        return transmittance;
     }
 }

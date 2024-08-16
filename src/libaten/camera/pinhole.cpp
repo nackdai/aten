@@ -251,13 +251,10 @@ namespace AT_NAME {
         const aten::CameraParameter& param,
         const aten::aabb& bounding_box)
     {
-        // https://stackoverflow.com/questions/2866350/move-camera-to-fit-3d-scene
         const auto bbox_center = bounding_box.getCenter();
-        const auto radius = bounding_box.ComputeSphereRadiusToCover();
 
-        // r / d = tan(t/2) <=> d = r / tan(t/2)
         const float theta = aten::Deg2Rad(param.vfov);
-        auto distance = radius / tan(theta / 2);
+        const auto distance = bounding_box.ComputeDistanceToCoverBoundingSphere(theta);
 
         const aten::vec3 tmp_origin(bbox_center.x, bbox_center.y, bbox_center.z * 2);
         const auto dir = normalize(tmp_origin - bbox_center);

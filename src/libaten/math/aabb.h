@@ -1,5 +1,7 @@
 #pragma once
 
+#include <limits>
+
 #include "defs.h"
 #include "math/vec3.h"
 #include "math/vec4.h"
@@ -171,9 +173,9 @@ namespace aten {
             return m_max;
         }
 
-        vec3 getCenter() const
+        AT_HOST_DEVICE_API vec3 getCenter() const
         {
-            vec3 center = (m_min + m_max) * float(0.5);
+            vec3 center = (m_min + m_max) * 0.5F;
             return center;
         }
 
@@ -226,7 +228,7 @@ namespace aten {
             return m_min.x == AT_MATH_INF;
         }
 
-        bool IsValid() const
+        AT_HOST_DEVICE_API bool IsValid() const
         {
             return (aten::cmpGEQ(m_min, m_max) & 0x07) == 0;
         }
@@ -341,15 +343,26 @@ namespace aten {
             return ret;
         }
 
-        float ComputeSphereRadiusToCover() const
+        AT_HOST_DEVICE_API float ComputeSphereRadiusToCover() const
         {
             const auto center = getCenter();
             const auto radius = length(m_max - center);
             return radius;
         }
 
+        AT_HOST_DEVICE_API float ComputeDistanceToCoverBoundingSphere(float theta) const
+        {
+            // https://stackoverflow.com/questions/2866350/move-camera-to-fit-3d-scene
+            const auto radius = ComputeSphereRadiusToCover();
+
+            // r / d = tan(t/2) <=> d = r / tan(t/2)
+            auto distance = radius / tan(theta / 2);
+
+            return distance;
+        }
+
     private:
-        vec3 m_min;
-        vec3 m_max;
+        vec3 m_min{ std::numeric_limits<float>::max() };
+        vec3 m_max{ std::numeric_limits<float>::min() };
     };
 }

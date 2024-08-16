@@ -49,7 +49,7 @@ namespace aten
                 can_update_depth = true;
 
                 if (is_render_grid_) {
-                    can_update_depth = ShadeWithGrid(
+                    can_update_depth = NeeWithGrid(
                         idx,
                         path_host_.paths, ctxt, rays_.data(),
                         isect, scene,
@@ -289,7 +289,8 @@ namespace aten
                     float is_visilbe_to_light = false;
 
                     aten::tie(is_visilbe_to_light, transmittance) = AT_NAME::TraverseShadowRay(
-                        ctxt, light_sample,
+                        ctxt, *sampler,
+                        light_sample,
                         next_ray.org, nml,
                         paths.throughput[idx].mediums,
                         scene);
@@ -372,7 +373,8 @@ namespace aten
                     float is_visilbe_to_light = false;
 
                     aten::tie(is_visilbe_to_light, transmittance) = AT_NAME::TraverseShadowRay(
-                        ctxt, light_sample,
+                        ctxt, *sampler,
+                        light_sample,
                         rec.p, orienting_normal,
                         paths.throughput[idx].mediums,
                         scene);

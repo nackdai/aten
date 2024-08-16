@@ -55,6 +55,16 @@ namespace aten
             int32_t rrDepth,
             int32_t bounce);
 
+        static bool NeeWithGrid(
+            int32_t idx,
+            aten::Path& paths,
+            const context& ctxt,
+            ray* rays,
+            const aten::Intersection& isect,
+            scene* scene,
+            int32_t rrDepth,
+            int32_t bounce);
+
         void radiance(
             int32_t idx,
             int32_t ix, int32_t iy,

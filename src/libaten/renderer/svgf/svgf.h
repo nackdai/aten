@@ -26,14 +26,14 @@ namespace aten
             const context& ctxt,
             Destination& dst,
             scene* scene,
-            camera* camera) override;
+            Camera* camera) override;
 
         virtual void SetMotionDepthBuffer(aten::FBO& fbo, int32_t idx);
 
     private:
         void Initialize(
             const Destination& dst,
-            const camera& camera);
+            const Camera& camera);
 
         void ExecRendering(
             int32_t idx,

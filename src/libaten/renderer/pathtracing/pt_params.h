@@ -195,7 +195,7 @@ namespace AT_NAME {
         {
             mtx_PrevW2V = mtx_W2V;
 
-            camera::ComputeCameraMatrices(camera, mtx_W2V, mtx_V2C);
+            Camera::ComputeCameraMatrices(camera, mtx_W2V, mtx_V2C);
 
             mtx_C2V = mtx_V2C;
             mtx_C2V.invert();

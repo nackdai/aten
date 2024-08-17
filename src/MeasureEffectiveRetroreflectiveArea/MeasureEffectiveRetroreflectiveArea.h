@@ -28,7 +28,7 @@ public:
 
     void VisualizeForDebug(
         const aten::context& ctxt,
-        const aten::camera* cam);
+        const aten::Camera* cam);
 
     aten::vec3 GenRay(float theta, float phi);
 

@@ -5,7 +5,7 @@
 #include "sampler/sampler.h"
 
 namespace aten {
-    class ThinLensCamera : public camera {
+    class ThinLensCamera : public Camera {
     public:
         ThinLensCamera() = default;
         virtual ~ThinLensCamera() = default;
@@ -26,70 +26,70 @@ namespace aten {
             float s, float t,
             sampler* sampler) const override final;
 
-        virtual float hitOnLens(
+        virtual float HitOnLens(
             const ray& r,
-            vec3& posOnLens,
-            vec3& posOnObjectPlane,
-            vec3& posOnImageSensor,
+            vec3& pos_on_lens,
+            vec3& pos_on_object_plane,
+            vec3& pos_on_image_sensor,
             int32_t& x, int32_t& y) const override final;
 
-        virtual float convertImageSensorPdfToScenePdf(
-            float pdfImage,
-            const vec3& hitPoint,
-            const vec3& hitpointNml,
-            const vec3& posOnImageSensor,
-            const vec3& posOnLens,
-            const vec3& posOnObjectPlane) const override final;
+        virtual float ConvertImageSensorPdfToScenePdf(
+            float pdf_image,
+            const vec3& hit_point,
+            const vec3& hit_point_nml,
+            const vec3& pos_on_image_sensor,
+            const vec3& pos_on_lens,
+            const vec3& pos_on_object_plane) const override final;
 
-        virtual float getSensitivity(
-            const vec3& posOnImagesensor,
-            const vec3& posOnLens) const override final;
+        virtual float GetSensitivity(
+            const vec3& pos_on_image_sensor,
+            const vec3& pos_on_lens) const override final;
 
-        virtual float getWdash(
-            const vec3& hitPoint,
-            const vec3& hitpointNml,
-            const vec3& posOnImageSensor,
-            const vec3& posOnLens,
-            const vec3& posOnObjectPlane) const override final;
+        virtual float GetWdash(
+            const vec3& hit_point,
+            const vec3& hit_point_nml,
+            const vec3& pos_on_image_sensor,
+            const vec3& pos_on_lens,
+            const vec3& pos_on_object_plane) const override final;
 
-        virtual bool needRevert() const final
+        virtual bool NeedRevert() const final
         {
             return true;
         }
 
-        virtual bool isPinhole() const final
+        virtual bool IsPinhole() const final
         {
             return false;
         }
 
-        virtual const vec3& getPos() const override final
+        virtual const vec3& GetPos() const override final
         {
             return m_imagesensor.center;
         }
-        virtual const vec3& getDir() const override final
+        virtual const vec3& GetDir() const override final
         {
             return m_imagesensor.dir;
         }
 
-        virtual aten::vec3& getPos() override final
+        virtual aten::vec3& GetPos() override final
         {
             return m_imagesensor.center;
         }
-        virtual aten::vec3& getAt() override final
+        virtual aten::vec3& GetAt() override final
         {
             return m_at;
         }
 
-        void revertRayToPixelPos(
+        void RevertRayToPixelPos(
             const ray& ray,
             int32_t& px, int32_t& py) const override final;
 
-        virtual float getImageSensorWidth() const final
+        virtual float GetImageSensorWidth() const final
         {
             return m_imagesensor.width;
         }
 
-        virtual float getImageSensorHeight() const final
+        virtual float GetImageSensorHeight() const final
         {
             return m_imagesensor.height;
         }

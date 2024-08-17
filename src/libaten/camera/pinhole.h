@@ -15,7 +15,7 @@ namespace AT_NAME
     /**
      * @brief Pinhole camera.
      */
-    class PinholeCamera : public camera
+    class PinholeCamera : public Camera
     {
     public:
         PinholeCamera() = default;
@@ -70,7 +70,7 @@ namespace AT_NAME
         /**
          * @brief Return camera's origin.
          */
-        virtual const aten::vec3 &getPos() const override final
+        virtual const aten::vec3 &GetPos() const override final
         {
             return m_param.origin;
         }
@@ -78,7 +78,7 @@ namespace AT_NAME
         /**
          * @brief Return camera's direction.
          */
-        virtual const aten::vec3 &getDir() const override final
+        virtual const aten::vec3 &GetDir() const override final
         {
             return m_param.dir;
         }
@@ -86,7 +86,7 @@ namespace AT_NAME
         /**
          * @brief Return camera's origin.
          */
-        virtual aten::vec3 &getPos() override final
+        virtual aten::vec3 &GetPos() override final
         {
             return m_param.origin;
         }
@@ -94,7 +94,7 @@ namespace AT_NAME
         /**
          * @brief Return camera's point of gaze
          */
-        virtual aten::vec3 &getAt() override final
+        virtual aten::vec3 &GetAt() override final
         {
             return m_param.lookat;
         }
@@ -104,35 +104,35 @@ namespace AT_NAME
             return m_param;
         }
 
-        virtual float computePixelWidthAtDistance(float distanceFromCamera) const override
+        virtual float ComputePixelWidthAtDistance(float distance_from_camera) const override
         {
-            return camera::computePixelWidthAtDistance(m_param, distanceFromCamera);
+            return Camera::ComputePixelWidthAtDistance(m_param, distance_from_camera);
         }
 
-        void revertRayToPixelPos(
+        void RevertRayToPixelPos(
             const aten::ray &ray,
             int32_t &px, int32_t &py) const override final;
 
-        virtual float convertImageSensorPdfToScenePdf(
-            float pdfImage, // Not used.
-            const aten::vec3 &hitPoint,
-            const aten::vec3 &hitpointNml,
-            const aten::vec3 &posOnImageSensor,
-            const aten::vec3 &posOnLens,
-            const aten::vec3 &posOnObjectPlane) const override final;
+        virtual float ConvertImageSensorPdfToScenePdf(
+            float pdf_image, // Not used.
+            const aten::vec3 &hit_point,
+            const aten::vec3 &hit_point_nml,
+            const aten::vec3 &pos_on_image_sensor,
+            const aten::vec3 &pos_on_lens,
+            const aten::vec3 &pos_on_object_plane) const override final;
 
-        virtual float getWdash(
-            const aten::vec3 &hitPoint,
-            const aten::vec3 &hitpointNml,
-            const aten::vec3 &posOnImageSensor,
-            const aten::vec3 &posOnLens,
-            const aten::vec3 &posOnObjectPlane) const override final;
+        virtual float GetWdash(
+            const aten::vec3 &hit_point,
+            const aten::vec3 &hit_point_nml,
+            const aten::vec3 &pos_on_image_sensor,
+            const aten::vec3 &pos_on_lens,
+            const aten::vec3 &pos_on_object_plane) const override final;
 
-        virtual float hitOnLens(
+        virtual float HitOnLens(
             const aten::ray &r,
-            aten::vec3 &posOnLens,
-            aten::vec3 &posOnObjectPlane,
-            aten::vec3 &posOnImageSensor,
+            aten::vec3 &pos_on_lens,
+            aten::vec3 &pos_on_object_plane,
+            aten::vec3 &pos_on_image_sensor,
             int32_t &x, int32_t &y) const override final;
 
         void FitBoundingBox(const aten::aabb& bounding_box);

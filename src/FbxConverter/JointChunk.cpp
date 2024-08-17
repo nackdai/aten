@@ -131,7 +131,7 @@ bool JointChunk::exportJoint(
             tvJoint,
             tvTransform);
 
-        aten::mat4 mtxRot;
+        aten::mat4 mtx_rot;
 
         sJoint.validParam = 0;
         sJoint.validAnmParam = 0;
@@ -180,7 +180,7 @@ bool JointChunk::exportJoint(
 
                 auto mtx = quat.getMatrix();
 
-                mtxRot = mtx * mtxRot;
+                mtx_rot = mtx * mtx_rot;
 
                 bHasQuatFromAxisRot = true;
             }
@@ -200,7 +200,7 @@ bool JointChunk::exportJoint(
 
         if (bHasQuatFromAxisRot) {
             aten::quat quat;
-            quat.fromMatrix(mtxRot);
+            quat.fromMatrix(mtx_rot);
 
             sJoint.pose.quat = quat;
 

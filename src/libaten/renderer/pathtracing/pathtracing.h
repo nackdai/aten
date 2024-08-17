@@ -17,7 +17,7 @@ namespace aten
             const context& ctxt,
             Destination& dst,
             scene* scene,
-            camera* camera) override;
+            Camera* camera) override;
 
         void registerBlueNoiseTex(const std::shared_ptr<texture>& tex)
         {
@@ -57,7 +57,7 @@ namespace aten
             aten::ShadowRay* shadow_rays,
             int32_t rrDepth,
             int32_t maxDepth,
-            camera* cam,
+            Camera* cam,
             scene* scene,
             aten::BackgroundResource& bg);
 

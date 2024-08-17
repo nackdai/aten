@@ -10,7 +10,7 @@ TEST(camera_test, ComputePixelWidthAtDistanceTest)
     param.width = 1280;
     param.height = 720;
 
-    auto result = aten::camera::computePixelWidthAtDistance(param, 1.0f);
+    auto result = aten::Camera::ComputePixelWidthAtDistance(param, 1.0f);
 
     EXPECT_FLOAT_EQ(result, 0.000473979220);
 }

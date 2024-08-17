@@ -33,7 +33,7 @@ namespace aten
             const context& ctxt,
             Destination& dst,
             scene* scene,
-            camera* camera)
+            Camera* camera)
         {
             context::PinContext(&ctxt);
             OnRender(ctxt, dst, scene, camera);
@@ -66,7 +66,7 @@ namespace aten
             const context& ctxt,
             Destination& dst,
             scene* scene,
-            camera* camera) = 0;
+            Camera* camera) = 0;
 
         static inline bool isInvalidColor(const vec3& v)
         {

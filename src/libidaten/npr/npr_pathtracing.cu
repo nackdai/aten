@@ -109,9 +109,9 @@ namespace npr_kernel {
 
         const auto distance_query_ray_hit = length(hrec_query.p - query_ray.org);
 
-        // disc.center‚Íquery_ray.org‚Éˆê’v‚·‚é.
-        // ‚½‚¾‚µAÅ‰‚¾‚¯‚ÍAquery_ray.org‚ÍƒJƒƒ‰‹“_‚É‚È‚Á‚Ä‚¢‚é‚ªA
-        // accumulated_distance‚ÅƒJƒƒ‰‚Ædisc‚Ì‹——£‚ª‚·‚Å‚ÉŠÜ‚Ü‚ê‚Ä‚¢‚é.
+        // disc.centerï¿½ï¿½query_ray.orgï¿½Éˆï¿½vï¿½ï¿½ï¿½ï¿½.
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½Åï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÍAquery_ray.orgï¿½ÍƒJï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½_ï¿½É‚È‚ï¿½ï¿½Ä‚ï¿½ï¿½é‚ªï¿½A
+        // accumulated_distanceï¿½ÅƒJï¿½ï¿½ï¿½ï¿½ï¿½ï¿½discï¿½Ì‹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å‚ÉŠÜ‚Ü‚ï¿½Ä‚ï¿½ï¿½ï¿½.
         hit_point_distance = length(hrec_query.p - disc.center);
 
         const auto prev_disc = disc;
@@ -298,7 +298,7 @@ namespace idaten {
 
             auto& hitcount = m_compaction.getCount();
 
-            const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_cam, 1);
+            const auto pixel_width = AT_NAME::Camera::ComputePixelWidthAtDistance(m_cam, 1);
 
             if (bounce == 0) {
                 npr_kernel::GenerateSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
@@ -356,7 +356,7 @@ namespace idaten {
 
             auto& hitcount = m_compaction.getCount();
 
-            const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_cam, 1);
+            const auto pixel_width = AT_NAME::Camera::ComputePixelWidthAtDistance(m_cam, 1);
 
             // Sample ray hit miss never happen at 1st bounce.
             npr_kernel::shadeMissSampleRay << <grid, block, 0, m_stream >> > (

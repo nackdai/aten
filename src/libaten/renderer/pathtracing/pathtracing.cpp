@@ -95,7 +95,7 @@ namespace aten
         ShadowRay* shadow_rays,
         int32_t rrDepth,
         int32_t maxDepth,
-        camera* cam,
+        Camera* cam,
         scene* scene,
         aten::BackgroundResource& bg)
     {
@@ -106,7 +106,7 @@ namespace aten
 
         const auto& cam_org = cam->param().origin;
 
-        const auto pixel_width = cam->computePixelWidthAtDistance(1);
+        const auto pixel_width = cam->ComputePixelWidthAtDistance(1);
 
         constexpr size_t SampleRayNum = 8;
 
@@ -429,7 +429,7 @@ namespace aten
         const context& ctxt,
         Destination& dst,
         scene* scene,
-        camera* camera)
+        Camera* camera)
     {
         int32_t width = dst.width;
         int32_t height = dst.height;

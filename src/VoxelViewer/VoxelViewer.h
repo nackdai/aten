@@ -8,22 +8,22 @@ public:
     ~VoxelViewer() = default;
 
 public:
-    // ‰Šú‰».
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
     bool init(
         int32_t width, int32_t height,
         std::string_view pathVS,
         std::string_view pathFS);
 
-    // SBVH‚Ìƒm[ƒh‚©‚çƒ{ƒNƒZƒ‹ƒf[ƒ^‚ğ‚Â‚à‚Ì‚Ì‚İ‚ğæ‚èo‚·.
-    // ‘ÎÛ‚Æ‚È‚é‚Ì‚ÍABottomLayer‚Ì‚P‚Â‚Ì‚İ.
+    // SBVHï¿½Ìƒmï¿½[ï¿½hï¿½ï¿½ï¿½ï¿½{ï¿½Nï¿½Zï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½Â‚ï¿½ï¿½Ì‚Ì‚İ‚ï¿½ï¿½ï¿½ï¿½oï¿½ï¿½.
+    // ï¿½ÎÛ‚Æ‚È‚ï¿½Ì‚ÍABottomLayerï¿½Ì‚Pï¿½Â‚Ì‚ï¿½.
     void bringVoxels(
         const std::vector<aten::ThreadedSbvhNode>& nodes,
         std::vector<std::vector<aten::ThreadedSbvhNode>>& voxelList);
 
-    // æ‚èo‚³‚ê‚½ƒ{ƒNƒZƒ‹ƒf[ƒ^‚É‚Â‚¢‚Ä•`‰æ‚·‚é.
+    // ï¿½ï¿½ï¿½oï¿½ï¿½ï¿½ê‚½ï¿½{ï¿½Nï¿½Zï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½É‚Â‚ï¿½ï¿½Ä•`ï¿½æ‚·ï¿½ï¿½.
     void draw(
         const aten::context& ctxt,
-        const aten::camera* cam,
+        const aten::Camera* cam,
         std::vector<std::vector<aten::ThreadedSbvhNode>>& voxelList,
         bool isWireframe,
         uint32_t depth);

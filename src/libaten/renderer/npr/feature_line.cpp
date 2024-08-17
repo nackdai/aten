@@ -10,7 +10,7 @@ namespace npr {
         const aten::hitrecord& hrec,
         const context& ctxt,
         const scene& scene,
-        const camera& camera)
+        const Camera& camera)
     {
         // NOTE
         // Ray Tracing NPR-Style Feature Lines

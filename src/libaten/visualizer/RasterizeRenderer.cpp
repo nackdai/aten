@@ -10,24 +10,21 @@ namespace aten
 {
     void RasterizeRenderer::clearBuffer(
         uint32_t clear_buffer_mask,
-        aten::vec4 &clear_color,
+        aten::vec4& clear_color,
         float clear_depth,
         int32_t clear_stencil)
     {
         GLbitfield clear_mask = 0;
 
-        if (clear_buffer_mask & static_cast<uint32_t>(Buffer::Color))
-        {
+        if (clear_buffer_mask & static_cast<uint32_t>(Buffer::Color)) {
             clear_mask |= GL_COLOR_BUFFER_BIT;
             CALL_GL_API(::glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a));
         }
-        if (clear_buffer_mask & static_cast<uint32_t>(Buffer::Depth))
-        {
+        if (clear_buffer_mask & static_cast<uint32_t>(Buffer::Depth)) {
             clear_mask |= GL_DEPTH_BUFFER_BIT;
             CALL_GL_API(::glClearDepthf(clear_depth));
         }
-        if (clear_buffer_mask & static_cast<uint32_t>(Buffer::Sencil))
-        {
+        if (clear_buffer_mask & static_cast<uint32_t>(Buffer::Sencil)) {
             clear_mask |= GL_STENCIL_BUFFER_BIT;
             CALL_GL_API(::glClearStencil(clear_stencil));
         }
@@ -37,15 +34,13 @@ namespace aten
         CALL_GL_API(::glClear(clear_mask));
     }
 
-    void RasterizeRenderer::beginRender(FBO *fbo /*= nullptr*/)
+    void RasterizeRenderer::beginRender(FBO* fbo /*= nullptr*/)
     {
-        if (fbo)
-        {
+        if (fbo) {
             AT_ASSERT(fbo->IsValid());
             fbo->BindFBO();
         }
-        else
-        {
+        else {
             // Set default frame buffer.
             CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
         }
@@ -74,7 +69,7 @@ namespace aten
         return m_shader.init(width, height, pathVS, pathGS, pathFS);
     }
 
-    void RasterizeRenderer::prepareDraw(const camera *cam)
+    void RasterizeRenderer::prepareDraw(const Camera* cam)
     {
         auto camparam = cam->param();
 
@@ -101,16 +96,16 @@ namespace aten
         m_shader.prepareRender(nullptr, false);
 
         auto hMtxW2C = m_shader.getHandle("mtx_W2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
     }
 
     void RasterizeRenderer::drawSceneForGBuffer(
         int32_t frame,
-        context &ctxt,
-        const scene *scene,
-        const camera *cam,
-        FBO &fbo,
-        shader *exShader /*= nullptr*/)
+        context& ctxt,
+        const scene* scene,
+        const Camera* cam,
+        FBO& fbo,
+        shader* exShader /*= nullptr*/)
     {
         AT_ASSERT(scene);
         AT_ASSERT(cam);
@@ -156,18 +151,17 @@ namespace aten
             mtx_W2C = mtxOffset * mtx_W2C;
         }
 
-        if (m_mtxPrevW2C.isIdentity())
-        {
+        if (m_mtxPrevW2C.isIdentity()) {
             m_mtxPrevW2C = mtx_W2C;
         }
 
         m_shader.prepareRender(nullptr, false);
 
         auto hMtxW2C = m_shader.getHandle("mtx_W2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
         auto hPrevMtxW2C = m_shader.getHandle("mtxPrevW2C");
-        CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, (const GLfloat *)&m_mtxPrevW2C.a[0]));
+        CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, (const GLfloat*)&m_mtxPrevW2C.a[0]));
 
         AT_ASSERT(fbo.IsValid());
         fbo.BindFBO(true);
@@ -190,24 +184,24 @@ namespace aten
         ctxt.build();
 
         // For object (which means "not" deformable).
-        scene->render([&](const aten::mat4 &mtx_L2W, const aten::mat4 &mtx_prev_L2W, int32_t objid, int32_t primid)
-                      {
-            auto hMtxL2W = m_shader.getHandle("mtx_L2W");
-            CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
+        scene->render(
+            [&](const aten::mat4& mtx_L2W, const aten::mat4& mtx_prev_L2W, int32_t objid, int32_t primid) {
+                auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+                CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
 
-            auto hPrevMtxL2W = m_shader.getHandle("mtx_prev_L2W");
-            CALL_GL_API(::glUniformMatrix4fv(hPrevMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_prev_L2W.a[0]));
+                auto hPrevMtxL2W = m_shader.getHandle("mtx_prev_L2W");
+                CALL_GL_API(::glUniformMatrix4fv(hPrevMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_prev_L2W.a[0]));
 
-            auto hObjId = m_shader.getHandle("objid");
-            CALL_GL_API(::glUniform1i(hObjId, objid));
+                auto hObjId = m_shader.getHandle("objid");
+                CALL_GL_API(::glUniform1i(hObjId, objid));
 
-            auto hPrimId = m_shader.getHandle("primid");
-            CALL_GL_API(::glUniform1i(hPrimId, primid)); },
-                      [](const std::shared_ptr<hitable> &target)
-                      {
-                          return !target->isDeformable();
-                      },
-                      ctxt);
+                auto hPrimId = m_shader.getHandle("primid");
+                CALL_GL_API(::glUniform1i(hPrimId, primid));
+            },
+            [](const std::shared_ptr<hitable>& target) {
+                return !target->isDeformable();
+            },
+            ctxt);
 
         // For deformable.
         if (exShader)
@@ -215,29 +209,29 @@ namespace aten
             exShader->prepareRender(nullptr, false);
 
             hMtxW2C = exShader->getHandle("mtx_W2C");
-            CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
+            CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
             hPrevMtxW2C = exShader->getHandle("mtxPrevW2C");
-            CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, (const GLfloat *)&m_mtxPrevW2C.a[0]));
+            CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, (const GLfloat*)&m_mtxPrevW2C.a[0]));
 
-            scene->render([&](const aten::mat4 &mtx_L2W, const aten::mat4 &mtx_prev_L2W, int32_t objid, int32_t primid)
-                          {
-                auto hMtxL2W = exShader->getHandle("mtx_L2W");
-                CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
+            scene->render(
+                [&](const aten::mat4& mtx_L2W, const aten::mat4& mtx_prev_L2W, int32_t objid, int32_t primid) {
+                    auto hMtxL2W = exShader->getHandle("mtx_L2W");
+                    CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
 
-                auto hPrevMtxL2W = exShader->getHandle("mtx_prev_L2W");
-                CALL_GL_API(::glUniformMatrix4fv(hPrevMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_prev_L2W.a[0]));
+                    auto hPrevMtxL2W = exShader->getHandle("mtx_prev_L2W");
+                    CALL_GL_API(::glUniformMatrix4fv(hPrevMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_prev_L2W.a[0]));
 
-                auto hObjId = exShader->getHandle("objid");
-                CALL_GL_API(::glUniform1i(hObjId, objid));
+                    auto hObjId = exShader->getHandle("objid");
+                    CALL_GL_API(::glUniform1i(hObjId, objid));
 
-                auto hPrimId = exShader->getHandle("primid");
-                CALL_GL_API(::glUniform1i(hPrimId, primid)); },
-                          [](const std::shared_ptr<hitable> &target)
-                          {
-                              return target->isDeformable();
-                          },
-                          ctxt);
+                    auto hPrimId = exShader->getHandle("primid");
+                    CALL_GL_API(::glUniform1i(hPrimId, primid));
+                },
+                [](const std::shared_ptr<hitable>& target) {
+                    return target->isDeformable();
+                },
+                ctxt);
         }
 
         // Set default frame buffer.
@@ -296,24 +290,25 @@ namespace aten
     };
 
     void RasterizeRenderer::drawAABB(
-        const camera *cam,
-        accelerator *accel)
+        const Camera* cam,
+        accelerator* accel)
     {
         prepareForDrawAABB(cam);
 
         auto hMtxL2W = m_shader.getHandle("mtx_L2W");
 
-        accel->drawAABB([&](const aten::mat4 &mtx_L2W)
-                        {
-            // Draw.
-            CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
-            m_boxvb.draw(aten::Primitive::Lines, 0, 12); },
-                        aten::mat4::Identity);
+        accel->drawAABB(
+            [&](const aten::mat4& mtx_L2W) {
+                // Draw.
+                CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
+                m_boxvb.draw(aten::Primitive::Lines, 0, 12);
+            },
+            aten::mat4::Identity);
     }
 
     void RasterizeRenderer::drawAABB(
-        const camera *cam,
-        const aabb &bbox)
+        const Camera* cam,
+        const aabb& bbox)
     {
         prepareForDrawAABB(cam);
 
@@ -328,20 +323,19 @@ namespace aten
         aten::mat4 mtx_L2W = mtxTrans * mtxScale;
 
         // Draw.
-        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtx_L2W.a[0]));
+        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
         m_boxvb.draw(aten::Primitive::Lines, 0, 12);
     }
 
-    void RasterizeRenderer::prepareForDrawAABB(const camera *cam)
+    void RasterizeRenderer::prepareForDrawAABB(const Camera* cam)
     {
         // Initialize vb.
-        if (!m_boxvb.isInitialized())
-        {
+        if (!m_boxvb.isInitialized()) {
             m_boxvb.init(
                 sizeof(aten::vertex),
                 AT_COUNTOF(boxvtx),
                 0,
-                (void *)boxvtx);
+                (void*)boxvtx);
         }
 
         m_shader.prepareRender(nullptr, false);
@@ -369,15 +363,15 @@ namespace aten
         aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
         auto hMtxW2C = m_shader.getHandle("mtx_W2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
     }
 
     void RasterizeRenderer::drawObject(
-        context &ctxt,
-        const AT_NAME::PolygonObject &obj,
-        const camera *cam,
+        context& ctxt,
+        const AT_NAME::PolygonObject& obj,
+        const Camera* cam,
         bool isWireFrame,
-        const mat4 &mtx_L2W)
+        const mat4& mtx_L2W)
     {
         auto camparam = cam->param();
 
@@ -405,17 +399,15 @@ namespace aten
 
         // Not modify local to world matrix...
         auto hMtxL2W = m_shader.getHandle("mtx_L2W");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtx_L2W.a[0]));
+        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
 
         auto hMtxW2C = m_shader.getHandle("mtx_W2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
-        if (isWireFrame)
-        {
+        if (isWireFrame) {
             CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
         }
-        else
-        {
+        else {
             CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
         }
 
@@ -428,102 +420,105 @@ namespace aten
         auto hColor = m_shader.getHandle("color");
         auto hMtrlId = m_shader.getHandle("materialId");
 
-        obj.draw([&](const aten::vec3 &color, const aten::texture *albedo, int32_t mtrlid)
-                 {
-            if (albedo) {
-                albedo->bindAsGLTexture(0, &m_shader);
-                CALL_GL_API(::glUniform1i(hHasAlbedo, true));
-            }
-            else {
-                CALL_GL_API(::glUniform1i(hHasAlbedo, false));
-            }
-
-            CALL_GL_API(::glUniform4f(hColor, color.x, color.y, color.z, 1.0f));
-
-            if (hMtrlId >= 0) {
-                CALL_GL_API(::glUniform1i(hMtrlId, mtrlid));
-            } },
-                 ctxt);
-
-        // 戻す.
-        CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
-    }
-
-    void RasterizeRenderer::drawWithOutsideRenderFunc(
-        context &ctxt,
-        std::function<void(FuncObjRenderer)> renderFunc,
-        const camera *cam,
-        bool isWireFrame,
-        const mat4 &mtx_L2W /*= mat4::Identity*/)
-    {
-        auto camparam = cam->param();
-
-        // TODO
-        camparam.znear = float(0.1);
-        camparam.zfar = float(10000.0);
-
-        mat4 mtx_W2V;
-        mat4 mtx_V2C;
-
-        mtx_W2V.lookat(
-            camparam.origin,
-            camparam.center,
-            camparam.up);
-
-        mtx_V2C.perspective(
-            camparam.znear,
-            camparam.zfar,
-            camparam.vfov,
-            camparam.aspect);
-
-        aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
-
-        m_shader.prepareRender(nullptr, false);
-
-        // Not modify local to world matrix...
-        auto hMtxL2W = m_shader.getHandle("mtx_L2W");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtx_L2W.a[0]));
-
-        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
-
-        if (isWireFrame)
-        {
-            CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
-        }
-        else
-        {
-            CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
-        }
-
-        CALL_GL_API(::glEnable(GL_DEPTH_TEST));
-        CALL_GL_API(::glEnable(GL_CULL_FACE));
-
-        ctxt.build();
-
-        auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
-        auto hColor = m_shader.getHandle("color");
-        auto hMtrlId = m_shader.getHandle("materialId");
-
-        renderFunc([&](const AT_NAME::PolygonObject&obj)
-                   { obj.draw([&](const aten::vec3 &color, const aten::texture *albedo, int32_t mtrlid)
-                              {
-                if (hHasAlbedo >= 0) {
-                    if (albedo) {
-                        albedo->bindAsGLTexture(0, &m_shader);
-                        CALL_GL_API(::glUniform1i(hHasAlbedo, true));
-                    }
-                    else {
-                        CALL_GL_API(::glUniform1i(hHasAlbedo, false));
-                    }
+        obj.draw(
+            [&](const aten::vec3& color, const aten::texture* albedo, int32_t mtrlid) {
+                if (albedo) {
+                    albedo->bindAsGLTexture(0, &m_shader);
+                    CALL_GL_API(::glUniform1i(hHasAlbedo, true));
+                }
+                else {
+                    CALL_GL_API(::glUniform1i(hHasAlbedo, false));
                 }
 
                 CALL_GL_API(::glUniform4f(hColor, color.x, color.y, color.z, 1.0f));
 
                 if (hMtrlId >= 0) {
                     CALL_GL_API(::glUniform1i(hMtrlId, mtrlid));
-                } },
-                              ctxt); });
+                }
+            },
+            ctxt);
+
+        // 戻す.
+        CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+    }
+
+    void RasterizeRenderer::drawWithOutsideRenderFunc(
+        context& ctxt,
+        std::function<void(FuncObjRenderer)> renderFunc,
+        const Camera* cam,
+        bool isWireFrame,
+        const mat4& mtx_L2W /*= mat4::Identity*/)
+    {
+        auto camparam = cam->param();
+
+        // TODO
+        camparam.znear = float(0.1);
+        camparam.zfar = float(10000.0);
+
+        mat4 mtx_W2V;
+        mat4 mtx_V2C;
+
+        mtx_W2V.lookat(
+            camparam.origin,
+            camparam.center,
+            camparam.up);
+
+        mtx_V2C.perspective(
+            camparam.znear,
+            camparam.zfar,
+            camparam.vfov,
+            camparam.aspect);
+
+        aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
+
+        m_shader.prepareRender(nullptr, false);
+
+        // Not modify local to world matrix...
+        auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
+
+        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
+
+        if (isWireFrame) {
+            CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+        }
+        else {
+            CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+        }
+
+        CALL_GL_API(::glEnable(GL_DEPTH_TEST));
+        CALL_GL_API(::glEnable(GL_CULL_FACE));
+
+        ctxt.build();
+
+        auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
+        auto hColor = m_shader.getHandle("color");
+        auto hMtrlId = m_shader.getHandle("materialId");
+
+        renderFunc(
+            [&](const AT_NAME::PolygonObject&obj) {
+                obj.draw(
+                    [&](const aten::vec3& color, const aten::texture* albedo, int32_t mtrlid) {
+                        if (hHasAlbedo >= 0) {
+                            if (albedo) {
+                                albedo->bindAsGLTexture(0, &m_shader);
+                                CALL_GL_API(::glUniform1i(hHasAlbedo, true));
+                            }
+                            else {
+                                CALL_GL_API(::glUniform1i(hHasAlbedo, false));
+                            }
+                        }
+
+                        CALL_GL_API(::glUniform4f(hColor, color.x, color.y, color.z, 1.0f));
+
+                        if (hMtrlId >= 0) {
+                            CALL_GL_API(::glUniform1i(hMtrlId, mtrlid));
+                        }
+                    },
+                    ctxt);
+                }
+            );
 
         // 戻す.
         CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
@@ -532,7 +527,7 @@ namespace aten
     void RasterizeRenderer::initBuffer(
         uint32_t vtxStride,
         uint32_t vtxNum,
-        const std::vector<uint32_t> &idxNums)
+        const std::vector<uint32_t>& idxNums)
     {
         if (!m_isInitBuffer)
         {
@@ -544,8 +539,7 @@ namespace aten
 
             m_ib.resize(idxNums.size());
 
-            for (int32_t i = 0; i < idxNums.size(); i++)
-            {
+            for (int32_t i = 0; i < idxNums.size(); i++) {
                 auto num = idxNums[i];
                 m_ib[i].init(num, nullptr);
             }
@@ -555,11 +549,11 @@ namespace aten
     }
 
     void RasterizeRenderer::draw(
-        const context &ctxt,
-        const std::vector<vertex> &vtxs,
-        const std::vector<std::vector<int32_t>> &idxs,
-        const std::vector<material *> &mtrls,
-        const camera *cam,
+        const context& ctxt,
+        const std::vector<vertex>& vtxs,
+        const std::vector<std::vector<int32_t>>& idxs,
+        const std::vector<material*>& mtrls,
+        const Camera* cam,
         bool isWireFrame,
         bool updateBuffer)
     {
@@ -591,28 +585,25 @@ namespace aten
 
         // Not modify local to world matrix...
         auto hMtxL2W = m_shader.getHandle("mtx_L2W");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mat4::Identity.a[0]));
+        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mat4::Identity.a[0]));
 
         auto hMtxW2C = m_shader.getHandle("mtx_W2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
         // Set default frame buffer.
         CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
 
-        if (isWireFrame)
-        {
+        if (isWireFrame) {
             CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
         }
-        else
-        {
+        else {
             CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
         }
 
         CALL_GL_API(::glEnable(GL_DEPTH_TEST));
         CALL_GL_API(::glEnable(GL_CULL_FACE));
 
-        if (!m_isInitBuffer)
-        {
+        if (!m_isInitBuffer) {
             vertex_buffer_.init(
                 sizeof(vertex),
                 static_cast<uint32_t>(vtxs.size()),
@@ -621,27 +612,22 @@ namespace aten
 
             m_ib.resize(idxs.size());
 
-            for (size_t i = 0; i < idxs.size(); i++)
-            {
-                if (!idxs[i].empty())
-                {
+            for (size_t i = 0; i < idxs.size(); i++) {
+                if (!idxs[i].empty()) {
                     m_ib[i].init(static_cast<uint32_t>(idxs[i].size()), idxs[i].data());
                 }
             }
 
             m_isInitBuffer = true;
         }
-        else if (updateBuffer)
-        {
+        else if (updateBuffer) {
             // TODO
             // 最初に最大数バッファをアロケートしておかないといけない...
 
             vertex_buffer_.update(vtxs.size(), vtxs.data());
 
-            for (size_t i = 0; i < idxs.size(); i++)
-            {
-                if (!idxs[i].empty())
-                {
+            for (size_t i = 0; i < idxs.size(); i++) {
+                if (!idxs[i].empty()) {
                     m_ib[i].update(static_cast<uint32_t>(idxs[i].size()), idxs[i].data());
                 }
             }
@@ -658,15 +644,13 @@ namespace aten
                 auto m = mtrls[i];
 
                 int32_t albedoTexId = m ? m->param().albedoMap : -1;
-                const auto &albedo = albedoTexId >= 0 ? ctxt.GetTexture(albedoTexId) : nullptr;
+                const auto& albedo = albedoTexId >= 0 ? ctxt.GetTexture(albedoTexId) : nullptr;
 
-                if (albedo)
-                {
+                if (albedo) {
                     albedo->bindAsGLTexture(0, &m_shader);
                     CALL_GL_API(::glUniform1i(hHasAlbedo, true));
                 }
-                else
-                {
+                else {
                     CALL_GL_API(::glUniform1i(hHasAlbedo, false));
                 }
 
@@ -679,9 +663,9 @@ namespace aten
     }
 
     void RasterizeRenderer::renderSceneDepth(
-        context &ctxt,
-        const scene *scene,
-        const camera *cam)
+        context& ctxt,
+        const scene* scene,
+        const Camera* cam)
     {
         auto camparam = cam->param();
 
@@ -708,7 +692,7 @@ namespace aten
         m_shader.prepareRender(nullptr, false);
 
         auto hMtxW2C = m_shader.getHandle("mtx_W2C");
-        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat *)&mtx_W2C.a[0]));
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
         // Set default frame buffer.
         CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
@@ -726,13 +710,11 @@ namespace aten
         ctxt.build();
 
         scene->render(
-            [&](const aten::mat4 &mtx_L2W, const aten::mat4 &mtx_prev_L2W, int32_t objid, int32_t primid)
-            {
+            [&](const aten::mat4& mtx_L2W, const aten::mat4& mtx_prev_L2W, int32_t objid, int32_t primid) {
                 auto hMtxL2W = m_shader.getHandle("mtx_L2W");
-                CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtx_L2W.a[0]));
+                CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
             },
-            [](const std::shared_ptr<hitable> &target)
-            {
+            [](const std::shared_ptr<hitable>& target) {
                 (void)target;
                 return true;
             },
@@ -742,7 +724,7 @@ namespace aten
         CALL_GL_API(::glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
     }
 
-    void RasterizeRenderer::setColor(const vec4 &color)
+    void RasterizeRenderer::setColor(const vec4& color)
     {
         auto hColor = m_shader.getHandle("color");
         CALL_GL_API(::glUniform4f(hColor, color.x, color.y, color.z, 1.0f));

@@ -15,9 +15,9 @@ namespace aten {
         auto dir = AT_NAME::Background::ConvertUVToDirection(s, t);
 
         CameraSampleResult result;
-        result.posOnLens = m_origin + dir;
-        result.nmlOnLens = dir;
-        result.posOnImageSensor = m_origin;
+        result.pos_on_lens = m_origin + dir;
+        result.nml_on_lens = dir;
+        result.pos_on_image_sensor = m_origin;
         result.r = ray(m_origin, dir);
 
         return result;

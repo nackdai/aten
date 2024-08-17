@@ -34,10 +34,10 @@ namespace npr {
             const aten::vec3 &color,
             int32_t x, int32_t y,
             int32_t width, int32_t height,
-            const aten::hitrecord &hrec,
-            const aten::context &ctxt,
-            const AT_NAME::scene &scene,
-            const AT_NAME::camera &camera);
+            const aten::hitrecord& hrec,
+            const aten::context& ctxt,
+            const AT_NAME::scene& scene,
+            const AT_NAME::Camera& camera);
 
         // NOTE
         // The following functions for "Physically-based Feature Line Rendering":

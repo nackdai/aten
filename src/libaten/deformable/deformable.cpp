@@ -238,7 +238,7 @@ namespace aten
 
     void DeformableRenderer::render(
         const context& ctxt,
-        const camera* cam,
+        const Camera* cam,
         deformable* mdl)
     {
         CALL_GL_API(::glEnable(GL_DEPTH_TEST));

@@ -99,7 +99,7 @@ void VoxelViewer::bringVoxels(
 
 void VoxelViewer::draw(
     const aten::context& ctxt,
-    const aten::camera* cam,
+    const aten::Camera* cam,
     std::vector<std::vector<aten::ThreadedSbvhNode>>& voxelList,
     bool isWireframe,
     uint32_t depth)

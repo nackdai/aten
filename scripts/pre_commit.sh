@@ -6,7 +6,7 @@ set -o pipefail
 usage() {
   cat <<EOF 1>&2
 Usage: $0 <docker_image>
-  <docker_iamge>          : docker image to run build
+  <docker_image>          : docker image to run build
 ex) $0 aten_dev:latest
 EOF
   exit 1

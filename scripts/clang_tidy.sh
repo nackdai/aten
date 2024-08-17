@@ -7,7 +7,7 @@ usage() {
   cat <<EOF 1>&2
 Usage: $0 [Options]
 Options:
-  -d <docker_iamge>    : docker image to run build. Required.
+  -d <docker_image>    : docker image to run build. Required.
   -h <header_filter>   : Header filter. If nothing is specified, "src" is specified.
   -g <commit> <commit> : Specify git diff files as clang-tidy target files.
   -f                   : Fix code.

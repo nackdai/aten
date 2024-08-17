@@ -9,7 +9,7 @@ Usage: $0 [Options]
 Options:
   -b <build_config>       : Build configuration. Default is "Release"
   -c <compute_capability> : Compute capability for CUDA. No need to specify ".". If it's "7.5", it's specified as "75". Default is "75"
-  -d <docker_iamge>       : docker image to run build. This option is necessary
+  -d <docker_image>       : docker image to run build. This option is necessary
   -e                      : Only export compile_commands.json
 ex) $0 -b Release -c 75 -d aten:latest
 EOF

@@ -53,6 +53,10 @@ And Idanten includes characters of aten, "id**aten**"
 - Camera
   - Pinhole
   - Equirect
+- VolumeRendering (Only cpu rendering)
+  - Homogeneous
+  - Heterogeneous
+  - NanoVDB format
 - Others
   - Instancing
   - Deformation
@@ -151,3 +155,11 @@ AlphaBlending
 Physically-based Feature Line Rendering
 
 ![FeatureLine](docs/gallery/feature_line.png)
+
+Homogeneous medium
+
+![Homogeneous](docs/gallery/homogeneous.png)
+
+Heterogeneous medium
+
+![Homogeneous](docs/gallery/heterogeneous.png)

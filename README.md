@@ -80,27 +80,26 @@ See [How To Build](docs/how_to_build.md) document
 
 ### Windows
 
-Please find `exe` files and run them. You can find them in each directories
-where source files are in.
+Please find `exe` files and run them. You can find them in each directory
+where the source files are in.
 
 ### Linux
 
-Please find execution files and run them. You can find them in the directories
-in the directory which you built the applications. And the directories have
-same name as execution file.
+Please find the executables and run them. You can find them in the directories which you built the
+applications. And the directories have same name as execution file.
 
 ### <a name="RunOnDocker">Docker</a>
 
 This section works for ony Linux.
 
-If you would like to run built applications in docker, you need to ensure that your host can accept
+If you would like to run the executables in docker, you need to ensure that your host can accept
 X forwarded connections:
 
 ```shell
 xhost +local:<Docker container name>`
 ```
 
-And, run docker container like the following:
+And then, run the docker container like the following:
 
 ```shell
 docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <Image Name>:latest bash
@@ -108,10 +107,10 @@ docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtim
 
 #### docker-compose
 
-You also need to ensure your host accept X forwared connections.
+You also need to ensure your host accept X forward connections.
 See [Docker in How to run](#RunOnDocker)
 
-And, run docker container via docker-compose like the following:
+And, run the docker container via docker-compose like the following:
 
 ```shell
 docker-compose -f .devcontainer/docker-compose.yml run aten
@@ -121,7 +120,7 @@ docker-compose -f .devcontainer/docker-compose.yml run aten
 
 You can open this project on VSCode devcontainer.
 If you face on devcontainer build failure, it might be due to docker-compose version. In that case,
-please update docker-compose.s
+please update docker-compose.
 
 ## Gallery
 

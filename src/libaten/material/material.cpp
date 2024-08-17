@@ -17,6 +17,8 @@
 #include "material/retroreflective.h"
 #include "material/car_paint.h"
 
+#include "volume/medium.h"
+
 namespace AT_NAME
 {
     const std::array<material::MaterialInfo, static_cast<size_t>(aten::MaterialType::MaterialTypeMax)> material::mtrl_type_info = { {
@@ -191,5 +193,30 @@ namespace AT_NAME
         auto albedo{ AT_NAME::sampleTexture(param.albedoMap, u, v, aten::vec4(float(1))) };
         albedo *= param.baseColor;
         return albedo.a;
+    }
+
+    aten::MaterialParameter material::CreateMaterialMediumParameter(
+        const float g,
+        const float sigma_a,
+        const float sigma_s,
+        const aten::vec3& le)
+    {
+        aten::MaterialParameter mtrl;
+
+        // TODO
+        mtrl.type = aten::MaterialType::MaterialTypeMax;
+
+        mtrl.is_medium = true;
+        mtrl.medium.phase_function_g = g;
+        mtrl.medium.sigma_a = sigma_a;
+        mtrl.medium.sigma_s = sigma_s;
+        mtrl.medium.le = le;
+
+        mtrl.attrib.isEmissive = false;
+        mtrl.attrib.isSingular = false;
+        mtrl.attrib.isGlossy = false;
+        mtrl.attrib.isTranslucent = false;
+
+        return mtrl;
     }
 }

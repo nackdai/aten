@@ -275,7 +275,7 @@ namespace aten {
         uint8_t f;
     };
 
-    inline int32_t cmpGEQ(const vec3& a, const vec3& b)
+    inline AT_HOST_DEVICE_API int32_t cmpGEQ(const vec3& a, const vec3& b)
     {
         _vec3_cmp_res res;
 

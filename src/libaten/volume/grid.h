@@ -1,12 +1,13 @@
 #pragma once
 
 #include <optional>
+#include <vector>
+
+#include <nanovdb/NanoVDB.h>
 
 #include "defs.h"
 #include "misc/tuple.h"
 #include "geometry/PolygonObject.h"
-
-#include "aten_nanovdb_defs.h"
 
 namespace aten {
     class context;
@@ -33,5 +34,37 @@ namespace AT_NAME {
             const nanovdb::FloatGrid* grid);
 
         static AT_DEVICE_API float GetValueInGrid(const aten::vec3& p, const nanovdb::FloatGrid* grid);
+
+        Grid() = default;
+        ~Grid() = default;
+
+        Grid(Grid&&) = default;
+
+        Grid(const Grid&) = delete;
+        Grid& operator=(const Grid&) = delete;
+        Grid& operator=(Grid&&) = delete;
+
+        void Clear()
+        {
+            grids_.clear();
+        }
+
+        nanovdb::FloatGrid* GetGrid(int32_t idx) const
+        {
+            if (0 <= idx && idx < grids_.size()) {
+                return grids_[idx];
+            }
+            return nullptr;
+        }
+
+        int32_t AddGrid(nanovdb::FloatGrid* grid)
+        {
+            grids_.emplace_back(grid);
+            int32_t ret = static_cast<int32_t>(grids_.size() - 1);
+            return ret;
+        }
+
+    private:
+        std::vector<nanovdb::FloatGrid*> grids_;
     };
 }

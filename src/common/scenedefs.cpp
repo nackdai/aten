@@ -1220,7 +1220,7 @@ void CornellBoxSmokeScene::makeScene(
         (void)nml;
 
         if (name == "medium") {
-            auto mtrl_param = AT_NAME::HomogeniousMedium::CreateMaterialParameter(
+            auto mtrl_param = aten::material::CreateMaterialMediumParameter(
                 -0.4F,
                 0.0F, 0.5F,
                 aten::vec3(1.0F, 0.0F, 0.0F));
@@ -1280,7 +1280,7 @@ void CornellBoxHomogeneousMediumScene::makeScene(
         (void)nml;
 
         if (name == "shortBox") {
-            auto mtrl_param = AT_NAME::HomogeniousMedium::CreateMaterialParameter(
+            auto mtrl_param = aten::material::CreateMaterialMediumParameter(
                 -0.4F,
                 0.5F, 0.5F,
                 aten::vec3(1.0F, 0.0F, 0.0F));
@@ -1292,7 +1292,7 @@ void CornellBoxHomogeneousMediumScene::makeScene(
             return mtrl;
         }
         else if (name == "tallBox") {
-            auto mtrl_param = AT_NAME::HomogeniousMedium::CreateMaterialParameter(
+            auto mtrl_param = aten::material::CreateMaterialMediumParameter(
                 -0.4F,
                 0.5F, 0.5F,
                 aten::vec3(0.0F, 1.0F, 0.0F));

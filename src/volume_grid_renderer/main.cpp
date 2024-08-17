@@ -13,6 +13,9 @@
 #include "atenscene.h"
 #include "../common/scenedefs.h"
 
+#include "volume/medium.h"
+#include "volume/grid.h"
+
 #define ENABLE_IBL
 
 constexpr int32_t WIDTH = 512;
@@ -67,6 +70,12 @@ public:
             fov,
             float(0.1), float(10000.0),
             WIDTH, HEIGHT);
+
+        // NOTE:
+        // grid_holder_ is used to add the loaded nanovdb grid in LoadNanoVDB.
+        // So, it has to be instantiated before calling LoadNanoVDB.
+        grid_holder_ = std::make_shared<aten::Grid>(aten::Grid());
+        ctxt_.RegisterGridHolder(grid_holder_);
 
         LoadNanoVDB("../../asset/vdb/smoke.nvdb");
 
@@ -200,7 +209,7 @@ private:
 
             grid_handle_ = nanovdb::io::readGrid<decltype(grid_handle_)::BufferType>(nvdb.data());
             auto cpu_grid = grid_handle_.grid<float>();
-            ctxt_.AddGrid(cpu_grid);
+            grid_holder_->AddGrid(cpu_grid);
 
             return true;
         }
@@ -221,6 +230,7 @@ private:
     aten::VolumePathTracing renderer_;
 
     nanovdb::GridHandle<nanovdb::HostBuffer> grid_handle_;
+    std::shared_ptr<aten::Grid> grid_holder_;
 
     std::shared_ptr<aten::visualizer> visualizer_;
 

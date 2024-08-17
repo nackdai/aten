@@ -1,5 +1,7 @@
 #pragma once
 
+#include <nanovdb/NanoVDB.h>
+
 #include "defs.h"
 #include "material/material.h"
 #include "math/ray.h"
@@ -8,8 +10,6 @@
 #include "renderer/pathtracing/pt_params.h"
 #include "sampler/sampler.h"
 #include "volume/phase_function.h"
-
-#include "aten_nanovdb_defs.h"
 
 namespace AT_NAME {
     class HomogeniousMedium {
@@ -24,9 +24,9 @@ namespace AT_NAME {
 
         static AT_DEVICE_API aten::tuple<bool, aten::ray> Sample(
             AT_NAME::PathThroughput& throughput,
-            AT_NAME::sampler& sampler,
+            aten::sampler& sampler,
             const aten::ray& curr_ray,
-            const AT_NAME::MediumParameter& medium,
+            const aten::MediumParameter& medium,
             const float distance_to_surface)
         {
             const auto sigma_a = medium.sigma_a;
@@ -83,7 +83,7 @@ namespace AT_NAME {
             return aten::make_tuple(true, next_ray);
         }
 
-        static AT_DEVICE_API float sigma_t(const AT_NAME::MediumParameter& medium)
+        static AT_DEVICE_API float sigma_t(const aten::MediumParameter& medium)
         {
             return medium.sigma_a + medium.sigma_s;
         }
@@ -116,31 +116,6 @@ namespace AT_NAME {
             const auto sigma_t = HomogeniousMedium::sigma_t(medium);
             return EvaluateTransmittance(sigma_t, distance);
         }
-
-        static AT_DEVICE_API AT_NAME::MaterialParameter CreateMaterialParameter(
-            const float g,
-            const float sigma_a,
-            const float sigma_s,
-            const aten::vec3& le)
-        {
-            AT_NAME::MaterialParameter mtrl;
-
-            // TODO
-            mtrl.type = AT_NAME::MaterialType::MaterialTypeMax;
-
-            mtrl.is_medium = true;
-            mtrl.medium.phase_function_g = g;
-            mtrl.medium.sigma_a = sigma_a;
-            mtrl.medium.sigma_s = sigma_s;
-            mtrl.medium.le = le;
-
-            mtrl.attrib.isEmissive = false;
-            mtrl.attrib.isSingular = false;
-            mtrl.attrib.isGlossy = false;
-            mtrl.attrib.isTranslucent = false;
-
-            return mtrl;
-        }
     };
 
     class HeterogeneousMedium {
@@ -159,14 +134,14 @@ namespace AT_NAME {
 
         static AT_DEVICE_API aten::tuple<bool, aten::ray> Sample(
             AT_NAME::PathThroughput& throughput,
-            AT_NAME::sampler& sampler,
+            aten::sampler& sampler,
             const aten::ray& curr_ray,
             const aten::MediumParameter& param,
             nanovdb::FloatGrid* grid);
 
         static AT_DEVICE_API float EvaluateTransmittance(
             nanovdb::FloatGrid* grid,
-            AT_NAME::sampler& sampler,
+            aten::sampler& sampler,
             const aten::MediumParameter& medium,
             const aten::vec3& p1, const aten::vec3& p2);
     };

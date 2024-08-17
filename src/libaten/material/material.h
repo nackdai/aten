@@ -587,6 +587,12 @@ namespace AT_NAME
             const aten::vec3& wi,
             aten::sampler* sampler);
 
+        static aten::MaterialParameter CreateMaterialMediumParameter(
+            const float g,
+            const float sigma_a,
+            const float sigma_s,
+            const aten::vec3& le);
+
     protected:
         aten::MaterialParameter m_param;
 

@@ -12,6 +12,7 @@
 
 #ifdef __AT_CUDA__
 #include "cuda/cudadefs.h"
+#include "cuda/cudamemory.h"
 #include "cuda/helper_math.h"
 #endif
 

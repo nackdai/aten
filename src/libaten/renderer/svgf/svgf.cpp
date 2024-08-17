@@ -416,7 +416,7 @@ namespace aten
 
     void SVGFRenderer::Initialize(
         const Destination& dst,
-        const camera& camera)
+        const Camera& camera)
     {
         int32_t width = dst.width;
         int32_t height = dst.height;
@@ -460,7 +460,7 @@ namespace aten
         const context& ctxt,
         Destination& dst,
         scene* scene,
-        camera* camera)
+        Camera* camera)
     {
         int32_t width = dst.width;
         int32_t height = dst.height;
@@ -589,7 +589,7 @@ namespace aten
 
                     int32_t idx = y * width + x;
 
-                    auto camera_distance = AT_NAME::camera::ComputeScreenDistance(camera->param(), height);
+                    auto camera_distance = AT_NAME::Camera::ComputeScreenDistance(camera->param(), height);
                     auto variance = EstimateVariance(
                         x, y, width, height,
                         camera_distance,
@@ -599,7 +599,7 @@ namespace aten
                 }
             }
 
-            auto camera_distance = AT_NAME::camera::ComputeScreenDistance(camera->param(), height);
+            auto camera_distance = AT_NAME::Camera::ComputeScreenDistance(camera->param(), height);
 
             for (int32_t i = 0; i < params_.atrous_iter_cnt; i++) {
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)

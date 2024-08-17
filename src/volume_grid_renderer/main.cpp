@@ -164,7 +164,7 @@ public:
             1.0f,
             0);
 
-        visualizer_->renderPixelData(buffer_.image().data(), camera_.needRevert());
+        visualizer_->renderPixelData(buffer_.image().data(), camera_.NeedRevert());
 
 #ifdef ENABLE_EVERY_FRAME_SC
         {

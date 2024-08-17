@@ -5,33 +5,37 @@
 
 namespace aten {
     class CameraOperator {
-    private:
+    public:
         CameraOperator() = delete;
         ~CameraOperator() = delete;
 
-    public:
+        CameraOperator(const CameraOperator&) = delete;
+        CameraOperator& operator=(const CameraOperator&) = delete;
+        CameraOperator(CameraOperator&&) = delete;
+        CameraOperator& operator=(CameraOperator&&) = delete;
+
         static void move(
-            camera& camera,
+            Camera& camera,
             int32_t x1, int32_t y1,
             int32_t x2, int32_t y2,
             float scale = float(1));
 
-        static void moveForward(
-            camera& camera,
+        static void MoveForward(
+            Camera& camera,
             float offset);
-        static void moveRight(
-            camera& camera,
+        static void MoveRight(
+            Camera& camera,
             float offset);
-        static void moveUp(
-            camera& camera,
+        static void MoveUp(
+            Camera& camera,
             float offset);
 
-        static void dolly(
-            camera& camera,
+        static void Dolly(
+            Camera& camera,
             float scale);
 
-        static void rotate(
-            camera& camera,
+        static void Rotate(
+            Camera& camera,
             int32_t width, int32_t height,
             int32_t _x1, int32_t _y1,
             int32_t _x2, int32_t _y2);

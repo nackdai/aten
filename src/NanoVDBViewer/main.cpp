@@ -136,7 +136,7 @@ public:
     {
         if (is_mouse_l_btn_down_)
         {
-            aten::CameraOperator::rotate(
+            aten::CameraOperator::Rotate(
                 camera_,
                 WIDTH, HEIGHT,
                 prev_mouse_pos_x_, prev_mouse_pos_y_,
@@ -159,7 +159,7 @@ public:
 
     void OnMouseWheel(int32_t delta)
     {
-        aten::CameraOperator::dolly(camera_, delta * float(0.1));
+        aten::CameraOperator::Dolly(camera_, delta * float(0.1));
         is_camera_dirty_ = true;
     }
 
@@ -189,25 +189,25 @@ public:
             {
             case aten::Key::Key_W:
             case aten::Key::Key_UP:
-                aten::CameraOperator::moveForward(camera_, offset);
+                aten::CameraOperator::MoveForward(camera_, offset);
                 break;
             case aten::Key::Key_S:
             case aten::Key::Key_DOWN:
-                aten::CameraOperator::moveForward(camera_, -offset);
+                aten::CameraOperator::MoveForward(camera_, -offset);
                 break;
             case aten::Key::Key_D:
             case aten::Key::Key_RIGHT:
-                aten::CameraOperator::moveRight(camera_, offset);
+                aten::CameraOperator::MoveRight(camera_, offset);
                 break;
             case aten::Key::Key_A:
             case aten::Key::Key_LEFT:
-                aten::CameraOperator::moveRight(camera_, -offset);
+                aten::CameraOperator::MoveRight(camera_, -offset);
                 break;
             case aten::Key::Key_Z:
-                aten::CameraOperator::moveUp(camera_, offset);
+                aten::CameraOperator::MoveUp(camera_, offset);
                 break;
             case aten::Key::Key_X:
-                aten::CameraOperator::moveUp(camera_, -offset);
+                aten::CameraOperator::MoveUp(camera_, -offset);
                 break;
             case aten::Key::Key_R:
                 break;

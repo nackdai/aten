@@ -103,21 +103,21 @@ namespace AT_NAME {
         s = float(2) * s - float(1);
         t = float(2) * t - float(1);
 
-        result->posOnLens = s * param->u + t * param->v;
-        result->posOnLens = result->posOnLens + param->center;
+        result->pos_on_lens = s * param->u + t * param->v;
+        result->pos_on_lens = result->pos_on_lens + param->center;
 
-        result->r.dir = normalize(result->posOnLens - param->origin);
+        result->r.dir = normalize(result->pos_on_lens - param->origin);
 
-        result->nmlOnLens = param->dir;
-        result->posOnImageSensor = param->origin;
+        result->nml_on_lens = param->dir;
+        result->pos_on_image_sensor = param->origin;
 
         result->r.org = param->origin;
 
-        result->pdfOnLens = 1;
-        result->pdfOnImageSensor = 1;
+        result->pdf_on_lens = 1;
+        result->pdf_on_image_sensor = 1;
     }
 
-    void PinholeCamera::revertRayToPixelPos(
+    void PinholeCamera::RevertRayToPixelPos(
         const aten::ray& ray,
         int32_t& px, int32_t& py) const
     {
@@ -142,17 +142,17 @@ namespace AT_NAME {
         py = (int32_t)v;
     }
 
-    float PinholeCamera::convertImageSensorPdfToScenePdf(
-        float pdfImage,    // Not used.
-        const aten::vec3& hitPoint,
-        const aten::vec3& hitpointNml,
-        const aten::vec3& posOnImageSensor,
-        const aten::vec3& posOnLens,
-        const aten::vec3& posOnObjectPlane) const
+    float PinholeCamera::ConvertImageSensorPdfToScenePdf(
+        float pdf_image,    // Not used.
+        const aten::vec3& hit_point,
+        const aten::vec3& hit_point_nml,
+        const aten::vec3& pos_on_image_sensor,
+        const aten::vec3& pos_on_lens,
+        const aten::vec3& pos_on_object_plane) const
     {
         float pdf = float(1) / (m_param.width * m_param.height);
 
-        aten::vec3 v = hitPoint - posOnLens;
+        aten::vec3 v = hit_point - pos_on_lens;
 
         {
             aten::vec3 dir = normalize(v);
@@ -163,10 +163,10 @@ namespace AT_NAME {
         }
 
         {
-            aten::vec3 dv = hitPoint - posOnLens;
+            aten::vec3 dv = hit_point - pos_on_lens;
             const float dist2 = aten::squared_length(dv);
             dv = normalize(dv);
-            const float c = dot(hitpointNml, dv);
+            const float c = dot(hit_point_nml, dv);
 
             pdf = pdf * aten::abs(c / dist2);
         }
@@ -174,16 +174,16 @@ namespace AT_NAME {
         return pdf;
     }
 
-    float PinholeCamera::getWdash(
-        const aten::vec3& hitPoint,
-        const aten::vec3& hitpointNml,
-        const aten::vec3& posOnImageSensor,
-        const aten::vec3& posOnLens,
-        const aten::vec3& posOnObjectPlane) const
+    float PinholeCamera::GetWdash(
+        const aten::vec3& hit_point,
+        const aten::vec3& hit_point_nml,
+        const aten::vec3& pos_on_image_sensor,
+        const aten::vec3& pos_on_lens,
+        const aten::vec3& pos_on_object_plane) const
     {
         const float W = float(1) / (m_param.width * m_param.height);
 
-        aten::vec3 v = hitPoint - posOnLens;
+        aten::vec3 v = hit_point - pos_on_lens;
         const float dist = length(v);
         v = normalize(v);
 
@@ -193,7 +193,7 @@ namespace AT_NAME {
         const float G0 = c0 / (d0 * d0);
 
         // hitpoint -> camera
-        const float c1 = dot(normalize(hitpointNml), -v);
+        const float c1 = dot(normalize(hit_point_nml), -v);
         const float d1 = dist;
         const float G1 = c1 / (d1 * d1);
 
@@ -202,17 +202,17 @@ namespace AT_NAME {
         return W_dash;
     }
 
-    float PinholeCamera::hitOnLens(
+    float PinholeCamera::HitOnLens(
         const aten::ray& r,
-        aten::vec3& posOnLens,
-        aten::vec3& posOnObjectPlane,
-        aten::vec3& posOnImageSensor,
+        aten::vec3& pos_on_lens,
+        aten::vec3& pos_on_object_plane,
+        aten::vec3& pos_on_image_sensor,
         int32_t& x, int32_t& y) const
     {
         int32_t px;
         int32_t py;
 
-        revertRayToPixelPos(r, px, py);
+        RevertRayToPixelPos(r, px, py);
 
         if ((px >= 0) && (px < m_param.width)
             && (py >= 0) && (py < m_param.height))
@@ -224,9 +224,9 @@ namespace AT_NAME {
             float v = (float)y / (float)m_param.height;
 
             auto camsample = sample(u, v, nullptr);
-            posOnLens = camsample.posOnLens;
+            pos_on_lens = camsample.pos_on_lens;
 
-            float lens_t = length(posOnLens - r.org);
+            float lens_t = length(pos_on_lens - r.org);
 
             return lens_t;
         }

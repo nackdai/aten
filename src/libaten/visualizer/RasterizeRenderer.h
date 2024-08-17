@@ -61,22 +61,22 @@ namespace aten {
             m_ib.clear();
         }
 
-        void prepareDraw(const camera* cam);
+        void prepareDraw(const Camera* cam);
 
         void drawSceneForGBuffer(
             int32_t frame,
             context& ctxt,
             const scene* scene,
-            const camera* cam,
+            const Camera* cam,
             FBO& fbo,
             shader* exShader = nullptr);
 
         void drawAABB(
-            const camera* cam,
+            const Camera* cam,
             accelerator* accel);
 
         void drawAABB(
-            const camera* cam,
+            const Camera* cam,
             const aabb& bbox);
 
         using FuncSetUniform = std::function<void(shader& shd, const aten::vec3& color, const aten::texture* albedo, int32_t mtrlid)>;
@@ -84,7 +84,7 @@ namespace aten {
         void drawObject(
             context& ctxt,
             const AT_NAME::PolygonObject& obj,
-            const camera* cam,
+            const Camera* cam,
             bool isWireFrame,
             const mat4& mtx_L2W = mat4::Identity);
 
@@ -93,7 +93,7 @@ namespace aten {
         void drawWithOutsideRenderFunc(
             context& ctxt,
             std::function<void(FuncObjRenderer)> renderFunc,
-            const camera* cam,
+            const Camera* cam,
             bool isWireFrame,
             const mat4& mtx_L2W = mat4::Identity);
 
@@ -107,14 +107,14 @@ namespace aten {
             const std::vector<vertex>& vtxs,
             const std::vector<std::vector<int32_t>>& idxs,
             const std::vector<material*>& mtrls,
-            const camera* cam,
+            const Camera* cam,
             bool isWireFrame,
             bool updateBuffer);
 
         void renderSceneDepth(
             context& ctxt,
             const scene* scene,
-            const camera* cam);
+            const Camera* cam);
 
         void setColor(const vec4& color);
 
@@ -124,7 +124,7 @@ namespace aten {
         }
 
     private:
-        void prepareForDrawAABB(const camera* cam);
+        void prepareForDrawAABB(const Camera* cam);
 
     private:
         shader m_shader;

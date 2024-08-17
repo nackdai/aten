@@ -159,7 +159,7 @@ namespace idaten
         bool isFirstIter = (filter_iter_count == 0);
         bool isFinalIter = (filter_iter_count == params_.atrous_iter_cnt - 1);
 
-        auto camera_distance = AT_NAME::camera::ComputeScreenDistance(m_cam, height);
+        auto camera_distance = AT_NAME::Camera::ComputeScreenDistance(m_cam, height);
 
         atrousFilter << <grid, block, 0, m_stream >> > (
             isFirstIter, isFinalIter,

@@ -6,7 +6,7 @@
 #include "math/math.h"
 
 namespace aten {
-    class EquirectCamera : public camera {
+    class EquirectCamera : public Camera {
     public:
         EquirectCamera() = default;
         virtual ~EquirectCamera() = default;
@@ -42,25 +42,25 @@ namespace aten {
             float s, float t,
             sampler* sampler) const override final;
 
-        virtual const vec3& getPos() const override final
+        virtual const vec3& GetPos() const override final
         {
             return m_origin;
         }
-        virtual const vec3& getDir() const override final
+        virtual const vec3& GetDir() const override final
         {
             return m_dir;
         }
 
-        virtual aten::vec3& getPos() override final
+        virtual aten::vec3& GetPos() override final
         {
             return m_origin;
         }
-        virtual aten::vec3& getAt() override final
+        virtual aten::vec3& GetAt() override final
         {
             return m_at;
         }
 
-        void revertRayToPixelPos(
+        void RevertRayToPixelPos(
             const ray& ray,
             int32_t& px, int32_t& py) const override final
         {

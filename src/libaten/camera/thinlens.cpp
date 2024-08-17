@@ -120,7 +120,7 @@ namespace aten {
         CameraSampleResult result;
 
         // イメージセンサ上の座標、[-0,5, 0.5]の範囲（0,0)がイメージセンサ中央を示す.
-        result.posOnImageSensor = m_imagesensor.center + s * m_imagesensor.u + t * m_imagesensor.v;
+        result.pos_on_image_sensor = m_imagesensor.center + s * m_imagesensor.u + t * m_imagesensor.v;
 
         // オブジェクトプレーン上の座標計算
         // オブジェクトプレーンのサイズは、レンズの公式の倍率計算（m=b/a）
@@ -129,7 +129,7 @@ namespace aten {
         // センサーとオブジェクトプレーンの向きは反対になるので、マイナスする?
         float u_on_objectplane = -ratio * s;
         float v_on_objectplane = -ratio * t;
-        result.posOnObjectplane = m_objectplane.center + u_on_objectplane * m_objectplane.u + v_on_objectplane * m_objectplane.v;
+        result.pos_on_object_plane = m_objectplane.center + u_on_objectplane * m_objectplane.u + v_on_objectplane * m_objectplane.v;
 
         // NOTE
         // lens.u、lens.v に lens.radius が含まれているので、レンズの半径について考慮する必要がない.
@@ -137,27 +137,27 @@ namespace aten {
         float r1 = sampler->nextSample() * float(2.0) * AT_MATH_PI;
         float u = r0 * cos(r1);
         float v = r0 * sin(r1);
-        result.posOnLens = m_lens.center + u * m_lens.u + v * m_lens.v;
-        result.nmlOnLens = m_lens.normal;
+        result.pos_on_lens = m_lens.center + u * m_lens.u + v * m_lens.v;
+        result.nml_on_lens = m_lens.normal;
 
         // ピクセル内の一点をサンプリングする確率密度関数（面積測度）
-        result.pdfOnImageSensor = float(1.0) / (m_pixelWidth * m_pixelHeight);
+        result.pdf_on_image_sensor = float(1.0) / (m_pixelWidth * m_pixelHeight);
 
         // レンズ上の一点をサンプリングする確率密度関数（面積測度）
-        result.pdfOnLens = float(1.0) / (AT_MATH_PI * m_lens.radius * m_lens.radius);
+        result.pdf_on_lens = float(1.0) / (AT_MATH_PI * m_lens.radius * m_lens.radius);
 
         result.r = ray(
-            result.posOnLens,
-            normalize(result.posOnObjectplane - result.posOnLens));
+            result.pos_on_lens,
+            normalize(result.pos_on_object_plane - result.pos_on_lens));
 
         return result;
     }
 
-    float ThinLensCamera::hitOnLens(
+    float ThinLensCamera::HitOnLens(
         const ray& r,
-        vec3& posOnLens,
-        vec3& posOnObjectPlane,
-        vec3& posOnImageSensor,
+        vec3& pos_on_lens,
+        vec3& pos_on_object_plane,
+        vec3& pos_on_image_sensor,
         int32_t& x, int32_t& y) const
     {
         // レンズと判定
@@ -165,24 +165,24 @@ namespace aten {
 
         if (AT_MATH_EPSILON < lens_t)
         {
-            posOnLens = r.org + lens_t * r.dir;
-            auto l = length(posOnLens - m_lens.center);
+            pos_on_lens = r.org + lens_t * r.dir;
+            auto l = length(pos_on_lens - m_lens.center);
             auto d = dot(m_lens.normal, r.dir);
 
             if (l < m_lens.radius && d <= 0.0)
             {
                 auto objplane_t = plane_intersection(m_objectplane.normal, m_objectplane.center, r);
 
-                posOnObjectPlane = r.org + objplane_t * r.dir;
+                pos_on_object_plane = r.org + objplane_t * r.dir;
 
-                auto u_on_objectplane = dot(posOnObjectPlane - m_objectplane.center, normalize(m_objectplane.u)) / length(m_objectplane.u);
-                auto v_on_objectplane = dot(posOnObjectPlane - m_objectplane.center, normalize(m_objectplane.v)) / length(m_objectplane.v);
+                auto u_on_objectplane = dot(pos_on_object_plane - m_objectplane.center, normalize(m_objectplane.u)) / length(m_objectplane.u);
+                auto v_on_objectplane = dot(pos_on_object_plane - m_objectplane.center, normalize(m_objectplane.v)) / length(m_objectplane.v);
 
                 auto ratio = m_imageSensorToLensDistance / m_lensToObjectplaneDistance;
                 auto u = -ratio * u_on_objectplane;
                 auto v = -ratio * v_on_objectplane;
 
-                posOnImageSensor = m_imagesensor.center + u * m_imagesensor.u + v * m_imagesensor.v;
+                pos_on_image_sensor = m_imagesensor.center + u * m_imagesensor.u + v * m_imagesensor.v;
 
                 if (-0.5f <= u && u < 0.5
                     && -0.5f <= v && v < 0.5)
@@ -199,13 +199,13 @@ namespace aten {
     }
 
     // イメージセンサ上のサンプリング確率密度（イメージセンサの面積測度に関する確率密度）をシーン上のサンプリング確率密度（面積測度に関する確率密度）に変換する.
-    float ThinLensCamera::convertImageSensorPdfToScenePdf(
-        float pdfImage,
-        const vec3& hitPoint,
-        const vec3& hitpointNml,
-        const vec3& posOnImageSensor,
-        const vec3& posOnLens,
-        const vec3& posOnObjectPlane) const
+    float ThinLensCamera::ConvertImageSensorPdfToScenePdf(
+        float pdf_image,
+        const vec3& hit_point,
+        const vec3& hit_point_nml,
+        const vec3& pos_on_image_sensor,
+        const vec3& pos_on_lens,
+        const vec3& pos_on_object_plane) const
     {
         // NOTE
         // http://rayspace.xyz/CG/contents/DoF.html
@@ -216,10 +216,10 @@ namespace aten {
         // p111
         // Pa = (B/A)^2 * (r''/r)^2 * (cosΘ'/cosΘ'') * Pij
 
-        const vec3& x0 = posOnLens;
-        const vec3& xI = posOnImageSensor;
-        const vec3& xV = posOnObjectPlane;
-        const vec3& x1 = hitPoint;
+        const vec3& x0 = pos_on_lens;
+        const vec3& xI = pos_on_image_sensor;
+        const vec3& xV = pos_on_object_plane;
+        const vec3& x1 = hit_point;
 
         const vec3 x0_xV = xV - x0;
         const vec3 x0_x1 = x1 - x0;
@@ -236,25 +236,25 @@ namespace aten {
         auto r2 = (squared_length(x0_xV) / squared_length(x0_x1));
 
         // (cosΘ'/cosΘ'')
-        auto c2 = (dot(normalize(-x0_x1), hitpointNml) / dot(normalize(x0_x1), normalize(m_imagesensor.dir)));
+        auto c2 = (dot(normalize(-x0_x1), hit_point_nml) / dot(normalize(x0_x1), normalize(m_imagesensor.dir)));
 
         // イメージセンサの面積測度に関する確率密度.
-        //auto pdfOnImageSensor = 1.0 / (m_imagesensor.width * m_imagesensor.height);
+        //auto pdf_on_image_sensor = 1.0 / (m_imagesensor.width * m_imagesensor.height);
 
-        auto pdf = pdfImage * ba2 * r2 * c2;
+        auto pdf = pdf_image * ba2 * r2 * c2;
 
         return pdf;
     }
 
-    float ThinLensCamera::getSensitivity(
-        const vec3& posOnImagesensor,
-        const vec3& posOnLens) const
+    float ThinLensCamera::GetSensitivity(
+        const vec3& pos_on_image_sensor,
+        const vec3& pos_on_lens) const
     {
         // NOTE
         // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
         // p54 - p62
 
-        const vec3 x0_xI = posOnImagesensor - posOnLens;
+        const vec3 x0_xI = pos_on_image_sensor - pos_on_lens;
 
         // センサ上の点の半球積分を、レンズ上の点の積分に変数変換した時に導入される係数
         // (cosΘ)^2/r^2
@@ -268,20 +268,20 @@ namespace aten {
         return ret;
     }
 
-    float ThinLensCamera::getWdash(
-        const vec3& hitPoint,
-        const vec3& hitpointNml,
-        const vec3& posOnImageSensor,
-        const vec3& posOnLens,
-        const vec3& posOnObjectPlane) const
+    float ThinLensCamera::GetWdash(
+        const vec3& hit_point,
+        const vec3& hit_point_nml,
+        const vec3& pos_on_image_sensor,
+        const vec3& pos_on_lens,
+        const vec3& pos_on_object_plane) const
     {
         // 幾何的な係数計算 + センサーセンシティビティの項を計算する.
         // x1 -> x0への放射輝度が最終的にイメージセンサに与える寄与度.
 
-        const vec3& x0 = posOnLens;
-        const vec3& xI = posOnImageSensor;
-        const vec3& xV = posOnObjectPlane;
-        const vec3& x1 = hitPoint;
+        const vec3& x0 = pos_on_lens;
+        const vec3& xI = pos_on_image_sensor;
+        const vec3& xV = pos_on_object_plane;
+        const vec3& x1 = hit_point;
 
         const vec3 x0_xI = xI - x0;    // lens to image sensor.
         const vec3 x0_xV = xV - x0;    // lens to object plane.
@@ -321,19 +321,19 @@ namespace aten {
         return W_dash;
     }
 
-    void ThinLensCamera::revertRayToPixelPos(
+    void ThinLensCamera::RevertRayToPixelPos(
         const ray& ray,
         int32_t& px, int32_t& py) const
     {
-        vec3 posOnLens;
-        vec3 posOnObjectPlane;
-        vec3 posOnImageSensor;
+        vec3 pos_on_lens;
+        vec3 pos_on_object_plane;
+        vec3 pos_on_image_sensor;
 
-        hitOnLens(
+        HitOnLens(
             ray,
-            posOnLens,
-            posOnObjectPlane,
-            posOnImageSensor,
+            pos_on_lens,
+            pos_on_object_plane,
+            pos_on_image_sensor,
             px, py);
     }
 }

@@ -258,7 +258,7 @@ float MeasureEffectiveRetroreflectiveArea::HitTest(float theta, float phi)
 
 void MeasureEffectiveRetroreflectiveArea::VisualizeForDebug(
     const aten::context& ctxt,
-    const aten::camera* cam)
+    const aten::Camera* cam)
 {
     m_shader.prepareRender(nullptr, false);
 

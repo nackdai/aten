@@ -54,7 +54,7 @@ namespace aten
         const context& ctxt,
         Destination& dst,
         scene* scene,
-        camera* camera)
+        Camera* camera)
     {
         int32_t width = dst.width;
         int32_t height = dst.height;

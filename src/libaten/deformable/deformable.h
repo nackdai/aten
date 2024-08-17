@@ -135,7 +135,7 @@ namespace aten
 
         void render(
             const context& ctxt,
-            const camera* cam,
+            const Camera* cam,
             deformable* mdl);
 
     private:

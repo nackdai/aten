@@ -47,12 +47,12 @@ namespace AT_NAME
             m_param.light_color = light_color;
         }
 
-        const aten::vec3& getPos() const
+        const aten::vec3& GetPos() const
         {
             return m_param.pos.v;
         }
 
-        const aten::vec3& getDir() const
+        const aten::vec3& GetDir() const
         {
             return m_param.dir.v;
         }

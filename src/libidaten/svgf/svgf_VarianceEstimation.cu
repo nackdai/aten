@@ -60,7 +60,7 @@ namespace idaten
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
-        float cameraDistance = AT_NAME::camera::ComputeScreenDistance(m_cam, height);
+        float cameraDistance = AT_NAME::Camera::ComputeScreenDistance(m_cam, height);
 
         auto& curaov = params_.GetCurrAovBuffer();
 

@@ -138,7 +138,7 @@ namespace AT_NAME {
             std::function<bool(const std::shared_ptr<aten::hitable>&)> funcIfDraw,
             const aten::context& ctxt) const;
 
-        virtual const aten::aabb& GetBoundingBox() const = 0;
+        virtual aten::aabb GetBoundingBox() const = 0;
 
     protected:
         std::vector<std::shared_ptr<aten::hitable>> m_list;

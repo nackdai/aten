@@ -8,8 +8,6 @@ add_library(
   ../../3rdparty/picojson/picojson.h
   ../../3rdparty/tinyxml2/tinyxml2.cpp
   ../../3rdparty/tinyxml2/tinyxml2.h
-  AssetManager.cpp
-  AssetManager.h
   AssimpImporter.cpp
   AssimpImporter.h
   ImageLoader.cpp

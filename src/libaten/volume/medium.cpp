@@ -57,7 +57,7 @@ namespace AT_NAME {
 
     AT_DEVICE_API aten::tuple<bool, aten::ray> HeterogeneousMedium::Sample(
         AT_NAME::PathThroughput& throughput,
-        AT_NAME::sampler& sampler,
+        aten::sampler& sampler,
         const aten::ray& ray,
         const aten::MediumParameter& param,
         nanovdb::FloatGrid* grid)
@@ -152,7 +152,7 @@ namespace AT_NAME {
 
     AT_DEVICE_API float HeterogeneousMedium::EvaluateTransmittance(
         nanovdb::FloatGrid* grid,
-        AT_NAME::sampler& sampler,
+        aten::sampler& sampler,
         const aten::MediumParameter& medium,
         const aten::vec3& p1, const aten::vec3& p2)
     {

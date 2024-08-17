@@ -7,6 +7,7 @@
 #include "misc/tuple.h"
 #include "renderer/pathtracing/pt_params.h"
 #include "volume/medium.h"
+#include "volume/grid.h"
 
 #ifdef __CUDACC__
 #include "cuda/cudadefs.h"
@@ -63,16 +64,15 @@ namespace AT_NAME
         return mtrl.type != aten::MaterialType::MaterialTypeMax && mtrl.is_medium;
     }
 
-    namespace _detail {
-        inline AT_DEVICE_API nanovdb::FloatGrid* GetGrid(
-            const AT_NAME::context& ctxt,
-            const aten::MediumParameter& medium)
-        {
-            auto* grid = medium.grid_idx >= 0
-                ? ctxt.GetGrid(medium.grid_idx)
-                : nullptr;
-            return grid;
-        }
+    inline AT_DEVICE_API nanovdb::FloatGrid* GetGridFromContext(
+        const AT_NAME::context& ctxt,
+        const aten::MediumParameter& medium)
+    {
+        auto* grid_holder = ctxt.GetGrid();
+        auto* grid = medium.grid_idx >= 0 && grid_holder
+            ? grid_holder->GetGrid(medium.grid_idx)
+            : nullptr;
+        return grid;
     }
 
     inline AT_DEVICE_API aten::tuple<bool, float> TraverseShadowRay(
@@ -126,7 +126,7 @@ namespace AT_NAME
 
                 if (HasMedium(medium_stack)) {
                     const auto& medium = GetCurrentMedium(ctxt, medium_stack);
-                    auto* grid = _detail::GetGrid(ctxt, medium);
+                    auto* grid = GetGridFromContext(ctxt, medium);
 
                     float tr = 1.0F;
 
@@ -158,7 +158,7 @@ namespace AT_NAME
                 // Nothing to occlude to light.
                 if (HasMedium(medium_stack)) {
                     const auto& medium = GetCurrentMedium(ctxt, medium_stack);
-                    auto* grid = _detail::GetGrid(ctxt, medium);
+                    auto* grid = GetGridFromContext(ctxt, medium);
 
                     const auto end_p = ray(t_max);
                     float tr = 1.0F;

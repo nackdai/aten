@@ -18,12 +18,12 @@
 #include "misc/type_traits.h"
 #include "texture/texture.h"
 #include "visualizer/GeomDataBuffer.h"
-#include "volume/aten_nanovdb_defs.h"
 
 namespace AT_NAME {
     class triangle;
     class Light;
     class scene;
+    class Grid;
 }
 
 namespace aten
@@ -146,18 +146,12 @@ namespace aten
         }
 
         /**
-         * @brief Get the volumetric grid.
-         * @param[in] idx Index to the voumetric grid.
-         * @return Voumetric grid.
+         * @brief Get the volumetric grid holder.
+         * @return Voumetric grid holder.
          */
-        nanovdb::FloatGrid* GetGrid(int32_t idx) const noexcept;
+        const AT_NAME::Grid* GetGrid() const noexcept;
 
-        /**
-         * @brief Registerd the volumetric grid.
-         * @param[in] grid Volumetric grid to be registered.
-         * @return Index to the registered volumetric grid.
-         */
-        int32_t AddGrid(nanovdb::FloatGrid* grid);
+        void RegisterGridHolder(const std::shared_ptr<AT_NAME::Grid>& grid_holder);
 
         /**
          * @brief Get the triangle parameter by index.
@@ -489,18 +483,7 @@ namespace aten
             return is_window_initialized_;
         }
 
-        void CleanAll()
-        {
-            vertices_.clear();
-            vertex_buffer_.clear();
-            materials_.clear();
-            triangles_.clear();
-            transformables_.clear();
-            textures_.clear();
-            matrices_.clear();
-            lights_.clear();
-            grids_.clear();
-        }
+        void CleanAll();
 
         /**
          * @brief Get the texture instance by name.
@@ -552,7 +535,8 @@ namespace aten
         std::vector<std::shared_ptr<aten::texture>> textures_;
         std::vector<std::shared_ptr<aten::mat4>> matrices_;
         std::vector<std::shared_ptr<AT_NAME::Light>> lights_;
-        std::vector<nanovdb::FloatGrid*> grids_;
+
+        std::shared_ptr<AT_NAME::Grid> grid_holder_;
 
         aten::aabb scene_bounding_box_;
 

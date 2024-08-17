@@ -7,6 +7,7 @@
 #include "geometry/transformable.h"
 #include "light/light.h"
 #include "scene/scene.h"
+#include "volume/grid.h"
 
 namespace aten
 {
@@ -312,23 +313,33 @@ namespace aten
         return lights_.size();
     }
 
+    void context::CleanAll()
+    {
+        vertices_.clear();
+        vertex_buffer_.clear();
+        materials_.clear();
+        triangles_.clear();
+        transformables_.clear();
+        textures_.clear();
+        matrices_.clear();
+        lights_.clear();
+        if (grid_holder_) {
+            grid_holder_->Clear();
+        }
+    }
+
     void context::UpdateSceneBoundingBox(const AT_NAME::scene& scene)
     {
         scene_bounding_box_ = scene.GetBoundingBox();
     }
 
-    nanovdb::FloatGrid* context::GetGrid(int32_t idx) const noexcept
+    const AT_NAME::Grid* context::GetGrid() const noexcept
     {
-        if (0 <= idx && idx < grids_.size()) {
-            return grids_[idx];
-        }
-        return nullptr;
+        return grid_holder_.get();
     }
 
-    int32_t context::AddGrid(nanovdb::FloatGrid* grid)
+    void context::RegisterGridHolder(const std::shared_ptr<AT_NAME::Grid>& grid_holder)
     {
-        grids_.emplace_back(grid);
-        int32_t ret = static_cast<int32_t>(grids_.size() - 1);
-        return ret;
+        grid_holder_ = grid_holder;
     }
 }

@@ -61,8 +61,8 @@ namespace aten
 
         if (AT_NAME::HasMedium(paths.throughput[idx].mediums)) {
             const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
-            auto* grid = (mtrl.is_medium && mtrl.medium.grid_idx >= 0)
-                ? ctxt.GetGrid(mtrl.medium.grid_idx)
+            auto* grid = mtrl.is_medium
+                ? AT_NAME::GetGridFromContext(ctxt, mtrl.medium)
                 : nullptr;
 
             if (grid) {
@@ -191,9 +191,10 @@ namespace aten
 
         if (AT_NAME::HasMedium(paths.throughput[idx].mediums)) {
             const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
-            auto* grid = (mtrl.is_medium && mtrl.medium.grid_idx >= 0)
-                ? ctxt.GetGrid(mtrl.medium.grid_idx)
+            auto* grid = mtrl.is_medium
+                ? AT_NAME::GetGridFromContext(ctxt, mtrl.medium)
                 : nullptr;
+
             if (grid) {
                 aten::tie(is_scattered, next_ray) = AT_NAME::HeterogeneousMedium::Sample(
                     paths.throughput[idx],

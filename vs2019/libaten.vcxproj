@@ -271,7 +271,6 @@
     <ClInclude Include="..\src\libaten\visualizer\shader.h" />
     <ClInclude Include="..\src\libaten\visualizer\visualizer.h" />
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
-    <ClInclude Include="..\src\libaten\volume\aten_nanovdb_defs.h" />
     <ClInclude Include="..\src\libaten\volume\grid.h" />
     <ClInclude Include="..\src\libaten\volume\medium.h" />
     <ClInclude Include="..\src\libaten\volume\phase_function.h" />

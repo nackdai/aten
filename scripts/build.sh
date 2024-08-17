@@ -83,7 +83,7 @@ COMPILE_COMMANDS_JSON="compile_commands.json"
 # Just exporting compile_commands.json, so finish here.
 if "${will_export_compile_commands_json}"; then
   if [ -e "${PWD}/build/${COMPILE_COMMANDS_JSON}" ]; then
-    mv "${PWD}/build/${COMPILE_COMMANDS_JSON}" "${PWD}/${COMPILE_COMMANDS_JSON}"
+    mv -f "${PWD}/build/${COMPILE_COMMANDS_JSON}" "${PWD}/${COMPILE_COMMANDS_JSON}"
     exit 0
   else
     echo "Not generated ${COMPILE_COMMANDS_JSON}"

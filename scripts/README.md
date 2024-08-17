@@ -15,14 +15,14 @@ Usage: build.sh [Options]
 Options:
   -b <build_config>       : Build configuration. Default is "Release"
   -c <compute_capability> : Compute capability for CUDA. No need to specify ".". If it's "7.5", it's specified as "75". Default is "75"
-  -d <docker_iamge>       : docker image to run build. This option is necessary
+  -d <docker_image>       : docker image to run build. This option is necessary
   -e                      : Only export compile_commands.json
 ```
 
 e.g.
 
 ```shell
-./scriots/build.sh -b Release -c 75 -d ghcr.io/nackdai/aten/aten:latest
+./scripts/build.sh -b Release -c 75 -d ghcr.io/nackdai/aten/aten:latest
 ```
 
 ## <a name="clang_tidy_sh">clang_tidy.sh</a>
@@ -39,7 +39,7 @@ runs for only diff files between two commits.
 ```plain
 Usage: clang_tidy.sh [Options]
 Options:
-  -d <docker_iamge>    : docker image to run build. Required.
+  -d <docker_image>    : docker image to run build. Required.
   -h <header_filter>   : Header filter. If nothing is specified, "src" is specified.
   -g <commit> <commit> : Specify git diff files as clang-tidy target files.
   -f                   : Fix code.
@@ -85,14 +85,14 @@ python3 ./scripts/docker_operator.py -i ghcr.io/nackdai/aten/aten_dev:latest -c 
 
 ## enter_docker_container.sh
 
-This is the helper script to run docker container and enter docker container. This scipt actually
+This is the helper script to run docker container and enter docker container. This script actually
 runs the python script `docker_operator.py`.
 
 **Usage:**
 
 ```plain
 Usage: enter_docker_container.sh <docker_image>
-  <docker_iamge>   : docker image to run build
+  <docker_image>   : docker image to run build
 ```
 
 e.g.
@@ -161,7 +161,7 @@ This is the helpder script to run the docker container and run `pre-commit` in t
 
 ```plain
 Usage: pre_commit.sh <docker_image>
-  <docker_iamge>          : docker image to run build
+  <docker_image>          : docker image to run build
 ```
 
 e.g.
@@ -172,7 +172,7 @@ pre_commit.sh ghcr.io/nackdai/aten/aten_dev:latest
 
 ## run_clang_tidy.py
 
-Thit is the python script to run `clang-tidy` actually. Bascally, this script isn't used directly.
+Thit is the python script to run `clang-tidy` actually. Basically, this script isn't used directly.
 This is used by [clang_tidy.sh](#clang_tidy_sh)
 
 **Usage:**
@@ -226,14 +226,14 @@ e.g.
 ## run_unit_test.sh
 
 This is the helper script to run aten's unit test in the docker container. This script just
-executes [run_executable.sh](#run_executable_sh) internally. This script is specialzed for running
-aten's unit test. Therefore, the unit test executable is specified directly in this scprit.
+executes [run_executable.sh](#run_executable_sh) internally. This script is specialized for running
+aten's unit test. Therefore, the unit test executable is specified directly in this script.
 
 **Usage:**
 
 ```plain
 Usage: run_unit_test.sh <docker_image> <base_directory>
-  <docker_iamge>   : docker image to run build
+  <docker_image>   : docker image to run build
   <base_directory> : Base directory to store executables
 ```
 

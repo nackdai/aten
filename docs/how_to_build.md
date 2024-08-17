@@ -127,7 +127,7 @@ There is a script to help building libraries and executables. The script fully d
 and it works on only Linux.
 
 ```shell
-./scripts/build.sh -b <build_config> -c <compute_capability -d <docker_iamge>
+./scripts/build.sh -b <build_config> -c <compute_capability -d <docker_image>
 ```
 
 For example:

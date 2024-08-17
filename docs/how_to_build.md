@@ -18,7 +18,7 @@ git submodule update --init --recursive
     - The second argument can accept `Community`, `Enterprise`, `BuildTools` etc.
     - Default is `Release` and `Communitiy`
 1. Launch `aten/vs2019/aten.sln`
-1. Build projects with `x64` (not support `x86`)
+1. Build the projects with `x64` (not support `x86`)
 
 The confirmed environment is `Visual Studio 2019` on `Windows10`.
 
@@ -55,13 +55,13 @@ Example to run `RunCMake.sh` is the following:
 ./RunCMake.sh Release 75
 ```
 
-You can get `Compute Capability` with running `get_cuda_sm.sh`.
+You can get `Compute Capability` by running `get_cuda_sm.sh`.
 If you don't specify `Compute Capability`, while configuring `CMakeLists.txt`,
-`get_cuda_sm.sh` run and `Compute Capability` is specified.
+`get_cuda_sm.sh` runs and `Compute Capability` is specified.
 
 ## Docker (on Linux)
 
-You can build and run executable aten application on Docker container.
+You can build and run the executables in docker container.
 
 1. Install `Docker`
 2. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
@@ -78,7 +78,7 @@ docker build -t <Any name> ./env/aten/
 docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <Image name>:latest bash
 ```
 
-6. In the docker container, run the following commands:
+6. In docker container, run the following commands:
 
 ```shell
 mkdir aten/build
@@ -104,7 +104,7 @@ docker-compose -f .devcontainer/docker-compose.yml build`
 docker-compose .devcontainer/docker-compose.yml run aten
 ```
 
-5. In the docker container, run the following commands:
+5. In docker container, run the following commands:
 
 ```shell
 mkdir aten/build

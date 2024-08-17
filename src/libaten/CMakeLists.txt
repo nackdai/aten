@@ -192,6 +192,7 @@ add_library(
   renderer/svgf/svgf_types.h
   renderer/volume/volume_pathtracing.cpp
   renderer/volume/volume_pathtracing.h
+  renderer/volume/volume_pathtracing_grid.cpp
   renderer/volume/volume_pathtracing_impl.h
   sampler/cmj.h
   sampler/sampler.cpp
@@ -231,6 +232,7 @@ add_library(
   visualizer/window.h
   volume/grid.cpp
   volume/grid.h
+  volume/medium.cpp
   volume/medium.h
   volume/phase_function.h)
 

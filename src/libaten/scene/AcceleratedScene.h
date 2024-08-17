@@ -64,7 +64,7 @@ namespace aten {
             return &m_accel;
         }
 
-        const aten::aabb& GetBoundingBox() const override
+        aten::aabb GetBoundingBox() const override
         {
             return m_accel.GetBoundingBox();
         }

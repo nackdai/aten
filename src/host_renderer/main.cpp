@@ -128,17 +128,17 @@ public:
     }
 
     template <class Renderer>
-    void SetMotionDepthBuffer()
+    void SetMotionDepthBuffer(Renderer& renderer)
     {
-        if constexpr (aten::is_detected<HasMemberFunc, decltype(renderer_)>::value) {
+        if constexpr (aten::is_detected<HasMemberFunc, Renderer>::value) {
             rasterizer_.drawSceneForGBuffer(
-                renderer_.GetFrameCount(),
+                renderer.GetFrameCount(),
                 ctxt_,
                 &scene_,
                 &camera_,
                 fbo_);
 
-            renderer_.SetMotionDepthBuffer(fbo_, 1);
+            renderer.SetMotionDepthBuffer(fbo_, 1);
         }
     }
 
@@ -160,7 +160,7 @@ public:
             dst.buffer = &buffer_;
         }
 
-        SetMotionDepthBuffer<decltype(renderer_)>();
+        SetMotionDepthBuffer(renderer_);
 
         const auto frame_cnt = renderer_.GetFrameCount();
 

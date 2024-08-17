@@ -189,7 +189,7 @@ private:
 
         if (!std::filesystem::exists(p)) {
             AT_ASSERT(false);
-            AT_PRINTF("%s doesn't exist.", nvdb);
+            AT_PRINTF("%s doesn't exist.", nvdb.data());
             return false;
         }
 

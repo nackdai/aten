@@ -1,3 +1,11 @@
+#pragma warning(push)
+#pragma warning(disable:4146)
+#include <nanovdb/NanoVDB.h>
+#include <nanovdb/util/HDDA.h>
+#include <nanovdb/util/IO.h>
+#include <nanovdb/util/Ray.h>
+#pragma warning(pop)
+
 #include "renderer/volume/volume_pathtracing.h"
 
 #include "material/material_impl.h"
@@ -48,20 +56,11 @@ namespace aten
 
                 can_update_depth = true;
 
-                if (is_render_grid_) {
-                    can_update_depth = NeeWithGrid(
-                        idx,
-                        path_host_.paths, ctxt, rays_.data(),
-                        isect, scene,
-                        m_rrDepth, depth);
-                }
-                else {
-                    can_update_depth = nee(
-                        idx,
-                        path_host_.paths, ctxt, rays_.data(),
-                        isect, scene,
-                        m_rrDepth, depth);
-                }
+                can_update_depth = Nee(
+                    idx,
+                    path_host_.paths, ctxt, rays_.data(),
+                    isect, scene,
+                    m_rrDepth, depth);
 
                 willContinue = !path_host_.paths.attrib[idx].isTerminate;
             }
@@ -100,7 +99,7 @@ namespace aten
         }
     }
 
-    bool VolumePathTracing::shade(
+    bool VolumePathTracing::Shade(
         int32_t idx,
         aten::Path& paths,
         const context& ctxt,
@@ -138,14 +137,15 @@ namespace aten
             rec.mtrlid, rec.isVoxel);
 
         bool is_scattered = false;
-        aten::ray next_ray(rec.p, ray.dir);
 
         if (AT_NAME::HasMedium(paths.throughput[idx].mediums)) {
-            const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
-            aten::tie(is_scattered, next_ray) = AT_NAME::HomogeniousMedium::Sample(
+            aten::ray next_ray;
+
+            aten::tie(is_scattered, next_ray) = AT_NAME::SampleMedium(
                 paths.throughput[idx],
                 paths.sampler[idx],
-                ray, medium, isect.t);
+                ctxt,
+                ray, isect);
 
             ray = next_ray;
         }
@@ -180,7 +180,6 @@ namespace aten
             }
             else {
                 auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, mtrl.baseColor, bounce);
-
 
                 if (!mtrl.attrib.isTranslucent && isBackfacing) {
                     orienting_normal = -orienting_normal;
@@ -223,7 +222,7 @@ namespace aten
         return will_update_depth;
     }
 
-    bool VolumePathTracing::nee(
+    bool VolumePathTracing::Nee(
         int32_t idx,
         aten::Path& paths,
         const context& ctxt,
@@ -261,14 +260,15 @@ namespace aten
             rec.mtrlid, rec.isVoxel);
 
         bool is_scattered = false;
-        aten::ray next_ray(rec.p, ray.dir);
 
         if (AT_NAME::HasMedium(paths.throughput[idx].mediums)) {
-            const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
-            aten::tie(is_scattered, next_ray) = AT_NAME::HomogeniousMedium::Sample(
+            aten::ray next_ray;
+
+            aten::tie(is_scattered, next_ray) = AT_NAME::SampleMedium(
                 paths.throughput[idx],
                 paths.sampler[idx],
-                ray, medium, isect.t);
+                ctxt,
+                ray, isect);
 
             if (is_scattered) {
                 auto nml = dot(next_ray.dir, orienting_normal) > 0

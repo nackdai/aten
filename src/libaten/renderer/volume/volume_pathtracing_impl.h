@@ -75,6 +75,38 @@ namespace AT_NAME
         return grid;
     }
 
+    inline AT_DEVICE_API aten::tuple<bool, aten::ray> SampleMedium(
+        aten::PathThroughput& throughput,
+        aten::sampler& sampler,
+        const aten::context& ctxt,
+        const aten::ray& ray,
+        const aten::Intersection& isect
+    )
+    {
+        bool is_scattered = false;
+        aten::ray next_ray;
+
+        const auto& medium = AT_NAME::GetCurrentMedium(ctxt, throughput.mediums);
+        auto* grid = GetGridFromContext(ctxt, medium);
+
+        if (grid) {
+            aten::tie(is_scattered, next_ray) = AT_NAME::HeterogeneousMedium::Sample(
+                throughput,
+                sampler,
+                ray,
+                medium,
+                grid);
+        }
+        else {
+            aten::tie(is_scattered, next_ray) = AT_NAME::HomogeniousMedium::Sample(
+                throughput,
+                sampler,
+                ray, medium, isect.t);
+        }
+
+        return aten::make_tuple(is_scattered, next_ray);
+    }
+
     inline AT_DEVICE_API aten::tuple<bool, float> TraverseShadowRay(
         const AT_NAME::context& ctxt,
         aten::sampler& sampler,

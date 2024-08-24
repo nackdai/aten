@@ -28,9 +28,15 @@ namespace AT_NAME
             rec.isVoxel = true;
         }
         else {
-            // Get float object. If the object is instance, we need to get float one.
-            const auto& real_obj = obj.object_id >= 0 ? ctxt.GetObject(obj.object_id) : obj;
-            const auto mtx_id = obj.object_id >= 0 ? obj.mtx_id : real_obj.mtx_id;
+            // Get real object. If the object is instance, we need to get real object.
+            const auto& real_obj = obj.type == aten::ObjectType::Instance
+                ? ctxt.GetObject(obj.object_id)
+                : obj;
+
+            // The matrix is applied for only instance type.
+            const auto mtx_id = obj.type == aten::ObjectType::Instance
+                ? obj.mtx_id
+                : -1;
 
             aten::mat4 mtx_L2W;
             if (mtx_id >= 0) {
@@ -71,9 +77,15 @@ namespace AT_NAME
         const CONTEXT& ctxt,
         aten::sampler* sampler)
     {
-        // Get float object. If the object is instance, we need to get float one.
-        const auto& real_obj = obj.object_id >= 0 ? ctxt.GetObject(obj.object_id) : obj;
-        const auto mtx_id = obj.object_id >= 0 ? obj.mtx_id : real_obj.mtx_id;
+        // Get real object. If the object is instance, we need to get real object.
+        const auto& real_obj = obj.type == aten::ObjectType::Instance
+            ? ctxt.GetObject(obj.object_id)
+            : obj;
+
+        // The matrix is applied for only instance type.
+        const auto mtx_id = obj.type == aten::ObjectType::Instance
+            ? obj.mtx_id
+            : -1;
 
         aten::mat4 mtx_L2W;
         if (mtx_id >= 0) {

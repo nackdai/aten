@@ -36,16 +36,21 @@ namespace aten
          * @brief Own index.
          *
          * Meaning of this variable is changed based on geometry type.
-         * - Polygons: Own index.
+         * - Polygons: Not used.
          * - Instance: Index of actual object which instance refers.
          * - Sphere: Not used.
          */
         int32_t object_id{ -1 };
 
-        int32_t mtx_id{ -1 };       ///< Index of matrix to apply to object.
+        /**
+         * @brief Index of matrix to apply to object.
+         *
+         * This is used for only Instance type.
+         */
+        int32_t mtx_id{ -1 };
 
         int32_t triangle_id{ -1 };  ///< First index of triangles in object.
-        int32_t triangle_num{ 0 }; ///< Number of triangles in object.
+        int32_t triangle_num{ 0 };  ///< Number of triangles in object.
 
         int32_t light_id{ -1 };     ///< If there is an associated light, index to light.
 
@@ -54,9 +59,6 @@ namespace aten
             float radius{ 0 };          ///< Radius of sphere.
             int32_t mtrl_id{ -1 };      ///< Index of material.
         } sphere;
-
-        ObjectParameter() = default;
-        ~ObjectParameter() = default;
     };
     AT_STATICASSERT((sizeof(ObjectParameter) % 16) == 0);
 

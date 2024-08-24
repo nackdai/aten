@@ -25,7 +25,7 @@ namespace AT_NAME
         const vec3& wo,
         const vec3& surface_normal,
         const MaterialParameter& mtrl,
-        aten::MedisumStack& mediums)
+        aten::MediumStack& mediums)
     {
         const auto wi = -ray.dir;
         const auto is_trasmitted = dot(wo, surface_normal) < 0 != dot(wi, surface_normal) < 0;
@@ -48,13 +48,13 @@ namespace AT_NAME
 
     inline AT_DEVICE_API const aten::MediumParameter& GetCurrentMedium(
         const AT_NAME::context& ctxt,
-        const aten::MedisumStack& mediums)
+        const aten::MediumStack& mediums)
     {
         auto idx = mediums.top();
         return ctxt.GetMaterial(idx).medium;
     }
 
-    inline AT_DEVICE_API bool HasMedium(const aten::MedisumStack& mediums)
+    inline AT_DEVICE_API bool HasMedium(const aten::MediumStack& mediums)
     {
         return !mediums.empty();
     }
@@ -113,7 +113,7 @@ namespace AT_NAME
         const aten::LightSampleResult& light_sample,
         const aten::vec3& start_point,
         const aten::vec3& surface_nml,
-        aten::MedisumStack medium_stack,
+        aten::MediumStack medium_stack,
         scene* scene)
     {
         float transmittance = 1.0F;

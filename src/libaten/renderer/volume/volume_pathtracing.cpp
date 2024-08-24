@@ -271,9 +271,11 @@ namespace aten
                 ray, isect);
 
             if (is_scattered) {
-                auto nml = dot(next_ray.dir, orienting_normal) > 0
-                    ? orienting_normal
-                    : -orienting_normal;
+                // NOTE:
+                // In volume, there is no normal.
+                // On the other hand, there is a possibility that we need to compute the tangent cooridnate.
+                // Therefore, next ray direction is treated as the normal alternatively.
+                const auto& nml = next_ray.dir;
 
                 aten::LightSampleResult light_sample;
                 float light_select_prob = 0.0F;

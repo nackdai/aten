@@ -118,6 +118,12 @@ namespace aten
         const aten::ObjectParameter& GetObject(uint32_t idx) const noexcept;
 
         /**
+         * @brief Get the list of object parameter and the list of the tranform matrix.
+         * @return Tuple for the list of object parameter and the list of the tranform matrix.
+         */
+        aten::tuple<std::vector<aten::ObjectParameter>, std::vector<aten::mat4>> GetObjectParametersAndMatrices() const;
+
+        /**
          * @brief Get number of registered objects.
          * @return Number of registered objects.
          */
@@ -135,6 +141,12 @@ namespace aten
         {
             return GetMaterialInstance(idx)->param();
         }
+
+        /**
+         * @brief Get the list of the material paremeter.
+         * @return List of the material paremeter.
+         */
+        std::vector<aten::MaterialParameter> GetMetarialParemeters() const;
 
         /**
          * @brief Get number of registered materials.
@@ -162,11 +174,17 @@ namespace aten
         const aten::TriangleParameter& GetTriangle(uint32_t idx) const noexcept;
 
         /**
-         * @brief Get the triangle parameter by index.
+         * @brief Get the light parameter by index.
          * @param[in] idx Index to the triangle parameter.
          * @return Triangle parameter.
          */
         const aten::LightParameter& GetLight(uint32_t idx) const noexcept;
+
+        /**
+         * @brief Get the list of the light parameter.
+         * @return List of the light parameter.
+         */
+        std::vector<aten::LightParameter> GetLightParameters() const;
 
         /**
          * @brief Get the matrix by index.
@@ -204,6 +222,12 @@ namespace aten
         {
             return vertices_;
         }
+
+        /**
+         * @brief Get the list of extracted position and normal from the vertices.
+         * @return List of extracted position and normal from the vertices.
+         */
+        aten::tuple<std::vector<aten::vec4>, std::vector<aten::vec4>> GetExtractedPosAndNmlInVertices() const;
 
         /**
          * @brief Get the number of the registered vertices.
@@ -334,7 +358,13 @@ namespace aten
          * @param[in] idx Index to the the actual triangle instance.
          * @return Triangle instance.
          */
-        std::shared_ptr<const AT_NAME::triangle> GetTriangleInstance(int32_t idx) const;
+        std::shared_ptr<AT_NAME::triangle> GetTriangleInstance(int32_t idx) const;
+
+        /**
+         * @brief Get the list of the triangle parameters.
+         * @return List of the triangle parameters.
+         */
+        std::vector<aten::TriangleParameter> GetPrimitiveParameters() const;
 
         /**
          * @brief Copy the registered triangles' paramters to the specified list.
@@ -361,7 +391,7 @@ namespace aten
          * @brief[in] idx Index to the transformable instance
          * @return If the transformable instance is found, returns it. Otherwise, returns nullptr.
          */
-        std::shared_ptr<const aten::transformable> GetTransformable(int32_t idx) const;
+        std::shared_ptr<aten::transformable> GetTransformable(int32_t idx) const;
 
         /**
          * @brief Traverse all registered transformable and execute the specified function for each transformable.

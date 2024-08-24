@@ -36,9 +36,8 @@ namespace idaten
         virtual void reset() {}
 
         void updateBVH(
-            const std::vector<aten::ObjectParameter>& geoms,
-            const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
-            const std::vector<aten::mat4>& mtxs);
+            const aten::context& scene_ctxt,
+            const std::vector<std::vector<aten::GPUBvhNode>>& nodes);
 
         void updateGeometry(
             std::vector<CudaGLBuffer>& vertices,
@@ -73,6 +72,16 @@ namespace idaten
         }
 
     protected:
+        virtual void UpdateSceneData(
+            GLuint gltex,
+            int32_t width, int32_t height,
+            const aten::CameraParameter& camera,
+            const aten::context& scene_ctxt,
+            const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
+            uint32_t advance_prim_num,
+            uint32_t advance_vtx_num,
+            const aten::BackgroundResource& bg_resource);
+
         idaten::DeviceContextInHost ctxt_host_;
 
         idaten::CudaGLSurface m_glimg;

@@ -18,6 +18,35 @@ namespace aten
         return GetTransformable(idx)->GetParam();
     }
 
+    aten::tuple<std::vector<aten::ObjectParameter>, std::vector<aten::mat4>> context::GetObjectParametersAndMatrices() const
+    {
+        // NOTE
+        // Apply the index to the tranform matrix of the objects in the following.
+        // So, the following have to be called before aggrigating the object paraemters.
+        auto mtxs = PickNonIdentityMatricesAndUpdateMatrixIdxInTransformable();
+
+        std::vector<aten::ObjectParameter> objs;
+        objs.reserve(transformables_.size());
+
+        for (const auto& transformable : transformables_) {
+            objs.emplace_back(transformable->GetParam());
+        }
+
+        return aten::make_tuple(objs, mtxs);
+    }
+
+    std::vector<aten::MaterialParameter> context::GetMetarialParemeters() const
+    {
+        std::vector<aten::MaterialParameter> mtrls;
+        mtrls.reserve(materials_.size());
+
+        for (const auto& material : materials_) {
+            mtrls.emplace_back(material->param());
+        }
+
+        return mtrls;
+    }
+
     const aten::TriangleParameter& context::GetTriangle(uint32_t idx) const noexcept
     {
         return triangles_[idx]->GetParam();
@@ -26,6 +55,34 @@ namespace aten
     const aten::LightParameter& context::GetLight(uint32_t idx) const noexcept
     {
         return lights_[idx]->param();
+    }
+
+    std::vector<aten::LightParameter> context::GetLightParameters() const
+    {
+        std::vector<aten::LightParameter> lights;
+        lights.reserve(lights_.size());
+
+        for (const auto& light : lights_) {
+            lights.emplace_back(light->param());
+        }
+
+        return lights;
+    }
+
+    aten::tuple<std::vector<aten::vec4>, std::vector<aten::vec4>> context::GetExtractedPosAndNmlInVertices() const
+    {
+        std::vector<aten::vec4> positions;
+        std::vector<aten::vec4> normals;
+
+        positions.reserve(vertices_.size());
+        normals.reserve(vertices_.size());
+
+        for (const auto& v : vertices_) {
+            positions.emplace_back(aten::vec4(v.pos.x, v.pos.y, v.pos.z, v.uv.x));
+            normals.emplace_back(aten::vec4(v.nml.x, v.nml.y, v.nml.z, v.uv.y));
+        }
+
+        return aten::make_tuple(positions, normals);
     }
 
     void context::build()
@@ -132,10 +189,22 @@ namespace aten
         return static_cast<uint32_t>(triangles_.size());
     }
 
-    std::shared_ptr<const AT_NAME::triangle> context::GetTriangleInstance(int32_t idx) const
+    std::shared_ptr<AT_NAME::triangle> context::GetTriangleInstance(int32_t idx) const
     {
         AT_ASSERT(0 <= idx && idx < triangles_.size());
         return triangles_[idx];
+    }
+
+    std::vector<aten::TriangleParameter> context::GetPrimitiveParameters() const
+    {
+        std::vector<aten::TriangleParameter> prims;
+        prims.reserve(triangles_.size());
+
+        for (const auto& triangle : triangles_) {
+            prims.emplace_back(triangle->GetParam());
+        }
+
+        return prims;
     }
 
     void context::CopyTriangleParameters(std::vector<aten::TriangleParameter>& dst) const
@@ -170,7 +239,7 @@ namespace aten
         t->updateIndex(transformables_.size() - 1);
     }
 
-    std::shared_ptr<const aten::transformable> context::GetTransformable(int32_t idx) const
+    std::shared_ptr<aten::transformable> context::GetTransformable(int32_t idx) const
     {
         AT_ASSERT(0 <= idx && idx < transformables_.size());
         return transformables_[idx];

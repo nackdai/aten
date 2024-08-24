@@ -115,22 +115,128 @@ namespace idaten {
         bg_ = bg_resource;
     }
 
-    void Renderer::updateBVH(
-        const std::vector<aten::ObjectParameter>& geoms,
+    void Renderer::UpdateSceneData(
+        GLuint gltex,
+        int32_t width, int32_t height,
+        const aten::CameraParameter& camera,
+        const aten::context& scene_ctxt,
         const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
-        const std::vector<aten::mat4>& mtxs)
+        uint32_t advance_prim_num,
+        uint32_t advance_vtx_num,
+        const aten::BackgroundResource& bg_resource)
     {
-        ctxt_host_.shapeparam.writeFromHostToDeviceByNum(&geoms[0], geoms.size());
+        m_glimg.init(gltex, CudaGLRscRegisterType::ReadWrite);
+
+        m_cam = camera;
+
+        std::vector<aten::ObjectParameter> objs;
+        std::vector<aten::mat4> mtxs;
+
+        aten::tie(objs, mtxs) = scene_ctxt.GetObjectParametersAndMatrices();
+
+        ctxt_host_.shapeparam.resize(objs.size());
+        ctxt_host_.shapeparam.writeFromHostToDeviceByNum(objs.data(), objs.size());
+
+        if (!mtxs.empty()) {
+            ctxt_host_.mtxparams.resize(mtxs.size());
+            ctxt_host_.mtxparams.writeFromHostToDeviceByNum(mtxs.data(), mtxs.size());
+        }
+
+        const auto mtrls = scene_ctxt.GetMetarialParemeters();
+        ctxt_host_.mtrlparam.resize(mtrls.size());
+        ctxt_host_.mtrlparam.writeFromHostToDeviceByNum(mtrls.data(), mtrls.size());
+
+        const auto lights = scene_ctxt.GetLightParameters();
+        if (!lights.empty()) {
+            ctxt_host_.lightparam.resize(lights.size());
+            ctxt_host_.lightparam.writeFromHostToDeviceByNum(lights.data(), lights.size());
+        }
+
+        const auto prims = scene_ctxt.GetPrimitiveParameters();
+        if (prims.empty()) {
+            ctxt_host_.primparams.resize(advance_prim_num);
+        }
+        else {
+            ctxt_host_.primparams.resize(prims.size() + advance_prim_num);
+            ctxt_host_.primparams.writeFromHostToDeviceByNum(prims.data(), prims.size());
+        }
+
+        ctxt_host_.nodeparam.resize(nodes.size());
+        for (int32_t i = 0; i < nodes.size(); i++) {
+            if (!nodes[i].empty()) {
+                ctxt_host_.nodeparam[i].init(
+                    reinterpret_cast<const aten::vec4*>(&nodes[i][0]),
+                    sizeof(aten::GPUBvhNode) / sizeof(float4),
+                    nodes[i].size());
+            }
+        }
+        ctxt_host_.nodetex.resize(nodes.size());
+
+        const auto vtxs_num = scene_ctxt.GetVertexNum();
+        if (vtxs_num == 0) {
+            ctxt_host_.vtxparamsPos.init(nullptr, 1, advance_vtx_num);
+            ctxt_host_.vtxparamsNml.init(nullptr, 1, advance_vtx_num);
+        }
+        else {
+            std::vector<aten::vec4> pos;
+            std::vector<aten::vec4> nml;
+
+            aten::tie(pos, nml) = scene_ctxt.GetExtractedPosAndNmlInVertices();
+
+            ctxt_host_.vtxparamsPos.init(nullptr, 1, pos.size() + advance_vtx_num);
+            ctxt_host_.vtxparamsNml.init(nullptr, 1, nml.size() + advance_vtx_num);
+
+            ctxt_host_.vtxparamsPos.update(pos.data(), 1, pos.size());
+            ctxt_host_.vtxparamsNml.update(nml.data(), 1, nml.size());
+        }
+
+        {
+            auto tex_num = scene_ctxt.GetTextureNum();
+            ctxt_host_.texRsc.reserve(tex_num);
+
+            for (int32_t i = 0; i < tex_num; i++)
+            {
+                auto t = scene_ctxt.GetTexture(i);
+                ctxt_host_.texRsc.emplace_back(idaten::CudaTexture());
+
+                // TODO
+#if 0
+                if (envmapRsc.idx == i) {
+                    m_texRsc[i].initAsMipmap(texs[i].ptr, texs[i].width, texs[i].height, 100);
+                }
+                else {
+                    m_texRsc[i].init(texs[i].ptr, texs[i].width, texs[i].height);
+                }
+#else
+                ctxt_host_.texRsc[i].initAsMipmap(t->colors(), t->width(), t->height(), 100);
+#endif
+            }
+            ctxt_host_.tex.resize(tex_num);
+        }
+
+        bg_ = bg_resource;
+    }
+
+    void Renderer::updateBVH(
+        const aten::context& scene_ctxt,
+        const std::vector<std::vector<aten::GPUBvhNode>>& nodes)
+    {
+        std::vector<aten::ObjectParameter> objs;
+        std::vector<aten::mat4> mtxs;
+
+        aten::tie(objs, mtxs) = scene_ctxt.GetObjectParametersAndMatrices();
+
+        ctxt_host_.shapeparam.writeFromHostToDeviceByNum(objs.data(), objs.size());
+
+        if (!mtxs.empty()) {
+            ctxt_host_.mtxparams.writeFromHostToDeviceByNum(&mtxs[0], mtxs.size());
+        }
 
         // Only for top layer...
         ctxt_host_.nodeparam[0].init(
             (aten::vec4*)&nodes[0][0],
             sizeof(aten::GPUBvhNode) / sizeof(float4),
             nodes[0].size());
-
-        if (!mtxs.empty()) {
-            ctxt_host_.mtxparams.writeFromHostToDeviceByNum(&mtxs[0], mtxs.size());
-        }
     }
 
     void Renderer::updateGeometry(

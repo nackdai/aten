@@ -209,6 +209,18 @@ namespace aten
 
         void init_matrices(context& ctxt)
         {
+            // NOTE:
+            // L2W matrix and W2L matrix are treated as pair.
+            // And, the matrices are listed as pair in the list.
+            //
+            // e.g.
+            // idx:   0      1      2      3      4      5    .....
+            // mtx: L2W_0, W2L_0, L2W_1, W2L_1, L2W_2, W2L_2, .....
+            //
+            // It means, if the index to one of them is identified, the index to another is just +1.
+            // e.g. If the index to mtx_L2W is 2. the index to mtx_W2L is 3.
+            // So, just keeping the index to one variable mtx_id is enough. No need to keep the two indices.
+
             aten::tie(m_param.mtx_id, m_mtx_L2W) = ctxt.CreateMatrix();
             aten::tie(std::ignore, m_mtx_W2L) = ctxt.CreateMatrix();
         }

@@ -11,9 +11,17 @@
 
 namespace idaten {
     // NOTE:
+    // https://stackoverflow.com/questions/43235899/cuda-restrict-tag-usage
+    // __restrict__ is hint for the compiler that we use the pointer to refer underlying data.
+    // And then, the compiler optimize it.
+    //
     // https://forums.developer.nvidia.com/t/restrict-seems-to-be-ignored-for-base-pointers-in-structs-having-base-pointers-with-restrict-as-kernel-arguments-directly-works-as-expected/154020/12
-    // __restrict__ hint doesn't work within a struct as a kernel argument.
+    // __restrict__ doesn't work within a struct as a kernel argument.
     // It works as a kernel argument.
+    //
+    // Therefore, the readonly data is not applied to the variable in context class and it is specified with __restrict__.
+    // __restrict__ can be specified for only pointer.
+    // Therefore, the texture data and int variable are applied before calling kernel.
 
     class context {
     public:

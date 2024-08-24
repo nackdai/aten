@@ -58,9 +58,16 @@ namespace aten
 
                 can_update_depth = Nee(
                     idx,
-                    path_host_.paths, ctxt, rays_.data(),
+                    path_host_.paths, ctxt,
+                    rays_.data(), shadow_rays_.data(),
                     isect, scene,
                     m_rrDepth, depth);
+
+                TraverseShadowRay(
+                    idx, depth,
+                    path_host_.paths, ctxt, isect,
+                    shadow_rays_.data(),
+                    scene);
 
                 willContinue = !path_host_.paths.attrib[idx].isTerminate;
             }
@@ -222,11 +229,75 @@ namespace aten
         return will_update_depth;
     }
 
+    void VolumePathTracing::TraverseShadowRay(
+        const int32_t idx,
+        const int32_t bounce,
+        aten::Path& paths,
+        const aten::context& ctxt,
+        const aten::Intersection& isect,
+        const AT_NAME::ShadowRay* shadow_rays,
+        aten::scene* scene)
+    {
+        const auto& shadow_ray = shadow_rays[idx];
+
+        if (!shadow_ray.isActive) {
+            return;
+        }
+
+        aten::ray next_ray(shadow_ray.rayorg, shadow_ray.raydir);
+
+        // NOTE:
+        // In volume, there is no normal.
+        // On the other hand, there is a possibility that we need to compute the tangent cooridnate.
+        // Therefore, next ray direction is treated as the normal alternatively.
+        const auto& nml = next_ray.dir;
+
+        const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
+
+        aten::LightSampleResult light_sample;
+        float light_select_prob = 0.0F;
+        int target_light_idx = -1;
+        aten::tie(light_sample, light_select_prob, target_light_idx) = AT_NAME::SampleLight(
+            ctxt, mtrl, bounce,
+            paths.sampler[idx],
+            next_ray.org, nml,
+            false);
+
+        if (target_light_idx >= 0) {
+            float transmittance = 1.0F;
+            float is_visilbe_to_light = false;
+
+            aten::tie(is_visilbe_to_light, transmittance) = AT_NAME::TraverseShadowRay(
+                ctxt, paths.sampler[idx],
+                light_sample,
+                next_ray.org, nml,
+                paths.throughput[idx].mediums,
+                scene);
+
+            if (is_visilbe_to_light) {
+                const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
+                const auto phase_f = AT_NAME::HenyeyGreensteinPhaseFunction::Evaluate(
+                    medium.phase_function_g,
+                    -next_ray.dir, light_sample.dir);
+
+                const auto dist2 = aten::sqr(light_sample.dist_to_light);
+
+                // Geometry term.
+                const auto G = 1.0F / dist2;
+
+                const auto Ls = transmittance * phase_f * G * light_sample.light_color / light_sample.pdf / light_select_prob;
+
+                paths.contrib[idx].contrib += paths.throughput[idx].throughput * Ls;
+            }
+        }
+    }
+
     bool VolumePathTracing::Nee(
         int32_t idx,
         aten::Path& paths,
         const context& ctxt,
-        ray* rays,
+        aten::ray* rays,
+        AT_NAME::ShadowRay* shadow_rays,
         const aten::Intersection& isect,
         scene* scene,
         int32_t rrDepth,
@@ -259,6 +330,9 @@ namespace aten
             ctxt,
             rec.mtrlid, rec.isVoxel);
 
+        auto& shadow_ray = shadow_rays[idx];
+        shadow_ray.isActive = false;
+
         bool is_scattered = false;
 
         if (AT_NAME::HasMedium(paths.throughput[idx].mediums)) {
@@ -271,48 +345,10 @@ namespace aten
                 ray, isect);
 
             if (is_scattered) {
-                // NOTE:
-                // In volume, there is no normal.
-                // On the other hand, there is a possibility that we need to compute the tangent cooridnate.
-                // Therefore, next ray direction is treated as the normal alternatively.
-                const auto& nml = next_ray.dir;
+                shadow_ray.isActive = true;
 
-                aten::LightSampleResult light_sample;
-                float light_select_prob = 0.0F;
-                int target_light_idx = -1;
-                aten::tie(light_sample, light_select_prob, target_light_idx) = AT_NAME::SampleLight(
-                    ctxt, mtrl, bounce,
-                    paths.sampler[idx],
-                    next_ray.org, nml,
-                    false);
-
-                if (target_light_idx >= 0) {
-                    float transmittance = 1.0F;
-                    float is_visilbe_to_light = false;
-
-                    aten::tie(is_visilbe_to_light, transmittance) = AT_NAME::TraverseShadowRay(
-                        ctxt, *sampler,
-                        light_sample,
-                        next_ray.org, nml,
-                        paths.throughput[idx].mediums,
-                        scene);
-
-                    if (is_visilbe_to_light) {
-                        const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
-                        const auto phase_f = AT_NAME::HenyeyGreensteinPhaseFunction::Evaluate(
-                            medium.phase_function_g,
-                            -next_ray.dir, light_sample.dir);
-
-                        const auto dist2 = aten::sqr(light_sample.dist_to_light);
-
-                        // Geometry term.
-                        const auto G = 1.0F / dist2;
-
-                        const auto Ls = transmittance * phase_f * G * light_sample.light_color / light_sample.pdf / light_select_prob;
-
-                        paths.contrib[idx].contrib += paths.throughput[idx].throughput * Ls;
-                    }
-                }
+                shadow_ray.rayorg = next_ray.org;
+                shadow_ray.raydir = next_ray.dir;
             }
 
             ray = next_ray;
@@ -473,6 +509,11 @@ namespace aten
         if (rays_.empty()) {
             rays_.resize(width * height);
         }
+
+        if (shadow_rays_.empty()) {
+            shadow_rays_.resize(width * height);
+        }
+
         path_host_.init(width, height);
         path_host_.Clear(GetFrameCount());
 

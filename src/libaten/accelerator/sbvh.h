@@ -138,10 +138,19 @@ namespace aten
             aten::hitable::FuncDrawAABB func,
             const aten::mat4& mtx_L2W) override final;
 
-        aten::aabb GetBoundingBox() const override
+        bool IsBuilt() const override
         {
-            const auto& root = m_threadedNodes[0][0];
-            return aten::aabb(root.boxmin, root.boxmax);
+            return !m_threadedNodes.empty() && !m_threadedNodes[0].empty();
+        }
+
+        std::optional<aten::aabb> GetBoundingBox() const override
+        {
+            if (IsBuilt()) {
+                const auto& root = m_threadedNodes[0][0];
+                return aten::aabb(root.boxmin, root.boxmax);
+            }
+            AT_ASSERT(false);
+            return std::nullopt;
         }
 
         /**

@@ -198,62 +198,20 @@ public:
         }
 
         {
-            std::vector<aten::ObjectParameter> shapeparams;
-            std::vector<aten::TriangleParameter> primparams;
-            std::vector<aten::LightParameter> lightparams;
-            std::vector<aten::MaterialParameter> mtrlparms;
-            std::vector<aten::vertex> vtxparams;
-            std::vector<aten::mat4> mtxs;
-
-            aten::DataCollector::collect(
-                ctxt_,
-                shapeparams,
-                primparams,
-                lightparams,
-                mtrlparms,
-                vtxparams,
-                mtxs);
-
-            tri_offset_ = primparams.size();
-            vtx_offset_ = vtxparams.size();
+            tri_offset_ = ctxt_.GetTriangleNum();
+            vtx_offset_ = ctxt_.GetVertexNum();
 
             const auto& nodes = scene_.getAccel()->getNodes();
-
-            std::vector<idaten::TextureResource> tex;
-            {
-                auto texNum = ctxt_.GetTextureNum();
-
-                for (int32_t i = 0; i < texNum; i++) {
-                    auto t = ctxt_.GetTexture(i);
-                    tex.push_back(
-                        idaten::TextureResource(t->colors(), t->width(), t->height()));
-                }
-            }
-
-#ifdef ENABLE_ENVMAP
-            for (auto& l : lightparams) {
-                if (l.type == aten::LightType::IBL) {
-                    l.envmapidx = envmap->id();
-                }
-            }
-#endif
 
             auto camparam = camera_.param();
             camparam.znear = float(0.1);
             camparam.zfar = float(10000.0);
 
-            renderer_.update(
+            renderer_.UpdateSceneData(
                 visualizer_->GetGLTextureHandle(),
                 WIDTH, HEIGHT,
-                camparam,
-                shapeparams,
-                mtrlparms,
-                lightparams,
-                nodes,
-                primparams, advanceTriNum,
-                vtxparams, advanceVtxNum,
-                mtxs,
-                tex,
+                camparam, ctxt_, nodes,
+                advanceTriNum, advanceVtxNum,
                 bg);
 
 #ifdef ENABLE_SVGF
@@ -680,28 +638,9 @@ private:
                 auto accel = scene_.getAccel();
                 accel->update(ctxt_);
 
-                std::vector<aten::ObjectParameter> shapeparams;
-                std::vector<aten::TriangleParameter> primparams;
-                std::vector<aten::LightParameter> lightparams;
-                std::vector<aten::MaterialParameter> mtrlparms;
-                std::vector<aten::vertex> vtxparams;
-                std::vector<aten::mat4> mtxs;
-
-                aten::DataCollector::collect(
-                    ctxt_,
-                    shapeparams,
-                    primparams,
-                    lightparams,
-                    mtrlparms,
-                    vtxparams,
-                    mtxs);
-
                 const auto& nodes = scene_.getAccel()->getNodes();
 
-                renderer_.updateBVH(
-                    shapeparams,
-                    nodes,
-                    mtxs);
+                renderer_.updateBVH(ctxt_, nodes);
             }
         }
     }

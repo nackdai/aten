@@ -49,8 +49,10 @@ namespace idaten
         }
     }
 
-    void PathTracing::updateLight(const std::vector<aten::LightParameter>& lights)
+    void PathTracing::updateLight(const aten::context& scene_ctxt)
     {
+        const auto lights = scene_ctxt.GetLightParameters();
+
         AT_ASSERT(lights.size() <= ctxt_host_.lightparam.num());
 
         if (lights.size() <= ctxt_host_.lightparam.num()) {

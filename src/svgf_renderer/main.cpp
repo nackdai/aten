@@ -101,53 +101,17 @@ public:
             auto d = aabb.getDiagonalLenght();
             renderer_.setHitDistanceLimit(d * 0.25f);
 
-            std::vector<aten::ObjectParameter> shapeparams;
-            std::vector<aten::TriangleParameter> primparams;
-            std::vector<aten::LightParameter> lightparams;
-            std::vector<aten::MaterialParameter> mtrlparms;
-            std::vector<aten::vertex> vtxparams;
-            std::vector<aten::mat4> mtxs;
-
-            aten::DataCollector::collect(
-                ctxt_,
-                shapeparams,
-                primparams,
-                lightparams,
-                mtrlparms,
-                vtxparams,
-                mtxs);
-
             const auto& nodes = scene_.getAccel()->getNodes();
-
-            std::vector<idaten::TextureResource> tex;
-            {
-                auto texNum = ctxt_.GetTextureNum();
-
-                for (int32_t i = 0; i < texNum; i++)
-                {
-                    auto t = ctxt_.GetTexture(i);
-                    tex.push_back(
-                        idaten::TextureResource(t->colors(), t->width(), t->height()));
-                }
-            }
 
             auto camparam = camera_.param();
             camparam.znear = float(0.1);
             camparam.zfar = float(10000.0);
 
-            renderer_.update(
+            renderer_.UpdateSceneData(
                 visualizer_->GetGLTextureHandle(),
                 WIDTH, HEIGHT,
-                camparam,
-                shapeparams,
-                mtrlparms,
-                lightparams,
-                nodes,
-                primparams, 0,
-                vtxparams, 0,
-                mtxs,
-                tex,
-                bg);
+                camparam, ctxt_, nodes,
+                0, 0, bg);
 
             renderer_.SetGBuffer(
                 fbo_.GetGLTextureHandle(0),
@@ -508,30 +472,8 @@ private:
             auto accel = scene_.getAccel();
             accel->update(ctxt_);
 
-            {
-                std::vector<aten::ObjectParameter> shapeparams;
-                std::vector<aten::TriangleParameter> primparams;
-                std::vector<aten::LightParameter> lightparams;
-                std::vector<aten::MaterialParameter> mtrlparms;
-                std::vector<aten::vertex> vtxparams;
-                std::vector<aten::mat4> mtxs;
-
-                aten::DataCollector::collect(
-                    ctxt_,
-                    shapeparams,
-                    primparams,
-                    lightparams,
-                    mtrlparms,
-                    vtxparams,
-                    mtxs);
-
-                const auto& nodes = scene_.getAccel()->getNodes();
-
-                renderer_.updateBVH(
-                    shapeparams,
-                    nodes,
-                    mtxs);
-            }
+            const auto& nodes = scene_.getAccel()->getNodes();
+            renderer_.updateBVH(ctxt_, nodes);
         }
     }
 

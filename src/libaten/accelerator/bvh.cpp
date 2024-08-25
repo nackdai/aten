@@ -616,8 +616,17 @@ namespace aten {
         }
     }
 
-    aten::aabb bvh::GetBoundingBox() const
+    bool bvh::IsBuilt() const
     {
-        return m_root->getBoundingbox();
+        return static_cast<bool>(m_root);
+    }
+
+    std::optional<aten::aabb> bvh::GetBoundingBox() const
+    {
+        if (IsBuilt()) {
+            return m_root->getBoundingbox();
+        }
+        AT_ASSERT(false);
+        return std::nullopt;
     }
 }

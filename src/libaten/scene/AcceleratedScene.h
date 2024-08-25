@@ -66,10 +66,24 @@ namespace aten {
 
         aten::aabb GetBoundingBox() const override
         {
-            return m_accel.GetBoundingBox();
+            auto optional_bbox = m_accel.GetBoundingBox();
+            if (optional_bbox) {
+                return optional_bbox.value();
+            }
+            auto bbox = CreateBoundingBox();
+            return bbox;
         }
 
     private:
+        aten::aabb CreateBoundingBox() const
+        {
+            aten::aabb bbox;
+            for (const auto& t : m_list) {
+                bbox = aten::aabb::merge(bbox, t->getBoundingbox());
+            }
+            return bbox;
+        }
+
         ACCEL m_accel;
         std::vector<aten::hitable*> m_tmp;
     };

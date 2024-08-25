@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "scene/hitable.h"
@@ -127,10 +128,16 @@ namespace aten {
             AT_ASSERT(false);
         }
 
-        virtual aten::aabb GetBoundingBox() const
+        virtual bool IsBuilt() const
         {
             AT_ASSERT(false);
-            return aten::aabb();
+            return false;
+        }
+
+        virtual std::optional<aten::aabb> GetBoundingBox() const
+        {
+            AT_ASSERT(false);
+            return std::nullopt;
         }
 
         struct ResultIntersectTestByFrustum {

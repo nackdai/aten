@@ -15,34 +15,22 @@
 
 namespace idaten
 {
-    void SVGFPathTracing::update(
+    void SVGFPathTracing::UpdateSceneData(
         GLuint gltex,
         int32_t width, int32_t height,
         const aten::CameraParameter& camera,
-        const std::vector<aten::ObjectParameter>& shapes,
-        const std::vector<aten::MaterialParameter>& mtrls,
-        const std::vector<aten::LightParameter>& lights,
+        const aten::context& scene_ctxt,
         const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
-        const std::vector<aten::TriangleParameter>& prims,
-        uint32_t advancePrimNum,
-        const std::vector<aten::vertex>& vtxs,
-        uint32_t advanceVtxNum,
-        const std::vector<aten::mat4>& mtxs,
-        const std::vector<TextureResource>& texs,
+        uint32_t advance_prim_num,
+        uint32_t advance_vtx_num,
         const aten::BackgroundResource& bg_resource)
     {
-        idaten::Renderer::update(
+        Renderer::UpdateSceneData(
             gltex,
             width, height,
-            camera,
-            shapes,
-            mtrls,
-            lights,
-            nodes,
-            prims, advancePrimNum,
-            vtxs, advanceVtxNum,
-            mtxs,
-            texs, bg_resource);
+            camera, scene_ctxt, nodes,
+            advance_prim_num, advance_vtx_num,
+            bg_resource);
 
         initSamplerParameter(width, height);
 

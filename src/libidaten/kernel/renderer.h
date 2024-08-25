@@ -17,22 +17,6 @@ namespace idaten
             int32_t maxSamples,
             int32_t maxBounce) = 0;
 
-        virtual void update(
-            GLuint gltex,
-            int32_t width, int32_t height,
-            const aten::CameraParameter& camera,
-            const std::vector<aten::ObjectParameter>& shapes,
-            const std::vector<aten::MaterialParameter>& mtrls,
-            const std::vector<aten::LightParameter>& lights,
-            const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
-            const std::vector<aten::TriangleParameter>& prims,
-            uint32_t advancePrimNum,
-            const std::vector<aten::vertex>& vtxs,
-            uint32_t advanceVtxNum,
-            const std::vector<aten::mat4>& mtxs,
-            const std::vector<TextureResource>& texs,
-            const aten::BackgroundResource& bg_resource);
-
         virtual void reset() {}
 
         void updateBVH(

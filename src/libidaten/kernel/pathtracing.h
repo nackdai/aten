@@ -98,7 +98,7 @@ namespace idaten
             const aten::BackgroundResource& bg_resource) override;
 
         void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
-        void updateLight(const std::vector<aten::LightParameter>& lights);
+        void updateLight(const aten::context& scene_ctxt);
 
         void SetRenderingMode(Mode mode)
         {

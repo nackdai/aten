@@ -187,6 +187,14 @@ namespace aten
         std::vector<aten::LightParameter> GetLightParameters() const;
 
         /**
+         * @brief Clear all registered lights.
+         */
+        void ClearAllLights()
+        {
+            lights_.clear();
+        }
+
+        /**
          * @brief Get the matrix by index.
          * @param[in] idx Index to the matrix.
          * @return Matrix.

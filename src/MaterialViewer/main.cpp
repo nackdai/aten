@@ -130,40 +130,10 @@ public:
             aten::vec3(0.0, 0.0, 50.0),
             aten::vec3(1.0, 0.0, 0.0),
             400.0f);
-        ctxt_.AddLight(scene_light_.point_light);
 #endif
 
 #ifdef GPU_RENDERING
-        std::vector<aten::ObjectParameter> shapeparams;
-        std::vector<aten::TriangleParameter> primparams;
-        std::vector<aten::LightParameter> lightparams;
-        std::vector<aten::MaterialParameter> mtrlparms;
-        std::vector<aten::vertex> vtxparams;
-        std::vector<aten::mat4> mtxs;
-
-        aten::DataCollector::collect(
-            ctxt_,
-            shapeparams,
-            primparams,
-            lightparams,
-            mtrlparms,
-            vtxparams,
-            mtxs);
-
         const auto& nodes = scene_.getAccel()->getNodes();
-
-        std::vector<idaten::TextureResource> tex;
-        {
-            auto texNum = ctxt_.GetTextureNum();
-
-            for (int32_t i = 0; i < texNum; i++) {
-                auto t = ctxt_.GetTexture(i);
-                tex.push_back(
-                    idaten::TextureResource(t->colors(), t->width(), t->height()));
-            }
-        }
-
-        MershallLightParameter(lightparams);
 
         auto camparam = camera_.param();
         camparam.znear = float(0.1);
@@ -173,19 +143,11 @@ public:
             WIDTH * HEIGHT,
             1024);
 
-        renderer_.update(
+        renderer_.UpdateSceneData(
             visualizer_->GetGLTextureHandle(),
             WIDTH, HEIGHT,
-            camparam,
-            shapeparams,
-            mtrlparms,
-            lightparams,
-            nodes,
-            primparams, 0,
-            vtxparams, 0,
-            mtxs,
-            tex,
-            bg);
+            camparam, ctxt_, nodes,
+            0, 0, bg);
 
         renderer_.SetEnableEnvmap(scene_light_.is_envmap);
 #else
@@ -253,12 +215,21 @@ public:
             constexpr std::array light_types = { "IBL", "PointLight" };
             int32_t lighttype = scene_light_.is_envmap ? 0 : 1;
             if (ImGui::Combo("light", &lighttype, light_types.data(), static_cast<int32_t>(light_types.size()))) {
+                ctxt_.ClearAllLights();
+
                 auto next_is_envmap = lighttype == 0;
-                if (scene_light_.is_envmap != next_is_envmap) {
-                    scene_light_.is_envmap = next_is_envmap;
-                    UpdateLightParameter();
-                    need_renderer_reset = true;
+                if (next_is_envmap) {
+                    ctxt_.AddLight(scene_light_.ibl);
                 }
+                else {
+                    ctxt_.AddLight(scene_light_.point_light);
+                }
+
+                need_renderer_reset = true;
+
+                scene_light_.is_envmap = next_is_envmap;
+                renderer_.SetEnableEnvmap(scene_light_.is_envmap);
+                renderer_.updateLight(ctxt_);
             }
 
             if (ImGui::SliderInt("Samples", &max_samples_, 1, 100)
@@ -643,24 +614,6 @@ private:
             lightparams.erase(result, lightparams.end());
         }
     }
-
-    void UpdateLightParameter()
-    {
-        std::vector<aten::LightParameter> lightparams;
-
-        auto lightNum = ctxt_.GetLightNum();
-
-        for (uint32_t i = 0; i < lightNum; i++) {
-            const auto& param = ctxt_.GetLight(i);
-            lightparams.push_back(param);
-        }
-
-        MershallLightParameter(lightparams);
-
-        renderer_.updateLight(lightparams);
-        renderer_.SetEnableEnvmap(scene_light_.is_envmap);
-    }
-
 
     struct SceneLight {
         bool is_envmap{ false };

@@ -235,7 +235,19 @@ public:
             std::vector<std::vector<aten::TriangleParameter>> triangles;
             std::vector<int32_t> triIdOffsets;
 
-            aten::DataCollector::collectTriangles(ctxt_, triangles, triIdOffsets);
+            int32_t triangleCount = 0;
+
+            ctxt_.TraverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::ObjectType type) {
+                if (type == aten::ObjectType::Polygons) {
+                    triangles.push_back(std::vector<aten::TriangleParameter>());
+                    auto pos = triangles.size() - 1;
+
+                    s->collectTriangles(triangles[pos]);
+
+                    triIdOffsets.push_back(triangleCount);
+                    triangleCount += static_cast<int32_t>(triangles[pos].size());
+                }
+            });
 
             uint32_t maxTriNum = 0;
             for (const auto& tris : triangles) {

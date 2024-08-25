@@ -40,9 +40,6 @@
     <Filter Include="filter">
       <UniqueIdentifier>{64490d9c-6f13-4ebf-893d-3eb9ba99d0af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="proxy">
-      <UniqueIdentifier>{e818a79f-f216-4883-a95c-38c597475433}</UniqueIdentifier>
-    </Filter>
     <Filter Include="accelerator">
       <UniqueIdentifier>{a5eb0545-e9e3-4875-bd02-d129b358b899}</UniqueIdentifier>
     </Filter>
@@ -256,9 +253,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\aten.h" />
     <ClInclude Include="..\src\libaten\aten_namespace.h" />
-    <ClInclude Include="..\src\libaten\proxy\DataCollector.h">
-      <Filter>proxy</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\accelerator\bvh.h">
       <Filter>accelerator</Filter>
     </ClInclude>
@@ -614,9 +608,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\light\arealight.cpp">
       <Filter>light</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\proxy\DataCollector.cpp">
-      <Filter>proxy</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp">
       <Filter>accelerator</Filter>

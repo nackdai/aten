@@ -49,8 +49,6 @@
 #include "light/arealight.h"
 #include "light/ibl.h"
 
-#include "proxy/DataCollector.h"
-
 #include "texture/texture.h"
 
 #include "hdr/hdr.h"

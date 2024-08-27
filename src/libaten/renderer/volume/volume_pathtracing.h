@@ -25,7 +25,7 @@ namespace aten
         }
 
     protected:
-        static bool Shade(
+        static void Shade(
             int32_t idx,
             aten::Path& paths,
             const context& ctxt,
@@ -35,7 +35,7 @@ namespace aten
             int32_t rrDepth,
             int32_t bounce);
 
-        static bool Nee(
+        static void Nee(
             int32_t idx,
             aten::Path& paths,
             const context& ctxt,

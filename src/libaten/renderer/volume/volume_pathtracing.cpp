@@ -44,7 +44,7 @@ namespace aten
             }
 
             bool willContinue = true;
-            bool can_update_depth = false;
+            bool will_update_depth = false;
             Intersection isect;
 
             const auto& ray = rays_[idx];
@@ -54,14 +54,14 @@ namespace aten
             if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
                 path_host_.paths.attrib[idx].isHit = true;
 
-                can_update_depth = true;
-
-                can_update_depth = Nee(
+                Nee(
                     idx,
                     path_host_.paths, ctxt,
                     rays_.data(), shadow_rays_.data(),
                     isect, scene,
                     m_rrDepth, depth);
+
+                will_update_depth = path_host_.paths.attrib[idx].willUpdateDepth;
 
                 TraverseShadowRay(
                     idx, depth,
@@ -98,7 +98,7 @@ namespace aten
                 break;
             }
 
-            if (can_update_depth) {
+            if (will_update_depth) {
                 depth++;
             }
 
@@ -106,7 +106,7 @@ namespace aten
         }
     }
 
-    bool VolumePathTracing::Shade(
+    void VolumePathTracing::Shade(
         int32_t idx,
         aten::Path& paths,
         const context& ctxt,
@@ -121,7 +121,8 @@ namespace aten
             paths.attrib[idx], paths.throughput[idx],
             paths.sampler[idx]);
         if (paths.attrib[idx].isTerminate) {
-            return false;
+            paths.attrib[idx].willUpdateDepth = false;
+            return;
         }
         paths.throughput[idx].throughput /= russianProb;
 
@@ -174,7 +175,8 @@ namespace aten
                 rec.area,
                 mtrl);
             if (is_hit_implicit_light) {
-                return false;
+                paths.attrib[idx].willUpdateDepth = false;
+                return;
             }
 
             const auto curr_ray = ray;
@@ -224,9 +226,9 @@ namespace aten
             AT_NAME::UpdateMedium(curr_ray, rays[idx].dir, orienting_normal, mtrl, paths.throughput[idx].mediums);
         }
 
-        bool will_update_depth = is_scattered || is_reflected_or_refracted;
+        paths.attrib[idx].willUpdateDepth = is_scattered || is_reflected_or_refracted;
 
-        return will_update_depth;
+        return;
     }
 
     void VolumePathTracing::TraverseShadowRay(
@@ -292,7 +294,7 @@ namespace aten
         }
     }
 
-    bool VolumePathTracing::Nee(
+    void VolumePathTracing::Nee(
         int32_t idx,
         aten::Path& paths,
         const context& ctxt,
@@ -308,7 +310,8 @@ namespace aten
             paths.attrib[idx], paths.throughput[idx],
             paths.sampler[idx]);
         if (paths.attrib[idx].isTerminate) {
-            return false;
+            paths.attrib[idx].willUpdateDepth = false;
+            return;
         }
         paths.throughput[idx].throughput /= russianProb;
 
@@ -371,7 +374,8 @@ namespace aten
                 rec.area,
                 mtrl);
             if (is_hit_implicit_light) {
-                return false;
+                paths.attrib[idx].willUpdateDepth = false;
+                return;
             }
 
             const auto curr_ray = ray;
@@ -453,9 +457,9 @@ namespace aten
             AT_NAME::UpdateMedium(curr_ray, rays[idx].dir, orienting_normal, mtrl, paths.throughput[idx].mediums);
         }
 
-        bool will_update_depth = is_scattered || is_reflected_or_refracted;
+        paths.attrib[idx].willUpdateDepth = is_scattered || is_reflected_or_refracted;
 
-        return will_update_depth;
+        return;
     }
 
     void VolumePathTracing::shadeMiss(

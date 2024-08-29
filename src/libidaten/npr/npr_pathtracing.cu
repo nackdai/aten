@@ -67,8 +67,7 @@ namespace npr_kernel {
 
         idx = hitindices[idx];
 
-        if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
-            paths.attrib[idx].isTerminate = true;
+        if (paths.attrib[idx].isTerminate) {
             return;
         }
 

@@ -343,10 +343,6 @@ namespace aten
                     buffer.resize(width * height);
                 }
             });
-
-        for (auto& attrib : path_host_.attrib) {
-            attrib.isKill = false;
-        }
     }
 
     void ReSTIRRenderer::ComputePixelColor(
@@ -423,7 +419,7 @@ namespace aten
                         for (int32_t x = 0; x < width; x++) {
                             int32_t idx = y * width + x;
 
-                            if (path_host_.paths.attrib[idx].isKill || path_host_.paths.attrib[idx].isTerminate) {
+                            if (path_host_.paths.attrib[idx].isTerminate) {
                                 continue;
                             }
 

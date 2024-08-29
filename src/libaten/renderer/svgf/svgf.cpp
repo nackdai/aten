@@ -440,10 +440,6 @@ namespace aten
 
         params_.InitBuffers(width, height);
         params_.mtxs.Reset(camera.param());
-
-        for (auto& attrib : path_host_.attrib) {
-            attrib.isKill = false;
-        }
     }
 
     void SVGFRenderer::SetMotionDepthBuffer(aten::FBO& fbo, int32_t idx)
@@ -489,10 +485,6 @@ namespace aten
                     }
 #endif
                     int32_t idx = y * width + x;
-
-                    if (path_host_.paths.attrib[idx].isKill) {
-                        continue;
-                    }
 
                     for (uint32_t i = 0; i < samples; i++) {
                         const auto rnd = aten::getRandom(idx);

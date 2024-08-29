@@ -521,10 +521,6 @@ namespace aten
         path_host_.init(width, height);
         path_host_.Clear(GetFrameCount());
 
-        for (auto& attrib : path_host_.attrib) {
-            attrib.isKill = false;
-        }
-
         auto time = timer::getSystemTime();
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
@@ -550,10 +546,6 @@ namespace aten
                     }
 #endif
                     int32_t idx = y * width + x;
-
-                    if (path_host_.paths.attrib[idx].isKill) {
-                        continue;
-                    }
 
                     for (uint32_t i = 0; i < samples; i++) {
                         const auto rnd = aten::getRandom(idx);

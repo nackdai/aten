@@ -64,10 +64,6 @@ namespace aten
 
         path_host_.init(width, height);
 
-        for (auto& attrib : path_host_.attrib) {
-            attrib.isKill = false;
-        }
-
         auto time = timer::getSystemTime();
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
@@ -91,10 +87,6 @@ namespace aten
                         DEBUG_BREAK();
                     }
 #endif
-
-                    if (path_host_.paths.attrib[idx].isKill) {
-                        continue;
-                    }
 
                     int32_t idx = y * width + x;
 

@@ -73,7 +73,6 @@ namespace AT_NAME {
         bool isHit{ false };
         bool isTerminate{ false };
         bool isSingular{ false };
-        bool isKill{ false };
         bool willUpdateDepth{ true };
 
         aten::MaterialType mtrlType{ aten::MaterialType::Lambert };

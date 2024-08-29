@@ -73,7 +73,6 @@ namespace npr {
         _detail::CopyVec(paths.contrib[idx].contrib, contrib);
 
         // Line is treated as light. So, query path need to be killed and termnated not to bounce anymore.
-        paths.attrib[idx].isKill = true;
         paths.attrib[idx].isTerminate = true;
     }
 

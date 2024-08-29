@@ -121,10 +121,6 @@ namespace ao {
         AT_NAME::Path& paths)
     {
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
-            if (is_first_bounce) {
-                paths.attrib[idx].isKill = true;
-            }
-
             _detail::CopyVec(paths.contrib[idx].contrib, aten::vec3(1));
 
             paths.attrib[idx].isTerminate = true;

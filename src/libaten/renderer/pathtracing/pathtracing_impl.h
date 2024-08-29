@@ -43,11 +43,6 @@ namespace AT_NAME
     {
         paths.attrib[idx].isHit = false;
 
-        if (paths.attrib[idx].isKill) {
-            paths.attrib[idx].isTerminate = true;
-            return;
-        }
-
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
         auto scramble = rnd * 0x1fe3434f
             * (((frame + sample) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
@@ -155,8 +150,6 @@ namespace AT_NAME
     {
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             if (bounce == 0) {
-                paths.attrib[idx].isKill = true;
-
                 if (!aov_normal_depth.empty() && !aov_albedo_meshid.empty())
                 {
                     // Export bg color to albedo buffer.
@@ -212,8 +205,6 @@ namespace AT_NAME
             if (bounce == 0
                 || (bounce == 1 && paths.attrib[idx].isSingular))
             {
-                paths.attrib[idx].isKill = true;
-
                 if (!aov_normal_depth.empty() && !aov_albedo_meshid.empty())
                 {
                     // Export bg color to albedo buffer.
@@ -393,8 +384,7 @@ namespace AT_NAME
         const AT_NAME::ShadowRay& shadow_ray,
         SCENE* scene = nullptr)
     {
-        if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
-            paths.attrib[idx].isTerminate = true;
+        if (paths.attrib[idx].isTerminate) {
             return false;
         }
 

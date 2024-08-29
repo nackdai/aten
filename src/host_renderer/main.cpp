@@ -9,7 +9,7 @@ constexpr const char* TITLE = "app";
 
 const aten::vec4 BGColor(0.0F);
 
-//#define ENABLE_IBL
+#define ENABLE_IBL
 // #define ENABLE_EVERY_FRAME_SC
 //#define ENABLE_FEATURE_LINE
 
@@ -30,8 +30,14 @@ public:
     HostRendererApp operator=(const HostRendererApp&) = delete;
     HostRendererApp operator=(HostRendererApp&&) = delete;
 
-    template <class T>
-    using HasMemberFunc = decltype(std::declval<T>().SetMotionDepthBuffer);
+    template <class T, class FBO, class N>
+    using HasSetMotionDepthBufferOp = decltype(std::declval<T>().SetMotionDepthBuffer(std::declval<FBO>(), std::declval<N>()));
+
+    template <class Renderer>
+    constexpr static bool HasSetMotionDepthBuffer()
+    {
+        return aten::is_detected<HasSetMotionDepthBufferOp, Renderer, aten::FBO, int32_t>::value;
+    }
 
     bool Init()
     {
@@ -54,7 +60,7 @@ public:
             "../shader/simple3d_vs.glsl",
             "../shader/simple3d_fs.glsl");
 
-        if constexpr (aten::is_detected<HasMemberFunc, decltype(renderer_)>::value) {
+        if constexpr (HasSetMotionDepthBuffer<decltype(renderer_)>()) {
             fbo_.asMulti(2);
             fbo_.init(
                 WIDTH, HEIGHT,
@@ -130,7 +136,7 @@ public:
     template <class Renderer>
     void SetMotionDepthBuffer(Renderer& renderer)
     {
-        if constexpr (aten::is_detected<HasMemberFunc, Renderer>::value) {
+        if constexpr (HasSetMotionDepthBuffer<decltype(renderer_)>()) {
             rasterizer_.drawSceneForGBuffer(
                 renderer.GetFrameCount(),
                 ctxt_,
@@ -221,10 +227,10 @@ private:
 
     std::shared_ptr<aten::texture> envmap_;
 
-    aten::PathTracing renderer_;
+    //aten::PathTracing renderer_;
     //aten::VolumePathTracing renderer_;
     //aten::SVGFRenderer renderer_;
-    //aten::ReSTIRRenderer renderer_;
+    aten::ReSTIRRenderer renderer_;
 
     std::shared_ptr<aten::visualizer> visualizer_;
 

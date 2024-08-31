@@ -10,6 +10,8 @@
 #include "math/mat4.h"
 
 namespace idaten {
+    class Grid;
+
     // NOTE:
     // https://stackoverflow.com/questions/43235899/cuda-restrict-tag-usage
     // __restrict__ is hint for the compiler that we use the pointer to refer underlying data.
@@ -43,6 +45,8 @@ namespace idaten {
 
         cudaTextureObject_t* textures{ nullptr };
         int32_t envmapIdx{ -1 };
+
+        AT_NAME::Grid* grid_holder{ nullptr };
 
         aten::aabb scene_bounding_box;
 
@@ -123,6 +127,8 @@ namespace idaten {
             return textures[idx];
         }
 
+        __device__ const AT_NAME::Grid* GetGrid() const noexcept;
+
         __device__ const aten::aabb& GetSceneBoundingBox() const
         {
             return scene_bounding_box;
@@ -144,6 +150,8 @@ namespace idaten {
 
         std::vector<idaten::CudaTexture> texRsc;
         idaten::TypedCudaMemory<cudaTextureObject_t> tex;
+
+        idaten::TypedCudaMemory<AT_NAME::Grid> grid;
 
         idaten::CudaTextureResource vtxparamsPos;
         idaten::CudaTextureResource vtxparamsNml;

@@ -367,6 +367,7 @@
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />
     <ClCompile Include="..\src\libaten\volume\grid.cpp" />
+    <ClCompile Include="..\src\libaten\volume\grid_host.cpp" />
     <ClCompile Include="..\src\libaten\volume\medium.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -148,7 +148,7 @@ namespace idaten
                     outputSurf,
                     width, height,
                     i,
-                    bounce, rrBounce);
+                    bounce, rrBounce, maxBounce);
 
                 bounce++;
             }

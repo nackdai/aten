@@ -32,7 +32,8 @@ namespace AT_NAME {
 
     struct PathThroughput {
         aten::vec3 throughput;
-        float pdfb;
+        float pdfb{ 1.0F };
+        int32_t depth_count{ 0 };
         MediumStack mediums;
     };
 
@@ -73,7 +74,7 @@ namespace AT_NAME {
         bool isHit{ false };
         bool isTerminate{ false };
         bool isSingular{ false };
-        bool willUpdateDepth{ true };
+        bool will_update_depth{ true };
 
         aten::MaterialType mtrlType{ aten::MaterialType::Lambert };
     };

@@ -67,8 +67,12 @@ namespace AT_NAME
 
         paths.throughput[idx].throughput = aten::vec3(1);
         paths.throughput[idx].pdfb = 1.0f;
+        paths.throughput[idx].depth_count = 0;
+        paths.throughput[idx].mediums.clear();
+
         paths.attrib[idx].isTerminate = false;
         paths.attrib[idx].isSingular = false;
+        paths.attrib[idx].will_update_depth = true;
 
         paths.contrib[idx].samples += 1;
     }

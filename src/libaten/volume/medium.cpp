@@ -7,7 +7,7 @@
 #include "volume/grid.h"
 
 namespace AT_NAME {
-    float HeterogeneousMedium::EvalMajorant(
+    AT_DEVICE_API float HeterogeneousMedium::EvalMajorant(
         nanovdb::FloatGrid* grid,
         const float sigma_a, const float sigma_s)
     {
@@ -62,7 +62,7 @@ namespace AT_NAME {
         const aten::MediumParameter& param,
         nanovdb::FloatGrid* grid)
     {
-        auto clip_info = aten::Grid::ClipRayByGridBoundingBox(ray, grid);
+        auto clip_info = AT_NAME::Grid::ClipRayByGridBoundingBox(ray, grid);
         if (!clip_info.has_value()) {
             return aten::make_tuple(false, ray);
         }
@@ -158,7 +158,7 @@ namespace AT_NAME {
     {
         aten::ray ray(p1, p2 - p1);
 
-        auto clip_info = aten::Grid::ClipRayByGridBoundingBox(ray, grid);
+        auto clip_info = AT_NAME::Grid::ClipRayByGridBoundingBox(ray, grid);
         if (!clip_info.has_value()) {
             return 1.0F;
         }

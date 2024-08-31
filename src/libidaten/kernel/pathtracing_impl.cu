@@ -307,7 +307,7 @@ namespace idaten
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height,
         int32_t sample,
-        int32_t bounce, int32_t rrBounce)
+        int32_t bounce, int32_t rrBounce, int32_t max_depth)
     {
         dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);

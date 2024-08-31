@@ -17,15 +17,14 @@
 #include "scene/host_scene_context.h"
 #endif
 
-
 namespace AT_NAME
 {
     inline AT_DEVICE_API void UpdateMedium(
-        const ray& ray,
-        const vec3& wo,
-        const vec3& surface_normal,
-        const MaterialParameter& mtrl,
-        aten::MediumStack& mediums)
+        const aten::ray& ray,
+        const aten::vec3& wo,
+        const aten::vec3& surface_normal,
+        const aten::MaterialParameter& mtrl,
+        AT_NAME::MediumStack& mediums)
     {
         const auto wi = -ray.dir;
         const auto is_trasmitted = dot(wo, surface_normal) < 0 != dot(wi, surface_normal) < 0;
@@ -48,13 +47,13 @@ namespace AT_NAME
 
     inline AT_DEVICE_API const aten::MediumParameter& GetCurrentMedium(
         const AT_NAME::context& ctxt,
-        const aten::MediumStack& mediums)
+        const AT_NAME::MediumStack& mediums)
     {
         auto idx = mediums.top();
         return ctxt.GetMaterial(idx).medium;
     }
 
-    inline AT_DEVICE_API bool HasMedium(const aten::MediumStack& mediums)
+    inline AT_DEVICE_API bool HasMedium(const AT_NAME::MediumStack& mediums)
     {
         return !mediums.empty();
     }
@@ -76,9 +75,9 @@ namespace AT_NAME
     }
 
     inline AT_DEVICE_API aten::tuple<bool, aten::ray> SampleMedium(
-        aten::PathThroughput& throughput,
+        AT_NAME::PathThroughput& throughput,
         aten::sampler& sampler,
-        const aten::context& ctxt,
+        const AT_NAME::context& ctxt,
         const aten::ray& ray,
         const aten::Intersection& isect
     )
@@ -107,14 +106,15 @@ namespace AT_NAME
         return aten::make_tuple(is_scattered, next_ray);
     }
 
+    template <class SCENE = void>
     inline AT_DEVICE_API aten::tuple<bool, float> TraverseShadowRay(
         const AT_NAME::context& ctxt,
         aten::sampler& sampler,
         const aten::LightSampleResult& light_sample,
         const aten::vec3& start_point,
         const aten::vec3& surface_nml,
-        aten::MediumStack medium_stack,
-        scene* scene)
+        AT_NAME::MediumStack medium_stack,
+        SCENE* scene = nullptr)
     {
         float transmittance = 1.0F;
 
@@ -133,13 +133,29 @@ namespace AT_NAME
         auto t_max = distance_to_light - AT_MATH_EPSILON;
 
         while (true) {
+            bool is_hit = false;
+
             aten::Intersection isect;
-            bool is_hit = scene->hit(ctxt, ray, AT_MATH_EPSILON, t_max, isect, aten::HitStopType::Closer);
+
+            if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
+                // NOTE:
+                // operation has to be related with template arg SCENE.
+                if (scene) {
+                    is_hit = scene->hit(ctxt, ray, AT_MATH_EPSILON, t_max, isect, aten::HitStopType::Closer);
+                }
+            }
+            else {
+#ifndef __CUDACC__
+                // Dummy to build with clang.
+                auto intersectCloser = [](auto... args) -> bool { return true; };
+#endif
+                is_hit = intersectCloser(&ctxt, ray, &isect, t_max, false);
+            }
 
             if (is_hit) {
                 const auto& hit_obj = ctxt.GetObject(isect.objid);
                 aten::hitrecord hrec;
-                aten::evaluate_hit_result(hrec, hit_obj, ctxt, ray, isect);
+                AT_NAME::evaluate_hit_result(hrec, hit_obj, ctxt, ray, isect);
 
                 const auto& mtrl = ctxt.GetMaterial(hrec.mtrlid);
 

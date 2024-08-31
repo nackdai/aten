@@ -285,7 +285,7 @@ namespace idaten {
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height,
         int32_t sample,
-        int32_t bounce, int32_t rrBounce)
+        int32_t bounce, int32_t rrBounce, int32_t max_depth)
     {
         if (is_enable_feature_line_) {
             dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
@@ -336,7 +336,7 @@ namespace idaten {
             outputSurf,
             width, height,
             sample,
-            bounce, rrBounce);
+            bounce, rrBounce, max_depth);
     }
 
     void NPRPathTracing::missShade(

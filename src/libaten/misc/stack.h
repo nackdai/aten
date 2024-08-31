@@ -16,12 +16,12 @@ namespace aten
         stack& operator=(const stack&) = default;
         stack& operator=(stack&&) = default;
 
-        bool empty() const
+        AT_DEVICE_API bool empty() const
         {
             return size_ == 0;
         }
 
-        size_t size() const
+        AT_DEVICE_API size_t size() const
         {
             return size_;
         }
@@ -31,7 +31,7 @@ namespace aten
             AT_ASSERT(size_ > 0);
             return queue_.front();
         }
-        const T& top() const
+        AT_DEVICE_API const T& top() const
         {
             AT_ASSERT(size_ > 0);
             return queue_.front();
@@ -48,7 +48,7 @@ namespace aten
             return queue_[size_ - 1];
         }
 
-        void push(const T& item)
+        AT_DEVICE_API void push(const T& item)
         {
             AT_ASSERT(size_ < N);
             queue_[size_] = item;
@@ -61,7 +61,7 @@ namespace aten
             size_ += 1;
         }
 
-        T& pop()
+        AT_DEVICE_API  T& pop()
         {
             AT_ASSERT(size_ > 0);
             T& ret = queue_[size_ - 1];
@@ -77,6 +77,11 @@ namespace aten
                 return ret;
             }
             return std::nullopt;
+        }
+
+        AT_DEVICE_API void clear()
+        {
+            size_ = 0;
         }
 
     private:

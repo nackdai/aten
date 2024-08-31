@@ -90,7 +90,7 @@ namespace AT_NAME
         return true;
     }
 
-    void sphere::EvaluateHitResult(
+    void AT_HOST_DEVICE_API sphere::EvaluateHitResult(
         const aten::ObjectParameter* param,
         const aten::ray& r,
         aten::hitrecord* rec,

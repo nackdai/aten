@@ -61,7 +61,7 @@ namespace aten
                     isect, scene,
                     m_rrDepth, depth);
 
-                will_update_depth = path_host_.paths.attrib[idx].willUpdateDepth;
+                will_update_depth = path_host_.paths.attrib[idx].will_update_depth;
 
                 TraverseShadowRay(
                     idx, depth,
@@ -121,7 +121,7 @@ namespace aten
             paths.attrib[idx], paths.throughput[idx],
             paths.sampler[idx]);
         if (paths.attrib[idx].isTerminate) {
-            paths.attrib[idx].willUpdateDepth = false;
+            paths.attrib[idx].will_update_depth = false;
             return;
         }
         paths.throughput[idx].throughput /= russianProb;
@@ -175,7 +175,7 @@ namespace aten
                 rec.area,
                 mtrl);
             if (is_hit_implicit_light) {
-                paths.attrib[idx].willUpdateDepth = false;
+                paths.attrib[idx].will_update_depth = false;
                 return;
             }
 
@@ -226,7 +226,7 @@ namespace aten
             AT_NAME::UpdateMedium(curr_ray, rays[idx].dir, orienting_normal, mtrl, paths.throughput[idx].mediums);
         }
 
-        paths.attrib[idx].willUpdateDepth = is_scattered || is_reflected_or_refracted;
+        paths.attrib[idx].will_update_depth = is_scattered || is_reflected_or_refracted;
 
         return;
     }
@@ -310,7 +310,7 @@ namespace aten
             paths.attrib[idx], paths.throughput[idx],
             paths.sampler[idx]);
         if (paths.attrib[idx].isTerminate) {
-            paths.attrib[idx].willUpdateDepth = false;
+            paths.attrib[idx].will_update_depth = false;
             return;
         }
         paths.throughput[idx].throughput /= russianProb;
@@ -374,7 +374,7 @@ namespace aten
                 rec.area,
                 mtrl);
             if (is_hit_implicit_light) {
-                paths.attrib[idx].willUpdateDepth = false;
+                paths.attrib[idx].will_update_depth = false;
                 return;
             }
 
@@ -457,7 +457,7 @@ namespace aten
             AT_NAME::UpdateMedium(curr_ray, rays[idx].dir, orienting_normal, mtrl, paths.throughput[idx].mediums);
         }
 
-        paths.attrib[idx].willUpdateDepth = is_scattered || is_reflected_or_refracted;
+        paths.attrib[idx].will_update_depth = is_scattered || is_reflected_or_refracted;
 
         return;
     }

@@ -280,6 +280,15 @@
     <ClInclude Include="..\src\libidaten\volume\volume_rendering.h">
       <Filter>volume</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\volume\medium.h">
+      <Filter>aten\volume</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\volume\phase_function.h">
+      <Filter>aten\volume</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\volume\grid.h">
+      <Filter>aten\volume</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -338,6 +347,9 @@
     </Filter>
     <Filter Include="volume">
       <UniqueIdentifier>{fcbb20a5-d6b8-4409-89d4-5b0ecf5436a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aten\volume">
+      <UniqueIdentifier>{19847303-0959-43d0-a7b7-bcf47a8fd898}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -492,6 +504,18 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\volume\simple_grid_rendering.cu">
       <Filter>volume</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\volume\volume_rendering.cu">
+      <Filter>volume</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\volume\grid.cpp">
+      <Filter>aten\volume</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\volume\medium.cpp">
+      <Filter>aten\volume</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\device_scene_context.cu">
+      <Filter>kernel</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

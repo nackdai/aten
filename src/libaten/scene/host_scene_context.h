@@ -574,6 +574,9 @@ namespace aten
         std::vector<std::shared_ptr<aten::mat4>> matrices_;
         std::vector<std::shared_ptr<AT_NAME::Light>> lights_;
 
+        // NOTE:
+        // This variable for AT_NAME::Grid needs to be defined with the template.
+        // Because, we do  forward declaration for AT_NAME::Grid not to include the header file directly in this file.
         std::shared_ptr<AT_NAME::Grid> grid_holder_;
 
         aten::aabb scene_bounding_box_;

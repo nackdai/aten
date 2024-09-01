@@ -30,15 +30,26 @@ namespace idaten
             const aten::vec3 bg_color = aten::vec3(0.0F, 0.5F, 1.0F));
 
     protected:
+        void OnRender(
+            int32_t width, int32_t height,
+            int32_t maxSamples,
+            int32_t maxBounce,
+            cudaSurfaceObject_t outputSurf) override;
+
         void onShade(
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height,
             int32_t sample,
             int32_t bounce, int32_t rrBounce, int32_t max_depth) override;
 
+        bool IsAllPathsTerminated(
+            int32_t width, int32_t height,
+            int32_t bounce);
+
         class SimpleGridRenderer;
         std::shared_ptr<SimpleGridRenderer> simple_grid_renderer_;
 
         cudaStream_t m_stream{ nullptr };
+        idaten::TypedCudaMemory<int32_t> terminated_path_count_;
     };
 }

@@ -14,7 +14,7 @@
 
 #include "../common/scenedefs.h"
 
-#define ENABLE_ENVMAP
+//#define ENABLE_ENVMAP
 //#define ENABLE_NPR
 
 constexpr int32_t WIDTH = 1280;
@@ -82,7 +82,7 @@ public:
 
         scene_.addImageBasedLight(ctxt_, ibl);
 #else
-        auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr);
+        auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, 0.0F);
 #endif
 
         {
@@ -440,7 +440,8 @@ private:
 #ifdef ENABLE_NPR
     idaten::NPRPathTracing renderer_;
 #else
-    idaten::PathTracing renderer_;
+    //idaten::PathTracing renderer_;
+    idaten::VolumeRendering renderer_;
 #endif
 
     std::shared_ptr<aten::visualizer> visualizer_;

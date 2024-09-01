@@ -389,6 +389,9 @@
     <ClCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp">
       <Filter>cuda</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libidaten\volume\volume_rendering.cpp">
+      <Filter>volume</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\src\libaten\material\beckman.cpp">

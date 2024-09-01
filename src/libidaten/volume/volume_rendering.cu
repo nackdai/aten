@@ -15,8 +15,12 @@
 #include "renderer/pathtracing/pathtracing_impl.h"
 #include "renderer/volume/volume_pathtracing_impl.h"
 
+#include <cooperative_groups.h>
+
 namespace vpt
 {
+    namespace cg = cooperative_groups;
+
     __global__ void ShadeVolumePT(
         int32_t width, int32_t height,
         idaten::context ctxt,
@@ -31,7 +35,7 @@ namespace vpt
         const aten::Intersection* __restrict__ isects,
         aten::ray* rays,
         int32_t sample, int32_t frame,
-        int32_t depth_for_rr, int32_t max_depth,
+        int32_t bounce, int32_t depth_for_rr, int32_t max_depth,
         uint32_t* random,
         AT_NAME::ShadowRay* shadow_rays)
     {
@@ -48,7 +52,7 @@ namespace vpt
             return;
         }
 
-        const auto bounce = paths.throughput[idx].depth_count;
+        //const auto bounce = paths.throughput[idx].depth_count;
 
         const auto russianProb = AT_NAME::ComputeRussianProbability(
             bounce, depth_for_rr,
@@ -326,6 +330,70 @@ namespace vpt
             paths.attrib[idx].isTerminate = true;
         }
     }
+
+    __global__ void CountTerminatedPath(
+        int32_t max_idx,
+        idaten::Path paths,
+        int32_t* terminated_path_count)
+    {
+#if 1
+        int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if (idx >= max_idx) {
+            return;
+        }
+
+        int32_t n = paths.attrib[idx].isTerminate ? 1 : 0;
+        atomicAdd(terminated_path_count + 0, n);
+#else
+        // NOTE:
+        // https://qiita.com/gyu-don/items/ef8a128fa24f6bddd342
+        // https://www.mattari-benkyo-note.com/2023/01/29/cuda-reduction2023/
+
+        cg::thread_block cta = cg::this_thread_block();
+
+        // NOTE:
+        // Dynamic size of shared memory is specified in 3rd option at launching the kernel.
+        extern __shared__ int32_t sdata[];
+
+        int32_t idx = blockIdx.x * (blockDim.x * 2) + threadIdx.x;
+
+        if (idx >= max_idx) {
+            return;
+        }
+
+        int32_t thread_idx = threadIdx.x;
+
+        auto sum = paths.attrib[idx].isTerminate ? 1 : 0;
+
+        // Half of threads in a block doesn't do anything in the following for loop.
+        // To reduce its waste as much as possible, compute the value here.
+        if (idx + blockDim.x < max_idx) {
+            sum += paths.attrib[idx + blockDim.x].isTerminate ? 1 : 0;
+        }
+
+        sdata[thread_idx] = sum;
+
+        // Sync to store the data to shared memory.
+        cg::sync(cta);
+
+        for (uint32_t s = blockDim.x / 2; s > 0; s >>= 1) {
+            if (thread_idx < s) {
+                sdata[thread_idx] += sdata[thread_idx + s];
+            }
+            // All results finally would be added into thread index 0.
+            // Not to exceed to thread index 0's computation, need to sync here.
+            cg::sync(cta);
+        }
+
+        cg::sync(cta);
+
+        if (thread_idx == 0) {
+            // All reasults are added to shared memory at 0.
+            atomicAdd(terminated_path_count + 0, sdata[0]);
+        }
+#endif
+    }
 }
 
 namespace idaten {
@@ -354,7 +422,7 @@ namespace idaten {
             m_rays.data(),
             sample,
             m_frame,
-            rrBounce, max_depth,
+            bounce, rrBounce, max_depth,
             m_random.data(),
             m_shadowRays.data());
 
@@ -374,5 +442,54 @@ namespace idaten {
             m_shadowRays.data());
 
         checkCudaKernel(TraverseShadowRay);
+    }
+
+    bool VolumeRendering::IsAllPathsTerminated(
+        int32_t width, int32_t height,
+        int32_t bounce)
+    {
+        if (terminated_path_count_.empty()) {
+            terminated_path_count_.resize(1);
+        }
+
+        // TODO
+        // What is the best way to put the specific value to the global memory which stores only one data.
+        int32_t clear_value = 0;
+        terminated_path_count_.writeFromHostToDeviceByNum(&clear_value, 1);
+
+        dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
+        dim3 threadPerBlock(64);
+        int32_t smemSize = 64 * sizeof(int32_t);
+
+        vpt::CountTerminatedPath << <blockPerGrid, threadPerBlock, smemSize, m_stream >> > (
+            width * height,
+            //128,
+            path_host_->paths,
+            terminated_path_count_.data());
+
+        checkCudaKernel(CountTerminatedPath);
+
+        // Read the result from device memory to host memory.
+        int32_t terminated_path_count{ 0 };
+        terminated_path_count_.readFromDeviceToHostByNum(&terminated_path_count, 1);
+
+        // Compute the "non" terminated path count.
+        const auto remaining_path_count = width * height - terminated_path_count;
+
+#ifdef __AT_DEBUG__
+        // In debug, read status from device memory to host memory and count it in host side.
+        // And then, compare it with the result from CountTerminatedPath kernel.
+        std::vector<AT_NAME::PathAttribute> attribs;
+        path_host_->attrib.readFromDeviceToHost(attribs);
+
+        int32_t count = 0;
+        for (const auto& a : attribs) {
+            count += a.isTerminate ? 1 : 0;
+        }
+
+        AT_ASSERT(count == terminated_path_count);
+#endif
+
+        return remaining_path_count == 0;
     }
 }

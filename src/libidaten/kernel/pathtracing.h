@@ -110,7 +110,7 @@ namespace idaten
         }
 
     protected:
-        void OnRender(
+        virtual void OnRender(
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce,

@@ -520,8 +520,5 @@
     <CudaCompile Include="..\src\libaten\volume\medium.cpp">
       <Filter>aten\volume</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\device_scene_context.cu">
-      <Filter>kernel</Filter>
-    </CudaCompile>
   </ItemGroup>
 </Project>

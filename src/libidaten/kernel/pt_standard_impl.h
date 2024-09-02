@@ -41,6 +41,11 @@ namespace idaten {
 
         aten::tuple<aten::ray, aten::vec3> getDebugInfo(uint32_t x, uint32_t y);
 
+        cudaStream_t GetCudaStream() const
+        {
+            return m_stream;
+        }
+
     protected:
         virtual void initSamplerParameter(
             int32_t width, int32_t height)

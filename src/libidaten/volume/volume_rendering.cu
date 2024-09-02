@@ -17,6 +17,8 @@
 
 #include <cooperative_groups.h>
 
+#include "volume/volume_grid.h"
+
 namespace vpt
 {
     namespace cg = cooperative_groups;

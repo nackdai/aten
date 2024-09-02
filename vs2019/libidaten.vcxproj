@@ -71,7 +71,7 @@
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\types.h" />
-    <ClInclude Include="..\src\libaten\volume\grid.h" />
+    <ClInclude Include="..\src\libaten\volume\grid_util.h" />
     <ClInclude Include="..\src\libaten\volume\medium.h" />
     <ClInclude Include="..\src\libaten\volume\phase_function.h" />
     <ClInclude Include="..\src\libidaten\ao\ao.h" />
@@ -112,6 +112,7 @@
     <ClInclude Include="..\src\libidaten\npr\npr_pathtracing.h" />
     <ClInclude Include="..\src\libidaten\restir\restir.h" />
     <ClInclude Include="..\src\libidaten\svgf\svgf.h" />
+    <ClInclude Include="..\src\libidaten\volume\volume_grid.h" />
     <ClInclude Include="..\src\libidaten\volume\volume_rendering.h" />
   </ItemGroup>
   <ItemGroup>

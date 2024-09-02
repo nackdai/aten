@@ -82,6 +82,7 @@ namespace idaten {
 
         size_t writeFromHostToDeviceByNum(const _T* p, size_t num)
         {
+            resize(num);
             auto ret = CudaMemory::writeFromHostToDeviceByBytes(p, sizeof(_T) * num);
             return ret;
         }
@@ -117,7 +118,7 @@ namespace idaten {
         size_t readFromDeviceToHost(std::vector<_T>& host)
         {
             host.resize(m_num);
-            return readFromDeviceToHostByNum(&host[0], m_num);
+            return readFromDeviceToHostByNum(host.data(), m_num);
         }
 
         size_t readFromDeviceToHostByNumWithOffset(_T* host, size_t num, size_t offset_num)

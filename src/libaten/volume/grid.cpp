@@ -6,10 +6,10 @@
 #include <nanovdb/util/Ray.h>
 #pragma warning(pop)
 
-#include "volume/grid.h"
+#include "volume/grid_util.h"
 
 namespace AT_NAME {
-    AT_DEVICE_API std::optional<aten::tuple<float, float>> Grid::ClipRayByGridBoundingBox(
+    AT_DEVICE_API std::optional<aten::tuple<float, float>> GridUtil::ClipRayByGridBoundingBox(
         const aten::ray& ray,
         const nanovdb::FloatGrid* grid)
     {
@@ -32,7 +32,7 @@ namespace AT_NAME {
         return std::nullopt;
     }
 
-    AT_DEVICE_API float Grid::GetValueInGrid(const aten::vec3& p, const nanovdb::FloatGrid* grid)
+    AT_DEVICE_API float GridUtil::GetValueInGrid(const aten::vec3& p, const nanovdb::FloatGrid* grid)
     {
         // TODO:
         // tri linear sampling etc...

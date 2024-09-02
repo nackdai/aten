@@ -26,15 +26,9 @@ namespace aten {
         const nanovdb::FloatGrid* grid);
 }
 
-namespace AT_NAME {
+namespace aten {
     class Grid {
     public:
-        static AT_DEVICE_API std::optional<aten::tuple<float, float>> ClipRayByGridBoundingBox(
-            const aten::ray& ray,
-            const nanovdb::FloatGrid* grid);
-
-        static AT_DEVICE_API float GetValueInGrid(const aten::vec3& p, const nanovdb::FloatGrid* grid);
-
         Grid() = default;
         ~Grid() = default;
 
@@ -46,55 +40,35 @@ namespace AT_NAME {
 
         void Clear()
         {
-#ifdef __AT_CUDA__
-            // Nothing to do.
-#else
             grids_.clear();
-#endif
         }
 
-        AT_DEVICE_API nanovdb::FloatGrid* GetGrid(int32_t idx) const
+        nanovdb::FloatGrid* GetGrid(int32_t idx) const
         {
-#ifdef __AT_CUDA__
-            if (grids_) {
-                return grids_[idx];
-            }
-            return nullptr;
-#else
             if (0 <= idx && idx < grids_.size()) {
                 return grids_[idx];
             }
             return nullptr;
-#endif
         }
 
         int32_t AddGrid(nanovdb::FloatGrid* grid)
         {
-#ifdef __AT_CUDA__
-            return 0;
-#else
             grids_.emplace_back(grid);
             int32_t ret = static_cast<int32_t>(grids_.size() - 1);
             return ret;
-#endif
         }
 
-        void AssignGrids(nanovdb::FloatGrid** grid, size_t num)
+        int32_t GetGridsNum() const
         {
-#ifdef __AT_CUDA__
-            grids_ = grid;
-            num_ = num;
-#else
-            AT_ASSERT(false);
-#endif
+            return grids_.size();
+        }
+
+        nanovdb::FloatGrid* const* GetGrids() const
+        {
+            return grids_.data();
         }
 
     private:
-#ifdef __AT_CUDA__
-        nanovdb::FloatGrid** grids_{ nullptr };
-        size_t num_{ 0 };
-#else
         std::vector<nanovdb::FloatGrid*> grids_;
-#endif
     };
 }

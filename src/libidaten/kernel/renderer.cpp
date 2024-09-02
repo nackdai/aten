@@ -1,5 +1,7 @@
 #include "kernel/renderer.h"
 
+#include "volume/grid.h"
+
 namespace idaten {
     void Renderer::UpdateSceneData(
         GLuint gltex,
@@ -9,7 +11,8 @@ namespace idaten {
         const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
         uint32_t advance_prim_num,
         uint32_t advance_vtx_num,
-        const aten::BackgroundResource& bg_resource)
+        const aten::BackgroundResource& bg_resource,
+        std::function<const aten::Grid*(const aten::context&)> proxy_get_grid_from_host_scene_context/*= nullptr*/)
     {
         m_glimg.init(gltex, CudaGLRscRegisterType::ReadWrite);
 
@@ -98,6 +101,15 @@ namespace idaten {
 #endif
             }
             ctxt_host_.tex.resize(tex_num);
+        }
+
+        if (proxy_get_grid_from_host_scene_context) {
+            const auto* grid_holder = proxy_get_grid_from_host_scene_context(scene_ctxt);
+            const auto grids_num = grid_holder ? grid_holder->GetGridsNum() : 0;
+            if (grids_num > 0) {
+                auto* const* grids = grid_holder->GetGrids();
+                ctxt_host_.grids.writeFromHostToDeviceByNum(grids, grids_num);
+            }
         }
 
         bg_ = bg_resource;

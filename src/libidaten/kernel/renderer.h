@@ -1,8 +1,9 @@
 #pragma once
 
 #include "aten4idaten.h"
+#include "cuda/cudaGLresource.h"
+#include "cuda/cudaTextureResource.h"
 #include "kernel/StreamCompaction.h"
-#include "kernel/device_scene_context.cuh"
 
 namespace aten {
     class Grid;
@@ -10,10 +11,12 @@ namespace aten {
 
 namespace idaten
 {
+    class DeviceContextInHost;
+
     class Renderer {
     protected:
-        Renderer() {}
-        virtual ~Renderer() {}
+        Renderer();
+        virtual ~Renderer() = default;
 
     public:
         virtual void render(
@@ -39,25 +42,13 @@ namespace idaten
             uint32_t idx,
             int32_t screenWidth, int32_t screenHeight);
 
-        uint32_t getRegisteredTextureNum() const
-        {
-            return static_cast<uint32_t>(ctxt_host_.texRsc.size());
-        }
+        uint32_t getRegisteredTextureNum() const;
 
-        std::vector<idaten::CudaTextureResource>& getCudaTextureResourceForBvhNodes()
-        {
-            return ctxt_host_.nodeparam;
-        }
+        std::vector<idaten::CudaTextureResource>& getCudaTextureResourceForBvhNodes();
 
-        idaten::CudaTextureResource getCudaTextureResourceForVtxPos()
-        {
-            return ctxt_host_.vtxparamsPos;
-        }
+        idaten::CudaTextureResource getCudaTextureResourceForVtxPos();
 
-        idaten::StreamCompaction& getCompaction()
-        {
-            return m_compaction;
-        }
+        idaten::StreamCompaction& getCompaction();
 
     protected:
         virtual void UpdateSceneData(
@@ -71,7 +62,7 @@ namespace idaten
             const aten::BackgroundResource& bg_resource,
             std::function<const aten::Grid*(const aten::context&)> proxy_get_grid_from_host_scene_context = nullptr);
 
-        idaten::DeviceContextInHost ctxt_host_;
+        std::shared_ptr<idaten::DeviceContextInHost> ctxt_host_;
 
         idaten::CudaGLSurface m_glimg;
 

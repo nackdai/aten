@@ -116,6 +116,7 @@
     <ClInclude Include="..\src\libidaten\volume\volume_rendering.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\libidaten\kernel\device_scene_context.cpp" />
     <ClCompile Include="..\src\libidaten\volume\volume_rendering.cpp" />
     <CudaCompile Include="..\src\libaten\material\FlakesNormal.cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>

@@ -196,12 +196,12 @@ namespace idaten
             aov_.albedo_meshid().data(),
             gbuffer,
             m_cam,
-            ctxt_host_.ctxt,
-            ctxt_host_.shapeparam.data(),
-            ctxt_host_.mtrlparam.data(),
-            ctxt_host_.lightparam.data(),
-            ctxt_host_.primparams.data(),
-            ctxt_host_.mtxparams.data());
+            ctxt_host_->ctxt,
+            ctxt_host_->shapeparam.data(),
+            ctxt_host_->mtrlparam.data(),
+            ctxt_host_->lightparam.data(),
+            ctxt_host_->primparams.data(),
+            ctxt_host_->mtxparams.data());
     }
 
     void ReSTIRPathTracing::pick(
@@ -219,12 +219,12 @@ namespace idaten
                 path_host_->paths,
                 aov_.normal_depth().data(),
                 aov_.albedo_meshid().data(),
-                ctxt_host_.ctxt,
-                ctxt_host_.shapeparam.data(),
-                ctxt_host_.mtrlparam.data(),
-                ctxt_host_.lightparam.data(),
-                ctxt_host_.primparams.data(),
-                ctxt_host_.mtxparams.data());
+                ctxt_host_->ctxt,
+                ctxt_host_->shapeparam.data(),
+                ctxt_host_->mtrlparam.data(),
+                ctxt_host_->lightparam.data(),
+                ctxt_host_->primparams.data(),
+                ctxt_host_->mtxparams.data());
 
             m_pick.readFromDeviceToHostByNum(&m_pickedInfo);
 

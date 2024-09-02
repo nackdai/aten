@@ -58,7 +58,7 @@ namespace aten {
             return ret;
         }
 
-        int32_t GetGridsNum() const
+        size_t GetGridsNum() const
         {
             return grids_.size();
         }

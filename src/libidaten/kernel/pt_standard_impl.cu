@@ -385,7 +385,7 @@ namespace idaten
 
     bool StandardPT::InitPath(int32_t width, int32_t height)
     {
-        ctxt_host_.BindToDeviceContext();
+        ctxt_host_->BindToDeviceContext();
 
         const auto result = path_host_->init(width, height);
 
@@ -436,18 +436,18 @@ namespace idaten
 
         kernel::hitTest << <grid, block >> > (
 #endif
-            ctxt_host_.ctxt,
-            ctxt_host_.shapeparam.data(),
-            ctxt_host_.mtrlparam.data(),
-            ctxt_host_.lightparam.data(),
-            ctxt_host_.primparams.data(),
-            ctxt_host_.mtxparams.data(),
+            ctxt_host_->ctxt,
+            ctxt_host_->shapeparam.data(),
+            ctxt_host_->mtrlparam.data(),
+            ctxt_host_->lightparam.data(),
+            ctxt_host_->primparams.data(),
+            ctxt_host_->mtxparams.data(),
             path_host_->paths,
             m_isects.data(),
             m_rays.data(),
             m_hitbools.data(),
             width, height,
-            ctxt_host_.nodetex.data(),
+            ctxt_host_->nodetex.data(),
             bounce,
             m_hitDistLimit);
 
@@ -470,12 +470,12 @@ namespace idaten
 
         kernel::hitTestPrimaryRayInScreenSpace << <grid, block >> > (
             binded_gbuffer,
-            ctxt_host_.ctxt,
-            ctxt_host_.shapeparam.data(),
-            ctxt_host_.mtrlparam.data(),
-            ctxt_host_.lightparam.data(),
-            ctxt_host_.primparams.data(),
-            ctxt_host_.mtxparams.data(),
+            ctxt_host_->ctxt,
+            ctxt_host_->shapeparam.data(),
+            ctxt_host_->mtrlparam.data(),
+            ctxt_host_->lightparam.data(),
+            ctxt_host_->primparams.data(),
+            ctxt_host_->mtxparams.data(),
             path_host_->paths,
             m_isects.data(),
             m_hitbools.data(),
@@ -502,7 +502,7 @@ namespace idaten
                 m_cam,
                 aovNormalDepth.data(),
                 aovTexclrMeshid.data(),
-                ctxt_host_.ctxt,
+                ctxt_host_->ctxt,
                 bg_,
                 path_host_->paths,
                 m_rays.data(),

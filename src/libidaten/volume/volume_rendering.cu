@@ -453,7 +453,7 @@ namespace idaten {
         }
 
         // TODO
-        // What is the best way to put the specific value to the global memory which stores only one data.
+        // What is the best way to put the specific value to the global memory which stores a non-array primitive data.
         int32_t clear_value = 0;
         terminated_path_count_.writeFromHostToDeviceByNum(&clear_value, 1);
 

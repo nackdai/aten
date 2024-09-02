@@ -53,7 +53,7 @@ And Idanten includes characters of aten, "id**aten**"
 - Camera
   - Pinhole
   - Equirect
-- VolumeRendering (Only cpu rendering)
+- VolumeRendering
   - Homogeneous
   - Heterogeneous
   - NanoVDB format

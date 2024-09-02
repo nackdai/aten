@@ -2,7 +2,6 @@
 
 #include "cuda/cudamemory.h"
 
-#include "kernel/device_scene_context.cuh"
 #include "kernel/renderer.h"
 
 namespace idaten {

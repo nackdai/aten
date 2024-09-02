@@ -1,4 +1,5 @@
 #include "kernel/pathtracing.h"
+#include "kernel/device_scene_context.cuh"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -43,10 +44,10 @@ namespace idaten
 
     void PathTracing::updateMaterial(const std::vector<aten::MaterialParameter>& mtrls)
     {
-        AT_ASSERT(mtrls.size() <= ctxt_host_.mtrlparam.num());
+        AT_ASSERT(mtrls.size() <= ctxt_host_->mtrlparam.num());
 
-        if (mtrls.size() <= ctxt_host_.mtrlparam.num()) {
-            ctxt_host_.mtrlparam.writeFromHostToDeviceByNum(&mtrls[0], (uint32_t)mtrls.size());
+        if (mtrls.size() <= ctxt_host_->mtrlparam.num()) {
+            ctxt_host_->mtrlparam.writeFromHostToDeviceByNum(&mtrls[0], (uint32_t)mtrls.size());
             reset();
         }
     }
@@ -55,10 +56,10 @@ namespace idaten
     {
         const auto lights = scene_ctxt.GetLightParameters();
 
-        AT_ASSERT(lights.size() <= ctxt_host_.lightparam.num());
+        AT_ASSERT(lights.size() <= ctxt_host_->lightparam.num());
 
-        if (lights.size() <= ctxt_host_.lightparam.num()) {
-            ctxt_host_.lightparam.writeFromHostToDeviceByNum(&lights[0], (uint32_t)lights.size());
+        if (lights.size() <= ctxt_host_->lightparam.num()) {
+            ctxt_host_->lightparam.writeFromHostToDeviceByNum(&lights[0], (uint32_t)lights.size());
             reset();
         }
     }

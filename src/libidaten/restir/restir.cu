@@ -357,12 +357,12 @@ namespace idaten
             sample,
             m_frame,
             bounce, rrBounce,
-            ctxt_host_.ctxt,
-            ctxt_host_.shapeparam.data(),
-            ctxt_host_.mtrlparam.data(),
-            ctxt_host_.lightparam.data(),
-            ctxt_host_.primparams.data(),
-            ctxt_host_.mtxparams.data(),
+            ctxt_host_->ctxt,
+            ctxt_host_->shapeparam.data(),
+            ctxt_host_->mtrlparam.data(),
+            ctxt_host_->lightparam.data(),
+            ctxt_host_->primparams.data(),
+            ctxt_host_->mtxparams.data(),
             m_random.data());
 
         checkCudaKernel(shade);
@@ -389,12 +389,12 @@ namespace idaten
             m_reservoirs.GetCurrParams().data(),
             m_restir_infos.GetCurrParams().data(),
             m_shadowRays.data(),
-            ctxt_host_.ctxt,
-            ctxt_host_.shapeparam.data(),
-            ctxt_host_.mtrlparam.data(),
-            ctxt_host_.lightparam.data(),
-            ctxt_host_.primparams.data(),
-            ctxt_host_.mtxparams.data());
+            ctxt_host_->ctxt,
+            ctxt_host_->shapeparam.data(),
+            ctxt_host_->mtrlparam.data(),
+            ctxt_host_->lightparam.data(),
+            ctxt_host_->primparams.data(),
+            ctxt_host_->mtxparams.data());
 
         checkCudaKernel(EvaluateVisibility);
 
@@ -409,9 +409,9 @@ namespace idaten
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
             aov_.albedo_meshid().data(),
-            ctxt_host_.lightparam.data(), static_cast<int32_t>(ctxt_host_.lightparam.num()),
-            ctxt_host_.mtrlparam.data(),
-            ctxt_host_.tex.data(),
+            ctxt_host_->lightparam.data(), static_cast<int32_t>(ctxt_host_->lightparam.num()),
+            ctxt_host_->mtrlparam.data(),
+            ctxt_host_->tex.data(),
             m_shadowRays.data());
 
         checkCudaKernel(ComputePixelColor);

@@ -1,4 +1,5 @@
 #include "kernel/renderer.h"
+#include "kernel/device_scene_context.cuh"
 #include "kernel/pt_common.h"
 
 #include <cuda_runtime.h>
@@ -8,7 +9,7 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
-#include "aten4idaten.h"
+#include "aten4idaten.h""
 
 __global__ void textureViewer(
     uint32_t texIdx,
@@ -44,13 +45,13 @@ namespace idaten
         m_glimg.map();
         auto outputSurf = m_glimg.bind();
 
-        if (!ctxt_host_.texRsc.empty()) {
+        if (!ctxt_host_->texRsc.empty()) {
             std::vector<cudaTextureObject_t> tmp;
-            for (auto& tex_rsc : ctxt_host_.texRsc) {
+            for (auto& tex_rsc : ctxt_host_->texRsc) {
                 auto cudaTex = tex_rsc.bind();
                 tmp.push_back(cudaTex);
             }
-            ctxt_host_.tex.writeFromHostToDeviceByNum(&tmp[0], (uint32_t)tmp.size());
+            ctxt_host_->tex.writeFromHostToDeviceByNum(&tmp[0], (uint32_t)tmp.size());
         }
 
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
@@ -61,10 +62,10 @@ namespace idaten
         textureViewer << <grid, block >> > (
             idx,
             screenWidth, screenHeight,
-            ctxt_host_.tex.data(),
+            ctxt_host_->tex.data(),
             outputSurf);
 
-        for (auto& tex_rsc : ctxt_host_.texRsc) {
+        for (auto& tex_rsc : ctxt_host_->texRsc) {
             tex_rsc.unbind();
         }
 

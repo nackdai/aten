@@ -115,12 +115,12 @@ namespace idaten {
             m_isects.data(),
             m_rays.data(),
             bounce, rrBounce,
-            ctxt_host_.ctxt,
-            ctxt_host_.shapeparam.data(),
-            ctxt_host_.mtrlparam.data(),
-            ctxt_host_.lightparam.data(),
-            ctxt_host_.primparams.data(),
-            ctxt_host_.mtxparams.data(),
+            ctxt_host_->ctxt,
+            ctxt_host_->shapeparam.data(),
+            ctxt_host_->mtrlparam.data(),
+            ctxt_host_->lightparam.data(),
+            ctxt_host_->primparams.data(),
+            ctxt_host_->mtxparams.data(),
             m_random.data());
 
         checkCudaKernel(shade);

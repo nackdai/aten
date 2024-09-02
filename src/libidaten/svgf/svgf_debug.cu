@@ -198,12 +198,12 @@ namespace idaten
             curaov.get<AT_NAME::SVGFAovBufferType::AlbedoMeshId>().data(),
             gbuffer,
             m_cam,
-            ctxt_host_.ctxt,
-            ctxt_host_.shapeparam.data(),
-            ctxt_host_.mtrlparam.data(),
-            ctxt_host_.lightparam.data(),
-            ctxt_host_.primparams.data(),
-            ctxt_host_.mtxparams.data());
+            ctxt_host_->ctxt,
+            ctxt_host_->shapeparam.data(),
+            ctxt_host_->mtrlparam.data(),
+            ctxt_host_->lightparam.data(),
+            ctxt_host_->primparams.data(),
+            ctxt_host_->mtxparams.data());
     }
 
     void SVGFPathTracing::pick(
@@ -223,12 +223,12 @@ namespace idaten
                 path_host_->paths,
                 curaov.get<AT_NAME::SVGFAovBufferType::NormalDepth>().data(),
                 curaov.get<AT_NAME::SVGFAovBufferType::AlbedoMeshId>().data(),
-                ctxt_host_.ctxt,
-                ctxt_host_.shapeparam.data(),
-                ctxt_host_.mtrlparam.data(),
-                ctxt_host_.lightparam.data(),
-                ctxt_host_.primparams.data(),
-                ctxt_host_.mtxparams.data());
+                ctxt_host_->ctxt,
+                ctxt_host_->shapeparam.data(),
+                ctxt_host_->mtrlparam.data(),
+                ctxt_host_->lightparam.data(),
+                ctxt_host_->primparams.data(),
+                ctxt_host_->mtxparams.data());
 
             m_pick.readFromDeviceToHostByNum(&m_pickedInfo);
 

@@ -532,6 +532,9 @@
     <ClInclude Include="..\src\libaten\volume\grid.h">
       <Filter>volume</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\volume\grid_util.h">
+      <Filter>volume</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

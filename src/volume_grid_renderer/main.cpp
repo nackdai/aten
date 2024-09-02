@@ -6,10 +6,12 @@
 #pragma warning(disable:4146)
 #include <nanovdb/NanoVDB.h>
 #include <nanovdb/util/IO.h>
+#include <nanovdb/util/cuda/CudaDeviceBuffer.h>
 #pragma warning(pop)
 #endif
 
 #include "aten.h"
+#include "idaten.h"
 #include "atenscene.h"
 #include "../common/scenedefs.h"
 
@@ -17,6 +19,13 @@
 #include "volume/grid.h"
 
 #define ENABLE_IBL
+#define DEVICE_RENDERING
+
+#ifdef DEVICE_RENDERING
+using NanoVDBBuffer = nanovdb::CudaDeviceBuffer;
+#else
+using NanoVDBBuffer = nanovdb::HostBuffer;
+#endif
 
 constexpr int32_t WIDTH = 512;
 constexpr int32_t HEIGHT = 512;
@@ -97,8 +106,6 @@ public:
             mtrl->param().medium.sigma_a,
             mtrl->param().medium.sigma_s);
 
-        renderer_.EnableRenderGrid(true);
-
         auto grid_obj = aten::GenerateTrianglesFromGridBoundingBox(ctxt_, mtrl_id, grid_handle_.grid<float>());
         auto obj = aten::TransformableFactory::createInstance(
             ctxt_, grid_obj,
@@ -118,7 +125,30 @@ public:
 #else
         auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, BGColor);
 #endif
+
+#ifdef DEVICE_RENDERING
+        {
+            auto aabb = scene_.getAccel()->getBoundingbox();
+            auto d = aabb.getDiagonalLenght();
+            renderer_.setHitDistanceLimit(d * 1.0F);
+
+            const auto& nodes = scene_.getAccel()->getNodes();
+
+            auto camparam = camera_.param();
+            camparam.znear = float(0.1);
+            camparam.zfar = float(10000.0);
+
+            renderer_.UpdateSceneData(
+                visualizer_->GetGLTextureHandle(),
+                WIDTH, HEIGHT,
+                camparam, ctxt_, nodes,
+                0, 0, bg,
+                [](const aten::context& ctxt) -> auto { return ctxt.GetGrid(); });
+        }
+#else
+        renderer_.EnableRenderGrid(true);
         renderer_.SetBG(bg);
+#endif
 
         return true;
     }
@@ -143,10 +173,16 @@ public:
             dst.buffer = &buffer_;
         }
 
-        const auto frame_cnt = renderer_.GetFrameCount();
-
         aten::timer timer;
         timer.begin();
+
+#ifdef DEVICE_RENDERING
+        renderer_.render(
+            WIDTH, HEIGHT,
+            dst.sample,
+            dst.maxDepth);
+#else
+        const auto frame_cnt = renderer_.GetFrameCount();
 
         // Trace rays.
         renderer_.render(ctxt_, dst, &scene_, &camera_);
@@ -156,6 +192,7 @@ public:
         avg_elapsed_ /= (frame_cnt + 1);
 
         AT_PRINTF("Elapsed %f[ms] / Avg %f[ms]\n", elapsed, avg_elapsed_);
+#endif
 
         aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
         aten::RasterizeRenderer::clearBuffer(
@@ -164,7 +201,11 @@ public:
             1.0f,
             0);
 
+#ifdef DEVICE_RENDERING
+        visualizer_->render(false);
+#else
         visualizer_->renderPixelData(buffer_.image().data(), camera_.NeedRevert());
+#endif
 
 #ifdef ENABLE_EVERY_FRAME_SC
         {
@@ -208,8 +249,13 @@ private:
             }
 
             grid_handle_ = nanovdb::io::readGrid<decltype(grid_handle_)::BufferType>(nvdb.data());
-            auto cpu_grid = grid_handle_.grid<float>();
-            grid_holder_->AddGrid(cpu_grid);
+#ifdef DEVICE_RENDERING
+            grid_handle_.deviceUpload(renderer_.GetCudaStream(), true);
+            auto grid = grid_handle_.deviceGrid<float>();
+#else
+            auto grid = grid_handle_.grid<float>();
+#endif
+            grid_holder_->AddGrid(grid);
 
             return true;
         }
@@ -227,9 +273,13 @@ private:
 
     std::shared_ptr<aten::texture> envmap_;
 
+#ifdef DEVICE_RENDERING
+    idaten::VolumeRendering renderer_;
+#else
     aten::VolumePathTracing renderer_;
+#endif
 
-    nanovdb::GridHandle<nanovdb::HostBuffer> grid_handle_;
+    nanovdb::GridHandle<NanoVDBBuffer> grid_handle_;
     std::shared_ptr<aten::Grid> grid_holder_;
 
     std::shared_ptr<aten::visualizer> visualizer_;

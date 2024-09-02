@@ -3,15 +3,14 @@
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
 #include "cuda/cudaTextureResource.h"
-#include "geometry/vertex.h"
-#include "material/material.h"
-#include "light/light_parameter.h"
 #include "geometry/geomparam.h"
+#include "geometry/vertex.h"
+#include "light/light_parameter.h"
+#include "material/material.h"
 #include "math/mat4.h"
+#include "volume/volume_grid.h"
 
 namespace idaten {
-    class Grid;
-
     // NOTE:
     // https://stackoverflow.com/questions/43235899/cuda-restrict-tag-usage
     // __restrict__ is hint for the compiler that we use the pointer to refer underlying data.
@@ -46,7 +45,7 @@ namespace idaten {
         cudaTextureObject_t* textures{ nullptr };
         int32_t envmapIdx{ -1 };
 
-        AT_NAME::Grid* grid_holder{ nullptr };
+        idaten::GridHolder grid_holder;
 
         aten::aabb scene_bounding_box;
 
@@ -127,7 +126,10 @@ namespace idaten {
             return textures[idx];
         }
 
-        __device__ const AT_NAME::Grid* GetGrid() const noexcept;
+        __device__ const idaten::GridHolder* GetGrid() const noexcept
+        {
+            return &grid_holder;
+        }
 
         __device__ const aten::aabb& GetSceneBoundingBox() const
         {
@@ -151,7 +153,7 @@ namespace idaten {
         std::vector<idaten::CudaTexture> texRsc;
         idaten::TypedCudaMemory<cudaTextureObject_t> tex;
 
-        idaten::TypedCudaMemory<AT_NAME::Grid> grid;
+        idaten::TypedCudaMemory<nanovdb::FloatGrid*> grids;
 
         idaten::CudaTextureResource vtxparamsPos;
         idaten::CudaTextureResource vtxparamsNml;
@@ -180,6 +182,10 @@ namespace idaten {
                     tex.writeFromHostToDeviceByNum(tmp_tex.data(), tmp_tex.size());
                 }
                 ctxt.textures = tex.data();
+            }
+
+            if (!grids.empty() && !ctxt.grid_holder.IsGridsAssigned()) {
+                ctxt.grid_holder.AssignGrids(grids.data(), grids.num());
             }
 
             ctxt.vtxPos = vtxparamsPos.bind();

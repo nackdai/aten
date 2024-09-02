@@ -286,7 +286,10 @@
     <ClInclude Include="..\src\libaten\volume\phase_function.h">
       <Filter>aten\volume</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\volume\grid.h">
+    <ClInclude Include="..\src\libidaten\volume\volume_grid.h">
+      <Filter>volume</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\volume\grid_util.h">
       <Filter>aten\volume</Filter>
     </ClInclude>
   </ItemGroup>

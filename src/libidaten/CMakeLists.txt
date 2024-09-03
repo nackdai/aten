@@ -43,6 +43,8 @@ set_source_files_properties(
   ../libaten/material/retroreflective.cpp
   ../libaten/material/specular.cpp
   ../libaten/material/velvet.cpp
+  ../libaten/volume/grid.cpp
+  ../libaten/volume/medium.cpp
   PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
 
 # Add library to build.
@@ -122,6 +124,11 @@ cuda_add_library(
   ../libaten/scene/hitable.h
   ../libaten/scene/scene.h
   ../libaten/types.h
+  ../libaten/volume/grid.cpp
+  ../libaten/volume/grid_util.h
+  ../libaten/volume/medium.cpp
+  ../libaten/volume/medium.h
+  ../libaten/volume/phase_function.h
   ao/ao.cpp
   ao/ao.cu
   ao/ao.h
@@ -154,6 +161,7 @@ cuda_add_library(
   kernel/bvh.cu
   kernel/bvh.cuh
   kernel/bvh_impl.cuh
+  kernel/device_scene_context.cpp
   kernel/device_scene_context.cuh
   kernel/intersect.cu
   kernel/intersect.cuh
@@ -192,6 +200,9 @@ cuda_add_library(
   svgf/svgf_pt.cu
   svgf/svgf_tp.cu
   volume/simple_grid_rendering.cu
+  volume/volume_grid.h
+  volume/volume_rendering.cpp
+  volume/volume_rendering.cu
   volume/volume_rendering.h)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
@@ -199,7 +210,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 target_include_directories(
   ${PROJECT_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  PRIVATE ${nanovdb_INCLUDE_DIRECTORIES})
+  PUBLIC ${nanovdb_INCLUDE_DIRECTORIES})
 
 target_link_libraries(${PROJECT_NAME} aten glm)
 

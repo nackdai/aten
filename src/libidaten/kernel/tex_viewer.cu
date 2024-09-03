@@ -9,7 +9,7 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
-#include "aten4idaten.h""
+#include "aten4idaten.h"
 
 __global__ void textureViewer(
     uint32_t texIdx,

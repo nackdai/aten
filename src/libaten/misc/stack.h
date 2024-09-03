@@ -54,14 +54,14 @@ namespace aten
             queue_[size_] = item;
             size_ += 1;
         }
-        void push(T&& item)
+        AT_DEVICE_API void push(T&& item)
         {
             AT_ASSERT(size_ < N);
             queue_[size_] = std::move(item);
             size_ += 1;
         }
 
-        AT_DEVICE_API  T& pop()
+        AT_DEVICE_API T& pop()
         {
             AT_ASSERT(size_ > 0);
             T& ret = queue_[size_ - 1];

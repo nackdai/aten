@@ -165,8 +165,6 @@ add_library(
   os/linux/misc/timer_linux.cpp
   os/linux/system_linux.cpp
   os/system.h
-  proxy/DataCollector.cpp
-  proxy/DataCollector.h
   renderer/ao/aorenderer.cpp
   renderer/ao/aorenderer.h
   renderer/ao/aorenderer_impl.h
@@ -192,7 +190,6 @@ add_library(
   renderer/svgf/svgf_types.h
   renderer/volume/volume_pathtracing.cpp
   renderer/volume/volume_pathtracing.h
-  renderer/volume/volume_pathtracing_grid.cpp
   renderer/volume/volume_pathtracing_impl.h
   sampler/cmj.h
   sampler/sampler.cpp
@@ -232,6 +229,8 @@ add_library(
   visualizer/window.h
   volume/grid.cpp
   volume/grid.h
+  volume/grid_host.cpp
+  volume/grid_util.h
   volume/medium.cpp
   volume/medium.h
   volume/phase_function.h)

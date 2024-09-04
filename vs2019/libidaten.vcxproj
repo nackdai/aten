@@ -112,6 +112,7 @@
     <ClInclude Include="..\src\libidaten\npr\npr_pathtracing.h" />
     <ClInclude Include="..\src\libidaten\restir\restir.h" />
     <ClInclude Include="..\src\libidaten\svgf\svgf.h" />
+    <ClInclude Include="..\src\libidaten\volume\grid_loader_device.h" />
     <ClInclude Include="..\src\libidaten\volume\volume_grid.h" />
     <ClInclude Include="..\src\libidaten\volume\volume_rendering.h" />
   </ItemGroup>
@@ -317,6 +318,7 @@
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\volume\grid_loader_device.cu" />
     <CudaCompile Include="..\src\libidaten\volume\simple_grid_rendering.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>

@@ -292,6 +292,9 @@
     <ClInclude Include="..\src\libaten\volume\grid_util.h">
       <Filter>aten\volume</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\volume\grid_loader_device.h">
+      <Filter>volume</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -522,6 +525,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\volume\medium.cpp">
       <Filter>aten\volume</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\volume\grid_loader_device.cu">
+      <Filter>volume</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

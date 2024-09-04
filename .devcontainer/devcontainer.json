@@ -8,7 +8,6 @@
     "extensions": [
         "ms-vscode.cpptools",
         "ms-vscode.cmake-tools",
-        "twxs.cmake",
         "kriegalex.vscode-cudacpp",
         "llvm-vs-code-extensions.vscode-clangd",
         "ms-python.python",

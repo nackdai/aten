@@ -26,30 +26,36 @@ jobs:
     name: checck_diff
     runs-on: ubuntu-20.04
     outputs:
-      sbould_build_image: ${{ steps.check_diff_File.outputs.sbould_build_image }}
+      should_build_image: ${{ steps.check_diff_File.outputs.should_build_image }}
     if: github.ref != 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Check diff files
+      # NOTE:
+      # https://github.com/actions/runner-images/issues/1281
+      # Check if the specified files are chnaged.
+      - name: Check if Dockerfiles are changed
+        id: check_change_docker_file
+        uses: tj-actions/changed-files@v44
+        with:
+          files_yaml_from_source_file: .github/workflows/resources/change_docker_file.yml
+
+      - name: Pass value if docker image should be built
         id: check_diff_File
         run: |
-          git fetch origin main
-          files=$(git diff origin/main HEAD --name-only 2>/dev/null)
-          diff_files=($(echo ${files}))
-          echo "${diff_files[@]}"
-          if [[ "${diff_files[@]}" == *"docker/"* ]]; then
-            echo "sbould_build_image=true" >> $GITHUB_OUTPUT
+          value=${{ steps.check_change_docker_file.outputs.src_any_changed }}
+          if [[ "${value}" == "true" ]]; then
+            echo "should_build_image=true" >> $GITHUB_OUTPUT
           else
-            echo "sbould_build_image=false" >> $GITHUB_OUTPUT
+            echo "should_build_image=false" >> $GITHUB_OUTPUT
           fi
 
   build_docker:
     name: build_docker
     runs-on: ubuntu-20.04
     needs: checck_diff
-    if: contains(needs.checck_diff.outputs.sbould_build_image, 'true')
+    if: contains(needs.checck_diff.outputs.should_build_image, 'true')
     steps:
       - name: Checkout
         uses: actions/checkout@v3

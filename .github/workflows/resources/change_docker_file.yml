@@ -1,0 +1,3 @@
+src:
+  - 'docker/**/Dockerfile'
+  - 'docker/build_docker_image.sh'

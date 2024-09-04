@@ -1,14 +1,6 @@
 #include <filesystem>
+#include <optional>
 #include <vector>
-
-#ifndef NANOVDB_NANOVDB_H_HAS_BEEN_INCLUDED
-#pragma warning(push)
-#pragma warning(disable:4146)
-#include <nanovdb/NanoVDB.h>
-#include <nanovdb/util/IO.h>
-#include <nanovdb/util/cuda/CudaDeviceBuffer.h>
-#pragma warning(pop)
-#endif
 
 #include "aten.h"
 #include "idaten.h"
@@ -22,8 +14,10 @@
 #define DEVICE_RENDERING
 
 #ifdef DEVICE_RENDERING
+#include "volume/grid_loader_device.h"
 using NanoVDBBuffer = nanovdb::CudaDeviceBuffer;
 #else
+#include "volume/grid_loader.h"
 using NanoVDBBuffer = nanovdb::HostBuffer;
 #endif
 
@@ -102,14 +96,14 @@ public:
         mtrl->param().medium.sigma_s = 0.9F;
         mtrl->param().medium.phase_function_g = 0.4F;
         mtrl->param().medium.majorant = AT_NAME::HeterogeneousMedium::EvalMajorant(
-            grid_handle_.grid<float>(),
+            grid_handle_->grid<float>(),
             mtrl->param().medium.sigma_a,
             mtrl->param().medium.sigma_s);
 
-        auto grid_obj = aten::GenerateTrianglesFromGridBoundingBox(ctxt_, mtrl_id, grid_handle_.grid<float>());
+        auto grid_obj = aten::GenerateTrianglesFromGridBoundingBox(ctxt_, mtrl_id, grid_handle_->grid<float>());
         auto obj = aten::TransformableFactory::createInstance(
             ctxt_, grid_obj,
-            aten::vec3(0.0f), aten::vec3(0.0f), aten::vec3(1.0f));
+            aten::vec3(0.0F), aten::vec3(0.0F), aten::vec3(1.0F));
         scene_.add(obj);
 
         camera_.FitBoundingBox(grid_obj->getBoundingbox());
@@ -226,43 +220,23 @@ public:
 private:
     bool LoadNanoVDB(std::string_view nvdb)
     {
-        std::filesystem::path p = nvdb;
+        using GridBufferType = decltype(grid_handle_)::value_type::BufferType;
 
-        if (!std::filesystem::exists(p)) {
-            AT_ASSERT(false);
-            AT_PRINTF("%s doesn't exist.", nvdb.data());
-            return false;
-        }
+        std::vector<nanovdb::FloatGrid*> grids;
 
-        try {
-            auto list = nanovdb::io::readGridMetaData(nvdb.data());
-            if (list.size() != 1) {
-                // TODO
-                // Support only one grid.
-                AT_PRINTF("Support only one grid\n");
-                return false;
-            }
-
-            if (list[0].gridName != "density") {
-                AT_PRINTF("Not denstity grid. Allow only density grid\n");
-                return false;
-            }
-
-            grid_handle_ = nanovdb::io::readGrid<decltype(grid_handle_)::BufferType>(nvdb.data());
 #ifdef DEVICE_RENDERING
-            grid_handle_.deviceUpload(renderer_.GetCudaStream(), true);
-            auto grid = grid_handle_.deviceGrid<float>();
+        grid_handle_ = idaten::LoadGrid(nvdb, grids, renderer_.GetCudaStream());
 #else
-            auto grid = grid_handle_.grid<float>();
+        grid_handle_ = aten::LoadGrid(nvdb, grids);
 #endif
-            grid_holder_->AddGrid(grid);
 
-            return true;
+        if (grid_handle_) {
+            for (auto* grid : grids) {
+                grid_holder_->AddGrid(grid);
+            }
         }
-        catch (const std::exception& e) {
-            AT_PRINTF("An exception occurred: %s\n", e.what());
-            return false;
-        }
+
+        return static_cast<bool>(grid_handle_);
     }
 
 private:
@@ -279,7 +253,7 @@ private:
     aten::VolumePathTracing renderer_;
 #endif
 
-    nanovdb::GridHandle<NanoVDBBuffer> grid_handle_;
+    std::optional<nanovdb::GridHandle<NanoVDBBuffer>> grid_handle_;
     std::shared_ptr<aten::Grid> grid_holder_;
 
     std::shared_ptr<aten::visualizer> visualizer_;

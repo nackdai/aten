@@ -199,6 +199,8 @@ cuda_add_library(
   svgf/svgf_debug.cu
   svgf/svgf_pt.cu
   svgf/svgf_tp.cu
+  volume/grid_loader_device.cu
+  volume/grid_loader_device.h
   volume/simple_grid_rendering.cu
   volume/volume_grid.h
   volume/volume_rendering.cpp

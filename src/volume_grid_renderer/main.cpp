@@ -2,6 +2,8 @@
 #include <optional>
 #include <vector>
 
+#include <imgui.h>
+
 #include "aten.h"
 #include "idaten.h"
 #include "atenscene.h"
@@ -11,10 +13,9 @@
 #include "volume/medium.h"
 #include "volume/grid.h"
 
-#pragma optimize( "", off)
-
 #define ENABLE_IBL
-#define DEVICE_RENDERING
+//#define ENABLE_EVERY_FRAME_SC
+//#define DEVICE_RENDERING
 
 #ifdef DEVICE_RENDERING
 #include "volume/grid_loader_device.h"
@@ -24,8 +25,14 @@ using NanoVDBBuffer = nanovdb::CudaDeviceBuffer;
 using NanoVDBBuffer = nanovdb::HostBuffer;
 #endif
 
+#ifdef DEVICE_RENDERING
 constexpr int32_t WIDTH = 512;
 constexpr int32_t HEIGHT = 512;
+#else
+constexpr int32_t WIDTH = 512;
+constexpr int32_t HEIGHT = 512;
+#endif
+
 constexpr const char* TITLE = "volume_grid_renderer";
 
 const aten::vec4 BGColor(1.0F);
@@ -66,9 +73,7 @@ public:
 
         aten::vec3 lookfrom;
         aten::vec3 lookat;
-        float fov;
-
-        Scene::getCameraPosAndAt(lookfrom, lookat, fov);
+        float fov = 60.0F;
 
         camera_.Initalize(
             lookfrom,
@@ -110,7 +115,7 @@ public:
             aten::vec3(0.0F), aten::vec3(0.0F), aten::vec3(1.0F));
         scene_.add(obj);
 
-        camera_.FitBoundingBox(grid_obj->getBoundingbox());
+        camera_.FitBoundingBox(grid_obj->getBoundingbox(), true);
 
         scene_.build(ctxt_);
 
@@ -223,6 +228,32 @@ public:
             const auto frame = renderer_.GetFrameCount();
             const auto file_name = aten::StringFormat("sc_%d.png", frame);
             visualizer_->takeScreenshot(file_name);
+        }
+#endif
+
+#ifdef DEVICE_RENDERING
+        if (will_show_gui_)
+        {
+            ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", renderer_.frame(), 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+            auto is_input_samples = ImGui::SliderInt("Samples", &max_samples_, 1, 100);
+            auto is_input_bounce = ImGui::SliderInt("Bounce", &max_bounce_, 1, 10);
+
+            if (is_input_samples || is_input_bounce)
+            {
+                renderer_.reset();
+            }
+
+            if (ImGui::Checkbox("Progressive", &enable_progressive_))
+            {
+                renderer_.SetEnableProgressive(enable_progressive_);
+            }
+
+            ImGui::SliderFloat("MoveMultiply", &move_multiply_scale_, 1.0f, 100.0f);
+
+            auto cam = camera_.param();
+            ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
+            ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
         }
 #endif
 

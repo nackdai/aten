@@ -234,13 +234,15 @@ namespace AT_NAME {
         return -AT_MATH_INF;
     }
 
-    void PinholeCamera::FitBoundingBox(const aten::aabb& bounding_box)
+    void PinholeCamera::FitBoundingBox(
+        const aten::aabb& bounding_box,
+        bool is_dir_to_curr_cam_param/*= false*/)
     {
-        aten::vec3 origin, lookat;
-        aten::tie(origin, lookat) = PinholeCamera::FitBoundingBox(m_param, bounding_box);
+        aten::vec3 cam_origin, lookat;
+        aten::tie(cam_origin, lookat) = PinholeCamera::FitBoundingBox(m_param, bounding_box, is_dir_to_curr_cam_param);
 
         Initalize(
-            origin, lookat,
+            cam_origin, lookat,
             aten::vec3(0, 1, 0),
             m_param.vfov,
             m_param.znear, m_param.zfar,
@@ -249,19 +251,24 @@ namespace AT_NAME {
 
     aten::tuple<aten::vec3, aten::vec3> PinholeCamera::FitBoundingBox(
         const aten::CameraParameter& param,
-        const aten::aabb& bounding_box)
+        const aten::aabb& bounding_box,
+        bool is_dir_to_curr_cam_param/*= false*/)
     {
         const auto bbox_center = bounding_box.getCenter();
 
         const float theta = aten::Deg2Rad(param.vfov);
         const auto distance = bounding_box.ComputeDistanceToCoverBoundingSphere(theta);
 
-        const aten::vec3 tmp_origin(bbox_center.x, bbox_center.y, bbox_center.z * 2);
-        const auto dir = normalize(tmp_origin - bbox_center);
+        aten::vec3 cam_origin(bbox_center.x, bbox_center.y, bbox_center.z * 2);
+        if (is_dir_to_curr_cam_param) {
+            cam_origin = param.origin;
+        }
 
-        const auto origin = bbox_center + dir * distance;
+        const auto dir = normalize(cam_origin - bbox_center);
+
+        cam_origin = bbox_center + dir * distance;
         const auto lookat = bbox_center;
 
-        return aten::make_tuple(origin, lookat);
+        return aten::make_tuple(cam_origin, lookat);
     }
 }

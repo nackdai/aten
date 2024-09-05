@@ -135,11 +135,14 @@ namespace AT_NAME
             aten::vec3 &pos_on_image_sensor,
             int32_t &x, int32_t &y) const override final;
 
-        void FitBoundingBox(const aten::aabb& bounding_box);
+        void FitBoundingBox(
+            const aten::aabb& bounding_box,
+            bool is_dir_to_curr_cam_param = false);
 
         static aten::tuple<aten::vec3, aten::vec3> FitBoundingBox(
             const aten::CameraParameter& param,
-            const aten::aabb& bounding_box);
+            const aten::aabb& bounding_box,
+            bool is_dir_to_curr_cam_param = false);
 
     private:
         aten::CameraParameter m_param;

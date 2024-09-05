@@ -6,9 +6,12 @@
 #include "idaten.h"
 #include "atenscene.h"
 #include "../common/scenedefs.h"
+#include "../common/app_base.h"
 
 #include "volume/medium.h"
 #include "volume/grid.h"
+
+#pragma optimize( "", off)
 
 #define ENABLE_IBL
 #define DEVICE_RENDERING
@@ -27,7 +30,7 @@ constexpr const char* TITLE = "volume_grid_renderer";
 
 const aten::vec4 BGColor(1.0F);
 
-class VolumeGridRendererApp {
+class VolumeGridRendererApp : public App {
 public:
     static constexpr int32_t ThreadNum
 #ifdef ENABLE_OMP
@@ -36,9 +39,10 @@ public:
     { 1 };
 #endif
 
-    VolumeGridRendererApp() = default;
+    VolumeGridRendererApp(int32_t width, int32_t height) : App(width, height) {}
     ~VolumeGridRendererApp() = default;
 
+    VolumeGridRendererApp() = delete;
     VolumeGridRendererApp(const VolumeGridRendererApp&) = delete;
     VolumeGridRendererApp(VolumeGridRendererApp&&) = delete;
     VolumeGridRendererApp operator=(const VolumeGridRendererApp&) = delete;
@@ -149,13 +153,26 @@ public:
 
     void update()
     {
+        if (is_camera_dirty_)
+        {
+            camera_.update();
+
+            auto camparam = camera_.param();
+            camparam.znear = float(0.1);
+            camparam.zfar = float(10000.0);
+
+#ifdef DEVICE_RENDERING
+            renderer_.updateCamera(camparam);
+#endif
+            is_camera_dirty_ = false;
+
+            visualizer_->clear();
+        }
     }
 
     bool Run()
     {
         update();
-
-        camera_.update();
 
         aten::Destination dst;
         {
@@ -240,8 +257,6 @@ private:
     }
 
 private:
-    aten::PinholeCamera camera_;
-
     aten::AcceleratedScene<aten::sbvh> scene_;
     aten::context ctxt_;
 
@@ -277,14 +292,19 @@ int32_t main(int32_t argc, char* argv[])
     aten::timer::init();
     aten::OMPUtil::setThreadNum(VolumeGridRendererApp::ThreadNum);
 
-    auto app = std::make_shared<VolumeGridRendererApp>();
+    auto app = std::make_shared<VolumeGridRendererApp>(WIDTH, HEIGHT);
 
     auto wnd = std::make_shared<aten::window>();
 
     auto id = wnd->Create(
         WIDTH, HEIGHT,
         TITLE,
-        std::bind(&VolumeGridRendererApp::Run, app));
+        [&app]() { return app->Run(); },
+        [&app]() {},
+        [&app](bool left, bool press, int32_t x, int32_t y) { app->OnMouseBtn(left, press, x, y); },
+        [&app](int32_t x, int32_t y) { app->OnMouseMove(x, y); },
+        [&app](int32_t delta) { app->OnMouseWheel(delta); },
+        [&app](bool press, aten::Key key) { app->OnKey(press, key); });
 
     if (id >= 0) {
         app->GetContext().SetIsWindowInitialized(true);

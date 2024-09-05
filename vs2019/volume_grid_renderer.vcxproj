@@ -19,6 +19,7 @@
     <ClCompile Include="..\src\volume_grid_renderer\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\common\app_base.h" />
     <ClInclude Include="..\src\common\scenedefs.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

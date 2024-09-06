@@ -46,6 +46,8 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t bounce);
 
+        void InitPathsForVolumeRendering(int32_t width, int32_t height);
+
         class SimpleGridRenderer;
         std::shared_ptr<SimpleGridRenderer> simple_grid_renderer_;
 

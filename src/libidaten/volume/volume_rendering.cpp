@@ -30,6 +30,8 @@ namespace idaten
                 i, maxBounce,
                 seed);
 
+            InitPathsForVolumeRendering(width, height);
+
             int32_t bounce = 0;
 
             while (true) {

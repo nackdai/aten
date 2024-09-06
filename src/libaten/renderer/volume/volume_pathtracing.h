@@ -43,12 +43,11 @@ namespace aten
             AT_NAME::ShadowRay* shadow_rays,
             const aten::Intersection& isect,
             scene* scene,
-            int32_t rrDepth,
-            int32_t bounce);
+            int32_t rrDepth);
 
         static void TraverseShadowRay(
             const int32_t idx,
-            const int32_t bounce,
+            const int32_t max_depth,
             aten::Path& paths,
             const aten::context& ctxt,
             const aten::Intersection& isect,

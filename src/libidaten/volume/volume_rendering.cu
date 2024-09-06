@@ -191,7 +191,7 @@ namespace vpt
                     float transmittance = 1.0F;
                     float is_visilbe_to_light = false;
 
-                    aten::tie(is_visilbe_to_light, transmittance) = AT_NAME::TraverseShadowRay(
+                    aten::tie(is_visilbe_to_light, transmittance) = AT_NAME::TraverseRayInMedium(
                         ctxt, paths.sampler[idx],
                         light_sample,
                         rec.p, orienting_normal,
@@ -262,75 +262,20 @@ namespace vpt
 
         idx = hitindices[idx];
 
+        ctxt.shapes = shapes;
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.matrices = matrices;
+
         const auto& shadow_ray = shadow_rays[idx];
+        const auto& isect = isects[idx];
 
-        if (shadow_ray.isActive) {
-            ctxt.shapes = shapes;
-            ctxt.mtrls = mtrls;
-            ctxt.lights = lights;
-            ctxt.prims = prims;
-            ctxt.matrices = matrices;
-
-            const auto bounce = paths.throughput[idx].depth_count;
-            const auto& isect = isects[idx];
-
-            aten::ray next_ray(shadow_ray.rayorg, shadow_ray.raydir);
-
-            // NOTE:
-            // In volume, there is no normal.
-            // On the other hand, there is a possibility that we need to compute the tangent cooridnate.
-            // Therefore, next ray direction is treated as the normal alternatively.
-            const auto& nml = next_ray.dir;
-
-            const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
-
-            aten::LightSampleResult light_sample;
-            float light_select_prob = 0.0F;
-            int target_light_idx = -1;
-            aten::tie(light_sample, light_select_prob, target_light_idx) = AT_NAME::SampleLight(
-                ctxt, mtrl, bounce,
-                paths.sampler[idx],
-                next_ray.org, nml,
-                false);
-
-            if (target_light_idx >= 0) {
-                float transmittance = 1.0F;
-                float is_visilbe_to_light = false;
-
-                aten::tie(is_visilbe_to_light, transmittance) = AT_NAME::TraverseShadowRay(
-                    ctxt, paths.sampler[idx],
-                    light_sample,
-                    next_ray.org, nml,
-                    paths.throughput[idx].mediums);
-
-                if (is_visilbe_to_light) {
-                    const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
-                    const auto phase_f = AT_NAME::HenyeyGreensteinPhaseFunction::Evaluate(
-                        medium.phase_function_g,
-                        -next_ray.dir, light_sample.dir);
-
-                    const auto dist2 = aten::sqr(light_sample.dist_to_light);
-
-                    // Geometry term.
-                    const auto G = 1.0F / dist2;
-
-                    const auto Ls = transmittance * phase_f * G * light_sample.light_color / light_sample.pdf / light_select_prob;
-                    const auto contrib = paths.throughput[idx].throughput * Ls;
-
-                    AT_NAME::_detail::AddVec3(paths.contrib[idx].contrib, contrib);
-                }
-            }
-        }
-
-        // Update depth count for the next bounce.
-        if (paths.attrib[idx].will_update_depth) {
-            paths.throughput[idx].depth_count += 1;
-        }
-        paths.attrib[idx].will_update_depth = false;
-
-        if (paths.throughput[idx].depth_count > max_depth) {
-            paths.attrib[idx].isTerminate = true;
-        }
+        AT_NAME::TraverseShadowRay(
+            idx,
+            shadow_ray,
+            max_depth,
+            paths, ctxt, isect);
     }
 
     __global__ void CountTerminatedPath(

@@ -107,7 +107,80 @@ namespace AT_NAME
     }
 
     template <class SCENE = void>
-    inline AT_DEVICE_API aten::tuple<bool, float> TraverseShadowRay(
+    inline AT_DEVICE_API void TraverseShadowRay(
+        int32_t idx,
+        const AT_NAME::ShadowRay& shadow_ray,
+        const int32_t max_depth,
+        AT_NAME::Path& paths,
+        const AT_NAME::context& ctxt,
+        const aten::Intersection& isect,
+        SCENE* scene = nullptr)
+    {
+        if (shadow_ray.isActive) {
+            const auto bounce = paths.throughput[idx].depth_count;
+
+            aten::ray next_ray(shadow_ray.rayorg, shadow_ray.raydir);
+
+            // NOTE:
+            // In volume, there is no normal.
+            // On the other hand, there is a possibility that we need to compute the tangent cooridnate.
+            // Therefore, next ray direction is treated as the normal alternatively.
+            const auto& nml = next_ray.dir;
+
+            const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
+
+            aten::LightSampleResult light_sample;
+            float light_select_prob = 0.0F;
+            int target_light_idx = -1;
+            aten::tie(light_sample, light_select_prob, target_light_idx) = AT_NAME::SampleLight(
+                ctxt, mtrl, bounce,
+                paths.sampler[idx],
+                next_ray.org, nml,
+                false);
+
+            if (target_light_idx >= 0) {
+                float transmittance = 1.0F;
+                float is_visilbe_to_light = false;
+
+                aten::tie(is_visilbe_to_light, transmittance) = TraverseRayInMedium(
+                    ctxt, paths.sampler[idx],
+                    light_sample,
+                    next_ray.org, nml,
+                    paths.throughput[idx].mediums,
+                    scene);
+
+                if (is_visilbe_to_light) {
+                    const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
+                    const auto phase_f = AT_NAME::HenyeyGreensteinPhaseFunction::Evaluate(
+                        medium.phase_function_g,
+                        -next_ray.dir, light_sample.dir);
+
+                    const auto dist2 = aten::sqr(light_sample.dist_to_light);
+
+                    // Geometry term.
+                    const auto G = 1.0F / dist2;
+
+                    const auto Ls = transmittance * phase_f * G * light_sample.light_color / light_sample.pdf / light_select_prob;
+
+                    const auto contrib = paths.throughput[idx].throughput * Ls;
+                    _detail::AddVec3(paths.contrib[idx].contrib, contrib);
+                }
+            }
+        }
+
+        // Update depth count for the next bounce.
+        if (paths.attrib[idx].will_update_depth) {
+            paths.throughput[idx].depth_count += 1;
+        }
+        paths.attrib[idx].will_update_depth = false;
+
+        if (paths.throughput[idx].depth_count > max_depth) {
+            paths.attrib[idx].isTerminate = true;
+        }
+    }
+
+    template <class SCENE = void>
+    inline AT_DEVICE_API aten::tuple<bool, float> TraverseRayInMedium(
         const AT_NAME::context& ctxt,
         aten::sampler& sampler,
         const aten::LightSampleResult& light_sample,

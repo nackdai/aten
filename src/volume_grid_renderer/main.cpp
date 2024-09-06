@@ -15,7 +15,7 @@
 
 #define ENABLE_IBL
 //#define ENABLE_EVERY_FRAME_SC
-//#define DEVICE_RENDERING
+#define DEVICE_RENDERING
 
 #ifdef DEVICE_RENDERING
 #include "volume/grid_loader_device.h"
@@ -116,7 +116,7 @@ public:
             aten::vec3(0.0F), aten::vec3(0.0F), aten::vec3(1.0F));
         scene_.add(obj);
 
-        camera_.FitBoundingBox(grid_obj->getBoundingbox(), true);
+        camera_.FitBoundingBox(grid_obj->getBoundingbox());
 
         scene_.build(ctxt_);
 

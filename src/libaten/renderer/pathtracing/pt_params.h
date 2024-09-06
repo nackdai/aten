@@ -75,6 +75,7 @@ namespace AT_NAME {
         bool isTerminate{ false };
         bool isSingular{ false };
         bool will_update_depth{ true };
+        bool does_use_throughput_depth{ false };
 
         aten::MaterialType mtrlType{ aten::MaterialType::Lambert };
     };

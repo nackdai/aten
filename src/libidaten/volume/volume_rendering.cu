@@ -54,7 +54,7 @@ namespace vpt
             return;
         }
 
-        //const auto bounce = paths.throughput[idx].depth_count;
+        bounce = paths.throughput[idx].depth_count;
 
         const auto russianProb = AT_NAME::ComputeRussianProbability(
             bounce, depth_for_rr,
@@ -396,6 +396,19 @@ namespace vpt
         }
 #endif
     }
+
+    __global__ void InitPaths(
+        int32_t max_idx,
+        idaten::Path paths)
+    {
+        int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if (idx >= max_idx) {
+            return;
+        }
+
+        paths.attrib[idx].does_use_throughput_depth = true;
+    }
 }
 
 namespace idaten {
@@ -493,5 +506,17 @@ namespace idaten {
 #endif
 
         return remaining_path_count == 0;
+    }
+
+    void VolumeRendering::InitPathsForVolumeRendering(int32_t width, int32_t height)
+    {
+        dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
+        dim3 threadPerBlock(64);
+
+        vpt::InitPaths << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
+            width * height,
+            path_host_->paths);
+
+        checkCudaKernel(InitPaths);
     }
 }

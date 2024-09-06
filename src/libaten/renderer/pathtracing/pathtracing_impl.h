@@ -152,6 +152,10 @@ namespace AT_NAME
         aten::span<AOV_BUFFER_TYPE> aov_normal_depth = nullptr,
         aten::span<AOV_BUFFER_TYPE> aov_albedo_meshid = nullptr)
     {
+        bounce = paths.attrib[idx].does_use_throughput_depth
+            ? paths.throughput[idx].depth_count
+            : bounce;
+
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             if (bounce == 0) {
                 if (!aov_normal_depth.empty() && !aov_albedo_meshid.empty())
@@ -184,6 +188,10 @@ namespace AT_NAME
         aten::span<AOV_BUFFER_TYPE> aov_normal_depth = nullptr,
         aten::span<AOV_BUFFER_TYPE> aov_albedo_meshid = nullptr)
     {
+        bounce = paths.attrib[idx].does_use_throughput_depth
+            ? paths.throughput[idx].depth_count
+            : bounce;
+
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             aten::vec3 dir = ray.dir;
 

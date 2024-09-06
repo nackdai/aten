@@ -93,6 +93,7 @@ public:
 
         // TODO
         aten::MaterialParameter param;
+        param.attrib = aten::MaterialAttribute{ false, false, false, false };
         param.type = aten::MaterialType::MaterialTypeMax;
         param.baseColor = aten::vec3(1, 0, 0);
         auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
@@ -225,8 +226,8 @@ public:
 
 #ifdef ENABLE_EVERY_FRAME_SC
         {
-            const auto frame = renderer_.GetFrameCount();
-            const auto file_name = aten::StringFormat("sc_%d.png", frame);
+            const auto file_name = aten::StringFormat("sc_%d.png", screen_shot_count_);
+            screen_shot_count_++;
             visualizer_->takeScreenshot(file_name);
         }
 #endif

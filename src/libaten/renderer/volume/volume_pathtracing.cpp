@@ -34,10 +34,9 @@ namespace aten
         scene* scene,
         const aten::CameraParameter& camera)
     {
-        int32_t depth = 0;
         int32_t loop_count = 0;
 
-        while (depth < m_maxDepth) {
+        while (!path_host_.paths.attrib[idx].isTerminate) {
             if (loop_count >= aten::MedisumStackSize) {
                 path_host_.attrib[idx].isTerminate = true;
                 break;
@@ -59,17 +58,13 @@ namespace aten
                     path_host_.paths, ctxt,
                     rays_.data(), shadow_rays_.data(),
                     isect, scene,
-                    m_rrDepth, depth);
-
-                will_update_depth = path_host_.paths.attrib[idx].will_update_depth;
+                    m_rrDepth);
 
                 TraverseShadowRay(
-                    idx, depth,
+                    idx, m_maxDepth,
                     path_host_.paths, ctxt, isect,
                     shadow_rays_.data(),
                     scene);
-
-                willContinue = !path_host_.paths.attrib[idx].isTerminate;
             }
             else {
                 auto ibl = scene->getIBL();
@@ -78,7 +73,7 @@ namespace aten
                         idx,
                         ix, iy,
                         width, height,
-                        depth,
+                        path_host_.throughput[idx].depth_count,
                         bg_,
                         ctxt, camera,
                         path_host_.paths, rays_[idx]);
@@ -86,20 +81,12 @@ namespace aten
                 else {
                     ShadeMiss(
                         idx,
-                        depth,
+                        path_host_.throughput[idx].depth_count,
                         bg_.bg_color,
                         path_host_.paths);
                 }
 
-                willContinue = false;
-            }
-
-            if (!willContinue) {
-                break;
-            }
-
-            if (will_update_depth) {
-                depth++;
+                path_host_.paths.attrib[idx].isTerminate = true;
             }
 
             loop_count++;
@@ -233,7 +220,7 @@ namespace aten
 
     void VolumePathTracing::TraverseShadowRay(
         const int32_t idx,
-        const int32_t bounce,
+        const int32_t max_depth,
         aten::Path& paths,
         const aten::context& ctxt,
         const aten::Intersection& isect,
@@ -242,56 +229,11 @@ namespace aten
     {
         const auto& shadow_ray = shadow_rays[idx];
 
-        if (!shadow_ray.isActive) {
-            return;
-        }
-
-        aten::ray next_ray(shadow_ray.rayorg, shadow_ray.raydir);
-
-        // NOTE:
-        // In volume, there is no normal.
-        // On the other hand, there is a possibility that we need to compute the tangent cooridnate.
-        // Therefore, next ray direction is treated as the normal alternatively.
-        const auto& nml = next_ray.dir;
-
-        const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
-
-        aten::LightSampleResult light_sample;
-        float light_select_prob = 0.0F;
-        int target_light_idx = -1;
-        aten::tie(light_sample, light_select_prob, target_light_idx) = AT_NAME::SampleLight(
-            ctxt, mtrl, bounce,
-            paths.sampler[idx],
-            next_ray.org, nml,
-            false);
-
-        if (target_light_idx >= 0) {
-            float transmittance = 1.0F;
-            float is_visilbe_to_light = false;
-
-            aten::tie(is_visilbe_to_light, transmittance) = AT_NAME::TraverseShadowRay(
-                ctxt, paths.sampler[idx],
-                light_sample,
-                next_ray.org, nml,
-                paths.throughput[idx].mediums,
-                scene);
-
-            if (is_visilbe_to_light) {
-                const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
-                const auto phase_f = AT_NAME::HenyeyGreensteinPhaseFunction::Evaluate(
-                    medium.phase_function_g,
-                    -next_ray.dir, light_sample.dir);
-
-                const auto dist2 = aten::sqr(light_sample.dist_to_light);
-
-                // Geometry term.
-                const auto G = 1.0F / dist2;
-
-                const auto Ls = transmittance * phase_f * G * light_sample.light_color / light_sample.pdf / light_select_prob;
-
-                paths.contrib[idx].contrib += paths.throughput[idx].throughput * Ls;
-            }
-        }
+        aten::TraverseShadowRay(
+            idx,
+            shadow_ray,
+            max_depth,
+            paths, ctxt, isect, scene);
     }
 
     void VolumePathTracing::Nee(
@@ -302,9 +244,10 @@ namespace aten
         AT_NAME::ShadowRay* shadow_rays,
         const aten::Intersection& isect,
         scene* scene,
-        int32_t rrDepth,
-        int32_t bounce)
+        int32_t rrDepth)
     {
+        const auto bounce = paths.throughput[idx].depth_count;
+
         const auto russianProb = AT_NAME::ComputeRussianProbability(
             bounce, rrDepth,
             paths.attrib[idx], paths.throughput[idx],
@@ -414,7 +357,7 @@ namespace aten
                     float transmittance = 1.0F;
                     float is_visilbe_to_light = false;
 
-                    aten::tie(is_visilbe_to_light, transmittance) = AT_NAME::TraverseShadowRay(
+                    aten::tie(is_visilbe_to_light, transmittance) = AT_NAME::TraverseRayInMedium(
                         ctxt, *sampler,
                         light_sample,
                         rec.p, orienting_normal,
@@ -561,6 +504,7 @@ namespace aten
                             rnd);
 
                         path_host_.paths.contrib[idx].contrib = aten::vec3(0);
+                        path_host_.paths.attrib[idx].does_use_throughput_depth = true;
 
                         radiance(
                             idx,

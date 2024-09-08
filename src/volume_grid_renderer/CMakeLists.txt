@@ -12,6 +12,7 @@ message("cudalibs " ${CUDA_cudadevrt_LIBRARY})
 
 add_executable(${PROJECT_NAME} main.cpp ../common/scenedefs.cpp)
 target_include_directories(
-  ${PROJECT_NAME} PUBLIC ${CUDA_INCLUDE_DIRS} ${nanovdb_INCLUDE_DIRECTORIES})
+  ${PROJECT_NAME} PUBLIC ${CUDA_INCLUDE_DIRS} ${nanovdb_INCLUDE_DIRECTORIES}
+                         ${imgui_INCLUDE_DIRECTORIES})
 target_link_directories(${PROJECT_NAME} PUBLIC ${CUDA_TOOLKIT_ROOT_DIR}/lib64)
 target_link_libraries(${PROJECT_NAME} PUBLIC aten atenscene idaten glm)

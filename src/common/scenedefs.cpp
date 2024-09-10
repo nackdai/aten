@@ -1351,34 +1351,36 @@ void HomogeneousMediumRefractionBunnyScene::makeScene(
         (void)albedo;
         (void)nml;
 
+        aten::MaterialParameter param;
+
+        if (name == "light") {
+            param.type = aten::MaterialType::Emissive;
+            param.baseColor = aten::vec3(1.0F);
+        }
+        else if (name == "material_0") {
+            param.type = aten::MaterialType::Refraction;
+            param.baseColor = aten::vec3(0.580000f, 0.580000f, 0.580000f);
+            param.standard.ior = 1.333F;
+            param.standard.roughness = 0.011F;
+        }
+        else {
+            param.type = aten::MaterialType::Lambert;
+            param.baseColor = mtrl_clr;
+        }
+
+        auto mtrl = ctxt.CreateMaterialWithMaterialParameter(name, param, nullptr, nullptr, nullptr);
+        mtrl->setName(name.data());
+
         if (name == "material_0") {
-            aten::MaterialParameter mtrl_param;
-            mtrl_param.type = aten::MaterialType::Refraction;
-#ifdef WHITE_FURNACE_TEST
-            mtrl_param.baseColor = aten::vec3(1.0F);
-#else
-            mtrl_param.baseColor = aten::vec3(0.580000f, 0.580000f, 0.580000f);
-#endif
-            mtrl_param.standard.ior = 1.333F;
-
-            auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
-                name,
-                mtrl_param,
-                nullptr, nullptr, nullptr);
-
             mtrl->param().is_medium = true;
             mtrl->param().medium.phase_function_g = 0.4F;
             mtrl->param().medium.sigma_a = 0.0F;
             mtrl->param().medium.sigma_s = 0.9F;
             mtrl->param().medium.le = aten::vec3(0.8F);
-            return mtrl;
         }
-        else {
-            auto mtrl = CreateMaterial(name, ctxt, type, mtrl_clr);
-            return mtrl;
-        }
-    },
-        true, true);
+
+        return mtrl;
+    }, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
         ctxt,

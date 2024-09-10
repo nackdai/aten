@@ -229,6 +229,8 @@ namespace vpt
                     albedo,
                     paths,
                     rays);
+
+                is_reflected_or_refracted = true;
             }
 
             AT_NAME::UpdateMedium(

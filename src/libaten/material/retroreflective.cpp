@@ -347,7 +347,7 @@ namespace AT_NAME
             const aten::vec3& wn)
         {
             // According to the paper, NDF is directly applied to output vector.
-            // So, apply usual backman imporntance sampling to output vector directly.
+            // So, apply usual beckman imporntance sampling to output vector directly.
             // But, in this case, theta is computed from -wi (= uo) not the macro surface normal.
             const auto uo = -wi;
 
@@ -356,7 +356,7 @@ namespace AT_NAME
 
             // NOTE:
             // log can't accept zero. If r1 is 1, (1 - r1) is zero.
-            // To avoid it, if r1 is 1, to lessen r1 less than 1, multipley 0.99.
+            // To avoid it, if r1 is 1, to lessen r1 less than 1, multiply 0.99 to r1.
             const auto theta = aten::atan(aten::sqrt(-a2 * aten::log(1.0F - r1 * 0.99F)));
             const auto phi = AT_MATH_PI_2 * r2;
 

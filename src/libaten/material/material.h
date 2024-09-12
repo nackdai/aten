@@ -460,9 +460,9 @@ namespace AT_NAME
 
             // NOTE:
             // https://qiita.com/emadurandal/items/76348ad118c36317ec5c#f%E3%83%95%E3%83%AC%E3%83%8D%E3%83%AB%E9%A0%85
-            // If normal is half vector between incident vectorand output vector,
+            // If normal is half vector between incident vector and output vector,
             // `w` is acceptable as whichever incident vector or output vector.
-            // Because, shkick fresnel use cos_theta, if normal is half vector, cos_theta is the same between dot(V, H) and dot(L, H).
+            // Because, schlick fresnel use cos_theta, if normal is half vector, cos_theta is the same between dot(V, H) and dot(L, H).
 
             // NOTE:
             // http://d.hatena.ne.jp/hanecci/20130525/p3

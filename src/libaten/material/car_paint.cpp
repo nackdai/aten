@@ -1,7 +1,7 @@
 #include "material/car_paint.h"
 #include "material/sample_texture.h"
 #include "material/FlakesNormal.h"
-#include "material/lambert.h"
+#include "material/diffuse.h"
 #include "material/beckman.h"
 
 namespace AT_NAME
@@ -48,7 +48,7 @@ namespace AT_NAME
             param->carpaint.flake_size,
             float(1));
 
-        auto diffuse_pdf = lambert::pdf(N, wo);
+        auto diffuse_pdf = Diffuse::pdf(N, wo);
 
         auto pdf = fresnel * beckman_pdf + (float(1) - fresnel) * (flakes_density * flakes_beckman_pdf + (1 - flakes_density) * diffuse_pdf);
         pdf = aten::clamp(pdf, float(0), float(1));
@@ -100,7 +100,7 @@ namespace AT_NAME
                 // Diffuse
                 r1 -= flakes_density;
                 r1 /= (float(1) - flakes_density);
-                dir = lambert::sampleDirection(N, r0, r1);
+                dir = Diffuse::sampleDirection(N, r0, r1);
             }
         }
 

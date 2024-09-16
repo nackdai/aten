@@ -56,7 +56,7 @@ namespace aten
         }
 
         MaterialParameter mtrl_param;
-        mtrl_param.type = MaterialType::Lambert;
+        mtrl_param.type = MaterialType::Diffuse;
 
         bool is_emissive = false;
 
@@ -78,7 +78,7 @@ namespace aten
 
             aiColor3D albedo;
             if (assimp_mtrl->Get(AI_MATKEY_COLOR_DIFFUSE, albedo) == AI_SUCCESS) {
-                mtrl_param.type = MaterialType::Lambert;
+                mtrl_param.type = MaterialType::Diffuse;
                 mtrl_param.baseColor = vec3(albedo.r, albedo.g, albedo.b);
             }
 

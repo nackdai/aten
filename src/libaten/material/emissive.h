@@ -1,7 +1,7 @@
 #pragma once
 
 #include "material/material.h"
-#include "material/lambert.h"
+#include "material/diffuse.h"
 
 namespace aten {
     class Values;
@@ -34,7 +34,7 @@ namespace AT_NAME
             const aten::vec3& wo,
             float u, float v)
         {
-            auto ret = lambert::pdf(normal, wo);
+            auto ret = Diffuse::pdf(normal, wo);
             return ret;
         }
 
@@ -45,7 +45,7 @@ namespace AT_NAME
             float u, float v,
             aten::sampler* sampler)
         {
-            return lambert::sampleDirection(normal, sampler);
+            return Diffuse::sampleDirection(normal, sampler);
         }
 
         static AT_DEVICE_API aten::vec3 bsdf(
@@ -55,7 +55,7 @@ namespace AT_NAME
             const aten::vec3& wo,
             float u, float v)
         {
-            auto ret = lambert::bsdf(param);
+            auto ret = Diffuse::bsdf(param);
             return ret;
         }
 
@@ -63,7 +63,7 @@ namespace AT_NAME
             const aten::MaterialParameter* param,
             const aten::vec3& externalAlbedo)
         {
-            auto ret = lambert::bsdf(param);
+            auto ret = Diffuse::bsdf(param);
             return ret;
         }
 

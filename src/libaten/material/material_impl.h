@@ -5,7 +5,7 @@
 #include "material/material.h"
 #include "material/sample_texture.h"
 #include "material/emissive.h"
-#include "material/lambert.h"
+#include "material/diffuse.h"
 #include "material/oren_nayar.h"
 #include "material/specular.h"
 #include "material/refraction.h"
@@ -49,8 +49,8 @@ namespace AT_NAME
         case aten::MaterialType::Emissive:
             AT_NAME::emissive::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
             break;
-        case aten::MaterialType::Lambert:
-            AT_NAME::lambert::sample(result, mtrl, normal, wi, sampler);
+        case aten::MaterialType::Diffuse:
+            AT_NAME::Diffuse::sample(result, mtrl, normal, wi, sampler);
             break;
         case aten::MaterialType::OrneNayar:
             AT_NAME::OrenNayar::sample(result, mtrl, normal, wi, sampler, u, v);
@@ -84,7 +84,7 @@ namespace AT_NAME
             break;
         default:
             AT_ASSERT(false);
-            AT_NAME::lambert::sample(result, mtrl, normal, wi, sampler);
+            AT_NAME::Diffuse::sample(result, mtrl, normal, wi, sampler);
             break;
         }
     }
@@ -102,8 +102,8 @@ namespace AT_NAME
         case aten::MaterialType::Emissive:
             pdf = AT_NAME::emissive::pdf(mtrl, normal, wi, wo, u, v);
             break;
-        case aten::MaterialType::Lambert:
-            pdf = AT_NAME::lambert::pdf(normal, wo);
+        case aten::MaterialType::Diffuse:
+            pdf = AT_NAME::Diffuse::pdf(normal, wo);
             break;
         case aten::MaterialType::OrneNayar:
             pdf = AT_NAME::OrenNayar::pdf(mtrl, normal, wi, wo, u, v);
@@ -137,7 +137,7 @@ namespace AT_NAME
             break;
         default:
             AT_ASSERT(false);
-            pdf = AT_NAME::lambert::pdf(normal, wo);
+            pdf = AT_NAME::Diffuse::pdf(normal, wo);
             break;
         }
 
@@ -155,8 +155,8 @@ namespace AT_NAME
         switch (mtrl->type) {
         case aten::MaterialType::Emissive:
             return AT_NAME::emissive::bsdf(mtrl, normal, wi, wo, u, v);
-        case aten::MaterialType::Lambert:
-            return AT_NAME::lambert::bsdf(mtrl);
+        case aten::MaterialType::Diffuse:
+            return AT_NAME::Diffuse::bsdf(mtrl);
         case aten::MaterialType::OrneNayar:
             return AT_NAME::OrenNayar::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Specular:
@@ -179,7 +179,7 @@ namespace AT_NAME
             return AT_NAME::DisneyBRDF::bsdf(*mtrl, normal, wi, wo, u, v);
         default:
             AT_ASSERT(false);
-            return AT_NAME::lambert::bsdf(mtrl);
+            return AT_NAME::Diffuse::bsdf(mtrl);
         }
 
         return aten::vec3();
@@ -229,9 +229,9 @@ namespace AT_NAME
 
         if (is_valid_mtrl) {
             if (is_voxel) {
-                // Replace to lambert.
+                // Replace to Diffuse.
                 const auto& albedo = ctxt.GetMaterial(static_cast<uint32_t>(mtrl_id)).baseColor;
-                dst_mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, aten::MaterialAttributeLambert);
+                dst_mtrl = aten::MaterialParameter(aten::MaterialType::Diffuse, aten::MaterialAttributeDiffuse);
                 dst_mtrl.baseColor = albedo;
             }
             else {
@@ -252,7 +252,7 @@ namespace AT_NAME
         }
         else {
             // TODO
-            dst_mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, aten::MaterialAttributeLambert);
+            dst_mtrl = aten::MaterialParameter(aten::MaterialType::Diffuse, aten::MaterialAttributeDiffuse);
             dst_mtrl.baseColor = aten::vec3(1.0f);
         }
 

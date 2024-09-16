@@ -70,8 +70,8 @@ namespace ao {
         aten::vec3 ao_color{ 0.0f };
 
         for (int32_t i = 0; i < ao_num_rays; i++) {
-            auto nextDir = AT_NAME::lambert::sampleDirection(orienting_normal, &paths.sampler[idx]);
-            auto pdfb = AT_NAME::lambert::pdf(orienting_normal, nextDir);
+            auto nextDir = AT_NAME::Diffuse::sampleDirection(orienting_normal, &paths.sampler[idx]);
+            auto pdfb = AT_NAME::Diffuse::pdf(orienting_normal, nextDir);
 
             float c = dot(orienting_normal, nextDir);
 

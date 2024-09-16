@@ -38,7 +38,7 @@ bool MtrlExporter::exportMaterial(
             {
                 // Fixed type.
                 auto xmlMtrlAttribElem = xmlDoc.NewElement("type");
-                xmlMtrlAttribElem->SetText("lambert");
+                xmlMtrlAttribElem->SetText("Diffuse");
                 xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
             }
 

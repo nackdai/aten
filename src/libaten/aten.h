@@ -13,7 +13,7 @@
 #include "filter/magnifier.h"
 
 #include "material/emissive.h"
-#include "material/lambert.h"
+#include "material/diffuse.h"
 #include "material/specular.h"
 #include "material/refraction.h"
 #include "material/ggx.h"

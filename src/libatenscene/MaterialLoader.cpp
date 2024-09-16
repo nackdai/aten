@@ -25,7 +25,7 @@ namespace aten {
     //        }
     // }
     // param_name
-    //  - type : material type [string]. If type is not specified, default type is "lambert".
+    //  - type : material type [string]. If type is not specified, default type is "Diffuse".
     //  - color : base color, emissive color, albedo color etc... [float3]
     //    - albedoMap : albedo texture [string]
     //  - normalMap : normal texture [string]
@@ -270,7 +270,7 @@ namespace aten {
 
                     if (mtrlType.empty()) {
                         AT_PRINTF("Material type is not specified in [%s]\n", mtrlName.c_str());
-                        mtrlType = "lambert";
+                        mtrlType = "Diffuse";
                     }
 
                     // Create material;
@@ -298,7 +298,7 @@ namespace aten {
     // </root>
     // param_name
     //  - name : material name [string].
-    //  - type : material type [string]. If type is not specified, default type is "lambert".
+    //  - type : material type [string]. If type is not specified, default type is "Diffuse".
     //  - color : base color, emissive color, albedo color etc... [float3]
     //    - albedoMap : albedo texture [string]
     //  - normalMap : normal texture [string]
@@ -397,7 +397,7 @@ namespace aten {
             if (!mtrl) {
                 if (mtrlType.empty()) {
                     AT_PRINTF("Material type is not specified in [%s]\n", mtrlName.c_str());
-                    mtrlType = "lambert";
+                    mtrlType = "Diffuse";
                 }
 
                 // Create material;

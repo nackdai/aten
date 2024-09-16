@@ -77,7 +77,7 @@ namespace AT_NAME {
         bool will_update_depth{ true };
         bool does_use_throughput_depth{ false };
 
-        aten::MaterialType mtrlType{ aten::MaterialType::Lambert };
+        aten::MaterialType mtrlType{ aten::MaterialType::Diffuse };
     };
 
     struct Path {

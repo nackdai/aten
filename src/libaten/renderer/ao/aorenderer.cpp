@@ -1,6 +1,6 @@
 #include "renderer/ao/aorenderer.h"
 
-#include "material/lambert.h"
+#include "material/diffuse.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
 #include "renderer/ao/aorenderer_impl.h"

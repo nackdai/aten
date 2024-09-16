@@ -905,34 +905,34 @@ namespace aten
         void* mtrl,
         std::vector<MaterialParam>& list)
     {
-        fbxsdk::FbxSurfaceLambert* lambert = (fbxsdk::FbxSurfaceLambert*)mtrl;
+        fbxsdk::FbxSurfaceLambert* Diffuse = (fbxsdk::FbxSurfaceLambert*)mtrl;
 
-        if (lambert->Diffuse.IsValid()) {
+        if (Diffuse->Diffuse.IsValid()) {
             MaterialParam diffuse;
             diffuse.name = "diffuse";
-            diffuse.values.push_back((float)lambert->Diffuse.Get().mData[0]);
-            diffuse.values.push_back((float)lambert->Diffuse.Get().mData[1]);
-            diffuse.values.push_back((float)lambert->Diffuse.Get().mData[2]);
+            diffuse.values.push_back((float)Diffuse->Diffuse.Get().mData[0]);
+            diffuse.values.push_back((float)Diffuse->Diffuse.Get().mData[1]);
+            diffuse.values.push_back((float)Diffuse->Diffuse.Get().mData[2]);
             diffuse.values.push_back(1.0f);
             list.push_back(diffuse);
         }
 
-        if (lambert->Ambient.IsValid()) {
+        if (Diffuse->Ambient.IsValid()) {
             MaterialParam ambient;
             ambient.name = "ambient";
-            ambient.values.push_back((float)lambert->Ambient.Get().mData[0]);
-            ambient.values.push_back((float)lambert->Ambient.Get().mData[1]);
-            ambient.values.push_back((float)lambert->Ambient.Get().mData[2]);
+            ambient.values.push_back((float)Diffuse->Ambient.Get().mData[0]);
+            ambient.values.push_back((float)Diffuse->Ambient.Get().mData[1]);
+            ambient.values.push_back((float)Diffuse->Ambient.Get().mData[2]);
             ambient.values.push_back(1.0f);
             list.push_back(ambient);
         }
 
-        if (lambert->Emissive.IsValid()) {
+        if (Diffuse->Emissive.IsValid()) {
             MaterialParam emmisive;
             emmisive.name = "emmisive";
-            emmisive.values.push_back((float)lambert->Emissive.Get().mData[0]);
-            emmisive.values.push_back((float)lambert->Emissive.Get().mData[1]);
-            emmisive.values.push_back((float)lambert->Emissive.Get().mData[2]);
+            emmisive.values.push_back((float)Diffuse->Emissive.Get().mData[0]);
+            emmisive.values.push_back((float)Diffuse->Emissive.Get().mData[1]);
+            emmisive.values.push_back((float)Diffuse->Emissive.Get().mData[2]);
             emmisive.values.push_back(1.0f);
             list.push_back(emmisive);
         }

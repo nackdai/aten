@@ -2,7 +2,7 @@
 #include "material/disney_brdf.h"
 #include "material/emissive.h"
 #include "material/ggx.h"
-#include "material/lambert.h"
+#include "material/diffuse.h"
 #include "material/material.h"
 #include "material/microfacet_refraction.h"
 #include "material/oren_nayar.h"
@@ -71,8 +71,8 @@ namespace AT_NAME {
         m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
     }
 
-    lambert::lambert(aten::Values& val)
-        : material(aten::MaterialType::Lambert, MaterialAttributeLambert, val)
+    Diffuse::Diffuse(aten::Values& val)
+        : material(aten::MaterialType::Diffuse, MaterialAttributeDiffuse, val)
     {}
 
     MicrofacetRefraction::MicrofacetRefraction(aten::Values& val)
@@ -80,7 +80,7 @@ namespace AT_NAME {
     {}
 
     OrenNayar::OrenNayar(aten::Values& val)
-        : material(aten::MaterialType::OrneNayar, MaterialAttributeLambert, val)
+        : material(aten::MaterialType::OrneNayar, MaterialAttributeDiffuse, val)
     {
         m_param.standard.roughness = val.get("roughness", m_param.standard.roughness);
         m_param.standard.roughness = aten::clamp<float>(m_param.standard.roughness, 0, 1);

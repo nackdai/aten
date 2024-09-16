@@ -8,22 +8,22 @@ namespace aten {
 
 namespace AT_NAME
 {
-    class lambert : public material {
+    class Diffuse : public material {
         friend class material;
 
     private:
-        lambert(
+        Diffuse(
             const aten::vec3& albedo = aten::vec3(0.5),
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Lambert, aten::MaterialAttributeLambert, albedo, 0)
+            : material(aten::MaterialType::Diffuse, aten::MaterialAttributeDiffuse, albedo, 0)
         {
             setTextures(albedoMap, normalMap, nullptr);
         }
 
-        lambert(aten::Values& val);
+        Diffuse(aten::Values& val);
 
-        virtual ~lambert() {}
+        virtual ~Diffuse() {}
 
     public:
         static AT_DEVICE_API float pdf(

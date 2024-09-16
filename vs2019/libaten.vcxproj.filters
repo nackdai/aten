@@ -798,6 +798,9 @@
     <ClCompile Include="..\src\libaten\volume\grid_host.cpp">
       <Filter>volume</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\pathtracing\npr.cpp">
+      <Filter>renderer\pathtracing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\tonemap_fs.glsl">

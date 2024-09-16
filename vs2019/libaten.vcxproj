@@ -350,6 +350,7 @@
     <ClCompile Include="..\src\libaten\renderer\ao\aorenderer.cpp" />
     <ClCompile Include="..\src\libaten\renderer\film.cpp" />
     <ClCompile Include="..\src\libaten\renderer\npr\feature_line.cpp" />
+    <ClCompile Include="..\src\libaten\renderer\pathtracing\npr.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing\pathtracing.cpp" />
     <ClCompile Include="..\src\libaten\renderer\restir\restir.cpp" />
     <ClCompile Include="..\src\libaten\renderer\svgf\svgf.cpp" />

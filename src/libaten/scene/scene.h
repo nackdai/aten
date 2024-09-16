@@ -102,7 +102,7 @@ namespace AT_NAME {
             if (attrib.isInfinite) {
                 return !isHit;
             }
-            else if (attrib.isSingular) {
+            else if (attrib.is_singular) {
                 //auto distToLight = (lightPos - r.org).length();
 
                 if (isHit && hitt < distToLight) {
@@ -125,7 +125,7 @@ namespace AT_NAME {
             if (attrib.isInfinite) {
                 return !isHit;
             }
-            else if (attrib.isSingular) {
+            else if (attrib.is_singular) {
                 return hitt > distToLight;
             }
 

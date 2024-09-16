@@ -44,7 +44,7 @@ namespace pt {
 
         idx = hitindices[idx];
 
-        if (paths.attrib[idx].isTerminate) {
+        if (paths.attrib[idx].is_terminated) {
             return;
         }
 
@@ -123,7 +123,7 @@ namespace pt {
             return;
         }
 
-        if (!shMtrls[threadIdx.x].attrib.isTranslucent && isBackfacing) {
+        if (!shMtrls[threadIdx.x].attrib.is_translucent && isBackfacing) {
             orienting_normal = -orienting_normal;
         }
 

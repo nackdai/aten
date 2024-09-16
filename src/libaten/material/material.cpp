@@ -212,10 +212,10 @@ namespace AT_NAME
         mtrl.medium.sigma_s = sigma_s;
         mtrl.medium.le = le;
 
-        mtrl.attrib.isEmissive = false;
-        mtrl.attrib.isSingular = false;
-        mtrl.attrib.isGlossy = false;
-        mtrl.attrib.isTranslucent = false;
+        mtrl.attrib.is_emissive = false;
+        mtrl.attrib.is_singular = false;
+        mtrl.attrib.is_glossy = false;
+        mtrl.attrib.is_translucent = false;
 
         return mtrl;
     }

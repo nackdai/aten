@@ -50,7 +50,7 @@ namespace restir {
                 u, v,
                 pre_sampled_r);
 
-            const auto geometry_term = light_attrib.isSingular || light_attrib.isInfinite
+            const auto geometry_term = light_attrib.is_singular || light_attrib.isInfinite
                 ? cosShadow * cosLight
                 : cosShadow * cosLight / dist2;
 
@@ -162,7 +162,7 @@ namespace restir {
             // It means there is nothing to convert pdf.
             // TODO: IBL...
             auto path_pdf = lightsample.pdf;
-            if (!light.attrib.isSingular && !light.attrib.isIBL) {
+            if (!light.attrib.is_singular && !light.attrib.isIBL) {
                 // Convert solid angle PDF to area PDF.
                 path_pdf = path_pdf * cosLight / dist2;
             }

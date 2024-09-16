@@ -62,9 +62,9 @@ namespace AT_NAME
             return m_param.light_color;
         }
 
-        bool isSingular() const
+        bool is_singular() const
         {
-            return m_param.attrib.isSingular;
+            return m_param.attrib.is_singular;
         }
 
         bool isInfinite() const

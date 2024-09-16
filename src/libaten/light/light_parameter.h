@@ -8,7 +8,7 @@ namespace aten {
      * @brief Description for attributes of light.
      */
     struct LightAttribute {
-        uint32_t isSingular : 1;    ///< Singular light.
+        uint32_t is_singular : 1;    ///< Singular light.
         uint32_t isInfinite : 1;    ///< Inifinite light.
         uint32_t isIBL : 1;         ///< Image Based Light.
     };

@@ -144,8 +144,8 @@ namespace aten
             ray.dir,
             &paths.sampler[idx]);
 
-        if (!mtrl.attrib.isTranslucent
-            && !mtrl.attrib.isEmissive
+        if (!mtrl.attrib.is_translucent
+            && !mtrl.attrib.is_emissive
             && isBackfacing)
         {
             orienting_normal = -orienting_normal;
@@ -190,7 +190,7 @@ namespace aten
         }
 
         // Generate initial candidates.
-        if (!(mtrl.attrib.isSingular || mtrl.attrib.isTranslucent))
+        if (!(mtrl.attrib.is_singular || mtrl.attrib.is_translucent))
         {
             auto& reservoir = reservoirs[idx];
 
@@ -419,7 +419,7 @@ namespace aten
                         for (int32_t x = 0; x < width; x++) {
                             int32_t idx = y * width + x;
 
-                            if (path_host_.paths.attrib[idx].isTerminate) {
+                            if (path_host_.paths.attrib[idx].is_terminated) {
                                 continue;
                             }
 
@@ -445,7 +445,7 @@ namespace aten
                         for (int32_t x = 0; x < width; x++) {
                             int32_t idx = y * width + x;
 
-                            if (path_host_.paths.attrib[idx].isTerminate) {
+                            if (path_host_.paths.attrib[idx].is_terminated) {
                                 continue;
                             }
 
@@ -491,7 +491,7 @@ namespace aten
                                 for (int32_t x = 0; x < width; x++) {
                                     int32_t idx = y * width + x;
 
-                                    if (path_host_.paths.attrib[idx].isTerminate) {
+                                    if (path_host_.paths.attrib[idx].is_terminated) {
                                         continue;
                                     }
 
@@ -516,7 +516,7 @@ namespace aten
                             for (int32_t x = 0; x < width; x++) {
                                 int32_t idx = y * width + x;
 
-                                if (path_host_.paths.attrib[idx].isTerminate) {
+                                if (path_host_.paths.attrib[idx].is_terminated) {
                                     continue;
                                 }
 
@@ -542,7 +542,7 @@ namespace aten
                         for (int32_t x = 0; x < width; x++) {
                             int32_t idx = y * width + x;
 
-                            if (path_host_.paths.attrib[idx].isTerminate) {
+                            if (path_host_.paths.attrib[idx].is_terminated) {
                                 continue;
                             }
 

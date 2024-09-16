@@ -204,7 +204,7 @@ struct JointTransformParam {
 struct TextureType {
     bool isSpecular{ false };
     bool isNormal{ false };
-    bool isTranslucent{ false };
+    bool is_translucent{ false };
 };
 
 struct MaterialTex {

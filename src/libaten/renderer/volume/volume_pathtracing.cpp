@@ -36,9 +36,9 @@ namespace aten
     {
         int32_t loop_count = 0;
 
-        while (!path_host_.paths.attrib[idx].isTerminate) {
+        while (!path_host_.paths.attrib[idx].is_terminated) {
             if (loop_count >= aten::MedisumStackSize) {
-                path_host_.attrib[idx].isTerminate = true;
+                path_host_.attrib[idx].is_terminated = true;
                 break;
             }
 
@@ -86,7 +86,7 @@ namespace aten
                         path_host_.paths);
                 }
 
-                path_host_.paths.attrib[idx].isTerminate = true;
+                path_host_.paths.attrib[idx].is_terminated = true;
             }
 
             loop_count++;
@@ -107,7 +107,7 @@ namespace aten
             bounce, rrDepth,
             paths.attrib[idx], paths.throughput[idx],
             paths.sampler[idx]);
-        if (paths.attrib[idx].isTerminate) {
+        if (paths.attrib[idx].is_terminated) {
             paths.attrib[idx].will_update_depth = false;
             return;
         }
@@ -177,7 +177,7 @@ namespace aten
             else {
                 auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, mtrl.baseColor, bounce);
 
-                if (!mtrl.attrib.isTranslucent && isBackfacing) {
+                if (!mtrl.attrib.is_translucent && isBackfacing) {
                     orienting_normal = -orienting_normal;
                 }
 
@@ -252,7 +252,7 @@ namespace aten
             bounce, rrDepth,
             paths.attrib[idx], paths.throughput[idx],
             paths.sampler[idx]);
-        if (paths.attrib[idx].isTerminate) {
+        if (paths.attrib[idx].is_terminated) {
             paths.attrib[idx].will_update_depth = false;
             return;
         }
@@ -332,7 +332,7 @@ namespace aten
             else {
                 auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, mtrl.baseColor, bounce);
 
-                if (!mtrl.attrib.isTranslucent && isBackfacing) {
+                if (!mtrl.attrib.is_translucent && isBackfacing) {
                     orienting_normal = -orienting_normal;
                 }
 
@@ -425,7 +425,7 @@ namespace aten
             // Sample IBL properly.
             if (depth == 0) {
                 float misW = 1.0F;
-                paths.attrib[idx].isTerminate = true;
+                paths.attrib[idx].is_terminated = true;
             }
             else {
                 auto pdfLight = ibl->samplePdf(ray, ctxt);
@@ -522,7 +522,7 @@ namespace aten
                         col2 += c * c;
                         cnt++;
 
-                        if (path_host_.paths.attrib[idx].isTerminate) {
+                        if (path_host_.paths.attrib[idx].is_terminated) {
                             break;
                         }
                     }

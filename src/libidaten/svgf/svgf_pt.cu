@@ -138,7 +138,7 @@ namespace svgf_kernel {
             return;
         }
 
-        if (!shMtrls[threadIdx.x].attrib.isTranslucent && isBackfacing) {
+        if (!shMtrls[threadIdx.x].attrib.is_translucent && isBackfacing) {
             orienting_normal = -orienting_normal;
         }
 

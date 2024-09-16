@@ -120,10 +120,10 @@ namespace ao {
         bool is_first_bounce,
         AT_NAME::Path& paths)
     {
-        if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
+        if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].isHit) {
             _detail::CopyVec(paths.contrib[idx].contrib, aten::vec3(1));
 
-            paths.attrib[idx].isTerminate = true;
+            paths.attrib[idx].is_terminated = true;
         }
     }
 }

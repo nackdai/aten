@@ -118,7 +118,7 @@ namespace kernel {
 
             hitbools[idx] = 0;
 
-            if (paths.attrib[idx].isTerminate) {
+            if (paths.attrib[idx].is_terminated) {
                 continue;
             }
 
@@ -127,7 +127,7 @@ namespace kernel {
             float t_max = AT_MATH_INF;
 
             if (bounce >= 1
-                && !paths.attrib[idx].isSingular)
+                && !paths.attrib[idx].is_singular)
             {
                 t_max = hitDistLimit;
             }
@@ -150,11 +150,11 @@ namespace kernel {
 #endif
 
             if (bounce >= 1
-                && !paths.attrib[idx].isSingular
+                && !paths.attrib[idx].is_singular
                 && isect.t > hitDistLimit)
             {
                 isHit = false;
-                paths.attrib[idx].isTerminate = true;
+                paths.attrib[idx].is_terminated = true;
             }
 
             paths.attrib[idx].isHit = isHit;
@@ -175,7 +175,7 @@ namespace kernel {
 
         hitbools[idx] = 0;
 
-        if (paths.attrib[idx].isTerminate) {
+        if (paths.attrib[idx].is_terminated) {
             return;
         }
 
@@ -190,7 +190,7 @@ namespace kernel {
         float t_max = AT_MATH_INF;
 
         if (bounce >= 1
-            && !paths.attrib[idx].isSingular)
+            && !paths.attrib[idx].is_singular)
         {
             t_max = hitDistLimit;
         }
@@ -211,7 +211,7 @@ namespace kernel {
 #endif
 
         if (bounce >= 1
-            && !paths.attrib[idx].isSingular
+            && !paths.attrib[idx].is_singular
             && isect.t > hitDistLimit)
         {
             isHit = false;
@@ -250,7 +250,7 @@ namespace kernel {
 
         hitbools[idx] = 0;
 
-        if (paths.attrib[idx].isTerminate) {
+        if (paths.attrib[idx].is_terminated) {
             return;
         }
 

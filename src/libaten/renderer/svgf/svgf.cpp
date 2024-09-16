@@ -138,19 +138,22 @@ namespace aten
         }
         // TODO
         // How to deal Refraction?
-        else if (bounce == 1 && paths.attrib[idx].mtrlType == aten::MaterialType::Specular) {
-            // texture color.
-            auto texcolor = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
+        else if (bounce == 1 && paths.attrib[idx].last_hit_mtrl_idx >= 0) {
+            const auto& last_hit_mtrl = ctxt.GetMaterial(paths.attrib[idx].last_hit_mtrl_idx);
+            if (last_hit_mtrl.type == aten::MaterialType::Specular) {
+                // texture color.
+                auto texcolor = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
-            // TODO
-            // No good idea to compute reflected depth.
-            AT_NAME::FillBasicAOVs(
-                aov_normal_depth[idx], orienting_normal, rec, mtx_W2C,
-                aov_albedo_meshid[idx], texcolor, isect);
-            aov_albedo_meshid[idx].w = static_cast<float>(isect.mtrlid);
+                // TODO
+                // No good idea to compute reflected depth.
+                AT_NAME::FillBasicAOVs(
+                    aov_normal_depth[idx], orienting_normal, rec, mtx_W2C,
+                    aov_albedo_meshid[idx], texcolor, isect);
+                aov_albedo_meshid[idx].w = static_cast<float>(isect.mtrlid);
 
-            // For exporting separated albedo.
-            mtrl.albedoMap = -1;
+                // For exporting separated albedo.
+                mtrl.albedoMap = -1;
+            }
         }
 
         auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1), bounce);

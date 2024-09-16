@@ -109,19 +109,22 @@ namespace svgf_kernel {
         }
         // TODO
         // How to deal Refraction?
-        else if (bounce == 1 && paths.attrib[idx].mtrlType == aten::MaterialType::Specular) {
-            // texture color.
-            auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
+        else if (bounce == 1 && paths.attrib[idx].last_hit_mtrl_idx >= 0) {
+            const auto& last_hit_mtrl = ctxt.GetMaterial(paths.attrib[idx].last_hit_mtrl_idx);
+            if (last_hit_mtrl.type == aten::MaterialType::Specular) {
+                // texture color.
+                auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
-            // TODO
-            // No good idea to compute reflected depth.
-            AT_NAME::FillBasicAOVs(
-                aovNormalDepth[idx], orienting_normal, rec, mtx_W2C,
-                aovTexclrMeshid[idx], texcolor, isect);
-            aovTexclrMeshid[idx].w = isect.mtrlid;
+                // TODO
+                // No good idea to compute reflected depth.
+                AT_NAME::FillBasicAOVs(
+                    aovNormalDepth[idx], orienting_normal, rec, mtx_W2C,
+                    aovTexclrMeshid[idx], texcolor, isect);
+                aovTexclrMeshid[idx].w = isect.mtrlid;
 
-            // For exporting separated albedo.
-            shMtrls[threadIdx.x].albedoMap = -1;
+                // For exporting separated albedo.
+                shMtrls[threadIdx.x].albedoMap = -1;
+            }
         }
 
         // Implicit conection to light.

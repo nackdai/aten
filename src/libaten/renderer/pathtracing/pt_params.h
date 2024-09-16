@@ -71,13 +71,15 @@ namespace AT_NAME {
     };
 
     struct PathAttribute {
-        bool isHit{ false };
-        bool is_terminated{ false };
-        bool is_singular{ false };
-        bool will_update_depth{ true };
-        bool does_use_throughput_depth{ false };
+        struct {
+            int32_t isHit : 1;
+            int32_t is_terminated : 1;
+            int32_t is_singular : 1;
+            int32_t will_update_depth : 1;
+            int32_t does_use_throughput_depth : 1;
+        };
 
-        aten::MaterialType mtrlType{ aten::MaterialType::Diffuse };
+        int32_t last_hit_mtrl_idx{ -1 };
     };
 
     struct Path {

@@ -269,7 +269,7 @@ private:
     {
         if (mtrlpath.empty()) {
             aten::MaterialParameter param;
-            param.type = aten::MaterialType::Lambert;
+            param.type = aten::MaterialType::Diffuse;
             param.baseColor = aten::vec3(0.4, 0.4, 0.4);;
 
             auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(

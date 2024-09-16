@@ -31,11 +31,11 @@
     <ClInclude Include="..\src\libaten\light\spotlight.h" />
     <ClInclude Include="..\src\libaten\material\beckman.h" />
     <ClInclude Include="..\src\libaten\material\car_paint.h" />
+    <ClInclude Include="..\src\libaten\material\diffuse.h" />
     <ClInclude Include="..\src\libaten\material\disney_brdf.h" />
     <ClInclude Include="..\src\libaten\material\emissive.h" />
     <ClInclude Include="..\src\libaten\material\FlakesNormal.h" />
     <ClInclude Include="..\src\libaten\material\ggx.h" />
-    <ClInclude Include="..\src\libaten\material\lambert.h" />
     <ClInclude Include="..\src\libaten\material\material.h" />
     <ClInclude Include="..\src\libaten\material\material_impl.h" />
     <ClInclude Include="..\src\libaten\material\microfacet_refraction.h" />

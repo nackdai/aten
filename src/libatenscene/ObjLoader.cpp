@@ -242,7 +242,7 @@ namespace aten
                     auto regireterd_mtrl = ctxt.GetMaterialInstance(0);
                     if (!regireterd_mtrl && callback_create_mtrl) {
                         regireterd_mtrl = callback_create_mtrl(
-                            "", ctxt, MaterialType::Lambert, aten::vec3(1), "", "");
+                            "", ctxt, MaterialType::Diffuse, aten::vec3(1), "", "");
                     }
 
                     AT_ASSERT(regireterd_mtrl);
@@ -286,7 +286,7 @@ namespace aten
                                 callback_create_mtrl(
                                     mtrl.name,
                                     ctxt,
-                                    MaterialType::Lambert,
+                                    MaterialType::Diffuse,
                                     aten::vec3(mtrl.diffuse[0], mtrl.diffuse[1], mtrl.diffuse[2]),
                                     mtrl.diffuse_texname,
                                     mtrl.bump_texname));
@@ -309,7 +309,7 @@ namespace aten
                             mtrl = callback_create_mtrl(
                                     objmtrl.name,
                                     ctxt,
-                                    MaterialType::Lambert,
+                                    MaterialType::Diffuse,
                                     aten::vec3(objmtrl.diffuse[0], objmtrl.diffuse[1], objmtrl.diffuse[2]),
                                     objmtrl.diffuse_texname,
                                     objmtrl.bump_texname);
@@ -349,7 +349,7 @@ namespace aten
                             }
 
                             aten::MaterialParameter mtrlParam;
-                            mtrlParam.type = aten::MaterialType::Lambert;
+                            mtrlParam.type = aten::MaterialType::Diffuse;
                             mtrlParam.baseColor = diffuse;
 
                             mtrl = ctxt.CreateMaterialWithMaterialParameter(

@@ -5,7 +5,7 @@
 #include "material/material.h"
 #include "material/sample_texture.h"
 #include "material/emissive.h"
-#include "material/lambert.h"
+#include "material/diffuse.h"
 #include "material/oren_nayar.h"
 #include "material/specular.h"
 #include "material/refraction.h"
@@ -23,7 +23,7 @@ namespace AT_NAME
 {
     const std::array<material::MaterialInfo, static_cast<size_t>(aten::MaterialType::MaterialTypeMax)> material::mtrl_type_info = { {
         {"emissive", []() { return new emissive(); }},
-        {"lambert", []() { return new lambert(); }},
+        {"Diffuse", []() { return new Diffuse(); }},
         {"ornenayar", []() { return new OrenNayar(); }},
         {"specular", []() { return new specular(); }},
         {"refraction", []() { return new refraction(); }},
@@ -81,8 +81,8 @@ namespace AT_NAME
         case aten::MaterialType::Emissive:
             mtrl = new AT_NAME::emissive(param.baseColor);
             break;
-        case aten::MaterialType::Lambert:
-            mtrl = new AT_NAME::lambert(param.baseColor, albedoMap, normalMap);
+        case aten::MaterialType::Diffuse:
+            mtrl = new AT_NAME::Diffuse(param.baseColor, albedoMap, normalMap);
             break;
         case aten::MaterialType::OrneNayar:
             mtrl = new AT_NAME::OrenNayar(param.baseColor, param.standard.roughness, albedoMap, normalMap);

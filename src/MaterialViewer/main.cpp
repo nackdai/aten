@@ -255,7 +255,7 @@ public:
 
             constexpr std::array mtrl_types = {
                 "Emissive",
-                "Lambert",
+                "Diffuse",
                 "OrneNayar",
                 "Specular",
                 "Refraction",
@@ -548,7 +548,7 @@ private:
                 param.baseColor = aten::vec3(1.0F);
             }
             else {
-                param.type = aten::MaterialType::Lambert;
+                param.type = aten::MaterialType::Diffuse;
                 param.baseColor = mtrl_clr;
             }
 

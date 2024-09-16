@@ -1,6 +1,6 @@
 #include "math/math.h"
 #include "material/disney_brdf.h"
-#include "material/lambert.h"
+#include "material/diffuse.h"
 #include "material/ggx.h"
 
 namespace AT_NAME
@@ -156,14 +156,14 @@ namespace AT_NAME
             const aten::vec3& L,
             const aten::vec3& N)
         {
-            return lambert::ComputePDF(N, L);
+            return Diffuse::ComputePDF(N, L);
         }
 
         static inline AT_DEVICE_API aten::vec3 SampleDirection(
             const float r1, const float r2,
             const aten::vec3& N)
         {
-            const auto L = lambert::SampleDirection(N, r1, r2);
+            const auto L = Diffuse::SampleDirection(N, r1, r2);
             return L;
         }
     };
@@ -196,14 +196,14 @@ namespace AT_NAME
             // Uniform hemisphere sampling.
             //return 1 / (AT_MATH_PI_2);
 
-            return lambert::ComputePDF(N, L);
+            return Diffuse::ComputePDF(N, L);
         }
 
         static inline AT_DEVICE_API aten::vec3 SampleDirection(
             const float r1, const float r2,
             const aten::vec3& N)
         {
-            const auto L = lambert::SampleDirection(N, r1, r2);
+            const auto L = Diffuse::SampleDirection(N, r1, r2);
             return L;
         }
     };

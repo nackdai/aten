@@ -35,9 +35,6 @@
     <ClInclude Include="..\src\libaten\material\ggx.h">
       <Filter>aten\material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\material\lambert.h">
-      <Filter>aten\material</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\material.h">
       <Filter>aten\material</Filter>
     </ClInclude>
@@ -294,6 +291,10 @@
     </ClInclude>
     <ClInclude Include="..\src\libidaten\volume\grid_loader_device.h">
       <Filter>volume</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\lambert.h" />
+    <ClInclude Include="..\src\libaten\material\diffuse.h">
+      <Filter>aten\material</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,7 +1,7 @@
 #include "material/retroreflective.h"
 #include "material/sample_texture.h"
 #include "material/beckman.h"
-#include "material/lambert.h"
+#include "material/diffuse.h"
 
 namespace AT_NAME
 {
@@ -412,7 +412,7 @@ namespace AT_NAME
         {
             // Apply geometric infinite series.
             // https://en.wikipedia.org/wiki/Geometric_series
-            const auto original_pdf = lambert::ComputePDF(n, wo);
+            const auto original_pdf = Diffuse::ComputePDF(n, wo);
             const auto pdf = 1.0F / (1.0F - original_pdf);
             return pdf;
         }
@@ -421,7 +421,7 @@ namespace AT_NAME
             const float r1, const float r2,
             const aten::vec3& wn)
         {
-            return lambert::SampleDirection(wn, r1, r2);
+            return Diffuse::SampleDirection(wn, r1, r2);
         }
     };
 

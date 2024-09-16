@@ -176,9 +176,6 @@
     <ClInclude Include="..\src\libaten\math\ray.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\material\lambert.h">
-      <Filter>material</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\ggx.h">
       <Filter>material</Filter>
     </ClInclude>
@@ -537,6 +534,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\volume\grid_loader.h">
       <Filter>volume</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\diffuse.h">
+      <Filter>material</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

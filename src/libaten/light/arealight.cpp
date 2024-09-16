@@ -14,7 +14,7 @@ namespace AT_NAME {
         m_param.light_color = light_color;
 
         // Convert lux[W] to intensity[W/sr].
-        // Lambert light and sample hemisphere uniformliy.
+        // Diffuse light and sample hemisphere uniformliy.
         m_param.intensity = lux / (2.0f * AT_MATH_PI_2);
     }
 }

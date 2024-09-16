@@ -1,5 +1,5 @@
 #include "material/velvet.h"
-#include "material/lambert.h"
+#include "material/diffuse.h"
 #include "material/sample_texture.h"
 
 namespace AT_NAME
@@ -150,7 +150,7 @@ namespace AT_NAME
         // NOTE:
         // The papaer mentions "We found plain uniform sampling of the upper hemisphere to be more effective".
         // So, sample based on hemisphere uniform sampling not importance sampling.
-        return lambert::ComputePDF(n, wo);
+        return Diffuse::ComputePDF(n, wo);
     }
 
     AT_DEVICE_API aten::vec3 MicrofacetVelvet::SampleDirection(
@@ -160,7 +160,7 @@ namespace AT_NAME
         // NOTE:
         // The papaer mentions "We found plain uniform sampling of the upper hemisphere to be more effective".
         // So, sample based on hemisphere uniform sampling not importance sampling.
-        return lambert::SampleDirection(n, r1, r2);
+        return Diffuse::SampleDirection(n, r1, r2);
     }
 
     AT_DEVICE_API aten::vec3 MicrofacetVelvet::ComputeBRDF(

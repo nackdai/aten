@@ -1,5 +1,5 @@
 #include "material/oren_nayar.h"
-#include "material/lambert.h"
+#include "material/diffuse.h"
 #include "material/sample_texture.h"
 
 //#pragma optimize( "", off)
@@ -35,7 +35,7 @@ namespace AT_NAME {
         float u, float v,
         aten::sampler* sampler)
     {
-        auto dir = lambert::sampleDirection(normal, sampler);
+        auto dir = Diffuse::sampleDirection(normal, sampler);
         return dir;
     }
 

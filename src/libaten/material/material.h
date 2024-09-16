@@ -29,7 +29,7 @@ namespace aten
     };
 
     AT_DEVICE_API constexpr auto MaterialAttributeMicrofacet = aten::MaterialAttribute{ false, false, false, true };
-    AT_DEVICE_API constexpr auto MaterialAttributeLambert = aten::MaterialAttribute{ false, false, false, false };
+    AT_DEVICE_API constexpr auto MaterialAttributeDiffuse = aten::MaterialAttribute{ false, false, false, false };
     AT_DEVICE_API constexpr auto MaterialAttributeEmissive = aten::MaterialAttribute{ true,  false, false, false };
     AT_DEVICE_API constexpr auto MaterialAttributeSpecular = aten::MaterialAttribute{ false, true,  false, true };
     AT_DEVICE_API constexpr auto MaterialAttributeRefraction = aten::MaterialAttribute{ false, true,  true,  true };
@@ -37,7 +37,7 @@ namespace aten
 
     enum class MaterialType : int32_t {
         Emissive,
-        Lambert,
+        Diffuse,
         OrneNayar,
         Specular,
         Refraction,

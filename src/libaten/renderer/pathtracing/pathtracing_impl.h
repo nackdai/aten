@@ -32,6 +32,16 @@ namespace AT_NAME
     inline aten::vec4 make_float4(float x, float y, float z, float w) { return { x, y, z, w }; }
 #endif
 
+    inline AT_DEVICE_API void ClearPathAttribute(PathAttribute& attrib)
+    {
+        attrib.isHit = false;
+        attrib.is_terminated = false;
+        attrib.is_singular = false;
+        attrib.will_update_depth = true;
+        attrib.does_use_throughput_depth = false;
+        attrib.last_hit_mtrl_idx = -1;
+    }
+
     inline AT_DEVICE_API void GeneratePath(
         aten::ray& generated_ray,
         int32_t idx,
@@ -41,8 +51,6 @@ namespace AT_NAME
         const aten::CameraParameter& camera,
         const uint32_t rnd)
     {
-        paths.attrib[idx].isHit = false;
-
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
         auto scramble = rnd * 0x1fe3434f
             * (((frame + sample) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
@@ -70,9 +78,7 @@ namespace AT_NAME
         paths.throughput[idx].depth_count = 0;
         paths.throughput[idx].mediums.clear();
 
-        paths.attrib[idx].is_terminated = false;
-        paths.attrib[idx].is_singular = false;
-        paths.attrib[idx].will_update_depth = true;
+        ClearPathAttribute(paths.attrib[idx]);
 
         paths.contrib[idx].samples += 1;
     }
@@ -609,7 +615,7 @@ namespace AT_NAME
         paths.throughput[idx].throughput *= albedo;
         paths.throughput[idx].pdfb = pdfb;
         paths.attrib[idx].is_singular = mtrl.attrib.is_singular;
-        paths.attrib[idx].mtrlType = mtrl.type;
+        paths.attrib[idx].last_hit_mtrl_idx = mtrl.id;
 
         // Make next ray.
         rays[idx] = aten::ray(rec.p, next_dir, ray_along_normal);

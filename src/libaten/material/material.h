@@ -22,10 +22,10 @@ namespace aten {
 namespace aten
 {
     struct MaterialAttribute {
-        uint32_t isEmissive : 1;
-        uint32_t isSingular : 1;
-        uint32_t isTranslucent : 1;
-        uint32_t isGlossy : 1;
+        uint32_t is_emissive : 1;
+        uint32_t is_singular : 1;
+        uint32_t is_translucent : 1;
+        uint32_t is_glossy : 1;
     };
 
     AT_DEVICE_API constexpr auto MaterialAttributeMicrofacet = aten::MaterialAttribute{ false, false, false, true };

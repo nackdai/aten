@@ -38,7 +38,7 @@ __global__ void computeTemporalReuse(
 
     auto idx = getIdx(ix, iy, width);
 
-    if (paths.attrib[idx].isTerminate) {
+    if (paths.attrib[idx].is_terminated) {
         return;
     }
 
@@ -91,7 +91,7 @@ __global__ void computeSpatialReuse(
 
     auto idx = getIdx(ix, iy, width);
 
-    if (paths.attrib[idx].isTerminate) {
+    if (paths.attrib[idx].is_terminated) {
         return;
     }
 

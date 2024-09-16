@@ -175,7 +175,7 @@ namespace AT_NAME
         paths.attrib[idx].will_update_depth = false;
 
         if (paths.throughput[idx].depth_count > max_depth) {
-            paths.attrib[idx].isTerminate = true;
+            paths.attrib[idx].is_terminated = true;
         }
     }
 

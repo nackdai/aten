@@ -67,7 +67,7 @@ namespace npr_kernel {
 
         idx = hitindices[idx];
 
-        if (paths.attrib[idx].isTerminate) {
+        if (paths.attrib[idx].is_terminated) {
             return;
         }
 
@@ -162,7 +162,7 @@ namespace npr_kernel {
             }
 
             const auto mtrl = ctxt.GetMaterial(hrec_query.mtrlid);
-            if (!mtrl.attrib.isGlossy) {
+            if (!mtrl.attrib.is_glossy) {
                 // In non glossy material case, sample ray doesn't bounce anymore.
                 // TODO
                 // Even if material is glossy, how glossy depends on parameter (e.g. roughness etc).
@@ -208,7 +208,7 @@ namespace npr_kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        if (paths.attrib[idx].isTerminate || paths.attrib[idx].isHit) {
+        if (paths.attrib[idx].is_terminated || paths.attrib[idx].isHit) {
             return;
         }
 

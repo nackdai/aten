@@ -49,7 +49,7 @@ namespace vpt
 
         idx = hitindices[idx];
 
-        if (paths.attrib[idx].isTerminate) {
+        if (paths.attrib[idx].is_terminated) {
             paths.attrib[idx].will_update_depth = false;
             return;
         }
@@ -60,7 +60,7 @@ namespace vpt
             bounce, depth_for_rr,
             paths.attrib[idx], paths.throughput[idx],
             paths.sampler[idx]);
-        if (paths.attrib[idx].isTerminate) {
+        if (paths.attrib[idx].is_terminated) {
             paths.attrib[idx].will_update_depth = false;
             return;
         }
@@ -174,7 +174,7 @@ namespace vpt
                     ray.dir,
                     &paths.sampler[idx]);
 
-                if (!shMtrls[threadIdx.x].attrib.isTranslucent && isBackfacing) {
+                if (!shMtrls[threadIdx.x].attrib.is_translucent && isBackfacing) {
                     orienting_normal = -orienting_normal;
                 }
 
@@ -292,7 +292,7 @@ namespace vpt
             return;
         }
 
-        int32_t n = paths.attrib[idx].isTerminate ? 1 : 0;
+        int32_t n = paths.attrib[idx].is_terminated ? 1 : 0;
         atomicAdd(terminated_path_count + 0, n);
 #else
         // NOTE:
@@ -313,12 +313,12 @@ namespace vpt
 
         int32_t thread_idx = threadIdx.x;
 
-        auto sum = paths.attrib[idx].isTerminate ? 1 : 0;
+        auto sum = paths.attrib[idx].is_terminated ? 1 : 0;
 
         // Half of threads in a block doesn't do anything in the following for loop.
         // To reduce its waste as much as possible, compute the value here.
         if (idx + blockDim.x < max_idx) {
-            sum += paths.attrib[idx + blockDim.x].isTerminate ? 1 : 0;
+            sum += paths.attrib[idx + blockDim.x].is_terminated ? 1 : 0;
         }
 
         sdata[thread_idx] = sum;
@@ -446,7 +446,7 @@ namespace idaten {
 
         int32_t count = 0;
         for (const auto& a : attribs) {
-            count += a.isTerminate ? 1 : 0;
+            count += a.is_terminated ? 1 : 0;
         }
 
         AT_ASSERT(count == terminated_path_count);

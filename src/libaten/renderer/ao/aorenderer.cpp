@@ -121,7 +121,7 @@ namespace aten
                         col += c;
                         cnt++;
 
-                        if (path_host_.paths.attrib[idx].isTerminate) {
+                        if (path_host_.paths.attrib[idx].is_terminated) {
                             break;
                         }
                     }

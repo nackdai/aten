@@ -49,7 +49,7 @@ namespace aten
                 std::ignore = AT_NAME::HitShadowRay(
                     idx, depth, ctxt, path_host_.paths, shadow_rays_[idx], scene);
 
-                willContinue = !path_host_.paths.attrib[idx].isTerminate;
+                willContinue = !path_host_.paths.attrib[idx].is_terminated;
             }
             else {
                 auto ibl = scene->getIBL();
@@ -172,7 +172,7 @@ namespace aten
             return;
         }
 
-        if (!mtrl.attrib.isTranslucent && isBackfacing) {
+        if (!mtrl.attrib.is_translucent && isBackfacing) {
             orienting_normal = -orienting_normal;
         }
 
@@ -511,7 +511,7 @@ namespace aten
                             continue;
                         }
 
-                        if (path_host_.paths.attrib[idx].isTerminate) {
+                        if (path_host_.paths.attrib[idx].is_terminated) {
                             break;
                         }
                     }

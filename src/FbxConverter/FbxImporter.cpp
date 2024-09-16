@@ -1036,7 +1036,7 @@ namespace aten
                         tex.type.isNormal = true;
                     }
                     else if (name == fbxsdk::FbxSurfaceMaterial::sTransparentColor) {
-                        tex.type.isTranslucent = true;
+                        tex.type.is_translucent = true;
                     }
 
                     // TODO

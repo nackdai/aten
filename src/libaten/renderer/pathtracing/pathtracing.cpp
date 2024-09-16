@@ -54,7 +54,7 @@ namespace aten
                 std::ignore = AT_NAME::HitShadowRay(
                     idx, depth, ctxt, path_host_.paths, shadow_rays_[idx], scene);
 
-                willContinue = !path_host_.paths.attrib[idx].isTerminate;
+                willContinue = !path_host_.paths.attrib[idx].is_terminated;
             }
             else {
                 auto ibl = scene->getIBL();
@@ -197,7 +197,7 @@ namespace aten
                     }
 
                     const auto mtrl = ctxt.GetMaterial(hrec_query.mtrlid);
-                    if (!mtrl.attrib.isGlossy) {
+                    if (!mtrl.attrib.is_glossy) {
                         // In non glossy material case, sample ray doesn't bounce anymore.
                         // TODO
                         // Even if material is glossy, how glossy depends on parameter (e.g. roughness etc).
@@ -332,7 +332,7 @@ namespace aten
             return;
         }
 
-        if (!mtrl.attrib.isTranslucent && isBackfacing) {
+        if (!mtrl.attrib.is_translucent && isBackfacing) {
             orienting_normal = -orienting_normal;
         }
 
@@ -414,7 +414,7 @@ namespace aten
             // Sample IBL properly.
             if (depth == 0) {
                 float misW = 1.0F;
-                paths.attrib[idx].isTerminate = true;
+                paths.attrib[idx].is_terminated = true;
             }
             else {
                 auto pdfLight = ibl->samplePdf(ray, ctxt);
@@ -520,7 +520,7 @@ namespace aten
                         col2 += c * c;
                         cnt++;
 
-                        if (path_host_.paths.attrib[idx].isTerminate) {
+                        if (path_host_.paths.attrib[idx].is_terminated) {
                             break;
                         }
                     }

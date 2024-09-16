@@ -70,8 +70,8 @@ namespace AT_NAME
         paths.throughput[idx].depth_count = 0;
         paths.throughput[idx].mediums.clear();
 
-        paths.attrib[idx].isTerminate = false;
-        paths.attrib[idx].isSingular = false;
+        paths.attrib[idx].is_terminated = false;
+        paths.attrib[idx].is_singular = false;
         paths.attrib[idx].will_update_depth = true;
 
         paths.contrib[idx].samples += 1;
@@ -156,7 +156,7 @@ namespace AT_NAME
             ? paths.throughput[idx].depth_count
             : bounce;
 
-        if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
+        if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].isHit) {
             if (bounce == 0) {
                 if (!aov_normal_depth.empty() && !aov_albedo_meshid.empty())
                 {
@@ -170,7 +170,7 @@ namespace AT_NAME
             auto contrib = paths.throughput[idx].throughput * bg;
             _detail::AddVec3(paths.contrib[idx].contrib, contrib);
 
-            paths.attrib[idx].isTerminate = true;
+            paths.attrib[idx].is_terminated = true;
         }
     }
 
@@ -192,7 +192,7 @@ namespace AT_NAME
             ? paths.throughput[idx].depth_count
             : bounce;
 
-        if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
+        if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].isHit) {
             aten::vec3 dir = ray.dir;
 
             if (bounce == 0) {
@@ -215,7 +215,7 @@ namespace AT_NAME
 
             float misW = 1.0f;
             if (bounce == 0
-                || (bounce == 1 && paths.attrib[idx].isSingular))
+                || (bounce == 1 && paths.attrib[idx].is_singular))
             {
                 if (!aov_normal_depth.empty() && !aov_albedo_meshid.empty())
                 {
@@ -233,7 +233,7 @@ namespace AT_NAME
             auto contrib = paths.throughput[idx].throughput * misW * emit;
             _detail::AddVec3(paths.contrib[idx].contrib, contrib);
 
-            paths.attrib[idx].isTerminate = true;
+            paths.attrib[idx].is_terminated = true;
         }
     }
 
@@ -259,7 +259,7 @@ namespace AT_NAME
 
         const auto lightnum = static_cast<int32_t>(ctxt.GetLightNum());
 
-        bool is_invalid_mtrl = is_on_surface && (mtrl.attrib.isSingular || mtrl.attrib.isTranslucent);
+        bool is_invalid_mtrl = is_on_surface && (mtrl.attrib.is_singular || mtrl.attrib.is_translucent);
 
         if (lightnum <= 0 || is_invalid_mtrl) {
             return aten::make_tuple(light_sample, light_select_prob, target_light_idx);
@@ -295,7 +295,7 @@ namespace AT_NAME
         auto cosLight = dot(light_sample.nml, -light_sample.dir);
 
         auto dist2 = aten::sqr(light_sample.dist_to_light);
-        dist2 = (light_sample.attrib.isInfinite || light_sample.attrib.isSingular) ? float{ 1 } : dist2;
+        dist2 = (light_sample.attrib.isInfinite || light_sample.attrib.is_singular) ? float{ 1 } : dist2;
 
         if (cosShadow >= 0 && cosLight >= 0
             && dist2 > 0
@@ -314,7 +314,7 @@ namespace AT_NAME
                 path_pdf = path_pdf * cosLight / dist2;
             }
 
-            auto misW = light_sample.attrib.isSingular
+            auto misW = light_sample.attrib.is_singular
                 ? 1.0f
                 : _detail::ComputeBalanceHeuristic(light_sample.pdf * light_select_prob, path_pdf);
 
@@ -396,7 +396,7 @@ namespace AT_NAME
         const AT_NAME::ShadowRay& shadow_ray,
         SCENE* scene = nullptr)
     {
-        if (paths.attrib[idx].isTerminate) {
+        if (paths.attrib[idx].is_terminated) {
             return false;
         }
 
@@ -478,7 +478,7 @@ namespace AT_NAME
         float hit_area,
         const aten::MaterialParameter& hit_target_mtrl)
     {
-        if (!hit_target_mtrl.attrib.isEmissive) {
+        if (!hit_target_mtrl.attrib.is_emissive) {
             return false;
         }
 
@@ -516,7 +516,7 @@ namespace AT_NAME
         _detail::AddVec3(path_contrib.contrib, contrib);
 
         // When ray hit the light, tracing will finish.
-        path_attrib.isTerminate = true;
+        path_attrib.is_terminated = true;
         return true;
     }
 
@@ -531,7 +531,7 @@ namespace AT_NAME
         AT_NAME::PathThroughput& path_throughput)
     {
         // If the material itself is originally translucent, we don't care alpha translucency.
-        if (mtrl.attrib.isTranslucent) {
+        if (mtrl.attrib.is_translucent) {
             return false;
         }
 
@@ -546,7 +546,7 @@ namespace AT_NAME
                 // Ray go through to the opposite direction. So, we need to specify inverted normal.
                 ray = aten::ray(hit_pos, ray.dir, -hit_nml);
                 path_throughput.throughput *= static_cast<aten::vec3>(mtrl.baseColor);
-                path_attrib.isSingular = true;
+                path_attrib.is_singular = true;
                 return true;
             }
         }
@@ -567,7 +567,7 @@ namespace AT_NAME
             if (aten::squared_length(path_throughput.throughput) > 0) {
                 russian_prob = aten::max_from_vec3(path_throughput.throughput);
                 auto p = sampler.nextSample();
-                path_attrib.isTerminate = (p >= russian_prob);
+                path_attrib.is_terminated = (p >= russian_prob);
             }
         }
 
@@ -602,13 +602,13 @@ namespace AT_NAME
             paths.throughput[idx].throughput /= russian_prob;
         }
         else {
-            paths.attrib[idx].isTerminate = true;
+            paths.attrib[idx].is_terminated = true;
             return;
         }
 
         paths.throughput[idx].throughput *= albedo;
         paths.throughput[idx].pdfb = pdfb;
-        paths.attrib[idx].isSingular = mtrl.attrib.isSingular;
+        paths.attrib[idx].is_singular = mtrl.attrib.is_singular;
         paths.attrib[idx].mtrlType = mtrl.type;
 
         // Make next ray.
@@ -663,7 +663,7 @@ namespace AT_NAME
             return;
         }
 
-        if (!mtrl.attrib.isTranslucent && isBackfacing) {
+        if (!mtrl.attrib.is_translucent && isBackfacing) {
             orienting_normal = -orienting_normal;
         }
 

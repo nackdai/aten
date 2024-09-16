@@ -119,8 +119,8 @@ __global__ void shade(
         ray.dir,
         &paths.sampler[idx]);
 
-    if (!shMtrls[threadIdx.x].attrib.isTranslucent
-        && !shMtrls[threadIdx.x].attrib.isEmissive
+    if (!shMtrls[threadIdx.x].attrib.is_translucent
+        && !shMtrls[threadIdx.x].attrib.is_emissive
         && isBackfacing)
     {
         orienting_normal = -orienting_normal;
@@ -165,7 +165,7 @@ __global__ void shade(
     }
 
     // Generate initial candidates.
-    if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
+    if (!(shMtrls[threadIdx.x].attrib.is_singular || shMtrls[threadIdx.x].attrib.is_translucent))
     {
         auto& reservoir = reservoirs[idx];
 
@@ -230,7 +230,7 @@ __global__ void EvaluateVisibility(
         return;
     }
 
-    if (paths.attrib[idx].isTerminate) {
+    if (paths.attrib[idx].is_terminated) {
         return;
     }
 
@@ -275,7 +275,7 @@ __global__ void ComputePixelColor(
 
     idx = hitindices[idx];
 
-    if (paths.attrib[idx].isTerminate) {
+    if (paths.attrib[idx].is_terminated) {
         return;
     }
 

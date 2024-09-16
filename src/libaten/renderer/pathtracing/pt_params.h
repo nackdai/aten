@@ -72,8 +72,8 @@ namespace AT_NAME {
 
     struct PathAttribute {
         bool isHit{ false };
-        bool isTerminate{ false };
-        bool isSingular{ false };
+        bool is_terminated{ false };
+        bool is_singular{ false };
         bool will_update_depth{ true };
         bool does_use_throughput_depth{ false };
 

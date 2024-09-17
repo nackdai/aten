@@ -110,6 +110,9 @@ namespace AT_NAME {
 
             result.pos = org + scene_radius * result.dir;
 
+            // TODO
+            result.nml = -normalize(result.dir);
+
             // NOTE:
             // Sphere uniform sampling.
             // Sample one point on sphere.

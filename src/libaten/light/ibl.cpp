@@ -308,7 +308,9 @@ namespace AT_NAME {
         // TODO
         // Currently not used...
         result.pos = aten::vec3();
-        result.nml = aten::vec3();
+
+        // TODO
+        result.nml = -normalize(result.dir);
 
         // NOTE:
         // Theoretically this has to be inf.

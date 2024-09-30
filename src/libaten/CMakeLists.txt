@@ -110,12 +110,12 @@ add_library(
   material/beckman.h
   material/car_paint.cpp
   material/car_paint.h
+  material/diffuse.h
   material/disney_brdf.cpp
   material/disney_brdf.h
   material/emissive.h
   material/ggx.cpp
   material/ggx.h
-  material/lambert.h
   material/material.cpp
   material/material.h
   material/material_impl.h
@@ -175,6 +175,7 @@ add_library(
   renderer/npr/feature_line.cpp
   renderer/npr/feature_line.h
   renderer/npr/npr_impl.h
+  renderer/pathtracing/npr.cpp
   renderer/pathtracing/pathtracing.cpp
   renderer/pathtracing/pathtracing.h
   renderer/pathtracing/pathtracing_impl.h
@@ -230,6 +231,7 @@ add_library(
   volume/grid.cpp
   volume/grid.h
   volume/grid_host.cpp
+  volume/grid_loader.h
   volume/grid_util.h
   volume/medium.cpp
   volume/medium.h

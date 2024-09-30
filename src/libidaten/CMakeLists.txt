@@ -73,12 +73,12 @@ cuda_add_library(
   ../libaten/material/beckman.h
   ../libaten/material/car_paint.cpp
   ../libaten/material/car_paint.h
+  ../libaten/material/diffuse.h
   ../libaten/material/disney_brdf.cpp
   ../libaten/material/disney_brdf.h
   ../libaten/material/emissive.h
   ../libaten/material/ggx.cpp
   ../libaten/material/ggx.h
-  ../libaten/material/lambert.h
   ../libaten/material/material.cpp
   ../libaten/material/material.h
   ../libaten/material/material_impl.h

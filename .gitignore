@@ -7,8 +7,10 @@
 *.ipdb
 *.pdb
 *.user
-*/.vs
-*/x64
+**/.venv
+**/.vs
+**/x64
+**/__pycache__
 .home
 .vscode
 3rdparty/**/bin

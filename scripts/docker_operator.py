@@ -15,6 +15,13 @@ from typing import List, Optional
 # In order to interact the container, use subprocess.
 # https://github.com/docker/docker-py/issues/390#issuecomment-333431415
 
+# NOTE:
+# Read output realtime from subprocess
+# https://www.lifewithpython.com/2021/12/python-subprocess-stream.html
+
+# How long wait to read output from subprocess
+INTERVAL_SECONDS_TO_READ_OUTPUT_FROM_SUBPROCESS = 0.005
+
 
 class ProcessRunner:
     """Class to run sub process."""
@@ -51,7 +58,7 @@ class ProcessRunner:
             interval: Time to interval.
 
         Yields:
-            String from stdoud and string from stderr.
+            String from stdout and string from stderr.
         """
         while True:
             if self._proc.stdout is None or self._proc.stderr is None:
@@ -78,7 +85,7 @@ class ProcessRunner:
 class ContainerRunningMode(Enum):
     """Mode how to run docker container."""
 
-    Detouch = 1
+    Detach = 1
     Enter = 2
 
 
@@ -103,7 +110,9 @@ async def run_process(
 
     await proc_runner.start(program, args, stdout_type, stderr_type)
 
-    async for stdout, stderr in proc_runner.stream(0.0):
+    async for stdout, stderr in proc_runner.stream(
+        INTERVAL_SECONDS_TO_READ_OUTPUT_FROM_SUBPROCESS
+    ):
         if stdout:
             print(stdout, end="", flush=True)
         if stderr:
@@ -125,7 +134,7 @@ async def run_docker_container(
         docker_image: Docker image.
         container_name: Docker container name.
         mode: Mode how to run docker container.
-        exec_command: String for command to execute direclty in docker container.
+        exec_command: String for command to execute directly in docker container.
 
     Returns:
         Return code from docker run command as sub process.
@@ -163,8 +172,8 @@ async def run_docker_container(
         container_name,
     ]
 
-    # If command to execute is specified, to display log, container should not be launched as detouch.
-    if mode == ContainerRunningMode.Detouch and exec_command is None:
+    # If command to execute is specified, to display log, container should not be launched as detach.
+    if mode == ContainerRunningMode.Detach and exec_command is None:
         args.append("-d")
 
     args.append(docker_image)
@@ -185,7 +194,7 @@ async def run_docker_container(
 async def execute_command_in_docker_container(
     container_name: str, command: Optional[str]
 ) -> Optional[int]:
-    """Exectute command in specified docker container.
+    """Execute command in specified docker container.
 
     Args:
         container_name: Container name to execute command.
@@ -234,7 +243,7 @@ def check_if_container_is_running(container_name: Optional[str]) -> bool:
     ]
 
     # NOTE:
-    # In order to get stdout direclty, use subprocess directly.
+    # In order to get stdout directly, use subprocess directly.
     proc = subprocess.Popen(cmds, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     result = proc.stdout.read().decode()
     proc.communicate()
@@ -326,7 +335,7 @@ async def main(container_name: str):
             returncode = await run_docker_container(
                 args.image,
                 container_name,
-                ContainerRunningMode.Detouch,
+                ContainerRunningMode.Detach,
                 args.command,
             )
 

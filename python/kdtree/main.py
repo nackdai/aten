@@ -8,7 +8,7 @@ from kdtree import KdTree
 def main():
     np.random.seed(19)
 
-    points = np.random.random_sample((10, 3))
+    points = np.random.random_sample((10, 2))
     target_point = np.array([0.5, 0.5]).reshape((1, 2))
 
     kdtree_root = KdTree.create(points)

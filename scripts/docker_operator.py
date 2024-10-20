@@ -67,9 +67,16 @@ class ProcessRunner:
             if self._proc.stdout.at_eof() and self._proc.stderr.at_eof():
                 break
 
+            # TODO:
+            # It seems that stderr is stuck until the process finishes.
+            # The following seems to be the solution to retrieve stderr realtime.
+            # On the other hand, the indent is broken with the following.
+            #   https://stackoverflow.com/questions/50901182/watch-stdout-and-stderr-of-a-subprocess-simultaneously
+            # So, disable to retrieve stderr at this moment.
             stdout = await self._proc.stdout.readline()
-            stderr = await self._proc.stderr.readline()
-            yield stdout.decode(), stderr.decode()
+            # stderr = await self._proc.stderr.readline()
+            # yield stdout.decode(), stderr.decode()
+            yield stdout.decode(), None
 
             await asyncio.sleep(interval)
 

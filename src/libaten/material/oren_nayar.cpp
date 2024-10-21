@@ -41,14 +41,11 @@ namespace AT_NAME {
 
     inline AT_DEVICE_API aten::vec3 computeBsdf(
         float roughness,
-        const aten::vec3& albedo,
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
         float u, float v)
     {
-        aten::vec3 bsdf = aten::vec3(0);
-
         const auto NL = dot(normal, wo);
         const auto NV = dot(normal, -wi);
 
@@ -92,7 +89,7 @@ namespace AT_NAME {
         const float A = float(1) - float(0.5) * (a2 / (a2 + float(0.33)));
         const float B = float(0.45) * (a2 / (a2 + float(0.09)));
 
-        bsdf = (albedo / AT_MATH_PI) * (A + B * aten::cmpMax(float(0), cosAzimuth) * sinAlpha * tanBeta);
+        auto bsdf = (1.0F / AT_MATH_PI) * (A + B * aten::cmpMax(float(0), cosAzimuth) * sinAlpha * tanBeta);
 #else
         // NOTE
         // A tiny improvement of Oren-Nayar reflectance model
@@ -109,10 +106,10 @@ namespace AT_NAME {
         const auto s = LV - NL * NV;
         const auto t = s <= 0 ? float(1) : s / aten::cmpMax(NL, NV);
 
-        bsdf = (albedo / AT_MATH_PI) * (A + B * aten::cmpMax(float(0), s / t));
+        auto bsdf = (1.0F / AT_MATH_PI) * (A + B * aten::cmpMax(float(0), s / t));
 #endif
 
-        return bsdf;
+        return aten::vec3(bsdf);
     }
 
     AT_DEVICE_API aten::vec3 OrenNayar::bsdf(
@@ -124,12 +121,8 @@ namespace AT_NAME {
     {
         auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
 
-        auto albedo = param->baseColor;
-        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(float(1)));
-
         auto bsdf = computeBsdf(
             roughness.r,
-            albedo,
             normal,
             wi,
             wo,

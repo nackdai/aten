@@ -41,9 +41,6 @@ namespace AT_NAME
     {
         auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
 
-        auto albedo = param->baseColor;
-        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(float(1)));
-
         float ior = param->standard.ior;
 
         aten::vec3 ret = ComputeBRDF(roughness.r, ior, normal, wi, wo);

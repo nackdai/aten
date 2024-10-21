@@ -137,7 +137,6 @@ namespace AT_NAME
 
         /**
          * @brief Compute BRDF.
-         * @param[in] albedo Albedo color.
          * @param[in] roughness Roughness parameter.
          * @param[in] wi Incident vector.
          * @param[in] wo Output vector.

@@ -137,12 +137,11 @@ namespace AT_NAME
 
         /**
          * @brief Compute BRDF.
-         * @param[in] albedo Albedo color.
          * @param[in] roughness Roughness parameter.
          * @param[in] ior Refraction index.
+         * @param[in] n Macrosurface normal.
          * @param[in] wi Incident vector.
          * @param[in] wo Output vector.
-         * @param[in] n Macrosurface normal.
          * @param[out] fresnel To obtain the computed fresnel in this API.
          * @return BRDF.
          */

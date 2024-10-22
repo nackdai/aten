@@ -1,0 +1,307 @@
+#include "material/toon.h"
+
+#include "light/light.h"
+#include "material/diffuse.h"
+#include "material/ggx.h"
+#include "material/sample_texture.h"
+#include "material/toon_specular.h"
+#include "misc/color.h"
+#include "renderer/pathtracing/pathtracing_impl.h"
+
+#ifdef __CUDACC__
+#include "cuda/cudadefs.h"
+#include "cuda/helper_math.h"
+#include "kernel/device_scene_context.cuh"
+#include "kernel/accelerator.cuh"
+#else
+#include "scene/host_scene_context.h"
+#endif
+
+//#pragma optimize( "", off)
+
+
+namespace AT_NAME
+{
+    bool Toon::edit(aten::IMaterialParamEditor* editor)
+    {
+        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, shininess, 0.0F, 100.0F);
+        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, translation_dt, -1.0F, 1.0F);
+
+        return b0;
+    }
+
+    AT_DEVICE_API aten::vec3 Toon::bsdf(
+        const AT_NAME::context& ctxt,
+        const aten::MaterialParameter& param,
+        aten::sampler& sampler,
+        const aten::vec3& hit_pos,
+        const aten::vec3& normal,
+        const aten::vec3& wi,
+        float u, float v,
+        float* pdf/*= nullptr*/)
+    {
+        // TODO
+        constexpr float w_min = 0.01F;
+        constexpr float y_min = 0.0F;
+        constexpr float y_max = 1.0F;
+
+        // Pick target light.
+        const auto* target_light = param.standard.toon.target_light_idx >= 0
+            ? &ctxt.GetLight(param.standard.toon.target_light_idx)
+            : nullptr;
+
+        // Allow only singular light.
+        target_light = target_light && target_light->attrib.is_singular
+            ? target_light
+            : nullptr;
+
+        aten::vec3 radiance(0.0F);
+        if (pdf) {
+            *pdf = 0.0F;
+        }
+
+        if (target_light) {
+            // Sample light.
+
+            // NOTE:
+            // The target light has to be the singular light.
+            // In that case, sample is not used at all. So, we can pass it as nullptr.
+            aten::LightSampleResult light_sample;
+            AT_NAME::Light::sample(light_sample, *target_light, ctxt, hit_pos, normal, &sampler);
+
+            // TODO
+            // How can we configure base material type.
+            aten::MaterialParameter base_mtrl;
+#if 0
+            base_mtrl.type = aten::MaterialType::Diffuse;
+#else
+            base_mtrl.type = aten::MaterialType::ToonSpecular;
+            base_mtrl.standard = param.standard;
+#endif
+
+            // The target light is sepcified beforehand and it is only one.
+            // So, light selected pdf is always 1.
+            constexpr float light_selected_pdf = 1.0F;
+
+            // Compute radiance.
+            // The target light is singular, and then MIS in ComputeRadianceNEE is always 1.0.
+            auto res = ComputeRadianceNEE(
+                wi, normal,
+                base_mtrl, 0.0F, u, v,
+                light_selected_pdf, light_sample);
+            if (res) {
+                radiance = res.value();
+                if (pdf) {
+#if 0
+                    *pdf = Diffuse::ComputePDF(normal, light_sample.dir);
+#else
+                    *pdf = ToonSpecular::ComputePDF(param, normal, wi, light_sample.dir, u, v);
+#endif
+                }
+            }
+        }
+
+        // Convert RGB to XYZ.
+        const auto xyz = color::RGBtoXYZ(radiance);
+        const auto y = xyz.y;
+
+        // To avoid too dark, compare with the minimum weight.
+        const auto weight = aten::saturate(aten::cmpMax(y, w_min));
+
+        // Compute texture coord (1D, vertical) for remap texture.
+        auto remap_v = 0.0F;
+        if (y_max <= y) {
+            remap_v = 1.0F;
+        }
+        else if (y <= y_min) {
+            remap_v = 0.0F;
+        }
+        else {
+            remap_v = (y - y_min) / (y_max - y_min);
+        }
+
+        const auto remap = AT_NAME::sampleTexture(param.standard.toon.remap_texture, 0.5F, remap_v, aten::vec4(radiance));
+
+        aten::vec3 bsdf = weight * remap * (pdf ? *pdf : 1.0F);
+
+        return bsdf;
+    }
+
+    namespace blinn {
+        inline  AT_DEVICE_API float ComputeDistribution(
+            const float shininess,
+            const aten::vec3& N,
+            const aten::vec3& H)
+        {
+            const auto a = shininess;
+            const auto NdotH = dot(N, H);
+
+            // NOTE
+            // http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
+            // https://agraphicsguynotes.com/posts/sample_microfacet_brdf/
+            auto D = (a + 2) / (2 * AT_MATH_PI);
+            D *= aten::pow(NdotH, a);
+            D *= (NdotH > 0 ? 1 : 0);
+
+            return D;
+        }
+
+        inline  AT_DEVICE_API float ComputePDF(
+            const aten::MaterialParameter& param,
+            const aten::vec3& N,
+            const aten::vec3& L,
+            const aten::vec3& H)
+        {
+            const auto costheta = dot(N, H);
+
+            const auto D = ComputeDistribution(param.standard.shininess, N, H);
+
+            // For Jacobian |dwh/dwo|
+            const auto denom = 4 * aten::abs(dot(L, H));
+
+            const auto pdf = denom > 0 ? (D * costheta) / denom : 0;
+
+            return pdf;
+        }
+
+        inline AT_DEVICE_API aten::vec3 ComputeBRDF(
+            const aten::MaterialParameter& param,
+            const aten::vec3& N,
+            const aten::vec3& V,
+            const aten::vec3& L,
+            const aten::vec3& H)
+        {
+            // Assume index of refraction of the medie on the incident side is vacuum.
+            const auto ni = 1.0F;
+            const auto nt = param.standard.ior;
+
+            const auto a = param.standard.shininess;
+
+            auto NdotH = aten::abs(dot(N, H));
+            auto VdotH = aten::abs(dot(V, H));
+            auto NdotL = aten::abs(dot(N, L));
+            auto NdotV = aten::abs(dot(N, V));
+
+            const auto F = material::ComputeSchlickFresnel(ni, nt, L, H);
+
+            auto denom = 4 * NdotL * NdotV;
+
+            const auto D = ComputeDistribution(param.standard.shininess, N, H);
+
+            // Compute G.
+            auto G{ 1.0F };
+            {
+                // Cook-Torrance geometry function.
+                // http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
+
+                auto G1 = 2 * NdotH * NdotL / VdotH;
+                auto G2 = 2 * NdotH * NdotV / VdotH;
+                G = aten::cmpMin(1.0F, aten::cmpMin(G1, G2));
+            }
+
+            const auto brdf = denom > AT_MATH_EPSILON ? F * G * D / denom : 0.0F;
+
+            return aten::vec3(brdf);
+        }
+    }
+
+    AT_DEVICE_API float ToonSpecular::ComputePDF(
+        const aten::MaterialParameter& param,
+        const aten::vec3& normal,
+        const aten::vec3& wi,
+        const aten::vec3& wo,
+        float u, float v)
+    {
+        const auto V = -wi;
+        const auto L = wo;
+        const auto N = normal;
+
+        const auto H = ComputeHalfVector(param, N, V, L);
+
+#if 0
+        const auto pdf = blinn::ComputePDF(param, N, L, H);
+#else
+        const auto pdf = MicrofacetGGX::ComputePDFWithHalfVector(param.standard.roughness, N, H, L);
+#endif
+        return pdf;
+    }
+
+    AT_DEVICE_API aten::vec3 ToonSpecular::ComputeBRDF(
+        const aten::MaterialParameter& param,
+        const aten::vec3& normal,
+        const aten::vec3& wi,
+        const aten::vec3& wo,
+        float u, float v)
+    {
+        const auto V = -wi;
+        const auto L = wo;
+        const auto N = normal;
+
+        const auto H = ComputeHalfVector(param, N, V, L);
+
+#if 0
+        const auto brdf = blinn::ComputeBRDF(
+            param,
+            N, V, L, H);
+#else
+        const auto brdf = MicrofacetGGX::ComputeBRDFWithHalfVector(
+            param.standard.roughness,
+            param.standard.ior,
+            N, V, L, H);
+#endif
+
+
+        return brdf;
+    }
+
+    AT_DEVICE_API aten::vec3 ToonSpecular::ComputeHalfVector(
+        const aten::MaterialParameter& param,
+        const aten::vec3& N,
+        const aten::vec3& V,
+        const aten::vec3& L)
+    {
+        auto H = normalize(L + V);
+
+        // Stylized hightlight.
+        aten::vec3 t, b;
+        aten::tie(t, b) = aten::GetTangentCoordinate(N);
+
+#if 0
+        // NOTE:
+        // The result from GetTangentCoordinate is:
+        //    +------>b
+        //   /|
+        //  / |
+        // n  t
+        // It's fully right hand coordiante as expected.
+        // But, this is not intuitive to translate the half vector.
+        // To translate the half vector intuitively like the following:
+        //    b
+        //    |
+        //    |
+        //    +------>t
+        //   /
+        //  /
+        // n
+        // We rotate t and b around n.
+        aten::mat4 rot;
+        rot.asRotateByZ(AT_MATH_PI * 0.5F);
+        t = rot.apply(t);
+        b = rot.apply(b);
+#endif
+
+        // Translation.
+        H = H + param.standard.toon.translation_dt * t + param.standard.toon.translation_db * b;
+        H = normalize(H);
+
+        // Direction scale.
+        H = H - param.standard.toon.scale_t * dot(H, t) * t;
+        H = normalize(H);
+
+        // Split.
+        H = H - param.standard.toon.split_t * aten::sign(dot(H, t)) * t - param.standard.toon.split_b * aten::sign(dot(H, b)) * b;
+        H = normalize(H);
+
+        return H;
+    }
+}

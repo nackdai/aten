@@ -538,6 +538,12 @@
     <ClInclude Include="..\src\libaten\material\diffuse.h">
       <Filter>material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\toon.h">
+      <Filter>material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\toon_specular.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -800,6 +806,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\pathtracing\npr.cpp">
       <Filter>renderer\pathtracing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\toon.cpp">
+      <Filter>material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

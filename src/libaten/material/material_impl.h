@@ -15,6 +15,7 @@
 #include "material/microfacet_refraction.h"
 #include "material/disney_brdf.h"
 #include "material/retroreflective.h"
+#include "material/toon_specular.h"
 #include "material/car_paint.h"
 
 namespace AT_NAME
@@ -135,6 +136,9 @@ namespace AT_NAME
         case aten::MaterialType::Disney:
             pdf = AT_NAME::DisneyBRDF::pdf(*mtrl, normal, wi, wo, u, v);
             break;
+        case aten::MaterialType::ToonSpecular:
+            pdf = AT_NAME::ToonSpecular::ComputePDF(*mtrl, normal, wi, wo, u, v);
+            break;
         default:
             AT_ASSERT(false);
             pdf = AT_NAME::Diffuse::pdf(normal, wo);
@@ -177,6 +181,8 @@ namespace AT_NAME
             return AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, pre_sampled_r);
         case aten::MaterialType::Disney:
             return AT_NAME::DisneyBRDF::bsdf(*mtrl, normal, wi, wo, u, v);
+        case aten::MaterialType::ToonSpecular:
+            return AT_NAME::ToonSpecular::ComputeBRDF(*mtrl, normal, wi, wo, u, v);
         default:
             AT_ASSERT(false);
             return AT_NAME::Diffuse::bsdf(mtrl);
@@ -247,6 +253,8 @@ namespace AT_NAME
                     dst_mtrl.albedoMap = static_cast<int32_t>(dst_mtrl.albedoMap >= 0 ? ctxt.textures[dst_mtrl.albedoMap] : -1);
                     dst_mtrl.normalMap = static_cast<int32_t>(dst_mtrl.normalMap >= 0 ? ctxt.textures[dst_mtrl.normalMap] : -1);
                     dst_mtrl.roughnessMap = static_cast<int32_t>(dst_mtrl.roughnessMap >= 0 ? ctxt.textures[dst_mtrl.roughnessMap] : -1);
+
+                    dst_mtrl.standard.toon.remap_texture = static_cast<int32_t>(dst_mtrl.standard.toon.remap_texture >= 0 ? ctxt.textures[dst_mtrl.standard.toon.remap_texture] : -1);
                 }
             }
         }

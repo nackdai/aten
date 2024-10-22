@@ -124,7 +124,8 @@ namespace aten
 
         // Implicit conection to light.
         auto is_hit_implicit_light = AT_NAME::HitTeminateMaterial(
-            ctxt, isect.objid,
+            ctxt, paths.sampler[idx],
+            isect.objid,
             isBackfacing,
             bounce,
             paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],

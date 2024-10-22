@@ -282,7 +282,7 @@ namespace AT_NAME
     }
 
     inline AT_DEVICE_API std::optional<aten::vec3> ComputeRadianceNEE(
-        const aten::ray& ray,
+        const aten::vec3& wi,
         const aten::vec3& surface_nml,
         const aten::MaterialParameter& surface_mtrl,
         const float pre_sampled_random,
@@ -292,8 +292,8 @@ namespace AT_NAME
     {
         auto cosShadow = dot(surface_nml, light_sample.dir);
 
-        float path_pdf{ AT_NAME::material::samplePDF(&surface_mtrl, surface_nml, ray.dir, light_sample.dir, hit_u, hit_v) };
-        auto bsdf{ AT_NAME::material::sampleBSDF(&surface_mtrl, surface_nml, ray.dir, light_sample.dir, hit_u, hit_v, pre_sampled_random) };
+        float path_pdf{ AT_NAME::material::samplePDF(&surface_mtrl, surface_nml, wi, light_sample.dir, hit_u, hit_v) };
+        auto bsdf{ AT_NAME::material::sampleBSDF(&surface_mtrl, surface_nml, wi, light_sample.dir, hit_u, hit_v, pre_sampled_random) };
 
         // Get light color.
         const auto& emit{ light_sample.light_color };
@@ -381,7 +381,7 @@ namespace AT_NAME
         shadow_ray.lightcontrib = aten::vec3(0);
 
         auto radiance = ComputeRadianceNEE(
-            ray, hit_nml,
+            ray.dir, hit_nml,
             mtrl, pre_sampled_r, hit_u, hit_v,
             lightSelectPdf, sampleres);
         if (radiance.has_value()) {

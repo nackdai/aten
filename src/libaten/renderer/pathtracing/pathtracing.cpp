@@ -123,15 +123,12 @@ namespace aten
         shadow_ray.isActive = false;
 
         // Implicit conection to light.
-        auto is_hit_implicit_light = AT_NAME::HitImplicitLight(
+        auto is_hit_implicit_light = AT_NAME::HitTeminateMaterial(
             ctxt, isect.objid,
             isBackfacing,
             bounce,
             paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
-            ray,
-            rec.p, orienting_normal,
-            rec.area,
-            mtrl);
+            ray, rec, mtrl);
         if (is_hit_implicit_light) {
             return;
         }

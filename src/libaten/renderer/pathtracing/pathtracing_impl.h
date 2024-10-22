@@ -479,9 +479,7 @@ namespace AT_NAME
         AT_NAME::PathAttribute& path_attrib,
         AT_NAME::PathThroughput& path_throughput,
         const aten::ray& ray,
-        const aten::vec3& hit_pos,
-        const aten::vec3& hit_nml,
-        float hit_area,
+        const aten::hitrecord& hrec,
         const aten::MaterialParameter& hit_target_mtrl)
     {
         if (!hit_target_mtrl.attrib.is_emissive) {
@@ -491,6 +489,10 @@ namespace AT_NAME
         if (is_back_facing) {
             return false;
         }
+
+        const aten::vec3& hit_pos = hrec.p;
+        const aten::vec3& hit_nml = hrec.normal;
+        float hit_area = hrec.area;
 
         const auto& obj = ctxt.GetObject(hit_obj_id);
         const auto& light = ctxt.GetLight(obj.light_id);
@@ -523,6 +525,45 @@ namespace AT_NAME
 
         // When ray hit the light, tracing will finish.
         path_attrib.is_terminated = true;
+        return true;
+    }
+
+    inline AT_DEVICE_API bool HitTeminateMaterial(
+        const AT_NAME::context& ctxt,
+        int32_t hit_obj_id,
+        bool is_back_facing,
+        int32_t bounce,
+        AT_NAME::PathContrib& path_contrib,
+        AT_NAME::PathAttribute& path_attrib,
+        AT_NAME::PathThroughput& path_throughput,
+        const aten::ray& ray,
+        const aten::hitrecord& hrec,
+        const aten::MaterialParameter& hit_target_mtrl)
+    {
+        const auto is_teminate_mtrl = material::IsTerminateMaterial(hit_target_mtrl);
+        if (!is_teminate_mtrl) {
+            return false;
+        }
+
+        const auto mtrl_type = hit_target_mtrl.type;
+
+        switch (mtrl_type) {
+        case aten::MaterialType::Emissive:
+            // Implicit conection to light.
+            return HitImplicitLight(
+                ctxt,
+                hit_obj_id, is_back_facing, bounce,
+                path_contrib, path_attrib, path_throughput,
+                ray, hrec, hit_target_mtrl);
+        case aten::MaterialType::Toon:
+            // TODO
+            // Treat toon as light.
+            break;
+        default:
+            AT_ASSERT(false);
+            return false;
+        }
+
         return true;
     }
 
@@ -662,8 +703,7 @@ namespace AT_NAME
             bounce,
             paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
             ray,
-            rec.p, orienting_normal,
-            rec.area,
+            rec,
             mtrl);
         if (is_hit_implicit_light) {
             return;

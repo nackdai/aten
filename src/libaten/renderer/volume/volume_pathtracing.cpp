@@ -158,8 +158,7 @@ namespace aten
                 bounce,
                 paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
                 ray,
-                rec.p, orienting_normal,
-                rec.area,
+                rec,
                 mtrl);
             if (is_hit_implicit_light) {
                 paths.attrib[idx].will_update_depth = false;
@@ -313,8 +312,7 @@ namespace aten
                 bounce,
                 paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
                 ray,
-                rec.p, orienting_normal,
-                rec.area,
+                rec,
                 mtrl);
             if (is_hit_implicit_light) {
                 paths.attrib[idx].will_update_depth = false;
@@ -366,7 +364,7 @@ namespace aten
 
                     if (is_visilbe_to_light) {
                         auto radiance = AT_NAME::ComputeRadianceNEE(
-                            ray, orienting_normal,
+                            ray.dir, orienting_normal,
                             mtrl, pre_sampled_r, rec.u, rec.v,
                             light_select_prob, light_sample);
                         if (radiance.has_value()) {

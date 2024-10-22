@@ -182,8 +182,7 @@ namespace aten
             bounce,
             paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
             ray,
-            rec.p, orienting_normal,
-            rec.area,
+            rec,
             mtrl);
         if (is_hit_implicit_light) {
             return;

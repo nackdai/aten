@@ -9,6 +9,7 @@
 #include "light/light_impl.h"
 #include "math/ray.h"
 #include "material/material.h"
+#include "material/toon.h"
 #include "misc/tuple.h"
 #include "misc/type_traits.h"
 #include "renderer/aov.h"
@@ -530,6 +531,7 @@ namespace AT_NAME
 
     inline AT_DEVICE_API bool HitTeminateMaterial(
         const AT_NAME::context& ctxt,
+        aten::sampler& sampler,
         int32_t hit_obj_id,
         bool is_back_facing,
         int32_t bounce,
@@ -556,9 +558,22 @@ namespace AT_NAME
                 path_contrib, path_attrib, path_throughput,
                 ray, hrec, hit_target_mtrl);
         case aten::MaterialType::Toon:
-            // TODO
-            // Treat toon as light.
-            break;
+        {
+            // Treat toon as a light.
+            float toon_pdf = 0.0F;
+            const auto toon_bsdf = Toon::bsdf(
+                ctxt, hit_target_mtrl, sampler,
+                hrec.p, hrec.normal, ray.dir,
+                0.0f, 0.0f,
+                &toon_pdf);
+            aten::vec3 contrib{ 0.0F };
+            if (toon_pdf > 0.0F) {
+                contrib = path_throughput.throughput * toon_bsdf / toon_pdf;
+            }
+            _detail::AddVec3(path_contrib.contrib, contrib);
+            path_attrib.is_terminated = true;
+            return true;
+        }
         default:
             AT_ASSERT(false);
             return false;

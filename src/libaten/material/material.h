@@ -54,6 +54,7 @@ namespace aten
 
         // From here, the followings are specialized materials.
         Volume,
+        ToonSpecular,
     };
 
     struct StandardMaterialParameter {
@@ -72,6 +73,18 @@ namespace aten
         float clearcoat;         // 第二の特別な目的のスペキュラーローブ.
         float clearcoatGloss;    // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
 
+        // TODO
+        // For toon.
+        struct {
+            int32_t target_light_idx;
+            int32_t remap_texture;
+            float translation_dt;
+            float translation_db;
+            float scale_t;
+            float split_t;
+            float split_b;
+        } toon;
+
         AT_HOST_DEVICE_API void Init()
         {
             ior = 1.0;
@@ -88,6 +101,14 @@ namespace aten
             sheenTint = 0.5;
             clearcoat = 0.5;
             clearcoatGloss = 0.5;
+
+            toon.target_light_idx = -1;
+            toon.remap_texture = -1;
+            toon.translation_dt = 0.0F;
+            toon.translation_db = 0.0F;
+            toon.scale_t = 0.0F;
+            toon.split_t = 0.0F;
+            toon.split_b = 0.0F;
         }
 
         AT_HOST_DEVICE_API StandardMaterialParameter()
@@ -109,6 +130,14 @@ namespace aten
             sheenTint = rhs.sheenTint;
             clearcoat = rhs.clearcoat;
             clearcoatGloss = rhs.clearcoatGloss;
+
+            toon.target_light_idx = rhs.toon.target_light_idx;
+            toon.remap_texture = rhs.toon.remap_texture;
+            toon.translation_dt = rhs.toon.translation_dt;
+            toon.translation_db = rhs.toon.translation_db;
+            toon.scale_t = rhs.toon.scale_t;
+            toon.split_t = rhs.toon.split_t;
+            toon.split_b = rhs.toon.split_b;
 
             return *this;
         }

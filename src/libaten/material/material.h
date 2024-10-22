@@ -48,6 +48,7 @@ namespace aten
         Retroreflective,
         CarPaint,
         Disney,
+        Toon,
 
         // TODO:
         // Currently, if MaterialTypeMax is specified, it is treated as non subsurface volumetric material.
@@ -541,6 +542,17 @@ namespace AT_NAME
             wo = normalize(wo);
 
             return wo;
+        }
+
+        /**
+         * @brief Get if the material need to terminate ray traverse.
+         * @param[in] mtrl Material parameter to be checked.
+         * @return If the material need to terminate ray traverse, returns true. Otherwise, returns false.
+         */
+        static AT_DEVICE_API bool IsTerminateMaterial(const aten::MaterialParameter& mtrl)
+        {
+            return mtrl.type == aten::MaterialType::Emissive
+                || mtrl.type == aten::MaterialType::Toon;
         }
 
         static AT_DEVICE_API aten::vec4 sampleAlbedoMap(

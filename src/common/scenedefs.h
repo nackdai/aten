@@ -105,16 +105,6 @@ public:
         float& fov);
 };
 
-class DisneyMaterialTestScene {
-public:
-    static void makeScene(aten::context& ctxt, aten::scene* scene);
-
-    static void getCameraPosAndAt(
-        aten::vec3& pos,
-        aten::vec3& at,
-        float& fov);
-};
-
 class ObjCornellBoxScene {
 public:
     static std::shared_ptr<aten::instance<aten::PolygonObject>> makeScene(

@@ -2,78 +2,7 @@
 
 #include <array>
 
-static std::shared_ptr<aten::material> CreateMaterial(
-    std::string_view name,
-    aten::context& ctxt,
-    aten::MaterialType type,
-    const aten::vec3& albedo,
-    aten::texture* albedoMap,
-    aten::texture* normalMap)
-{
-    aten::MaterialParameter param;
-    param.type = type;
-    param.baseColor = albedo;
-
-    auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
-        name,
-        param,
-        albedoMap,
-        normalMap,
-        nullptr);
-
-    return mtrl;
-}
-
-static std::shared_ptr<aten::material> CreateMaterial(
-    std::string_view name,
-    aten::context& ctxt,
-    aten::MaterialType type,
-    const aten::vec3& albedo)
-{
-    aten::MaterialParameter param;
-    param.type = type;
-    param.baseColor = albedo;
-
-    return ctxt.CreateMaterialWithMaterialParameter(
-        name,
-        param,
-        nullptr, nullptr, nullptr);
-}
-
-static std::shared_ptr<aten::material> createMaterialWithParamter(
-    std::string_view name,
-    aten::context& ctxt,
-    aten::MaterialType type,
-    const aten::MaterialParameter& param)
-{
-    aten::MaterialParameter mtrl_param = param;
-    mtrl_param.type = type;
-
-    return ctxt.CreateMaterialWithMaterialParameter(
-        name,
-        mtrl_param,
-        nullptr, nullptr, nullptr);
-}
-
-static std::shared_ptr<aten::material> createMaterialWithParamter(
-    std::string_view name,
-    aten::context& ctxt,
-    aten::MaterialType type,
-    const aten::MaterialParameter& param,
-    aten::texture* albedoMap,
-    aten::texture* normalMap,
-    aten::texture* roughnessMap)
-{
-    aten::MaterialParameter mtrl_param = param;
-    mtrl_param.type = type;
-
-    return ctxt.CreateMaterialWithMaterialParameter(
-        name,
-        mtrl_param,
-        albedoMap,
-        normalMap,
-        roughnessMap);
-}
+#include "app_misc.h"
 
 void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
@@ -269,7 +198,7 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
                         ctxt,
                         center,
                         0.2f,
-                        createMaterialWithParamter(mtrl_name, ctxt, aten::MaterialType::Refraction, mtrlParam));
+                        CreateMaterialWithParamter(mtrl_name, ctxt, aten::MaterialType::Refraction, mtrlParam));
                 }
 
                 scene->add(s);
@@ -279,7 +208,7 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     mtrlParam.baseColor = aten::vec3(1);
     mtrlParam.standard.ior = 1.5;
-    s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(0, 1, 0), 1.0, createMaterialWithParamter("refraction", ctxt, aten::MaterialType::Refraction, mtrlParam));
+    s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(0, 1, 0), 1.0, CreateMaterialWithParamter("refraction", ctxt, aten::MaterialType::Refraction, mtrlParam));
     scene->add(s);
 
     s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-4, 1, 0), 1.0, CreateMaterial("Diffuse", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.4, 0.2, 0.1)));
@@ -308,13 +237,13 @@ void MtrlTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
     mtrlParam.standard.roughness = 0.2f;
     mtrlParam.standard.ior = 0.2f;
-    auto s_ggx = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-3.0f, 0.0f, 0.0f), 1.0f, createMaterialWithParamter("ggx", ctxt, aten::MaterialType::GGX, mtrlParam));
+    auto s_ggx = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-3.0f, 0.0f, 0.0f), 1.0f, CreateMaterialWithParamter("ggx", ctxt, aten::MaterialType::GGX, mtrlParam));
     scene->add(s_ggx);
 
     mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
     mtrlParam.standard.roughness = 0.2f;
     mtrlParam.standard.ior = 0.2f;
-    auto s_beckman = aten::TransformableFactory::createSphere(ctxt, aten::vec3(+1.0f, 0.0f, 0.0f), 1.0f, createMaterialWithParamter("beckman", ctxt, aten::MaterialType::Beckman, mtrlParam));
+    auto s_beckman = aten::TransformableFactory::createSphere(ctxt, aten::vec3(+1.0f, 0.0f, 0.0f), 1.0f, CreateMaterialWithParamter("beckman", ctxt, aten::MaterialType::Beckman, mtrlParam));
     scene->add(s_beckman);
 
     auto s_glass = aten::TransformableFactory::createSphere(ctxt, aten::vec3(+3.0f, 0.0f, 0.0f), 1.0f, CreateMaterial("specular", ctxt, aten::MaterialType::Specular, aten::vec3(0.7, 0.6, 0.5)));
@@ -340,8 +269,8 @@ void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene)
     mtrlParam.standard.roughness = 0.5f;
     mtrlParam.standard.ior = 0.2f;
 
-    createMaterialWithParamter("m1", ctxt, aten::MaterialType::GGX, mtrlParam);
-    createMaterialWithParamter("Material.001", ctxt, aten::MaterialType::GGX, mtrlParam);
+    CreateMaterialWithParamter("m1", ctxt, aten::MaterialType::GGX, mtrlParam);
+    CreateMaterialWithParamter("Material.001", ctxt, aten::MaterialType::GGX, mtrlParam);
 
     auto obj = aten::ObjLoader::LoadFirstObj("../../asset/suzanne/suzanne.obj", ctxt);
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
@@ -545,7 +474,7 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
                     mtrlParam.baseColor = aten::vec3(1.0f);
                     mtrlParam.standard.ior = 1.5f;
 
-                    s = aten::TransformableFactory::createSphere(ctxt, center, 0.2f, createMaterialWithParamter(mtrl_name, ctxt, aten::MaterialType::Refraction, mtrlParam));
+                    s = aten::TransformableFactory::createSphere(ctxt, center, 0.2f, CreateMaterialWithParamter(mtrl_name, ctxt, aten::MaterialType::Refraction, mtrlParam));
                 }
 
                 scene->add(s);
@@ -556,7 +485,7 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     mtrlParam.baseColor = aten::vec3(1);
     mtrlParam.standard.ior = 1.5;
-    s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(0, 1, 0), 1.0, createMaterialWithParamter("refraction", ctxt, aten::MaterialType::Refraction, mtrlParam));
+    s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(0, 1, 0), 1.0, CreateMaterialWithParamter("refraction", ctxt, aten::MaterialType::Refraction, mtrlParam));
     scene->add(s);
 
     s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-4, 1, 0), 1.0, CreateMaterial("Diffuse", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.8, 0.2, 0.1)));
@@ -609,7 +538,7 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
     mtrlParam.standard.roughness = 0.5f;
     mtrlParam.standard.ior = 0.2f;
 
-    auto blinn = createMaterialWithParamter(
+    auto blinn = CreateMaterialWithParamterAndTextures(
         "ggx",
         ctxt, aten::MaterialType::GGX, mtrlParam,
         albedo.get(), nml.get(), nullptr);
@@ -626,7 +555,7 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
     mtrlParam.standard.roughness = 0.2f;
     mtrlParam.standard.ior = 0.2f;
 
-    auto ggx = createMaterialWithParamter(
+    auto ggx = CreateMaterialWithParamterAndTextures(
         "ggx_1",
         ctxt, aten::MaterialType::GGX, mtrlParam,
         albedo.get(), nml.get(), rough.get());
@@ -642,7 +571,7 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
     mtrlParam.standard.roughness = 0.2f;
     mtrlParam.standard.ior = 0.2f;
 
-    auto beckman = createMaterialWithParamter(
+    auto beckman = CreateMaterialWithParamterAndTextures(
         "beckman",
         ctxt, aten::MaterialType::Beckman, mtrlParam,
         albedo.get(), nml.get(), rough.get());
@@ -767,7 +696,7 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         ctxt,
         aten::vec3(77.0f, 16.5f, 78.0f),
         16.5f,
-        createMaterialWithParamter("glass", ctxt, aten::MaterialType::Refraction, mtrlParam));
+        CreateMaterialWithParamter("glass", ctxt, aten::MaterialType::Refraction, mtrlParam));
 
 #if 1
     scene->add(light);
@@ -821,7 +750,7 @@ std::shared_ptr<aten::instance<aten::PolygonObject>> ObjCornellBoxScene::makeSce
                     mtrlParam.standard.roughness = 0.1f;
                     mtrlParam.standard.ior = 0.01f;
 
-                    auto mtrl = createMaterialWithParamter(name, ctxt, type, mtrlParam);
+                    auto mtrl = CreateMaterialWithParamter(name, ctxt, type, mtrlParam);
                     return mtrl;
                 }
                 else if (name == "floor") {
@@ -833,7 +762,7 @@ std::shared_ptr<aten::instance<aten::PolygonObject>> ObjCornellBoxScene::makeSce
                     mtrlParam.standard.roughness = 0.1f;
                     mtrlParam.standard.ior = 0.01f;
 
-                    auto mtrl = createMaterialWithParamter(name, ctxt, type, mtrlParam);
+                    auto mtrl = CreateMaterialWithParamter(name, ctxt, type, mtrlParam);
                     return mtrl;
                 }
                 else {
@@ -932,7 +861,7 @@ void BunnyScene::makeScene(aten::context& ctxt, aten::scene* scene)
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(0.7f, 0.7f, 0.7f);
 
-    createMaterialWithParamter("m1", ctxt, aten::MaterialType::Diffuse, mtrlParam);
+    CreateMaterialWithParamter("m1", ctxt, aten::MaterialType::Diffuse, mtrlParam);
 
     auto objs = aten::ObjLoader::load("../../asset/teapot/teapot.obj", ctxt);
     auto bunny = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[0], aten::mat4::Identity);

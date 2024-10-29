@@ -88,7 +88,7 @@ int32_t main(int32_t argc, char* argv[])
 
         return mtrl;
     },
-        true, true);
+        nullptr, true, true);
 
 
     if (objs.empty()) {

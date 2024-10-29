@@ -19,18 +19,25 @@ namespace aten
                 const std::string& albedo,
                 const std::string& nml)>;
 
+        using FuncFindMaterialFromSceneContextByName = std::function<
+            std::shared_ptr<material> (
+                std::string_view name,
+                const context& ctxt)>;
+
         static void setBasePath(std::string_view base);
 
         static std::shared_ptr<aten::PolygonObject> LoadFirstObj(
             std::string_view path,
             context& ctxt,
             FuncCreateMaterial callback_create_mtrl = nullptr,
+            FuncFindMaterialFromSceneContextByName callback_find_mtrl = nullptr,
             bool need_compute_normal_on_the_fly = false);
 
         static std::vector<std::shared_ptr<aten::PolygonObject>> Load(
             std::string_view path,
             context& ctxt,
             FuncCreateMaterial callback_create_mtrl = nullptr,
+            FuncFindMaterialFromSceneContextByName callback_find_mtrl = nullptr,
             bool will_register_shape_as_separate_obj = false,
             bool need_compute_normal_on_the_fly = false);
 
@@ -39,6 +46,7 @@ namespace aten
             std::string_view path,
             context& ctxt,
             FuncCreateMaterial callback_create_mtrl = nullptr,
+            FuncFindMaterialFromSceneContextByName callback_find_mtrl = nullptr,
             bool will_register_shape_as_separate_obj = false,
             bool need_compute_normal_on_the_fly = false);
     };

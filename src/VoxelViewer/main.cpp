@@ -269,7 +269,7 @@ private:
             mtrlParam,
             nullptr, nullptr, nullptr);
 
-        objs_ = aten::ObjLoader::load(args_.input, ctxt_);
+        objs_ = aten::ObjLoader::Load(args_.input, ctxt_);
 
         for (auto& obj : objs_) {
             auto instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt_, obj, aten::mat4::Identity);

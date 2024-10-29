@@ -9,7 +9,7 @@ constexpr const char* TITLE = "app";
 
 const aten::vec4 BGColor(0.0F);
 
-#define ENABLE_IBL
+//#define ENABLE_IBL
 // #define ENABLE_EVERY_FRAME_SC
 //#define ENABLE_FEATURE_LINE
 
@@ -227,10 +227,10 @@ private:
 
     std::shared_ptr<aten::texture> envmap_;
 
-    //aten::PathTracing renderer_;
+    aten::PathTracing renderer_;
     //aten::VolumePathTracing renderer_;
     //aten::SVGFRenderer renderer_;
-    aten::ReSTIRRenderer renderer_;
+    //aten::ReSTIRRenderer renderer_;
 
     std::shared_ptr<aten::visualizer> visualizer_;
 

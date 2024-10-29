@@ -25,28 +25,21 @@ namespace aten
             std::string_view path,
             context& ctxt,
             FuncCreateMaterial callback_create_mtrl = nullptr,
-            bool needComputeNormalOntime = false);
+            bool need_compute_normal_on_the_fly = false);
 
-        static std::shared_ptr<aten::PolygonObject> LoadFirstObjAndStoreToAssetManagerWithTag(
-            std::string_view tag,
+        static std::vector<std::shared_ptr<aten::PolygonObject>> Load(
             std::string_view path,
             context& ctxt,
             FuncCreateMaterial callback_create_mtrl = nullptr,
-            bool needComputeNormalOntime = false);
+            bool will_register_shape_as_separate_obj = false,
+            bool need_compute_normal_on_the_fly = false);
 
-        static std::vector<std::shared_ptr<aten::PolygonObject>> load(
+    private:
+        static std::vector<std::shared_ptr<aten::PolygonObject>> OnLoad(
             std::string_view path,
             context& ctxt,
             FuncCreateMaterial callback_create_mtrl = nullptr,
-            bool willSeparate = false,
-            bool needComputeNormalOntime = false);
-
-        static std::vector<std::shared_ptr<aten::PolygonObject>> LoadAndStoreToAssetManagerWithTag(
-            std::string_view tag,
-            std::string_view path,
-            context& ctxt,
-            FuncCreateMaterial callback_create_mtrl = nullptr,
-            bool willSeparate = false,
-            bool needComputeNormalOntime = false);
+            bool will_register_shape_as_separate_obj = false,
+            bool need_compute_normal_on_the_fly = false);
     };
 }

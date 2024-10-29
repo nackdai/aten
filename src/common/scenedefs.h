@@ -236,7 +236,7 @@ void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene)
     }
 }
 
-//#define Scene CornellBoxScene
+#define Scene CornellBoxScene
 //#define Scene RandomScene
 //#define Scene ObjectScene
 //#define Scene MtrlTestScene
@@ -249,7 +249,7 @@ void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene)
 //#define Scene DisneyMaterialTestScene
 //#define Scene LayeredMaterialTestScene
 //#define Scene ToonShadeTestScene
-#define Scene ObjCornellBoxScene
+//#define Scene ObjCornellBoxScene
 //#define Scene SponzaScene
 //#define Scene BunnyScene
 //#define Scene DeformScene

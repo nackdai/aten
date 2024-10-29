@@ -21,10 +21,14 @@ namespace aten
         std::string_view path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
+        FuncFindMaterialFromSceneContextByName callback_find_mtrl/*= nullptr*/,
         bool need_compute_normal_on_the_fly/*= false*/)
     {
         auto objs = Load(
-            path, ctxt, callback_create_mtrl, need_compute_normal_on_the_fly);
+            path, ctxt,
+            callback_create_mtrl,
+            callback_find_mtrl,
+            need_compute_normal_on_the_fly);
 
         return (!objs.empty() ? objs[0] : nullptr);
     }
@@ -33,6 +37,7 @@ namespace aten
         std::string_view path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
+        FuncFindMaterialFromSceneContextByName callback_find_mtrl/*= nullptr*/,
         bool will_register_shape_as_separate_obj/*= false*/,
         bool need_compute_normal_on_the_fly/*= false*/)
     {
@@ -54,20 +59,22 @@ namespace aten
         }
 
         return OnLoad(
-            fullpath, ctxt, callback_create_mtrl, will_register_shape_as_separate_obj, need_compute_normal_on_the_fly);
+            fullpath, ctxt,
+            callback_create_mtrl,
+            callback_find_mtrl,
+            will_register_shape_as_separate_obj,
+            need_compute_normal_on_the_fly);
     }
 
     std::vector<std::shared_ptr<aten::PolygonObject>> ObjLoader::OnLoad(
         std::string_view path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
+        FuncFindMaterialFromSceneContextByName callback_find_mtrl/*= nullptr*/,
         bool will_register_shape_as_separate_obj/*= false*/,
         bool need_compute_normal_on_the_fly/*= false*/)
     {
         std::vector<std::shared_ptr<aten::PolygonObject>> objs;
-
-        // TODO
-        // Should we check if the same tagged object exists?
 
         std::string pathname;
         std::string extname;
@@ -281,7 +288,9 @@ namespace aten
                         // Apply new materil to the shape.
                         const auto& mtrl = mtrls[mtrl_idx];
 
-                        auto aten_mtrl = ctxt.FindMaterialByName(mtrl.name);
+                        auto aten_mtrl = callback_find_mtrl
+                            ? callback_find_mtrl(mtrl.name, ctxt)
+                            : ctxt.FindMaterialByName(mtrl.name);
 
                         // If the specifiend name material is not found, try to create a new material via the external function.
                         if (!aten_mtrl && callback_create_mtrl) {

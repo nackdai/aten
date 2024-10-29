@@ -770,7 +770,7 @@ std::shared_ptr<aten::instance<aten::PolygonObject>> ObjCornellBoxScene::makeSce
                     return mtrl;
                 }
         },
-        true, true);
+        nullptr, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
         ctxt,
@@ -990,7 +990,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
     auto tall = CreateMaterial("tallBox", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.0000f, 0.000f, 1.0000f));
     tall->param().baseColor.a = 0.25f;
 
-    auto objs = aten::ObjLoader::Load("../../asset/cornellbox/orig.obj", ctxt, nullptr, true, true);
+    auto objs = aten::ObjLoader::Load("../../asset/cornellbox/orig.obj", ctxt, nullptr, nullptr, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
         ctxt,
@@ -1165,7 +1165,7 @@ void CornellBoxSmokeScene::makeScene(
             return mtrl;
         }
     },
-        true, true);
+        nullptr, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
         ctxt,
@@ -1237,7 +1237,7 @@ void CornellBoxHomogeneousMediumScene::makeScene(
             return mtrl;
         }
     },
-        true, true);
+        nullptr, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
         ctxt,
@@ -1309,7 +1309,7 @@ void HomogeneousMediumRefractionBunnyScene::makeScene(
         }
 
         return mtrl;
-    }, true, true);
+    }, nullptr, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
         ctxt,

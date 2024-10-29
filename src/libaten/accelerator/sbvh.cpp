@@ -1024,7 +1024,11 @@ namespace aten
                     aten::ray transformedRay;
 
                     if (mtx_id >= 0) {
-                        const auto& mtx_W2L = ctxt.GetMatrix(mtx_id);
+                        // NOTE:
+                        // mtx_id just indicast L2W matrix.
+                        // The matrices are located L2W and W2L matrix as pair of paris.
+                        // mtx_id + 1 is necessary so to get the W2L matrix.
+                        const auto& mtx_W2L = ctxt.GetMatrix(mtx_id + 1);
 
                         transformedRay = mtx_W2L.applyRay(r);
                     }

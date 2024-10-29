@@ -130,7 +130,7 @@ AT_INLINE_RELEASE __device__ bool intersectBVH(
                     const auto* s = &ctxt->GetObject(static_cast<uint32_t>(attrib.x));
 
                     if (s->mtx_id >= 0) {
-                        auto mtx_W2L = ctxt->GetMatrix(s->mtx_id * 2 + 1);
+                        auto mtx_W2L = ctxt->GetMatrix(s->mtx_id + 1);
                         transformedRay.dir = mtx_W2L.applyXYZ(r.dir);
                         transformedRay.dir = normalize(transformedRay.dir);
                         transformedRay.org = mtx_W2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
@@ -215,7 +215,7 @@ AT_INLINE_RELEASE __device__ bool intersectBVH(
                     aten::ray transformedRay;
 
                     if (s->mtx_id >= 0) {
-                        const auto& mtx_W2L = ctxt->GetMatrix(s->mtx_id * 2 + 1);
+                        const auto& mtx_W2L = ctxt->GetMatrix(s->mtx_id + 1);
                         transformedRay.dir = mtx_W2L.applyXYZ(r.dir);
                         transformedRay.dir = normalize(transformedRay.dir);
                         transformedRay.org = mtx_W2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;

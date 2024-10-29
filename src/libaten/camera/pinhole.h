@@ -137,12 +137,12 @@ namespace AT_NAME
 
         void FitBoundingBox(
             const aten::aabb& bounding_box,
-            bool is_dir_to_curr_cam_param = false);
+            bool will_use_curr_camera_origin = false);
 
         static aten::tuple<aten::vec3, aten::vec3> FitBoundingBox(
             const aten::CameraParameter& param,
             const aten::aabb& bounding_box,
-            bool is_dir_to_curr_cam_param = false);
+            bool will_use_curr_camera_origin = false);
 
     private:
         aten::CameraParameter m_param;

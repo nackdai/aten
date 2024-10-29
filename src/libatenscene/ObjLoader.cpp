@@ -21,33 +21,20 @@ namespace aten
         std::string_view path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
-        bool needComputeNormalOntime/*= false*/)
+        bool need_compute_normal_on_the_fly/*= false*/)
     {
-        auto objs = load(
-            path, ctxt, callback_create_mtrl, needComputeNormalOntime);
+        auto objs = Load(
+            path, ctxt, callback_create_mtrl, need_compute_normal_on_the_fly);
 
         return (!objs.empty() ? objs[0] : nullptr);
     }
 
-    std::shared_ptr<aten::PolygonObject> ObjLoader::LoadFirstObjAndStoreToAssetManagerWithTag(
-        std::string_view tag,
+    std::vector<std::shared_ptr<aten::PolygonObject>> ObjLoader::Load(
         std::string_view path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
-        bool needComputeNormalOntime/*= false*/)
-    {
-        auto objs = LoadAndStoreToAssetManagerWithTag(
-            tag, path, ctxt, callback_create_mtrl, needComputeNormalOntime);
-
-        return (!objs.empty() ? objs[0] : nullptr);
-    }
-
-    std::vector<std::shared_ptr<aten::PolygonObject>> ObjLoader::load(
-        std::string_view path,
-        context& ctxt,
-        ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
-        bool willSeparate/*= false*/,
-        bool needComputeNormalOntime/*= false*/)
+        bool will_register_shape_as_separate_obj/*= false*/,
+        bool need_compute_normal_on_the_fly/*= false*/)
     {
         std::vector<std::shared_ptr<aten::PolygonObject>> objs;
 
@@ -66,17 +53,16 @@ namespace aten
             fullpath = g_base + "/" + fullpath;
         }
 
-        return LoadAndStoreToAssetManagerWithTag(
-            filename, fullpath, ctxt, callback_create_mtrl, willSeparate, needComputeNormalOntime);
+        return OnLoad(
+            fullpath, ctxt, callback_create_mtrl, will_register_shape_as_separate_obj, need_compute_normal_on_the_fly);
     }
 
-    std::vector<std::shared_ptr<aten::PolygonObject>> ObjLoader::LoadAndStoreToAssetManagerWithTag(
-        std::string_view tag,
+    std::vector<std::shared_ptr<aten::PolygonObject>> ObjLoader::OnLoad(
         std::string_view path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_create_mtrl/*= nullptr*/,
-        bool willSeparate/*= false*/,
-        bool needComputeNormalOntime/*= false*/)
+        bool will_register_shape_as_separate_obj/*= false*/,
+        bool need_compute_normal_on_the_fly/*= false*/)
     {
         std::vector<std::shared_ptr<aten::PolygonObject>> objs;
 
@@ -106,38 +92,47 @@ namespace aten
             return objs;
         }
 
-        auto obj(aten::TransformableFactory::createObject(ctxt));
+        // NOTE:
+        // obj: Entire obj file.
+        // shape: Polygon group in obj file. This is grouped in each material.
 
-        vec3 shapemin = vec3(AT_MATH_INF);
-        vec3 shapemax = vec3(-AT_MATH_INF);
+        std::shared_ptr<aten::PolygonObject> obj;
 
-        uint32_t numPolygons = 0;
+        auto create_obj_functor = [](
+            std::shared_ptr<aten::PolygonObject>& obj,
+            const tinyobj::shape_t& shape,
+            aten::context& ctxt) {
+            if (!obj) {
+                obj = aten::TransformableFactory::createObject(ctxt);
+            }
+            if (obj->getName().empty()) {
+                obj->setName(shape.name);
+            }
+        };
+
+        vec3 shape_bbox_min = vec3(AT_MATH_INF);
+        vec3 shape_bbox_max = vec3(-AT_MATH_INF);
+
+        uint32_t all_triangle_num = 0;
 
         for (int32_t p = 0; p < shapes.size(); p++) {
             const auto& shape = shapes[p];
 
-            if (obj && obj->getName().empty()) {
-                obj->setName(shape.name.c_str());
-            }
+            auto curr_vtx_pos = ctxt.GetVertexNum();
 
-            auto curVtxPos = ctxt.GetVertexNum();
-
-            vec3 pmin = vec3(AT_MATH_INF);
-            vec3 pmax = vec3(-AT_MATH_INF);
-
-            auto face_num = shape.mesh.num_face_vertices.size();
+            auto triangle_num = shape.mesh.num_face_vertices.size();
 
             // Keep polygon counts.
-            numPolygons += static_cast<uint32_t>(face_num);
+            all_triangle_num += static_cast<uint32_t>(triangle_num);
 
             // TODO
             // Avoid duplicate.
             std::vector<tinyobj::index_t> vtx_info_list;
 
-            std::vector<aten::TriangleParameter> face_parameters;
+            std::vector<aten::TriangleParameter> triangle_parameters;
 
             // Aggregate vertex indices.
-            for (uint32_t i = 0; i < face_num; i++) {
+            for (uint32_t i = 0; i < triangle_num; i++) {
                 // Loading as triangle is specified, so vertex num per triangle have to be 3.
                 AT_ASSERT(shape.mesh.num_face_vertices[i] == 3);
 
@@ -149,18 +144,21 @@ namespace aten
 
                 vtx_info_list.push_back(idx_0);
                 auto it = vtx_info_list.back();
-                faceParam.idx[0] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curVtxPos;
+                faceParam.idx[0] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curr_vtx_pos;
 
                 vtx_info_list.push_back(idx_1);
                 it = vtx_info_list.back();
-                faceParam.idx[1] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curVtxPos;
+                faceParam.idx[1] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curr_vtx_pos;
 
                 vtx_info_list.push_back(idx_2);
                 it = vtx_info_list.back();
-                faceParam.idx[2] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curVtxPos;
+                faceParam.idx[2] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curr_vtx_pos;
 
-                face_parameters.push_back(faceParam);
+                triangle_parameters.push_back(faceParam);
             }
+
+            vec3 triangle_bbox_min = vec3(AT_MATH_INF);
+            vec3 triangle_bbox_max = vec3(-AT_MATH_INF);
 
             // Vertices.
             for (const auto& idx : vtx_info_list) {
@@ -184,7 +182,7 @@ namespace aten
                     vtx.nml.x = attrib.normals[idx.normal_index * 3 + 0];
                     vtx.nml.y = attrib.normals[idx.normal_index * 3 + 1];
                     vtx.nml.z = attrib.normals[idx.normal_index * 3 + 2];
-                    vtx.uv.z = needComputeNormalOntime ? float(1) : float(0);
+                    vtx.uv.z = need_compute_normal_on_the_fly ? float(1) : float(0);
                 }
 
                 if (std::isnan(vtx.nml.x) || std::isnan(vtx.nml.y) || std::isnan(vtx.nml.z))
@@ -205,82 +203,87 @@ namespace aten
                 ctxt.AddVertex(vtx);
 
                 // To compute bouding box, store min/max position.
-                pmin = vec3(
-                    std::min(pmin.x, vtx.pos.x),
-                    std::min(pmin.y, vtx.pos.y),
-                    std::min(pmin.z, vtx.pos.z));
-                pmax = vec3(
-                    std::max(pmax.x, vtx.pos.x),
-                    std::max(pmax.y, vtx.pos.y),
-                    std::max(pmax.z, vtx.pos.z));
+                triangle_bbox_min = vec3(
+                    std::min(triangle_bbox_min.x, vtx.pos.x),
+                    std::min(triangle_bbox_min.y, vtx.pos.y),
+                    std::min(triangle_bbox_min.z, vtx.pos.z));
+                triangle_bbox_max = vec3(
+                    std::max(triangle_bbox_max.x, vtx.pos.x),
+                    std::max(triangle_bbox_max.y, vtx.pos.y),
+                    std::max(triangle_bbox_max.z, vtx.pos.z));
             }
 
-            // Compute bounding box.
-            shapemin = vec3(
-                std::min(shapemin.x, pmin.x),
-                std::min(shapemin.y, pmin.y),
-                std::min(shapemin.z, pmin.z));
-            shapemax = vec3(
-                std::max(shapemax.x, pmax.x),
-                std::max(shapemax.y, pmax.y),
-                std::max(shapemax.z, pmax.z));
+            // Compute bounding box of shape..
+            shape_bbox_min = vec3(
+                std::min(shape_bbox_min.x, triangle_bbox_min.x),
+                std::min(shape_bbox_min.y, triangle_bbox_min.y),
+                std::min(shape_bbox_min.z, triangle_bbox_min.z));
+            shape_bbox_max = vec3(
+                std::max(shape_bbox_max.x, triangle_bbox_max.x),
+                std::max(shape_bbox_max.y, triangle_bbox_max.y),
+                std::max(shape_bbox_max.z, triangle_bbox_max.z));
 
-            std::shared_ptr<aten::TriangleGroupMesh> dst_shape;
+            std::shared_ptr<aten::TriangleGroupMesh> aten_shape;
             int32_t prev_mtrl_idx = -1;
 
             // One shape has one material.It means another shape would be created if different material appear.
-            for (uint32_t i = 0; i < face_num; i++) {
+            for (uint32_t i = 0; i < triangle_num; i++) {
                 // Loading as triangle is specified, so vertex num per triangle have to be 3.
                 AT_ASSERT(shape.mesh.num_face_vertices[i] == 3);
 
-                int32_t m = shape.mesh.material_ids[i];
+                int32_t mtrl_idx = shape.mesh.material_ids[i];
 
-                if (m < 0 && !dst_shape) {
-                    // If a material doesn't exist.
-                    dst_shape = std::make_shared<aten::TriangleGroupMesh>();
+                if (mtrl_idx < 0 && !aten_shape) {
+                    // If any material is not defined in obj file, try to create the material via the external function.
+                    aten_shape = std::make_shared<aten::TriangleGroupMesh>();
 
-                    auto regireterd_mtrl = ctxt.GetMaterialInstance(0);
-                    if (!regireterd_mtrl && callback_create_mtrl) {
+                    std::shared_ptr<aten::material> regireterd_mtrl = nullptr;
+
+                    if (callback_create_mtrl) {
                         regireterd_mtrl = callback_create_mtrl(
                             "", ctxt, MaterialType::Diffuse, aten::vec3(1), "", "");
                     }
 
                     AT_ASSERT(regireterd_mtrl);
 
-                    dst_shape->SetMaterial(regireterd_mtrl);
+                    if (regireterd_mtrl) {
+                        aten_shape->SetMaterial(regireterd_mtrl);
+                    }
                 }
-                else if (prev_mtrl_idx != m) {
-                    // If different material appear.
+                else if (prev_mtrl_idx != mtrl_idx) {
+                    // If the different material from the previous one appear.
 
-                    if (dst_shape) {
+                    if (aten_shape) {
                         // If the shape already exist.
 
-                        auto mtrl = dst_shape->GetMaterial();
+                        auto mtrl = aten_shape->GetMaterial();
 
                         if (mtrl->param().type == aten::MaterialType::Emissive) {
-                            // Export the object which has an emissive material as the emissive object.
+                            // Export as the seprated object which has an emissive material.
                             auto emitobj(aten::TransformableFactory::createObject(ctxt));
-                            emitobj->appendShape(dst_shape);
-                            emitobj->setBoundingBox(aten::aabb(pmin, pmax));
+                            emitobj->setName(shape.name);
+                            emitobj->appendShape(aten_shape);
+                            emitobj->setBoundingBox(aten::aabb(shape_bbox_min, shape_bbox_max));
                             objs.push_back(std::move(emitobj));
                         }
                         else {
-                            // When different material appear, register the shape to the object.
+                            // When different material from the previous one appear, register the shape to the object.
                             // And, create new shape and shift to it later.
-                            obj->appendShape(dst_shape);
+                            create_obj_functor(obj, shape, ctxt);
+                            obj->appendShape(aten_shape);
                         }
                     }
 
-                    // Create new shape for new material.
-                    dst_shape = std::make_shared<aten::TriangleGroupMesh>();
-                    prev_mtrl_idx = m;
+                    // Create a new shape for the next new material.
+                    aten_shape = std::make_shared<aten::TriangleGroupMesh>();
 
-                    if (prev_mtrl_idx >= 0) {
+                    if (mtrl_idx >= 0) {
                         // Apply new materil to the shape.
-                        const auto& mtrl = mtrls[prev_mtrl_idx];
+                        const auto& mtrl = mtrls[mtrl_idx];
 
                         auto aten_mtrl = ctxt.FindMaterialByName(mtrl.name);
 
+                        // If the specifiend name material is not found, try to create a new material via the external function.
                         if (!aten_mtrl && callback_create_mtrl) {
                             std::shared_ptr<material> new_mtrl(
                                 callback_create_mtrl(
@@ -290,18 +293,20 @@ namespace aten
                                     aten::vec3(mtrl.diffuse[0], mtrl.diffuse[1], mtrl.diffuse[2]),
                                     mtrl.diffuse_texname,
                                     mtrl.bump_texname));
-                            dst_shape->SetMaterial(new_mtrl);
+                            aten_shape->SetMaterial(new_mtrl);
                         }
                         else {
-                            dst_shape->SetMaterial(aten_mtrl);
+                            aten_shape->SetMaterial(aten_mtrl);
                         }
                     }
 
-                    if (!dst_shape->GetMaterial()) {
-                        // If the shape doesn't have a material until here, set dummy material....
+                    // For the next loop.
+                    prev_mtrl_idx = mtrl_idx;
 
-                        // Only lambertian.
-                        const auto& objmtrl = mtrls[m];
+                    // If the shape doesn't have a material until here, set dummy material....
+                    if (!aten_shape->GetMaterial()) {
+                        // Only diffuse.
+                        const auto& objmtrl = mtrls[mtrl_idx];
 
                         std::shared_ptr<aten::material> mtrl;
 
@@ -360,40 +365,45 @@ namespace aten
                                 nullptr);
                         }
 
-                        dst_shape->SetMaterial(mtrl);
+                        aten_shape->SetMaterial(mtrl);
                     }
                 }
 
-                auto& face_param = face_parameters[i];
+                // Add a triangle to the shape(= triangle group which has the same material).
+                auto& triangle_param = triangle_parameters[i];
 
-                const auto& v0 = ctxt.GetVertex(face_param.idx[0]);
-                const auto& v1 = ctxt.GetVertex(face_param.idx[1]);
-                const auto& v2 = ctxt.GetVertex(face_param.idx[2]);
+                const auto& v0 = ctxt.GetVertex(triangle_param.idx[0]);
+                const auto& v1 = ctxt.GetVertex(triangle_param.idx[1]);
+                const auto& v2 = ctxt.GetVertex(triangle_param.idx[2]);
 
                 if (v0.uv.z == float(1)
                     || v1.uv.z == float(1)
                     || v2.uv.z == float(1)
-                    || needComputeNormalOntime)
+                    || need_compute_normal_on_the_fly)
                 {
-                    face_param.needNormal = 1;
+                    triangle_param.needNormal = 1;
                 }
 
-                face_param.mtrlid = dst_shape->GetMaterial()->id();
-                face_param.mesh_id = dst_shape->get_mesh_id();
+                // Triangle should belong the triangle group which has the same material(=shape).
+                // So, apply the same material index.
+                triangle_param.mtrlid = aten_shape->GetMaterial()->id();
+                triangle_param.mesh_id = aten_shape->get_mesh_id();
 
-                auto f = ctxt.CreateTriangle(face_param);
+                auto f = ctxt.CreateTriangle(triangle_param);
 
-                dst_shape->AddFace(f);
+                aten_shape->AddFace(f);
             }
 
             // Register the shape to the object.
             {
-                const auto& mtrl = dst_shape->GetMaterial();
+                const auto& mtrl = aten_shape->GetMaterial();
 
-                if (willSeparate) {
-                    // Split the object for each shape.
-                    obj->appendShape(dst_shape);
-                    obj->setBoundingBox(aten::aabb(pmin, pmax));
+                if (will_register_shape_as_separate_obj) {
+                    // Register the each shape as the separated different obj.
+                    create_obj_functor(obj, shape, ctxt);
+
+                    obj->appendShape(aten_shape);
+                    obj->setBoundingBox(aten::aabb(shape_bbox_min, shape_bbox_max));
                     objs.push_back(obj);
 
                     if (p + 1 < shapes.size()) {
@@ -408,20 +418,22 @@ namespace aten
                 else if (mtrl->param().type == aten::MaterialType::Emissive) {
                     // Export the object which has an emissive material as the emissive object.
                     auto emitobj(aten::TransformableFactory::createObject(ctxt));
-                    emitobj->appendShape(dst_shape);
-                    emitobj->setBoundingBox(aten::aabb(pmin, pmax));
+                    emitobj->setName(shape.name);
+                    emitobj->appendShape(aten_shape);
+                    emitobj->setBoundingBox(aten::aabb(shape_bbox_min, shape_bbox_max));
                     objs.push_back(std::move(emitobj));
                 }
                 else {
-                    obj->appendShape(dst_shape);
+                    create_obj_functor(obj, shape, ctxt);
+                    obj->appendShape(aten_shape);
                 }
             }
         }
 
-        if (!willSeparate) {
-            AT_ASSERT(obj);
-
-            obj->setBoundingBox(aten::aabb(shapemin, shapemax));
+        // Register all shapes as one obj.
+        // In this case, obj instance has to be created.
+        if (!will_register_shape_as_separate_obj && obj) {
+            obj->setBoundingBox(aten::aabb(shape_bbox_min, shape_bbox_max));
 
             // TODO
             // If we need to manage if the same tagged object exist, should we register it here?
@@ -433,7 +445,7 @@ namespace aten
 
         AT_PRINTF("(%s)\n", path.data());
         AT_PRINTF("    %d[vertices]\n", vtxNum);
-        AT_PRINTF("    %d[polygons]\n", numPolygons);
+        AT_PRINTF("    %d[polygons]\n", all_triangle_num);
 
         return objs;
     }

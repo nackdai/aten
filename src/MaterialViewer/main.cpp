@@ -534,7 +534,7 @@ private:
             mtrl_param,
             nullptr, nullptr, nullptr);
 
-        auto objs = aten::ObjLoader::load(asset_path, ctxt_,
+        auto objs = aten::ObjLoader::Load(asset_path, ctxt_,
             [&](std::string_view name, aten::context& ctxt,
                 aten::MaterialType type, const aten::vec3& mtrl_clr,
                 const std::string& albedo, const std::string& nml) -> auto {

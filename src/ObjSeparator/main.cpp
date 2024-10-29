@@ -67,7 +67,7 @@ int32_t main(int32_t argc, char* argv[])
 
     aten::context ctxt;
 
-    auto objs = aten::ObjLoader::load(
+    auto objs = aten::ObjLoader::Load(
         "../../asset/mansion/interior_bundled4_chairmove_1163769_606486_2.obj",
         ctxt);
 

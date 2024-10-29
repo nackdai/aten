@@ -318,7 +318,7 @@ private:
             aten::MaterialLoader::load(mtrlpath, ctxt_);
         }
 
-        objs_ = aten::ObjLoader::load(objpath, ctxt_, nullptr, true);
+        objs_ = aten::ObjLoader::Load(objpath, ctxt_, nullptr, true);
 
         obj_aabb_.empty();
         for (const auto& obj : objs_) {

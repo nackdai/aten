@@ -100,7 +100,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     CreateMaterial("Material.001", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.2, 0.2, 0.7));
 
     auto obj = aten::ObjLoader::LoadFirstObj("../../asset/suzanne/suzanne.obj", ctxt);
-    //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
+    //auto obj = aten::ObjLoader::Load("../../asset/teapot.obj");
 
     aten::mat4 mtx_L2W;
     mtx_L2W.asRotateByY(aten::Deg2Rad(-25));
@@ -273,7 +273,7 @@ void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene)
     CreateMaterialWithParamter("Material.001", ctxt, aten::MaterialType::GGX, mtrlParam);
 
     auto obj = aten::ObjLoader::LoadFirstObj("../../asset/suzanne/suzanne.obj", ctxt);
-    //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
+    //auto obj = aten::ObjLoader::Load("../../asset/teapot.obj");
 
     aten::mat4 mtx_L2W;
     mtx_L2W.asRotateByZ(aten::Deg2Rad(45.0f));
@@ -734,7 +734,7 @@ std::shared_ptr<aten::instance<aten::PolygonObject>> ObjCornellBoxScene::makeSce
 {
     auto emit = CreateMaterial("light", ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
 
-    auto objs = aten::ObjLoader::load("../../asset/cornellbox/orig.obj", ctxt,
+    auto objs = aten::ObjLoader::Load("../../asset/cornellbox/orig.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
@@ -805,7 +805,7 @@ void ObjCornellBoxScene::getCameraPosAndAt(
 
 void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto objs = aten::ObjLoader::load(
+    auto objs = aten::ObjLoader::Load(
         "../../asset/sponza/sponza.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
@@ -830,7 +830,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
         int32_t offsetTriIdx = ctxt.GetTriangleNum();
 
         objs.clear();
-        objs = aten::ObjLoader::load("../../asset/sponza/sponza_lod.obj", ctxt);
+        objs = aten::ObjLoader::Load("../../asset/sponza/sponza_lod.obj", ctxt);
         objs[0]->importInternalAccelTree("../../asset/sponza/sponza_lod.sbvh", ctxt, offsetTriIdx);
         sponza->setLod(objs[0]);
     }
@@ -863,7 +863,7 @@ void BunnyScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     CreateMaterialWithParamter("m1", ctxt, aten::MaterialType::Diffuse, mtrlParam);
 
-    auto objs = aten::ObjLoader::load("../../asset/teapot/teapot.obj", ctxt);
+    auto objs = aten::ObjLoader::Load("../../asset/teapot/teapot.obj", ctxt);
     auto bunny = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[0], aten::mat4::Identity);
     scene->add(bunny);
 }
@@ -924,7 +924,7 @@ aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<a
         CreateMaterial("leftWall", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.504000f, 0.052000f, 0.040000f));
         CreateMaterial("rightWall", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.112000f, 0.360000f, 0.072800f));
 
-        auto objs = aten::ObjLoader::load("../../asset/cornellbox/box.obj", ctxt, nullptr, false);
+        auto objs = aten::ObjLoader::Load("../../asset/cornellbox/box.obj", ctxt, nullptr, false);
 
         auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
             ctxt,
@@ -990,7 +990,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
     auto tall = CreateMaterial("tallBox", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.0000f, 0.000f, 1.0000f));
     tall->param().baseColor.a = 0.25f;
 
-    auto objs = aten::ObjLoader::load("../../asset/cornellbox/orig.obj", ctxt, nullptr, true, true);
+    auto objs = aten::ObjLoader::Load("../../asset/cornellbox/orig.obj", ctxt, nullptr, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
         ctxt,
@@ -1023,7 +1023,7 @@ void AlphaBlendedObjCornellBoxScene::getCameraPosAndAt(
 
 void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto objs = aten::ObjLoader::load(
+    auto objs = aten::ObjLoader::Load(
         "../../asset/crytek_sponza/sponza.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
@@ -1141,7 +1141,7 @@ void CornellBoxSmokeScene::makeScene(
 {
     auto emit = CreateMaterial("light", ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
 
-    auto objs = aten::ObjLoader::load("../../asset/cornellbox/box_smoke.obj", ctxt,
+    auto objs = aten::ObjLoader::Load("../../asset/cornellbox/box_smoke.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
@@ -1201,7 +1201,7 @@ void CornellBoxHomogeneousMediumScene::makeScene(
 {
     auto emit = CreateMaterial("light", ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
 
-    auto objs = aten::ObjLoader::load("../../asset/cornellbox/orig.obj", ctxt,
+    auto objs = aten::ObjLoader::Load("../../asset/cornellbox/orig.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
@@ -1273,7 +1273,7 @@ void HomogeneousMediumRefractionBunnyScene::makeScene(
 {
     auto emit = CreateMaterial("light", ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
 
-    auto objs = aten::ObjLoader::load("../../asset/cornellbox/bunny_in_box.obj", ctxt,
+    auto objs = aten::ObjLoader::Load("../../asset/cornellbox/bunny_in_box.obj", ctxt,
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {

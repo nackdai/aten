@@ -85,7 +85,7 @@ int32_t main(int32_t argc, char* argv[])
 
     aten::context ctxt;
 
-    auto objs = aten::ObjLoader::load(args->input, ctxt);
+    auto objs = aten::ObjLoader::Load(args->input, ctxt);
 
     if (objs.empty()) {
         // TODO
@@ -93,7 +93,7 @@ int32_t main(int32_t argc, char* argv[])
         return 1;
     }
 
-    auto combine_objs = aten::ObjLoader::load(args->combine, ctxt);
+    auto combine_objs = aten::ObjLoader::Load(args->combine, ctxt);
 
     if (combine_objs.empty()) {
         // TODO

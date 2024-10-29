@@ -28,12 +28,8 @@ namespace aten {
             Values& values);
 
     private:
-#ifdef USE_JSON
-        static void onLoad(const std::string& strJson);
-#else
         static void onLoad(
             const void* xmlRoot,
             context& ctxt);
-#endif
     };
 }

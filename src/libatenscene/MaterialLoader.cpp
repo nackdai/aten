@@ -1,8 +1,4 @@
-#ifdef USE_JSON
-#include "picojson.h"
-#else
 #include "tinyxml2.h"
-#endif
 
 #include "MaterialLoader.h"
 #include "ImageLoader.h"
@@ -16,91 +12,6 @@ namespace aten {
         g_base = removeTailPathSeparator(base);
     }
 
-#ifdef USE_JSON
-    // NOTE
-    // Format
-    // {
-    //        <tag> : {
-    //            <param_name> : <value>
-    //        }
-    // }
-    // param_name
-    //  - type : material type [string]. If type is not specified, default type is "Diffuse".
-    //  - color : base color, emissive color, albedo color etc... [float3]
-    //    - albedoMap : albedo texture [string]
-    //  - normalMap : normal texture [string]
-    //  - roughnessmap : roughness texture [string]
-    //  - ior : index of reflaction [float]
-    //  - shininess [float]
-    //  - roughness [float]
-    //  - metallic [float]
-    //  - subsurface [float]
-    //  - specular [float]
-    //  - roughness [float]
-    //  - specularTint [float]
-    //  - anisotropic [float]
-    //  - sheen [float]
-    //  - sheenTint [float]
-    //  - clearcoat [float]
-    //  - clearcoatGloss [float]
-
-    template <class TYPE>
-    aten::PolymorphicValue getValue(picojson::value& v)
-    {
-        AT_ASSERT(false);
-        PolymorphicValue ret;
-        return ret;
-    }
-
-    template <>
-    aten::PolymorphicValue getValue<vec3>(picojson::value& val)
-    {
-        auto a = val.get<picojson::array>();
-
-        int32_t num = std::min<int32_t>(3, (int32_t)a.size());
-
-        aten::PolymorphicValue v;
-
-        for (int32_t i = 0; i < num; i++) {
-            v.val.v[i] = a[i].get<double>();
-        }
-
-        return v;
-    }
-
-    template <>
-    aten::PolymorphicValue getValue<float>(picojson::value& val)
-    {
-        aten::PolymorphicValue v;
-        v.val.f = val.get<double>();
-        return v;
-    }
-
-    template <>
-    aten::PolymorphicValue getValue<texture*>(picojson::value& val)
-    {
-        auto s = val.get<std::string>();
-
-        std::string pathname;
-        std::string extname;
-        std::string filename;
-
-        getStringsFromPath(
-            s,
-            pathname,
-            extname,
-            filename);
-
-        auto tex = ImageLoader::load(s);
-
-        aten::PolymorphicValue v;
-        v.val.p = tex;
-
-        return v;
-    }
-
-    using GetValueFromFile = std::function<aten::PolymorphicValue(picojson::value&)>;
-#else
     template <class TYPE>
     aten::PolymorphicValue getValue(const tinyxml2::XMLElement* e, aten::context& ctxt)
     {
@@ -161,7 +72,6 @@ namespace aten {
     }
 
     using GetValueFromFile = std::function<aten::PolymorphicValue(const tinyxml2::XMLElement*, aten::context&)>;
-#endif
 
     static std::array<GetValueFromFile, static_cast<size_t>(MtrlParamType::Num)> g_funcGetValueFromFile = {
         getValue<vec3>,
@@ -188,107 +98,6 @@ namespace aten {
         std::pair<std::string, MtrlParamType>("roughnessMap", MtrlParamType::Texture),
     };
 
-#ifdef USE_JSON
-    void MaterialLoader::load(const std::string& path)
-    {
-        std::string fullpath = path;
-        if (!g_base.empty()) {
-            fullpath = g_base + "/" + fullpath;
-        }
-
-        std::vector<char> filechars;
-
-        // Read json text.
-        FILE* fp = fopen(fullpath.c_str(), "rt");
-        {
-            fseek(fp, 0, SEEK_END);
-            auto size = ftell(fp);
-            fseek(fp, 0, SEEK_SET);
-            filechars.resize(size + 1);
-            fread(&filechars[0], sizeof(char), size, fp);
-            fclose(fp);
-        }
-
-        std::string strJson(&filechars[0]);
-
-        onLoad(strJson);
-    }
-
-    void MaterialLoader::onLoad(const std::string& strJson)
-    {
-        // Parse json.
-        picojson::value json;
-        auto err = picojson::parse(json, strJson);
-
-        if (err.empty()) {
-            auto& objs = json.get<picojson::object>();
-
-            for (auto it = objs.begin(); it != objs.end(); it++) {
-                auto mtrlName = it->first;
-
-                // Check if there is same name material.
-                auto mtrl = ctxt.FindMaterialByName(mtrlName);
-
-                if (mtrl) {
-                    AT_PRINTF("There is same tag material. [%s]\n", mtrlName.c_str());
-                }
-                else {
-                    auto& params = objs[mtrlName].get<picojson::object>();
-
-                    // Search material type.
-                    std::string mtrlType;
-                    Values mtrlValues;
-
-                    // Traverse parameters.
-                    for (auto it = params.begin(); it != params.end(); it++) {
-                        auto paramName = it->first;
-                        auto& jsonVal = it->second;
-
-                        if (paramName == "type") {
-                            mtrlType = jsonVal.get<std::string>();
-                        }
-                        else {
-                            // Get parameter type by parameter name.
-                            auto itParamType = g_paramtypes.find(paramName);
-
-                            if (itParamType != g_paramtypes.end()) {
-                                auto paramType = itParamType->second;
-
-                                auto funcGetValue = g_funcGetValueFromFile[paramType];
-
-                                // Get value from json.
-                                auto value = funcGetValue(jsonVal);
-
-                                mtrlValues.add(paramName, value);
-                            }
-                            else {
-                                AT_ASSERT(false);
-                                AT_PRINTF("[%s] is not suppoorted in [%s]\n", paramName.c_str(), mtrlName.c_str());
-                            }
-                        }
-                    }
-
-                    if (mtrlType.empty()) {
-                        AT_PRINTF("Material type is not specified in [%s]\n", mtrlName.c_str());
-                        mtrlType = "Diffuse";
-                    }
-
-                    // Create material;
-                    mtrl = create(mtrlName, mtrlType, mtrlValues);
-
-                    if (!mtrl) {
-                        AT_ASSERT(false);
-                        AT_PRINTF("Failed to create material : type[%s] name[%s]\n", mtrlType.c_str(), mtrlName.c_str());
-                    }
-                }
-            }
-        }
-        else {
-            AT_ASSERT(false);
-            AT_PRINTF("Json parse err [%s]\n", err.c_str());
-        }
-    }
-#else
     // NOTE
     // Format
     // <root>
@@ -410,7 +219,6 @@ namespace aten {
             }
         }
     }
-#endif
 
     std::shared_ptr<material> MaterialLoader::create(
         std::string_view name,

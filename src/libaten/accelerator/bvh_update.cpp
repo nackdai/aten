@@ -8,7 +8,7 @@
 
 // NOTE
 // Fast, Effective BVH Updates for Animated Scenes.
-// http://www.cs.utah.edu/~thiago/papers/rotations.pdf
+// https://hwrt.cs.utah.edu/papers/hwrt_rotations.pdf
 
 namespace aten
 {

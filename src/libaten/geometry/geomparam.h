@@ -45,6 +45,8 @@ namespace aten
         /**
          * @brief Index of matrix to apply to object.
          *
+         * The matrix is converting from world to local.
+         * mtx_id + 1 indicates the inverse matrix to convert from local to world.
          * This is used for only Instance type.
          */
         int32_t mtx_id{ -1 };
@@ -76,7 +78,7 @@ namespace aten
 
         union {
             aten::vec4 v1;
-            struct{
+            struct {
                 int32_t needNormal; ///< Flag to describe if normal needs to be computed on the fly.
                 int32_t mtrlid;     ///< Material id.
                 int32_t mesh_id;    ///< Belonged mesh id. (Mesh = Triangle group to have same material).

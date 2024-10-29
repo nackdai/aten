@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="picojson">
-      <UniqueIdentifier>{0ff00e85-4cb5-4040-895e-35519496c388}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include">
       <UniqueIdentifier>{5406530b-8b5b-438e-9acf-2a4d5cbe79a1}</UniqueIdentifier>
     </Filter>
@@ -39,9 +36,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libatenscene\atenscene.h" />
-    <ClInclude Include="..\3rdparty\picojson\picojson.h">
-      <Filter>picojson</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libatenscene\ImageLoader.h">
       <Filter>include</Filter>
     </ClInclude>

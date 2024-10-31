@@ -94,7 +94,7 @@ public:
         // TODO
         aten::MaterialParameter param;
         param.attrib = aten::MaterialAttribute{ false, false, false, false };
-        param.type = aten::MaterialType::MaterialTypeMax;
+        param.type = aten::MaterialType::Volume;
         param.baseColor = aten::vec3(1, 0, 0);
         auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
             "medium", param, nullptr, nullptr, nullptr);

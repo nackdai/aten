@@ -50,10 +50,10 @@ namespace aten
         Disney,
         Toon,
 
-        // TODO:
-        // Currently, if MaterialTypeMax is specified, it is treated as non subsurface volumetric material.
-        // We may need to introduce the specific enum value.
         MaterialTypeMax,
+
+        // From here, the followings are specialized materials.
+        Volume,
     };
 
     struct StandardMaterialParameter {

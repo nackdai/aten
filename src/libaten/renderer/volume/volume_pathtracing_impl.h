@@ -60,7 +60,7 @@ namespace AT_NAME
 
     inline AT_DEVICE_API bool IsSubsurface(const aten::MaterialParameter& mtrl)
     {
-        return mtrl.type != aten::MaterialType::MaterialTypeMax && mtrl.is_medium;
+        return mtrl.type != aten::MaterialType::Volume && mtrl.is_medium;
     }
 
     inline AT_DEVICE_API nanovdb::FloatGrid* GetGridFromContext(

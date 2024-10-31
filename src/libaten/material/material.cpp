@@ -203,8 +203,7 @@ namespace AT_NAME
     {
         aten::MaterialParameter mtrl;
 
-        // TODO
-        mtrl.type = aten::MaterialType::MaterialTypeMax;
+        mtrl.type = aten::MaterialType::Volume;
 
         mtrl.is_medium = true;
         mtrl.medium.phase_function_g = g;

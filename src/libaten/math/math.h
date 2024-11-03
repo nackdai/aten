@@ -59,6 +59,19 @@ namespace aten {
         return std::sin(f);
     }
 
+    inline AT_HOST_DEVICE_API float sign(float f)
+    {
+        if (f == 0.0F) {
+            return 0.0F;
+        }
+        else if (f > 0.0F) {
+            return 1.0F;
+        }
+        else {
+            return -1.0F;
+        }
+    }
+
     inline AT_HOST_DEVICE_API float atan2(float y, float x)
     {
         return std::atan2(y, x);

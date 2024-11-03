@@ -172,9 +172,9 @@ namespace AT_NAME
          * @brief Compute BRDF.
          * @param[in] roughness Roughness parameter.
          * @param[in] ior Refraction index.
+         * @param[in] n Macrosurface normal.
          * @param[in] wi Incident vector.
          * @param[in] wo Output vector.
-         * @param[in] n Macrosurface normal.
          * @return BRDF.
          */
         static AT_DEVICE_API aten::vec3 ComputeBRDF(
@@ -183,5 +183,23 @@ namespace AT_NAME
             const aten::vec3& n,
             const aten::vec3& wi,
             const aten::vec3& wo);
+
+        /**
+         * @brief Compute BRDF with specified half vector.
+         * @param[in] roughness Roughness parameter.
+         * @param[in] ior Refraction index.
+         * @param[in] N Macrosurface normal.
+         * @param[in] V Vector to view.
+         * @param[in] L Vector to light.
+         * @param[in] H Half vector.
+         * @return BRDF.
+         */
+        static AT_DEVICE_API aten::vec3 ComputeBRDFWithHalfVector(
+            const float roughness,
+            const float ior,
+            const aten::vec3& N,
+            const aten::vec3& V,
+            const aten::vec3& L,
+            const aten::vec3& H);
     };
 }

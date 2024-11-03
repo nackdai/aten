@@ -232,6 +232,21 @@ namespace AT_NAME
         // Then, we can compute micro surface normal as the half vector between incident and output vector.
         const auto H = normalize(L + V);
 
+        const auto brdf = ComputeBRDFWithHalfVector(
+            roughness, ior,
+            N, V, L, H);
+
+        return brdf;
+    }
+
+    AT_DEVICE_API aten::vec3 MicrofacetGGX::ComputeBRDFWithHalfVector(
+        const float roughness,
+        const float ior,
+        const aten::vec3& N,
+        const aten::vec3& V,
+        const aten::vec3& L,
+        const aten::vec3& H)
+    {
         auto NL = aten::abs(dot(N, L));
         auto NV = aten::abs(dot(N, V));
 

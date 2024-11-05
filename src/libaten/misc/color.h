@@ -100,11 +100,13 @@ namespace AT_NAME {
         }
 
         // RGB -> sRGB
-        static aten::vec3 RGBtoXYZ(const aten::vec3& rgb)
+        static AT_DEVICE_API aten::vec3 RGBtoXYZ(const aten::vec3& rgb)
         {
-            static const aten::vec3 _RGB2X = aten::vec3(float(0.412391), float(0.357584), float(0.180481));
-            static const aten::vec3 _RGB2Y = aten::vec3(float(0.212639), float(0.715169), float(0.072192));
-            static const aten::vec3 _RGB2Z = aten::vec3(float(0.019331), float(0.119195), float(0.950532));
+            // NOTE:
+            // CUDA compiler doesn't allow dynamic static initialization during compile.
+            const aten::vec3 _RGB2X = aten::vec3(float(0.412391), float(0.357584), float(0.180481));
+            const aten::vec3 _RGB2Y = aten::vec3(float(0.212639), float(0.715169), float(0.072192));
+            const aten::vec3 _RGB2Z = aten::vec3(float(0.019331), float(0.119195), float(0.950532));
 
             auto x = dot(_RGB2X, rgb);
             auto y = dot(_RGB2Y, rgb);

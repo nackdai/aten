@@ -292,8 +292,13 @@
     <ClInclude Include="..\src\libidaten\volume\grid_loader_device.h">
       <Filter>volume</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\material\lambert.h" />
     <ClInclude Include="..\src\libaten\material\diffuse.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\toon.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\toon_specular.h">
       <Filter>aten\material</Filter>
     </ClInclude>
   </ItemGroup>
@@ -529,6 +534,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\volume\grid_loader_device.cu">
       <Filter>volume</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\toon.cpp">
+      <Filter>aten\material</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

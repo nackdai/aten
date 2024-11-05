@@ -9,6 +9,7 @@
 #include "light/light_impl.h"
 #include "math/ray.h"
 #include "material/material.h"
+#include "material/material_impl.h"
 #include "material/toon.h"
 #include "misc/tuple.h"
 #include "misc/type_traits.h"

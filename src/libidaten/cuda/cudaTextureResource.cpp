@@ -1,4 +1,5 @@
 #include <memory.h>
+#include <array>
 
 #include "cuda/cudaTextureResource.h"
 
@@ -116,9 +117,33 @@ namespace idaten
 
     /////////////////////////////////////////////////////
 
+    cudaTextureFilterMode CudaTexture::ConvertFilterMode(aten::TextureFilterMode filter)
+    {
+        constexpr auto size = static_cast<size_t>(aten::TextureFilterMode::Max);
+        constexpr std::array<cudaTextureFilterMode, size> filter_conversion_map{
+            cudaTextureFilterMode::cudaFilterModePoint,
+            cudaTextureFilterMode::cudaFilterModeLinear,
+        };
+        return filter_conversion_map[static_cast<int>(filter)];
+    }
+
+    cudaTextureAddressMode CudaTexture::ConvertAddressMode(aten::TextureAddressMode address)
+    {
+        constexpr auto size = static_cast<size_t>(aten::TextureAddressMode::Max);
+        constexpr std::array<cudaTextureAddressMode, size> address_conversion_map{
+            cudaTextureAddressMode::cudaAddressModeWrap,
+            cudaTextureAddressMode::cudaAddressModeClamp,
+            cudaTextureAddressMode::cudaAddressModeMirror,
+            cudaTextureAddressMode::cudaAddressModeBorder,
+        };
+        return address_conversion_map[static_cast<int>(address)];
+    }
+
     void CudaTexture::init(
         const aten::vec4* p,
-        int32_t width, int32_t height)
+        int32_t width, int32_t height,
+        aten::TextureFilterMode filter/*= aten::TextureFilterMode::Linear*/,
+        aten::TextureAddressMode address/*= aten::TextureAddressMode::Wrap*/)
     {
         // NOTE
         // http://www.slis.tsukuba.ac.jp/~fujisawa.makoto.fu/cgi-bin/wiki/index.php?%A5%EA%A5%CB%A5%A2%A5%E1%A5%E2%A5%EA%A4%C8CUDA%C7%DB%CE%F3
@@ -173,6 +198,9 @@ namespace idaten
         m_resDesc.resType = cudaResourceTypeArray;
         m_resDesc.res.array.array = m_array;
 #endif
+
+        filter_mode_ = ConvertFilterMode(filter);
+        address_mode_ = ConvertAddressMode(address);
     }
 
     cudaTextureObject_t CudaTexture::bind()
@@ -182,18 +210,12 @@ namespace idaten
                 cudaTextureDesc tex_desc = {};
 
                 tex_desc.normalizedCoords = 1;
-                tex_desc.filterMode = cudaFilterModeLinear;
+                tex_desc.filterMode = filter_mode_;
                 tex_desc.mipmapFilterMode = cudaFilterModeLinear;
 
-#if 0
-                tex_desc.addressMode[0] = cudaAddressModeClamp;
-                tex_desc.addressMode[1] = cudaAddressModeClamp;
-                tex_desc.addressMode[2] = cudaAddressModeClamp;
-#else
-                tex_desc.addressMode[0] = cudaAddressModeWrap;
-                tex_desc.addressMode[1] = cudaAddressModeWrap;
+                tex_desc.addressMode[0] = address_mode_;
+                tex_desc.addressMode[1] = address_mode_;
                 tex_desc.addressMode[2] = cudaAddressModeWrap;
-#endif
 
                 tex_desc.maxMipmapLevelClamp = float(m_mipmapLevel - 1);
 
@@ -208,9 +230,9 @@ namespace idaten
                 // Make texture description:
                 cudaTextureDesc tex_desc = {};
                 tex_desc.readMode = cudaReadModeElementType;
-                tex_desc.filterMode = cudaFilterModeLinear;
-                tex_desc.addressMode[0] = cudaAddressModeWrap;
-                tex_desc.addressMode[1] = cudaAddressModeWrap;
+                tex_desc.filterMode = filter_mode_;
+                tex_desc.addressMode[0] = address_mode_;
+                tex_desc.addressMode[1] = address_mode_;
                 tex_desc.normalizedCoords = 1;
 
                 checkCudaErrors(cudaCreateTextureObject(&m_tex, &m_resDesc, &tex_desc, nullptr));
@@ -240,7 +262,9 @@ namespace idaten
     void CudaTexture::initAsMipmap(
         const aten::vec4* p,
         int32_t width, int32_t height,
-        int32_t level)
+        int32_t level,
+        aten::TextureFilterMode filter/*= aten::TextureFilterMode::Linear*/,
+        aten::TextureAddressMode address/*= aten::TextureAddressMode::Wrap*/)
     {
         level = std::min(level, getMipMapLevels(width, height));
 
@@ -280,5 +304,8 @@ namespace idaten
 
         m_isMipmap = true;
         m_mipmapLevel = level;
+
+        filter_mode_ = ConvertFilterMode(filter);
+        address_mode_ = ConvertAddressMode(address);
     }
 }

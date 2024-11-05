@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "math/vec4.h"
+#include "texture/texture.h"
 #include "cuda/cudadefs.h"
 #include "cuda/cudautil.h"
 
@@ -66,20 +67,31 @@ namespace idaten
     public:
         void init(
             const aten::vec4* p,
-            int32_t width, int32_t height);
+            int32_t width, int32_t height,
+            aten::TextureFilterMode filter = aten::TextureFilterMode::Linear,
+            aten::TextureAddressMode address = aten::TextureAddressMode::Wrap);
 
         void initAsMipmap(
             const aten::vec4* p,
             int32_t width, int32_t height,
-            int32_t level);
+            int32_t level,
+            aten::TextureFilterMode filter = aten::TextureFilterMode::Linear,
+            aten::TextureAddressMode address = aten::TextureAddressMode::Wrap);
 
         virtual cudaTextureObject_t bind() override;
 
     private:
+        static inline cudaTextureFilterMode ConvertFilterMode(aten::TextureFilterMode filter);
+
+        static inline cudaTextureAddressMode ConvertAddressMode(aten::TextureAddressMode address);
+
         bool m_isMipmap{ false };
         int32_t m_mipmapLevel{ 0 };
 
         cudaArray_t m_array{ nullptr };
         cudaChannelFormatDesc m_channelFmtDesc;
+
+        cudaTextureFilterMode filter_mode_{ cudaTextureFilterMode::cudaFilterModePoint };
+        cudaTextureAddressMode address_mode_{ cudaTextureAddressMode::cudaAddressModeWrap };
     };
 }

@@ -12,6 +12,20 @@
 
 namespace aten
 {
+    enum class TextureFilterMode {
+        Point,
+        Linear,
+        Max,
+    };
+
+    enum class TextureAddressMode {
+        Wrap,   //< Wrapping address mode.
+        Clamp,  //< Clamp to edge address mode.
+        Mirror, //< Mirror address mode.
+        Border, //< Border address mode.
+        Max,
+    };
+
     class texture {
         friend class context;
 
@@ -135,6 +149,26 @@ namespace aten
 
         bool exportAsPNG(const std::string& filename);
 
+        void SetFilterMode(TextureFilterMode filter) noexcept
+        {
+            filter_mode_ = filter;
+        }
+
+        TextureFilterMode GetFilterMode() const noexcept
+        {
+            return filter_mode_;
+        }
+
+        void SetAddressMode(TextureAddressMode address) noexcept
+        {
+            address_mode_ = address;
+        }
+
+        TextureAddressMode GetAddressMode() const noexcept
+        {
+            return address_mode_;
+        }
+
     private:
         template <class T>
         auto updateIndex(T id)
@@ -168,6 +202,9 @@ namespace aten
         std::vector<vec4> m_colors;
 
         uint32_t m_gltex{ 0 };
+
+        TextureFilterMode filter_mode_{ TextureFilterMode::Point };
+        TextureAddressMode address_mode_{ TextureAddressMode::Clamp };
 
         std::string m_name;
     };

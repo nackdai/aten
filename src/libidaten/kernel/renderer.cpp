@@ -102,7 +102,11 @@ namespace idaten {
                     m_texRsc[i].init(texs[i].ptr, texs[i].width, texs[i].height);
                 }
 #else
-                ctxt_host_->texRsc[i].initAsMipmap(t->colors(), t->width(), t->height(), 100);
+                ctxt_host_->texRsc[i].initAsMipmap(
+                    t->colors(),
+                    t->width(), t->height(),
+                    100,
+                    t->GetFilterMode(), t->GetAddressMode());
 #endif
             }
             ctxt_host_->tex.resize(tex_num);

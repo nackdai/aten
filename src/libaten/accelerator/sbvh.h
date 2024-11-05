@@ -149,7 +149,6 @@ namespace aten
                 const auto& root = m_threadedNodes[0][0];
                 return aten::aabb(root.boxmin, root.boxmax);
             }
-            AT_ASSERT(false);
             return std::nullopt;
         }
 

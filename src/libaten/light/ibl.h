@@ -6,6 +6,7 @@
 #include "misc/color.h"
 #include "material/sample_texture.h"
 #include "renderer/background.h"
+#include "scene/host_scene_context.h"
 
 namespace aten {
     class Values;

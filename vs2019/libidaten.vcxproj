@@ -44,6 +44,8 @@
     <ClInclude Include="..\src\libaten\material\retroreflective.h" />
     <ClInclude Include="..\src\libaten\material\sample_texture.h" />
     <ClInclude Include="..\src\libaten\material\specular.h" />
+    <ClInclude Include="..\src\libaten\material\toon.h" />
+    <ClInclude Include="..\src\libaten\material\toon_specular.h" />
     <ClInclude Include="..\src\libaten\material\velvet.h" />
     <ClInclude Include="..\src\libaten\math\aabb.h" />
     <ClInclude Include="..\src\libaten\math\intersect.h" />
@@ -117,6 +119,11 @@
     <ClInclude Include="..\src\libidaten\volume\volume_rendering.h" />
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="..\src\libaten\material\toon.cpp">
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
+    </CudaCompile>
     <ClCompile Include="..\src\libidaten\kernel\device_scene_context.cpp" />
     <ClCompile Include="..\src\libidaten\volume\volume_rendering.cpp" />
     <CudaCompile Include="..\src\libaten\material\FlakesNormal.cpp">

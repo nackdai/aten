@@ -42,6 +42,7 @@ set_source_files_properties(
   ../libaten/material/refraction.cpp
   ../libaten/material/retroreflective.cpp
   ../libaten/material/specular.cpp
+  ../libaten/material/toon.cpp
   ../libaten/material/velvet.cpp
   ../libaten/volume/grid.cpp
   ../libaten/volume/medium.cpp
@@ -93,6 +94,9 @@ cuda_add_library(
   ../libaten/material/sample_texture.h
   ../libaten/material/specular.cpp
   ../libaten/material/specular.h
+  ../libaten/material/toon.cpp
+  ../libaten/material/toon.h
+  ../libaten/material/toon_specular.h
   ../libaten/material/velvet.cpp
   ../libaten/material/velvet.h
   ../libaten/math/aabb.h
@@ -113,6 +117,7 @@ cuda_add_library(
   ../libaten/renderer/npr/feature_line.h
   ../libaten/renderer/npr/npr_impl.h
   ../libaten/renderer/pathtracing/pathtracing_impl.h
+  ../libaten/renderer/pathtracing/pathtracing_nee_impl.h
   ../libaten/renderer/pathtracing/pt_params.h
   ../libaten/renderer/restir/restir_impl.h
   ../libaten/renderer/restir/restir_types.h

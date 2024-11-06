@@ -131,6 +131,9 @@ add_library(
   material/sample_texture.h
   material/specular.cpp
   material/specular.h
+  material/toon.cpp
+  material/toon.h
+  material/toon_specular.h
   material/velvet.cpp
   material/velvet.h
   math/aabb.h
@@ -179,6 +182,7 @@ add_library(
   renderer/pathtracing/pathtracing.cpp
   renderer/pathtracing/pathtracing.h
   renderer/pathtracing/pathtracing_impl.h
+  renderer/pathtracing/pathtracing_nee_impl.h
   renderer/pathtracing/pt_params.h
   renderer/renderer.h
   renderer/restir/restir.cpp

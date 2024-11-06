@@ -5,7 +5,6 @@ project(${PROJECT_NAME})
 # Add library to build.
 add_library(
   ${PROJECT_NAME} STATIC
-  ../../3rdparty/picojson/picojson.h
   ../../3rdparty/tinyxml2/tinyxml2.cpp
   ../../3rdparty/tinyxml2/tinyxml2.h
   AssimpImporter.cpp

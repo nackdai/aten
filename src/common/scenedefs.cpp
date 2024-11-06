@@ -924,7 +924,7 @@ aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<a
         CreateMaterial("leftWall", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.504000f, 0.052000f, 0.040000f));
         CreateMaterial("rightWall", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.112000f, 0.360000f, 0.072800f));
 
-        auto objs = aten::ObjLoader::Load("../../asset/cornellbox/box.obj", ctxt, nullptr, false);
+        auto objs = aten::ObjLoader::Load("../../asset/cornellbox/box.obj", ctxt, nullptr, nullptr, false);
 
         auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
             ctxt,

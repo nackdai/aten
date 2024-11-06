@@ -1,24 +1,22 @@
 #include "material/toon.h"
 
 #include "light/light.h"
+#include "light/light_impl.h"
 #include "material/diffuse.h"
 #include "material/ggx.h"
+#include "material/material.h"
 #include "material/sample_texture.h"
 #include "material/toon_specular.h"
 #include "misc/color.h"
-#include "renderer/pathtracing/pathtracing_impl.h"
+#include "renderer/pathtracing/pathtracing_nee_impl.h"
 
 #ifdef __CUDACC__
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "kernel/device_scene_context.cuh"
-#include "kernel/accelerator.cuh"
 #else
 #include "scene/host_scene_context.h"
 #endif
-
-//#pragma optimize( "", off)
-
 
 namespace AT_NAME
 {
@@ -180,8 +178,6 @@ namespace AT_NAME
             // Assume index of refraction of the medie on the incident side is vacuum.
             const auto ni = 1.0F;
             const auto nt = param.standard.ior;
-
-            const auto a = param.standard.shininess;
 
             auto NdotH = aten::abs(dot(N, H));
             auto VdotH = aten::abs(dot(V, H));

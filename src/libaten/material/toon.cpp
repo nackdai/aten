@@ -24,10 +24,16 @@ namespace AT_NAME
 {
     bool Toon::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, shininess, 0.0F, 100.0F);
-        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, translation_dt, -1.0F, 1.0F);
+        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0.01F, 1.0F);
+        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, 0.01F, 10.0F);
 
-        return b0;
+        auto t1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, translation_dt, -1.0F, 1.0F);
+        auto t2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, translation_db, -1.0F, 1.0F);
+        auto t3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, scale_t, 0.0F, 1.0F);
+        auto t4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, split_t, 0.0F, 1.0F);
+        auto t5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, split_b, 0.0F, 1.0F);
+
+        return b0 || b1 || t1 || t2 || t3 || t4 || t5;
     }
 
     AT_DEVICE_API aten::vec3 Toon::bsdf(

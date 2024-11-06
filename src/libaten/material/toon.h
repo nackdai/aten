@@ -11,11 +11,12 @@ namespace AT_NAME
 
     private:
         Toon(
-            const aten::vec3& albedo = aten::vec3(0.5),
+            const aten::MaterialParameter& param,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Toon, aten::MaterialAttributeDiffuse, albedo, 0)
+            : material(aten::MaterialType::Toon, aten::MaterialAttributeDiffuse, param.baseColor, 0)
         {
+            m_param = param;
             setTextures(albedoMap, normalMap, nullptr);
         }
         ~Toon() = default;

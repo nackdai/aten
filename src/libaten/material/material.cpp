@@ -15,6 +15,7 @@
 #include "material/microfacet_refraction.h"
 #include "material/disney_brdf.h"
 #include "material/retroreflective.h"
+#include "material/toon.h"
 #include "material/car_paint.h"
 
 #include "volume/medium.h"
@@ -113,6 +114,9 @@ namespace AT_NAME
             break;
         case aten::MaterialType::Disney:
             mtrl = new AT_NAME::DisneyBRDF(param, albedoMap, normalMap, roughnessMap);
+            break;
+        case aten::MaterialType::Toon:
+            mtrl = new AT_NAME::Toon(param, albedoMap, normalMap);
             break;
         default:
             mtrl = new AT_NAME::material();

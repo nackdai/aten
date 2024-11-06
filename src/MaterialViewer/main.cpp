@@ -12,6 +12,9 @@
 #include "atenscene.h"
 #include "idaten.h"
 
+#pragma optimize( "", off)
+
+
 #define GPU_RENDERING
 //#define WHITE_FURNACE_TEST
 
@@ -129,7 +132,7 @@ public:
         scene_light_.point_light = std::make_shared<aten::PointLight>(
             aten::vec3(0.0, 0.0, 50.0),
             aten::vec3(1.0, 0.0, 0.0),
-            400.0f);
+            4000.0f);
 #endif
 
 #ifdef GPU_RENDERING
@@ -266,6 +269,7 @@ public:
                 "Retroreflective",
                 "CarPaint",
                 "Disney",
+                "Toon",
             };
             if (mtrl) {
                 int32_t mtrlType = static_cast<int32_t>(mtrl->param().type);
@@ -275,6 +279,11 @@ public:
 
                     ctxt_.DeleteAllMaterialsAndClearList();
                     mtrl = CreateMaterial(mtrl_param);
+
+                    // TODO
+                    auto& param = mtrl->param();
+                    param.standard.toon.target_light_idx = 0;
+                    param.standard.toon.remap_texture = 0;
 
                     needUpdateMtrl = true;
                 }
@@ -520,6 +529,9 @@ private:
         auto obj = aten::ObjLoader::LoadFirstObj(asset_path, ctxt_);
         auto poly_obj = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt_, obj, aten::mat4::Identity);
         scene->add(poly_obj);
+
+        // For toon ramp.
+        auto toon_ramp_tex = aten::ImageLoader::load("../../asset/toon/toon.png", ctxt_);
 
         // TODO
         //albedo_map_ = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");

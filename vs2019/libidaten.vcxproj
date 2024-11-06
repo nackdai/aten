@@ -62,6 +62,7 @@
     <ClInclude Include="..\src\libaten\renderer\npr\feature_line.h" />
     <ClInclude Include="..\src\libaten\renderer\npr\npr_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_impl.h" />
+    <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_nee_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pt_params.h" />
     <ClInclude Include="..\src\libaten\renderer\restir\restir_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\restir\restir_types.h" />

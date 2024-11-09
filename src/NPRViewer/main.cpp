@@ -7,12 +7,12 @@
 #include "atenscene.h"
 #include "idaten.h"
 
-#include "StylizedHighlightTest.h"
+#include "StylizedHighlight.h"
 
 
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
-constexpr char* TITLE = "StylizedHighlightTest";
+constexpr char* TITLE = "StylizedHighlight";
 
 class StylizedHighlightTestApp {
 public:
@@ -359,7 +359,7 @@ private:
 
     aten::RasterizeRenderer rasterizer_;
 
-    StylizedHighlightTest tester_;
+    StylizedHighlight tester_;
     float half_trans_t_{ 0.0F };
     float half_scale_{ 0.0F };
     float half_split_t_{ 0.0F };

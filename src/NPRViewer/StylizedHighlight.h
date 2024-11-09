@@ -4,10 +4,10 @@
 
 #include "aten.h"
 
-class StylizedHighlightTest {
+class StylizedHighlight {
 public:
-    StylizedHighlightTest() = default;
-    ~StylizedHighlightTest() = default;
+    StylizedHighlight() = default;
+    ~StylizedHighlight() = default;
 
     void Init(
         int32_t width, int32_t height,

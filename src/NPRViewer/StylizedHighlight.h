@@ -2,28 +2,29 @@
 
 #include <vector>
 
-#include "aten.h"
+#include "NPRModule.h"
 
-class StylizedHighlight {
+class StylizedHighlight : public NPRModule {
 public:
     StylizedHighlight() = default;
     ~StylizedHighlight() = default;
 
-    void Init(
+    void InitDebugVisual(
         int32_t width, int32_t height,
         std::string_view pathVS,
-        std::string_view pathFS);
+        std::string_view pathFS) override final;
 
-    void UpdateHalfVectors(
-        float translation,
-        float scale,
-        float split);
+    void PreRender(aten::shader& shader) override final;
 
-    void Draw(
+    void DrawDebugVisual(
         const aten::context& ctxt,
-        const aten::Camera& cam);
+        const aten::Camera& cam) override final;
+
+    void EditParameter() override final;
 
 private:
+    void UpdateHalfVectors();
+
     std::vector<aten::vec3> points_;
     std::vector<aten::vec3> normals_;
     std::vector<aten::vec3> tangents_;
@@ -34,4 +35,8 @@ private:
     aten::GeomIndexBuffer ib_;
 
     aten::shader shader_;
+
+    float half_trans_t_{ 0.0F };
+    float half_scale_{ 0.0F };
+    float half_split_t_{ 0.0F };
 };

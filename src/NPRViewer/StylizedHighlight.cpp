@@ -1,5 +1,7 @@
 #include <numeric>
 
+#include <imgui.h>
+
 #include "StylizedHighlight.h"
 #include "visualizer/atengl.h"
 
@@ -9,7 +11,7 @@ namespace _detail {
     };
 }
 
-void StylizedHighlight::Init(
+void StylizedHighlight::InitDebugVisual(
     int32_t width, int32_t height,
     std::string_view pathVS,
     std::string_view pathFS)
@@ -74,7 +76,7 @@ void StylizedHighlight::Init(
         _detail::attribs.size(),
         tangent_vtx.data());
 
-    UpdateHalfVectors(0.0F, 0.0F, 0.0F);
+    UpdateHalfVectors();
 
     // Index buffer.
     std::vector<uint32_t> indices;
@@ -83,10 +85,19 @@ void StylizedHighlight::Init(
     ib_.init(indices.size(), indices.data());
 }
 
-void StylizedHighlight::UpdateHalfVectors(
-    float translation,
-    float scale,
-    float split)
+void StylizedHighlight::PreRender(aten::shader& shader)
+{
+    auto h_translation_dt = shader.getHandle("translation_dt");
+    CALL_GL_API(::glUniform1f(h_translation_dt, half_trans_t_));
+
+    auto h_scale_t = shader.getHandle("scale_t");
+    CALL_GL_API(::glUniform1f(h_scale_t, half_scale_));
+
+    auto h_split_t = shader.getHandle("split_t");
+    CALL_GL_API(::glUniform1f(h_split_t, half_split_t_));
+}
+
+void StylizedHighlight::UpdateHalfVectors()
 {
     const aten::vec3 target_light(0.0F, 0.0F, 5.0F);
     const aten::vec3 eye(0.0F, 0.0F, 5.0F);
@@ -103,11 +114,11 @@ void StylizedHighlight::UpdateHalfVectors(
         const auto& t = tangents_[i];
 
         // Translation.
-        half = half + translation * t;
+        half = half + half_trans_t_ * t;
         half = normalize(half);
 
         // Directional scale.
-        half = half - scale * dot(half, t) * t;
+        half = half - half_scale_ * dot(half, t) * t;
         half = normalize(half);
 
         // Split.
@@ -115,7 +126,7 @@ void StylizedHighlight::UpdateHalfVectors(
         sign_t = sign_t > 0
             ? 1
             : sign_t < 0 ? -1 : sign_t;
-        half = half - split * sign_t * t;
+        half = half - half_split_t_ * sign_t * t;
         half = normalize(half);
 
         half_vtx.emplace_back(aten::vec4(p, 1.0F));
@@ -136,7 +147,7 @@ void StylizedHighlight::UpdateHalfVectors(
     }
 }
 
-void StylizedHighlight::Draw(
+void StylizedHighlight::DrawDebugVisual(
     const aten::context& ctxt,
     const aten::Camera& cam)
 {
@@ -187,4 +198,13 @@ void StylizedHighlight::Draw(
     // Half.
     CALL_GL_API(::glUniform4f(hColor, 0.0f, 1.0f, 0.0f, 1.0F));
     ib_.draw(vb_halfs_, aten::Primitive::Lines, 0, line_vtx_num);
+}
+
+void StylizedHighlight::EditParameter()
+{
+    ImGui::SliderFloat("trans t", &half_trans_t_, -1, 1);
+    ImGui::SliderFloat("scale t", &half_scale_, 0.0, 1);
+    ImGui::SliderFloat("split t", &half_split_t_, 0.0, 1);
+
+    UpdateHalfVectors();
 }

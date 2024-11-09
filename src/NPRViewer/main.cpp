@@ -9,13 +9,17 @@
 
 #include "StylizedHighlight.h"
 
-
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
 constexpr char* TITLE = "StylizedHighlight";
 
 class StylizedHighlightTestApp {
 public:
+    enum class NPRType : int32_t {
+        StylizedHighlight,
+        Max,
+    };
+
     StylizedHighlightTestApp() = default;
     ~StylizedHighlightTestApp() = default;
 
@@ -45,12 +49,12 @@ public:
 
         Load(args_.input);
 
-        rasterizer_.init(
+        // StylizedHighlight.
+        stylized_hightlight_.Init(
             WIDTH, HEIGHT,
             "highlight_vs.glsl",
             "highlight_fs.glsl");
-
-        tester_.Init(
+        stylized_hightlight_.InitDebugVisual(
             WIDTH, HEIGHT,
             "../shader/drawobj_vs.glsl",
             "../shader/drawobj_fs.glsl");
@@ -105,54 +109,23 @@ public:
         obj_min_ = std::min<int32_t>(obj_min_, static_cast<int32_t>(objs_.size()));
         obj_max_ = std::min<int32_t>(obj_max_, static_cast<int32_t>(objs_.size()));
 
-        rasterizer_.drawWithOutsideRenderFunc(
-            ctxt_,
-            [&](aten::RasterizeRenderer::FuncObjRenderer func) {
-                auto& shader = rasterizer_.getShader();
-                auto h_translation_dt = shader.getHandle("translation_dt");
-                CALL_GL_API(::glUniform1f(h_translation_dt, half_trans_t_));
-
-                auto h_scale_t = shader.getHandle("scale_t");
-                CALL_GL_API(::glUniform1f(h_scale_t, half_scale_));
-
-                auto h_split_t = shader.getHandle("split_t");
-                CALL_GL_API(::glUniform1f(h_split_t, half_split_t_));
-
-                for (size_t i = 0; i < objs_.size(); i++) {
-                    auto& obj = objs_[i];
-                    func(*obj);
-                }
-            },
-            &camera_,
-                is_wireframe_);
-
-        tester_.UpdateHalfVectors(half_trans_t_, half_scale_, half_split_t_);
-        tester_.Draw(ctxt_, camera_);
+        npr().Draw(ctxt_, objs_, camera_, is_wireframe_);
+        npr().DrawDebugVisual(ctxt_, camera_);
 
         const auto& aabb_max = obj_aabb_.maxPos();
         const auto& aabb_min = obj_aabb_.minPos();
         ImGui::Text("max(%.3f, %.3f, %.3f)", aabb_max.x, aabb_max.y, aabb_max.z);
         ImGui::Text("min(%.3f, %.3f, %.3f)", aabb_min.x, aabb_min.y, aabb_min.z);
 
-        ImGui::SliderInt("min", &obj_min_, 0, obj_max_);
-        ImGui::SliderInt("max", &obj_max_, obj_min_, static_cast<int32_t>(objs_.size() - 1));
-
-        ImGui::SliderFloat("trans t", &half_trans_t_, -1, 1);
-        ImGui::SliderFloat("scale t", &half_scale_, 0.0, 1);
-        ImGui::SliderFloat("split t", &half_split_t_, 0.0, 1);
-
-        for (size_t i = obj_min_; i < obj_max_; i++) {
-            const auto& obj = objs_[i];
-            auto mtrl_name = obj->getShapes()[0]->GetMaterial()->name();
-
-            auto name = obj->getName();
-            name += mtrl_name;
-
-            bool is_enable = obj_enables_.at(i);
-            if (ImGui::Checkbox(name.c_str(), &is_enable)) {
-                obj_enables_[i] = is_enable;
-            }
+        constexpr std::array npr_types = {
+            "StylizedHightlight",
+        };
+        if (ImGui::Combo("type", reinterpret_cast<int32_t*>(&type_), npr_types.data(), static_cast<int32_t>(npr_types.size()))) {
+            // TODO
+            // If necessary...
         }
+
+        npr().EditParameter();
 
         if (will_take_screen_shot_)
         {
@@ -355,14 +328,19 @@ private:
         std::string input{ "../../asset/sphere/sphere.obj" };
     } args_;
 
+    NPRModule& npr()
+    {
+        return *(npr_[static_cast<int32_t>(type_)]);
+    }
+
     aten::context ctxt_;
 
-    aten::RasterizeRenderer rasterizer_;
+    NPRType type_{ static_cast<NPRType>(0) };
+    StylizedHighlight stylized_hightlight_;
 
-    StylizedHighlight tester_;
-    float half_trans_t_{ 0.0F };
-    float half_scale_{ 0.0F };
-    float half_split_t_{ 0.0F };
+    std::array<NPRModule*, static_cast<size_t>(NPRType::Max)> npr_ = {
+        &stylized_hightlight_,
+    };
 
     std::vector<std::shared_ptr<aten::PolygonObject>> objs_;
     std::vector<bool> obj_enables_;

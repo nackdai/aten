@@ -19,6 +19,7 @@
     <ClCompile Include="..\src\NPRViewer\StylizedHighlight.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\NPRViewer\NPRModule.h" />
     <ClInclude Include="..\src\NPRViewer\StylizedHighlight.h" />
   </ItemGroup>
   <ItemGroup>

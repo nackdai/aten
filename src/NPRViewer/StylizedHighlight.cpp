@@ -1,6 +1,6 @@
 #include <numeric>
 
-#include "StylizedHighlightTest.h"
+#include "StylizedHighlight.h"
 #include "visualizer/atengl.h"
 
 namespace _detail {
@@ -9,7 +9,7 @@ namespace _detail {
     };
 }
 
-void StylizedHighlightTest::Init(
+void StylizedHighlight::Init(
     int32_t width, int32_t height,
     std::string_view pathVS,
     std::string_view pathFS)
@@ -83,7 +83,7 @@ void StylizedHighlightTest::Init(
     ib_.init(indices.size(), indices.data());
 }
 
-void StylizedHighlightTest::UpdateHalfVectors(
+void StylizedHighlight::UpdateHalfVectors(
     float translation,
     float scale,
     float split)
@@ -136,7 +136,7 @@ void StylizedHighlightTest::UpdateHalfVectors(
     }
 }
 
-void StylizedHighlightTest::Draw(
+void StylizedHighlight::Draw(
     const aten::context& ctxt,
     const aten::Camera& cam)
 {

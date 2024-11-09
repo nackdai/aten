@@ -107,14 +107,15 @@ public:
 
         rasterizer_.drawWithOutsideRenderFunc(
             ctxt_,
-            [&](aten::RasterizeRenderer::FuncObjRenderer func, aten::shader* shader) {
-                auto h_translation_dt = shader->getHandle("translation_dt");
+            [&](aten::RasterizeRenderer::FuncObjRenderer func) {
+                auto& shader = rasterizer_.getShader();
+                auto h_translation_dt = shader.getHandle("translation_dt");
                 CALL_GL_API(::glUniform1f(h_translation_dt, half_trans_t_));
 
-                auto h_scale_t = shader->getHandle("scale_t");
+                auto h_scale_t = shader.getHandle("scale_t");
                 CALL_GL_API(::glUniform1f(h_scale_t, half_scale_));
 
-                auto h_split_t = shader->getHandle("split_t");
+                auto h_split_t = shader.getHandle("split_t");
                 CALL_GL_API(::glUniform1f(h_split_t, half_split_t_));
 
                 for (size_t i = 0; i < objs_.size(); i++) {

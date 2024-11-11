@@ -8,6 +8,7 @@
 #include "idaten.h"
 
 #include "StylizedHighlight.h"
+#include "RimLight.h"
 
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
@@ -17,6 +18,7 @@ class StylizedHighlightTestApp {
 public:
     enum class NPRType : int32_t {
         StylizedHighlight,
+        RimLight,
         Max,
     };
 
@@ -55,6 +57,16 @@ public:
             "highlight_vs.glsl",
             "highlight_fs.glsl");
         stylized_hightlight_.InitDebugVisual(
+            WIDTH, HEIGHT,
+            "../shader/drawobj_vs.glsl",
+            "../shader/drawobj_fs.glsl");
+
+        // RimLight.
+        rim_light_.Init(
+            WIDTH, HEIGHT,
+            "rimlight_vs.glsl",
+            "rimlight_fs.glsl");
+        rim_light_.InitDebugVisual(
             WIDTH, HEIGHT,
             "../shader/drawobj_vs.glsl",
             "../shader/drawobj_fs.glsl");
@@ -119,6 +131,7 @@ public:
 
         constexpr std::array npr_types = {
             "StylizedHightlight",
+            "RimLight",
         };
         if (ImGui::Combo("type", reinterpret_cast<int32_t*>(&type_), npr_types.data(), static_cast<int32_t>(npr_types.size()))) {
             // TODO
@@ -337,9 +350,11 @@ private:
 
     NPRType type_{ static_cast<NPRType>(0) };
     StylizedHighlight stylized_hightlight_;
+    RimLight rim_light_;
 
     std::array<NPRModule*, static_cast<size_t>(NPRType::Max)> npr_ = {
         &stylized_hightlight_,
+        &rim_light_,
     };
 
     std::vector<std::shared_ptr<aten::PolygonObject>> objs_;

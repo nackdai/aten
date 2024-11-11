@@ -26,7 +26,7 @@ public:
             ctxt,
             [&](aten::RasterizeRenderer::FuncObjRenderer func) {
                 auto& shader = rasterizer_.getShader();
-                PreRender(shader);
+                PreRender(shader, camera);
 
                 for (size_t i = 0; i < objs.size(); i++) {
                     auto& obj = objs[i];
@@ -42,7 +42,7 @@ public:
         std::string_view path_fs)
     {}
 
-    virtual void PreRender(aten::shader& shader)
+    virtual void PreRender(aten::shader& shader, const aten::PinholeCamera& camera)
     {}
 
     virtual void DrawDebugVisual(

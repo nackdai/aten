@@ -14,7 +14,7 @@ public:
         std::string_view pathVS,
         std::string_view pathFS) override final;
 
-    void PreRender(aten::shader& shader) override final;
+    void PreRender(aten::shader& shader, const aten::PinholeCamera& camera) override final;
 
     void DrawDebugVisual(
         const aten::context& ctxt,

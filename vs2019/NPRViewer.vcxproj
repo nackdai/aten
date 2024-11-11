@@ -16,15 +16,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\NPRViewer\main.cpp" />
+    <ClCompile Include="..\src\NPRViewer\RimLight.cpp" />
     <ClCompile Include="..\src\NPRViewer\StylizedHighlight.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\NPRViewer\NPRModule.h" />
+    <ClInclude Include="..\src\NPRViewer\RimLight.h" />
     <ClInclude Include="..\src\NPRViewer\StylizedHighlight.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\NPRViewer\highlight_fs.glsl" />
     <None Include="..\src\NPRViewer\highlight_vs.glsl" />
+    <None Include="..\src\NPRViewer\rimlight_fs.glsl" />
+    <None Include="..\src\NPRViewer\rimlight_vs.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4DD37EDF-3FD6-4764-BEAF-B034711A1473}</ProjectGuid>

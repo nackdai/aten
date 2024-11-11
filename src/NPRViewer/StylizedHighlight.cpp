@@ -85,7 +85,7 @@ void StylizedHighlight::InitDebugVisual(
     ib_.init(indices.size(), indices.data());
 }
 
-void StylizedHighlight::PreRender(aten::shader& shader)
+void StylizedHighlight::PreRender(aten::shader& shader, const aten::PinholeCamera& camera)
 {
     auto h_translation_dt = shader.getHandle("translation_dt");
     CALL_GL_API(::glUniform1f(h_translation_dt, half_trans_t_));

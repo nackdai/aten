@@ -509,6 +509,12 @@ namespace AT_NAME
                 contrib = path_throughput.throughput * toon_bsdf / toon_pdf;
             }
             _detail::AddVec3(path_contrib.contrib, contrib);
+
+            const auto post_processed_additional_color = Toon::PostProcess(
+                ctxt, hit_target_mtrl,
+                hrec.p, hrec.normal, ray.dir);
+            _detail::AddVec3(path_contrib.contrib, post_processed_additional_color);
+
             path_attrib.is_terminated = true;
             return true;
         }

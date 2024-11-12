@@ -80,9 +80,20 @@ namespace aten
             int32_t remap_texture;
             float translation_dt;
             float translation_db;
+
             float scale_t;
             float split_t;
             float split_b;
+            float rim_light_width;
+
+            vec3 rim_light_color;
+            float rim_light_softness;
+
+            float rim_light_spread;
+            struct {
+                uint32_t enable_rim_light : 1;
+            };
+            float padding[2];
         } toon;
 
         AT_HOST_DEVICE_API void Init()
@@ -109,6 +120,11 @@ namespace aten
             toon.scale_t = 0.0F;
             toon.split_t = 0.0F;
             toon.split_b = 0.0F;
+            toon.rim_light_color = aten::vec3(0);
+            toon.rim_light_width = 0.0F;
+            toon.rim_light_softness = 0.0F;
+            toon.rim_light_spread = 0.0F;
+            toon.enable_rim_light = false;
         }
 
         AT_HOST_DEVICE_API StandardMaterialParameter()
@@ -138,6 +154,11 @@ namespace aten
             toon.scale_t = rhs.toon.scale_t;
             toon.split_t = rhs.toon.split_t;
             toon.split_b = rhs.toon.split_b;
+            toon.rim_light_color = rhs.toon.rim_light_color;
+            toon.rim_light_width = rhs.toon.rim_light_width;
+            toon.rim_light_softness = rhs.toon.rim_light_softness;
+            toon.rim_light_spread = rhs.toon.rim_light_spread;
+            toon.enable_rim_light = rhs.toon.enable_rim_light;
 
             return *this;
         }

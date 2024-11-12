@@ -32,6 +32,13 @@ namespace AT_NAME
             float u, float v,
             float* pdf = nullptr);
 
+        static AT_DEVICE_API aten::vec3 PostProcess(
+            const AT_NAME::context& ctxt,
+            const aten::MaterialParameter& param,
+            const aten::vec3& hit_pos,
+            const aten::vec3& normal,
+            const aten::vec3& wi);
+
         bool edit(aten::IMaterialParamEditor* editor) override final;
     };
 }

@@ -46,9 +46,9 @@ namespace AT_NAME {
             result.light_color = param.light_color * param.scale * param.luminance;
 
             // NOTE:
-            // Theoretically this has to be inf.
-            // But, to compute the geometry term with divinding the squared distance without checking the light type,
-            // that the distance to light is 1.0 is helpful.
+            // Theoretically this should be inf.
+            // But, to compute the geometry term by divinding the squared distance without checking the light type,
+            // the distance to light is 1.0 is helpful.
             result.dist_to_light = 1.0F;
         }
     };

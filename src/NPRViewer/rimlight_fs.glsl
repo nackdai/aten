@@ -16,9 +16,6 @@ uniform float spread;
 
 layout(location = 0) out vec4 outColor;
 
-// bezier curve with 2 control points
-// A is the starting point, B, C are the control points, D is the destination
-// t from 0 ~ 1
 float bezier(float B0, float B1, float B2, float t)
 {
     float P = (B0 - 2 * B1 + B2) * t * t + (-2 * B0 + 2 * B1) * t + B0;

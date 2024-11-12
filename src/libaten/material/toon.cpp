@@ -22,16 +22,28 @@ namespace AT_NAME
 {
     bool Toon::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0.01F, 1.0F);
-        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, 0.01F, 10.0F);
+        auto is_updated = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0.01F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, 0.01F, 10.0F);
 
-        auto t1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, translation_dt, -1.0F, 1.0F);
-        auto t2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, translation_db, -1.0F, 1.0F);
-        auto t3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, scale_t, 0.0F, 1.0F);
-        auto t4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, split_t, 0.0F, 1.0F);
-        auto t5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, split_b, 0.0F, 1.0F);
+        // Stylized highlight.
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, translation_dt, -1.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, translation_db, -1.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, scale_t, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, split_t, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, split_b, 0.0F, 1.0F);
 
-        return b0 || b1 || t1 || t2 || t3 || t4 || t5;
+        // Rim light.
+        {
+            bool enable_rim_light = m_param.standard.toon.enable_rim_light;
+            is_updated |= editor->edit("enable_rim_light", enable_rim_light);
+            m_param.standard.toon.enable_rim_light = enable_rim_light;
+        }
+        is_updated |= AT_EDIT_MATERIAL_PARAM(editor, m_param.standard.toon, rim_light_color);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, rim_light_width, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, rim_light_softness, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, rim_light_spread, 0.0F, 1.0F);
+
+        return is_updated;
     }
 
     AT_DEVICE_API aten::vec3 Toon::bsdf(
@@ -129,6 +141,70 @@ namespace AT_NAME
         aten::vec3 bsdf = weight * remap * (pdf ? *pdf : 1.0F);
 
         return bsdf;
+    }
+
+    namespace _detail {
+        inline AT_DEVICE_API float bezier(float B0, float B1, float B2, float t)
+        {
+            float P = (B0 - 2 * B1 + B2) * t * t + (-2 * B0 + 2 * B1) * t + B0;
+            return P;
+        }
+
+        inline AT_DEVICE_API float bezier_smoothstep(float edge0, float edge1, float mid, float t, float s)
+        {
+            if (t <= edge0) {
+                return 0;
+            }
+            else if (t >= edge1) {
+                return 1;
+            }
+
+            t = (t - edge0) / (edge1 - edge0);
+            t *= s;
+
+            float P = bezier(0, mid, 1, t);
+            return P;
+        }
+
+    }
+
+    AT_DEVICE_API aten::vec3 Toon::PostProcess(
+        const AT_NAME::context& ctxt,
+        const aten::MaterialParameter& param,
+        const aten::vec3& hit_pos,
+        const aten::vec3& normal,
+        const aten::vec3& wi)
+    {
+        aten::vec3 post_processed_additional_color(0.0F);
+
+        const auto V = -wi;
+        const auto N = normal;
+
+        // Rim light.
+        if (param.standard.toon.enable_rim_light) {
+            const auto NdotV = dot(V, N);
+
+            float rim = 0;
+
+            // NOTE:
+            // width is larger, rim light is thicker. If width is smaller, rim light is thinner.
+            // As smoothstep, less than edge0 is zero.
+            // In that case, if width is large, the result of smoothstep might be more zero.
+            // It means, if width is larger, rim light is thinner. It's fully opposite what widthe means.
+            // Therefore, width need to be invert as smoothstep edge0 argument.
+            if (NdotV > 0) {
+                rim = _detail::bezier_smoothstep(
+                    1.0 - param.standard.toon.rim_light_width,
+                    1.0,
+                    (1 - param.standard.toon.rim_light_softness) * 0.5,
+                    1 - NdotV,
+                    param.standard.toon.rim_light_spread);
+
+                post_processed_additional_color += rim * param.standard.toon.rim_light_color;
+            }
+        }
+
+        return post_processed_additional_color;
     }
 
     namespace blinn {

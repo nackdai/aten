@@ -17,14 +17,11 @@ namespace AT_NAME
 
     private:
         refraction(
-            const aten::vec3& albedo = aten::vec3(0.5),
-            float ior = float(1),
-            bool isIdealRefraction = false,
+            const aten::MaterialParameter& param,
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Refraction, aten::MaterialAttributeRefraction, albedo, ior)
+            : material(param, aten::MaterialAttributeRefraction)
         {
             setTextures(nullptr, normalMap, nullptr);
-            m_param.isIdealRefraction = isIdealRefraction;
         }
 
         refraction(aten::Values& val);

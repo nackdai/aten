@@ -17,8 +17,8 @@ namespace AT_NAME
             : material(aten::MaterialType::Emissive, aten::MaterialAttributeEmissive)
         {}
 
-        emissive(const aten::vec3& e)
-            : material(aten::MaterialType::Emissive, aten::MaterialAttributeEmissive, e)
+        emissive(const aten::MaterialParameter& param)
+            : material(param, aten::MaterialAttributeEmissive)
         {}
 
         emissive(aten::Values& val);

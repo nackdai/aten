@@ -14,15 +14,13 @@ namespace AT_NAME
 
     private:
         OrenNayar(
-            const aten::vec3& albedo = aten::vec3(0.5),
-            float roughness = float(0.5),
+            const aten::MaterialParameter& param,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
-            : material(aten::MaterialType::OrneNayar, aten::MaterialAttributeDiffuse, albedo, 1)
+            : material(param, aten::MaterialAttributeDiffuse)
         {
             setTextures(albedoMap, normalMap, roughnessMap);
-            m_param.standard.roughness = aten::clamp<float>(roughness, 0, 1);
         }
 
         OrenNayar(aten::Values& val);

@@ -22,19 +22,19 @@
 
 namespace AT_NAME
 {
-    const std::array<material::MaterialInfo, static_cast<size_t>(aten::MaterialType::MaterialTypeMax)> material::mtrl_type_info = { {
-        {"emissive", []() { return new emissive(); }},
-        {"Diffuse", []() { return new Diffuse(); }},
-        {"ornenayar", []() { return new OrenNayar(); }},
-        {"specular", []() { return new specular(); }},
-        {"refraction", []() { return new refraction(); }},
-        {"ggx", []() { return new MicrofacetGGX(); }},
-        {"beckman", []() { return new MicrofacetBeckman(); }},
-        {"velvet", []() { return new MicrofacetVelvet(); }},
-        {"microfacet_refraction", []() { return new MicrofacetRefraction(); }},
-        {"retroreflective", []() { return new Retroreflective(); }},
-        {"carpaint", []() { return new CarPaint(); }},
-        {"disney_brdf", []() { return new DisneyBRDF(); }},
+    const std::array<std::string, static_cast<size_t>(aten::MaterialType::MaterialTypeMax)> material::mtrl_type_info = { {
+        "emissive",
+        "Diffuse",
+        "ornenayar",
+        "specular",
+        "refraction",
+        "ggx",
+        "beckman",
+        "velvet"
+        "microfacet_refraction",
+        "retroreflective",
+        "carpaint",
+        "disney_brdf",
     } };
 
     std::shared_ptr<material> material::CreateMaterial(
@@ -80,31 +80,31 @@ namespace AT_NAME
 
         switch (param.type) {
         case aten::MaterialType::Emissive:
-            mtrl = new AT_NAME::emissive(param.baseColor);
+            mtrl = new AT_NAME::emissive(param);
             break;
         case aten::MaterialType::Diffuse:
-            mtrl = new AT_NAME::Diffuse(param.baseColor, albedoMap, normalMap);
+            mtrl = new AT_NAME::Diffuse(param, albedoMap, normalMap);
             break;
         case aten::MaterialType::OrneNayar:
-            mtrl = new AT_NAME::OrenNayar(param.baseColor, param.standard.roughness, albedoMap, normalMap);
+            mtrl = new AT_NAME::OrenNayar(param, albedoMap, normalMap);
             break;
         case aten::MaterialType::Specular:
-            mtrl = new AT_NAME::specular(param.baseColor, param.standard.ior, albedoMap, normalMap);
+            mtrl = new AT_NAME::specular(param, albedoMap, normalMap);
             break;
         case aten::MaterialType::Refraction:
-            mtrl = new AT_NAME::refraction(param.baseColor, param.standard.ior, param.isIdealRefraction, normalMap);
+            mtrl = new AT_NAME::refraction(param, normalMap);
             break;
         case aten::MaterialType::GGX:
-            mtrl = new AT_NAME::MicrofacetGGX(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
+            mtrl = new AT_NAME::MicrofacetGGX(param, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Beckman:
-            mtrl = new AT_NAME::MicrofacetBeckman(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
+            mtrl = new AT_NAME::MicrofacetBeckman(param, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Velvet:
-            mtrl = new AT_NAME::MicrofacetVelvet(param.baseColor, param.standard.roughness, albedoMap, normalMap);
+            mtrl = new AT_NAME::MicrofacetVelvet(param, albedoMap, normalMap);
             break;
         case aten::MaterialType::Microfacet_Refraction:
-            mtrl = new AT_NAME::MicrofacetRefraction(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
+            mtrl = new AT_NAME::MicrofacetRefraction(param, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Retroreflective:
             mtrl = new AT_NAME::Retroreflective(param, albedoMap, normalMap, roughnessMap);
@@ -131,7 +131,7 @@ namespace AT_NAME
 
     const char* material::getMaterialTypeName(aten::MaterialType type)
     {
-        return mtrl_type_info[static_cast<size_t>(type)].name.c_str();
+        return mtrl_type_info[static_cast<size_t>(type)].c_str();
     }
 
     aten::MaterialType material::getMaterialTypeFromMaterialTypeName(std::string_view name)
@@ -140,7 +140,7 @@ namespace AT_NAME
         std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
 
         for (size_t i = 0; i < mtrl_type_info.size(); i++) {
-            const auto& mtrlName = mtrl_type_info[i].name;
+            const auto& mtrlName = mtrl_type_info[i];
 
             if (lowerName == mtrlName) {
                 return static_cast<aten::MaterialType>(i);
@@ -157,7 +157,7 @@ namespace AT_NAME
         std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
         for (const auto& info : mtrl_type_info) {
-            const auto& mtrl_name = info.name;
+            const auto& mtrl_name = info;
             if (lower == mtrl_name) {
                 return true;
             }

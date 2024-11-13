@@ -20,13 +20,11 @@ namespace AT_NAME
 
     private:
         MicrofacetRefraction(
-            const aten::vec3& albedo = aten::vec3(0.5),
-            const float roughness = 0.5F,
-            const float ior = 1.0F,
+            const aten::MaterialParameter& param,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
-            : material(aten::MaterialType::Microfacet_Refraction, aten::MaterialAttributeRefraction, albedo, ior)
+            : material(param, aten::MaterialAttributeRefraction)
         {
             setTextures(albedoMap, normalMap, roughnessMap);
         }

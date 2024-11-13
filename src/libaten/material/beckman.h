@@ -14,16 +14,13 @@ namespace AT_NAME
 
     private:
         MicrofacetBeckman(
-            const aten::vec3& albedo = aten::vec3(0.5),
-            float roughness = float(0.5),
-            float ior = float(1),
+            const aten::MaterialParameter& param,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
-            : material(aten::MaterialType::Beckman, aten::MaterialAttributeMicrofacet, albedo, ior)
+            : material(param, aten::MaterialAttributeMicrofacet)
         {
             setTextures(albedoMap, normalMap, roughnessMap);
-            m_param.standard.roughness = aten::clamp<float>(roughness, 0, 1);
         }
 
         MicrofacetBeckman(aten::Values& val);

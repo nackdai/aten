@@ -13,14 +13,12 @@ namespace AT_NAME
 
     private:
         MicrofacetVelvet(
-            const aten::vec3& albedo = aten::vec3(0.5),
-            float roughness = float(0.5),
+            const aten::MaterialParameter& param,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Velvet, aten::MaterialAttributeMicrofacet, albedo, 0)
+            : material(param, aten::MaterialAttributeMicrofacet)
         {
             setTextures(albedoMap, normalMap, nullptr);
-            m_param.standard.roughness = aten::clamp<float>(roughness, 0, 1);
         }
 
         MicrofacetVelvet(aten::Values& val);

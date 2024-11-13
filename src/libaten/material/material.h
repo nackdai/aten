@@ -362,11 +362,7 @@ namespace AT_NAME
     class material {
         friend class context;
 
-        struct MaterialInfo {
-            std::string name;
-            std::function<material* ()> func;
-        };
-        static const std::array<MaterialInfo, static_cast<size_t>(aten::MaterialType::MaterialTypeMax)> mtrl_type_info;
+        static const std::array<std::string, static_cast<size_t>(aten::MaterialType::MaterialTypeMax)> mtrl_type_info;
 
     protected:
         material(
@@ -376,14 +372,11 @@ namespace AT_NAME
         {}
 
         material(
-            aten::MaterialType type,
-            const aten::MaterialAttribute& attrib,
-            const aten::vec3& clr,
-            float ior = 1)
-            : material(type, attrib)
+            const aten::MaterialParameter& param,
+            const aten::MaterialAttribute& attrib)
         {
-            m_param.baseColor = clr;
-            m_param.standard.ior = ior;
+            m_param = param;
+            m_param.attrib = attrib;
         }
 
         material(

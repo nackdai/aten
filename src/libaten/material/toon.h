@@ -14,9 +14,8 @@ namespace AT_NAME
             const aten::MaterialParameter& param,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Toon, aten::MaterialAttributeDiffuse, param.baseColor, 0)
+            : material(param, aten::MaterialAttributeDiffuse)
         {
-            m_param = param;
             setTextures(albedoMap, normalMap, nullptr);
         }
         ~Toon() = default;

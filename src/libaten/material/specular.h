@@ -13,11 +13,10 @@ namespace AT_NAME
 
     private:
         specular(
-            const aten::vec3& albedo = aten::vec3(0.5),
-            float ior = float(0),
+            const aten::MaterialParameter& param,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Specular, aten::MaterialAttributeSpecular, albedo, ior)
+            : material(param, aten::MaterialAttributeSpecular)
         {
             setTextures(albedoMap, normalMap, nullptr);
         }

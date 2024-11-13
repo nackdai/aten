@@ -13,10 +13,10 @@ namespace AT_NAME
 
     private:
         Diffuse(
-            const aten::vec3& albedo = aten::vec3(0.5),
+            const aten::MaterialParameter& param,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Diffuse, aten::MaterialAttributeDiffuse, albedo, 0)
+            : material(param, aten::MaterialAttributeDiffuse)
         {
             setTextures(albedoMap, normalMap, nullptr);
         }

@@ -26,22 +26,22 @@ namespace AT_NAME
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, 0.01F, 10.0F);
 
         // Stylized highlight.
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, translation_dt, -1.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, translation_db, -1.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, scale_t, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, split_t, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, split_b, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, translation_dt, -1.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, translation_db, -1.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, scale_t, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, split_t, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, split_b, 0.0F, 1.0F);
 
         // Rim light.
         {
-            bool enable_rim_light = m_param.standard.toon.enable_rim_light;
+            bool enable_rim_light = m_param.toon.enable_rim_light;
             is_updated |= editor->edit("enable_rim_light", enable_rim_light);
-            m_param.standard.toon.enable_rim_light = enable_rim_light;
+            m_param.toon.enable_rim_light = enable_rim_light;
         }
-        is_updated |= AT_EDIT_MATERIAL_PARAM(editor, m_param.standard.toon, rim_light_color);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, rim_light_width, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, rim_light_softness, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard.toon, rim_light_spread, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM(editor, m_param.toon, rim_light_color);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, rim_light_width, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, rim_light_softness, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, rim_light_spread, 0.0F, 1.0F);
 
         return is_updated;
     }
@@ -62,8 +62,8 @@ namespace AT_NAME
         constexpr float y_max = 1.0F;
 
         // Pick target light.
-        const auto* target_light = param.standard.toon.target_light_idx >= 0
-            ? &ctxt.GetLight(param.standard.toon.target_light_idx)
+        const auto* target_light = param.toon.target_light_idx >= 0
+            ? &ctxt.GetLight(param.toon.target_light_idx)
             : nullptr;
 
         // Allow only singular light.
@@ -87,12 +87,11 @@ namespace AT_NAME
 
             // TODO
             // How can we configure base material type.
-            aten::MaterialParameter base_mtrl;
+            aten::MaterialParameter base_mtrl = param;
 #if 0
             base_mtrl.type = aten::MaterialType::Diffuse;
 #else
             base_mtrl.type = aten::MaterialType::ToonSpecular;
-            base_mtrl.standard = param.standard;
 #endif
 
             // The target light is sepcified beforehand and it is only one.
@@ -136,7 +135,7 @@ namespace AT_NAME
             remap_v = (y - y_min) / (y_max - y_min);
         }
 
-        const auto remap = AT_NAME::sampleTexture(param.standard.toon.remap_texture, 0.5F, remap_v, aten::vec4(radiance));
+        const auto remap = AT_NAME::sampleTexture(param.toon.remap_texture, 0.5F, remap_v, aten::vec4(radiance));
 
         aten::vec3 bsdf = weight * remap * (pdf ? *pdf : 1.0F);
 
@@ -181,7 +180,7 @@ namespace AT_NAME
         const auto N = normal;
 
         // Rim light.
-        if (param.standard.toon.enable_rim_light) {
+        if (param.toon.enable_rim_light) {
             const auto NdotV = dot(V, N);
 
             float rim = 0;
@@ -194,13 +193,13 @@ namespace AT_NAME
             // Therefore, width need to be invert as smoothstep edge0 argument.
             if (NdotV > 0) {
                 rim = _detail::bezier_smoothstep(
-                    1.0 - param.standard.toon.rim_light_width,
+                    1.0 - param.toon.rim_light_width,
                     1.0,
-                    (1 - param.standard.toon.rim_light_softness) * 0.5,
+                    (1 - param.toon.rim_light_softness) * 0.5,
                     1 - NdotV,
-                    param.standard.toon.rim_light_spread);
+                    param.toon.rim_light_spread);
 
-                post_processed_additional_color += rim * param.standard.toon.rim_light_color;
+                post_processed_additional_color += rim * param.toon.rim_light_color;
             }
         }
 
@@ -369,15 +368,15 @@ namespace AT_NAME
 #endif
 
         // Translation.
-        H = H + param.standard.toon.translation_dt * t + param.standard.toon.translation_db * b;
+        H = H + param.toon.translation_dt * t + param.toon.translation_db * b;
         H = normalize(H);
 
         // Direction scale.
-        H = H - param.standard.toon.scale_t * dot(H, t) * t;
+        H = H - param.toon.scale_t * dot(H, t) * t;
         H = normalize(H);
 
         // Split.
-        H = H - param.standard.toon.split_t * aten::sign(dot(H, t)) * t - param.standard.toon.split_b * aten::sign(dot(H, b)) * b;
+        H = H - param.toon.split_t * aten::sign(dot(H, t)) * t - param.toon.split_b * aten::sign(dot(H, b)) * b;
         H = normalize(H);
 
         return H;

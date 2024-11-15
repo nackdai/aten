@@ -73,29 +73,6 @@ namespace aten
         float clearcoat;         // 第二の特別な目的のスペキュラーローブ.
         float clearcoatGloss;    // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
 
-        // TODO
-        // For toon.
-        struct {
-            int32_t target_light_idx;
-            int32_t remap_texture;
-            float translation_dt;
-            float translation_db;
-
-            float scale_t;
-            float split_t;
-            float split_b;
-            float rim_light_width;
-
-            vec3 rim_light_color;
-            float rim_light_softness;
-
-            float rim_light_spread;
-            struct {
-                uint32_t enable_rim_light : 1;
-            };
-            float padding[2];
-        } toon;
-
         AT_HOST_DEVICE_API void Init()
         {
             ior = 1.0;
@@ -112,19 +89,6 @@ namespace aten
             sheenTint = 0.5;
             clearcoat = 0.5;
             clearcoatGloss = 0.5;
-
-            toon.target_light_idx = -1;
-            toon.remap_texture = -1;
-            toon.translation_dt = 0.0F;
-            toon.translation_db = 0.0F;
-            toon.scale_t = 0.0F;
-            toon.split_t = 0.0F;
-            toon.split_b = 0.0F;
-            toon.rim_light_color = aten::vec3(0);
-            toon.rim_light_width = 0.0F;
-            toon.rim_light_softness = 0.0F;
-            toon.rim_light_spread = 0.0F;
-            toon.enable_rim_light = false;
         }
 
         AT_HOST_DEVICE_API StandardMaterialParameter()
@@ -147,21 +111,28 @@ namespace aten
             clearcoat = rhs.clearcoat;
             clearcoatGloss = rhs.clearcoatGloss;
 
-            toon.target_light_idx = rhs.toon.target_light_idx;
-            toon.remap_texture = rhs.toon.remap_texture;
-            toon.translation_dt = rhs.toon.translation_dt;
-            toon.translation_db = rhs.toon.translation_db;
-            toon.scale_t = rhs.toon.scale_t;
-            toon.split_t = rhs.toon.split_t;
-            toon.split_b = rhs.toon.split_b;
-            toon.rim_light_color = rhs.toon.rim_light_color;
-            toon.rim_light_width = rhs.toon.rim_light_width;
-            toon.rim_light_softness = rhs.toon.rim_light_softness;
-            toon.rim_light_spread = rhs.toon.rim_light_spread;
-            toon.enable_rim_light = rhs.toon.enable_rim_light;
-
             return *this;
         }
+    };
+
+    struct ToonParameter {
+        int32_t target_light_idx{ -1 };
+        int32_t remap_texture{ -1 };
+        float translation_dt{ 0.0F };
+        float translation_db{ 0.0F };
+
+        float scale_t{ 0.0F };
+        float split_t{ 0.0F };
+        float split_b{ 0.0F };
+        float rim_light_width{ 0.0F };
+
+        vec3 rim_light_color{ 0.0F };
+        float rim_light_softness{ 0.0F };
+
+        float rim_light_spread{ 0.0F };
+        bool enable_rim_light{ false };
+        int8_t padding[3];
+        float padding_1[2];
     };
 
     struct CarPaintMaterialParameter {
@@ -245,6 +216,7 @@ namespace aten
         };
 
         MediumParameter medium;
+        ToonParameter toon;
 
         AT_HOST_DEVICE_API void Init()
         {
@@ -295,6 +267,7 @@ namespace aten
             }
 
             medium = rhs.medium;
+            toon = rhs.toon;
 
             return *this;
         }

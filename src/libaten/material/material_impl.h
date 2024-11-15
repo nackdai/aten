@@ -254,7 +254,7 @@ namespace AT_NAME
                     dst_mtrl.normalMap = static_cast<int32_t>(dst_mtrl.normalMap >= 0 ? ctxt.textures[dst_mtrl.normalMap] : -1);
                     dst_mtrl.roughnessMap = static_cast<int32_t>(dst_mtrl.roughnessMap >= 0 ? ctxt.textures[dst_mtrl.roughnessMap] : -1);
 
-                    dst_mtrl.standard.toon.remap_texture = static_cast<int32_t>(dst_mtrl.standard.toon.remap_texture >= 0 ? ctxt.textures[dst_mtrl.standard.toon.remap_texture] : -1);
+                    dst_mtrl.toon.remap_texture = static_cast<int32_t>(dst_mtrl.toon.remap_texture >= 0 ? ctxt.textures[dst_mtrl.toon.remap_texture] : -1);
                 }
             }
         }

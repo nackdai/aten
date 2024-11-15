@@ -282,8 +282,8 @@ public:
 
                     // TODO
                     auto& param = mtrl->param();
-                    param.standard.toon.target_light_idx = 0;
-                    param.standard.toon.remap_texture = 0;
+                    param.toon.target_light_idx = 0;
+                    param.toon.remap_texture = 0;
 
                     needUpdateMtrl = true;
                 }

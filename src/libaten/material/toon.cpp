@@ -31,6 +31,8 @@ namespace AT_NAME
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, scale_t, 0.0F, 1.0F);
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, split_t, 0.0F, 1.0F);
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, split_b, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, square_sharp, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, square_magnitude, 0.0F, 1.0F);
 
         // Rim light.
         {
@@ -377,6 +379,12 @@ namespace AT_NAME
 
         // Split.
         H = H - param.toon.split_t * aten::sign(dot(H, t)) * t - param.toon.split_b * aten::sign(dot(H, b)) * b;
+        H = normalize(H);
+
+        // Square.
+        const auto sqrnorm_t = sin(aten::pow(aten::acos(dot(H, t)), param.toon.square_sharp));
+        const auto sqrnorm_b = sin(aten::pow(aten::acos(dot(H, b)), param.toon.square_sharp));
+        H = H - param.toon.square_magnitude * (sqrnorm_t * dot(H, t) * t + sqrnorm_b * dot(H, b) * b);
         H = normalize(H);
 
         return H;

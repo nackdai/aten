@@ -122,18 +122,21 @@ namespace aten
         float highligt_translation_db{ 0.0F };
 
         float highligt_scale_t{ 0.0F };
+        float highligt_scale_b{ 0.0F };
         float highlight_split_t{ 0.0F };
         float highlight_split_b{ 0.0F };
-        float highlight_square_sharp{ 0.0F };
 
+        float highlight_square_sharp{ 0.0F };
         float highlight_square_magnitude{ 0.0F };
         float rim_light_width{ 0.0F };
         float rim_light_softness{ 0.0F };
-        float rim_light_spread{ 0.0F };
 
+        float rim_light_spread{ 0.0F };
         vec3 rim_light_color{ 0.0F };
+
         bool enable_rim_light{ false };
         int8_t padding[3];
+        int32_t padding_1[3];
     };
 
     struct CarPaintMaterialParameter {

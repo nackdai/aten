@@ -29,6 +29,7 @@ namespace AT_NAME
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_translation_dt, -1.0F, 1.0F);
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_translation_db, -1.0F, 1.0F);
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_scale_t, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_scale_b, 0.0F, 1.0F);
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_split_t, 0.0F, 1.0F);
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_split_b, 0.0F, 1.0F);
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_square_sharp, 0.0F, 1.0F);
@@ -375,6 +376,8 @@ namespace AT_NAME
 
         // Direction scale.
         H = H - param.toon.highligt_scale_t * dot(H, t) * t;
+        H = normalize(H);
+        H = H - param.toon.highligt_scale_b * dot(H, b) * b;
         H = normalize(H);
 
         // Split.

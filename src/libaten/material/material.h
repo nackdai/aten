@@ -118,15 +118,15 @@ namespace aten
     struct ToonParameter {
         int32_t target_light_idx{ -1 };
         int32_t remap_texture{ -1 };
-        float translation_dt{ 0.0F };
-        float translation_db{ 0.0F };
+        float highligt_translation_dt{ 0.0F };
+        float highligt_translation_db{ 0.0F };
 
-        float scale_t{ 0.0F };
-        float split_t{ 0.0F };
-        float split_b{ 0.0F };
-        float square_sharp{ 0.0F };
+        float highligt_scale_t{ 0.0F };
+        float highlight_split_t{ 0.0F };
+        float highlight_split_b{ 0.0F };
+        float highlight_square_sharp{ 0.0F };
 
-        float square_magnitude{ 0.0F };
+        float highlight_square_magnitude{ 0.0F };
         float rim_light_width{ 0.0F };
         float rim_light_softness{ 0.0F };
         float rim_light_spread{ 0.0F };

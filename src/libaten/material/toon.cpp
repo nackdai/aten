@@ -26,13 +26,13 @@ namespace AT_NAME
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, 0.01F, 10.0F);
 
         // Stylized highlight.
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, translation_dt, -1.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, translation_db, -1.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, scale_t, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, split_t, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, split_b, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, square_sharp, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, square_magnitude, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_translation_dt, -1.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_translation_db, -1.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_scale_t, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_split_t, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_split_b, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_square_sharp, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_square_magnitude, 0.0F, 1.0F);
 
         // Rim light.
         {
@@ -370,21 +370,21 @@ namespace AT_NAME
 #endif
 
         // Translation.
-        H = H + param.toon.translation_dt * t + param.toon.translation_db * b;
+        H = H + param.toon.highligt_translation_dt * t + param.toon.highligt_translation_db * b;
         H = normalize(H);
 
         // Direction scale.
-        H = H - param.toon.scale_t * dot(H, t) * t;
+        H = H - param.toon.highligt_scale_t * dot(H, t) * t;
         H = normalize(H);
 
         // Split.
-        H = H - param.toon.split_t * aten::sign(dot(H, t)) * t - param.toon.split_b * aten::sign(dot(H, b)) * b;
+        H = H - param.toon.highlight_split_t * aten::sign(dot(H, t)) * t - param.toon.highlight_split_b * aten::sign(dot(H, b)) * b;
         H = normalize(H);
 
         // Square.
-        const auto sqrnorm_t = sin(aten::pow(aten::acos(dot(H, t)), param.toon.square_sharp));
-        const auto sqrnorm_b = sin(aten::pow(aten::acos(dot(H, b)), param.toon.square_sharp));
-        H = H - param.toon.square_magnitude * (sqrnorm_t * dot(H, t) * t + sqrnorm_b * dot(H, b) * b);
+        const auto sqrnorm_t = sin(aten::pow(aten::acos(dot(H, t)), param.toon.highlight_square_sharp));
+        const auto sqrnorm_b = sin(aten::pow(aten::acos(dot(H, b)), param.toon.highlight_square_sharp));
+        H = H - param.toon.highlight_square_magnitude * (sqrnorm_t * dot(H, t) * t + sqrnorm_b * dot(H, b) * b);
         H = normalize(H);
 
         return H;

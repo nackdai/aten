@@ -124,15 +124,16 @@ namespace aten
         float scale_t{ 0.0F };
         float split_t{ 0.0F };
         float split_b{ 0.0F };
+        float square_sharp{ 0.0F };
+
+        float square_magnitude{ 0.0F };
         float rim_light_width{ 0.0F };
+        float rim_light_softness{ 0.0F };
+        float rim_light_spread{ 0.0F };
 
         vec3 rim_light_color{ 0.0F };
-        float rim_light_softness{ 0.0F };
-
-        float rim_light_spread{ 0.0F };
         bool enable_rim_light{ false };
         int8_t padding[3];
-        float padding_1[2];
     };
 
     struct CarPaintMaterialParameter {

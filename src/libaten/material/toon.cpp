@@ -119,6 +119,10 @@ namespace AT_NAME
             }
         }
 
+        // NOTE:
+        // ACP
+        // https://diglib.eg.org/server/api/core/bitstreams/d84134e0-af8c-4db6-a13a-dc854294f6aa/content
+
         // Convert RGB to XYZ.
         const auto xyz = color::RGBtoXYZ(radiance);
         const auto y = xyz.y;
@@ -140,6 +144,9 @@ namespace AT_NAME
 
         const auto remap = AT_NAME::sampleTexture(param.toon.remap_texture, 0.5F, remap_v, aten::vec4(radiance));
 
+        // TODO
+        // According to the paper, weight is necessary.
+        // But, it causes the gradation, color change etc from ramp color...
         aten::vec3 bsdf = weight * remap * (pdf ? *pdf : 1.0F);
 
         return bsdf;

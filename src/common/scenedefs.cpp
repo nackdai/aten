@@ -1337,3 +1337,244 @@ void HomogeneousMediumRefractionBunnyScene::getCameraPosAndAt(
     at = aten::vec3(0.f, 1.f, 0.f);
     fov = 45.0f;
 }
+
+/////////////////////////////////////////////////////
+
+void ToonSimpleSphereScene::makeScene(
+    aten::context& ctxt, aten::scene* scene)
+{
+    constexpr char* asset_path = "../../asset/sphere/sphere.obj";
+    constexpr char* mtrl_in_asset = "m1";
+
+#if 0
+    // Light.
+    {
+        aten::MaterialParameter mtrl_param;
+        mtrl_param.type = aten::MaterialType::Emissive;
+        mtrl_param.baseColor = aten::vec3(1.0000f, 1.0000f, 1.0000f);
+
+        auto objs = aten::ObjLoader::Load(asset_path, ctxt,
+            [&](std::string_view name, aten::context& ctxt,
+                aten::MaterialType type, const aten::vec3& mtrl_clr,
+                const std::string& albedo, const std::string& nml) -> auto {
+            auto emissive = ctxt.CreateMaterialWithMaterialParameter(
+                "emissive",
+                mtrl_param,
+                nullptr, nullptr, nullptr);
+            return emissive;
+        },
+            // To create material forcibly, return nullptr as any material is not found.
+            [&](std::string_view name, const aten::context& ctxt) -> auto {
+            return nullptr;
+        });
+
+        aten::mat4 mtxT;
+        mtxT.asTrans(aten::vec3(-18, 18, 0));
+
+        aten::mat4 mtxS;
+        mtxS.asScale(1);
+
+        const auto mtx_L2W = mtxT * mtxS;
+
+        auto& obj_light = objs[0];
+        auto instance_light = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, obj_light, mtx_L2W);
+        scene->add(instance_light);
+
+        auto light = std::make_shared<aten::AreaLight>(instance_light, mtrl_param.baseColor, 4000.0f);
+        ctxt.AddLight(light);
+    }
+
+    // Glass.
+    {
+        aten::MaterialParameter mtrl_param;
+        mtrl_param.type = aten::MaterialType::Refraction;
+        mtrl_param.baseColor = aten::vec3(1.0000f, 1.0000f, 1.0000f);
+        mtrl_param.standard.ior = 1.33F;
+
+        auto objs = aten::ObjLoader::Load(asset_path, ctxt,
+            [&](std::string_view name, aten::context& ctxt,
+                aten::MaterialType type, const aten::vec3& mtrl_clr,
+                const std::string& albedo, const std::string& nml) -> auto {
+            auto glass = ctxt.CreateMaterialWithMaterialParameter(
+                "glass",
+                mtrl_param,
+                nullptr, nullptr, nullptr);
+            return glass;
+        },
+            // To create material forcibly, return nullptr as any material is not found.
+            [&](std::string_view name, const aten::context& ctxt) -> auto {
+            return nullptr;
+        });
+
+        aten::mat4 mtxT;
+        mtxT.asTrans(aten::vec3(-12, 12, 0));
+
+        aten::mat4 mtxS;
+        mtxS.asScale(1.25);
+
+        const auto mtx_L2W = mtxT * mtxS;
+
+        auto& obj_glass = objs[0];
+        auto instance_glass = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, obj_glass, mtx_L2W);
+        scene->add(instance_glass);
+    }
+#else
+    // Point light.
+    auto light = std::make_shared<aten::PointLight>(
+        //aten::vec3(-18.0F, 18.0F, 0.0F),
+        aten::vec3(0.0F, 0.0F, 18.0F),
+        aten::vec3(1.0F, 1.0F, 1.0F),
+        8000.0f);
+
+    ctxt.AddLight(light);
+
+    // Toon.
+    {
+        auto toon_tex = aten::ImageLoader::load("../../asset/toon/toon.png", ctxt);
+
+        aten::MaterialParameter mtrl_param;
+        mtrl_param.type = aten::MaterialType::Toon;
+        mtrl_param.baseColor = aten::vec3(1.0000f, 1.0000f, 1.0000f);
+        mtrl_param.standard.roughness = 0.15F;
+        mtrl_param.standard.ior = 2.3F;
+        mtrl_param.toon.target_light_idx = 0;
+        mtrl_param.toon.remap_texture = 0;
+        mtrl_param.toon.highligt_translation_dt = 0.0F;
+        mtrl_param.toon.highligt_translation_db = 0.0F;
+        mtrl_param.toon.highligt_scale_t = 0.0F;
+        mtrl_param.toon.highlight_split_t = 0.0F;
+        mtrl_param.toon.highlight_split_b = 0.0F;
+        mtrl_param.toon.enable_rim_light = true;
+        mtrl_param.toon.rim_light_color = aten::vec3(1);
+        mtrl_param.toon.rim_light_width = 0.25F;
+        mtrl_param.toon.rim_light_softness = 0.5F;
+        mtrl_param.toon.rim_light_spread = 0.6F;
+        mtrl_param.toon.toon_type = aten::ToonParameter::ToonType::Specular;
+
+        auto objs = aten::ObjLoader::Load(asset_path, ctxt,
+            [&](std::string_view name, aten::context& ctxt,
+                aten::MaterialType type, const aten::vec3& mtrl_clr,
+                const std::string& albedo, const std::string& nml) -> auto {
+            auto diffuse = ctxt.CreateMaterialWithMaterialParameter(
+                "toon",
+                mtrl_param,
+                nullptr, nullptr, nullptr);
+            return diffuse;
+        },
+            // To create material forcibly, return nullptr as any material is not found.
+            [&](std::string_view name, const aten::context& ctxt) -> auto {
+            return nullptr;
+        });
+
+        aten::mat4 mtxS;
+        mtxS.asScale(3);
+
+        const auto mtx_L2W = mtxS;
+
+        auto& obj_diffuse = objs[0];
+        auto instance_diffuse = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, obj_diffuse, mtx_L2W);
+        scene->add(instance_diffuse);
+    }
+#endif
+}
+
+void ToonSimpleSphereScene::getCameraPosAndAt(
+    aten::vec3& pos,
+    aten::vec3& at,
+    float& fov)
+{
+    //pos = aten::vec3(-7.7f, 7.7f, 7.7f) * 2.5f;
+    pos = aten::vec3(0, 0, 7.7f) * 2.5f;
+    at = aten::vec3(0.f, 0.f, 0.f);
+    fov = 45.0f;
+}
+
+/////////////////////////////////////////////////////
+
+void ToonCornellBoxScene::makeScene(
+    aten::context& ctxt, aten::scene* scene)
+{
+    auto light = std::make_shared<aten::PointLight>(
+        aten::vec3(0.0F, 1.98F, 0.0F),
+        aten::vec3(1.0F, 1.0F, 1.0F),
+        1000.0f);
+
+    ctxt.AddLight(light);
+
+    aten::ImageLoader::load("../../asset/toon/cornell_box_toon_basic.png", ctxt);
+    aten::ImageLoader::load("../../asset/toon/cornell_box_toon_left_wall.png", ctxt);
+    aten::ImageLoader::load("../../asset/toon/cornell_box_toon_right_wall.png", ctxt);
+
+    auto objs = aten::ObjLoader::Load("../../asset/cornellbox/orig_nolight.obj", ctxt,
+        [&](std::string_view name, aten::context& ctxt,
+            aten::MaterialType type, const aten::vec3& mtrl_clr,
+            const std::string& albedo, const std::string& nml) -> auto {
+        (void)albedo;
+        (void)nml;
+
+        if (name == "leftWall") {
+            aten::MaterialParameter mtrl_param;
+            mtrl_param.type = aten::MaterialType::Toon;
+            mtrl_param.baseColor = aten::vec3(1.0000f, 1.0000f, 1.0000f);
+            mtrl_param.standard.roughness = 0.15F;
+            mtrl_param.standard.ior = 2.3F;
+            mtrl_param.toon.target_light_idx = 0;
+            mtrl_param.toon.remap_texture = 1;
+            mtrl_param.toon.toon_type = aten::ToonParameter::ToonType::Diffuse;
+
+            auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
+                name,
+                mtrl_param,
+                nullptr, nullptr, nullptr);
+            return mtrl;
+        }
+        else if (name == "rightWall") {
+            aten::MaterialParameter mtrl_param;
+            mtrl_param.type = aten::MaterialType::Toon;
+            mtrl_param.baseColor = aten::vec3(1.0000f, 1.0000f, 1.0000f);
+            mtrl_param.standard.roughness = 0.15F;
+            mtrl_param.standard.ior = 2.3F;
+            mtrl_param.toon.target_light_idx = 0;
+            mtrl_param.toon.remap_texture = 2;
+            mtrl_param.toon.toon_type = aten::ToonParameter::ToonType::Diffuse;
+
+            auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
+                name,
+                mtrl_param,
+                nullptr, nullptr, nullptr);
+            return mtrl;
+        }
+        else {
+            aten::MaterialParameter mtrl_param;
+            mtrl_param.type = aten::MaterialType::Toon;
+            mtrl_param.baseColor = aten::vec3(1.0000f, 1.0000f, 1.0000f);
+            mtrl_param.standard.roughness = 0.15F;
+            mtrl_param.standard.ior = 2.3F;
+            mtrl_param.toon.target_light_idx = 0;
+            mtrl_param.toon.remap_texture = 0;
+            mtrl_param.toon.toon_type = aten::ToonParameter::ToonType::Diffuse;
+
+            auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
+                name,
+                mtrl_param,
+                nullptr, nullptr, nullptr);
+            return mtrl;
+        }
+    },
+        nullptr, true, true);
+
+    for (size_t i = 0; i < objs.size(); i++) {
+        auto instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[i], aten::mat4::Identity);
+        scene->add(instance);
+    }
+}
+
+void ToonCornellBoxScene::getCameraPosAndAt(
+    aten::vec3& pos,
+    aten::vec3& at,
+    float& fov)
+{
+    pos = aten::vec3(0.f, 1.f, 3.f);
+    at = aten::vec3(0.f, 1.f, 0.f);
+    fov = 45.0f;
+}

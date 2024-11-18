@@ -225,6 +225,26 @@ public:
         float& fov);
 };
 
+class ToonSimpleSphereScene {
+public:
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
+
+    static void getCameraPosAndAt(
+        aten::vec3& pos,
+        aten::vec3& at,
+        float& fov);
+};
+
+class ToonCornellBoxScene {
+public:
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
+
+    static void getCameraPosAndAt(
+        aten::vec3& pos,
+        aten::vec3& at,
+        float& fov);
+};
+
 template <class SCENE, class T>
 void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene)
 {
@@ -236,7 +256,7 @@ void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene)
     }
 }
 
-#define Scene CornellBoxScene
+//#define Scene CornellBoxScene
 //#define Scene RandomScene
 //#define Scene ObjectScene
 //#define Scene MtrlTestScene
@@ -260,3 +280,5 @@ void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene)
 //#define Scene CornellBoxSmokeScene
 //#define Scene CornellBoxHomogeneousMediumScene
 //#define Scene HomogeneousMediumRefractionBunnyScene
+//#define Scene ToonSimpleSphereScene
+#define Scene ToonCornellBoxScene

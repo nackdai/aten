@@ -467,6 +467,7 @@ namespace AT_NAME
         return true;
     }
 
+    template <class SCENE = void>
     inline AT_DEVICE_API bool HitTeminateMaterial(
         const AT_NAME::context& ctxt,
         aten::sampler& sampler,
@@ -478,7 +479,8 @@ namespace AT_NAME
         AT_NAME::PathThroughput& path_throughput,
         const aten::ray& ray,
         const aten::hitrecord& hrec,
-        const aten::MaterialParameter& hit_target_mtrl)
+        const aten::MaterialParameter& hit_target_mtrl,
+        SCENE* scene = nullptr)
     {
         const auto is_teminate_mtrl = material::IsTerminateMaterial(hit_target_mtrl);
         if (!is_teminate_mtrl) {
@@ -503,10 +505,14 @@ namespace AT_NAME
                 ctxt, hit_target_mtrl, sampler,
                 hrec.p, hrec.normal, ray.dir,
                 0.0f, 0.0f,
-                &toon_pdf);
+                toon_pdf,
+                scene);
             aten::vec3 contrib{ 0.0F };
             if (toon_pdf > 0.0F) {
                 contrib = path_throughput.throughput * toon_bsdf / toon_pdf;
+            }
+            else {
+                contrib = path_throughput.throughput * toon_bsdf;
             }
             _detail::AddVec3(path_contrib.contrib, contrib);
 

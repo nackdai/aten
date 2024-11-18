@@ -72,11 +72,12 @@ namespace AT_NAME
             // TODO
             // How can we configure base material type.
             aten::MaterialParameter base_mtrl = param;
-#if 0
-            base_mtrl.type = aten::MaterialType::Diffuse;
-#else
-            base_mtrl.type = aten::MaterialType::ToonSpecular;
-#endif
+            if (param.toon.toon_type == aten::ToonParameter::ToonType::Diffuse) {
+                base_mtrl.type = aten::MaterialType::Diffuse;
+            }
+            else {
+                base_mtrl.type = aten::MaterialType::ToonSpecular;
+            }
 
             // The target light is sepcified beforehand and it is only one.
             // So, light selected pdf is always 1.
@@ -90,11 +91,12 @@ namespace AT_NAME
                 light_selected_pdf, *light_sample);
             if (res) {
                 radiance = res.value();
-#if 0
-                pdf = Diffuse::ComputePDF(normal, light_sample->dir);
-#else
-                pdf = ToonSpecular::ComputePDF(param, normal, wi, light_sample->dir, u, v);
-#endif
+                if (param.toon.toon_type == aten::ToonParameter::ToonType::Diffuse) {
+                    pdf = Diffuse::ComputePDF(normal, light_sample->dir);
+                }
+                else {
+                    pdf = ToonSpecular::ComputePDF(param, normal, wi, light_sample->dir, u, v);
+                }
             }
         }
 

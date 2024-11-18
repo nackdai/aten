@@ -116,6 +116,11 @@ namespace aten
     };
 
     struct ToonParameter {
+        enum class ToonType : int32_t {
+            Diffuse,
+            Specular,
+        };
+
         int32_t target_light_idx{ -1 };
         int32_t remap_texture{ -1 };
         float highligt_translation_dt{ 0.0F };
@@ -134,9 +139,10 @@ namespace aten
         float rim_light_spread{ 0.0F };
         vec3 rim_light_color{ 0.0F };
 
+        ToonType toon_type{ ToonType::Diffuse };
         bool enable_rim_light{ false };
         int8_t padding[3];
-        int32_t padding_1[3];
+        int32_t padding_1[2];
     };
 
     struct CarPaintMaterialParameter {

@@ -46,7 +46,7 @@ public:
     bool edit(std::string_view name, aten::vec3& param) override final
     {
         std::array f = { param.x, param.y, param.z };
-        bool ret = ImGui::ColorEdit3(name.data(), f.data());
+        const auto ret = ImGui::ColorEdit3(name.data(), f.data());
 
         param.x = f[0];
         param.y = f[1];
@@ -58,7 +58,7 @@ public:
     bool edit(std::string_view name, aten::vec4& param) override final
     {
         std::array f = { param.x, param.y, param.z, param.w };
-        bool ret = ImGui::ColorEdit4(name.data(), f.data());
+        const auto ret = ImGui::ColorEdit4(name.data(), f.data());
 
         param.x = f[0];
         param.y = f[1];
@@ -70,8 +70,13 @@ public:
 
     void edit(std::string_view name, std::string_view str) override final
     {
-        std::string s(str);
-        ImGui::Text("[%s] : (%s)", name.data(), s.empty() ? "none" : str.data());
+        ImGui::Text("[%s] : (%s)", name.data(), str.empty() ? "none" : str.data());
+    }
+
+    bool edit(std::string_view name, const std::vector<const char*>& elements, int32_t& param) override final
+    {
+        const auto ret = ImGui::Combo(name.data(), &param, elements.data(), static_cast<int32_t>(elements.size()));
+        return ret;
     }
 };
 

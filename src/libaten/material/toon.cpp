@@ -49,45 +49,26 @@ namespace AT_NAME
         return is_updated;
     }
 
-    AT_DEVICE_API aten::vec3 Toon::bsdf(
+    AT_DEVICE_API aten::vec3 Toon::ComputeBRDF(
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& param,
+        const aten::LightSampleResult* light_sample,
         aten::sampler& sampler,
         const aten::vec3& hit_pos,
         const aten::vec3& normal,
         const aten::vec3& wi,
         float u, float v,
-        float* pdf/*= nullptr*/)
+        float& pdf)
     {
         // TODO
         constexpr float w_min = 0.01F;
         constexpr float y_min = 0.0F;
         constexpr float y_max = 1.0F;
 
-        // Pick target light.
-        const auto* target_light = param.toon.target_light_idx >= 0
-            ? &ctxt.GetLight(param.toon.target_light_idx)
-            : nullptr;
-
-        // Allow only singular light.
-        target_light = target_light && target_light->attrib.is_singular
-            ? target_light
-            : nullptr;
-
         aten::vec3 radiance(0.0F);
-        if (pdf) {
-            *pdf = 0.0F;
-        }
+        pdf = 1.0F;
 
-        if (target_light) {
-            // Sample light.
-
-            // NOTE:
-            // The target light has to be the singular light.
-            // In that case, sample is not used at all. So, we can pass it as nullptr.
-            aten::LightSampleResult light_sample;
-            AT_NAME::Light::sample(light_sample, *target_light, ctxt, hit_pos, normal, &sampler);
-
+        if (light_sample) {
             // TODO
             // How can we configure base material type.
             aten::MaterialParameter base_mtrl = param;
@@ -106,16 +87,14 @@ namespace AT_NAME
             auto res = ComputeRadianceNEE(
                 wi, normal,
                 base_mtrl, 0.0F, u, v,
-                light_selected_pdf, light_sample);
+                light_selected_pdf, *light_sample);
             if (res) {
                 radiance = res.value();
-                if (pdf) {
 #if 0
-                    *pdf = Diffuse::ComputePDF(normal, light_sample.dir);
+                pdf = Diffuse::ComputePDF(normal, light_sample->dir);
 #else
-                    *pdf = ToonSpecular::ComputePDF(param, normal, wi, light_sample.dir, u, v);
+                pdf = ToonSpecular::ComputePDF(param, normal, wi, light_sample->dir, u, v);
 #endif
-                }
             }
         }
 
@@ -147,7 +126,7 @@ namespace AT_NAME
         // TODO
         // According to the paper, weight is necessary.
         // But, it causes the gradation, color change etc from ramp color...
-        aten::vec3 bsdf = weight * remap * (pdf ? *pdf : 1.0F);
+        aten::vec3 bsdf = weight * remap * pdf;
 
         return bsdf;
     }

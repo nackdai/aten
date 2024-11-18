@@ -3,6 +3,7 @@
 #include <array>
 #include <functional>
 #include <string>
+#include <vector>
 
 #include "types.h"
 #include "math/vec3.h"
@@ -293,6 +294,7 @@ namespace aten
         virtual bool edit(std::string_view name, bool& param) = 0;
         virtual bool edit(std::string_view name, vec3& param) = 0;
         virtual bool edit(std::string_view name, vec4& param) = 0;
+        virtual bool edit(std::string_view name, const std::vector<const char*>& elements, int32_t& param) = 0;
 
         void editTex(std::string_view name, int32_t texid)
         {

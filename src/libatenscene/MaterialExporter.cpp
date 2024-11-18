@@ -71,6 +71,13 @@ namespace aten
             }
         }
 
+        bool edit(std::string_view name, const std::vector<const char*>& elements, int32_t& param) override final
+        {
+            // TODO
+            AT_ASSERT(false);
+            return false;
+        }
+
     private:
         tinyxml2::XMLDocument& m_xmlDoc;
         tinyxml2::XMLElement* m_xmlElem{ nullptr };

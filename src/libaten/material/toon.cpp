@@ -25,6 +25,15 @@ namespace AT_NAME
         auto is_updated = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0.01F, 1.0F);
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, 0.01F, 10.0F);
 
+        // Toon type.
+        static std::vector<const char*> toon_type_list = {
+            "Diffuse",
+            "Specular",
+        };
+        auto toon_type = static_cast<int32_t>(m_param.toon.toon_type);
+        is_updated |= editor->edit("toon_type", toon_type_list, toon_type);
+        m_param.toon.toon_type = static_cast<aten::ToonParameter::ToonType>(toon_type);
+
         // Stylized highlight.
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_translation_dt, -1.0F, 1.0F);
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_translation_db, -1.0F, 1.0F);

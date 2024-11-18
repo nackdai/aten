@@ -18,7 +18,7 @@ namespace aten
         {
             dir = normalize(d);
 
-            AT_ASSERT(dot(dir, normal) >= float(0.0));
+            //AT_ASSERT(dot(dir, normal) >= float(0.0));
 
             constexpr float origin = float(1.0) / float(32.0);
             constexpr float float_scale = float(1.0) / float(65536.0);

@@ -440,8 +440,8 @@ private:
 #ifdef ENABLE_NPR
     idaten::NPRPathTracing renderer_;
 #else
-    //idaten::PathTracing renderer_;
-    idaten::VolumeRendering renderer_;
+    idaten::PathTracing renderer_;
+    //idaten::VolumeRendering renderer_;
 #endif
 
     std::shared_ptr<aten::visualizer> visualizer_;

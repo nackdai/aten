@@ -69,6 +69,7 @@ namespace AT_NAME
         const auto c = aten::abs(dot(wo, n));
 
         // https://cgg.mff.cuni.cz/~jaroslav/teaching/2017-npgr010/slides/03%20-%20npgr010-2017%20-%20BRDF.pdf#page=48.00
+        // https://www.pbr-book.org/3ed-2018/Reflection_Models/Specular_Reflection_and_Transmission#SpecularTransmission
         const auto nt_ni = nt / ni;
         const auto bsdf = c == 0.0F ? 0.0F : (nt_ni * nt_ni) * fresnle_transmittance / c;
 

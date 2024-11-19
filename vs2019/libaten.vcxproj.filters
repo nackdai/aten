@@ -547,6 +547,9 @@
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_nee_impl.h">
       <Filter>renderer\pathtracing</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\toon_impl.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

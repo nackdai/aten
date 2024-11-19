@@ -204,6 +204,7 @@
     <ClInclude Include="..\src\libaten\material\sample_texture.h" />
     <ClInclude Include="..\src\libaten\material\specular.h" />
     <ClInclude Include="..\src\libaten\material\toon.h" />
+    <ClInclude Include="..\src\libaten\material\toon_impl.h" />
     <ClInclude Include="..\src\libaten\material\toon_specular.h" />
     <ClInclude Include="..\src\libaten\material\velvet.h" />
     <ClInclude Include="..\src\libaten\math\aabb.h" />

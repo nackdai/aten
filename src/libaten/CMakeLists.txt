@@ -133,6 +133,7 @@ add_library(
   material/specular.h
   material/toon.cpp
   material/toon.h
+  material/toon_impl.h
   material/toon_specular.h
   material/velvet.cpp
   material/velvet.h

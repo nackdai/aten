@@ -10,7 +10,7 @@
 #include "math/ray.h"
 #include "material/material.h"
 #include "material/material_impl.h"
-#include "material/toon.h"
+#include "material/toon_impl.h"
 #include "misc/tuple.h"
 #include "misc/type_traits.h"
 #include "renderer/aov.h"

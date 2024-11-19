@@ -96,6 +96,7 @@ cuda_add_library(
   ../libaten/material/specular.h
   ../libaten/material/toon.cpp
   ../libaten/material/toon.h
+  ../libaten/material/toon_impl.h
   ../libaten/material/toon_specular.h
   ../libaten/material/velvet.cpp
   ../libaten/material/velvet.h

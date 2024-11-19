@@ -304,6 +304,9 @@
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_nee_impl.h">
       <Filter>kernel\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\toon_impl.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

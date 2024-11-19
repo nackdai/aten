@@ -45,26 +45,13 @@ public:
 
     bool edit(std::string_view name, aten::vec3& param) override final
     {
-        std::array f = { param.x, param.y, param.z };
-        const auto ret = ImGui::ColorEdit3(name.data(), f.data());
-
-        param.x = f[0];
-        param.y = f[1];
-        param.z = f[2];
-
+        const auto ret = ImGui::ColorEdit3(name.data(), reinterpret_cast<float*>(&param));
         return ret;
     }
 
     bool edit(std::string_view name, aten::vec4& param) override final
     {
-        std::array f = { param.x, param.y, param.z, param.w };
-        const auto ret = ImGui::ColorEdit4(name.data(), f.data());
-
-        param.x = f[0];
-        param.y = f[1];
-        param.z = f[2];
-        param.w = f[3];
-
+        const auto ret = ImGui::ColorEdit4(name.data(), reinterpret_cast<float*>(&param));
         return ret;
     }
 
@@ -238,6 +225,18 @@ public:
                 scene_light_.is_envmap = next_is_envmap;
                 renderer_.SetEnableEnvmap(scene_light_.is_envmap);
                 renderer_.updateLight(ctxt_);
+            }
+
+            if (!scene_light_.is_envmap) {
+                auto& point_light = ctxt_.GetLightInstance(0);
+                auto& light_param = point_light->param();
+
+                bool is_updated = false;
+                is_updated |= ImGui::ColorEdit3("LightColor", reinterpret_cast<float*>(&light_param.light_color));
+                is_updated |= ImGui::SliderFloat("LightIntensity", &light_param.intensity, 0.0F, 10000.0F);
+                if (is_updated) {
+                    renderer_.updateLight(ctxt_);
+                }
             }
 
             if (ImGui::SliderInt("Samples", &max_samples_, 1, 100)

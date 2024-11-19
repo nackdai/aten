@@ -92,11 +92,8 @@ namespace AT_NAME
             const aten::vec3& wo,
             const aten::vec3& n)
         {
-            // NOTE
+            // NOTE:
             // https://www.pbr-book.org/3ed-2018/Reflection_Models/Specular_Reflection_and_Transmission#SpecularReflection
-            // Ideal specular isn't affected by cosine factor.
-            // But, consine factor is multpiled out of this API to keep consistency with other BRDFs.
-            // So, dividing with cosine factor is necessary to cancel multiplying cosine factor.
 
             // For canceling cosine factor.
             const auto c = aten::dot(n, wo);

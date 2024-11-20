@@ -507,13 +507,7 @@ namespace AT_NAME
                 0.0f, 0.0f,
                 toon_pdf,
                 scene);
-            aten::vec3 contrib{ 0.0F };
-            if (toon_pdf > 0.0F) {
-                contrib = path_throughput.throughput * toon_bsdf / toon_pdf;
-            }
-            else {
-                contrib = path_throughput.throughput * toon_bsdf;
-            }
+            const auto contrib = path_throughput.throughput * toon_bsdf;
             _detail::AddVec3(path_contrib.contrib, contrib);
 
             const auto post_processed_additional_color = Toon::PostProcess(

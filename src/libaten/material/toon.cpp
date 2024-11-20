@@ -139,7 +139,8 @@ namespace AT_NAME
         // But, it causes the gradation, color change etc from ramp color...
         // According to the paper, multiplying pdf seems to be necessary as well.
         // But, it darken the result....
-        aten::vec3 bsdf = weight * remap * pdf;
+        //aten::vec3 bsdf = weight * remap * pdf;
+        aten::vec3 bsdf = weight * remap;
 
         return bsdf;
     }

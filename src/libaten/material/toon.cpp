@@ -75,7 +75,7 @@ namespace AT_NAME
         constexpr float y_max = 1.0F;
 
         aten::vec3 radiance(0.0F);
-        pdf = 1.0F;
+        pdf = 0.0F;
 
         if (light_sample) {
             // TODO
@@ -137,6 +137,8 @@ namespace AT_NAME
         // TODO
         // According to the paper, weight is necessary.
         // But, it causes the gradation, color change etc from ramp color...
+        // According to the paper, multiplying pdf seems to be necessary as well.
+        // But, it darken the result....
         aten::vec3 bsdf = weight * remap * pdf;
 
         return bsdf;

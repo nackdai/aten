@@ -85,14 +85,7 @@ namespace AT_NAME
             const aten::vec3& wo,
             float u, float v);
 
-        static AT_DEVICE_API aten::vec3 sampleDirection(
-            const aten::MaterialParameter& mtrl,
-            const aten::vec3& n,
-            const aten::vec3& wi,
-            float u, float v,
-            aten::sampler* sampler);
-
-        static AT_DEVICE_API aten::vec3 bsdf(
+        static AT_DEVICE_API AT_NAME::MaterialSampling bsdf(
             const aten::MaterialParameter& mtrl,
             const aten::vec3& n,
             const aten::vec3& wi,
@@ -125,6 +118,7 @@ namespace AT_NAME
 
         static AT_DEVICE_API void ComputeWeights(
             std::array<float, Component::Num>& weights,
+            const aten::vec3& base_color,
             const float metalic,
             const float sheen,
             const float specular,

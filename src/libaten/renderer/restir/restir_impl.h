@@ -44,11 +44,13 @@ namespace restir {
             const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
             const auto dist2 = aten::sqr(lightsample.dist_to_light);
 
-            auto brdf = AT_NAME::material::sampleBSDF(
+            const auto mtrl_eval_result = AT_NAME::material::sampleBSDF(
                 &mtrl, normal,
                 ray_dir, dirToLight,
                 u, v,
                 pre_sampled_r);
+
+            const auto& brdf = mtrl_eval_result.bsdf;
 
             const auto geometry_term = light_attrib.is_singular || light_attrib.isInfinite
                 ? cosShadow * cosLight

@@ -56,7 +56,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
         aten::vec3(65.0f, 20.0f, 20.0f),
         20.0f,
         CreateMaterial("green", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.25f, 0.75f, 0.25f)));
-        //CreateMaterial(ctxt, aten::vec3(1, 1, 1), tex));
+    //CreateMaterial(ctxt, aten::vec3(1, 1, 1), tex));
 #else
     auto green = aten::TransformableFactory::createSphere(
         aten::vec3(65, 20, 20),
@@ -84,7 +84,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
         layer);
 #endif
 
-//#if DEFALT
+    //#if DEFALT
 #if 0
     auto glass = aten::TransformableFactory::createSphere(
         aten::vec3(77, 16.5, 78),
@@ -738,38 +738,38 @@ std::shared_ptr<aten::instance<aten::PolygonObject>> ObjCornellBoxScene::makeSce
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
-                (void)albedo;
-                (void)nml;
+        (void)albedo;
+        (void)nml;
 
-                if (name == "shortBox") {
-                    //type = aten::MaterialType::GGX;
-                    type = aten::MaterialType::Specular;
+        if (name == "shortBox") {
+            //type = aten::MaterialType::GGX;
+            type = aten::MaterialType::Specular;
 
-                    aten::MaterialParameter mtrlParam;
-                    mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
-                    mtrlParam.standard.roughness = 0.1f;
-                    mtrlParam.standard.ior = 0.01f;
+            aten::MaterialParameter mtrlParam;
+            mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
+            mtrlParam.standard.roughness = 0.1f;
+            mtrlParam.standard.ior = 0.01f;
 
-                    auto mtrl = CreateMaterialWithParamter(name, ctxt, type, mtrlParam);
-                    return mtrl;
-                }
-                else if (name == "floor") {
-                    type = aten::MaterialType::GGX;
-                    //type = aten::MaterialType::Specular;
+            auto mtrl = CreateMaterialWithParamter(name, ctxt, type, mtrlParam);
+            return mtrl;
+        }
+        else if (name == "floor") {
+            type = aten::MaterialType::GGX;
+            //type = aten::MaterialType::Specular;
 
-                    aten::MaterialParameter mtrlParam;
-                    mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
-                    mtrlParam.standard.roughness = 0.1f;
-                    mtrlParam.standard.ior = 0.01f;
+            aten::MaterialParameter mtrlParam;
+            mtrlParam.baseColor = aten::vec3(0.7f, 0.6f, 0.5f);
+            mtrlParam.standard.roughness = 0.1f;
+            mtrlParam.standard.ior = 0.01f;
 
-                    auto mtrl = CreateMaterialWithParamter(name, ctxt, type, mtrlParam);
-                    return mtrl;
-                }
-                else {
-                    auto mtrl = CreateMaterial(name, ctxt, type, mtrl_clr);
-                    return mtrl;
-                }
-        },
+            auto mtrl = CreateMaterialWithParamter(name, ctxt, type, mtrlParam);
+            return mtrl;
+        }
+        else {
+            auto mtrl = CreateMaterial(name, ctxt, type, mtrl_clr);
+            return mtrl;
+        }
+    },
         nullptr, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
@@ -810,16 +810,16 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
-                auto albedo_map = albedo.empty()
-                    ? nullptr
-                    : aten::ImageLoader::load("../../asset/sponza/" + albedo, ctxt);
-                auto nml_map = nml.empty()
-                    ? nullptr
-                    : aten::ImageLoader::load("../../asset/sponza/" + nml, ctxt);
+        auto albedo_map = albedo.empty()
+            ? nullptr
+            : aten::ImageLoader::load("../../asset/sponza/" + albedo, ctxt);
+        auto nml_map = nml.empty()
+            ? nullptr
+            : aten::ImageLoader::load("../../asset/sponza/" + nml, ctxt);
 
-                auto mtrl = CreateMaterial(name, ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
-                return mtrl;
-        });
+        auto mtrl = CreateMaterial(name, ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
+        return mtrl;
+    });
 
     objs[0]->importInternalAccelTree("../../asset/sponza/sponza.sbvh", ctxt, 0);
 
@@ -1028,16 +1028,16 @@ void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
         [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
-                auto albedo_map = albedo.empty()
-                    ? nullptr
-                    : aten::ImageLoader::load("../../asset/crytek_sponza/" + albedo, ctxt);
-                auto nml_map = nml.empty()
-                    ? nullptr
-                    : aten::ImageLoader::load("../../asset/crytek_sponza/" + nml, ctxt);
+        auto albedo_map = albedo.empty()
+            ? nullptr
+            : aten::ImageLoader::load("../../asset/crytek_sponza/" + albedo, ctxt);
+        auto nml_map = nml.empty()
+            ? nullptr
+            : aten::ImageLoader::load("../../asset/crytek_sponza/" + nml, ctxt);
 
-                auto mtrl = CreateMaterial(name, ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
-                return mtrl;
-        });
+        auto mtrl = CreateMaterial(name, ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
+        return mtrl;
+    });
 
     objs[0]->importInternalAccelTree("../../asset/crytek_sponza/sponza.sbvh", ctxt, 0);
 

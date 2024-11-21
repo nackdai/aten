@@ -161,33 +161,47 @@ namespace AT_NAME
         switch (mtrl->type) {
         case aten::MaterialType::Emissive:
             result.bsdf = AT_NAME::emissive::bsdf(mtrl, normal, wi, wo, u, v);
+            break;
         case aten::MaterialType::Diffuse:
             result.bsdf = AT_NAME::Diffuse::bsdf(mtrl);
+            break;
         case aten::MaterialType::OrneNayar:
             result.bsdf = AT_NAME::OrenNayar::bsdf(mtrl, normal, wi, wo, u, v);
+            break;
         case aten::MaterialType::Specular:
             result.bsdf = AT_NAME::specular::bsdf(mtrl, normal, wi, wo, u, v);
+            break;
         case aten::MaterialType::Refraction:
             result.bsdf = AT_NAME::refraction::bsdf(mtrl, normal, wi, wo, u, v);
+            break;
         case aten::MaterialType::GGX:
             result.bsdf = AT_NAME::MicrofacetGGX::bsdf(mtrl, normal, wi, wo, u, v);
+            break;
         case aten::MaterialType::Beckman:
             result.bsdf = AT_NAME::MicrofacetBeckman::bsdf(mtrl, normal, wi, wo, u, v);
+            break;
         case aten::MaterialType::Velvet:
             result.bsdf = AT_NAME::MicrofacetVelvet::bsdf(mtrl, normal, wi, wo, u, v);
+            break;
         case aten::MaterialType::Microfacet_Refraction:
             result.bsdf = AT_NAME::MicrofacetRefraction::bsdf(*mtrl, normal, wi, wo, u, v);
+            break;
         case aten::MaterialType::Retroreflective:
             result.bsdf = AT_NAME::Retroreflective::bsdf(*mtrl, normal, wi, wo, u, v);
+            break;
         case aten::MaterialType::CarPaint:
             result.bsdf = AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, pre_sampled_r);
+            break;
         case aten::MaterialType::Disney:
-            result.bsdf = AT_NAME::DisneyBRDF::bsdf(*mtrl, normal, wi, wo, u, v);
+            result = AT_NAME::DisneyBRDF::bsdf(*mtrl, normal, wi, wo, u, v);
+            break;
         case aten::MaterialType::ToonSpecular:
             result.bsdf = AT_NAME::ToonSpecular::ComputeBRDF(*mtrl, normal, wi, wo, u, v);
+            break;
         default:
             AT_ASSERT(false);
             result.bsdf = AT_NAME::Diffuse::bsdf(mtrl);
+            break;
         }
 
         return result;

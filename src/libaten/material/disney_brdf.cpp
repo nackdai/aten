@@ -2,6 +2,7 @@
 #include "material/disney_brdf.h"
 #include "material/diffuse.h"
 #include "material/ggx.h"
+#include "misc/color.h"
 
 namespace AT_NAME
 {
@@ -14,81 +15,26 @@ namespace AT_NAME
     // Physically-Based Shading at Disney
     // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 
-    AT_DEVICE_API float DisneyBRDF::pdf(
-        const aten::MaterialParameter& mtrl,
-        const aten::vec3& n,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        float u, float v)
-    {
-        const auto pdf = ComputePDF(mtrl, wi, wo, n);
-        return pdf;
-    }
-
-    AT_DEVICE_API aten::vec3 DisneyBRDF::sampleDirection(
-        const aten::MaterialParameter& mtrl,
-        const aten::vec3& n,
-        const aten::vec3& wi,
-        float u, float v,
-        aten::sampler* sampler)
-    {
-        const auto r1 = sampler->nextSample();
-        const auto r2 = sampler->nextSample();
-        const auto r3 = sampler->nextSample();
-
-        const auto dir = SampleDirection(r1, r2, r3, mtrl, wi, n);
-        return dir;
-    }
-
-    AT_DEVICE_API aten::vec3 DisneyBRDF::bsdf(
-        const aten::MaterialParameter& mtrl,
-        const aten::vec3& n,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        float u, float v)
-    {
-        const auto bsdf = ComputeBRDF(mtrl, n, wi, wo);
-        return bsdf;
-    }
-
-    AT_DEVICE_API void DisneyBRDF::sample(
-        AT_NAME::MaterialSampling& result,
-        const aten::MaterialParameter& mtrl,
-        const aten::vec3& n,
-        const aten::vec3& wi,
-        aten::sampler* sampler,
-        float u, float v)
-    {
-        const auto r1 = sampler->nextSample();
-        const auto r2 = sampler->nextSample();
-        const auto r3 = sampler->nextSample();
-
-        result.dir = SampleDirection(r1, r2, r3, mtrl, wi, n);
-        const auto& wo = result.dir;
-
-        result.pdf = ComputePDF(mtrl, wi, wo, n);
-        result.bsdf = ComputeBRDF(mtrl, n, wi, wo);
-    }
-
     bool DisneyBRDF::edit(aten::IMaterialParamEditor* editor)
     {
-        bool b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, subsurface, 0, 1);
-        bool b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, metallic, 0, 1);
-        bool b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, specular, 0, 1);
-        bool b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, specularTint, 0, 1);
-        bool b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0, 1);
-        bool b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, anisotropic, 0, 1);
-        bool b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, sheen, 0, 1);
-        bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, sheenTint, 0, 1);
-        bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, clearcoat, 0, 1);
-        bool b9 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, clearcoatGloss, 0, 1);
-        bool b10 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, float(0.01), float(10));
-        bool b11 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+        bool is_update = false;
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, subsurface, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, metallic, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, specular, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, specularTint, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, anisotropic, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, sheen, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, sheenTint, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, clearcoat, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, clearcoatGloss, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, float(0.01), float(10));
+        is_update |= AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
 
-        return b0 || b1 || b2 || b3 || b4 || b5 || b6 || b7 || b8 || b9 || b10 || b11;
+        return is_update;
     }
 
     namespace DisneyBrdfUtil {
@@ -98,54 +44,42 @@ namespace AT_NAME
             const auto Ctint = Y > 0 ? base_color / Y : aten::vec3(1.0F);
             return Ctint;
         }
+
+        static inline AT_DEVICE_API float SchlickFresnel(const float u)
+        {
+            const float m = aten::clamp(1.0F - u, 0.0F, 1.0F);
+            const float m2 = m * m;
+            return m2 * m2 * m;
+        }
     };
 
     class DisneyBrdfDiffuse {
     public:
-        static inline AT_DEVICE_API float SchlickFresnel(const float Fd90, const float cos_theta)
-        {
-            const auto c = aten::saturate(1.0F - cos_theta);
-            const auto c5 = c * c * c * c * c;
-            return (1.0F + (Fd90 - 1.0F) * c5);
-        }
-
         static inline AT_DEVICE_API aten::vec3 EvalBRDF(
             const aten::vec3& base_color,
             const float roughness,
             const float subsurface,
             const aten::vec3& V,
             const aten::vec3& L,
-            const aten::vec3& N,
-            const aten::vec3& H)
+            const aten::vec3& N)
         {
-            const auto LdotH = dot(L, H);
+            const auto H = normalize(V + L);
 
-            float fd = 0.0F;
+            const auto LdotH = dot(L, H);
+            const auto NdotV = dot(V, N);
+            const auto NdotL = dot(L, N);
+
+            const auto FV = DisneyBrdfUtil::SchlickFresnel(dot(V, N));
+            const auto FL = DisneyBrdfUtil::SchlickFresnel(dot(L, N));
 
             // Diffuse factor is available.
-            if (subsurface < 1.0F) {
-                const auto Fd90 = 0.5F + 2 * LdotH * LdotH * roughness;
-
-                const auto FV = SchlickFresnel(Fd90, dot(V, N));
-                const auto FL = SchlickFresnel(Fd90, dot(L, N));
-
-                fd = FV * FL;
-            }
-
-            float ss = 0.0F;
+            const auto Fd90 = 0.5F + 2 * LdotH * LdotH * roughness;
+            auto fd = aten::mix(1.0F, Fd90, FL) * aten::mix(1.0F, Fd90, FV);
 
             // Subsurface factor is available.
-            if (subsurface > 0.0F) {
-                const auto Fss90 = LdotH * LdotH * roughness;
-
-                const auto FV = SchlickFresnel(Fss90, dot(V, N));
-                const auto FL = SchlickFresnel(Fss90, dot(L, N));
-
-                const auto NdotV = dot(V, N);
-                const auto NdotL = dot(L, N);
-
-                ss = 1.25F * (FV * FL * (1 / (NdotL + NdotV) - 0.5F) + 0.5F);
-            }
+            const auto Fss90 = LdotH * LdotH * roughness;
+            const auto Fss = aten::mix(1.0F, Fss90, FL) * aten::mix(1.0F, Fss90, FV);
+            const auto ss = 1.25F * (Fss * (1.0F / (NdotL + NdotV) - 0.5F) + 0.5F);
 
             fd = aten::mix(fd, ss, subsurface);
 
@@ -176,14 +110,15 @@ namespace AT_NAME
             const float sheen_tint,
             const aten::vec3& V,
             const aten::vec3& L,
-            const aten::vec3& N,
-            const aten::vec3& H)
+            const aten::vec3& N)
         {
+            const auto H = normalize(V + L);
+
             // Luminance approximmation.
             const auto Ctint = DisneyBrdfUtil::ComputeCtint(base_color);
             const auto Csheen = aten::mix(aten::vec3(1.0F), Ctint, sheen_tint);
 
-            const auto FH = material::ComputeSchlickFresnelWithF0AndCosTheta(0.0F, dot(L, H));
+            const float FH = DisneyBrdfUtil::SchlickFresnel(dot(L, H));
 
             const auto Fsheen = sheen * Csheen * FH;
             return Fsheen;
@@ -194,9 +129,9 @@ namespace AT_NAME
             const aten::vec3& N)
         {
             // Uniform hemisphere sampling.
-            //return 1 / (AT_MATH_PI_2);
+            return 1 / (AT_MATH_PI);
 
-            return Diffuse::ComputePDF(N, L);
+            //return Diffuse::ComputePDF(N, L);
         }
 
         static inline AT_DEVICE_API aten::vec3 SampleDirection(
@@ -212,24 +147,17 @@ namespace AT_NAME
     public:
         static inline AT_DEVICE_API float D_GTR1(
             const float roughness,
-            const aten::vec3& N,
-            const aten::vec3& H)
+            const float NdotH)
         {
-            // NOTE:
-            // If roughness is 1, a2 is 1.
-            // Then, log(a2) is log(1) and it's zero.
-            // It causes zero divide to calculate D.
-            // To avoid it, clamp roughness less than 1.
+            const auto a = roughness;
 
-            // Equation (4).
-            const auto a = aten::cmpMin(roughness, 0.99F);
-            const auto NdotH = aten::abs(dot(N, H));
+            if (a >= 1) {
+                return 1 / AT_MATH_PI;
+            }
 
             const auto a2 = a * a;
-            const auto denom = 1 + (a2 - 1) * NdotH * NdotH;
-
-            const auto D = (a2 - 1) / (AT_MATH_PI * aten::log(a2)) / denom;
-            return D;
+            const auto t = 1.0F + (a2 - 1.0F) * NdotH * NdotH;
+            return (a2 - 1) / (AT_MATH_PI * aten::log(a2) * t);
         }
 
         static inline AT_DEVICE_API aten::vec3 EvalBRDF(
@@ -238,36 +166,59 @@ namespace AT_NAME
             const float clearcoat_gloss,
             const aten::vec3& V,
             const aten::vec3& L,
-            const aten::vec3& N,
-            const aten::vec3& H)
+            const aten::vec3& N)
         {
-            const auto a_clearcoat = clearcoat_gloss;
+#if 0
+            const auto H = normalize(V + L);
 
-            const auto D = D_GTR1(a_clearcoat, N, H);
+            const auto NdotH = dot(N, H);
+            const auto LdotH = dot(L, H);
+
+            const auto a_clearcoat = aten::mix(0.1F, 0.001F, clearcoat_gloss);
+
+            const auto D = D_GTR1(a_clearcoat, NdotH);
 
             // clearcoat (ior = 1.5 -> F0 = 0.04).
-            const auto FH = material::ComputeSchlickFresnelWithF0AndCosTheta(0.04F, dot(L, H));
+            const auto FH = DisneyBrdfUtil::SchlickFresnel(aten::abs(LdotH));
+            const auto F = aten::mix(0.04F, 1.0F, FH);
 
             const auto G = MicrofacetGGX::ComputeG2Smith(0.25F, V, L, N);
 
-            const auto f_clearcoat = 0.25F * clearcoat * FH * D * G;
+            const auto denom = 4 * aten::abs(dot(L, N)) * aten::abs(dot(V, N));
+
+            const auto f_clearcoat = denom > 0.0F ? 0.25F * clearcoat * F * D * G : 0.0F;
             return aten::vec3(f_clearcoat);
+#else
+            const auto H = normalize(V + L);
+
+            const auto LdotH = dot(L, H);
+
+            const auto FH = DisneyBrdfUtil::SchlickFresnel(aten::abs(LdotH));
+            const auto F = aten::mix(0.04F, 1.0F, FH);
+
+            const auto f_clearcoat = 0.25F * clearcoat * F;
+            return aten::vec3(f_clearcoat);
+#endif
         }
 
         static inline AT_DEVICE_API float EvalPDF(
             const float clearcoat_gloss,
+            const aten::vec3& V,
             const aten::vec3& L,
-            const aten::vec3& N,
-            const aten::vec3& H)
+            const aten::vec3& N)
         {
-            const auto a_clearcoat = clearcoat_gloss;
+            const auto H = normalize(V + L);
 
-            const auto D = D_GTR1(a_clearcoat, N, H);
+            const auto NdotH = dot(N, H);
+
+            const auto a_clearcoat = aten::mix(0.1F, 0.001F, clearcoat_gloss);
+
+            const auto D = D_GTR1(a_clearcoat, NdotH);
 
             const auto costheta = aten::abs(dot(H, N));
 
             // For Jacobian |dwh/dwo|
-            const auto denom = 4 * aten::abs(dot(L, N));
+            const auto denom = 4 * aten::abs(dot(L, H));
 
             const auto pdf = denom > 0 ? (D * costheta) / denom : 0;
 
@@ -280,7 +231,7 @@ namespace AT_NAME
             const aten::vec3& V,
             const aten::vec3& N)
         {
-            const auto a_clearcoat = clearcoat_gloss;
+            const auto a_clearcoat = aten::mix(0.1F, 0.001F, clearcoat_gloss);
 
             const auto m = MicrofacetGGX::SampleMicrosurfaceNormal(a_clearcoat, N, r1, r2);
 
@@ -312,15 +263,16 @@ namespace AT_NAME
             const float specular_tint,
             const aten::vec3& V,
             const aten::vec3& L,
-            const aten::vec3& N,
-            const aten::vec3& H)
+            const aten::vec3& N)
         {
+            const auto H = normalize(V + L);
+
             const auto Ctint = DisneyBrdfUtil::ComputeCtint(base_color);
             const auto Cspec = aten::mix(aten::vec3(1), Ctint, specular_tint);
 
             const auto F_s0 = aten::mix(0.08F * specular * Cspec, base_color, metallic);
 
-            const auto F = material::ComputeSchlickFresnelWithF0AndCosTheta(F_s0, dot(L, H));
+            const auto F = aten::mix(F_s0, aten::vec3(1.0F), dot(L, H));
 
             const auto D = MicrofacetGGX::ComputeDistribution(H, N, roughness);
             const auto G = MicrofacetGGX::ComputeG2Smith(roughness, V, L, N);
@@ -336,10 +288,11 @@ namespace AT_NAME
 
         static inline AT_DEVICE_API float EvalPDF(
             const float roughness,
+            const aten::vec3& V,
             const aten::vec3& L,
-            const aten::vec3& N,
-            const aten::vec3& H)
+            const aten::vec3& N)
         {
+            const auto H = normalize(V + L);
             const auto pdf = MicrofacetGGX::ComputePDFWithHalfVector(roughness, N, H, L);
             return pdf;
         }
@@ -357,14 +310,17 @@ namespace AT_NAME
 
     AT_DEVICE_API void DisneyBRDF::ComputeWeights(
         std::array<float, Component::Num>& weights,
+        const aten::vec3& base_color,
         const float metalic,
         const float sheen,
         const float specular,
         const float clearcoat)
     {
-        weights[Component::Diffuse] = 1 - metalic;
+        const auto base_color_lum = AT_NAME::color::luminance(base_color.x, base_color.y, base_color.z);
+
+        weights[Component::Diffuse] = base_color_lum * (1 - metalic);
         weights[Component::Sheen] = sheen * (1 - metalic);
-        weights[Component::Specular] = specular * metalic;
+        weights[Component::Specular] = aten::mix(specular, 1.0F, metalic);
         weights[Component::Clearcoat] = 0.25F * clearcoat;
 
         float norm = 0.0F;
@@ -372,8 +328,10 @@ namespace AT_NAME
             norm += w;
         }
 
-        for (auto& w : weights) {
-            w /= norm;
+        if (norm > 0) {
+            for (auto& w : weights) {
+                w /= norm;
+            }
         }
     }
 
@@ -387,58 +345,127 @@ namespace AT_NAME
         cdf[Component::Clearcoat] = cdf[Component::Specular] + weights[Component::Clearcoat];
     }
 
-    AT_DEVICE_API float DisneyBRDF::ComputePDF(
-        const aten::MaterialParameter& param,
+    AT_DEVICE_API float DisneyBRDF::pdf(
+        const aten::MaterialParameter& mtrl,
+        const aten::vec3& n,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        const aten::vec3& n)
+        float u, float v)
     {
-        const auto roughness = param.standard.roughness;
-        const auto metalic = param.standard.metallic;
-        const auto sheen = param.standard.sheen;
-        const auto specular = param.standard.specular;
-        const auto clearcoat = param.standard.clearcoat;
-        const auto clearcoat_gloss = param.standard.clearcoatGloss;
+        const auto roughness = mtrl.standard.roughness;
+        const auto metalic = mtrl.standard.metallic;
+        const auto sheen = mtrl.standard.sheen;
+        const auto specular = mtrl.standard.specular;
+        const auto clearcoat = mtrl.standard.clearcoat;
+        const auto clearcoat_gloss = mtrl.standard.clearcoatGloss;
 
         std::array<float, Component::Num> weights;
-        ComputeWeights(weights, metalic, sheen, specular, clearcoat);
+        ComputeWeights(weights, mtrl.baseColor, metalic, sheen, specular, clearcoat);
 
-        const auto H = normalize(-wi + wo);
+        const auto V = -wi;
+        const auto L = wo;
+        const auto N = n;
+        const auto H = normalize(V + L);
 
         float pdf = 0.0F;
-
-        if (weights[Component::Diffuse] > 0.0F) {
-            pdf += weights[Component::Diffuse] * DisneyBrdfDiffuse::EvalPDF(wo, n);
-        }
-        if (weights[Component::Sheen] > 0.0F) {
-            pdf += weights[Component::Sheen] * DisneyBrdfSheen::EvalPDF(wo, n);
-        }
-
-        if (weights[Component::Specular] > 0.0F) {
-            pdf += weights[Component::Specular] * DisneyBrdfSpecular::EvalPDF(roughness, wo, n, H);
-        }
-        if (weights[Component::Clearcoat] > 0.0F) {
-            pdf += weights[Component::Clearcoat] * DisneyBrdfClearcoat::EvalPDF(clearcoat_gloss, wo, n, H);
-        }
+        pdf += weights[Component::Diffuse] * DisneyBrdfDiffuse::EvalPDF(L, N);
+        pdf += weights[Component::Sheen] * DisneyBrdfSheen::EvalPDF(L, N);
+        pdf += weights[Component::Specular] * DisneyBrdfSpecular::EvalPDF(roughness, V, L, N);
+        pdf += weights[Component::Clearcoat] * DisneyBrdfClearcoat::EvalPDF(clearcoat_gloss, V, L, N);
 
         return pdf;
     }
 
-    AT_DEVICE_API aten::vec3 DisneyBRDF::SampleDirection(
-        const float r1, const float r2, const float r3,
-        const aten::MaterialParameter& param,
+    AT_DEVICE_API AT_NAME::MaterialSampling DisneyBRDF::bsdf(
+        const aten::MaterialParameter& mtrl,
+        const aten::vec3& n,
         const aten::vec3& wi,
-        const aten::vec3& n)
+        const aten::vec3& wo,
+        float u, float v)
     {
-        const auto roughness = param.standard.roughness;
-        const auto metalic = param.standard.metallic;
-        const auto sheen = param.standard.sheen;
-        const auto specular = param.standard.specular;
-        const auto clearcoat = param.standard.clearcoat;
-        const auto clearcoat_gloss = param.standard.clearcoatGloss;
+        const auto roughness = mtrl.standard.roughness;
+        const auto metalic = mtrl.standard.metallic;
+        const auto sheen = mtrl.standard.sheen;
+        const auto specular = mtrl.standard.specular;
+        const auto clearcoat = mtrl.standard.clearcoat;
+        const auto clearcoat_gloss = mtrl.standard.clearcoatGloss;
+
+        const auto subsurface = mtrl.standard.subsurface;
+        const auto sheen_tint = mtrl.standard.sheenTint;
+        const auto specular_tint = mtrl.standard.specularTint;
 
         std::array<float, Component::Num> weights;
-        ComputeWeights(weights, metalic, sheen, specular, clearcoat);
+        ComputeWeights(weights, mtrl.baseColor, metalic, sheen, specular, clearcoat);
+
+        const auto V = -wi;
+        const auto L = wo;
+        const auto N = n;
+
+        float pdf{ 0.0F };
+
+        aten::vec3 diffuse_brdf{ 0.0F };
+        aten::vec3 sheen_brdf{ 0.0F };
+        aten::vec3 specular_brdf{ 0.0F };
+        aten::vec3 clearcoat_brdf{ 0.0F };
+
+        if (weights[Component::Diffuse] > 0.0F) {
+            // Diffuse.
+            diffuse_brdf = DisneyBrdfDiffuse::EvalBRDF(mtrl.baseColor, roughness, subsurface, V, wo, N);
+            const auto prob = DisneyBrdfDiffuse::EvalPDF(wo, N);
+            pdf += prob * weights[Component::Diffuse];
+        }
+        if (weights[Component::Sheen] > 0.0F) {
+            // Sheen.
+            sheen_brdf = DisneyBrdfSheen::EvalBRDF(mtrl.baseColor, sheen, sheen_tint, V, wo, N);
+            const auto prob = DisneyBrdfSheen::EvalPDF(wo, N);
+            pdf += prob * weights[Component::Sheen];
+        }
+        if (weights[Component::Specular] > 0.0F) {
+            // Specular.
+            specular_brdf = DisneyBrdfSpecular::EvalBRDF(mtrl.baseColor, roughness, metalic, specular, specular_tint, V, wo, N);
+            const auto prob = DisneyBrdfSpecular::EvalPDF(roughness, V, wo, N);
+            pdf += prob * weights[Component::Specular];
+        }
+        if (weights[Component::Clearcoat] > 0.0F) {
+            // Cleaercoat.
+            clearcoat_brdf = DisneyBrdfClearcoat::EvalBRDF(mtrl.baseColor, clearcoat, clearcoat_gloss, V, wo, N);
+            const auto prob = DisneyBrdfClearcoat::EvalPDF(roughness, V, wo, N);
+            pdf += prob * weights[Component::Clearcoat];
+        }
+
+        AT_NAME::MaterialSampling result;
+
+        result.bsdf = (1 - metalic) * (diffuse_brdf + sheen_brdf) + specular_brdf + clearcoat_brdf;
+        result.pdf = pdf;
+
+        return result;
+    }
+
+    AT_DEVICE_API void DisneyBRDF::sample(
+        AT_NAME::MaterialSampling& result,
+        const aten::MaterialParameter& mtrl,
+        const aten::vec3& n,
+        const aten::vec3& wi,
+        aten::sampler* sampler,
+        float u, float v)
+    {
+        const auto r1 = sampler->nextSample();
+        const auto r2 = sampler->nextSample();
+        const auto r3 = sampler->nextSample();
+
+        const auto roughness = mtrl.standard.roughness;
+        const auto metalic = mtrl.standard.metallic;
+        const auto sheen = mtrl.standard.sheen;
+        const auto specular = mtrl.standard.specular;
+        const auto clearcoat = mtrl.standard.clearcoat;
+        const auto clearcoat_gloss = mtrl.standard.clearcoatGloss;
+
+        const auto subsurface = mtrl.standard.subsurface;
+        const auto sheen_tint = mtrl.standard.sheenTint;
+        const auto specular_tint = mtrl.standard.specularTint;
+
+        std::array<float, Component::Num> weights;
+        ComputeWeights(weights, mtrl.baseColor, metalic, sheen, specular, clearcoat);
 
         std::array<float, Component::Num> cdf;
         GetCDF(weights, cdf);
@@ -447,69 +474,84 @@ namespace AT_NAME
         const auto N = n;
 
         aten::vec3 wo;
+        float pdf = 0;
+
+        aten::vec3 diffuse_brdf{ 0.0F };
+        aten::vec3 sheen_brdf{ 0.0F };
+        aten::vec3 specular_brdf{ 0.0F };
+        aten::vec3 clearcoat_brdf{ 0.0F };
 
         if (r3 < cdf[Component::Diffuse]) {
+            // Diffuse.
             wo = DisneyBrdfDiffuse::SampleDirection(r1, r2, N);
+            diffuse_brdf = DisneyBrdfDiffuse::EvalBRDF(mtrl.baseColor, roughness, subsurface, V, wo, N);
+            pdf = DisneyBrdfDiffuse::EvalPDF(wo, N);
+            pdf *= weights[Component::Diffuse];
+
+            // Diffuse is already sampled. So, no need to evaluate with the sample outgoing vector anymore.
+            weights[Component::Diffuse] = 0.0F;
         }
         else if (r3 < cdf[Component::Sheen]) {
+            // Sheen.
             wo = DisneyBrdfSheen::SampleDirection(r1, r2, N);
+            sheen_brdf = DisneyBrdfSheen::EvalBRDF(mtrl.baseColor, sheen, sheen_tint, V, wo, N);
+            pdf = DisneyBrdfSheen::EvalPDF(wo, N);
+            pdf *= weights[Component::Sheen];
+
+            // Sheen is already sampled. So, no need to evaluate with the sample outgoing vector anymore.
+            weights[Component::Sheen] = 0.0F;
         }
         else if (r3 < cdf[Component::Specular]) {
+            // Specular.
             wo = DisneyBrdfSpecular::SampleDirection(r1, r2, roughness, V, N);
+            specular_brdf = DisneyBrdfSpecular::EvalBRDF(mtrl.baseColor, roughness, metalic, specular, specular_tint, V, wo, N);
+            pdf = DisneyBrdfSpecular::EvalPDF(roughness, V, wo, N);
+            pdf *= weights[Component::Specular];
+
+            // Specular is already sampled. So, no need to evaluate with the sample outgoing vector anymore.
+            weights[Component::Specular] = 0.0F;
         }
         else {
             // Cleaercoat.
             wo = DisneyBrdfClearcoat::SampleDirection(r1, r2, clearcoat_gloss, V, N);
+            clearcoat_brdf = DisneyBrdfClearcoat::EvalBRDF(mtrl.baseColor, clearcoat, clearcoat_gloss, V, wo, N);
+            pdf = DisneyBrdfClearcoat::EvalPDF(roughness, V, wo, N);
+            pdf *= weights[Component::Clearcoat];
+
+            // Clearcoat is already sampled. So, no need to evaluate with the sample outgoing vector anymore.
+            weights[Component::Clearcoat] = 0.0F;
         }
 
-        return wo;
-    }
+        // Evaluate with the sampled outgoing vector.
+        // If weight is zero, it means brdf and pdf are already sampled and no need to evaluate.
 
-    AT_DEVICE_API aten::vec3 DisneyBRDF::ComputeBRDF(
-        const aten::MaterialParameter& param,
-        const aten::vec3& n,
-        const aten::vec3& wi,
-        const aten::vec3& wo)
-    {
-        const auto roughness = param.standard.roughness;
-        const auto metalic = param.standard.metallic;
-        const auto sheen = param.standard.sheen;
-        const auto specular = param.standard.specular;
-        const auto clearcoat = param.standard.clearcoat;
-        const auto clearcoat_gloss = param.standard.clearcoatGloss;
+        if (weights[Component::Diffuse] > 0.0F) {
+            // Diffuse.
+            diffuse_brdf = DisneyBrdfDiffuse::EvalBRDF(mtrl.baseColor, roughness, subsurface, V, wo, N);
+            const auto prob = DisneyBrdfDiffuse::EvalPDF(wo, N);
+            pdf += weights[Component::Diffuse] * prob;
+        }
+        if (weights[Component::Sheen] > 0.0F) {
+            // Sheen.
+            sheen_brdf = DisneyBrdfSheen::EvalBRDF(mtrl.baseColor, sheen, sheen_tint, V, wo, N);
+            const auto prob = DisneyBrdfSheen::EvalPDF(wo, N);
+            pdf += weights[Component::Sheen] * prob;
+        }
+        if (weights[Component::Specular] > 0.0F) {
+            // Specular.
+            specular_brdf = DisneyBrdfSpecular::EvalBRDF(mtrl.baseColor, roughness, metalic, specular, specular_tint, V, wo, N);
+            const auto prob = DisneyBrdfSpecular::EvalPDF(roughness, V, wo, N);
+            pdf += weights[Component::Specular] * prob;
+        }
+        if (weights[Component::Clearcoat] > 0.0F) {
+            // Clearcoat.
+            clearcoat_brdf = DisneyBrdfClearcoat::EvalBRDF(mtrl.baseColor, clearcoat, clearcoat_gloss, V, wo, N);
+            const auto prob = DisneyBrdfClearcoat::EvalPDF(roughness, V, wo, N);
+            pdf += weights[Component::Clearcoat] * prob;
+        }
 
-        const auto subsurface = param.standard.subsurface;
-        const auto sheen_tint = param.standard.sheenTint;
-        const auto specular_tint = param.standard.specularTint;
-
-        const auto V = -wi;
-        const auto L = wo;
-        const auto N = n;
-        const auto H = normalize(V + L);
-
-        const auto f_d = DisneyBrdfDiffuse::EvalBRDF(
-            param.baseColor,
-            roughness, subsurface,
-            V, L, N, H);
-
-        const auto f_sheen = DisneyBrdfSheen::EvalBRDF(
-            param.baseColor,
-            sheen, sheen_tint,
-            V, L, N, H);
-
-        const auto f_spec = DisneyBrdfSpecular::EvalBRDF(
-            param.baseColor,
-            roughness, metalic,
-            specular, specular_tint,
-            V, L, N, H);
-
-        const auto f_clearcoat = DisneyBrdfClearcoat::EvalBRDF(
-            param.baseColor,
-            clearcoat, clearcoat_gloss,
-            V, L, N, H);
-
-        const auto f = (f_d + f_sheen) * (1 - metalic) + f_spec + f_clearcoat;
-
-        return f;
+        result.pdf = pdf;
+        result.bsdf = (1 - metalic) * (diffuse_brdf + sheen_brdf) + specular_brdf + clearcoat_brdf;
+        result.dir = wo;
     }
 }

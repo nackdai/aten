@@ -610,7 +610,7 @@ namespace AT_NAME
             const aten::vec3& wo,
             float u, float v);
 
-        static AT_DEVICE_API aten::vec3 sampleBSDF(
+        static AT_DEVICE_API AT_NAME::MaterialSampling sampleBSDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,

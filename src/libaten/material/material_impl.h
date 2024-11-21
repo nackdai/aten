@@ -148,7 +148,7 @@ namespace AT_NAME
         return pdf;
     }
 
-    inline AT_DEVICE_API aten::vec3 material::sampleBSDF(
+    inline AT_DEVICE_API AT_NAME::MaterialSampling material::sampleBSDF(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -156,39 +156,41 @@ namespace AT_NAME
         float u, float v,
         float pre_sampled_r)
     {
+        AT_NAME::MaterialSampling result;
+
         switch (mtrl->type) {
         case aten::MaterialType::Emissive:
-            return AT_NAME::emissive::bsdf(mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::emissive::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Diffuse:
-            return AT_NAME::Diffuse::bsdf(mtrl);
+            result.bsdf = AT_NAME::Diffuse::bsdf(mtrl);
         case aten::MaterialType::OrneNayar:
-            return AT_NAME::OrenNayar::bsdf(mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::OrenNayar::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Specular:
-            return AT_NAME::specular::bsdf(mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::specular::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Refraction:
-            return AT_NAME::refraction::bsdf(mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::refraction::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::GGX:
-            return AT_NAME::MicrofacetGGX::bsdf(mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::MicrofacetGGX::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Beckman:
-            return AT_NAME::MicrofacetBeckman::bsdf(mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::MicrofacetBeckman::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Velvet:
-            return AT_NAME::MicrofacetVelvet::bsdf(mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::MicrofacetVelvet::bsdf(mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Microfacet_Refraction:
-            return AT_NAME::MicrofacetRefraction::bsdf(*mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::MicrofacetRefraction::bsdf(*mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::Retroreflective:
-            return AT_NAME::Retroreflective::bsdf(*mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::Retroreflective::bsdf(*mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::CarPaint:
-            return AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, pre_sampled_r);
+            result.bsdf = AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, pre_sampled_r);
         case aten::MaterialType::Disney:
-            return AT_NAME::DisneyBRDF::bsdf(*mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::DisneyBRDF::bsdf(*mtrl, normal, wi, wo, u, v);
         case aten::MaterialType::ToonSpecular:
-            return AT_NAME::ToonSpecular::ComputeBRDF(*mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::ToonSpecular::ComputeBRDF(*mtrl, normal, wi, wo, u, v);
         default:
             AT_ASSERT(false);
-            return AT_NAME::Diffuse::bsdf(mtrl);
+            result.bsdf = AT_NAME::Diffuse::bsdf(mtrl);
         }
 
-        return aten::vec3();
+        return result;
     }
 
     inline AT_DEVICE_API float material::applyNormal(

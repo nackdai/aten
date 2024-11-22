@@ -187,7 +187,7 @@ namespace AT_NAME
             result.bsdf = AT_NAME::MicrofacetRefraction::bsdf(*mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::Retroreflective:
-            result.bsdf = AT_NAME::Retroreflective::bsdf(*mtrl, normal, wi, wo, u, v);
+            result = AT_NAME::Retroreflective::bsdf(*mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::CarPaint:
             result.bsdf = AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, pre_sampled_r);

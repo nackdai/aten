@@ -1578,3 +1578,47 @@ void ToonCornellBoxScene::getCameraPosAndAt(
     at = aten::vec3(0.f, 1.f, 0.f);
     fov = 45.0f;
 }
+
+
+/////////////////////////////////////////////////////
+
+void DisneyBrdfScene::makeScene(
+    aten::context& ctxt, aten::scene* scene)
+{
+    aten::MaterialParameter mtrl_param;
+    mtrl_param.type = aten::MaterialType::Disney;
+    memset(&mtrl_param.standard, 0, sizeof(mtrl_param.standard));
+    mtrl_param.baseColor = aten::vec3(0.580000f, 0.580000f, 0.580000f);
+    mtrl_param.standard.ior = 1.333F;
+    mtrl_param.standard.roughness = 0.011F;
+    mtrl_param.standard.metallic = 1;
+    mtrl_param.standard.specular = 1.0F;
+    mtrl_param.standard.specularTint = 1.0F;
+
+#if 1
+    constexpr char* asset_path = "../../asset/sphere/sphere.obj";
+    constexpr char* mtrl_in_asset = "m1";
+#else
+    constexpr char* asset_path = "../../asset/suzanne/suzanne.obj";
+    constexpr char* mtrl_in_asset = "Material.001";
+#endif
+
+    auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
+        mtrl_in_asset,
+        mtrl_param,
+        nullptr, nullptr, nullptr);
+
+    auto obj = aten::ObjLoader::LoadFirstObj(asset_path, ctxt);
+    auto poly_obj = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, obj, aten::mat4::Identity);
+    scene->add(poly_obj);
+}
+
+void DisneyBrdfScene::getCameraPosAndAt(
+    aten::vec3& pos,
+    aten::vec3& at,
+    float& fov)
+{
+    pos = aten::vec3(0.f, 0.f, 15.f);
+    at = aten::vec3(0.f, 0.f, 0.f);
+    fov = 45.0f;
+}

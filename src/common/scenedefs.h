@@ -245,6 +245,16 @@ public:
         float& fov);
 };
 
+class DisneyBrdfScene {
+public:
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
+
+    static void getCameraPosAndAt(
+        aten::vec3& pos,
+        aten::vec3& at,
+        float& fov);
+};
+
 template <class SCENE, class T>
 void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene)
 {
@@ -267,8 +277,6 @@ void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene)
 //#define Scene TexturesScene
 //#define Scene HideLightScene
 //#define Scene DisneyMaterialTestScene
-//#define Scene LayeredMaterialTestScene
-//#define Scene ToonShadeTestScene
 //#define Scene ObjCornellBoxScene
 //#define Scene SponzaScene
 //#define Scene BunnyScene
@@ -281,4 +289,5 @@ void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene)
 //#define Scene CornellBoxHomogeneousMediumScene
 //#define Scene HomogeneousMediumRefractionBunnyScene
 //#define Scene ToonSimpleSphereScene
-#define Scene ToonCornellBoxScene
+//#define Scene ToonCornellBoxScene
+#define Scene DisneyBrdfScene

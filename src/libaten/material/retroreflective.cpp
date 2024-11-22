@@ -5,62 +5,6 @@
 
 namespace AT_NAME
 {
-    AT_DEVICE_API float Retroreflective::pdf(
-        const aten::MaterialParameter& param,
-        const aten::vec3& n,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        float u, float v)
-    {
-        const auto pdf = ComputePDF(param, wi, wo, n);
-        return pdf;
-    }
-
-    AT_DEVICE_API aten::vec3 Retroreflective::sampleDirection(
-        const aten::MaterialParameter& param,
-        const aten::vec3& n,
-        const aten::vec3& wi,
-        float u, float v,
-        aten::sampler* sampler)
-    {
-        const auto r1 = sampler->nextSample();
-        const auto r2 = sampler->nextSample();
-        const auto r3 = sampler->nextSample();
-
-        const auto dir = SampleDirection(r1, r2, r3, param, wi, n);
-        return dir;
-    }
-
-    AT_DEVICE_API aten::vec3 Retroreflective::bsdf(
-        const aten::MaterialParameter& param,
-        const aten::vec3& n,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        float u, float v)
-    {
-        const auto bsdf = ComputeBRDF(param, n, wi, wo);
-        return bsdf;
-    }
-
-    AT_DEVICE_API void Retroreflective::sample(
-        AT_NAME::MaterialSampling& result,
-        const aten::MaterialParameter& param,
-        const aten::vec3& n,
-        const aten::vec3& wi,
-        aten::sampler* sampler,
-        float u, float v)
-    {
-        const auto r1 = sampler->nextSample();
-        const auto r2 = sampler->nextSample();
-        const auto r3 = sampler->nextSample();
-
-        result.dir = SampleDirection(r1, r2, r3, param, wi, n);
-        const auto& wo = result.dir;
-
-        result.pdf = ComputePDF(param, wi, wo, n);
-        result.bsdf = ComputeBRDF(param, n, wi, wo);
-    }
-
     bool Retroreflective::edit(aten::IMaterialParamEditor* editor)
     {
         auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0.01F, 1.0F);
@@ -464,11 +408,12 @@ namespace AT_NAME
         cdf[Component::Diffuse] = cdf[Component::RetroReflection] + weights[Component::Diffuse];
     }
 
-    AT_DEVICE_API float Retroreflective::ComputePDF(
+    AT_DEVICE_API float Retroreflective::pdf(
         const aten::MaterialParameter& param,
+        const aten::vec3& n,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        const aten::vec3& n)
+        float u, float v)
     {
         const auto roughness = param.standard.roughness;
         const auto ior = param.standard.ior;
@@ -494,12 +439,79 @@ namespace AT_NAME
         return pdf;
     }
 
-    AT_DEVICE_API aten::vec3 Retroreflective::SampleDirection(
-        const float r1, const float r2, const float r3,
+    AT_DEVICE_API AT_NAME::MaterialSampling Retroreflective::bsdf(
         const aten::MaterialParameter& param,
+        const aten::vec3& n,
         const aten::vec3& wi,
-        const aten::vec3& n)
+        const aten::vec3& wo,
+        float u, float v)
     {
+        const auto roughness = param.standard.roughness;
+        const auto ior = param.standard.ior;
+
+        const auto ni = 1.0F;
+        const auto nt = ior;
+
+        std::array<float, Component::Num> weights;
+        ComputeWeights(weights, ni, nt, wi, n);
+
+        aten::vec3 f_r{ 0.0F };
+        aten::vec3 f_rr{ 0.0F };
+        aten::vec3 f_d{ 0.0F };
+
+        float pdf{ 0.0F };
+
+        if (weights[Component::SurfaceReflection] > 0.0F) {
+            f_r = RetroreflectiveSurfaceReflection::EvalBRDF(roughness, ior, n, wi, wo);
+            const auto prob = RetroreflectiveSurfaceReflection::EvalPDF(roughness, n, wi, wo);
+            pdf += prob * weights[Component::SurfaceReflection];
+        }
+
+        float used_E = 0.0F;
+        float used_F = 0.0F;
+
+        if (weights[Component::RetroReflection] > 0.0F) {
+            f_rr = RetroreflectiveRetroreflection::EvalBRDF(roughness, ior, n, wi, wo, &used_E, &used_F);
+            const auto prob = RetroreflectiveRetroreflection::EvalPDF(roughness, ni, nt, n, wi, wo);
+            pdf += prob * weights[Component::RetroReflection];
+        }
+        else {
+            const auto ut = material::ComputeRefractVector(ni, nt, wi, n);
+
+            const auto E = RetroreflectiveRetroreflection::GetEffectiveRetroreflectiveArea(ut, n);
+            used_E = E;
+
+            auto F = (1.0F - material::ComputeSchlickFresnel(ni, nt, -wi, n));
+            F *= (1.0F - material::ComputeSchlickFresnel(ni, nt, wo, n));
+            used_F = F;
+        }
+
+        if (weights[Component::Diffuse] > 0.0F) {
+            f_d = RetroreflectiveDiffuse::EvalBRDF(used_E, used_F, ni, nt, n, wi, wo);
+            const auto prob = RetroreflectiveDiffuse::EvalPDF(n, wo);
+            pdf += prob * weights[Component::Diffuse];
+        }
+
+        AT_NAME::MaterialSampling result;
+
+        result.bsdf = f_r + f_rr + f_d;
+        result.pdf = pdf;
+
+        return result;
+    }
+
+    AT_DEVICE_API void Retroreflective::sample(
+        AT_NAME::MaterialSampling& result,
+        const aten::MaterialParameter& param,
+        const aten::vec3& n,
+        const aten::vec3& wi,
+        aten::sampler* sampler,
+        float u, float v)
+    {
+        const auto r1 = sampler->nextSample();
+        const auto r2 = sampler->nextSample();
+        const auto r3 = sampler->nextSample();
+
         const auto roughness = param.standard.roughness;
         const auto ior = param.standard.ior;
 
@@ -512,52 +524,83 @@ namespace AT_NAME
         std::array<float, Component::Num> cdf;
         GetCDF(weights, cdf);
 
+        aten::vec3 f_r{ 0.0F };
+        aten::vec3 f_rr{ 0.0F };
+        aten::vec3 f_d{ 0.0F };
+
+        float pdf{ 0.0F };
         aten::vec3 wo;
-
-        if (r3 < cdf[Component::SurfaceReflection]) {
-            wo = RetroreflectiveSurfaceReflection::SampleDirection(r1, r2, roughness, wi, n);
-        }
-        else if (r3 < cdf[Component::RetroReflection]) {
-            wo = RetroreflectiveRetroreflection::SampleDirection(r1, r2, roughness, ni, nt, wi, n);
-        }
-        else {
-            wo = RetroreflectiveDiffuse::SampleDirection(r1, r2, n);
-        }
-
-        return wo;
-    }
-
-    AT_DEVICE_API aten::vec3 Retroreflective::ComputeBRDF(
-        const aten::MaterialParameter& param,
-        const aten::vec3& n,
-        const aten::vec3& wi,
-        const aten::vec3& wo)
-    {
-        const auto roughness = param.standard.roughness;
-        const auto ior = param.standard.ior;
-
-        const auto ni = 1.0F;
-        const auto nt = ior;
-
-        const auto f_r = RetroreflectiveSurfaceReflection::EvalBRDF(
-            roughness, ior,
-            n, wi, wo);
 
         float used_E = 0.0F;
         float used_F = 0.0F;
 
-        const auto f_rr = RetroreflectiveRetroreflection::EvalBRDF(
-            roughness, ior,
-            n, wi, wo,
-            &used_E, &used_F);
+        if (r3 < cdf[Component::SurfaceReflection]) {
+            wo = RetroreflectiveSurfaceReflection::SampleDirection(r1, r2, roughness, wi, n);
+            f_r = RetroreflectiveSurfaceReflection::EvalBRDF(roughness, ior, n, wi, wo);
+            const auto prob = RetroreflectiveSurfaceReflection::EvalPDF(roughness, n, wi, wo);
+            pdf += prob * weights[Component::SurfaceReflection];
 
-        const auto f_d = RetroreflectiveDiffuse::EvalBRDF(
-            used_E, used_F,
-            ni, nt,
-            n, wi, wo);
+            // SurfaceReflection is already sampled. So, no need to evaluate with the sample outgoing vector anymore.
+            weights[Component::SurfaceReflection] = 0.0F;
+        }
+        else if (r3 < cdf[Component::RetroReflection]) {
+            wo = RetroreflectiveRetroreflection::SampleDirection(r1, r2, roughness, ni, nt, wi, n);
+            f_rr = RetroreflectiveRetroreflection::EvalBRDF(roughness, ior, n, wi, wo, &used_E, &used_F);
+            const auto prob = RetroreflectiveRetroreflection::EvalPDF(roughness, ni, nt, n, wi, wo);
+            pdf += prob * weights[Component::RetroReflection];
 
-        const auto f = f_r + f_rr + f_d;
+            // RetroReflection is already sampled. So, no need to evaluate with the sample outgoing vector anymore.
+            weights[Component::RetroReflection] = 0.0F;
+        }
+        else {
+            const auto ut = material::ComputeRefractVector(ni, nt, wi, n);
 
-        return f;
+            const auto E = RetroreflectiveRetroreflection::GetEffectiveRetroreflectiveArea(ut, n);
+            used_E = E;
+
+            auto F = (1.0F - material::ComputeSchlickFresnel(ni, nt, -wi, n));
+            F *= (1.0F - material::ComputeSchlickFresnel(ni, nt, wo, n));
+            used_F = F;
+
+            wo = RetroreflectiveDiffuse::SampleDirection(r1, r2, n);
+            f_d = RetroreflectiveDiffuse::EvalBRDF(used_E, used_F, ni, nt, n, wi, wo);
+            const auto prob = RetroreflectiveDiffuse::EvalPDF(n, wo);
+            pdf += prob * weights[Component::Diffuse];
+
+            // Diffuse is already sampled. So, no need to evaluate with the sample outgoing vector anymore.
+            weights[Component::Diffuse] = 0.0F;
+        }
+
+        // Evaluate with the sampled outgoing vector.
+        // If weight is zero, it means brdf and pdf are already sampled and no need to evaluate.
+
+        if (weights[Component::SurfaceReflection] > 0.0F) {
+            f_r = RetroreflectiveSurfaceReflection::EvalBRDF(roughness, ior, n, wi, wo);
+            const auto prob = RetroreflectiveSurfaceReflection::EvalPDF(roughness, n, wi, wo);
+            pdf += prob * weights[Component::SurfaceReflection];
+        }
+        if (weights[Component::RetroReflection] > 0.0F) {
+            f_rr = RetroreflectiveRetroreflection::EvalBRDF(roughness, ior, n, wi, wo, &used_E, &used_F);
+            const auto prob = RetroreflectiveRetroreflection::EvalPDF(roughness, ni, nt, n, wi, wo);
+            pdf += prob * weights[Component::RetroReflection];
+        }
+        if (weights[Component::Diffuse] > 0.0F) {
+            const auto ut = material::ComputeRefractVector(ni, nt, wi, n);
+
+            const auto E = RetroreflectiveRetroreflection::GetEffectiveRetroreflectiveArea(ut, n);
+            used_E = E;
+
+            auto F = (1.0F - material::ComputeSchlickFresnel(ni, nt, -wi, n));
+            F *= (1.0F - material::ComputeSchlickFresnel(ni, nt, wo, n));
+            used_F = F;
+
+            f_d = RetroreflectiveDiffuse::EvalBRDF(used_E, used_F, ni, nt, n, wi, wo);
+            const auto prob = RetroreflectiveDiffuse::EvalPDF(n, wo);
+            pdf += prob * weights[Component::Diffuse];
+        }
+
+        result.pdf = pdf;
+        result.bsdf = f_r + f_rr + f_d;
+        result.dir = wo;
     }
 }

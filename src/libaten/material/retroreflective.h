@@ -45,14 +45,7 @@ namespace AT_NAME
             const aten::vec3& wo,
             float u, float v);
 
-        static AT_DEVICE_API aten::vec3 sampleDirection(
-            const aten::MaterialParameter& param,
-            const aten::vec3& n,
-            const aten::vec3& wi,
-            float u, float v,
-            aten::sampler* sampler);
-
-        static AT_DEVICE_API aten::vec3 bsdf(
+        static AT_DEVICE_API AT_NAME::MaterialSampling bsdf(
             const aten::MaterialParameter& param,
             const aten::vec3& n,
             const aten::vec3& wi,
@@ -85,23 +78,5 @@ namespace AT_NAME
         static AT_DEVICE_API void GetCDF(
             const std::array<float, Component::Num>& weights,
             std::array<float, Component::Num>& cdf);
-
-        static AT_DEVICE_API float ComputePDF(
-            const aten::MaterialParameter& param,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            const aten::vec3& n);
-
-        static AT_DEVICE_API aten::vec3 SampleDirection(
-            const float r1, const float r2, const float r3,
-            const aten::MaterialParameter& param,
-            const aten::vec3& wi,
-            const aten::vec3& n);
-
-        static AT_DEVICE_API aten::vec3 ComputeBRDF(
-            const aten::MaterialParameter& param,
-            const aten::vec3& n,
-            const aten::vec3& wi,
-            const aten::vec3& wo);
     };
 }

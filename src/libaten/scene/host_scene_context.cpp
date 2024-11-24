@@ -361,7 +361,7 @@ namespace aten
 
         // Assigne light id to object of light.
         if (light->param().arealight_objid >= 0) {
-            const auto light_id = lights_.size() - 1;
+            const auto light_id = static_cast<int32_t>(lights_.size() - 1);
             auto obj = transformables_.at(light->param().arealight_objid);
             obj->GetParam().light_id = light_id;
 

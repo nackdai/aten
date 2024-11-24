@@ -196,9 +196,9 @@ namespace AT_NAME
             // Therefore, width need to be invert as smoothstep edge0 argument.
             if (NdotV > 0) {
                 rim = _detail::bezier_smoothstep(
-                    1.0 - param.toon.rim_light_width,
-                    1.0,
-                    (1 - param.toon.rim_light_softness) * 0.5,
+                    1.0F - param.toon.rim_light_width,
+                    1.0F,
+                    (1 - param.toon.rim_light_softness) * 0.5F,
                     1 - NdotV,
                     param.toon.rim_light_spread);
 

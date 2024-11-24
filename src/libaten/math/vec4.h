@@ -58,6 +58,16 @@ namespace aten {
             z = _z;
             w = _w;
         }
+
+        template <class T>
+        AT_HOST_DEVICE_API vec4(T _x, T _y, T _z)
+        {
+            x = static_cast<float>(_x);
+            y = static_cast<float>(_y);
+            z = static_cast<float>(_z);
+            w = 1.0F;
+        }
+
         AT_HOST_DEVICE_API vec4(const vec3& _v, float _w)
         {
             v = _v;

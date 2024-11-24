@@ -49,15 +49,15 @@ namespace aten {
         {
             // Compute normal on the fly.
             // To do it, specify -1 at uv.z;
-            aten::vertex v0{ aten::vec4(bbox_min[0], bbox_min[1], bbox_min[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
-            aten::vertex v1{ aten::vec4(bbox_max[0], bbox_min[1], bbox_min[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
-            aten::vertex v2{ aten::vec4(bbox_max[0], bbox_max[1], bbox_min[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
-            aten::vertex v3{ aten::vec4(bbox_min[0], bbox_max[1], bbox_min[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v0{ aten::vec4(bbox_min[0], bbox_min[1], bbox_min[2]), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v1{ aten::vec4(bbox_max[0], bbox_min[1], bbox_min[2]), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v2{ aten::vec4(bbox_max[0], bbox_max[1], bbox_min[2]), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v3{ aten::vec4(bbox_min[0], bbox_max[1], bbox_min[2]), aten::vec3(), aten::vec3(0, 0, -1) };
 
-            aten::vertex v4{ aten::vec4(bbox_max[0], bbox_min[1], bbox_max[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
-            aten::vertex v5{ aten::vec4(bbox_min[0], bbox_min[1], bbox_max[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
-            aten::vertex v6{ aten::vec4(bbox_min[0], bbox_max[1], bbox_max[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
-            aten::vertex v7{ aten::vec4(bbox_max[0], bbox_max[1], bbox_max[2], 1), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v4{ aten::vec4(bbox_max[0], bbox_min[1], bbox_max[2]), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v5{ aten::vec4(bbox_min[0], bbox_min[1], bbox_max[2]), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v6{ aten::vec4(bbox_min[0], bbox_max[1], bbox_max[2]), aten::vec3(), aten::vec3(0, 0, -1) };
+            aten::vertex v7{ aten::vec4(bbox_max[0], bbox_max[1], bbox_max[2]), aten::vec3(), aten::vec3(0, 0, -1) };
 
             ctxt.AddVertex(v0);
             ctxt.AddVertex(v1);

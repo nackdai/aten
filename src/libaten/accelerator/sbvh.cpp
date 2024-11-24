@@ -1371,7 +1371,7 @@ namespace aten
             // TODO
             static std::array<char, 128> tmpbuf = { 0 };
 
-            for (int32_t i = 0; i < header.cntMtrlForVoxel; i++)
+            for (uint32_t i = 0; i < header.cntMtrlForVoxel; i++)
             {
                 // id.
                 int32_t mtrlid = -1;

@@ -12,14 +12,14 @@ namespace aten {
         auto& pos = camera.GetPos();
         auto& at = camera.GetAt();
 
-        auto offset_x = x1 - x2;
+        auto offset_x = static_cast<float>(x1 - x2);
         offset_x *= scale;
 
-        auto offsetY = y1 - y2;
-        offsetY *= scale;
+        auto offset_y = static_cast<float>(y1 - y2);
+        offset_y *= scale;
 
         // 移動ベクトル.
-        aten::vec3 offset(offset_x, offsetY, 0.0F);
+        aten::vec3 offset(offset_x, offset_y, 0.0F);
 
         // カメラの回転を考慮する.
         aten::vec3 dir = at - pos;

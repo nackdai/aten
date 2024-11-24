@@ -454,7 +454,7 @@ namespace AT_NAME
             const auto nnt = ni / nt;
             const auto sini2 = float(1.0) - cosi * cosi;
             const auto sint2 = nnt * nnt * sini2;
-            const auto cost = aten::sqrt(aten::cmpMax(float(0.0), float(1.0) - sint2));
+            const auto cost = aten::sqrt(aten::max(float(0.0), float(1.0) - sint2));
 
             const auto rp = (nt * cosi - ni * cost) / (nt * cosi + ni * cost);
             const auto rs = (ni * cosi - nt * cost) / (ni * cosi + nt * cost);

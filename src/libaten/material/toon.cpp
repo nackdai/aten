@@ -118,7 +118,7 @@ namespace AT_NAME
         const auto y = xyz.y;
 
         // To avoid too dark, compare with the minimum weight.
-        const auto weight = aten::saturate(aten::cmpMax(y, w_min));
+        const auto weight = aten::saturate(aten::max(y, w_min));
 
         // Compute texture coord (1D, vertical) for remap texture.
         auto remap_v = 0.0F;
@@ -276,7 +276,7 @@ namespace AT_NAME
 
                 auto G1 = 2 * NdotH * NdotL / VdotH;
                 auto G2 = 2 * NdotH * NdotV / VdotH;
-                G = aten::cmpMin(1.0F, aten::cmpMin(G1, G2));
+                G = aten::min(1.0F, aten::min(G1, G2));
             }
 
             const auto brdf = denom > AT_MATH_EPSILON ? F * G * D / denom : 0.0F;

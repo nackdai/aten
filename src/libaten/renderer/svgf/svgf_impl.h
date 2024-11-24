@@ -399,7 +399,7 @@ namespace svgf {
                 {
                     int32_t pidx = _detail::GetIdx(xx, yy, width);
                     float w = aov_moment_temporalweight[pidx].w;
-                    temporal_weight = aten::cmpMin(temporal_weight, w);
+                    temporal_weight = aten::min(temporal_weight, w);
                 }
             }
         }
@@ -503,7 +503,7 @@ namespace svgf {
                         const auto uv_length = aten::sqrt(static_cast<float>(u * u + v * v));
 
                         const float Wz = aten::abs(sample_depth - center_depth) / (pixel_distance_ratio * uv_length + 1e-2f);
-                        const float Wn = aten::pow(aten::cmpMax(0.0f, dot(sample_nml, center_normal)), 128.0f);
+                        const float Wn = aten::pow(aten::max(0.0f, dot(sample_nml, center_normal)), 128.0f);
 
                         const float Wm = center_meshid == sample_meshid ? 1.0f : 0.0f;
 
@@ -519,10 +519,10 @@ namespace svgf {
             moment_sum /= weight;
             color /= weight;
 
-            variance = aten::cmpMax(0.0f, moment_sum.x - moment_sum.y * moment_sum.y);
+            variance = aten::max(0.0f, moment_sum.x - moment_sum.y * moment_sum.y);
         }
         else {
-            variance = aten::cmpMax(0.0f, center_moment.x - center_moment.y * center_moment.y);
+            variance = aten::max(0.0f, center_moment.x - center_moment.y * center_moment.y);
         }
 
         color.w = variance;
@@ -759,9 +759,9 @@ namespace svgf {
 
             float Wz = 3.0f * fabs(center_depth - depth) / (sigmaZ * (pixel_distance_ratio * u_length) + 0.000001f);
 
-            float Wn = powf(aten::cmpMax(0.0f, dot(center_normal, normal)), sigmaN);
+            float Wn = powf(aten::max(0.0f, dot(center_normal, normal)), sigmaN);
 
-            float Wl = aten::cmpMin(expf(-fabs(center_luminance - lum) / (sigmaL * sqrt_gauss_filtered_variance + 0.000001f)), 1.0f);
+            float Wl = aten::min(expf(-fabs(center_luminance - lum) / (sigmaL * sqrt_gauss_filtered_variance + 0.000001f)), 1.0f);
 
             float Wm = meshid == center_meshid ? 1.0f : 0.0f;
 

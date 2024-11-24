@@ -47,7 +47,7 @@ namespace AT_NAME
             auto aspect = float(1) / flakeMapAspect;
 
             auto D = AT_MATH_PI * flake_size * flake_size * aspect;
-            D = aten::cmpMin(D, float(1));
+            D = aten::min(D, float(1));
 
             return D;
         }

@@ -134,7 +134,7 @@ namespace restir {
     {
         const auto light_num = ctxt.GetLightNum();
         const auto max_light_num = static_cast<decltype(MaxLightCount)>(light_num);
-        const auto light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
+        const auto light_cnt = aten::min(MaxLightCount, max_light_num);
 
         reservoir.clear();
 

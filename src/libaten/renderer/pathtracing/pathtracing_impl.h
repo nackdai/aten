@@ -267,7 +267,7 @@ namespace AT_NAME
             return aten::make_tuple(light_sample, light_select_prob, target_light_idx);
         }
 
-        target_light_idx = aten::cmpMin<decltype(lightnum)>(
+        target_light_idx = aten::min<decltype(lightnum)>(
             static_cast<decltype(lightnum)>(sampler.nextSample() * lightnum), lightnum - 1);
         light_select_prob = 1.0f / lightnum;
 

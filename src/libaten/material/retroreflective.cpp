@@ -181,7 +181,7 @@ namespace AT_NAME
             else {
                 // Compute interp factor.
                 const auto d = ERATable.at(idx)[0];
-                t = aten::cmpMin(1.0F, aten::abs(d - theta) / Step);
+                t = aten::min(1.0F, aten::abs(d - theta) / Step);
 
                 // Obtain interp targets.
                 a = ERATable[idx][1];

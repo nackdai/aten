@@ -75,8 +75,8 @@ namespace aten {
             const auto tmax = aten::vmax(f, n);
             const auto tmin = aten::vmin(f, n);
 
-            const auto t1 = aten::cmpMin(aten::min_from_vec3(tmax), t_max);
-            const auto t0 = aten::cmpMax(aten::max_from_vec3(tmin), t_min);
+            const auto t1 = aten::min(aten::min_from_vec3(tmax), t_max);
+            const auto t0 = aten::max(aten::max_from_vec3(tmin), t_min);
 
             if (t_result) {
                 *t_result = t0;

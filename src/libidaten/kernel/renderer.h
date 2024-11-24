@@ -11,7 +11,7 @@ namespace aten {
 
 namespace idaten
 {
-    class DeviceContextInHost;
+    struct DeviceContextInHost;
 
     class Renderer {
     protected:

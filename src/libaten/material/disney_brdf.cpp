@@ -398,7 +398,6 @@ namespace AT_NAME
         ComputeWeights(weights, mtrl.baseColor, metalic, sheen, specular, clearcoat);
 
         const auto V = -wi;
-        const auto L = wo;
         const auto N = n;
 
         float pdf{ 0.0F };

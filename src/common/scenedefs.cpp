@@ -1343,8 +1343,8 @@ void HomogeneousMediumRefractionBunnyScene::getCameraPosAndAt(
 void ToonSimpleSphereScene::makeScene(
     aten::context& ctxt, aten::scene* scene)
 {
-    constexpr char* asset_path = "../../asset/sphere/sphere.obj";
-    constexpr char* mtrl_in_asset = "m1";
+    constexpr const char* asset_path = "../../asset/sphere/sphere.obj";
+    constexpr const char* mtrl_in_asset = "m1";
 
 #if 0
     // Light.
@@ -1596,11 +1596,11 @@ void DisneyBrdfScene::makeScene(
     mtrl_param.standard.specularTint = 1.0F;
 
 #if 1
-    constexpr char* asset_path = "../../asset/sphere/sphere.obj";
-    constexpr char* mtrl_in_asset = "m1";
+    constexpr const char* asset_path = "../../asset/sphere/sphere.obj";
+    constexpr const char* mtrl_in_asset = "m1";
 #else
-    constexpr char* asset_path = "../../asset/suzanne/suzanne.obj";
-    constexpr char* mtrl_in_asset = "Material.001";
+    constexpr const char* asset_path = "../../asset/suzanne/suzanne.obj";
+    constexpr const char* mtrl_in_asset = "Material.001";
 #endif
 
     auto mtrl = ctxt.CreateMaterialWithMaterialParameter(

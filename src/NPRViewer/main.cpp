@@ -12,7 +12,7 @@
 
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
-constexpr char* TITLE = "StylizedHighlight";
+constexpr const char* TITLE = "StylizedHighlight";
 
 class StylizedHighlightTestApp {
 public:

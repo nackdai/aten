@@ -9,7 +9,7 @@
 
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
-constexpr char* TITLE = "ShaderViewer";
+constexpr const char* TITLE = "ShaderViewer";
 
 class ShaderViewerApp {
 public:

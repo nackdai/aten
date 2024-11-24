@@ -7,7 +7,7 @@
 
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
-constexpr char* TITLE = "ObjViewer";
+constexpr const char* TITLE = "ObjViewer";
 
 class ObjViewerApp {
 public:

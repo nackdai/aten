@@ -7,7 +7,7 @@
 
 class FlakesNormalMapMakerApp {
 public:
-    static constexpr char* TITLE = "FlakesNormalMapMaker";
+    static constexpr const char* TITLE = "FlakesNormalMapMaker";
 
     FlakesNormalMapMakerApp() = default;
     ~FlakesNormalMapMakerApp() = default;

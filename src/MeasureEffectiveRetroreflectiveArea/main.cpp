@@ -11,7 +11,7 @@
 
 constexpr int32_t WIDTH = 512;
 constexpr int32_t HEIGHT = 512;
-constexpr char* TITLE = "MeasureEffectiveRetroreflectiveArea";
+constexpr const char* TITLE = "MeasureEffectiveRetroreflectiveArea";
 
 class ERAApp {
 public:

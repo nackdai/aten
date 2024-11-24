@@ -7,7 +7,7 @@
 
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
-constexpr char* TITLE = "DeformationModelViewer";
+constexpr const char* TITLE = "DeformationModelViewer";
 
 class DeformationModelViewerApp {
 public:

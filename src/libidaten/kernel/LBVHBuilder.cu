@@ -274,7 +274,7 @@ __forceinline__ __device__ int32_t findSplit(
     // Fetch codes for both ends
     int32_t left = span.x;
     int32_t right = span.y;
-    int32_t d = span.z;
+    [[maybe_unused]] int32_t d = span.z;
 
     // Calculate the number of identical bits from higher end
     int32_t numIdentical = computeLongestCommonPrefix(sortedKeys, numOfElems, left, right);
@@ -462,7 +462,7 @@ __device__ __host__ inline void onApplyTraverseOrder(
                         : nullptr);
 
                     if (grandParent) {
-                        const auto _left = grandParent->left >= 0 ? &src[grandParent->left] : nullptr;
+                        [[maybe_unused]] const auto _left = grandParent->left >= 0 ? &src[grandParent->left] : nullptr;
                         const auto _right = grandParent->right >= 0 ? &src[grandParent->right] : nullptr;
 
                         auto sibling = _right;

@@ -25,10 +25,10 @@ namespace idaten
             return nullptr;
         }
 
-        void AssignGrids(nanovdb::FloatGrid** grids, int32_t num)
+        void AssignGrids(nanovdb::FloatGrid** grids, size_t num)
         {
             grids_ = grids;
-            num_ = num;
+            num_ = static_cast<int32_t>(num);
         }
 
         bool IsGridsAssigned() const

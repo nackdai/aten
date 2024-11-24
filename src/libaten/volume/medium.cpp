@@ -7,7 +7,7 @@
 #include "volume/grid_util.h"
 
 namespace AT_NAME {
-    AT_DEVICE_API float HeterogeneousMedium::EvalMajorant(
+    float HeterogeneousMedium::EvalMajorant(
         nanovdb::FloatGrid* grid,
         const float sigma_a, const float sigma_s)
     {
@@ -101,7 +101,7 @@ namespace AT_NAME {
             const auto density = _nanovdb_detail::GetValueInGrid(grid, curr_ray, sample_s);
             const auto sigma_a_at = param.sigma_a * density;
             const auto sigma_s_at = param.sigma_s * density;
-            const auto sigma_n = param.majorant - sigma_a_at - sigma_s_at;
+            [[maybe_unused]] const auto sigma_n = param.majorant - sigma_a_at - sigma_s_at;
 
             const auto prob_sigma_a = sigma_a_at / param.majorant;
             const auto prob_sigma_s = sigma_s_at / param.majorant;

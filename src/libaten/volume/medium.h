@@ -30,7 +30,7 @@ namespace AT_NAME {
             const float distance_to_surface)
         {
             const auto sigma_a = medium.sigma_a;
-            const auto sigma_s = medium.sigma_s;
+            [[maybe_unused]] const auto sigma_s = medium.sigma_s;
             const auto sigma_t = HomogeniousMedium::sigma_t(medium);
 
             const auto r1 = sampler.nextSample();
@@ -49,9 +49,9 @@ namespace AT_NAME {
             const auto r2 = sampler.nextSample();
 
             const auto Pa = sigma_a / sigma_t;
-            const auto Ps = 1.0F - Pa;
+            [[maybe_unused]] const auto Ps = 1.0F - Pa;
             const auto tr = EvaluateTransmittance(sigma_t, s);
-            const auto pdf = sigma_t * tr;
+            [[maybe_unused]] const auto pdf = sigma_t * tr;
 
             aten::ray next_ray{ curr_ray };
             next_ray.org += next_ray.dir * s;

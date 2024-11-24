@@ -178,7 +178,7 @@ namespace aten {
     template <class T>
     inline AT_HOST_DEVICE_API T clamp(T f, T a, T b)
     {
-        return cmpMin(cmpMax(f, a), b);
+        return std::clamp(f, a, b);
     }
 
     template <class T>

@@ -25,7 +25,7 @@ constexpr int32_t HEIGHT = 720;
 constexpr int32_t WIDTH = 512;
 constexpr int32_t HEIGHT = 512;
 #endif
-constexpr char* TITLE = "MaterialViewer";
+constexpr const char* TITLE = "MaterialViewer";
 
 class MaterialParamEditor : public aten::IMaterialParamEditor {
 public:
@@ -515,14 +515,14 @@ private:
 
 #if 1
 #if 0
-        constexpr char* asset_path = "../../asset/suzanne/suzanne.obj";
-        constexpr char* mtrl_in_asset = "Material.001";
+        constexpr const char* asset_path = "../../asset/suzanne/suzanne.obj";
+        constexpr const char* mtrl_in_asset = "Material.001";
 #elif 0
-        constexpr char* asset_path = "../../asset/teapot/teapot.obj";
-        constexpr char* mtrl_in_asset = "m1";
+        constexpr const char* asset_path = "../../asset/teapot/teapot.obj";
+        constexpr const char* mtrl_in_asset = "m1";
 #else
-        constexpr char* asset_path = "../../asset/sphere/sphere.obj";
-        constexpr char* mtrl_in_asset = "m1";
+        constexpr const char* asset_path = "../../asset/sphere/sphere.obj";
+        constexpr const char* mtrl_in_asset = "m1";
 #endif
 
         auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
@@ -543,7 +543,7 @@ private:
 
         obj->getShapes()[0]->GetMaterial()->setTextures(albedo_map_, normal_map_, nullptr);
 #else
-        constexpr char* asset_path = "../../asset/cornellbox/bunny_in_box.obj";
+        constexpr const char* asset_path = "../../asset/cornellbox/bunny_in_box.obj";
 
         auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
             "material_0",

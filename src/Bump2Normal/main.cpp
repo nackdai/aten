@@ -6,7 +6,7 @@
 
 class Bump2NormalApp {
 public:
-    static constexpr char* TITLE = "Bump2Normal";
+    static constexpr const char* TITLE = "Bump2Normal";
 
     Bump2NormalApp() = default;
     ~Bump2NormalApp() = default;

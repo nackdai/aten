@@ -15,7 +15,7 @@
 
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
-constexpr char* TITLE = "NanoVDBViewer";
+constexpr const char* TITLE = "NanoVDBViewer";
 
 class NanoVDBViewerApp {
 public:

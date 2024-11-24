@@ -62,8 +62,8 @@ namespace AT_NAME {
         float tanThetaO = sinThetaO / std::abs(cosThetaO);
         float tanThetaI = sinThetaI / std::abs(cosThetaI);
 
-        float sinAlpha = aten::cmpMax(sinThetaO, sinThetaI);
-        float tanBeta = aten::cmpMin(tanThetaO, tanThetaI);
+        float sinAlpha = aten::max(sinThetaO, sinThetaI);
+        float tanBeta = aten::min(tanThetaO, tanThetaI);
 
         // NOTE
         // cos(φi - φr) = cosφi * cosφr + sinφi * sinφr
@@ -89,7 +89,7 @@ namespace AT_NAME {
         const float A = float(1) - float(0.5) * (a2 / (a2 + float(0.33)));
         const float B = float(0.45) * (a2 / (a2 + float(0.09)));
 
-        auto bsdf = (1.0F / AT_MATH_PI) * (A + B * aten::cmpMax(float(0), cosAzimuth) * sinAlpha * tanBeta);
+        auto bsdf = (1.0F / AT_MATH_PI) * (A + B * aten::max(float(0), cosAzimuth) * sinAlpha * tanBeta);
 #else
         // NOTE
         // A tiny improvement of Oren-Nayar reflectance model
@@ -104,9 +104,9 @@ namespace AT_NAME {
         const auto LV = dot(wo, -wi);
 
         const auto s = LV - NL * NV;
-        const auto t = s <= 0 ? float(1) : s / aten::cmpMax(NL, NV);
+        const auto t = s <= 0 ? float(1) : s / aten::max(NL, NV);
 
-        auto bsdf = (1.0F / AT_MATH_PI) * (A + B * aten::cmpMax(float(0), s / t));
+        auto bsdf = (1.0F / AT_MATH_PI) * (A + B * aten::max(float(0), s / t));
 #endif
 
         return aten::vec3(bsdf);

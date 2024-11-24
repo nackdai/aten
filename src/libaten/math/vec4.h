@@ -344,7 +344,7 @@ namespace aten {
     template <class T>
     inline AT_HOST_DEVICE_API T vmax(const T& a, const T& b)
     {
-        return T(aten::cmpMax(a.x, b.x), aten::cmpMax(a.y, b.y), aten::cmpMax(a.z, b.z), aten::cmpMax(a.w, b.w));
+        return T(aten::max(a.x, b.x), aten::max(a.y, b.y), aten::max(a.z, b.z), aten::max(a.w, b.w));
     }
 
 #ifdef __CUDACC__
@@ -364,7 +364,7 @@ namespace aten {
     template <class T>
     inline AT_HOST_DEVICE_API T vmin(const T& a, const T& b)
     {
-        return T(aten::cmpMin(a.x, b.x), aten::cmpMin(a.y, b.y), aten::cmpMin(a.z, b.z), aten::cmpMin(a.w, b.w));
+        return T(aten::min(a.x, b.x), aten::min(a.y, b.y), aten::min(a.z, b.z), aten::min(a.w, b.w));
     }
 
 #ifdef __CUDACC__

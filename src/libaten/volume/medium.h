@@ -36,7 +36,7 @@ namespace AT_NAME {
             const auto r1 = sampler.nextSample();
 
             // Sample distance.
-            const float s = -aten::log(aten::cmpMax(1.0F - r1, 0.0F)) / sigma_t;
+            const float s = -aten::log(aten::max(1.0F - r1, 0.0F)) / sigma_t;
 
             // Hit volume boundary.
             if (s >= distance_to_surface) {

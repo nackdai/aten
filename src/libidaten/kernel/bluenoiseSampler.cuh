@@ -111,7 +111,7 @@ namespace idaten {
 
 #ifdef __CUDA_ARCH__
             float4 ret = tex2DLayered<float4>(m_noise, u, v, p.z);
-            return aten::cmpMin(ret.x, 0.9999999999999f);
+            return aten::min(ret.x, 0.9999999999999f);
 #else
             return float(1.0f);
 #endif

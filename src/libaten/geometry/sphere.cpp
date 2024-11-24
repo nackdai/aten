@@ -80,10 +80,10 @@ namespace AT_NAME
             return false;
         }
         else if (t1 > 0 && t2 > 0) {
-            isect->t = aten::cmpMin(t1, t2);
+            isect->t = aten::min(t1, t2);
         }
         else {
-            isect->t = aten::cmpMax(t1, t2);
+            isect->t = aten::max(t1, t2);
         }
 #endif
 

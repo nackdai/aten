@@ -236,17 +236,17 @@ namespace aten {
     inline AT_HOST_DEVICE_API vec3 vmin(const vec3& a, const vec3& b)
     {
         return vec3(
-            aten::cmpMin(a.x, b.x),
-            aten::cmpMin(a.y, b.y),
-            aten::cmpMin(a.z, b.z));
+            aten::min(a.x, b.x),
+            aten::min(a.y, b.y),
+            aten::min(a.z, b.z));
     }
 
     inline AT_HOST_DEVICE_API vec3 vmax(const vec3& a, const vec3& b)
     {
         return vec3(
-            aten::cmpMax(a.x, b.x),
-            aten::cmpMax(a.y, b.y),
-            aten::cmpMax(a.z, b.z));
+            aten::max(a.x, b.x),
+            aten::max(a.y, b.y),
+            aten::max(a.z, b.z));
     }
 
     inline AT_HOST_DEVICE_API vec3 pow(const vec3& v, float a)

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <algorithm>
+#include <filesystem>
 
 namespace aten {
     inline void getStringsFromPath(
@@ -10,19 +11,11 @@ namespace aten {
         std::string& extname,
         std::string& filename)
     {
-        std::string filepath(path);
+        std::filesystem::path p = path;
 
-        // Get tag from file path.
-        // Replace \\->/
-        std::replace(filepath.begin(), filepath.end(), '\\', '/');
-
-        int32_t pathPos = (int32_t)filepath.find_last_of("/") + 1;
-        int32_t extPos = (int32_t)filepath.find_last_of(".");
-
-        pathname = filepath.substr(0, pathPos - 1);
-        extname = filepath.substr(extPos, filepath.size() - extPos);
-        filename = filepath.substr(pathPos, extPos - pathPos);
-
+        pathname = p.parent_path().generic_string();
+        extname = p.extension().generic_string();
+        filename = p.filename().generic_string();
 
         if (path == pathname) {
             pathname = "./";

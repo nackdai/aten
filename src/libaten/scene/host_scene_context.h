@@ -459,6 +459,12 @@ namespace aten
         std::shared_ptr<texture> GetTexture(int32_t idx) const;
 
         /**
+         * @brief Get the list to store the texture instances.
+         * @return List to store the texture instances.
+         */
+        std::vector<std::shared_ptr<texture>> GetTextures();
+
+        /**
          * @brief Initialize all registered texture instances as OpenGL texture.
          */
         void InitAllTextureAsGLTexture();

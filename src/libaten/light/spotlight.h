@@ -12,23 +12,34 @@ namespace AT_NAME {
         SpotLight()
             : Light(aten::LightType::Spot, aten::LightAttributeSingluar)
         {}
+
+        /**
+         * @brief Constructor.
+         * @param[in] pos Light position.
+         * @param[in] dir Light direction from the position.
+         * @param[in] light_color Light color.
+         * @param[in] intensity Punctual light intensity [W] as spot light.
+         * @param[in] inner_angle Umbra angle of spotlight in radians.
+         * @param[in] outer_angle Penumbra angle of spotlight in radians.
+         * @param[in] scale Scale for the sampled light color.
+         */
         SpotLight(
-            const aten::vec3& pos,  // light position.
-            const aten::vec3& dir,  // light direction from the position.
-            const aten::vec3& light_color,   // light color.
-            float flux,
-            float innerAngle,    // Umbra angle of spotlight in radians.
-            float outerAngle)    // Penumbra angle of spotlight in radians.
+            const aten::vec3& pos,
+            const aten::vec3& dir,
+            const aten::vec3& light_color,
+            const float intensity,
+            const float inner_angle,
+            const float outer_angle,
+            const float scale = 1.0F)
             : Light(aten::LightType::Spot, aten::LightAttributeSingluar)
         {
             m_param.pos = pos;
             m_param.dir = normalize(dir);
             m_param.light_color = light_color;
+            m_param.intensity = intensity;
+            m_param.scale = scale;
 
-            // Convert flux[W] to intensity[W/sr]
-            m_param.intensity = flux / AT_MATH_PI;
-
-            setSpotlightFactor(innerAngle, outerAngle);
+            setSpotlightFactor(inner_angle, outer_angle);
         }
 
         SpotLight(aten::Values& val);
@@ -37,11 +48,11 @@ namespace AT_NAME {
 
     public:
         void setSpotlightFactor(
-            float innerAngle,    // Umbra angle of spotlight in radians.
-            float outerAngle)    // Penumbra angle of spotlight in radians.
+            float inner_angle,    // Umbra angle of spotlight in radians.
+            float outer_angle)    // Penumbra angle of spotlight in radians.
         {
-            m_param.innerAngle = aten::clamp<float>(innerAngle, 0, AT_MATH_PI - AT_MATH_EPSILON);
-            m_param.outerAngle = aten::clamp<float>(outerAngle, innerAngle, AT_MATH_PI - AT_MATH_EPSILON);
+            m_param.innerAngle = aten::clamp<float>(inner_angle, 0, AT_MATH_PI - AT_MATH_EPSILON);
+            m_param.outerAngle = aten::clamp<float>(outer_angle, inner_angle, AT_MATH_PI - AT_MATH_EPSILON);
         }
 
         static AT_HOST_DEVICE_API void sample(
@@ -69,10 +80,9 @@ namespace AT_NAME {
                 auto angle_attenuation = (rho - cosHalfOuter) / (cosHalfInner - cosHalfOuter);
                 angle_attenuation = aten::clamp<float>(angle_attenuation, 0.0f, 1.0f);
 
+                // Convert intensity [W] to [W/m^2] by dividing with the squared distance.
                 auto dist2 = aten::sqr(result.dist_to_light);
-
-                auto luminance = param.scale * param.intensity / dist2 / AT_MATH_PI;
-                result.light_color = param.light_color * luminance;
+                result.light_color = param.scale * param.light_color * angle_attenuation * param.intensity / dist2;
             }
             else {
                 // Out of spot light.

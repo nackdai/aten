@@ -16,10 +16,19 @@ namespace AT_NAME {
         AreaLight()
             : Light(aten::LightType::Area, aten::LightAttributeArea)
         {}
+
+        /**
+         * @brief Constructor.
+         * @param[in] pos Light position.
+         * @param[in] light_color Light color.
+         * @param[in] intensity Light intensity as radiant flux [W].
+         * @param[in] scale Scale for the sampled light color.
+         */
         AreaLight(
             const std::shared_ptr<aten::transformable>& obj,
             const aten::vec3& light_color,
-            float lux);
+            const float intensity,
+            const float scale = 1.0F);
 
         AreaLight(const aten::Values& val);
 
@@ -48,7 +57,7 @@ namespace AT_NAME {
 
         static AT_HOST_DEVICE_API aten::vec3 ComputeLightColor(const aten::LightParameter& param, float area)
         {
-            // Convert intenstiy[W/sr] to luminance[W/(sr * m^2)]
+            // Convert radiant flux[W] to irradiance[W/m^2]
             auto luminance = param.scale * param.intensity / area;
             return param.light_color* luminance;
         }

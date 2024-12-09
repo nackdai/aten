@@ -71,11 +71,8 @@ namespace aten {
             aten::vec4 v2;
 
             struct {
-                float scale;    ///< Scele factor to be multiplied to intensity or luminance.
-                union {
-                    float intensity;    ///< Light intetnsity for point/spot/area light. [W/sr]
-                    float luminance;    ///< Luminance emittance for directional light. [W/(sr*m^2)]
-                };
+                float scale;                ///< Scele factor to be multiplied to intensity or luminance.
+                float intensity;
                 int32_t arealight_objid;    ///< Object index to be referred as area light.
                 int32_t envmapidx;          ///< Texture index as environment map.
             };

@@ -284,10 +284,10 @@ void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene)
 //#define Scene DeformInBoxScene
 //#define Scene AlphaBlendedObjCornellBoxScene
 //#define Scene CryteckSponzaScene
-//#define Scene ManyLightCryteckSponzaScene
+#define Scene ManyLightCryteckSponzaScene
 //#define Scene CornellBoxSmokeScene
 //#define Scene CornellBoxHomogeneousMediumScene
 //#define Scene HomogeneousMediumRefractionBunnyScene
 //#define Scene ToonSimpleSphereScene
 //#define Scene ToonCornellBoxScene
-#define Scene DisneyBrdfScene
+//#define Scene DisneyBrdfScene

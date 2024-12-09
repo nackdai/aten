@@ -338,6 +338,11 @@ namespace aten
         return textures_[idx];
     }
 
+    std::vector<std::shared_ptr<texture>> context::GetTextures()
+    {
+        return textures_;
+    }
+
     void context::AddTexture(const std::shared_ptr<texture>& tex)
     {
         AT_ASSERT(tex);

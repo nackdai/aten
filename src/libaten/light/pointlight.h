@@ -12,17 +12,25 @@ namespace AT_NAME {
         PointLight()
             : Light(aten::LightType::Point, aten::LightAttributeSingluar)
         {}
+
+        /**
+         * @brief Constructor.
+         * @param[in] pos Light position.
+         * @param[in] light_color Light color.
+         * @param[in] intensity Punctual light intensity [W] as point light.
+         * @param[in] scale Scale for the sampled light color.
+         */
         PointLight(
             const aten::vec3& pos,
             const aten::vec3& light_color,
-            float flux)
+            const float intensity,
+            const float scale = 1.0F)
             : Light(aten::LightType::Point, aten::LightAttributeSingluar)
         {
             m_param.pos = pos;
             m_param.light_color = light_color;
-
-            // Convert flux[W] to intensity[W/sr]
-            m_param.intensity = flux / (4.0f * AT_MATH_PI);
+            m_param.intensity = intensity;
+            m_param.scale = scale;
         }
 
         PointLight(aten::Values& val);
@@ -45,10 +53,10 @@ namespace AT_NAME {
             result.pos = param.pos;
             result.nml = normalize(-result.dir);
 
-            auto dist2 = aten::sqr(result.dist_to_light);
+            const auto dist2 = aten::sqr(result.dist_to_light);
 
-            auto luminance = param.scale * param.intensity / dist2;
-            result.light_color = param.light_color * luminance;
+            // Convert intensity [W] to [W/m^2] by dividing with the squared distance.
+            result.light_color = param.light_color * param.scale * param.intensity / dist2;
         }
     };
 }

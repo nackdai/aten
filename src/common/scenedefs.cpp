@@ -821,6 +821,11 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
         return mtrl;
     });
 
+    for (auto tex : ctxt.GetTextures()) {
+        tex->SetFilterMode(aten::TextureFilterMode::Linear);
+        tex->SetAddressMode(aten::TextureAddressMode::Wrap);
+    }
+
     objs[0]->importInternalAccelTree("../../asset/sponza/sponza.sbvh", ctxt, 0);
 
     auto sponza = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[0], aten::mat4::Identity);
@@ -1038,6 +1043,11 @@ void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
         auto mtrl = CreateMaterial(name, ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
         return mtrl;
     });
+
+    for (auto tex : ctxt.GetTextures()) {
+        tex->SetFilterMode(aten::TextureFilterMode::Linear);
+        tex->SetAddressMode(aten::TextureAddressMode::Wrap);
+    }
 
     objs[0]->importInternalAccelTree("../../asset/crytek_sponza/sponza.sbvh", ctxt, 0);
 

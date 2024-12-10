@@ -1106,7 +1106,7 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
                 auto l = std::make_shared<aten::PointLight>(
                     pos,
                     color[num % color.size()],
-                    6000.0f);
+                    500.0F);
 
                 // NOTE:
                 // Scaling for unit is [cm].
@@ -1125,7 +1125,7 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
     auto l = std::make_shared<aten::PointLight>(
         aten::vec3(-353.4f, 359.4f, -41.2f),
         aten::vec3(1.0f, 1.0f, 1.0f),
-        6000.0f);
+        500.0F);
 
     // NOTE:
     // Scaling for unit is [cm].

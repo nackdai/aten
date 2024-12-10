@@ -94,7 +94,6 @@ namespace restir {
                 normal, ray_dir, mtrl,
                 u, v,
                 pre_sampled_r);
-            energy /= pdf;
 
             auto target_pdf = (energy.x + energy.y + energy.z) / 3;
 
@@ -159,18 +158,8 @@ namespace restir {
             const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
             const auto dist2 = aten::sqr(lightsample.dist_to_light);
 
-            // NOTE:
-            // Regarding punctual light, nothing to sample.
-            // It means there is nothing to convert pdf.
-            // TODO: IBL...
-            auto path_pdf = lightsample.pdf;
-            if (!light.attrib.is_singular && !light.attrib.isIBL) {
-                // Convert solid angle PDF to area PDF.
-                path_pdf = path_pdf * cosLight / dist2;
-            }
-
             // p
-            auto sampling_pdf = path_pdf * light_select_prob;
+            auto sampling_pdf = lightsample.pdf * light_select_prob;
 
             // p_hat
             auto target_pdf = _detail::ComputeTargetPDF(
@@ -252,7 +241,7 @@ namespace restir {
         if (!isHit) {
             // NOTE:
             // In the function to combine the streams of multiple reservoirs (Alg.4), M is used to compute sum of samples.
-            // So, M should not be cleared.
+            // So, M should not be cleared. It means we can't use Reservoir::clear here.
             reservoir.w_sum = 0.0f;
             reservoir.W = 0.0f;
             reservoir.target_pdf_of_y = 0.0f;

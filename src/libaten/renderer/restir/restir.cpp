@@ -471,6 +471,7 @@ namespace aten
                     auto target_reservoirs_idx = curr_reservoirs_idx;
                     auto target_restir_infos_idx = curr_restir_infos_idx;
 
+#if 1
                     if (bounce == 0) {
                         const auto dst_reservoirs_idx = reservoirs_.GetDestinationParamsIdxForSpatialReuse();
 
@@ -486,7 +487,6 @@ namespace aten
                         reservoirs_.Update();
                         restir_infos_.Update();
 
-#if 1
                         const auto frame = GetFrameCount();
                         if (frame > 1) {
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
@@ -536,8 +536,8 @@ namespace aten
                                     aov_.albedo_meshid());
                             }
                         }
-#endif
                     }
+#endif
 
 #if 1
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)

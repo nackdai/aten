@@ -222,18 +222,18 @@ public:
                 renderer_.reset();
             }
 
-            static const char* items[] = { "ReSTIR", "PT", "AOV" };
+            constexpr std::array items = { "ReSTIR", "PT", "AOV" };
 
-            if (ImGui::Combo("mode", reinterpret_cast<int32_t*>(&curr_rendering_mode_), items, AT_COUNTOF(items)))
+            if (ImGui::Combo("mode", reinterpret_cast<int32_t*>(&curr_rendering_mode_), items.data(), items.size()))
             {
                 renderer_.SetMode(curr_rendering_mode_);
             }
 
             if (curr_rendering_mode_ == idaten::ReSTIRPathTracing::Mode::ReSTIR)
             {
-                static const char* restir_items[] = { "ReSTIR", "SpatialReuse" };
+                constexpr std::array restir_items = { "ReSTIR", "SpatialReuse", "TemporalReuse" };
 
-                if (ImGui::Combo("restir mode", reinterpret_cast<int32_t*>(&curr_restir_mode_), restir_items, AT_COUNTOF(restir_items)))
+                if (ImGui::Combo("restir mode", reinterpret_cast<int32_t*>(&curr_restir_mode_), restir_items.data(), restir_items.size()))
                 {
                     renderer_.SetReSTIRMode(curr_restir_mode_);
                 }
@@ -241,9 +241,9 @@ public:
 
             if (curr_rendering_mode_ == idaten::ReSTIRPathTracing::Mode::AOVar)
             {
-                static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion", "ObjId" };
+                constexpr std::array aovitems = { "Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion", "ObjId" };
 
-                if (ImGui::Combo("aov", (int32_t*)&curr_aov_mode_, aovitems, AT_COUNTOF(aovitems)))
+                if (ImGui::Combo("aov", (int32_t*)&curr_aov_mode_, aovitems.data(), aovitems.size()))
                 {
                     renderer_.SetAOVMode(curr_aov_mode_);
                 }

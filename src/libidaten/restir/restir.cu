@@ -138,6 +138,12 @@ __global__ void shade(
         restir_info.p = rec.p;
         restir_info.pre_sampled_r = pre_sampled_r;
         restir_info.mesh_id = isect.meshid;
+
+        // NOTE:
+        // PathThroughput in paths will be updated at the end of this API for the next frame.
+        // On the other hand, we need the current throughput which is not updated for the integration the computed color by ReSTIR as this frame result.
+        // For that, we keep the current throughput.
+        restir_info.throughput = paths.throughput[idx].throughput;
     }
 
     if (bounce == 0) {
@@ -307,7 +313,7 @@ __global__ void ComputePixelColor(
         shMtrls[threadIdx.x],
         aovTexclrMeshid[idx]);
     if (pixel_color) {
-        const auto result = pixel_color.value() * paths.throughput[idx].throughput;
+        const auto result = pixel_color.value() * restir_info.throughput;
         paths.contrib[idx].contrib += make_float3(result.x, result.y, result.z);
     }
 }

@@ -97,6 +97,7 @@ namespace AT_NAME {
         aten::vec3 p;                   ///< Hit point.
         float pre_sampled_r{ 0.0f };    ///< Pre sampled random value for brdf calculation.
 
+        aten::vec3 throughput;  ///< Throughput.
         int32_t mesh_id{ -1 };  ///< Mesh id on point.
 
         AT_HOST_DEVICE_API void clear()

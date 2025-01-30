@@ -180,6 +180,7 @@
     <ClInclude Include="..\src\libaten\hdr\gamma.h" />
     <ClInclude Include="..\src\libaten\hdr\hdr.h" />
     <ClInclude Include="..\src\libaten\hdr\tonemap.h" />
+    <ClInclude Include="..\src\libaten\image\image.h" />
     <ClInclude Include="..\src\libaten\light\arealight.h" />
     <ClInclude Include="..\src\libaten\light\directionallight.h" />
     <ClInclude Include="..\src\libaten\light\ibl.h" />
@@ -318,6 +319,7 @@
     <ClCompile Include="..\src\libaten\hdr\gamma.cpp" />
     <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />
+    <ClCompile Include="..\src\libaten\image\image.cpp" />
     <ClCompile Include="..\src\libaten\light\arealight.cpp" />
     <ClCompile Include="..\src\libaten\light\ibl.cpp" />
     <ClCompile Include="..\src\libaten\light\light_instantiate_from_value.cpp" />

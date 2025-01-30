@@ -550,6 +550,9 @@
     <ClInclude Include="..\src\libaten\image\texture.h">
       <Filter>image</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\image\image.h">
+      <Filter>image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -814,6 +817,9 @@
       <Filter>material</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\image\texture.cpp">
+      <Filter>image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\image\image.cpp">
       <Filter>image</Filter>
     </ClCompile>
   </ItemGroup>

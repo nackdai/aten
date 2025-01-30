@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-#include "image/texture.h"
+#include "image/image.h"
 #include "scene/host_scene_context.h"
 
 namespace aten {
@@ -12,23 +12,18 @@ namespace aten {
         ImageLoader() = delete;
         ~ImageLoader() = delete;
 
-    public:
-        enum ImgFormat {
-            Fmt8Bit,
-            Fmt16Bit,
-        };
+        static std::string base_path;
 
+    public:
         static void setBasePath(const std::string& base);
 
         static std::shared_ptr<texture> load(
             const std::string& path,
-            context& ctxt,
-            ImgFormat fmt = ImgFormat::Fmt8Bit);
+            context& ctxt);
 
         static std::shared_ptr<texture> load(
             const std::string& tag,
             const std::string& path,
-            context& ctxt,
-            ImgFormat fmt = ImgFormat::Fmt8Bit);
+            context& ctxt);
     };
 }

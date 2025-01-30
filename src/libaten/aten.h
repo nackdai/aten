@@ -49,7 +49,7 @@
 #include "light/arealight.h"
 #include "light/ibl.h"
 
-#include "texture/texture.h"
+#include "image/texture.h"
 
 #include "hdr/hdr.h"
 #include "hdr/tonemap.h"

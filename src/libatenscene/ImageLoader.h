@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-#include "texture/texture.h"
+#include "image/texture.h"
 #include "scene/host_scene_context.h"
 
 namespace aten {

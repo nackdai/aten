@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "math/vec4.h"
-#include "texture/texture.h"
+#include "image/texture.h"
 #include "cuda/cudadefs.h"
 #include "cuda/cudautil.h"
 

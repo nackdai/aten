@@ -2,7 +2,7 @@
 
 #include "stb_image_write.h"
 
-#include "texture/texture.h"
+#include "image/texture.h"
 #include "visualizer/atengl.h"
 #include "visualizer/shader.h"
 #include "misc/color.h"

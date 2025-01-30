@@ -1,7 +1,7 @@
 #include "filter/taa.h"
 #include "visualizer/atengl.h"
 #include "math/mat4.h"
-#include "texture/texture.h"
+#include "image/texture.h"
 
 namespace aten
 {

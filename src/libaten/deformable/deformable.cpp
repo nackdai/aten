@@ -6,7 +6,7 @@
 #include "misc/stream.h"
 #include "visualizer/shader.h"
 #include "visualizer/atengl.h"
-#include "texture/texture.h"
+#include "image/texture.h"
 #include "camera/camera.h"
 #include "accelerator/accelerator.h"
 

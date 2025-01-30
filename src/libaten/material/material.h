@@ -8,7 +8,7 @@
 #include "types.h"
 #include "math/vec3.h"
 #include "sampler/sampler.h"
-#include "texture/texture.h"
+#include "image/texture.h"
 #include "math/ray.h"
 #include "misc/misc.h"
 

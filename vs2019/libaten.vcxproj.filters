@@ -28,9 +28,6 @@
     <Filter Include="hdr">
       <UniqueIdentifier>{4ed65f2c-4571-44f4-bedb-b94973d7fdd6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="texture">
-      <UniqueIdentifier>{bff96104-0255-4157-be6a-053f128b2868}</UniqueIdentifier>
-    </Filter>
     <Filter Include="shader">
       <UniqueIdentifier>{d02f9897-3ec7-49aa-afe9-076f1ccbfbef}</UniqueIdentifier>
     </Filter>
@@ -106,6 +103,9 @@
     <Filter Include="renderer\volume">
       <UniqueIdentifier>{592da6ff-7b67-47b9-8682-e24a543c0c8e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="image">
+      <UniqueIdentifier>{bff96104-0255-4157-be6a-053f128b2868}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -154,9 +154,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\material\specular.h">
       <Filter>material</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\texture\texture.h">
-      <Filter>texture</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\background.h">
       <Filter>renderer</Filter>
@@ -550,6 +547,9 @@
     <ClInclude Include="..\src\libaten\material\toon_impl.h">
       <Filter>material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\image\texture.h">
+      <Filter>image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -641,9 +641,6 @@
     </ClCompile>
     <ClCompile Include="..\3rdparty\imgui\imgui_draw.cpp">
       <Filter>ui\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\texture\texture.cpp">
-      <Filter>texture</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\filter\taa.cpp">
       <Filter>filter</Filter>
@@ -815,6 +812,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\toon.cpp">
       <Filter>material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\image\texture.cpp">
+      <Filter>image</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

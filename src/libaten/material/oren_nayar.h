@@ -1,7 +1,7 @@
 #pragma once
 
 #include "material/material.h"
-#include "texture/texture.h"
+#include "image/texture.h"
 
 namespace aten {
     class Values;

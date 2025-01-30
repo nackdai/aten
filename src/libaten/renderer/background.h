@@ -4,7 +4,7 @@
 #include "material/sample_texture.h"
 #include "math/vec3.h"
 #include "math/ray.h"
-#include "texture/texture.h"
+#include "image/texture.h"
 #include "material/sample_texture.h"
 
 namespace aten

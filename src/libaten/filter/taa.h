@@ -1,7 +1,7 @@
 #pragma once
 
 #include "visualizer/MultiPassPostProc.h"
-#include "texture/texture.h"
+#include "image/texture.h"
 #include "camera/pinhole.h"
 #include "math/mat4.h"
 

@@ -16,7 +16,7 @@
 #include "math/mat4.h"
 #include "misc/tuple.h"
 #include "misc/type_traits.h"
-#include "texture/texture.h"
+#include "image/texture.h"
 #include "visualizer/GeomDataBuffer.h"
 
 namespace AT_NAME {

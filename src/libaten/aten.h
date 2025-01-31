@@ -49,10 +49,9 @@
 #include "light/arealight.h"
 #include "light/ibl.h"
 
+#include "image/hdr.h"
 #include "image/texture.h"
 
-#include "hdr/hdr.h"
-#include "hdr/tonemap.h"
 #include "hdr/gamma.h"
 
 #include "visualizer/visualizer.h"

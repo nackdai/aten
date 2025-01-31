@@ -140,12 +140,6 @@
     <ClInclude Include="..\src\libaten\visualizer\window.h">
       <Filter>visualizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\hdr\hdr.h">
-      <Filter>hdr</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\hdr\tonemap.h">
-      <Filter>hdr</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\misc\color.h">
       <Filter>misc</Filter>
     </ClInclude>
@@ -553,6 +547,9 @@
     <ClInclude Include="..\src\libaten\image\image.h">
       <Filter>image</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\image\hdr.h">
+      <Filter>image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -560,12 +557,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\visualizer\window.cpp">
       <Filter>visualizer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\hdr\hdr.cpp">
-      <Filter>hdr</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\hdr\tonemap.cpp">
-      <Filter>hdr</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\specular.cpp">
       <Filter>material</Filter>
@@ -820,6 +811,9 @@
       <Filter>image</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\image\image.cpp">
+      <Filter>image</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\image\hdr.cpp">
       <Filter>image</Filter>
     </ClCompile>
   </ItemGroup>

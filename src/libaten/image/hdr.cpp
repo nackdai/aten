@@ -1,4 +1,4 @@
-#include "hdr/hdr.h"
+#include "image/hdr.h"
 
 namespace aten
 {

@@ -50,6 +50,7 @@
 #include "light/ibl.h"
 
 #include "image/hdr.h"
+#include "image/image.h"
 #include "image/texture.h"
 
 #include "hdr/gamma.h"

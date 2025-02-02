@@ -14,8 +14,8 @@ namespace aten {
 
     public:
         static std::shared_ptr<texture> Load(
-            const std::string& tag,
-            const std::string& path,
+            const std::string_view tag,
+            const std::string_view path,
             context& ctxt);
     };
 }

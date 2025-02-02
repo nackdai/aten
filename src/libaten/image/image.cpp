@@ -39,8 +39,8 @@ namespace aten {
     }
 
     std::shared_ptr<texture> Image::Load(
-        const std::string& tag,
-        const std::string& path,
+        const std::string_view tag,
+        const std::string_view path,
         context& ctxt)
     {
         auto stored_tex = ctxt.GetTextureByName(tag);
@@ -56,8 +56,8 @@ namespace aten {
         int32_t height = 0;
         int32_t channels = 0;
 
-        if (stbi_is_hdr(path.c_str())) {
-            auto src = stbi_loadf(path.c_str(), &width, &height, &channels, 0);
+        if (stbi_is_hdr(path.data())) {
+            auto src = stbi_loadf(path.data(), &width, &height, &channels, 0);
             if (src) {
                 tex = ctxt.CreateTexture(width, height, channels, tag);
 
@@ -68,7 +68,7 @@ namespace aten {
             }
         }
         else {
-            auto src = stbi_load(path.c_str(), &width, &height, &channels, 0);
+            auto src = stbi_load(path.data(), &width, &height, &channels, 0);
             if (src) {
                 tex = ctxt.CreateTexture(width, height, channels, tag);
 
@@ -81,7 +81,7 @@ namespace aten {
 
         if (!tex) {
             AT_ASSERT(false);
-            AT_PRINTF("Failed load texture. [%s]\n", path.c_str());
+            AT_PRINTF("Failed load texture. [%s]\n", path.data());
             return nullptr;
         }
 

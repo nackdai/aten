@@ -179,12 +179,15 @@ int32_t main(int32_t argc, char* argv[])
 
     auto wnd = std::make_shared<aten::window>();
 
+    aten::window::MesageHandlers handlers;
+    handlers.OnRun = [&app]() { return app->Run(); };
+    handlers.OnClose = [&app]() { app->OnClose(); };
+
     auto id = wnd->Create(
         app->width(), app->height(),
         FlakesNormalMapMakerApp::TITLE,
         !app->NeedGui(),
-        std::bind(&FlakesNormalMapMakerApp::Run, app),
-        std::bind(&FlakesNormalMapMakerApp::OnClose, app));
+        handlers);
 
     if (id >= 0) {
         app->GetContext().SetIsWindowInitialized(true);

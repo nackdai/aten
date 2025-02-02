@@ -204,34 +204,42 @@ namespace aten {
         using OnKeyFunc = std::function<void(bool press, Key key)>;
         using OnDropFileFunc = std::function<void(std::string_view path)>;
 
+        struct MesageHandlers {
+            OnRunFunc OnRun{ nullptr };
+            OnCloseFunc OnClose{ nullptr };
+            OnMouseBtnFunc OnMouseBtn{ nullptr };
+            OnMouseMoveFunc OnMouseMove{ nullptr };
+            OnMouseWheelFunc OnMouseWheel{ nullptr };
+            OnKeyFunc OnKey{ nullptr };
+            OnDropFileFunc OnDropFile{ nullptr };
+        };
+
         int32_t Create(
             int32_t width, int32_t height, std::string_view title,
-            OnRunFunc onRun,
-            OnCloseFunc onClose = nullptr,
-            OnMouseBtnFunc onMouseBtn = nullptr,
-            OnMouseMoveFunc onMouseMove = nullptr,
-            OnMouseWheelFunc onMouseWheel = nullptr,
-            OnKeyFunc onKey = nullptr,
-            OnDropFileFunc onDropFile = nullptr)
+            const MesageHandlers& handlers)
         {
-            return CreateImpl(
-                width, height, title, false,
-                onRun, onClose, onMouseBtn, onMouseMove, onMouseWheel, onKey, onDropFile);
+            return Create(width, height, title, false, handlers);
         }
 
         int32_t Create(
             int32_t width, int32_t height, std::string_view title,
             bool is_offscreen,
-            OnRunFunc onRun,
-            OnCloseFunc onClose = nullptr,
-            OnMouseBtnFunc onMouseBtn = nullptr,
-            OnMouseMoveFunc onMouseMove = nullptr,
-            OnMouseWheelFunc onMouseWheel = nullptr,
-            OnKeyFunc onKey = nullptr)
+            const MesageHandlers& handlers)
         {
+            if (!handlers.OnRun) {
+                AT_ASSERT(false);
+                return -1;
+            }
+
             return CreateImpl(
                 width, height, title, is_offscreen,
-                onRun, onClose, onMouseBtn, onMouseMove, onMouseWheel, onKey);
+                handlers.OnRun,
+                handlers.OnClose,
+                handlers.OnMouseBtn,
+                handlers.OnMouseMove,
+                handlers.OnMouseWheel,
+                handlers.OnKey,
+                handlers.OnDropFile);
         }
 
         void Run();

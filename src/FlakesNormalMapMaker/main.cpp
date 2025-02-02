@@ -153,7 +153,6 @@ private:
     } args_;
 
     aten::context ctxt_;
-    std::shared_ptr<aten::texture> bump_map_;
 
     std::shared_ptr<aten::visualizer> visualizer_;
 

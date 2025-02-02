@@ -347,14 +347,17 @@ int32_t main(int32_t argc, char* argv[])
 
     auto wnd = std::make_shared<aten::window>();
 
+    aten::window::MesageHandlers handlers;
+    handlers.OnRun = [&app]() { return app->Run(); };
+    handlers.OnClose = [&app]() { app->OnClose(); };
+    handlers.OnMouseBtn = [&app](bool left, bool press, int32_t x, int32_t y) { app->OnMouseBtn(left, press, x, y); };
+    handlers.OnMouseMove = [&app](int32_t x, int32_t y) { app->OnMouseMove(x, y);  };
+    handlers.OnMouseWheel = [&app](int32_t delta) { app->OnMouseWheel(delta); };
+    handlers.OnKey = [&app](bool press, aten::Key key) { app->OnKey(press, key); };
+
     auto id = wnd->Create(
         WIDTH, HEIGHT, TITLE,
-        std::bind(&AssimpLoadViewerApp::Run, app),
-        std::bind(&AssimpLoadViewerApp::OnClose, app),
-        std::bind(&AssimpLoadViewerApp::OnMouseBtn, app, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4),
-        std::bind(&AssimpLoadViewerApp::OnMouseMove, app, std::placeholders::_1, std::placeholders::_2),
-        std::bind(&AssimpLoadViewerApp::OnMouseWheel, app, std::placeholders::_1),
-        std::bind(&AssimpLoadViewerApp::OnKey, app, std::placeholders::_1, std::placeholders::_2));
+        handlers);
 
     if (id >= 0) {
         app->GetContext().SetIsWindowInitialized(true);

@@ -388,15 +388,18 @@ int32_t main(int32_t argc, char* argv[])
 
     auto wnd = std::make_shared<aten::window>();
 
+    aten::window::MesageHandlers handlers;
+    handlers.OnRun = [&app]() { return app->Run(); };
+    handlers.OnClose = [&app]() { app->OnClose(); };
+    handlers.OnMouseBtn = [&app](bool left, bool press, int32_t x, int32_t y) { app->OnMouseBtn(left, press, x, y); };
+    handlers.OnMouseMove = [&app](int32_t x, int32_t y) { app->OnMouseMove(x, y);  };
+    handlers.OnMouseWheel = [&app](int32_t delta) { app->OnMouseWheel(delta); };
+    handlers.OnKey = [&app](bool press, aten::Key key) { app->OnKey(press, key); };
+    handlers.OnDropFile = [&app](std::string_view path) { app->Load(path); };
+
     auto id = wnd->Create(
         WIDTH, HEIGHT, TITLE,
-        [&app]() { return app->Run(); },
-        [&app]() { app->OnClose(); },
-        [&app](bool left, bool press, int32_t x, int32_t y) { app->OnMouseBtn(left, press, x, y); },
-        [&app](int32_t x, int32_t y) { app->OnMouseMove(x, y); },
-        [&app](int32_t delta) {app->OnMouseWheel(delta); },
-        [&app](bool press, aten::Key key) { app->OnKey(press, key); },
-        [&app](std::string_view path) { app->Load(path); });
+        handlers);
 
     if (id >= 0) {
         app->GetContext().SetIsWindowInitialized(true);

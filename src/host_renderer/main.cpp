@@ -264,10 +264,13 @@ int32_t main(int32_t argc, char* argv[])
 
     auto wnd = std::make_shared<aten::window>();
 
+    aten::window::MesageHandlers handlers;
+    handlers.OnRun = [&app]() { return app->Run(); };
+
     auto id = wnd->Create(
         WIDTH, HEIGHT,
         TITLE,
-        std::bind(&HostRendererApp::Run, app));
+        handlers);
 
     if (id >= 0) {
         app->GetContext().SetIsWindowInitialized(true);

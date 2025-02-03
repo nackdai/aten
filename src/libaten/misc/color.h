@@ -117,4 +117,56 @@ namespace AT_NAME {
             return xyz;
         }
     };
+
+    class ColorEncoder {
+    public:
+        ColorEncoder() = default;
+        virtual ~ColorEncoder() = default;
+
+        ColorEncoder(const ColorEncoder&) = delete;
+        ColorEncoder(ColorEncoder&&) = delete;
+        ColorEncoder& operator=(const ColorEncoder&) = delete;
+        ColorEncoder& operator=(ColorEncoder&&) = delete;
+
+        virtual float FromLinear(const float v) const = 0;
+        virtual float ToLinear(const float v) const = 0;
+    };
+
+    class LinearEncoder : public ColorEncoder {
+    public:
+        LinearEncoder() = default;
+        virtual ~LinearEncoder() {}
+
+        float FromLinear(const float v) const override
+        {
+            return v;
+        }
+
+        float ToLinear(const float v) const override
+        {
+            return v;
+        }
+    };
+
+    class sRGBGammaEncoder : public ColorEncoder {
+    public:
+        sRGBGammaEncoder() = default;
+        virtual ~sRGBGammaEncoder() {}
+
+        float FromLinear(const float v) const override
+        {
+            if (v <= 0.0031308F) {
+                return v * 12.92F;
+            }
+            return 1.055F * aten::pow(v, 1 / 2.4F) - 0.055F;
+        }
+
+        float ToLinear(const float v) const override
+        {
+            if (v <= 0.04045F) {
+                return v / 12.92F;
+            }
+            return aten::pow((v + 0.055F) / 1.055F, 2.4F);
+        }
+    };
 }

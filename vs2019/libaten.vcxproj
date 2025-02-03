@@ -391,13 +391,11 @@
     <None Include="..\src\shader\simple3d_vs.glsl" />
     <None Include="..\src\shader\skinning_fs.glsl" />
     <None Include="..\src\shader\skinning_vs.glsl" />
-    <None Include="..\src\shader\srgb_fs.glsl" />
     <None Include="..\src\shader\ssrt_fs.glsl" />
     <None Include="..\src\shader\ssrt_gs.glsl" />
     <None Include="..\src\shader\ssrt_vs.glsl" />
     <None Include="..\src\shader\taa_final_fs.glsl" />
     <None Include="..\src\shader\taa_fs.glsl" />
-    <None Include="..\src\shader\tonemap_fs.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

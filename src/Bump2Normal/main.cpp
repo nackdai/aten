@@ -63,7 +63,7 @@ public:
             1.0f,
             0);
 
-        visualizer_->renderGLTexture(bump_map_->getGLTexHandle(), false);
+        visualizer_->renderGLTexture(bump_map_.get(), false);
 
         if (will_take_screenshot_) {
             visualizer_->takeScreenshot(args_.output, args_.width, args_.height);

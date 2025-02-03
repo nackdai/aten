@@ -1,12 +1,14 @@
 #pragma once
 
 #include "defs.h"
-#include "math/vec4.h"
 #include "visualizer/pixelformat.h"
 #include "visualizer/shader.h"
 #include "visualizer/fbo.h"
+
+#include "math/vec4.h"
 #include "misc/value.h"
 #include "misc/color.h"
+#include "image/texture.h"
 
 namespace aten {
     class visualizer {
@@ -111,7 +113,11 @@ namespace aten {
             bool revert);
 
         void render(bool revert);
-        void renderGLTexture(uint32_t gltex, bool revert);
+        void renderGLTexture(aten::texture* tex, bool revert);
+
+        void RenderGLTextureByGLTexId(
+            uint32_t gltex, bool revert,
+            std::function<void()> OnSetTextureFilterAndAddress = nullptr);
 
         void clear();
 

@@ -52,13 +52,6 @@ namespace AT_NAME {
 
     class color {
     public:
-        static const aten::vec3 RGB2Y;
-        static const aten::vec3 RGB2Cb;
-        static const aten::vec3 RGB2Cr;
-        static const aten::vec3 YCbCr2R;
-        static const aten::vec3 YCbCr2G;
-        static const aten::vec3 YCbCr2B;
-
         static inline AT_HOST_DEVICE_API float luminance(const aten::vec3& v)
         {
             float ret = luminance(v.r, v.g, v.b);
@@ -71,35 +64,6 @@ namespace AT_NAME {
             return ret;
         }
 
-        static aten::vec3 RGBtoYCbCr(const aten::vec3& rgb)
-        {
-            auto y = dot(RGB2Y, rgb);
-            auto cb = dot(RGB2Cb, rgb);
-            auto cr = dot(RGB2Cr, rgb);
-
-            aten::vec3 ycbcr = aten::vec3(y, cb, cr);
-
-            return ycbcr;
-        }
-
-        static float RGBtoY(const aten::vec3& rgb)
-        {
-            auto y = dot(RGB2Y, rgb);
-            return y;
-        }
-
-        static aten::vec3 YCbCrtoRGB(const aten::vec3& ycbcr)
-        {
-            auto r = dot(YCbCr2R, ycbcr);
-            auto g = dot(YCbCr2G, ycbcr);
-            auto b = dot(YCbCr2B, ycbcr);
-
-            aten::vec3 rgb = aten::vec3(r, g, b);
-
-            return rgb;
-        }
-
-        // RGB -> sRGB
         static AT_DEVICE_API aten::vec3 RGBtoXYZ(const aten::vec3& rgb)
         {
             // NOTE:

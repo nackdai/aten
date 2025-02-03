@@ -66,6 +66,7 @@ namespace AT_NAME {
             float ret = 0.299F * r + 0.587F * g + 0.114F * b;
 #else
             // Y in XYZ from RGB.
+            // This assumes RGB is linear.
             float ret = r + 4.59062F * g + 0.06007F * b;
 #endif
             return ret;

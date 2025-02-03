@@ -4,6 +4,7 @@
 #include <string>
 
 #include "image/texture.h"
+#include "misc/color.h"
 #include "scene/host_scene_context.h"
 
 namespace aten {
@@ -16,6 +17,7 @@ namespace aten {
         static std::shared_ptr<texture> Load(
             const std::string_view tag,
             const std::string_view path,
-            context& ctxt);
+            context& ctxt,
+            const AT_NAME::ColorEncoder* encoder = nullptr);
     };
 }

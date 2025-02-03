@@ -135,7 +135,7 @@ public:
                 1.0f,
                 0);
             fbo_->BindAsTexture();
-            visualizer_->renderGLTexture(fbo_->GetGLTextureHandle(), camera_.NeedRevert());
+            visualizer_->RenderGLTextureByGLTexId(fbo_->GetGLTextureHandle(), camera_.NeedRevert());
         }
 
         if (will_take_screen_shot_)

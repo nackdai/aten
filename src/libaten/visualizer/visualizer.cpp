@@ -227,10 +227,22 @@ namespace aten
 
     void visualizer::render(bool revert)
     {
-        renderGLTexture(m_tex, revert);
+        RenderGLTextureByGLTexId(m_tex, revert);
     }
 
-    void visualizer::renderGLTexture(uint32_t gltex, bool revert)
+    void visualizer::renderGLTexture(aten::texture* tex, bool revert)
+    {
+        RenderGLTextureByGLTexId(
+            tex->getGLTexHandle(), revert,
+            [&tex] {
+                tex->SetFilterAndAddressModeAsGLTexture();
+            }
+        );
+    }
+
+    void visualizer::RenderGLTextureByGLTexId(
+        uint32_t gltex, bool revert,
+        std::function<void()> OnSetTextureFilterAndAddress/*= nullptr*/)
     {
         // This API uses rendered OpenGL texture resource by GPGPU directly.
         // So, do not handle pixel data pointer directly.
@@ -239,13 +251,17 @@ namespace aten
 
         CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, gltex));
 
-        // TODO
+        if (OnSetTextureFilterAndAddress) {
+            OnSetTextureFilterAndAddress();
+        }
 #if 0
-        // Specify filter after binding!!!!!
-        CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP));
-        CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP));
-        CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-        CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+        else {
+            // Specify filter after binding!!!!!
+            CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP));
+            CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP));
+            CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+            CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+        }
 #endif
 
         bool willRevert = revert;

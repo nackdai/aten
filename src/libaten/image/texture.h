@@ -28,6 +28,7 @@ namespace aten
 
     class texture {
         friend class context;
+        friend class visualizer;
 
     public:
         texture() = default;
@@ -189,6 +190,8 @@ namespace aten
             }
             return value;
         }
+
+        void SetFilterAndAddressModeAsGLTexture();
 
     private:
         int32_t m_id{ -1 };

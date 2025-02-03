@@ -245,4 +245,30 @@ namespace aten
 
         return (ret > 0);
     }
+
+    void texture::SetFilterAndAddressModeAsGLTexture()
+    {
+        constexpr std::array GLFilterMode = {
+            GL_NEAREST,
+            GL_LINEAR,
+        };
+        AT_STATICASSERT(GLFilterMode.size() == static_cast<size_t>(TextureFilterMode::Max));
+
+        constexpr std::array GLAddressMode = {
+            GL_REPEAT,
+            GL_CLAMP,
+            GL_MIRRORED_REPEAT,
+            GL_CLAMP_TO_BORDER,
+        };
+        AT_STATICASSERT(GLAddressMode.size() == static_cast<size_t>(TextureAddressMode::Max));
+
+        const auto gl_filter = GLFilterMode[static_cast<int>(filter_mode_)];
+        const auto gl_address = GLAddressMode[static_cast<int>(address_mode_)];
+
+        // Specify filter after binding!!!!!
+        CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gl_address));
+        CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_address));
+        CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter));
+        CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter));
+    }
 }

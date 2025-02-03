@@ -818,9 +818,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\shader\tonemap_fs.glsl">
-      <Filter>shader</Filter>
-    </None>
     <None Include="..\src\shader\gamma_fs.glsl">
       <Filter>shader</Filter>
     </None>
@@ -868,9 +865,6 @@
     </None>
     <None Include="..\src\shader\skinning_vs.glsl">
       <Filter>shader\skinning</Filter>
-    </None>
-    <None Include="..\src\shader\srgb_fs.glsl">
-      <Filter>shader</Filter>
     </None>
     <None Include="..\src\shader\magnifier_fs.glsl">
       <Filter>shader</Filter>

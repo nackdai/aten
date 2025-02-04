@@ -190,15 +190,35 @@ namespace aten
             pixeltype,
             textureimage));
 
+        ApplyPostProcesses(pixels, revert);
+    }
+
+    void visualizer::ApplyPostProcesses(
+        const vec4* pixels,
+        bool revert) const
+    {
+        // Keep how many post processes are enabled.
+        int32_t count_enabled_post_procs = 0;
+
+        for (const auto& post_proc : m_postprocs) {
+            count_enabled_post_procs += post_proc->IsEnabled() ? 1 : 0;
+        }
+
         bool willRevert = revert;
 
-        for (int32_t i = 0; i < m_postprocs.size(); i++) {
-            auto* postproc = m_postprocs[i];
-            PostProc* prevPostproc = nullptr;
+        // Count the current activated post process count.
+        int32_t curr_activated_post_proc_count = 0;
 
-            if (i > 0) {
-                prevPostproc = m_postprocs[i - 1];
-                auto& fbo = prevPostproc->getFbo();
+        // Keep the previous post process.
+        PostProc* prev_post_proc = nullptr;
+
+        for (const auto& post_proc : m_postprocs) {
+            if (!post_proc->IsEnabled()) {
+                continue;
+            }
+
+            if (curr_activated_post_proc_count > 0) {
+                auto& fbo = prev_post_proc->getFbo();
 
                 CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
 
@@ -206,22 +226,33 @@ namespace aten
                 fbo.BindAsTexture();
             }
 
-            postproc->prepareRender(prevPostproc, pixels, willRevert);
-            auto& fbo = postproc->getFbo();
+            curr_activated_post_proc_count++;
 
-            // 最初の１回だけ反転すればいいので.
-            willRevert = false;
+            post_proc->prepareRender(prev_post_proc, pixels, willRevert);
 
-            if (fbo.IsValid()) {
-                // Set FBO.
-                fbo.BindFBO();
+            if (curr_activated_post_proc_count == count_enabled_post_procs) {
+                // We can assume that this post process is the last one and needs to bind with the default FBO.
+                CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
             }
             else {
-                // Set default frame buffer.
-                CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+                auto& fbo = post_proc->getFbo();
+
+                if (fbo.IsValid()) {
+                    // Set FBO.
+                    fbo.BindFBO();
+                }
+                else {
+                    // Set default frame buffer.
+                    CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+                }
             }
 
             CALL_GL_API(::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+
+            // It's fine to revert only once.
+            willRevert = false;
+
+            prev_post_proc = post_proc;
         }
     }
 
@@ -264,39 +295,7 @@ namespace aten
         }
 #endif
 
-        bool willRevert = revert;
-
-        for (int32_t i = 0; i < m_postprocs.size(); i++) {
-            auto* postproc = m_postprocs[i];
-            PostProc* prevPostproc = nullptr;
-
-            if (i > 0) {
-                prevPostproc = m_postprocs[i - 1];
-                auto& fbo = prevPostproc->getFbo();
-
-                CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
-
-                // Set FBO as source texture.
-                fbo.BindAsTexture();
-            }
-
-            postproc->prepareRender(prevPostproc, nullptr, willRevert);
-            auto& fbo = postproc->getFbo();
-
-            // 最初の１回だけ反転すればいいので.
-            willRevert = false;
-
-            if (fbo.IsValid()) {
-                // Set FBO.
-                fbo.BindFBO();
-            }
-            else {
-                // Set default frame buffer.
-                CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
-            }
-
-            CALL_GL_API(::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
-        }
+        ApplyPostProcesses(nullptr, revert);
     }
 
     void visualizer::clear()

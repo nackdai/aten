@@ -4,7 +4,7 @@
 #include <string>
 
 #include "image/texture.h"
-#include "misc/color.h"
+#include "misc/color.h""
 #include "scene/host_scene_context.h"
 
 namespace aten {
@@ -19,5 +19,7 @@ namespace aten {
             const std::string_view path,
             context& ctxt,
             const AT_NAME::ColorEncoder* encoder = nullptr);
+
+        static bool IsHdr(const std::string_view path);
     };
 }

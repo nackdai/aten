@@ -553,6 +553,9 @@
     <ClInclude Include="..\src\libaten\display\gt_tonemapper.h">
       <Filter>display</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\display\srgb_oetf.h">
+      <Filter>display</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -876,6 +879,9 @@
       <Filter>shader</Filter>
     </None>
     <None Include="..\src\shader\gt_tonemapper_fs.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\shader\srgb_oetf_fs.glsl">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>

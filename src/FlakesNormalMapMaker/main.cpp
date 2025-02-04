@@ -24,7 +24,7 @@ public:
 
     bool Run()
     {
-        if (!maker_.IsValid()) {
+        if (!maker_.IsInitialized()) {
             visualizer_ = aten::visualizer::init(args_.width, args_.height);
 
             if (!maker_.init(

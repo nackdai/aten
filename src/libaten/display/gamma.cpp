@@ -1,5 +1,5 @@
 #include "visualizer/atengl.h"
-#include "hdr/gamma.h"
+#include "display/gamma.h"
 
 namespace aten
 {

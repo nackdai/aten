@@ -48,10 +48,11 @@ public:
             }
         }
 
-#if 0
-        if (!blitter_.IsInitialized()) {
+        if (!visualizer_) {
             visualizer_ = aten::visualizer::init(args_.width, args_.height);
+        }
 
+        if (!blitter_.IsInitialized()) {
             if (!blitter_.init(
                 args_.width, args_.height,
                 "../shader/fullscreen_vs.glsl",
@@ -63,22 +64,19 @@ public:
 
             visualizer_->addPostProc(&blitter_);
         }
-#else
-        if (!visualizer_) {
-            visualizer_ = aten::visualizer::init(args_.width, args_.height);
-        }
 
-        if (!tonemapper_.IsInitialized()) {
+        if (is_hdr_texture_ && !tonemapper_.IsInitialized()) {
             if (!tonemapper_.Init(args_.width, args_.height, "../"))
             {
                 AT_ASSERT(false);
                 return false;
             }
 
+            need_apply_tone_mapping_ = tonemapper_.IsEnabled();
+
             visualizer_->addPostProc(&tonemapper_);
         }
 
-#if 1
         if (!srgb_oetf_.IsInitialized()) {
             if (!srgb_oetf_.Init(args_.width, args_.height, "../"))
             {
@@ -90,8 +88,6 @@ public:
 
             visualizer_->addPostProc(&srgb_oetf_);
         }
-#endif
-#endif
 
         aten::RasterizeRenderer::clearBuffer(
             aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
@@ -110,7 +106,15 @@ public:
             }
         }
 
-        tonemapper_.Edit(&param_editor_);
+        if (is_hdr_texture_ && tonemapper_.IsInitialized()) {
+            if (need_apply_tone_mapping_) {
+                tonemapper_.Edit(&param_editor_);
+            }
+
+            if (ImGui::Checkbox("Apply tone mapping", &need_apply_tone_mapping_)) {
+                tonemapper_.SetIsEnabled(need_apply_tone_mapping_);
+            }
+        }
 
         if (ImGui::Checkbox("Apply sRGB OETF", &need_apply_srgb_oetf_)) {
             srgb_oetf_.SetIsEnabled(need_apply_srgb_oetf_);
@@ -190,6 +194,8 @@ private:
         const AT_NAME::sRGBGammaEncoder srgb_encoder;
         const AT_NAME::LinearEncoder linear_encoder;
 
+        is_hdr_texture_ = aten::Image::IsHdr(path);
+
         image_ = aten::Image::Load(
             "", path,
             ctxt_,
@@ -202,7 +208,9 @@ private:
     } args_;
 
     aten::context ctxt_;
+
     std::shared_ptr<aten::texture> image_;
+    bool is_hdr_texture_{ false };
 
     std::string image_file_path_;
 
@@ -216,6 +224,7 @@ private:
     aten::sRGBOptoElectronicTransferFunction srgb_oetf_;
 
     bool need_read_as_srgb_{ false };
+    bool need_apply_tone_mapping_{ false };
     bool need_apply_srgb_oetf_{ true };
 };
 

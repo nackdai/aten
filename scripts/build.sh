@@ -18,9 +18,9 @@ EOF
 
 CONTAINER_NAME=""
 kill_container() {
-  local contaner_name="${1}"
-  docker kill "${contaner_name}" >/dev/null 2>&1 || true
-  docker container rm "${contaner_name}" >/dev/null 2>&1 || true
+  local container_name="${1}"
+  docker kill "${container_name}" >/dev/null 2>&1 || true
+  docker container rm "${container_name}" >/dev/null 2>&1 || true
 }
 trap 'kill_container ${CONTAINER_NAME}' EXIT ERR
 
@@ -91,7 +91,7 @@ if "${will_export_compile_commands_json}"; then
   fi
 fi
 
-# No need to keep docker conainer after running command. So, specify remove option.
+# No need to keep docker container after running command. So, specify remove option.
 python3 ./scripts/docker_operator.py -r -i "${docker_image}" -n "${CONTAINER_NAME}" -c "cd build && ninja -j 4"
 
 kill_container "${CONTAINER_NAME}"

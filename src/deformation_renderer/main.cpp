@@ -349,7 +349,7 @@ public:
         aten::GLProfiler::begin();
 
         aten::RasterizeRenderer::clearBuffer(
-            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Stencil,
             aten::vec4(0, 0.5f, 1.0f, 1.0f),
             1.0f,
             0);

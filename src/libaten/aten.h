@@ -53,7 +53,7 @@
 #include "image/image.h"
 #include "image/texture.h"
 
-#include "hdr/gamma.h"
+#include "display/gamma.h"
 
 #include "visualizer/visualizer.h"
 #include "visualizer/window.h"

@@ -177,7 +177,7 @@
     <ClInclude Include="..\src\libaten\geometry\triangle.h" />
     <ClInclude Include="..\src\libaten\geometry\TriangleGroupMesh.h" />
     <ClInclude Include="..\src\libaten\geometry\vertex.h" />
-    <ClInclude Include="..\src\libaten\hdr\gamma.h" />
+    <ClInclude Include="..\src\libaten\display\gamma.h" />
     <ClInclude Include="..\src\libaten\image\hdr.h" />
     <ClInclude Include="..\src\libaten\image\image.h" />
     <ClInclude Include="..\src\libaten\light\arealight.h" />
@@ -315,7 +315,7 @@
     <ClCompile Include="..\src\libaten\geometry\sphere.cpp" />
     <ClCompile Include="..\src\libaten\geometry\triangle.cpp" />
     <ClCompile Include="..\src\libaten\geometry\TriangleGroupMesh.cpp" />
-    <ClCompile Include="..\src\libaten\hdr\gamma.cpp" />
+    <ClCompile Include="..\src\libaten\display\gamma.cpp" />
     <ClCompile Include="..\src\libaten\image\hdr.cpp" />
     <ClCompile Include="..\src\libaten\image\image.cpp" />
     <ClCompile Include="..\src\libaten\light\arealight.cpp" />

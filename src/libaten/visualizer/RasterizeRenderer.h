@@ -28,7 +28,7 @@ namespace aten {
         enum Buffer {
             Color = 0x001,
             Depth = 0x010,
-            Sencil = 0x100,
+            Stencil = 0x100,
         };
 
         static void clearBuffer(

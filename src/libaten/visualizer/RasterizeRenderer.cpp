@@ -24,7 +24,7 @@ namespace aten
             clear_mask |= GL_DEPTH_BUFFER_BIT;
             CALL_GL_API(::glClearDepthf(clear_depth));
         }
-        if (clear_buffer_mask & static_cast<uint32_t>(Buffer::Sencil)) {
+        if (clear_buffer_mask & static_cast<uint32_t>(Buffer::Stencil)) {
             clear_mask |= GL_STENCIL_BUFFER_BIT;
             CALL_GL_API(::glClearStencil(clear_stencil));
         }
@@ -178,7 +178,7 @@ namespace aten
 
         aten::vec4 tmp_clear_color;
         clearBuffer(
-            Buffer::Depth | Buffer::Sencil,
+            Buffer::Depth | Buffer::Stencil,
             tmp_clear_color, 1.0f, 0);
 
         ctxt.build();
@@ -704,7 +704,7 @@ namespace aten
 
         aten::vec4 tmp_clear_color;
         clearBuffer(
-            Buffer::Depth | Buffer::Sencil,
+            Buffer::Depth | Buffer::Stencil,
             tmp_clear_color, 1.0f, 0);
 
         ctxt.build();

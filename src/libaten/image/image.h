@@ -4,7 +4,7 @@
 #include <string>
 
 #include "image/texture.h"
-#include "misc/color.h""
+#include "misc/color.h"
 #include "scene/host_scene_context.h"
 
 namespace aten {

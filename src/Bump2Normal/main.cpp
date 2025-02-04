@@ -42,7 +42,7 @@ public:
             return false;
         }
 
-        if (!blitter_.IsValid()) {
+        if (!blitter_.IsInitialized()) {
             visualizer_ = aten::visualizer::init(args_.width, args_.height);
 
             if (!blitter_.init(

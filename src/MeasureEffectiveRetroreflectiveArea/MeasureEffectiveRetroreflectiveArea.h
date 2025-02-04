@@ -36,7 +36,7 @@ public:
 
     bool IsValid() const
     {
-        return m_shader.IsValid();
+        return m_shader.IsInitialized();
     }
 
 private:

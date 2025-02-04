@@ -38,7 +38,7 @@ namespace aten {
             return m_program;
         }
 
-        bool IsValid() const
+        bool IsInitialized() const
         {
             return (m_program > 0);
         }

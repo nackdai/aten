@@ -338,7 +338,7 @@ async def main(container_name: str):
                     container_name, args.command
                 )
         else:
-            # Execute command directily with docker run command.
+            # Execute command directly with docker run command.
             returncode = await run_docker_container(
                 args.image,
                 container_name,

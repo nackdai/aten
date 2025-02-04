@@ -89,9 +89,11 @@ public:
             visualizer_->addPostProc(&srgb_oetf_);
         }
 
+        const aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
+
         aten::RasterizeRenderer::clearBuffer(
             aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
-            aten::vec4(0, 0.5f, 1.0f, 1.0f),
+            clear_color,
             1.0f,
             0);
 

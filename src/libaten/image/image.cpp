@@ -47,7 +47,7 @@ namespace aten {
     {
         auto stored_tex = ctxt.GetTextureByName(tag);
         if (stored_tex) {
-            AT_PRINTF("There is same tag texture. [%s]\n", tag);
+            AT_PRINTF("There is same tag texture. [%s]\n", tag.data());
             return stored_tex;
         }
 

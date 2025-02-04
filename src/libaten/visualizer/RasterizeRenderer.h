@@ -33,7 +33,7 @@ namespace aten {
 
         static void clearBuffer(
             uint32_t clear_buffer_mask,
-            aten::vec4& clear_color,
+            const aten::vec4& clear_color,
             float clear_depth,
             int32_t clear_stencil);
 

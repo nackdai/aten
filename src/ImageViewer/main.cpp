@@ -5,8 +5,22 @@
 
 #include "../common/app_base.h"
 
+#include "display/gt_tonemapper.h"
+#include "display/srgb_oetf.h"
+
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
+
+class GTTonmapperParameterEditor : public aten::BlitterParameterEditor {
+public:
+    GTTonmapperParameterEditor() = default;
+    ~GTTonmapperParameterEditor() = default;
+
+    bool Edit(std::string_view name, float& param, float _min, float _max) const override
+    {
+        return ImGui::SliderFloat(name.data(), &param, _min, _max);
+    }
+};
 
 class ImageViewerApp : public App {
 public:
@@ -34,7 +48,8 @@ public:
             }
         }
 
-        if (!blitter_.IsValid()) {
+#if 0
+        if (!blitter_.IsInitialized()) {
             visualizer_ = aten::visualizer::init(args_.width, args_.height);
 
             if (!blitter_.init(
@@ -48,6 +63,35 @@ public:
 
             visualizer_->addPostProc(&blitter_);
         }
+#else
+        if (!visualizer_) {
+            visualizer_ = aten::visualizer::init(args_.width, args_.height);
+        }
+
+        if (!tonemapper_.IsInitialized()) {
+            if (!tonemapper_.Init(args_.width, args_.height, "../"))
+            {
+                AT_ASSERT(false);
+                return false;
+            }
+
+            visualizer_->addPostProc(&tonemapper_);
+        }
+
+#if 1
+        if (!srgb_oetf_.IsInitialized()) {
+            if (!srgb_oetf_.Init(args_.width, args_.height, "../"))
+            {
+                AT_ASSERT(false);
+                return false;
+            }
+
+            need_apply_srgb_oetf_ = srgb_oetf_.IsEnabled();
+
+            visualizer_->addPostProc(&srgb_oetf_);
+        }
+#endif
+#endif
 
         aten::RasterizeRenderer::clearBuffer(
             aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
@@ -64,6 +108,12 @@ public:
                 // Re-read.
                 ReadImage(image_file_path_);
             }
+        }
+
+        tonemapper_.Edit(&param_editor_);
+
+        if (ImGui::Checkbox("Apply sRGB OETF", &need_apply_srgb_oetf_)) {
+            srgb_oetf_.SetIsEnabled(need_apply_srgb_oetf_);
         }
 
         return true;
@@ -160,7 +210,13 @@ private:
 
     aten::Blitter blitter_;
 
+    aten::GTTonemapper tonemapper_;
+    GTTonmapperParameterEditor param_editor_;
+
+    aten::sRGBOptoElectronicTransferFunction srgb_oetf_;
+
     bool need_read_as_srgb_{ false };
+    bool need_apply_srgb_oetf_{ true };
 };
 
 int32_t main(int32_t argc, char* argv[])

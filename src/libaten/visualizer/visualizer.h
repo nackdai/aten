@@ -82,6 +82,16 @@ namespace aten {
                 prepareRender(pixels, revert);
             }
 
+            bool IsEnabled() const
+            {
+                return is_enabled_;
+            }
+
+            void SetIsEnabled(bool b)
+            {
+                is_enabled_ = b;
+            }
+
         protected:
             void setVisualizer(aten::visualizer* visualizer)
             {
@@ -96,6 +106,8 @@ namespace aten {
             FBO fbo_;
             PostProc* m_prevPass{ nullptr };
             aten::visualizer* m_visualizer{ nullptr };
+
+            bool is_enabled_{ true };
         };
 
     public:
@@ -132,6 +144,10 @@ namespace aten {
     private:
         const void* doPreProcs(const vec4* pixels);
         const void* convertTextureData(const void* textureimage);
+
+        void ApplyPostProcesses(
+            const vec4* pixels,
+            bool revert) const;
 
     private:
         uint32_t m_tex{ 0 };

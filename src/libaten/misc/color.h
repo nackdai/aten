@@ -101,6 +101,21 @@ namespace AT_NAME {
 
             return aten::vec3(x, y, z);
         }
+
+        static AT_DEVICE_API aten::vec3 XYZtoRGB(const aten::vec3& xyz)
+        {
+            // NOTE:
+            // CUDA compiler doesn't allow dynamic static initialization during compile.
+            const aten::vec3 _XYZ2R = aten::vec3(0.4185F, -0.1587F, -0.0814F);
+            const aten::vec3 _XYZ2G = aten::vec3(-0.0912F, 0.2524F, 0.0154F);
+            const aten::vec3 _XYZ2B = aten::vec3(0.4185F, -0.1587F, -0.0814F);
+
+            auto r = dot(_XYZ2R, xyz);
+            auto g = dot(_XYZ2G, xyz);
+            auto b = dot(_XYZ2B, xyz);
+
+            return aten::vec3(r, g, b);
+        }
     };
 
     class ColorEncoder {

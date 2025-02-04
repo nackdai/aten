@@ -550,6 +550,9 @@
     <ClInclude Include="..\src\libaten\image\hdr.h">
       <Filter>image</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\display\gt_tonemapper.h">
+      <Filter>display</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -816,6 +819,9 @@
     <ClCompile Include="..\src\libaten\image\hdr.cpp">
       <Filter>image</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\display\gt_tonemapper.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\gamma_fs.glsl">
@@ -867,6 +873,9 @@
       <Filter>shader\skinning</Filter>
     </None>
     <None Include="..\src\shader\magnifier_fs.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\shader\gt_tonemapper_fs.glsl">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>

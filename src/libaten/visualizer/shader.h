@@ -5,6 +5,10 @@
 #include "types.h"
 #include "math/vec3.h"
 
+#define AT_DEFINE_SHADER_PARAMETER(type, param, default_value) \
+    type param##_{ default_value }; \
+    static constexpr const char* name_##param = #param
+
 namespace aten {
     class shader {
     public:

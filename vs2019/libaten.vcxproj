@@ -163,6 +163,7 @@
     <ClInclude Include="..\src\libaten\deformable\SkinningVertex.h" />
     <ClInclude Include="..\src\libaten\deformable\SKLFormat.h" />
     <ClInclude Include="..\src\libaten\defs.h" />
+    <ClInclude Include="..\src\libaten\display\gt_tonemapper.h" />
     <ClInclude Include="..\src\libaten\filter\atrous.h" />
     <ClInclude Include="..\src\libaten\filter\magnifier.h" />
     <ClInclude Include="..\src\libaten\filter\taa.h" />
@@ -307,6 +308,7 @@
     <ClCompile Include="..\src\libaten\deformable\DeformMeshSet.cpp" />
     <ClCompile Include="..\src\libaten\deformable\DeformPrimitives.cpp" />
     <ClCompile Include="..\src\libaten\deformable\Skeleton.cpp" />
+    <ClCompile Include="..\src\libaten\display\gt_tonemapper.cpp" />
     <ClCompile Include="..\src\libaten\filter\atrous.cpp" />
     <ClCompile Include="..\src\libaten\filter\magnifier.cpp" />
     <ClCompile Include="..\src\libaten\filter\taa.cpp" />
@@ -386,6 +388,7 @@
     <None Include="..\src\shader\fullscreen_fs.glsl" />
     <None Include="..\src\shader\fullscreen_vs.glsl" />
     <None Include="..\src\shader\gamma_fs.glsl" />
+    <None Include="..\src\shader\gt_tonemapper_fs.glsl" />
     <None Include="..\src\shader\magnifier_fs.glsl" />
     <None Include="..\src\shader\simple3d_fs.glsl" />
     <None Include="..\src\shader\simple3d_vs.glsl" />

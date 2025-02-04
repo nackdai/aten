@@ -65,6 +65,11 @@ add_library(
   deformable/deformable.cpp
   deformable/deformable.h
   defs.h
+  display/gamma.cpp
+  display/gamma.h
+  display/gt_tonemapper.cpp
+  display/gt_tonemapper.h
+  display/srgb_oetf.h
   filter/atrous.cpp
   filter/atrous.h
   filter/magnifier.cpp
@@ -87,12 +92,12 @@ add_library(
   geometry/triangle.cpp
   geometry/triangle.h
   geometry/vertex.h
-  hdr/gamma.cpp
-  hdr/gamma.h
-  hdr/hdr.cpp
-  hdr/hdr.h
-  hdr/tonemap.cpp
-  hdr/tonemap.h
+  image/hdr.cpp
+  image/hdr.h
+  image/image.cpp
+  image/image.h
+  image/texture.cpp
+  image/texture.h
   light/arealight.cpp
   light/arealight.h
   light/directionallight.h
@@ -210,8 +215,6 @@ add_library(
   scene/host_scene_context.h
   scene/scene.cpp
   scene/scene.h
-  texture/texture.cpp
-  texture/texture.h
   types.h
   visualizer/GLProfiler.cpp
   visualizer/GLProfiler.h

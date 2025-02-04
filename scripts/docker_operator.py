@@ -10,6 +10,8 @@ from asyncio.subprocess import Process
 from enum import Enum
 from typing import List, Optional
 
+import docker
+
 # NOTE:
 # Why not use docker sdk is that the container does not become interactive within the python terminal.
 # In order to interact the container, use subprocess.
@@ -281,6 +283,23 @@ async def kill_docker_container(container_name: str):
     )
 
 
+def check_if_image_exists(image_name: str) -> bool:
+    """Check if docker image exists.
+
+    Args:
+        image_name: Image name to be checked.
+
+    Returns:
+        If it exists, returns True. Otherwise, returns False.
+    """
+    client = docker.from_env()
+    try:
+        client.images.get(image_name)
+        return True
+    except docker.errors.ImageNotFound:
+        return False
+
+
 async def main(container_name: str):
     # NOTE:
     # e.g.
@@ -306,6 +325,11 @@ async def main(container_name: str):
         "-c", "--command", type=str, help="Commands to be executed", default=None
     )
     args = parser.parse_args()
+
+    is_image_exists = check_if_image_exists(args.image)
+    if not is_image_exists:
+        print(f"{args.image} doesn't exist.")
+        sys.exit(1)
 
     container_name = args.name
 

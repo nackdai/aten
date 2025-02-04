@@ -61,7 +61,7 @@ namespace aten {
         // Regardless of any encoder, HDR format is always linear.
         AT_NAME::LinearEncoder linear_encoder;
 
-        if (stbi_is_hdr(path.data())) {
+        if (IsHdr(path)) {
             auto src = stbi_loadf(path.data(), &width, &height, &channels, 0);
             if (src) {
                 tex = ctxt.CreateTexture(width, height, channels, tag);
@@ -93,5 +93,10 @@ namespace aten {
         }
 
         return tex;
+    }
+
+    bool Image::IsHdr(const std::string_view path)
+    {
+        return stbi_is_hdr(path.data());
     }
 }

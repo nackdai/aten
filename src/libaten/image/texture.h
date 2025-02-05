@@ -90,9 +90,9 @@ namespace aten
             return m_colors[pos][c];
         }
 
-        const vec4* colors() const
+        const std::vector<vec4>& colors() const
         {
-            return &m_colors[0];
+            return m_colors;
         }
 
         auto width() const

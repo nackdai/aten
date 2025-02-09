@@ -1,6 +1,6 @@
 // Tone mapping from Gran Turismo 7.
 
-#version 330
+#version 450
 precision highp float;
 precision highp int;
 
@@ -47,24 +47,24 @@ vec3 gt_tonemapper_shoulder(vec3 x, float l0)
     return S;
 }
 
-vec3 RGBtoXYZ(vec3 rgb)
+vec3 sRGBtoXYZ(vec3 rgb)
 {
-    mat3 mtx_RGBtoXYZ = mat3(
-        2.7689, 1.7517, 1.1302,
-        1.0000, 4.5907, 0.0601,
-        0.0000, 0.0565, 5.6943
+    mat3 mtx_sRGBtoXYZ = mat3(
+        0.4124f, 0.2126f, 0.0193f,
+        0.3576f, 0.7152f, 0.1192f,
+        0.1805f, 0.0722f, 0.9505f
     );
-    return mtx_RGBtoXYZ * rgb;
+    return mtx_sRGBtoXYZ * rgb;
 }
 
-vec3 XYZtoRGB(vec3 xyz)
+vec3 XYZtosRGB(vec3 xyz)
 {
-    mat3 mtx_XYZtoRGB = mat3(
-        0.4185, -0.1587, -0.0814,
-        -0.0912, 0.2524, 0.0154,
-        0.0009, -0.0025, 0.1755
+    mat3 mtx_XYZtosRGB = mat3(
+         3.2406f, -0.9689f,  0.0557f,
+        -1.5372f,  1.8758f, -0.2040f,
+        -0.4986f,  0.0415f,  1.0570f
     );
-    return mtx_XYZtoRGB * xyz;
+    return mtx_XYZtosRGB * xyz;
 }
 
 void main()
@@ -78,7 +78,7 @@ void main()
     vec4 col = texture2D(image, uv);
 
     // Convert to XYZ.
-    vec3 xyz = RGBtoXYZ(col.rgb);
+    vec3 xyz = sRGBtoXYZ(col.rgb);
 
 #if 1
     float Y = xyz.y;
@@ -103,7 +103,7 @@ void main()
 #endif
 
     // Convert to RGB with the tone mapped luminance.
-    col.rgb = XYZtoRGB(xyz);
+    col.rgb = XYZtosRGB(xyz);
 
     oColour.rgb = col.rgb;
     oColour.a = 1;

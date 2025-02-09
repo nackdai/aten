@@ -65,9 +65,9 @@ namespace AT_NAME {
             // ITU-R BT.601.
             float ret = 0.299F * r + 0.587F * g + 0.114F * b;
 #else
-            // Y in XYZ from RGB.
-            // This assumes RGB is linear.
-            float ret = r + 4.59062F * g + 0.06007F * b;
+            // Y in XYZ from sRGB.
+            // This assumes sRGB is linear.
+            float ret = 0.212639F * r + 0.71517F * g + 0.0721926F * b;
 #endif
             return ret;
         }
@@ -87,28 +87,13 @@ namespace AT_NAME {
             return aten::vec3(x, y, z);
         }
 
-        static AT_DEVICE_API aten::vec3 RGBtoXYZ(const aten::vec3& rgb)
+        static AT_DEVICE_API aten::vec3 XYZtosRGB(const aten::vec3& xyz)
         {
             // NOTE:
             // CUDA compiler doesn't allow dynamic static initialization during compile.
-            const aten::vec3 _RGB2X = aten::vec3(2.7689F, 1.7517F, 1.1302F);
-            const aten::vec3 _RGB2Y = aten::vec3(1.0000F, 4.5907F, 0.0601F);
-            const aten::vec3 _RGB2Z = aten::vec3(0.0000F, 0.0565F, 5.6943F);
-
-            auto x = dot(_RGB2X, rgb);
-            auto y = dot(_RGB2Y, rgb);
-            auto z = dot(_RGB2Z, rgb);
-
-            return aten::vec3(x, y, z);
-        }
-
-        static AT_DEVICE_API aten::vec3 XYZtoRGB(const aten::vec3& xyz)
-        {
-            // NOTE:
-            // CUDA compiler doesn't allow dynamic static initialization during compile.
-            const aten::vec3 _XYZ2R = aten::vec3(0.4185F, -0.1587F, -0.0814F);
-            const aten::vec3 _XYZ2G = aten::vec3(-0.0912F, 0.2524F, 0.0154F);
-            const aten::vec3 _XYZ2B = aten::vec3(0.4185F, -0.1587F, -0.0814F);
+            const aten::vec3 _XYZ2R = aten::vec3(3.2406F, -0.9689F, 0.0557F);
+            const aten::vec3 _XYZ2G = aten::vec3(-1.5372F, 1.8758F, -0.2040F);
+            const aten::vec3 _XYZ2B = aten::vec3(-0.4986F, 0.0415F, 1.0570F);
 
             auto r = dot(_XYZ2R, xyz);
             auto g = dot(_XYZ2G, xyz);

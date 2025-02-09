@@ -114,7 +114,7 @@ namespace AT_NAME
         // https://diglib.eg.org/server/api/core/bitstreams/d84134e0-af8c-4db6-a13a-dc854294f6aa/content
 
         // Convert RGB to XYZ.
-        const auto xyz = color::RGBtoXYZ(radiance);
+        const auto xyz = color::sRGBtoXYZ(radiance);
         const auto y = xyz.y;
 
         // To avoid too dark, compare with the minimum weight.

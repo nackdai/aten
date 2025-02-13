@@ -74,51 +74,15 @@ with dynamic direct lighting](https://research.nvidia.com/sites/default/files/pu
 
 ## How To Build
 
-See [How To Build](docs/how_to_build.md) document
+[How To Build](docs/how_to_build.md)
 
 ## How to run
 
-### Windows
-
-Please find `exe` files and run them. You can find them in each directory
-where the source files are in.
-
-### Linux
-
-Please find the executables and run them. You can find them in the directories which you built the
-applications. And the directories have same name as execution file.
-
-### <a name="RunOnDocker">Docker</a>
-
-This section works for ony Linux.
-
-If you would like to run the executables in docker, you need to ensure that your host can accept
-X forwarded connections:
-
-```shell
-xhost +local:<Docker container name>`
-```
-
-And then, run the docker container like the following:
-
-```shell
-docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <Image Name>:latest bash
-```
-
-#### docker-compose
-
-You also need to ensure your host accept X forward connections.
-See [Docker in How to run](#RunOnDocker)
-
-And, run the docker container via docker-compose like the following:
-
-```shell
-docker-compose -f .devcontainer/docker-compose.yml run aten
-```
+[How To Run](docs/how_to_run.md)
 
 ## For VSCode development
 
-You can open this project on VSCode devcontainer.
+We can open this project on VSCode devcontainer.
 If you face on devcontainer build failure, it might be due to docker-compose version. In that case,
 please update docker-compose.
 
@@ -162,3 +126,8 @@ Homogeneous medium
 Heterogeneous medium
 
 ![Homogeneous](docs/gallery/heterogeneous.png)
+
+## Misc
+
+* Conventional Commits
+  * https://www.conventionalcommits.org/en/v1.0.0/

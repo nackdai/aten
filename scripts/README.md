@@ -155,7 +155,7 @@ powershell -NoProfile -ExecutionPolicy Unrestricted .\scripts\install_cuda.ps1
 
 ## pre_commit.sh
 
-This is the helpder script to run the docker container and run `pre-commit` in the docker container.
+This is the helper script to run the docker container and run `pre-commit` in the docker container.
 
 **Usage:**
 
@@ -172,7 +172,7 @@ pre_commit.sh ghcr.io/nackdai/aten/aten_dev:latest
 
 ## run_clang_tidy.py
 
-Thit is the python script to run `clang-tidy` actually. Basically, this script isn't used directly.
+This is the python script to run `clang-tidy` actually. Basically, this script isn't used directly.
 This is used by [clang_tidy.sh](#clang_tidy_sh)
 
 **Usage:**
@@ -191,7 +191,7 @@ optional arguments:
   -t [TARGET_FILES [TARGET_FILES ...]], --target_files [TARGET_FILES [TARGET_FILES ...]]
                         Specific target file to run clang-tidy
   -f, --fix             Fix code
-  --fail_fast           If error hapens, fails immediately
+  --fail_fast           If error happens, fails immediately
 ```
 
 e.g.

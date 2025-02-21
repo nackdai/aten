@@ -1,6 +1,6 @@
 // Tone mapping from Gran Turismo 7.
 
-#version 330
+#version 450
 precision highp float;
 precision highp int;
 
@@ -12,7 +12,7 @@ uniform bool revert = false;
 // output colour for the fragment
 layout(location = 0) out highp vec4 oColour;
 
-float sRGBOptoElectronicTransferFunction(float v)
+float SRGBOptoElectronicTransferFunction(float v)
 {
     if (v <= 0.0031308f) {
         return v * 12.92f;
@@ -30,9 +30,9 @@ void main()
 
     vec4 col = texture2D(image, uv);
 
-    col.r = sRGBOptoElectronicTransferFunction(col.r);
-    col.g = sRGBOptoElectronicTransferFunction(col.g);
-    col.b = sRGBOptoElectronicTransferFunction(col.b);
+    col.r = SRGBOptoElectronicTransferFunction(col.r);
+    col.g = SRGBOptoElectronicTransferFunction(col.g);
+    col.b = SRGBOptoElectronicTransferFunction(col.b);
 
     oColour.rgb = col.rgb;
     oColour.a = 1;

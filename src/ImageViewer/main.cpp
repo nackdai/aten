@@ -193,7 +193,7 @@ public:
 private:
     void ReadImage(std::string_view path)
     {
-        const AT_NAME::sRGBGammaEncoder srgb_encoder;
+        const AT_NAME::SRGBGammaEncoder srgb_encoder;
         const AT_NAME::LinearEncoder linear_encoder;
 
         is_hdr_texture_ = aten::Image::IsHdr(path);
@@ -223,7 +223,7 @@ private:
     aten::GTTonemapper tonemapper_;
     GTTonmapperParameterEditor param_editor_;
 
-    aten::sRGBOptoElectronicTransferFunction srgb_oetf_;
+    aten::SRGBOptoElectronicTransferFunction srgb_oetf_;
 
     bool need_read_as_srgb_{ false };
     bool need_apply_tone_mapping_{ false };

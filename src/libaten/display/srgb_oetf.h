@@ -7,10 +7,10 @@
 namespace aten
 {
     // sRGB OETF = Opto-Electronic Transfer Function
-    class sRGBOptoElectronicTransferFunction : public Blitter {
+    class SRGBOptoElectronicTransferFunction : public Blitter {
     public:
-        sRGBOptoElectronicTransferFunction() = default;
-        ~sRGBOptoElectronicTransferFunction() = default;
+        SRGBOptoElectronicTransferFunction() = default;
+        ~SRGBOptoElectronicTransferFunction() = default;
 
         static constexpr const char* VertexShaderFile = "shader/fullscreen_vs.glsl";
         static constexpr const char* FragmentShaderFile = "shader/srgb_oetf_fs.glsl";
@@ -20,10 +20,10 @@ namespace aten
             std::string_view base_path)
         {
             std::string vs(base_path);
-            vs += sRGBOptoElectronicTransferFunction::VertexShaderFile;
+            vs += SRGBOptoElectronicTransferFunction::VertexShaderFile;
 
             std::string fs(base_path);
-            fs += sRGBOptoElectronicTransferFunction::FragmentShaderFile;
+            fs += SRGBOptoElectronicTransferFunction::FragmentShaderFile;
 
             return Blitter::init(width, height, vs, fs);
         }

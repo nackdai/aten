@@ -133,10 +133,10 @@ namespace AT_NAME {
         }
     };
 
-    class sRGBGammaEncoder : public ColorEncoder {
+    class SRGBGammaEncoder : public ColorEncoder {
     public:
-        sRGBGammaEncoder() = default;
-        virtual ~sRGBGammaEncoder() {}
+        SRGBGammaEncoder() = default;
+        virtual ~SRGBGammaEncoder() {}
 
         float FromLinear(const float v) const override
         {

@@ -2,26 +2,27 @@
 
 This directory contains docker related files.
 
-## cudagl
+## nvidia cudagl
 
-Dockerfile in this directory is for preparing Cuda and OpenGL. Unfotunately, NVIDIA official cudagl
-docker image is behind from Cuda version. On the other hand, NVIDIA provides the newer CUDA version
-docker image without OpenGL. In order to use the newer CUDA with OpenGL, we need to create docker
-image manually with the [following way](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/cudagl).
+NVIDIA basically doesn't update their official nvidia/cudagl image so often. Thus, unfortunately,
+NVIDIA official nvidia/cudagl docker image is behind from CUDA version. But, we can build it
+manually based on [NVIDIA container-images/cuda repository](https://gitlab.com/nvidia/container-images/cuda).
+It's added as submodule at [3rdparty/nvidia_container_image_cuda](../3rdparty/nvidia_container_image_cuda).
 
-Dockerfile in this directory follows [this Dockerfile](https://gitlab.com/nvidia/container-images/opengl/blob/ubuntu20.04/glvnd/devel/Dockerfile)
+We can find the detail of the command to build it at [nvidia/cudagl docker hub](https://hub.docker.com/r/nvidia/cudagl),
+like the following:
 
-In order to build the docker image, base CUDA docker image needs to be specified.
-
-```shell
-docker build -t ghcr.io/nackdai/aten/nvidia/cudagl:11.7.1-devel-ubuntu20.04 --build-arg from=nvidia/cuda:11.7.1-devel-ubuntu20.04 -f docker/cudagl/Dockerfile docker
+```sh
+./build.sh -d --image-name <image name> --cuda-version 11.7.1 --os ubuntu --os-version 20.04 --arch x86_64 --cudagl
 ```
+
+[build_docker_image.sh](./build_docker_image) does it in its script.
 
 ## aten
 
 Dockerfile in this directory is for the minimum development environment. The docker image by
 Dockerfile in aten directory establish the minimum development environment. The docker imgae is
-based on the [Cuda and OpenGL docker image](#cudagl). The docker image is basically named as
+based on the [nvidia/cudagl image](#nvidia-cudagl). The docker image is basically named as
 `aten`.
 
 ```shell

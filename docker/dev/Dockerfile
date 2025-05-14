@@ -32,7 +32,7 @@ RUN pip install pre-commit
 # Install shfmt
 # https://github.com/mvdan/sh
 # Need to install golang
-ARG go_version=1.20.5
+ARG go_version=1.24.3
 RUN curl -L https://go.dev/dl/go${go_version}.linux-amd64.tar.gz -o go.tar.gz \
     && tar -C /usr/local -xzf go.tar.gz \
     && GO111MODULE=on /usr/local/go/bin/go install mvdan.cc/sh/v3/cmd/shfmt@latest \

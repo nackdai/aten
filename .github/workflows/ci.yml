@@ -93,8 +93,6 @@ jobs:
         run: |
           docker push ghcr.io/${{ github.repository }}/aten:latest
           docker push ghcr.io/${{ github.repository }}/aten_dev:latest
-          nvidia_cudagl_tag=$(docker images "ghcr.io/${{ github.repository }}/nvidia/cudagl" --format "{{.Tag}}")
-          docker push "ghcr.io/${{ github.repository }}/nvidia/cudagl:${nvidia_cudagl_tag}"
 
   ci:
     name: ci

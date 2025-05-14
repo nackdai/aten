@@ -7,10 +7,12 @@ usage() {
   cat <<EOF 1>&2
 Usage: $0 <OPTIONS>
   -b <build_context>         : Docker build context.
-  -n <nvidia_cuda_image_tag> : Base nvidia/cuda docker image
+  -c <cuda_version>          : CUDA version. Default is 11.7.1
+  -u <ubuntu_version>        : Ubuntu version. Default is 20.04
   -p <image_tag_prefix>      : Prefix for image tag
-  -c                         : Build with cleaning cache.
-ex) $0 -b ./docker -p foo
+  --clear_cache              : Build with clearing cache.
+
+ex) $0 -b ./docker -b ./docker/ -p "ghcr.io/aten" -c 11.7.1 -u 20.04
 EOF
   exit 1
 }
@@ -19,21 +21,31 @@ build_context="./"
 image_tag_prefix=""
 dcoker_build_opitons=()
 
-NVIDIA_CUDA_TAG="11.7.1-devel-ubuntu20.04"
+CUDA_VERSION="11.7.1"
+UBUNTU_VERSION="20.04"
 
-while getopts "b:n:p:c" opt; do
+CUDAGL_BUILD_DIR="3rdparty/nvidia_container_image_cuda"
+
+while getopts "b:p:c:u:-:" opt; do
   case "${opt}" in
+    -)
+      case "${OPTARG}" in
+        clear_cache)
+          dcoker_build_opitons+=("--no-cache")
+          ;;
+      esac
+      ;;
     b)
       build_context="${OPTARG}"
-      ;;
-    n)
-      NVIDIA_CUDA_TAG="${OPTARG}"
       ;;
     p)
       image_tag_prefix="${OPTARG}"
       ;;
     c)
-      dcoker_build_opitons+=("--no-cache")
+      CUDA_VERSION="${OPTARG}"
+      ;;
+    u)
+      UBUNTU_VERSION="${OPTARG}"
       ;;
     \?)
       usage
@@ -53,14 +65,16 @@ if [[ "${tail_image_tag_prefix}" == "/" ]]; then
   image_tag_prefix="${image_tag_prefix/%?/}"
 fi
 
-nvidia_cuda="docker.io/nvidia/cuda:${NVIDIA_CUDA_TAG}"
-nvidia_cudagl="nvidia/cudagl:${NVIDIA_CUDA_TAG}"
-
-docker pull "${nvidia_cuda}"
-
 export DOCKER_BUILDKIT=0
 export COMPOSE_DOCKER_CLI_BUILD=0
 
-docker build "${dcoker_build_opitons[@]}" -t "${image_tag_prefix}/${nvidia_cudagl}" --build-arg from="${nvidia_cuda}" -f "${build_context}/cudagl/Dockerfile" "${build_context}"
-docker build "${dcoker_build_opitons[@]}" -t "${image_tag_prefix}/aten" --build-arg from="${image_tag_prefix}/${nvidia_cudagl}" -f "${build_context}/aten/Dockerfile" "${build_context}"
+base_cudagl_image_tag="${image_tag_prefix}/nvidia/cudagl"
+
+pushd "${CUDAGL_BUILD_DIR}"
+./build.sh -d --image-name "${base_cudagl_image_tag}" --cuda-version "${CUDA_VERSION}" --os ubuntu --os-version "${UBUNTU_VERSION}" --arch x86_64 --cudagl
+popd
+
+base_cudagl_image_tag="${base_cudagl_image_tag}:${CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION}"
+
+docker build "${dcoker_build_opitons[@]}" -t "${image_tag_prefix}/aten" --build-arg from="${base_cudagl_image_tag}" -f "${build_context}/aten/Dockerfile" "${build_context}"
 docker build "${dcoker_build_opitons[@]}" -t "${image_tag_prefix}/aten_dev" --build-arg from="${image_tag_prefix}/aten:latest" -f "${build_context}/dev/Dockerfile" "${build_context}"

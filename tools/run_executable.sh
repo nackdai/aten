@@ -59,4 +59,4 @@ executable_path="${base_dir}/${executable}/${executable}"
 ld_library_path="${base_dir}/lib"
 ld_library_path="LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:${ld_library_path}"
 
-python3 ./scripts/docker_operator.py -r -i "${docker_image}" -c "${ld_library_path} ${executable_path} ${args_to_exec[*]}"
+python3 ./tools/docker_operator.py -r -i "${docker_image}" -c "${ld_library_path} ${executable_path} ${args_to_exec[*]}"

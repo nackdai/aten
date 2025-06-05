@@ -132,12 +132,12 @@ parsed_image_name=(${parsed_image_name[-1]//:/ })
 CONTAINER_NAME="${parsed_image_name[0]}"
 
 # NOTE:
-# It seems that python3 ./scripts/run_clang_tidy.py via docker exec can't work in python subprocess.
+# It seems that python3 ./tools/run_clang_tidy.py via docker exec can't work in python subprocess.
 # So, run docker exec separately here.
-python3 ./scripts/docker_operator.py -i "${docker_image}" -n "${CONTAINER_NAME}"
+python3 ./tools/docker_operator.py -i "${docker_image}" -n "${CONTAINER_NAME}"
 
 docker exec "${CONTAINER_NAME}" bash -c \
-  "python3 ./scripts/run_clang_tidy.py \
+  "python3 ./tools/run_clang_tidy.py \
     -i ${IGNORE_WORDS[*]} \
     --header_filter ${header_filter} \
     ${fix_option} \

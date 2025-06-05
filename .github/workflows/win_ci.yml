@@ -57,7 +57,7 @@ jobs:
       - name: Install CUDA
         if: ${{ steps.changed_files.outputs.src_any_changed == 'true' }}
         run: |
-          powershell -NoProfile -ExecutionPolicy Unrestricted .\scripts\install_cuda.ps1
+          powershell -NoProfile -ExecutionPolicy Unrestricted .\tools\install_cuda.ps1
           if ($LastExitCode -ne 0) { exit 1 }
 
       # NOTE:

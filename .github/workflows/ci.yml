@@ -127,7 +127,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cp ../scripts/RunCMake.sh ./
+          cp ../tools/RunCMake.sh ./
           ./RunCMake.sh Release 75
 
       - name: Build

@@ -30,7 +30,7 @@ The confirmed environment is `Visual Studio 2019` on `Windows10`.
     1. Install `clang 12`
     1. Install `ninja-build`
 1. `cd aten/build`
-1. `cp ../scripts/RunCMake.sh ./`
+1. `cp ../tools/RunCMake.sh ./`
 1. `./RunCMake.sh <Build Type> <Compute Capability>`
 1. Run make `ninja`
 
@@ -39,7 +39,7 @@ The confirmed environment is `Ubuntu 20.04`.
 ### What is RunCMake.sh
 
 `RunCMake.sh` is a script to help you to build `aten` with CMake.
-It is located in `scripts` directory. If you would like to use it.
+It is located in `tools` directory. If you would like to use it.
 Copy it to the build directory you want.
 
 It needs 2 arguments like the followings:
@@ -83,7 +83,7 @@ docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtim
 ```shell
 mkdir aten/build
 cd aten/build
-cp ../scripts/RunCMake.sh .
+cp ../tools/RunCMake.sh .
 ./RunCMake.sh <Build Type> <Compute Capability>
 ninja
 ```
@@ -109,7 +109,7 @@ docker-compose .devcontainer/docker-compose.yml run aten
 ```shell
 mkdir aten/build
 cd aten/build
-cp ../scripts/RunCMake.sh .
+cp ../tools/RunCMake.sh .
 ./RunCMake.sh <Build Type> <Compute Capability>
 ninja
 ```
@@ -127,11 +127,11 @@ There is a script to help building libraries and executables. The script fully d
 and it works on only Linux.
 
 ```shell
-./scripts/build.sh -b <build_config> -c <compute_capability -d <docker_image>
+./tools/build.sh -b <build_config> -c <compute_capability -d <docker_image>
 ```
 
 For example:
 
 ```shell
-./scripts/build.sh -b Release -c 75 -d ghcr.io/nackdai/aten/aten:latest
+./tools/build.sh -b Release -c 75 -d ghcr.io/nackdai/aten/aten:latest
 ```

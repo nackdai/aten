@@ -72,10 +72,10 @@ CONTAINER_NAME="${parsed_image_name[0]}"
 
 if "${will_export_compile_commands_json}"; then
   # Just generating compile_commands_json. So, docker container should be removed.
-  python3 ./scripts/docker_operator.py -r -i "${docker_image}" -n "${CONTAINER_NAME}" -c "mkdir -p build && cd build && ${cmake_cmd}"
+  python3 ./tools/docker_operator.py -r -i "${docker_image}" -n "${CONTAINER_NAME}" -c "mkdir -p build && cd build && ${cmake_cmd}"
 else
   # In first running, not remove docker container for second running.
-  python3 ./scripts/docker_operator.py -i "${docker_image}" -n "${CONTAINER_NAME}" -c "mkdir -p build && cd build && ${cmake_cmd}"
+  python3 ./tools/docker_operator.py -i "${docker_image}" -n "${CONTAINER_NAME}" -c "mkdir -p build && cd build && ${cmake_cmd}"
 fi
 
 COMPILE_COMMANDS_JSON="compile_commands.json"
@@ -92,6 +92,6 @@ if "${will_export_compile_commands_json}"; then
 fi
 
 # No need to keep docker container after running command. So, specify remove option.
-python3 ./scripts/docker_operator.py -r -i "${docker_image}" -n "${CONTAINER_NAME}" -c "cd build && ninja -j 4"
+python3 ./tools/docker_operator.py -r -i "${docker_image}" -n "${CONTAINER_NAME}" -c "cd build && ninja -j 4"
 
 kill_container "${CONTAINER_NAME}"

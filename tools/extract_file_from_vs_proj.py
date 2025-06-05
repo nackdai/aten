@@ -122,7 +122,7 @@ def dump_list(list: List[str]):
 def main():
     # NOTE:
     # e.g.
-    # python3 ./scripts/extract_file_from_vs_proj.py -v vs2019/libaten.vcxproj -o libaten.txt -b src/libaten
+    # python3 ./tools/extract_file_from_vs_proj.py -v vs2019/libaten.vcxproj -o libaten.txt -b src/libaten
     parser = argparse.ArgumentParser(
         description="Extract compile files from vs proj file"
     )

@@ -303,7 +303,7 @@ def check_if_image_exists(image_name: str) -> bool:
 async def main(container_name: str):
     # NOTE:
     # e.g.
-    # python3 ./scripts/docker_operator.py -i ghcr.io/nackdai/aten/aten_dev:latest -c "pre-commit run -a" -r
+    # python3 ./tools/docker_operator.py -i ghcr.io/nackdai/aten/aten_dev:latest -c "pre-commit run -a" -r
     parser = argparse.ArgumentParser(description="Support docker operation")
     parser.add_argument("-i", "--image", type=str, help="docker image", default=None)
     parser.add_argument("-n", "--name", type=str, help="container name", default=None)

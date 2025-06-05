@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD033 -->
 # Scripts
 
-In this directory, there are some helper scripts.
+In this directory, there are some helper tools.
 
 ## build.sh
 
@@ -22,7 +22,7 @@ Options:
 e.g.
 
 ```shell
-./scripts/build.sh -b Release -c 75 -d ghcr.io/nackdai/aten/aten:latest
+./tools/build.sh -b Release -c 75 -d ghcr.io/nackdai/aten/aten:latest
 ```
 
 ## <a name="clang_tidy_sh">clang_tidy.sh</a>
@@ -49,7 +49,7 @@ Options:
 e.g.
 
 ```shell
-./scripts/clang_tidy.sh -d ghcr.io/nackdai/aten/aten:latest -g -h ${PWD}/src --fail_fast
+./tools/clang_tidy.sh -d ghcr.io/nackdai/aten/aten:latest -g -h ${PWD}/src --fail_fast
 ```
 
 ## docker_operator.py
@@ -80,7 +80,7 @@ optional arguments:
 e.g.
 
 ```shell
-python3 ./scripts/docker_operator.py -i ghcr.io/nackdai/aten/aten_dev:latest -c "pre-commit run -a" -r
+python3 ./tools/docker_operator.py -i ghcr.io/nackdai/aten/aten_dev:latest -c "pre-commit run -a" -r
 ```
 
 ## enter_docker_container.sh
@@ -98,7 +98,7 @@ Usage: enter_docker_container.sh <docker_image>
 e.g.
 
 ```shell
-./scripts/enter_docker_container.sh ghcr.io/nackdai/aten/aten:latest
+./tools/enter_docker_container.sh ghcr.io/nackdai/aten/aten:latest
 ```
 
 ## extract_file_from_vs_proj.py
@@ -130,7 +130,7 @@ optional arguments:
 e.g.
 
 ```shell
-python3 ./scripts/extract_file_from_vs_proj.py -v vs2019/libaten.vcxproj -o libaten.txt -b src/libaten
+python3 ./tools/extract_file_from_vs_proj.py -v vs2019/libaten.vcxproj -o libaten.txt -b src/libaten
 ```
 
 ## install_cuda.ps1
@@ -150,7 +150,7 @@ Usage: install_cuda.ps1 [Options]
 e.g.
 
 ```batch
-powershell -NoProfile -ExecutionPolicy Unrestricted .\scripts\install_cuda.ps1
+powershell -NoProfile -ExecutionPolicy Unrestricted .\tools\install_cuda.ps1
 ```
 
 ## pre_commit.sh
@@ -197,7 +197,7 @@ optional arguments:
 e.g.
 
 ```shell
-python3 ./scripts/run_clang_tidy.py -i 3rdparty imgui unittest --header_filter "${PWD}/src/" -t accelerator.cpp
+python3 ./tools/run_clang_tidy.py -i 3rdparty imgui unittest --header_filter "${PWD}/src/" -t accelerator.cpp
 ```
 
 ## <a name="run_executable_sh">run_executable.sh</a>
@@ -220,7 +220,7 @@ Args to executable: Arguments to pass to executable
 e.g.
 
 ```shell
-./scripts/run_executable.sh -d build -e xxx -d ghcr.io/nackdai/aten/aten:latest -- -a
+./tools/run_executable.sh -d build -e xxx -d ghcr.io/nackdai/aten/aten:latest -- -a
 ```
 
 ## run_unit_test.sh
@@ -240,5 +240,5 @@ Usage: run_unit_test.sh <docker_image> <base_directory>
 e.g.:
 
 ```shell
-./scripts/run_unit_test.sh ghcr.io/nackdai/aten/aten:latest ./
+./tools/run_unit_test.sh ghcr.io/nackdai/aten/aten:latest ./
 ```

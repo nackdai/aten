@@ -116,7 +116,7 @@ def exec_clang_tidy_by_compile_commands_json(
 def main():
     # NOTE:
     # e.g.
-    # python3 ./scripts/run_clang_tidy.py -i 3rdparty imgui unittest --header_filter "${PWD}/src/" -t accelerator.cpp  # noqa
+    # python3 ./tools/run_clang_tidy.py -i 3rdparty imgui unittest --header_filter "${PWD}/src/" -t accelerator.cpp  # noqa
     parser = argparse.ArgumentParser(description="Run clang-tidy")
     parser.add_argument(
         "-i",

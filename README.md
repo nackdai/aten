@@ -14,8 +14,6 @@ And Idanten includes characters of aten, "id**aten**"
 
 ## Features
 
-**Some features are only supported by either.**
-
 - Rendering algorithms
   - Next Event Estimation Path Tracing
 - Acceleration
@@ -128,6 +126,8 @@ Heterogeneous medium
 ![Homogeneous](docs/gallery/heterogeneous.png)
 
 ## Misc
+
+- [Python development](docs/python_development.md)
 
 - Conventional Commits
   - <https://www.conventionalcommits.org/en/v1.0.0/>

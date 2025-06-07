@@ -11,12 +11,12 @@ For more details, see [pre-commit](https://pre-commit.com/).
 ### How to install pre-commit
 
 We have already defined `pre-commit` as one of the optional dependencies in [.pre-commit-config.yaml](../.pre-commit-config.yaml).
-Thus, if you install the dependencies as described in [Install a project in editable mode](python_development.md#install-a-project-in-editable-mode),
+Thus, if we install the dependencies as described in [Install a project in editable mode](python_development.md#install-a-project-in-editable-mode),
 `pre-commit` will be installed.
 
 #### Linux
 
-You need to install [shfmt](https://github.com/mvdan/sh) and [shellcheck](https://github.com/koalaman/shellcheck)
+We need to install [shfmt](https://github.com/mvdan/sh) and [shellcheck](https://github.com/koalaman/shellcheck)
 locally.
 
 - `shfmt`
@@ -49,11 +49,11 @@ On Windows, the following tools do not work stably:
 
 ### How to run pre-commit
 
-If you follow [Python development](python_development.md), the development environment is created
+If we follow [Python development](python_development.md), the development environment is created
 in `.venv`.
-Thus, you need to activate it as described in [venv](python_development.md#venv).
+Thus, we need to activate it as described in [venv](python_development.md#venv).
 
-You can run pre-commit as follows:
+We can run pre-commit as follows:
 
 - **Linux**
 
@@ -87,18 +87,18 @@ For more details, see [pre-commit](https://pre-commit.com/).
 
 We have already defined `ruff` as one of the optional dependencies
 in [.pre-commit-config.yaml](../.pre-commit-config.yaml).
-Thus, if you install the dependencies as described
+Thus, if we install the dependencies as described
 in [Install a project in editable mode](python_development.md#install-a-project-in-editable-mode),
 `ruff` will be installed.
 
 ### How to run Ruff
 
 The procedure is the same as [How to run pre-commit](#how-to-run-pre-commit).
-If you follow [Python development](python_development.md), the development environment is created
+If we follow [Python development](python_development.md), the development environment is created
 in `.venv`.
-Thus, you need to activate it as described in [venv](python_development.md#venv).
+Thus, we need to activate it as described in [venv](python_development.md#venv).
 
-You can run ruff as follows:
+We can run ruff as follows:
 
 - **Linux**
 

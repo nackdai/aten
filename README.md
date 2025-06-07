@@ -3,14 +3,14 @@
 
 ![CI](https://github.com/nackdai/aten/workflows/CI/badge.svg)
 
-This is easy, simple ray tracing renderer.
+This is an easy, simple ray tracing renderer.
 
-Aten is Egyptian sun god.
+Aten is the Egyptian sun god.
 
-Idaten(path tracing on GPGPU) is under construction.
+Idaten (path tracing on GPGPU) is under construction.
 
-Idaten is Japanese god, it runs fast.
-And Idanten includes characters of aten, "id**aten**"
+Idaten is a Japanese god who runs fast.
+"Idaten" includes the characters of aten: "id**aten**".
 
 ## Features
 
@@ -20,38 +20,38 @@ And Idanten includes characters of aten, "id**aten**"
   - BVH
   - SBVH
   - TopLayer, BottomLayer
-  - Transform(Translate, Rotate, Scale) objects
+  - Transform (Translate, Rotate, Scale) objects
 - Materials
   - Emissive
   - Lambert
   - Specular
   - Refraction
-  - Microfacet Beckman
+  - Microfacet Beckmann
   - Microfacet GGX
-  - OrenNayar
+  - Oren-Nayar
   - Disney BRDF
   - Retroreflective (Experimental)
 - Lights
-  - Polygonal Light(Area Light)
+  - Polygonal Light (Area Light)
   - Point Light
   - Spot Light
   - Directional Light
   - Image Based Lighting
 - Quasi Monte Carlo
-  - CMJ(Correllated Multi Jittered)
+  - CMJ (Correlated Multi Jittered)
 - Rendering shapes
-  - Polygon(.obj file)
+  - Polygon (.obj file)
   - Sphere
 - Texture Map
   - Albedo
   - Normal
   - Roughness
-- PostEffect
-  - Reinherd Tone Mapping
+- Post Effect
+  - Reinhard Tone Mapping
 - Camera
   - Pinhole
-  - Equirect
-- VolumeRendering
+  - Equirectangular
+- Volume Rendering
   - Homogeneous
   - Heterogeneous
   - NanoVDB format
@@ -60,35 +60,34 @@ And Idanten includes characters of aten, "id**aten**"
   - Deformation
   - Alpha blending
 - [Spatiotemporal Variance-Guided Filtering: Real-Time Reconstruction for Path-Traced Global Illumination](https://cg.ivd.kit.edu/svgf.php)
-- [Spatiotemporal reservoir resampling for real-time ray tracing
-with dynamic direct lighting](https://research.nvidia.com/sites/default/files/pubs/2020-07_Spatiotemporal-reservoir-resampling/ReSTIR.pdf)
+- [Spatiotemporal Reservoir Resampling for Real-Time Ray Tracing with Dynamic Direct Lighting (ReSTIR)](https://research.nvidia.com/sites/default/files/pubs/2020-07_Spatiotemporal-reservoir-resampling/ReSTIR.pdf)
 - [Physically-based Feature Line Rendering](http://lines.rexwe.st/)
 
 ## Limitations
 
-- Not optimized by SIMD
-  - To keep easy, simple, to avoid difficult to understand, so not use SIMD.
-- There are still some Japanese comments...
+- Not optimized with SIMD
+  - To keep things easy and simple, SIMD is not used.
+- Some comments are still in Japanese.
 
-## How To Build
+## How to Build
 
-[How To Build](docs/how_to_build.md)
+[How to Build](docs/how_to_build.md)
 
-## How to run
+## How to Run
 
-[How To Run](docs/how_to_run.md)
+[How to Run](docs/how_to_run.md)
 
 ## Gallery
 
-PathTracing 100spp
+Path Tracing 100 spp
 
 ![PathTracing](docs/gallery/pt100.png)
 
-Materials PathTracing 100spp
+Materials Path Tracing 100 spp
 
 ![Materials](docs/gallery/pt100_mtrl.png)
 
-SVGF (1spp/5bounds)
+SVGF (1 spp / 5 bounces)
 
 ![SVGF_sponza](docs/gallery/svgf_1spp_sponza.png)
 ![SVGF_cryteksponza](docs/gallery/svgf_1spp_cryteksponza.png)
@@ -99,11 +98,11 @@ Deformation
 
 (c) Unity Technologies Japan/UCL
 
-ReSTIR (1spp/5bounds/126point lights w/o environment map)
+ReSTIR (1 spp / 5 bounces / 126 point lights, without environment map)
 
 ![ReSTIR](docs/gallery/compare_restir.png)
 
-AlphaBlending
+Alpha Blending
 
 ![AlphaBlending](docs/gallery/alpha_blend.png)
 
@@ -117,22 +116,18 @@ Homogeneous medium
 
 Heterogeneous medium
 
-![Homogeneous](docs/gallery/heterogeneous.png)
+![Heterogeneous](docs/gallery/heterogeneous.png)
 
 ## Development
 
 - [Docker](docker/README.md)
-
 - [Tools](tools/README.md)
-
-- [Lint and format](docs/lint_and_format.md)
-
-- [Python development](docs/python_development.md)
-
+- [Lint and Format](docs/lint_and_format.md)
+- [Python Development](docs/python_development.md)
 - [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
 
 ### For VSCode development
 
-We can open this project on VSCode devcontainer.
-If you face on devcontainer build failure, it might be due to docker-compose version. In that case,
-please update docker-compose.
+We can open this project in a VSCode devcontainer.
+If we encounter a devcontainer build failure, it might be due to the docker-compose version.
+In that case, please update docker-compose.

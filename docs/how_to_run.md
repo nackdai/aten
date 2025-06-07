@@ -1,39 +1,38 @@
 <!-- markdownlint-disable MD024 MD029 MD033 -->
-# How to run
+# How to Run
 
 ## Windows
 
-We can find `exe` files and run them. You can find them in each directory
-where the source files are in.
+We can find and run the `.exe` files in each directory where the source files are located.
 
 ## Linux
 
-We can find the executables and run them. You can find them in the directories which you built the
-applications. And the directories have same name as execution file.
+We can find and run the executables in the directories where we built the applications.
+The directories have the same names as the executable files.
 
 ## <a name="RunOnDocker">Docker</a>
 
-This section works for ony Linux.
+This section applies only to Linux.
 
-If we would like to run the executables in docker, we need to ensure that your host can accept
-X forwarded connections:
+If we would like to run the executables in the docker container,
+we need to ensure that your host can accept X11 forwarded connections:
 
 ```bash
-xhost +local:<Docker container name>`
+xhost +local:<docker container name>
 ```
 
-And then, run the docker container like the following:
+Then, run the docker container as follows:
 
 ```bash
-docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <Image Name>:latest bash
+docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <image_name>:latest bash
 ```
 
 ### docker-compose
 
-We also need to ensure your host accept X forward connections.
-See [Docker in How to run](#RunOnDocker)
+We also need to ensure your host accepts X11 forwarded connections.
+See [Docker in How to Run](#RunOnDocker).
 
-And, run the docker container via docker-compose like the following:
+Then, run the docker container via docker-compose as follows:
 
 ```bash
 docker-compose -f .devcontainer/docker-compose.yml run aten

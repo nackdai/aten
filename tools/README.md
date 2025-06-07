@@ -21,7 +21,7 @@ Options:
 
 e.g.
 
-```shell
+```bash
 ./tools/build.sh -b Release -c 75 -d ghcr.io/nackdai/aten/aten:latest
 ```
 
@@ -48,7 +48,7 @@ Options:
 
 e.g.
 
-```shell
+```bash
 ./tools/clang_tidy.sh -d ghcr.io/nackdai/aten/aten:latest -g -h ${PWD}/src --fail_fast
 ```
 
@@ -79,7 +79,7 @@ optional arguments:
 
 e.g.
 
-```shell
+```bash
 python3 ./tools/docker_operator.py -i ghcr.io/nackdai/aten/aten_dev:latest -c "pre-commit run -a" -r
 ```
 
@@ -97,7 +97,7 @@ Usage: enter_docker_container.sh <docker_image>
 
 e.g.
 
-```shell
+```bash
 ./tools/enter_docker_container.sh ghcr.io/nackdai/aten/aten:latest
 ```
 
@@ -129,7 +129,7 @@ optional arguments:
 
 e.g.
 
-```shell
+```bash
 python3 ./tools/extract_file_from_vs_proj.py -v vs2019/libaten.vcxproj -o libaten.txt -b src/libaten
 ```
 
@@ -166,7 +166,7 @@ Usage: pre_commit.sh <docker_image>
 
 e.g.
 
-```shell
+```bash
 pre_commit.sh ghcr.io/nackdai/aten/aten_dev:latest
 ```
 
@@ -196,7 +196,7 @@ optional arguments:
 
 e.g.
 
-```shell
+```bash
 python3 ./tools/run_clang_tidy.py -i 3rdparty imgui unittest --header_filter "${PWD}/src/" -t accelerator.cpp
 ```
 
@@ -219,7 +219,7 @@ Args to executable: Arguments to pass to executable
 
 e.g.
 
-```shell
+```bash
 ./tools/run_executable.sh -d build -e xxx -d ghcr.io/nackdai/aten/aten:latest -- -a
 ```
 
@@ -239,6 +239,6 @@ Usage: run_unit_test.sh <docker_image> <base_directory>
 
 e.g.:
 
-```shell
+```bash
 ./tools/run_unit_test.sh ghcr.io/nackdai/aten/aten:latest ./
 ```

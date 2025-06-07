@@ -18,13 +18,13 @@ This section works for ony Linux.
 If we would like to run the executables in docker, we need to ensure that your host can accept
 X forwarded connections:
 
-```shell
+```bash
 xhost +local:<Docker container name>`
 ```
 
 And then, run the docker container like the following:
 
-```shell
+```bash
 docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <Image Name>:latest bash
 ```
 
@@ -35,6 +35,6 @@ See [Docker in How to run](#RunOnDocker)
 
 And, run the docker container via docker-compose like the following:
 
-```shell
+```bash
 docker-compose -f .devcontainer/docker-compose.yml run aten
 ```

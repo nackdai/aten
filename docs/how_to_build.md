@@ -1,10 +1,10 @@
 <!-- markdownlint-disable MD024 MD029 MD033 -->
-# How to build
+# How to Build
 
-## Prepearation
+## Preparation
 
-You also should get submodules in `3rdparty` directory.
-To do that, follow like the following:
+We should also initialize submodules in the `3rdparty` directory.
+To do this, run:
 
 ```bash
 git submodule update --init --recursive
@@ -12,111 +12,109 @@ git submodule update --init --recursive
 
 ## Windows
 
-1. Install `CUDA 11.7` and depended NVIDIA driver
-1. Run `aten/3rdparty/Build3rdParty.bat <BuildConfiguration> <VisualStudio edition>`
-    - The first argument can accept `Debug`, `Release` etc.
-    - The second argument can accept `Community`, `Enterprise`, `BuildTools` etc.
-    - Default is `Release` and `Communitiy`
-1. Launch `aten/vs2019/aten.sln`
-1. Build the projects with `x64` (not support `x86`)
+1. Install `CUDA 11.7` and the required NVIDIA driver.
+2. Run `aten/3rdparty/Build3rdParty.bat <BuildConfiguration> <VisualStudio edition>`
+    - The first argument can be `Debug`, `Release`, etc.
+    - The second argument can be `Community`, `Enterprise`, `BuildTools`, etc.
+    - The defaults are `Release` and `Community`.
+3. Open `aten/vs2019/aten.sln`.
+4. Build the projects with the `x64` configuration (not `x86`).
 
-The confirmed environment is `Visual Studio 2019` on `Windows10`.
+The confirmed environment is Visual Studio 2019 on Windows 10.
 
 ## Linux
 
-1. Install `CUDA 11.7` and depended NVIDIA driver
-1. Install applications (You can find what you need in `env/aten/Dockerfile`)
-    1. Install `cmake` `3.21.3` or later
-    1. Install `clang 12`
-    1. Install `ninja-build`
-1. `cd aten/build`
-1. `cp ../tools/RunCMake.sh ./`
-1. `./RunCMake.sh <Build Type> <Compute Capability>`
-1. Run make `ninja`
+1. Install `CUDA 11.7` and the required NVIDIA driver.
+2. Install the necessary applications (see `env/aten/Dockerfile` for details):
+    1. Install `cmake` version 3.21.3 or later.
+    2. Install `clang` 12.
+    3. Install `ninja-build`.
+3. `cd aten/build`
+4. `cp ../tools/RunCMake.sh ./`
+5. `./RunCMake.sh <Build Type> <Compute Capability>`
+6. Run `ninja`
 
-The confirmed environment is `Ubuntu 20.04`.
+The confirmed environment is Ubuntu 20.04.
 
-### What is RunCMake.sh
+### What is RunCMake.sh?
 
-`RunCMake.sh` is a script to help you to build `aten` with CMake.
-It is located in `tools` directory. If you would like to use it.
-Copy it to the build directory you want.
+`RunCMake.sh` is a script to help we build `aten` with CMake.
+It is located in the `tools` directory. If we want to use it, copy it to the build directory.
 
-It needs 2 arguments like the followings:
+It requires two arguments:
 
 1. Build Type: `Debug` or `Release`
-1. Compute Capability: It depends on your GPU. But, you need to specify it
-without `.`. For example, if `Compute Capability` is `7.5`, please specify
-like `75`.
+2. Compute Capability: This depends on your GPU. Specify it without a dot. For example,
+   if the Compute Capability is `7.5`, specify `75`.
 
-Example to run `RunCMake.sh` is the following:
+Example usage:
 
 ```bash
 ./RunCMake.sh Release 75
 ```
 
-You can get `Compute Capability` by running `get_cuda_sm.sh`.
-If you don't specify `Compute Capability`, while configuring `CMakeLists.txt`,
-`get_cuda_sm.sh` runs and `Compute Capability` is specified.
+We can get your Compute Capability by running `get_cuda_sm.sh`.
+If we do not specify the Compute Capability, `get_cuda_sm.sh` will run during CMake configuration
+and set it automatically.
 
 ## Docker (on Linux)
 
-You can build and run the executables in docker container.
+We can build and run the executables in a docker container.
 
-1. Install `Docker`
+1. Install Docker.
 2. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
-3. Move to `aten` directory
-4. Build docker image like the following:
+3. Move to the `aten` directory.
+4. Build the docker image:
 
-```bash
-docker build -t <Any name> ./env/aten/
-```
+    ```bash
+    docker build -t <any_name> ./env/aten/
+    ```
 
-5. Run docker container like the following:
+5. Run the docker container:
 
-```bash
-docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <Image name>:latest bash
-```
+    ```bash
+    docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <image_name>:latest bash
+    ```
 
-6. In docker container, run the following commands:
+6. Inside the docker container, run:
 
-```bash
-mkdir aten/build
-cd aten/build
-cp ../tools/RunCMake.sh .
-./RunCMake.sh <Build Type> <Compute Capability>
-ninja
-```
+    ```bash
+    mkdir aten/build
+    cd aten/build
+    cp ../tools/RunCMake.sh .
+    ./RunCMake.sh <Build Type> <Compute Capability>
+    ninja
+    ```
 
 ## docker-compose
 
-1. Install `Docker` and `docker-compose`
+1. Install Docker and docker-compose.
 2. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
-3. Build docker image like the following:
+3. Build the docker image:
 
-```bash
-docker-compose -f .devcontainer/docker-compose.yml build`
-```
+    ```bash
+    docker-compose -f .devcontainer/docker-compose.yml build
+    ```
 
-4. Run docker container like the following:
+4. Run the docker container:
 
-```bash
-docker-compose .devcontainer/docker-compose.yml run aten
-```
+    ```bash
+    docker-compose -f .devcontainer/docker-compose.yml run aten
+    ```
 
-5. In docker container, run the following commands:
+5. Inside the docker container, run:
 
-```bash
-mkdir aten/build
-cd aten/build
-cp ../tools/RunCMake.sh .
-./RunCMake.sh <Build Type> <Compute Capability>
-ninja
-```
+    ```bash
+    mkdir aten/build
+    cd aten/build
+    cp ../tools/RunCMake.sh .
+    ./RunCMake.sh <Build Type> <Compute Capability>
+    ninja
+    ```
 
-## Pull pre built docker image
+## Pull pre-built docker image
 
-If you need the pre-built docker image, you can pull the docker image like the following:
+If we need a pre-built docker image, we can pull it as follows:
 
 ```bash
 docker pull ghcr.io/nackdai/aten/aten:latest
@@ -124,11 +122,11 @@ docker pull ghcr.io/nackdai/aten/aten:latest
 
 ## Helper script
 
-There is a script to help building libraries and executables. The script fully depends on docker
-and it works on only Linux.
+There is a script to help build libraries and executables.
+This script fully depends on Docker and works only on Linux.
 
 ```bash
-./tools/build.sh -b <build_config> -c <compute_capability -d <docker_image>
+./tools/build.sh -b <build_config> -c <compute_capability> -d <docker_image>
 ```
 
 For example:

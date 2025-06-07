@@ -13,6 +13,9 @@ dependencies = [
     "scipy",
 ]
 
+[project.optional-dependencies]
+dev = ["pre-commit"]
+
 [tool.setuptools.packages.find]
 where = ["tools"]
 include = ["*"]

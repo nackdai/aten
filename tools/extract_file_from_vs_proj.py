@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import os
-from typing import List, Tuple
 
 from lxml import etree
 
@@ -10,7 +9,10 @@ NAMESPACE_MAP = {"ns": "http://schemas.microsoft.com/developer/msbuild/2003"}
 
 
 def parse_compile_items_from_item_group(
-    item_group_element: etree.Element, tag: str, attrib: str, item_list: List[str]
+    item_group_element: etree.Element,
+    tag: str,
+    attrib: str,
+    item_list: list[str],
 ):
     """Parse compile items from ItemGroup element.
 
@@ -28,7 +30,7 @@ def parse_compile_items_from_item_group(
                 item_list.append(value.replace("\\", "/"))
 
 
-def parse_compile_items(vc_proj_file: str) -> Tuple[List[str], List[str]]:
+def parse_compile_items(vc_proj_file: str) -> tuple[list[str], list[str]]:
     """Parse compile items from Visual Studio project file.
 
     Args:
@@ -43,18 +45,27 @@ def parse_compile_items(vc_proj_file: str) -> Tuple[List[str], List[str]]:
 
         item_groups = xml.findall(".//ns:ItemGroup", NAMESPACE_MAP)
 
-        compile_items: List[str] = []
-        cuda_compile_items: List[str] = []
+        compile_items: list[str] = []
+        cuda_compile_items: list[str] = []
 
         for group in list(item_groups):
             parse_compile_items_from_item_group(
-                group, "ClInclude", "Include", compile_items
+                group,
+                "ClInclude",
+                "Include",
+                compile_items,
             )
             parse_compile_items_from_item_group(
-                group, "ClCompile", "Include", compile_items
+                group,
+                "ClCompile",
+                "Include",
+                compile_items,
             )
             parse_compile_items_from_item_group(
-                group, "CudaCompile", "Include", cuda_compile_items
+                group,
+                "CudaCompile",
+                "Include",
+                cuda_compile_items,
             )
 
         return [compile_items, cuda_compile_items]
@@ -64,7 +75,10 @@ def parse_compile_items(vc_proj_file: str) -> Tuple[List[str], List[str]]:
 
 
 def format_for_cmake_linux(
-    compile_items: List[str], workdir: str, vc_proj_file: str, basepath: str
+    compile_items: list[str],
+    workdir: str,
+    vc_proj_file: str,
+    basepath: str,
 ):
     """Format item string to fit into CMake.
 
@@ -85,7 +99,8 @@ def format_for_cmake_linux(
                 continue
 
             rel_path = os.path.relpath(
-                workdir + "/" + vc_proj_dir + "/" + item, workdir + "/" + basepath
+                workdir + "/" + vc_proj_dir + "/" + item,
+                workdir + "/" + basepath,
             )
 
             compile_items[i] = "  " + rel_path
@@ -109,7 +124,7 @@ def trim_end_path_separtor(path: str) -> str:
     return path
 
 
-def dump_list(list: List[str]):
+def dump_list(list: list[str]):
     """Dump list.
 
     Args:
@@ -122,9 +137,9 @@ def dump_list(list: List[str]):
 def main():
     # NOTE:
     # e.g.
-    # python3 ./tools/extract_file_from_vs_proj.py -v vs2019/libaten.vcxproj -o libaten.txt -b src/libaten
+    # python3 ./tools/extract_file_from_vs_proj.py -v vs2019/libaten.vcxproj -o libaten.txt -b src/libaten  # noqa: E501
     parser = argparse.ArgumentParser(
-        description="Extract compile files from vs proj file"
+        description="Extract compile files from vs proj file",
     )
     parser.add_argument(
         "-v",
@@ -144,7 +159,11 @@ def main():
         default=None,
     )
     parser.add_argument(
-        "-w", "--workdir", type=str, help="Working directory", default="."
+        "-w",
+        "--workdir",
+        type=str,
+        help="Working directory",
+        default=".",
     )
     args = parser.parse_args()
 
@@ -153,7 +172,7 @@ def main():
 
     compile_items, cuda_compile_items = parse_compile_items(args.vcproj)
 
-    cpp_as_cuda_list: List[str] = []
+    cpp_as_cuda_list: list[str] = []
     for item in cuda_compile_items:
         if ".cpp" in item or ".cxx" in item:
             cpp_as_cuda_list.append(item)

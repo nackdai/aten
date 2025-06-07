@@ -2,6 +2,7 @@
 .home
 .venv
 .vscode
+.ruff_cache
 
 *.bak
 *.dll

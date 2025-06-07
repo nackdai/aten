@@ -14,8 +14,34 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pre-commit"]
+dev = [
+    "pre-commit",
+    "ruff",
+]
 
 [tool.setuptools.packages.find]
 where = ["tools"]
 include = ["*"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+exclude = [
+    "3rdparty/**",
+    "*.ipynb",
+    ".venv",
+]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D413",     # Missing blank line after last section
+    "FIX002",   # Line contains TODO, consider resolving the issue
+    "TD003",    # Missing issue link for this TODO
+    "TD002",    # Missing author in TODO; try: `# TODO(<author_name>): ...` or `# TODO @<author_name>: ...`
+    "PLR0913",  # Too many arguments in function definition
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

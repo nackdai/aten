@@ -78,12 +78,6 @@ with dynamic direct lighting](https://research.nvidia.com/sites/default/files/pu
 
 [How To Run](docs/how_to_run.md)
 
-## For VSCode development
-
-We can open this project on VSCode devcontainer.
-If you face on devcontainer build failure, it might be due to docker-compose version. In that case,
-please update docker-compose.
-
 ## Gallery
 
 PathTracing 100spp
@@ -125,9 +119,20 @@ Heterogeneous medium
 
 ![Homogeneous](docs/gallery/heterogeneous.png)
 
-## Misc
+## Development
+
+- [Docker](docker/README.md)
+
+- [Tools](tools/README.md)
+
+- [Lint and format](docs/lint_and_format.md)
 
 - [Python development](docs/python_development.md)
 
-- Conventional Commits
-  - <https://www.conventionalcommits.org/en/v1.0.0/>
+- [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+
+### For VSCode development
+
+We can open this project on VSCode devcontainer.
+If you face on devcontainer build failure, it might be due to docker-compose version. In that case,
+please update docker-compose.

@@ -42,7 +42,9 @@ def is_target_file(file: str, target_files: list(str)) -> bool:
     return len(file_in) > 0
 
 
-def exec_clang_tidy(file: str, header_filter: str, will_fix: bool) -> int:  # noqa: FBT001
+def exec_clang_tidy(
+    file: str, header_filter: str, will_fix: bool  # noqa: FBT001
+) -> int:
     """Execute clang_tidy.
 
     Args:

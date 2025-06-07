@@ -9,7 +9,7 @@ the base image with docker-compose. As aten, `aten_dev` docker image requires th
 
 Therefore, we need to build docker image beforehand for devcontainer with the following command.
 
-```sh
+```bash
 ./docker/build_docker_image.sh -b ./docker -p aten
 ```
 

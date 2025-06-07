@@ -6,7 +6,7 @@
 You also should get submodules in `3rdparty` directory.
 To do that, follow like the following:
 
-```shell
+```bash
 git submodule update --init --recursive
 ```
 
@@ -51,7 +51,7 @@ like `75`.
 
 Example to run `RunCMake.sh` is the following:
 
-```shell
+```bash
 ./RunCMake.sh Release 75
 ```
 
@@ -68,19 +68,19 @@ You can build and run the executables in docker container.
 3. Move to `aten` directory
 4. Build docker image like the following:
 
-```shell
+```bash
 docker build -t <Any name> ./env/aten/
 ```
 
 5. Run docker container like the following:
 
-```shell
+```bash
 docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <Image name>:latest bash
 ```
 
 6. In docker container, run the following commands:
 
-```shell
+```bash
 mkdir aten/build
 cd aten/build
 cp ../tools/RunCMake.sh .
@@ -94,19 +94,19 @@ ninja
 2. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
 3. Build docker image like the following:
 
-```shell
+```bash
 docker-compose -f .devcontainer/docker-compose.yml build`
 ```
 
 4. Run docker container like the following:
 
-```shell
+```bash
 docker-compose .devcontainer/docker-compose.yml run aten
 ```
 
 5. In docker container, run the following commands:
 
-```shell
+```bash
 mkdir aten/build
 cd aten/build
 cp ../tools/RunCMake.sh .
@@ -118,7 +118,7 @@ ninja
 
 If you need the pre-built docker image, you can pull the docker image like the following:
 
-```shell
+```bash
 docker pull ghcr.io/nackdai/aten/aten:latest
 ```
 
@@ -127,12 +127,12 @@ docker pull ghcr.io/nackdai/aten/aten:latest
 There is a script to help building libraries and executables. The script fully depends on docker
 and it works on only Linux.
 
-```shell
+```bash
 ./tools/build.sh -b <build_config> -c <compute_capability -d <docker_image>
 ```
 
 For example:
 
-```shell
+```bash
 ./tools/build.sh -b Release -c 75 -d ghcr.io/nackdai/aten/aten:latest
 ```

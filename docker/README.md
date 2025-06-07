@@ -12,7 +12,7 @@ It's added as submodule at [3rdparty/nvidia_container_image_cuda](../3rdparty/nv
 We can find the detail of the command to build it at [nvidia/cudagl docker hub](https://hub.docker.com/r/nvidia/cudagl),
 like the following:
 
-```sh
+```bash
 ./build.sh -d --image-name <image name> --cuda-version 11.7.1 --os ubuntu --os-version 20.04 --arch x86_64 --cudagl
 ```
 
@@ -25,7 +25,7 @@ Dockerfile in aten directory establish the minimum development environment. The 
 based on the [nvidia/cudagl image](#nvidia-cudagl). The docker image is basically named as
 `aten`.
 
-```shell
+```bash
 docker build -t ghcr.io/nackdai/aten/aten:latest --build-arg from=ghcr.io/nackdai/aten/nvidia/cudagl:11.7.1-devel-ubuntu20.04 -f docker/aten/Dockerfile docker
 ```
 
@@ -35,7 +35,7 @@ Dockerfile in this directory is for the extra development environment The docker
 Dockerfile in dev directory is intended to be based on `aten`. It extends to isntall linter and
 formatter tools. The docker image is basically named as `aten_dev`
 
-```shell
+```bash
 docker build -t ghcr.io/nackdai/aten/aten_dev:latest --build-arg from=ghcr.io/nackdai/aten/aten:latest -f docker/aten/Dockerfile docker
 ```
 
@@ -54,7 +54,7 @@ Usage: build_docker_image.sh <OPTIONS>
 
 e.g.
 
-```shell
+```bash
 build_docker_image.sh -b docker -n 11.7.1-devel-ubuntu20.04 -p ghcr.io/nackdai/aten
 ```
 
@@ -64,14 +64,14 @@ If `-n` is not specified, the default is `11.7.1-devel-ubuntu20.04`.
 
 * Check where docker-compose is located:
 
-```sh
+```bash
 $ which docker-compose
 /usr/local/bin/docker-compose
 ```
 
 * Remove docker-compose
 
-```sh
+```bash
 sudo rm -rf /usr/bin/docker-compose
 ```
 
@@ -79,13 +79,13 @@ sudo rm -rf /usr/bin/docker-compose
 
 We can locate where ever we want, if that location is in PATH.
 
-```sh
+```bash
 sudo curl -L https://github.com/docker/compose/releases/download/<version>/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
 * Confirm if docker-compose works
 
-```sh
+```bash
 docker-compose version
 ```

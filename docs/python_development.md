@@ -4,14 +4,14 @@
 
 ### Linux
 
-We can install `pyenv` like the following:
+We can install `pyenv` as follows:
 
 ```bash
 curl https://pyenv.run | bash
 ```
 
-Then, we can see the log to put some codes in `.bashrc`. To enable pyenv, we need to add the
-followings in `.bashrc`:
+After installation, we will see instructions to add some lines to your `.bashrc`.
+To enable `pyenv`, add the following to your `.bashrc`:
 
 ```bash
 export PYENV_ROOT="$HOME/.pyenv"
@@ -22,21 +22,22 @@ eval "$(pyenv init -)"
 
 ### Windows
 
-Refer the [this (Japanese article)](https://qiita.com/probabilityhill/items/9a22f395a1e93206c846).
+Refer to [this Japanese article](https://qiita.com/probabilityhill/items/9a22f395a1e93206c846).
 
 ## venv
 
-We can create the virtual environment locally with the following:
+We can create a local virtual environment with:
 
 ```bash
 python3 -m venv .venv
 ```
 
-`.venv` directory is created and it has been already specified in `.gitignore` to avoid pushing it accidentally.
+The `.venv` directory will be created, and it is already listed in `.gitignore` to prevent
+accidental commits.
 
-If we'd like to active the virtual environment with the following:
+To activate the virtual environment:
 
-- Linux
+- **Linux**
 
 ```bash
 source .venv/bin/activate
@@ -48,15 +49,15 @@ or
 . .venv/bin/activate
 ```
 
-- Windows
+- **Windows**
 
-Regardless of PowerShell or cmd, we can activate the virtual environment with the following:
+We can activate the virtual environment in both PowerShell and cmd with:
 
 ```powershell
 .\.venv\Scripts\activate
 ```
 
-Regardless of Linux or Windows, if we'd like to deactivate:
+To deactivate the virtual environment on any platform:
 
 ```bash
 deactivate
@@ -64,48 +65,34 @@ deactivate
 
 ## Install a project in editable mode
 
-We can install the dependencies. We would like to install the our development source codes so that
-we can import it from other codes. But, the development source codes are under development. It
-means that we would update them so often. If they are installed the built fixed codes as the
-module, it's not flexible and inefficient to develop.
+We can install the dependencies and your development source code in editable mode so that changes
+to the source code are immediately reflected without reinstalling.
+This is useful for development, as we will often update the source code.
 
-Thus, we'd like to install our development source code as the editable mode (i.e. develop mode)
-like the following:
+To install in editable mode:
 
 ```bash
 pip install -e .
 ```
 
-Currently, there is no setting to build the python module to deploy.
+Currently, there is no configuration to build the Python module for deployment.
 
-If we'e like to install the optional dependencies, we can install them like the following:
-
-```bash
-pip install .[dev]
-```
-
-Or, for editable mode:
+To install optional dependencies, use:
 
 ```bash
 pip install -e .[dev]
 ```
 
-If the several optional dependencies are defined like the following:
+If we have several optional dependencies defined, for example:
 
 ```toml
 [project.optional-dependencies]
 dev = ["pytest"]
-cli = ["rich", "click",]
+cli = ["rich", "click"]
 ```
 
-We can specify the key in `[]`, like the following:
+We can specify multiple keys in brackets:
 
 ```bash
-pip install .[dev, cli]
-```
-
-Or, for editable mode:
-
-```bash
-pip install -e .[dev, cli]
+pip install -e .[dev,cli]
 ```

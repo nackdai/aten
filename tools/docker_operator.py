@@ -8,7 +8,6 @@ import subprocess
 import sys
 from asyncio.subprocess import Process
 from enum import Enum
-from typing import List, Optional
 
 import docker
 
@@ -34,13 +33,13 @@ class ProcessRunner:
     async def start(
         self,
         program: str,
-        args: List[str],
-        stdout_type: Optional[int],
-        stderr_type: Optional[int],
+        args: list[str],
+        stdout_type: int | None,
+        stderr_type: int | None,
     ):
         """Invoke sub process.
 
-        Args
+        Args:
             program: Program to be run as sub process.
             args: Arguments to pass to program.
             stdout_type: Stream type for stdout.
@@ -100,13 +99,13 @@ class ContainerRunningMode(Enum):
 
 async def run_process(
     program: str,
-    args: List[str],
-    stdout_type: Optional[int],
-    stderr_type: Optional[int],
-) -> Optional[int]:
+    args: list[str],
+    stdout_type: int | None,
+    stderr_type: int | None,
+) -> int | None:
     """Run process
 
-    Args
+    Args:
         program: Program to be run as sub process.
         args: Arguments to pass to program.
         stdout_type: Stream type for stdout.
@@ -120,7 +119,7 @@ async def run_process(
     await proc_runner.start(program, args, stdout_type, stderr_type)
 
     async for stdout, stderr in proc_runner.stream(
-        INTERVAL_SECONDS_TO_READ_OUTPUT_FROM_SUBPROCESS
+        INTERVAL_SECONDS_TO_READ_OUTPUT_FROM_SUBPROCESS,
     ):
         if stdout:
             print(stdout, end="", flush=True)
@@ -135,8 +134,8 @@ async def run_docker_container(
     docker_image: str,
     container_name: str,
     mode: ContainerRunningMode,
-    exec_command: Optional[str],
-) -> Optional[int]:
+    exec_command: str | None,
+) -> int | None:
     """Run docker container.
 
     Args:
@@ -201,8 +200,9 @@ async def run_docker_container(
 
 
 async def execute_command_in_docker_container(
-    container_name: str, command: Optional[str]
-) -> Optional[int]:
+    container_name: str,
+    command: str | None,
+) -> int | None:
     """Execute command in specified docker container.
 
     Args:
@@ -225,12 +225,15 @@ async def execute_command_in_docker_container(
     args.append(command)
 
     returncode = await run_process(
-        "docker", args, asyncio.subprocess.PIPE, asyncio.subprocess.PIPE
+        "docker",
+        args,
+        asyncio.subprocess.PIPE,
+        asyncio.subprocess.PIPE,
     )
     return returncode
 
 
-def check_if_container_is_running(container_name: Optional[str]) -> bool:
+def check_if_container_is_running(container_name: str | None) -> bool:
     """Check if container is running.
 
     Args:
@@ -274,12 +277,18 @@ async def kill_docker_container(container_name: str):
     """
     kill_args = ["kill", container_name]
     _ = await run_process(
-        "docker", kill_args, asyncio.subprocess.DEVNULL, asyncio.subprocess.STDOUT
+        "docker",
+        kill_args,
+        asyncio.subprocess.DEVNULL,
+        asyncio.subprocess.STDOUT,
     )
 
     rm_args = ["container", "rm", container_name]
     _ = await run_process(
-        "docker", rm_args, asyncio.subprocess.DEVNULL, asyncio.subprocess.STDOUT
+        "docker",
+        rm_args,
+        asyncio.subprocess.DEVNULL,
+        asyncio.subprocess.STDOUT,
     )
 
 
@@ -322,7 +331,11 @@ async def main(container_name: str):
         default=False,
     )
     parser.add_argument(
-        "-c", "--command", type=str, help="Commands to be executed", default=None
+        "-c",
+        "--command",
+        type=str,
+        help="Commands to be executed",
+        default=None,
     )
     args = parser.parse_args()
 
@@ -348,7 +361,10 @@ async def main(container_name: str):
         # Kill container forcibly.
         await kill_docker_container(container_name)
         returncode = await run_docker_container(
-            args.image, container_name, ContainerRunningMode.Enter, None
+            args.image,
+            container_name,
+            ContainerRunningMode.Enter,
+            None,
         )
     else:
         returncode = 0
@@ -359,7 +375,8 @@ async def main(container_name: str):
             if args.command is not None:
                 # Specified container is running. So, run docker exec command.
                 returncode = await execute_command_in_docker_container(
-                    container_name, args.command
+                    container_name,
+                    args.command,
                 )
         else:
             # Execute command directly with docker run command.

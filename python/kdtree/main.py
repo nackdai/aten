@@ -1,8 +1,8 @@
-import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 import rerun as rr
 from kdtree import KdTree
+from matplotlib import patches
 
 
 def main():
@@ -16,11 +16,18 @@ def main():
     found_points = []
     max_dist = 0.3
     KdTree.search_nearest_neighbors(
-        target_point, max_dist**2, found_points, kdtree_root
+        target_point,
+        max_dist**2,
+        found_points,
+        kdtree_root,
     )
 
     c = patches.Circle(
-        (0.5, 0.5), radius=max_dist, edgecolor="green", facecolor="none", linewidth=1
+        (0.5, 0.5),
+        radius=max_dist,
+        edgecolor="green",
+        facecolor="none",
+        linewidth=1,
     )
     ax = plt.axes()
     ax.add_patch(c)

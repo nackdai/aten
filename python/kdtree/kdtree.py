@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 import numpy as np
 import numpy.typing as npt
 from kdtree_node import KdTreeNode
@@ -9,7 +7,7 @@ from kdtree_node import KdTreeNode
 
 class KdTree:
     @staticmethod
-    def create(points, depth: int = 0) -> Optional[KdTreeNode]:
+    def create(points, depth: int = 0) -> KdTreeNode | None:
         # Accept any list type by converting NDArray.
         points_list = np.array(points)
         if len(points_list) == 0:
@@ -45,7 +43,7 @@ class KdTree:
         base_point: npt.NDArray,
         max_dist2: float,
         found_points: list,
-        node: Optional[KdTreeNode],
+        node: KdTreeNode | None,
     ):
         if node is None:
             return
@@ -62,18 +60,30 @@ class KdTree:
         if delta < 0:
             # Left
             KdTree.search_nearest_neighbors(
-                base_point, max_dist2, found_points, node.left_child
+                base_point,
+                max_dist2,
+                found_points,
+                node.left_child,
             )
             if delta * delta < max_dist2:
                 KdTree.search_nearest_neighbors(
-                    base_point, max_dist2, found_points, node.right_child
+                    base_point,
+                    max_dist2,
+                    found_points,
+                    node.right_child,
                 )
         else:
             # Right
             KdTree.search_nearest_neighbors(
-                base_point, max_dist2, found_points, node.right_child
+                base_point,
+                max_dist2,
+                found_points,
+                node.right_child,
             )
             if delta * delta < max_dist2:
                 KdTree.search_nearest_neighbors(
-                    base_point, max_dist2, found_points, node.left_child
+                    base_point,
+                    max_dist2,
+                    found_points,
+                    node.left_child,
                 )

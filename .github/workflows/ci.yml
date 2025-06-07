@@ -37,7 +37,7 @@ jobs:
       # Check if the specified files are chnaged.
       - name: Check if Dockerfiles are changed
         id: check_change_docker_file
-        uses: tj-actions/changed-files@v44
+        uses: tj-actions/changed-files@v46
         with:
           files_yaml_from_source_file: .github/workflows/resources/change_docker_file.yml
 

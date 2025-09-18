@@ -78,7 +78,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\NvTriStrip\include;$(ProjectDir)..\3rdparty\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -100,7 +100,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\NvTriStrip\include;$(ProjectDir)..\3rdparty\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -123,7 +123,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\NvTriStrip\include;$(ProjectDir)..\3rdparty\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>

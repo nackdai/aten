@@ -79,6 +79,22 @@ namespace aten
             return ret;
         }
 
+        void put(
+            const aten::vec4& color,
+            float u, float v)
+        {
+            int32_t iu = static_cast<int32_t>(u * (width_ - 1));
+            int32_t iv = static_cast<int32_t>(v * (height_ - 1));
+
+            // NOTE:
+            // Wrap as repeat.
+            const auto x = NormalizeToWrapRepeat(iu, width_ - 1);
+            const auto y = NormalizeToWrapRepeat(iv, height_ - 1);
+
+            uint32_t pos = y * width_ + x;
+            m_colors[pos] = color;
+        }
+
         float& operator()(int32_t x, int32_t y, int32_t c)
         {
             x = std::min(x, width_ - 1);

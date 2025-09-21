@@ -15,11 +15,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\EnvmapConverter\cubemap.cpp" />
+    <ClCompile Include="..\src\EnvmapConverter\envmap.cpp" />
+    <ClCompile Include="..\src\EnvmapConverter\equirect.cpp" />
     <ClCompile Include="..\src\EnvmapConverter\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\shader\bump_2_normal_fs.glsl" />
-    <None Include="..\src\shader\fullscreen_vs.glsl" />
+    <ClInclude Include="..\src\EnvmapConverter\cubemap.h" />
+    <ClInclude Include="..\src\EnvmapConverter\envmap.h" />
+    <ClInclude Include="..\src\EnvmapConverter\equirect.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{21014655-FB2E-4DE3-AAE2-AEA426553038}</ProjectGuid>
@@ -30,20 +34,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>

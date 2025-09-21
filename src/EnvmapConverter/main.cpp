@@ -4,6 +4,8 @@
 #include <cmdline.h>
 #include <imgui.h>
 
+#include "envmap.h"
+
 class EnvmapConvereterApp {
 public:
     static constexpr const char* TITLE = "EnvmapConverter";
@@ -18,69 +20,23 @@ public:
 
     bool Init()
     {
-        bump_map_ = aten::ImageLoader::load(args_.input, ctxt_);
+        src_ = EnvMap::LoadEnvmap(
+            ctxt_,
+            EnvMapType::Equirect,
+            "studio015.hdr");
 
-        if (!bump_map_) {
-            AT_ASSERT(false);
-            return false;
-        }
+        dst_ = EnvMap::CreateEmptyEnvmap(EnvMapType::CubeMap, 512, 512);
 
-        if (args_.width < 0) {
-            args_.width = bump_map_->width();
-        }
-        if (args_.height < 0) {
-            args_.height = bump_map_->height();
-        }
+        EnvMap::Convert(src_, dst_);
+
+        dst_->SaveAsPng("cubemap.png");
 
         return true;
     }
 
     bool Run()
     {
-        if (!bump_map_->initAsGLTexture()) {
-            AT_ASSERT(false);
-            return false;
-        }
-
-        if (!blitter_.IsInitialized()) {
-            visualizer_ = aten::visualizer::init(args_.width, args_.height);
-
-            if (!blitter_.init(
-                args_.width, args_.height,
-                "../shader/fullscreen_vs.glsl",
-                "../shader/bump_2_normal_fs.glsl"))
-            {
-                AT_ASSERT(false);
-                return false;
-            }
-
-            visualizer_->addPostProc(&blitter_);
-        }
-
-        aten::RasterizeRenderer::clearBuffer(
-            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Stencil,
-            aten::vec4(0, 0.5f, 1.0f, 1.0f),
-            1.0f,
-            0);
-
-        visualizer_->renderGLTexture(bump_map_.get(), false);
-
-        if (will_take_screenshot_) {
-            visualizer_->takeScreenshot(args_.output, args_.width, args_.height);
-            will_take_screenshot_ = false;
-        }
-
-        ImGui::Text("width: %d", args_.width);
-        ImGui::Text("height: %d", args_.height);
-
-        ImGui::SliderFloat("scale", &blitter_.scale, 1, 100);
-
-        ImGui::Text("Export to %s", args_.output.c_str());
-        if (ImGui::Button("Export")) {
-            will_take_screenshot_ = true;
-        }
-
-        return NeedGui();
+        return true;
     }
 
     void OnClose()
@@ -146,7 +102,7 @@ public:
         }
 
         args_.need_gui = cmd.exist("gui");
-        will_take_screenshot_ = !args_.need_gui;
+        //will_take_screenshot_ = !args_.need_gui;
 
         return true;
     }
@@ -181,49 +137,29 @@ private:
     } args_;
 
     aten::context ctxt_;
-    std::shared_ptr<aten::texture> bump_map_;
+    std::shared_ptr<EnvMap> src_;
+    std::shared_ptr<EnvMap> dst_;
 
     std::shared_ptr<aten::visualizer> visualizer_;
-
-    class Normal2BumpBlitter : public aten::Blitter {
-    public:
-        Normal2BumpBlitter() = default;
-        ~Normal2BumpBlitter() = default;
-
-        void prepareRender(
-            const void* pixels,
-            bool revert) override
-        {
-            aten::Blitter::prepareRender(pixels, revert);
-
-            setUniformFloat("scale", scale);
-        }
-
-        float scale{ 1.0f };
-    };
-
-    Normal2BumpBlitter blitter_;
-
-    bool will_take_screenshot_{ false };
 };
 
 int32_t main(int32_t argc, char* argv[])
 {
+    aten::SetCurrentDirectoryFromExe();
+
     auto app = std::make_shared<EnvmapConvereterApp>();
 
-    if (!app->ParseArgs(argc, argv)) {
+    /*if (!app->ParseArgs(argc, argv)) {
         AT_ASSERT(false);
         return 1;
-    }
+    }*/
 
     if (!app->Init()) {
         AT_ASSERT(false);
         return 1;
     }
 
-    aten::SetCurrentDirectoryFromExe();
-
-    auto wnd = std::make_shared<aten::window>();
+    /*auto wnd = std::make_shared<aten::window>();
 
     aten::window::MesageHandlers handlers;
     handlers.OnRun = [&app]() { return app->Run(); };
@@ -247,7 +183,7 @@ int32_t main(int32_t argc, char* argv[])
 
     app.reset();
 
-    wnd->Terminate();
+    wnd->Terminate();*/
 
     return 1;
 }

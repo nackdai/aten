@@ -380,8 +380,9 @@ namespace AT_NAME
             aten::texture* normalMap,
             aten::texture* roughnessMap);
 
+        // To pass the polymorphic raw pointer to shared_ptr.
         material() = default;
-        ~material() = default;
+        virtual ~material() = default;
 
         int32_t id() const
         {

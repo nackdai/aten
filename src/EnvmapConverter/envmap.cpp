@@ -2,6 +2,7 @@
 
 #include "cubemap.h"
 #include "equirect.h"
+#include "mirrormap.h"
 
 #include <memory>
 
@@ -28,6 +29,9 @@ std::shared_ptr<EnvMap> EnvMap::LoadEnvmap(
     case EnvMapType::Equirect:
         envmap = EquirectMap::Load(ctxt, filename);
         break;
+    case EnvMapType::Mirror:
+        envmap = MirrorMap::Load(ctxt, filename);
+        break;
     }
 
     std::shared_ptr<EnvMap> ret(envmap);
@@ -46,6 +50,9 @@ std::shared_ptr<EnvMap> EnvMap::CreateEmptyEnvmap(
         break;
     case EnvMapType::Equirect:
         envmap = EquirectMap::Create(width, height);
+        break;
+    case EnvMapType::Mirror:
+        envmap = MirrorMap::Create(width, height);
         break;
     }
 
@@ -69,7 +76,9 @@ void EnvMap::Convert(
     for (int32_t face = 0; face < dst_face_num; face++) {
         for (int32_t y = 0; y < dst_height; y++) {
             for (int32_t x = 0; x < dst_width; x++) {
-                //IZ_BOOL isValid = out->isValid(x, y);
+                if (!dst->IsValidPos(x, y)) {
+                    continue;
+                }
 
                 const auto dir = dst->GetDirFromXY(x, y, static_cast<CubemapFace>(face));
                 const auto [u, v, target_face] = src->GetUVFromDir(dir);

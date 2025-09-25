@@ -15,10 +15,10 @@
 // z = cos(theta) * cos(phi)
 
 // NOTE
-//      |-
-//  ----+----> phi
-//      |+
-//      theta
+//          |-
+//  +phi----+---- -phi
+//          |+
+//           theta
 
 EquirectMap* EquirectMap::Load(
     aten::context& ctxt,
@@ -56,32 +56,9 @@ EquirectMap* EquirectMap::Create(std::int32_t width, std::int32_t height)
 
 std::tuple<float, float, CubemapFace> EquirectMap::GetUVFromDir(const aten::vec3& dir) const
 {
-    // y = sin(theta) -> theta = asin(y)
-    // theta : [-pi/2, pi/2]
-    const auto theta = aten::asin(dir.y);
-
-    // Normalize [-pi/2, pi/2] -> [-1, 1]
-    auto v = theta / AT_MATH_PI_HALF;
-
-    const auto cos_theta = aten::cos(theta);
-
-    // z = cos(theta) * cos(phi) -> cos(phi) = z / cos(theta) -> phi = acos(z / cos(theta))
-    auto cos_phi = dir.z / (cos_theta + 0.00001f);
-    cos_phi = aten::clamp(cos_phi, -1.0f, 1.0f);
-
-    auto phi = aten::acos(cos_phi);
-
-    // NOTE
-    // acos -> [0, +pi].
-    // phi : [-pi, pi]
-    phi = (dir.x < 0.0f ? -phi : phi);
-
-    // Normalize [-pi, pi] -> [-1, 1]
-    auto u = phi / AT_MATH_PI;
-
-    // Normalize [-1, 1] -> [0, 1]
-    u = (u + 1.0f) * 0.5f;
-    v = (v + 1.0f) * 0.5f;
+    const auto uv = aten::Background::ConvertDirectionToUV(dir);
+    const auto u = uv.x;
+    const auto v = uv.y;
 
     return std::make_tuple(u, v, CubemapFace::Num);
 }
@@ -95,9 +72,19 @@ aten::vec3 EquirectMap::GetDirFromXY(
     const auto width = static_cast<float>(tex_->width() - 1);
     const auto height = static_cast<float>(tex_->height() - 1);
 
-    // [-1:1]
+    // NOTE:
+    //          |-
+    //  +phi----+---- -phi
+    //          |+
+    //           theta
+
+    // [0,1] -> [-1,1]
     auto phi = 2.0f * (x / width) - 1.0f;
     auto theta = 2.0f * (y / height) - 1.0f;
+
+    // NOTE:
+    // -----+-----> phi => +phi----+---- -phi
+    phi = -phi;
 
     phi = phi * AT_MATH_PI;
     theta = theta * AT_MATH_PI_HALF;
@@ -110,7 +97,7 @@ aten::vec3 EquirectMap::GetDirFromXY(
     aten::vec3 dir;
     dir.x = cos_theta * sin_phi;
     dir.y = sin_theta;
-    dir.z = cos_theta * sin_phi;
+    dir.z = cos_theta * cos_phi;
 
     dir = normalize(dir);
 

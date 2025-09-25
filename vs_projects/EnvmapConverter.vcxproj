@@ -19,11 +19,13 @@
     <ClCompile Include="..\src\EnvmapConverter\envmap.cpp" />
     <ClCompile Include="..\src\EnvmapConverter\equirect.cpp" />
     <ClCompile Include="..\src\EnvmapConverter\main.cpp" />
+    <ClCompile Include="..\src\EnvmapConverter\mirrormap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\EnvmapConverter\cubemap.h" />
     <ClInclude Include="..\src\EnvmapConverter\envmap.h" />
     <ClInclude Include="..\src\EnvmapConverter\equirect.h" />
+    <ClInclude Include="..\src\EnvmapConverter\mirrormap.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{21014655-FB2E-4DE3-AAE2-AEA426553038}</ProjectGuid>

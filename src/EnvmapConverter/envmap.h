@@ -77,6 +77,11 @@ public:
 
     virtual int32_t height() const = 0;
 
+    virtual bool IsValidPos(int32_t x, int32_t y) const
+    {
+        return true;
+    }
+
     EnvMapType type() const
     {
         return type_;

@@ -2,6 +2,14 @@
 
 #include "atenscene.h"
 
+namespace _cubmap_detail {
+    constexpr std::array face_type_str = {
+        "pos_x", "neg_x",
+        "pos_y", "neg_y",
+        "pos_z", "neg_z",
+    };
+}
+
 CubeMap* CubeMap::Load(
     aten::context& ctxt,
     std::string_view filename_pos_x,
@@ -25,8 +33,34 @@ CubeMap* CubeMap::Load(
         filename_neg_z.data()
     };
 
-    for (const auto* filename : filenames) {
-        auto tex = aten::ImageLoader::load(filename, ctxt);
+    bool need_create_path = filename_neg_x.empty()
+        || filename_pos_y.empty()
+        || filename_neg_y.empty()
+        || filename_pos_z.empty()
+        || filename_neg_z.empty();
+
+    for (int32_t face = 0; face < static_cast<int32_t>(CubemapFace::Num); face++) {
+        const auto* filename = filenames[face];
+        std::string face_png_name;
+
+        if (need_create_path) {
+            filename = filenames[0];
+
+            std::string path;
+            std::string file;
+            std::string ext;
+
+            aten::getStringsFromPath(
+                filename,
+                path, ext, file);
+
+            face_png_name = path + file + "_" + _cubmap_detail::face_type_str[face] + ext;
+        }
+        else {
+            face_png_name = filenames[face];
+        }
+
+        auto tex = aten::ImageLoader::load(face_png_name, ctxt);
         if (!tex) {
             delete cubemap;
             return nullptr;
@@ -95,7 +129,7 @@ std::tuple<float, float, CubemapFace> CubeMap::GetUVFromDir(const aten::vec3& di
     }
     else if (max_dir == y) {
         // Y
-        face = (dir.y > 0.0f ? CubemapFace::NegX : CubemapFace::PosX);
+        face = (dir.y > 0.0f ? CubemapFace::NegY : CubemapFace::PosY);
     }
     else {
         // Z
@@ -213,7 +247,7 @@ aten::vec4 CubeMap::At(
     float u, float v,
     CubemapFace face/*= CubemapFace::Num*/) const
 {
-    AT_ASSERT(face == CubemapFace::Num);
+    AT_ASSERT(face < CubemapFace::Num);
 
     const auto face_tex = faces_[static_cast<int>(face)];
 
@@ -252,16 +286,10 @@ bool CubeMap::SaveAsPng(std::string_view filename) const
 
     constexpr auto face_num = static_cast<int32_t>(CubemapFace::Num);
 
-    constexpr std::array face_type_str = {
-        "pos_x", "neg_x",
-        "pos_y", "neg_y",
-        "pos_z", "neg_z",
-    };
-
     bool result = true;
 
     for (int32_t face = 0; face < face_num; face++) {
-        std::string face_png_name = path + file + "_" + face_type_str[face] + ext;
+        std::string face_png_name = path + file + "_" + _cubmap_detail::face_type_str[face] + ext;
 
         const auto& face_tex_ = faces_[face];
         AT_ASSERT(face_tex_);

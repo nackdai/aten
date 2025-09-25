@@ -20,16 +20,30 @@ public:
 
     bool Init()
     {
+#if 0
         src_ = EnvMap::LoadEnvmap(
             ctxt_,
             EnvMapType::Equirect,
             "studio015.hdr");
 
         dst_ = EnvMap::CreateEmptyEnvmap(EnvMapType::CubeMap, 512, 512);
+        const char* dst_png = "cubemap.png";
+
+        //dst_ = EnvMap::CreateEmptyEnvmap(EnvMapType::Mirror, 512, 512);
+        //const char* dst_png = "mirrormap.png";
+#else
+        src_ = EnvMap::LoadEnvmap(
+            ctxt_,
+            EnvMapType::Equirect,
+            //"studio015.hdr");
+            "sphere_map_sample.png");
+        dst_ = EnvMap::CreateEmptyEnvmap(EnvMapType::CubeMap, 512, 512);
+        const char* dst_png = "cubemap_test.png";
+#endif
 
         EnvMap::Convert(src_, dst_);
 
-        dst_->SaveAsPng("cubemap.png");
+        dst_->SaveAsPng(dst_png);
 
         return true;
     }

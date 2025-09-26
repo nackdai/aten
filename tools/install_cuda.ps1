@@ -11,7 +11,7 @@ param (
     [switch]$no_copy        # Flag if script doesn't copy packages.
 )
 
-[string] $script:CUDA_VERSION = "11.7"
+[string] $script:CUDA_VERSION = "12.5"
 [string] $script:CUDA_PLATFORM = "windows-x86_64"
 [string] $script:CUDA_PACKAGE_ARCHIVE_URL = "https://developer.download.nvidia.com/compute/cuda/redist"
 
@@ -25,6 +25,10 @@ param (
 [string] $script:CUDA_CXX_URL = "https://github.com/NVIDIA/libcudacxx/archive/refs/tags/"
 
 [string] $script:CUDA_PATH = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$CUDA_VERSION"
+
+[string] $script:CUDA_NVCC_PATCH_VERSION = "82"
+[string] $script:CUDA_CUDART_PATCH_VERSION = "82"
+[string] $script:CUDA_VS_INTEGRATION_PATCH_VERSION = "82"
 
 [string] $script:ERROR_STORE_TXT = "stderr.txt"
 
@@ -112,21 +116,21 @@ if ((Get-Command "7z" -ErrorAction SilentlyContinue) -eq $null) {
 if (-not $no_download) {
     # nvcc
     Write-Host "Download cuda_nvcc" -f Green
-    DownloadCUDASubPackage "cuda_nvcc" "$CUDA_VERSION.99"
+    DownloadCUDASubPackage "cuda_nvcc" "$CUDA_VERSION.$CUDA_NVCC_PATCH_VERSION"
     if ($LastExitCode -ne 0) {
         exit 1
     }
 
     # cudart
     Write-Host "Download cuda_cudart" -f Green
-    DownloadCUDASubPackage "cuda_cudart" "$CUDA_VERSION.99"
+    DownloadCUDASubPackage "cuda_cudart" "$CUDA_VERSION.$CUDA_CUDART_PATCH_VERSION"
     if ($LastExitCode -ne 0) {
         exit 1
     }
 
     # visual_studio_integration
     Write-Host "Download visual_studio_integration" -f Green
-    DownloadCUDASubPackage "visual_studio_integration" "$CUDA_VERSION.91"
+    DownloadCUDASubPackage "visual_studio_integration" "$CUDA_VERSION.$CUDA_VS_INTEGRATION_PATCH_VERSION"
     if ($LastExitCode -ne 0) {
         exit 1
     }
@@ -186,17 +190,17 @@ if (-not $no_copy) {
 
     # nvcc
     Write-Host "Copy cuda_nvcc" -f Green
-    CopyCUDASubPackage "cuda_nvcc" "$CUDA_VERSION.99" $CUDA_PATH
+    CopyCUDASubPackage "cuda_nvcc" "$CUDA_VERSION.$CUDA_NVCC_PATCH_VERSION" $CUDA_PATH
 
     # cudart
     Write-Host "Copy cuda_cudart" -f Green
-    CopyCUDASubPackage "cuda_cudart" "$CUDA_VERSION.99" $CUDA_PATH
+    CopyCUDASubPackage "cuda_cudart" "$CUDA_VERSION.$CUDA_CUDART_PATCH_VERSION" $CUDA_PATH
 
     # visual_studio_integration
     Write-Host "Copy visual_studio_integration" -f Green
     [string] $extra_dst_dir = "$CUDA_PATH\extras"
     CreateDirectory $extra_dst_dir
-    CopyCUDASubPackage "visual_studio_integration" "$CUDA_VERSION.91" $extra_dst_dir
+    CopyCUDASubPackage "visual_studio_integration" "$CUDA_VERSION.$CUDA_VS_INTEGRATION_PATCH_VERSION" $extra_dst_dir
 
     # libcudacxx
     Write-Host "Copy libcudacxx" -f Green

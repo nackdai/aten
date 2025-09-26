@@ -88,7 +88,7 @@ function Check7zipExtractError {
 
             # If the erorr mentions creating symbolic ling is faild, it's the ignorable error.
             if ($line -match "^(ERROR)") {
-                if ($line -match "^(ERROR: Cannot create symbolic link).+$") {
+                if ($line -match "^(ERROR: Cannot create symbolic link).+$" -or $line -match "^(ERROR: Dangerous link path was ignored).+$") {
                     $exit_code = 0
                 } else {
                     Write-Host "Error log: [$line]" -f Red

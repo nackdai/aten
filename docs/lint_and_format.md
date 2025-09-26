@@ -86,7 +86,7 @@ For more details, see [pre-commit](https://pre-commit.com/).
 ### How to install Ruff
 
 We have already defined `ruff` as one of the optional dependencies
-in [.pre-commit-config.yaml](../.pre-commit-config.yaml).
+in [pyproject.toml](../pyproject.toml).
 Thus, if we install the dependencies as described
 in [Install a project in editable mode](python_development.md#install-a-project-in-editable-mode),
 `ruff` will be installed.

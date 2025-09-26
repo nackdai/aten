@@ -5,12 +5,6 @@ on:
   pull_request:
     branches:
       - 'main'
-    paths:
-      - '3rdparty/**'
-      - 'src/**'
-      - 'vs2019/**'
-      - 'tools/install_cuda.ps1'
-      - '.github/workflows/win_ci.yml'
   # NOTE: In order to reduce the number of running workflow on windows runner, suppress the following code.
   # push:
   #   branches:
@@ -24,25 +18,59 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci_on_windows:
-    name: ci on windows
-    # NOTE:
-    # https://stackoverflow.com/questions/71288257/visual-studio-16-2019-stopped-working-with-github-actions
-    # In order to use Visual Studio 16 2019, runner has to be windows-2019.
-    # After windows-2019, Visual Studio 16 2019 is deprecated.
+  # NOTE:
+  # https://stackoverflow.com/questions/71288257/visual-studio-16-2019-stopped-working-with-github-actions
+  # In order to use Visual Studio 16 2019, runner has to be windows-2019.
+  # After windows-2019, Visual Studio 16 2019 is deprecated.
 
-    # NOTE:
-    # https://github.blog/changelog/2019-10-17-github-actions-default-shell-on-windows-runners-is-changing-to-powershell/
-    # Default shell is PowerShell.
+  # NOTE:
+  # https://github.blog/changelog/2019-10-17-github-actions-default-shell-on-windows-runners-is-changing-to-powershell/
+  # Default shell is PowerShell.
 
-    # NOTE:
-    # https://github.com/actions/runner-images/blob/main/images/win/Windows2019-Readme.md
+  # NOTE:
+  # https://github.com/actions/runner-images/blob/main/images/win/Windows2019-Readme.md
+
+  check_ci_on_windows:
+    name: check ci on windows
     runs-on: windows-2019
+    outputs:
+      any_changed: ${{ steps.changed_files.outputs.any_changed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: true
+
+      # NOTE:
+      # https://github.com/actions/runner-images/issues/1281
+      # Check if the specified files are changed.
+      - name: Check changed files
+        id: changed_files
+        uses: step-security/changed-files@v46
+        with:
+          files: |
+            3rdparty/**
+            src/**
+            vs2019/**
+            tools/install_cuda.ps1
+            .github/workflows/win_ci.yml
+
+  ci_on_windows:
+    name: check ci on windows
+    runs-on: windows-2019
+    needs: check_ci_on_windows
+    if: ${{ needs.check_ci_on_windows.outputs.any_changed }} == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.3.1
+        with:
+          vs-version: 16.11
+          msbuild-architecture: x64
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.3.1

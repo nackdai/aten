@@ -15,7 +15,7 @@ namespace aten {
 
         pathname = p.parent_path().generic_string();
         extname = p.extension().generic_string();
-        filename = p.filename().generic_string();
+        filename = p.stem().generic_string();
 
         if (path == pathname) {
             pathname = "./";

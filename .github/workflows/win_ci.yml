@@ -11,7 +11,7 @@ on:
   #     - 'main'
 
 env:
-  CUDA_PATH: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.7
+  CUDA_PATH: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.5
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -32,7 +32,7 @@ jobs:
 
   check_ci_on_windows:
     name: check ci on windows
-    runs-on: windows-2019
+    runs-on: windows-2022
     outputs:
       any_changed: ${{ steps.changed_files.outputs.any_changed }}
     steps:
@@ -56,8 +56,8 @@ jobs:
             .github/workflows/win_ci.yml
 
   ci_on_windows:
-    name: check ci on windows
-    runs-on: windows-2019
+    name: ci on windows
+    runs-on: windows-2022
     needs: check_ci_on_windows
     if: ${{ needs.check_ci_on_windows.outputs.any_changed }} == 'true'
     steps:
@@ -69,13 +69,7 @@ jobs:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.3.1
         with:
-          vs-version: 16.11
-          msbuild-architecture: x64
-
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.3.1
-        with:
-          vs-version: 16.11
+          vs-version: 17.14
           msbuild-architecture: x64
 
       - name: Install CUDA
@@ -93,7 +87,7 @@ jobs:
         shell: pwsh
         run: |
           echo "CUDA_PATH_V11_7=${{ env.CUDA_PATH }}" >> $env:GITHUB_ENV
-          Copy-Item -Path "${{ env.CUDA_PATH }}\extras\visual_studio_integration\MSBuildExtensions\*.*" -Destination "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Microsoft\VC\v160\BuildCustomizations" -Recurse
+          Copy-Item -Path "${{ env.CUDA_PATH }}\extras\visual_studio_integration\MSBuildExtensions\*.*" -Destination "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\BuildCustomizations" -Recurse
 
       # NOTE:
       # In GHA windows runner, Visual Studio is Enterprise.

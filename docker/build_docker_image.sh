@@ -7,12 +7,12 @@ usage() {
   cat <<EOF 1>&2
 Usage: $0 <OPTIONS>
   -b <build_context>         : Docker build context.
-  -c <cuda_version>          : CUDA version. Default is 11.7.1
-  -u <ubuntu_version>        : Ubuntu version. Default is 20.04
+  -c <cuda_version>          : CUDA version. Default is 12.5.1
+  -u <ubuntu_version>        : Ubuntu version. Default is 22.04
   -p <image_tag_prefix>      : Prefix for image tag
   --clear_cache              : Build with clearing cache.
 
-ex) $0 -b ./docker -p "ghcr.io/aten" -c 11.7.1 -u 20.04
+ex) $0 -b ./docker -p "ghcr.io/nackdai/aten" -c 12.5.1 -u 22.04
 EOF
   exit 1
 }
@@ -21,8 +21,8 @@ build_context="./"
 image_tag_prefix=""
 docker_build_options=()
 
-CUDA_VERSION="11.7.1"
-UBUNTU_VERSION="20.04"
+CUDA_VERSION="12.5.1"
+UBUNTU_VERSION="22.04"
 
 CUDAGL_BUILD_DIR="3rdparty/nvidia_container_image_cuda"
 

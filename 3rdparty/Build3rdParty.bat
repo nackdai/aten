@@ -18,7 +18,7 @@ if not defined CONFIG (
 
 set PLATFORM=x64
 
-set VS="Visual Studio 16 2019"
+set VS="Visual Studio 17 2022"
 
 rem Path to vs tools depends on which version is installed. e.g. "BuildTools", "Community".
 set VS_TARGET=%2
@@ -29,7 +29,7 @@ if not defined VS_TARGET (
 rem Check if path to msbuild. If no, run vs tool bat file.
 where msbuild
 if not %errorlevel%==0 (
-    call "C:\Program Files (x86)\Microsoft Visual Studio\2019\%VS_TARGET%\Common7\Tools\VsMSBuildCmd.bat"
+	call "C:\Program Files\Microsoft Visual Studio\2022\%VS_TARGET%\Common7\Tools\VsMSBuildCmd.bat"
 )
 
 rem glfw =============================
@@ -53,7 +53,7 @@ cmake --build tinyobjloader\build --config=%CONFIG% -j 4 || goto error
 
 rem assimp ==========================
 
-cmake %EXTRA_CMAKE_OPTION% -S assimp -B assimp\build -A %PLATFORM% -DASSIMP_BUILD_TESTS=FALSE -DASSIMP_INSTALL=FALSE -DASSIMP_INSTALL_PDB=FALSE -DLIBRARY_SUFFIX= -DCMAKE_DEBUG_POSTFIX= -DASSIMP_BUILD_ASSIMP_TOOLS=FALSE || goto error
+cmake %EXTRA_CMAKE_OPTION% -S assimp -B assimp\build -A %PLATFORM% -DCMAKE_CXX_FLAGS="/wd4819 /utf-8 /EHsc" -DASSIMP_BUILD_TESTS=FALSE -DASSIMP_INSTALL=FALSE -DASSIMP_INSTALL_PDB=FALSE -DLIBRARY_SUFFIX= -DCMAKE_DEBUG_POSTFIX= -DASSIMP_BUILD_ASSIMP_TOOLS=FALSE || goto error
 cmake --build assimp\build --config=%CONFIG% -j 4 || goto error
 
 rem googletest =======================
@@ -62,10 +62,7 @@ cmake %EXTRA_CMAKE_OPTION% -S googletest -B googletest\build -A %PLATFORM% -DBUI
 cmake --build googletest\build --config=%CONFIG% -j 4 || goto error
 
 rem openvdb ==========================
-rem Nanovdb is header only. There is nothing to build as Debug. Tools are also unnecessary. So, just installing is enough.
-
-cmake %EXTRA_CMAKE_OPTION% -S openvdb -B openvdb\build -A %PLATFORM% -DUSE_NANOVDB=ON -DNANOVDB_BUILD_TOOLS=OFF -DOPENVDB_BUILD_CORE=OFF -DOPENVDB_BUILD_BINARIES=OFF -DNANOVDB_USE_TBB=OFF -DNANOVDB_USE_BLOSC=OFF -DNANOVDB_USE_ZLIB=OFF -DNANOVDB_USE_CUDA=ON -DCMAKE_INSTALL_PREFIX=openvdb\build || goto error
-cmake --install openvdb\build --config Release || goto error
+rem Nanovdb is header only. There is nothing to build as Debug. Tools are also unnecessary.
 
 rem Copy files for Profile configuration ==============================
 if %CONFIG% == Release (

@@ -1,4 +1,4 @@
-ARG from=ubuntu:20.04
+ARG from=ubuntu:22.04
 FROM ${from}
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y \
     tk-dev \
     libffi-dev \
     liblzma-dev \
-    python-openssl \
+    python3-openssl \
     git \
     shellcheck \
     python3 \

@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checck_diff:
+  check_diff:
     name: check_diff
     runs-on: ubuntu-22.04
     outputs:
@@ -34,28 +34,25 @@ jobs:
 
       # NOTE:
       # https://github.com/actions/runner-images/issues/1281
-      # Check if the specified files are chnaged.
+      # Check if the specified files are changed.
       - name: Check if Dockerfiles are changed
         id: check_change_docker_file
-        uses: tj-actions/changed-files@v46
+        uses: step-security/changed-files@v46
         with:
-          files_yaml_from_source_file: .github/workflows/resources/change_docker_file.yml
+          files: |
+            docker/**/Dockerfile
+            docker/build_docker_image.sh
 
       - name: Pass value if docker image should be built
         id: check_diff_File
         run: |
-          value=${{ steps.check_change_docker_file.outputs.src_any_changed }}
-          if [[ "${value}" == "true" ]]; then
-            echo "should_build_image=true" >> $GITHUB_OUTPUT
-          else
-            echo "should_build_image=false" >> $GITHUB_OUTPUT
-          fi
+          echo "should_build_image=${{ steps.check_change_docker_file.outputs.any_changed }}" >> $GITHUB_OUTPUT
 
   build_docker:
     name: build_docker
     runs-on: ubuntu-22.04
-    needs: checck_diff
-    if: contains(needs.checck_diff.outputs.should_build_image, 'true')
+    needs: check_diff
+    if: contains(needs.check_diff.outputs.should_build_image, 'true')
     steps:
       - name: Checkout
         uses: actions/checkout@v3

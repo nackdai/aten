@@ -1,10 +1,49 @@
+#include <memory>
+
 #include "envmap.h"
 
+#include "angularmap.h"
 #include "cubemap.h"
 #include "equirect.h"
 #include "mirrormap.h"
 
-#include <memory>
+#include "atenscene.h"
+
+template<typename TEnvMap>
+TEnvMap* SingleEnvMap::Load(
+    aten::context& ctxt,
+    std::string_view filename)
+{
+    auto tex = aten::ImageLoader::load(filename.data(), ctxt);
+    if (!tex) {
+        return nullptr;
+    }
+
+    auto envmap = new TEnvMap();
+    if (!envmap) {
+        return nullptr;
+    }
+
+    envmap->tex_ = std::move(tex);
+
+    return envmap;
+}
+
+template<typename TEnvMap>
+TEnvMap* SingleEnvMap::Create(std::int32_t width, std::int32_t height)
+{
+    auto envmap = new TEnvMap();
+    if (!envmap) {
+        return nullptr;
+    }
+
+    envmap->tex_ = std::make_shared<aten::texture>(width, height, 4, "");
+    if (!envmap->tex_) {
+        return nullptr;
+    }
+
+    return envmap;
+}
 
 std::shared_ptr<EnvMap> EnvMap::LoadEnvmap(
     aten::context& ctxt,
@@ -27,10 +66,13 @@ std::shared_ptr<EnvMap> EnvMap::LoadEnvmap(
             filename_pos_z, filename_neg_z);
         break;
     case EnvMapType::Equirect:
-        envmap = EquirectMap::Load(ctxt, filename);
+        envmap = SingleEnvMap::Load<EquirectMap>(ctxt, filename);
         break;
     case EnvMapType::Mirror:
-        envmap = MirrorMap::Load(ctxt, filename);
+        envmap = SingleEnvMap::Load<MirrorMap>(ctxt, filename);
+        break;
+    case EnvMapType::Angular:
+        envmap = SingleEnvMap::Load<AngularMap>(ctxt, filename);
         break;
     }
 
@@ -49,10 +91,13 @@ std::shared_ptr<EnvMap> EnvMap::CreateEmptyEnvmap(
         envmap = CubeMap::Create(width, height);
         break;
     case EnvMapType::Equirect:
-        envmap = EquirectMap::Create(width, height);
+        envmap = SingleEnvMap::Create<EquirectMap>(width, height);
         break;
     case EnvMapType::Mirror:
-        envmap = MirrorMap::Create(width, height);
+        envmap = SingleEnvMap::Create<MirrorMap>(width, height);
+        break;
+    case EnvMapType::Angular:
+        envmap = SingleEnvMap::Create<AngularMap>(width, height);
         break;
     }
 

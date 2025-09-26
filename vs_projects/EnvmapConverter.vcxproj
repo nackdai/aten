@@ -15,6 +15,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\EnvmapConverter\angularmap.cpp" />
     <ClCompile Include="..\src\EnvmapConverter\cubemap.cpp" />
     <ClCompile Include="..\src\EnvmapConverter\envmap.cpp" />
     <ClCompile Include="..\src\EnvmapConverter\equirect.cpp" />
@@ -22,6 +23,7 @@
     <ClCompile Include="..\src\EnvmapConverter\mirrormap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\EnvmapConverter\angularmap.h" />
     <ClInclude Include="..\src\EnvmapConverter\cubemap.h" />
     <ClInclude Include="..\src\EnvmapConverter\envmap.h" />
     <ClInclude Include="..\src\EnvmapConverter\equirect.h" />

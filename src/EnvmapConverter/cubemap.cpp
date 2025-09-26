@@ -129,7 +129,7 @@ std::tuple<float, float, CubemapFace> CubeMap::GetUVFromDir(const aten::vec3& di
     }
     else if (max_dir == y) {
         // Y
-        face = (dir.y > 0.0f ? CubemapFace::NegY : CubemapFace::PosY);
+        face = (dir.y > 0.0f ? CubemapFace::PosY : CubemapFace::NegY);
     }
     else {
         // Z
@@ -142,11 +142,11 @@ std::tuple<float, float, CubemapFace> CubeMap::GetUVFromDir(const aten::vec3& di
     // Compute uv coordinate.
     switch (face) {
     case CubemapFace::PosX: // +X
-        u = -dir.z / dir.x;
+        u = dir.z / dir.x;
         v = dir.y / dir.x;
         break;
     case CubemapFace::NegX: // -X
-        u = -dir.z / dir.x;
+        u = dir.z / dir.x;
         v = -dir.y / dir.x;
         break;
     case CubemapFace::PosY: // +Y
@@ -158,11 +158,11 @@ std::tuple<float, float, CubemapFace> CubeMap::GetUVFromDir(const aten::vec3& di
         v = -dir.z / dir.y;
         break;
     case CubemapFace::PosZ: // +Z
-        u = dir.x / dir.z;
+        u = -dir.x / dir.z;
         v = dir.y / dir.z;
         break;
     case CubemapFace::NegZ: // -Z
-        u = dir.x / dir.z;
+        u = -dir.x / dir.z;
         v = -dir.y / dir.z;
         break;
     }
@@ -210,30 +210,30 @@ aten::vec3 CubeMap::GetDirFromXY(
     case CubemapFace::PosX: // +X
         dir.x = 1.0f;
         dir.y = v;
-        dir.z = -u;
+        dir.z = u;
         break;
     case CubemapFace::NegX: // -X
         dir.x = -1.0f;
         dir.y = v;
-        dir.z = u;
+        dir.z = -u;
         break;
     case CubemapFace::PosY: // +Y
-        dir.x = u;
-        dir.y = -1.0f;
-        dir.z = v;
-        break;
-    case CubemapFace::NegY: // -Y
-        dir.x = u;
+        dir.x = -u;
         dir.y = 1.0f;
         dir.z = -v;
         break;
+    case CubemapFace::NegY: // -Y
+        dir.x = -u;
+        dir.y = -1.0f;
+        dir.z = v;
+        break;
     case CubemapFace::PosZ: // +Z
-        dir.x = u;
+        dir.x = -u;
         dir.y = v;
         dir.z = 1.0f;
         break;
     case CubemapFace::NegZ: // -Z
-        dir.x = -u;
+        dir.x = u;
         dir.y = v;
         dir.z = -1.0f;
         break;

@@ -2,40 +2,6 @@
 
 #include "atenscene.h"
 
-MirrorMap* MirrorMap::Load(
-    aten::context& ctxt,
-    std::string_view filename)
-{
-    auto tex = aten::ImageLoader::load(filename.data(), ctxt);
-    if (!tex) {
-        return nullptr;
-    }
-
-    auto equirect = new MirrorMap();
-    if (!equirect) {
-        return nullptr;
-    }
-
-    equirect->tex_ = std::move(tex);
-
-    return equirect;
-}
-
-MirrorMap* MirrorMap::Create(std::int32_t width, std::int32_t height)
-{
-    auto equirect = new MirrorMap();
-    if (!equirect) {
-        return nullptr;
-    }
-
-    equirect->tex_ = std::make_shared<aten::texture>(width, height, 4, "");
-    if (!equirect->tex_) {
-        return nullptr;
-    }
-
-    return equirect;
-}
-
 std::tuple<float, float, CubemapFace> MirrorMap::GetUVFromDir(const aten::vec3& dir) const
 {
     // We assume the followings:
@@ -43,9 +9,12 @@ std::tuple<float, float, CubemapFace> MirrorMap::GetUVFromDir(const aten::vec3& 
     //    * We can see the reflected scene on the surface of the mirror ball.
     //    * So, we can't see the scene at the behind of the mirror ball on the surface of the mirror ball.
     //
-    //         +y
-    //         |
-    //  scene  +-------->z   @ mirror ball
+    //         +y /+x                        +v
+    //         | /                            |
+    //         |/                            /
+    //  scene  +-------->z   @ mirror ball  /+u
+    // 
+    //  * The direction of +x is -u direction. So, we need to flip u.
     //
     //  * The vector which is reflected by the normal on the mirror ball is the direction to the scene.
     //  * If we define the normal on the mirror ball as N = (N.x, N.y, N.z), N.x and N.y are (u, v) coordinate values.
@@ -56,11 +25,11 @@ std::tuple<float, float, CubemapFace> MirrorMap::GetUVFromDir(const aten::vec3& 
     // dot(N, E) = dot((N.x, N.y, N.z), (0, 0, 1) = N.z
 
     // R = 2 * dot(N, eye) * N - E = 2 * N.z * (N.x, N.y, N.z) - (0, 0, 1)
-    //  - R.z = 2 * N.z * N.z - 1 = 2 * pow(N.z, 2) - 1
+    //  -> R.z = 2 * N.z * N.z - 1 = 2 * pow(N.z, 2) - 1
     //       => N.z = sqrt((R.z + 1) / 2)
-    //  - R.x = 2 * N.z * N.x - 0
+    //  -> R.x = 2 * N.z * N.x - 0
     //       => N.x = R.x / (2 * N.z) = u
-    //  - R.y = 2 * N.z * N.y - 0
+    //  -> R.y = 2 * N.z * N.y - 0
     //       => N.y = R.y / (2 * N.z) = v
     //
     // 2 * N.z = 2 * sqrt((R.z + 1) / 2) = sqrt(4 * (R.z + 1) / 2) = sqrt(2 * (R.z + 1))
@@ -68,7 +37,8 @@ std::tuple<float, float, CubemapFace> MirrorMap::GetUVFromDir(const aten::vec3& 
     const auto& R = dir;
     const auto div = 1.0F / aten::sqrt(2.0F * (R.z + 1.0F));
 
-    auto u = R.x * div;
+    // The direction of +x is -u direction. So, we need to flip u.
+    auto u = -R.x * div;
     auto v = R.y * div;
 
     u = aten::clamp(u, -1.0F, 1.0F);
@@ -99,8 +69,19 @@ aten::vec3 MirrorMap::GetDirFromXY(
     const auto width = static_cast<float>(tex_->width() - 1);
     const auto height = static_cast<float>(tex_->height() - 1);
 
+    // NOTE:
+    //         +y /+x                        +v
+    //         | /                            |
+    //         |/                            /
+    //  scene  +-------->z   @ mirror ball  /+u
+    //
+    // The direction of +x is -u direction. So, we need to flip u.
+
+    auto u = x / width;
+    u = 1 - u;
+
     // [0, 1] -> [-1, 1].
-    const auto u = 2.0F * (x / width) - 1.0F;
+    u = 2.0F * u - 1.0F;
     const auto v = 2.0F * (y / height) - 1.0F;
 
     aten::vec3 N(

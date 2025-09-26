@@ -2,9 +2,9 @@
 
 #include "envmap.h"
 
-class EquirectMap : public EnvMap {
+class EquirectMap : public SingleEnvMap {
 public:
-    EquirectMap() : EnvMap(EnvMapType::Equirect) {}
+    EquirectMap() : SingleEnvMap(EnvMapType::Equirect) {}
     virtual ~EquirectMap() = default;
 
     EquirectMap(const EquirectMap&) = delete;
@@ -52,8 +52,5 @@ public:
         }
         return tex_->height();
     }
-
-protected:
-    std::shared_ptr<aten::texture> tex_;
 };
 

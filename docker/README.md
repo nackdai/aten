@@ -14,10 +14,12 @@ We can find details on how to build the image at the [nvidia/cudagl Docker Hub](
 For example:
 
 ```bash
-./build.sh -d --image-name <image name> --cuda-version 11.7.1 --os ubuntu --os-version 20.04 --arch x86_64 --cudagl
+./build.sh -d --image-name <image name> --cuda-version 12.5.1 --os ubuntu --os-version 22.04 --arch x86_64 --cudagl
 ```
 
 The [build_docker_image.sh](./build_docker_image) script automates this process.
+
+To get which CUDA version and which Ubuntu version are supported, visit [nvidia/cuda Docker hub](https://hub.docker.com/r/nvidia/cuda/tags)
 
 ## aten
 
@@ -27,7 +29,7 @@ development environment and is based on the [nvidia/cudagl image](#nvidia-cudagl
 The image is typically named `aten`.
 
 ```bash
-docker build -t ghcr.io/nackdai/aten/aten:latest --build-arg from=ghcr.io/nackdai/aten/nvidia/cudagl:11.7.1-devel-ubuntu20.04 -f docker/aten/Dockerfile docker
+docker build -t ghcr.io/nackdai/aten/aten:latest --build-arg from=ghcr.io/nackdai/aten/nvidia/cudagl:12.5.1-devel-ubuntu22.04 -f docker/aten/Dockerfile docker
 ```
 
 ## dev
@@ -49,17 +51,19 @@ This is a helper script to build the docker images.
 ```plain
 Usage: build_docker_image.sh <OPTIONS>
   -b <build_context>         : Docker build context.
-  -n <nvidia_cuda_image_tag> : Base nvidia/cuda docker image
+  -c <cuda_version>          : CUDA version. Default is 12.5.1
+  -u <ubuntu_version>        : Ubuntu version. Default is 22.04
   -p <image_tag_prefix>      : Prefix for image tag
+  --clear_cache              : Build with clearing cache.
 ```
 
 Example:
 
 ```bash
-build_docker_image.sh -b docker -n 11.7.1-devel-ubuntu20.04 -p ghcr.io/nackdai/aten
+build_docker_image.sh -b ./docker -p "ghcr.io/nackdai/aten" -c 12.5.1 -u 22.04
 ```
 
-If `-n` is not specified, the default is `11.7.1-devel-ubuntu20.04`.
+The default CUDA version is `12.5.1` and the default Ubuntu version is `22.04`.
 
 ## How to upgrade docker-compose
 

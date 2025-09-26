@@ -1,6 +1,0 @@
-src:
-  - '3rdparty/**'
-  - 'src/**'
-  - 'vs2019/**'
-  - 'tools/install_cuda.ps1'
-  - '.github/workflows/win_ci.yml'

@@ -5,6 +5,12 @@ on:
   pull_request:
     branches:
       - 'main'
+    paths:
+      - '3rdparty/**'
+      - 'src/**'
+      - 'vs2019/**'
+      - 'tools/install_cuda.ps1'
+      - '.github/workflows/win_ci.yml'
   # NOTE: In order to reduce the number of running workflow on windows runner, suppress the following code.
   # push:
   #   branches:
@@ -38,24 +44,13 @@ jobs:
         with:
           submodules: true
 
-      # NOTE:
-      # https://github.com/actions/runner-images/issues/1281
-      # Check if the specified files are chnaged.
-      - name: Check changed files
-        id: changed_files
-        uses: tj-actions/changed-files@v46
-        with:
-          files_yaml_from_source_file: .github/workflows/resources/change_file_win_ci.yml
-
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.3.1
-        if: ${{ steps.changed_files.outputs.src_any_changed == 'true' }}
         with:
           vs-version: 16.11
           msbuild-architecture: x64
 
       - name: Install CUDA
-        if: ${{ steps.changed_files.outputs.src_any_changed == 'true' }}
         run: |
           powershell -NoProfile -ExecutionPolicy Unrestricted .\tools\install_cuda.ps1
           if ($LastExitCode -ne 0) { exit 1 }
@@ -67,7 +62,6 @@ jobs:
       #   - $env:GITHUB_ENV
       #     - https://stackoverflow.com/questions/66733076/github-actions-set-environment-variable-for-windows-build-with-powershell
       - name: Setup CUDA
-        if: ${{ steps.changed_files.outputs.src_any_changed == 'true' }}
         shell: pwsh
         run: |
           echo "CUDA_PATH_V11_7=${{ env.CUDA_PATH }}" >> $env:GITHUB_ENV
@@ -76,14 +70,12 @@ jobs:
       # NOTE:
       # In GHA windows runner, Visual Studio is Enterprise.
       - name: Build 3rdparty
-        if: ${{ steps.changed_files.outputs.src_any_changed == 'true' }}
         shell: cmd
         run: |
           cd 3rdparty
           .\Build3rdParty.bat Release Enterprise || exit 1
 
       - name: Build
-        if: ${{ steps.changed_files.outputs.src_any_changed == 'true' }}
         env:
           TARGET: Build
           CONFIG: Release

@@ -12,7 +12,7 @@ git submodule update --init --recursive
 
 ## Windows
 
-1. Install `CUDA 11.7` and the required NVIDIA driver.
+1. Install `CUDA 12.5` and the required NVIDIA driver.
 2. Run `aten/3rdparty/Build3rdParty.bat <BuildConfiguration> <VisualStudio edition>`
     - The first argument can be `Debug`, `Release`, etc.
     - The second argument can be `Community`, `Enterprise`, `BuildTools`, etc.
@@ -20,11 +20,11 @@ git submodule update --init --recursive
 3. Open `aten/vs2019/aten.sln`.
 4. Build the projects with the `x64` configuration (not `x86`).
 
-The confirmed environment is Visual Studio 2019 on Windows 10.
+The confirmed environment is `Visual Studio 2022` on Windows 10.
 
 ## Linux
 
-1. Install `CUDA 11.7` and the required NVIDIA driver.
+1. Install `CUDA 12.5` and the required NVIDIA driver.
 2. Install the necessary applications (see `env/aten/Dockerfile` for details):
     1. Install `cmake` version 3.21.3 or later.
     2. Install `clang` 12.
@@ -34,7 +34,7 @@ The confirmed environment is Visual Studio 2019 on Windows 10.
 5. `./RunCMake.sh <Build Type> <Compute Capability>`
 6. Run `ninja`
 
-The confirmed environment is Ubuntu 20.04.
+The confirmed environment is Ubuntu 22.04.
 
 ### What is RunCMake.sh?
 

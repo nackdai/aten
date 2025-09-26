@@ -20,44 +20,18 @@
 //          |+
 //           theta
 
-EquirectMap* EquirectMap::Load(
-    aten::context& ctxt,
-    std::string_view filename)
-{
-    auto tex = aten::ImageLoader::load(filename.data(), ctxt);
-    if (!tex) {
-        return nullptr;
-    }
-
-    auto equirect = new EquirectMap();
-    if (!equirect) {
-        return nullptr;
-    }
-
-    equirect->tex_ = std::move(tex);
-
-    return equirect;
-}
-
-EquirectMap* EquirectMap::Create(std::int32_t width, std::int32_t height)
-{
-    auto equirect = new EquirectMap();
-    if (!equirect) {
-        return nullptr;
-    }
-
-    equirect->tex_ = std::make_shared<aten::texture>(width, height, 4, "");
-    if (!equirect->tex_) {
-        return nullptr;
-    }
-
-    return equirect;
-}
-
 std::tuple<float, float, CubemapFace> EquirectMap::GetUVFromDir(const aten::vec3& dir) const
 {
     const auto uv = aten::Background::ConvertDirectionToUV(dir);
-    const auto u = uv.x;
+
+    auto u = uv.x;
+    if (u < 0.5F) {
+        u = 0.5F - u;
+    }
+    else {
+        u = 1.0F - (u - 0.5F);
+    }
+
     const auto v = uv.y;
 
     return std::make_tuple(u, v, CubemapFace::Num);
@@ -72,22 +46,20 @@ aten::vec3 EquirectMap::GetDirFromXY(
     const auto width = static_cast<float>(tex_->width() - 1);
     const auto height = static_cast<float>(tex_->height() - 1);
 
-    // NOTE:
-    //          |-
-    //  +phi----+---- -phi
-    //          |+
-    //           theta
+    float phi = 0.0F;
 
-    // [0,1] -> [-1,1]
-    auto phi = 2.0f * (x / width) - 1.0f;
-    auto theta = 2.0f * (y / height) - 1.0f;
+    auto u = x / width;
+    if (u < 0.5F) {
+        u = 0.5F - u;
+        phi = u * AT_MATH_PI_2;
+    }
+    else {
+        u = 1.0F - (u - 0.5F);
+        phi = u * AT_MATH_PI_2 - AT_MATH_PI_2;
+    }
 
-    // NOTE:
-    // -----+-----> phi => +phi----+---- -phi
-    phi = -phi;
-
-    phi = phi * AT_MATH_PI;
-    theta = theta * AT_MATH_PI_HALF;
+    const auto v = 1.0F - y / height;
+    const auto theta = AT_MATH_PI * v;
 
     const auto sin_theta = aten::sin(theta);
     const auto cos_theta = aten::cos(theta);
@@ -95,9 +67,9 @@ aten::vec3 EquirectMap::GetDirFromXY(
     const auto cos_phi = aten::cos(phi);
 
     aten::vec3 dir;
-    dir.x = cos_theta * sin_phi;
-    dir.y = sin_theta;
-    dir.z = cos_theta * cos_phi;
+    dir.x = sin_theta * sin_phi;
+    dir.y = cos_theta;
+    dir.z = sin_theta * cos_phi;
 
     dir = normalize(dir);
 

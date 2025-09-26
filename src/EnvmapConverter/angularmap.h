@@ -2,15 +2,15 @@
 
 #include "envmap.h"
 
-class MirrorMap : public SingleEnvMap {
+class AngularMap : public SingleEnvMap {
 public:
-    MirrorMap() : SingleEnvMap(EnvMapType::Equirect) {}
-    virtual ~MirrorMap() = default;
+    AngularMap() : SingleEnvMap(EnvMapType::Equirect) {}
+    virtual ~AngularMap() = default;
 
-    MirrorMap(const MirrorMap&) = delete;
-    MirrorMap(MirrorMap&&) = delete;
-    MirrorMap& operator=(const MirrorMap&) = delete;
-    MirrorMap& operator=(MirrorMap&&) = delete;
+    AngularMap(const AngularMap&) = delete;
+    AngularMap(AngularMap&&) = delete;
+    AngularMap& operator=(const AngularMap&) = delete;
+    AngularMap& operator=(AngularMap&&) = delete;
 
     std::tuple<float, float, CubemapFace> GetUVFromDir(const aten::vec3& dir) const override final;
 

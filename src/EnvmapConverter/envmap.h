@@ -12,6 +12,7 @@ enum class EnvMapType : int {
     Mirror,
     CubeMap,
     CrossMap,
+    Invalid,
 };
 
 enum class CubemapFace : int {
@@ -89,4 +90,24 @@ public:
 
 protected:
     EnvMapType type_;
+};
+
+class SingleEnvMap : public EnvMap {
+protected:
+    SingleEnvMap(EnvMapType type) : EnvMap(type) {}
+
+    SingleEnvMap(const SingleEnvMap&) = delete;
+    SingleEnvMap(SingleEnvMap&&) = delete;
+    SingleEnvMap& operator=(const SingleEnvMap&) = delete;
+    SingleEnvMap& operator=(SingleEnvMap&&) = delete;
+
+public:
+    template<typename TEnvMap>
+    static TEnvMap* Load(aten::context& ctxt, std::string_view filename);
+
+    template<typename TEnvMap>
+    static TEnvMap* Create(std::int32_t width, std::int32_t height);
+
+protected:
+    std::shared_ptr<aten::texture> tex_;
 };

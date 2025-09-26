@@ -18,71 +18,63 @@ public:
     EnvmapConvereterApp operator=(const EnvmapConvereterApp&) = delete;
     EnvmapConvereterApp operator=(EnvmapConvereterApp&&) = delete;
 
-    bool Init()
+    bool Run()
     {
-#if 0
         src_ = EnvMap::LoadEnvmap(
             ctxt_,
-            EnvMapType::Equirect,
-            "studio015.hdr");
+            args_.in_type,
+            args_.input);
+        if (!src_) {
+            std::cerr << "failed to load env map: " << args_.input << std::endl;
+            return false;
+        }
 
-        dst_ = EnvMap::CreateEmptyEnvmap(EnvMapType::CubeMap, 512, 512);
-        const char* dst_png = "cubemap.png";
+        dst_ = EnvMap::CreateEmptyEnvmap(
+            args_.out_type,
+            args_.width, args_.height);
 
-        //dst_ = EnvMap::CreateEmptyEnvmap(EnvMapType::Mirror, 512, 512);
-        //const char* dst_png = "mirrormap.png";
-#else
-        src_ = EnvMap::LoadEnvmap(
-            ctxt_,
-            EnvMapType::Equirect,
-            //"studio015.hdr");
-            "sphere_map_sample.png");
-        dst_ = EnvMap::CreateEmptyEnvmap(EnvMapType::CubeMap, 512, 512);
-        const char* dst_png = "cubemap_test.png";
-#endif
+        if (!dst_) {
+            std::cerr << "failed to create empty env map" << std::endl;
+            return false;
+        }
 
         EnvMap::Convert(src_, dst_);
 
-        dst_->SaveAsPng(dst_png);
+        dst_->SaveAsPng(args_.output);
 
         return true;
     }
 
-    bool Run()
+    EnvMapType ConvertStringToEnvMapType(const std::string& type_str)
     {
-        return true;
+        if (type_str == "equirect") {
+            return EnvMapType::Equirect;
+        }
+        else if (type_str == "cube") {
+            return EnvMapType::CubeMap;
+        }
+        else if (type_str == "mirror") {
+            return EnvMapType::Mirror;
+        }
+        else if (type_str == "angular") {
+            return EnvMapType::Angular;
+        }
+        else {
+            std::cerr << "unknown env map type: " << type_str << std::endl;
+            return EnvMapType::Invalid;
+        }
     }
 
-    void OnClose()
-    {
-    }
-
-    void OnMouseBtn(bool left, bool press, int32_t x, int32_t y)
-    {
-    }
-
-    void OnMouseMove(int32_t x, int32_t y)
-    {
-    }
-
-    void OnMouseWheel(int32_t delta)
-    {
-    }
-
-    void OnKey(bool press, aten::Key key)
-    {
-    }
-
-    bool ParseArgs(int32_t argc, char* argv[])
+    bool ParseArgs(int32_t argc, const char** argv)
     {
         cmdline::parser cmd;
         {
-            cmd.add<std::string>("input", 'i', "input bump map(png)", true);
-            cmd.add<std::string>("output", 'o', "output normal map(png)", false, "result");
-            cmd.add<int32_t>("width", 'w', "texture width", false);
-            cmd.add<int32_t>("height", 'h', "texture height", false);
-            cmd.add("gui", 'g', "GUI mode");
-
+            cmd.add<std::string>("input", 'i', "input env map", true);
+            cmd.add<std::string>("in_type", 0, "input env type [equirect, cube, mirror, anglar]", true);
+            cmd.add<std::string>("output", 'o', "output env map(png)", false, "result");
+            cmd.add<std::string>("out_type", 0, "output env type [equirect, cube, mirror, anglar]", true);
+            cmd.add<int32_t>("width", 'w', "output texture width", false);
+            cmd.add<int32_t>("height", 'h', "output texture height", false);
             cmd.add<std::string>("help", '?', "print usage", false);
         }
 
@@ -107,54 +99,58 @@ public:
             args_.output = "result.png";
         }
 
-        if (cmd.exist("height")) {
-            args_.width = cmd.get<int32_t>("height");
+        auto in_type_str = cmd.get<std::string>("in_type");
+        args_.in_type = ConvertStringToEnvMapType(in_type_str);
+        if (args_.in_type == EnvMapType::Invalid) {
+            return false;
+        }
+
+        auto out_type_str = cmd.get<std::string>("out_type");
+        args_.out_type = ConvertStringToEnvMapType(out_type_str);
+        if (args_.in_type == EnvMapType::Invalid) {
+            return false;
         }
 
         if (cmd.exist("width")) {
             args_.width = cmd.get<int32_t>("width");
         }
+        else {
+            if (args_.out_type == EnvMapType::Equirect) {
+                args_.width = 1024;
+            }
+            else {
+                args_.width = 512;
+            }
+        }
 
-        args_.need_gui = cmd.exist("gui");
-        //will_take_screenshot_ = !args_.need_gui;
+        if (cmd.exist("height")) {
+            args_.width = cmd.get<int32_t>("height");
+        }
+        else {
+            if (args_.out_type == EnvMapType::Equirect) {
+                args_.height = args_.width / 2;
+            }
+            else {
+                args_.height = args_.width;
+            }
+        }
 
         return true;
-    }
-
-    int32_t width() const
-    {
-        return args_.width;
-    }
-
-    int32_t height() const
-    {
-        return args_.height;
-    }
-
-    bool NeedGui() const
-    {
-        return args_.need_gui;
-    }
-
-    aten::context& GetContext()
-    {
-        return ctxt_;
     }
 
 private:
     struct Args {
         std::string input;
+        EnvMapType in_type{ EnvMapType::Equirect };
         std::string output;
+        EnvMapType out_type{ EnvMapType::CubeMap };
         int32_t width{ -1 };
         int32_t height{ -1 };
-        bool need_gui{ false };
     } args_;
 
     aten::context ctxt_;
     std::shared_ptr<EnvMap> src_;
     std::shared_ptr<EnvMap> dst_;
-
-    std::shared_ptr<aten::visualizer> visualizer_;
 };
 
 int32_t main(int32_t argc, char* argv[])
@@ -163,41 +159,36 @@ int32_t main(int32_t argc, char* argv[])
 
     auto app = std::make_shared<EnvmapConvereterApp>();
 
-    /*if (!app->ParseArgs(argc, argv)) {
-        AT_ASSERT(false);
-        return 1;
-    }*/
-
-    if (!app->Init()) {
+#if 1
+    if (!app->ParseArgs(argc, const_cast<const char**>(argv))) {
         AT_ASSERT(false);
         return 1;
     }
 
-    /*auto wnd = std::make_shared<aten::window>();
-
-    aten::window::MesageHandlers handlers;
-    handlers.OnRun = [&app]() { return app->Run(); };
-    handlers.OnClose = [&app]() { app->OnClose(); };
-
-    auto id = wnd->Create(
-        app->width(), app->height(),
-        EnvmapConvereterApp::TITLE,
-        !app->NeedGui(),
-        handlers);
-
-    if (id >= 0) {
-        app->GetContext().SetIsWindowInitialized(true);
-    }
-    else {
+    if (!app->Run()) {
         AT_ASSERT(false);
         return 1;
     }
+#else
+    // for debug
+    std::array args = {
+        "EnvmapConverter",
+        "-i", "sphere_map_sample.png",
+        "--in_type", "equirect",
+        "-o", "result.png",
+        "--out_type", "cube",
+        "-w", "512",
+        "-h", "512",
+    };
+    if (!app->ParseArgs(args.size(), args.data())) {
+        AT_ASSERT(false);
+        return 1;
+    }
+    if (!app->Run()) {
+        AT_ASSERT(false);
+        return 1;
+    }
+#endif
 
-    wnd->Run();
-
-    app.reset();
-
-    wnd->Terminate();*/
-
-    return 1;
+    return 0;
 }

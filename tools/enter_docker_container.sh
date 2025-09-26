@@ -6,14 +6,14 @@ set -o pipefail
 usage() {
   cat <<EOF 1>&2
 Usage: $0 <docker_image>
-  <docker_image>   : docker image to run build
+  <docker_image>   : docker image to run
 ex) $0 aten:latest
 EOF
   exit 1
 }
 
 if [ "${#}" -ne 1 ]; then
-  echo "Argumaents are not specified properly"
+  echo "Arguments are not specified properly"
   usage
 fi
 

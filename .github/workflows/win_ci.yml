@@ -86,7 +86,7 @@ jobs:
       - name: Setup CUDA
         shell: pwsh
         run: |
-          echo "CUDA_PATH_V11_7=${{ env.CUDA_PATH }}" >> $env:GITHUB_ENV
+          echo "CUDA_PATH_V12_5=${{ env.CUDA_PATH }}" >> $env:GITHUB_ENV
           Copy-Item -Path "${{ env.CUDA_PATH }}\extras\visual_studio_integration\MSBuildExtensions\*.*" -Destination "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\BuildCustomizations" -Recurse
 
       # NOTE:

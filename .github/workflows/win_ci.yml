@@ -104,5 +104,5 @@ jobs:
           PLATFORM: x64
         shell: cmd
         run: |
-          msbuild .\vs2019\libaten.vcxproj /t:${{ env.TARGET }} /p:Configuration=${{ env.CONFIG }} /p:Platform=${{ env.PLATFORM }} /m:4 /p:BuildInParallel=true || exit 1
-          msbuild .\vs2019\libidaten.vcxproj /t:${{ env.TARGET }} /p:Configuration=${{ env.CONFIG }} /p:Platform=${{ env.PLATFORM }} /m:4 /p:BuildInParallel=true || exit 1
+          msbuild .\vs_projects\libaten.vcxproj /t:${{ env.TARGET }} /p:Configuration=${{ env.CONFIG }} /p:Platform=${{ env.PLATFORM }} /m:4 /p:BuildInParallel=true || exit 1
+          msbuild .\vs_projects\libidaten.vcxproj /t:${{ env.TARGET }} /p:Configuration=${{ env.CONFIG }} /p:Platform=${{ env.PLATFORM }} /m:4 /p:BuildInParallel=true || exit 1

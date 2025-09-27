@@ -67,18 +67,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Compare the last modified time of the docker directory and the created time of the docker image as unit time.
       - name: Check docker image build time
         id: check_image_time
         continue-on-error: true
         run: |
           docker pull ghcr.io/${{ github.repository }}/aten
-          file_change_date=$(TZ=UTC git log -1 --pretty="format:%cd" --date=format-local:"%Y%m%d%H%M%S" ./docker/)
-          image_build_date=$(docker inspect -f '{{ .Created }}' ghcr.io/${{ github.repository }}/aten | xargs -i date --utc --date="{}" +"%Y%m%d%H%M%S")
+          file_change_date=$(git log -1 --pretty="format:%ct" ./docker/)
+          image_build_date=$(docker inspect -f '{{ .Created }}' ghcr.io/${{ github.repository }}/aten | xargs -i date --utc --date="{}" +%s)
           echo "File [${file_change_date}] DockerImage [${image_build_date}]"
-          if [[ "${file_change_date}" < "${image_build_date}" ]]; then
+          if [[ "${file_change_date}" -lt "${image_build_date}" ]]; then
             echo "Docker images are already latest"
             exit 1
           fi
+          echo "Docker images need to be rebuilt"
 
       # Run the following step if Dockerfile is modified.
       - name: Build images

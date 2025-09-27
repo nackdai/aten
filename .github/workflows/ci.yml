@@ -31,6 +31,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       # NOTE:
       # https://github.com/actions/runner-images/issues/1281
@@ -43,10 +45,30 @@ jobs:
             docker/**/Dockerfile
             docker/build_docker_image.sh
 
-      - name: Pass value if docker image should be built
-        id: check_diff_File
+      - name: Login to GitHub Container Registry
+        id: login
+        if: ${{ steps.check_change_docker_file.outputs.any_changed == 'true' }}
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Compare the last modified time of the docker directory and the created time of the docker image as unit time.
+      - name: Check docker image build time
+        id: check_image_time
+        if: ${{ steps.check_change_docker_file.outputs.any_changed == 'true' }}
+        continue-on-error: true
         run: |
-          echo "should_build_image=${{ steps.check_change_docker_file.outputs.any_changed }}" >> $GITHUB_OUTPUT
+          docker pull ghcr.io/${{ github.repository }}/aten
+          file_change_date=$(git log -1 --pretty="format:%ct" ./docker/)
+          image_build_date=$(docker inspect -f '{{ .Created }}' ghcr.io/${{ github.repository }}/aten | xargs -i date --utc --date="{}" +%s)
+          echo "File [${file_change_date}] DockerImage [${image_build_date}]"
+          if [[ "${file_change_date}" -gt "${image_build_date}" ]]; then
+            echo "should_build_image=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_build_image=false" >> $GITHUB_OUTPUT
+          fi
 
   build_docker:
     name: build_docker
@@ -59,38 +81,13 @@ jobs:
         with:
           submodules: true
 
-      - name: Login to GitHub Container Registry
-        id: login
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # Compare the last modified time of the docker directory and the created time of the docker image as unit time.
-      - name: Check docker image build time
-        id: check_image_time
-        continue-on-error: true
-        run: |
-          docker pull ghcr.io/${{ github.repository }}/aten
-          file_change_date=$(git log -1 --pretty="format:%ct" ./docker/)
-          image_build_date=$(docker inspect -f '{{ .Created }}' ghcr.io/${{ github.repository }}/aten | xargs -i date --utc --date="{}" +%s)
-          echo "File [${file_change_date}] DockerImage [${image_build_date}]"
-          if [[ "${file_change_date}" -lt "${image_build_date}" ]]; then
-            echo "Docker images are already latest"
-            exit 1
-          fi
-          echo "Docker images need to be rebuilt"
-
       # Run the following step if Dockerfile is modified.
       - name: Build images
         id: build_image
-        if: ${{ steps.check_image_time.outcome == 'success' }}
         run: |
           ./docker/build_docker_image.sh -b ./docker/ -p "ghcr.io/${{ github.repository }}/"
 
       - name: Push images
-        if: ${{ steps.build_image.outcome == 'success' }}
         run: |
           docker push ghcr.io/${{ github.repository }}/aten:latest
           docker push ghcr.io/${{ github.repository }}/aten_dev:latest

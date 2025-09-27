@@ -53,7 +53,7 @@ cmake --build tinyobjloader\build --config=%CONFIG% -j 4 || goto error
 
 rem assimp ==========================
 
-cmake %EXTRA_CMAKE_OPTION% -S assimp -B assimp\build -A %PLATFORM% -DCMAKE_CXX_FLAGS="/wd4819 /utf-8 /EHsc" -DASSIMP_BUILD_TESTS=FALSE -DASSIMP_INSTALL=FALSE -DASSIMP_INSTALL_PDB=FALSE -DLIBRARY_SUFFIX= -DCMAKE_DEBUG_POSTFIX= -DASSIMP_BUILD_ASSIMP_TOOLS=FALSE || goto error
+cmake %EXTRA_CMAKE_OPTION% -S assimp -B assimp\build -A %PLATFORM% -DCMAKE_CXX_FLAGS="/wd4834 /wd4819 /utf-8 /EHsc" -DASSIMP_BUILD_TESTS=FALSE -DASSIMP_INSTALL=FALSE -DASSIMP_INSTALL_PDB=FALSE -DLIBRARY_SUFFIX= -DCMAKE_DEBUG_POSTFIX= -DASSIMP_BUILD_ASSIMP_TOOLS=FALSE || goto error
 cmake --build assimp\build --config=%CONFIG% -j 4 || goto error
 
 rem googletest =======================

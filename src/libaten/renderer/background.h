@@ -125,6 +125,24 @@ namespace AT_NAME
 
         static AT_HOST_DEVICE_API aten::vec3 ConvertDirectionToUV(const aten::vec3& dir)
         {
+            // NOTE:
+            //
+            // phi +pi         0          -pi  theta  v
+            //     +-----+-----+-----+-----+    0     1
+            //     |     |     |     |     |    |     |
+            //     +-----+-----+-----+-----+   pi/2  0.5
+            //     |     |     |     |     |    |     |
+            //     +-----+-----+-----+-----+    pi    0
+            //  u 0.5  0.25   0|1   0.75  0.5
+
+            //     (u=0) +z (u=1)
+            //           |
+            //           |
+            // +x <------+------ -x
+            // (u=0.25)  |       (u=0.75)
+            //           |
+            //           -z (u=0.5)
+
             auto temp = aten::atan2(dir.x, dir.z);
             auto r = length(dir);
 
@@ -132,8 +150,13 @@ namespace AT_NAME
             auto phi = (float)((temp >= 0) ? temp : (temp + 2 * AT_MATH_PI));
             auto theta = aten::acos(dir.y / r);
 
-            // Map to [0,1]x[0,1] range and reverse Y axis
             float u = phi / (2 * AT_MATH_PI);
+
+            // NOTE:
+            // +v
+            //  |
+            //  0---> +u
+            // Convert v coordinate as from bottom to top is 0 to 1.
             float v = 1 - theta / AT_MATH_PI;
 
             aten::vec3 uv = aten::vec3(u, v, 0);

@@ -21,7 +21,7 @@ param (
 [string] $script:CUDA_CUB_VERSION = "1.15.0"
 [string] $script:CUDA_CUB_URL = "https://github.com/NVIDIA/cub/archive/refs/tags/"
 
-[string] $script:CUDA_CXX_VERSION = "1.8.0-post-release"
+[string] $script:CUDA_CXX_VERSION = "2.1.0"
 [string] $script:CUDA_CXX_URL = "https://github.com/NVIDIA/libcudacxx/archive/refs/tags/"
 
 [string] $script:CUDA_PATH = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$CUDA_VERSION"

@@ -19,9 +19,7 @@ concurrency:
 
 jobs:
   # NOTE:
-  # https://stackoverflow.com/questions/71288257/visual-studio-16-2019-stopped-working-with-github-actions
-  # In order to use Visual Studio 16 2019, runner has to be windows-2019.
-  # After windows-2019, Visual Studio 16 2019 is deprecated.
+  # windows-2019 has been expired.
 
   # NOTE:
   # https://github.blog/changelog/2019-10-17-github-actions-default-shell-on-windows-runners-is-changing-to-powershell/
@@ -51,7 +49,7 @@ jobs:
           files: |
             3rdparty/**
             src/**
-            vs2019/**
+            vs_projects/**
             tools/install_cuda.ps1
             .github/workflows/win_ci.yml
 

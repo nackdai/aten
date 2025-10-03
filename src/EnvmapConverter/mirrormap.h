@@ -49,4 +49,3 @@ public:
 
     bool IsValidPos(int32_t x, int32_t y) const override final;
 };
-

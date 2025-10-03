@@ -53,4 +53,3 @@ public:
         return tex_->height();
     }
 };
-

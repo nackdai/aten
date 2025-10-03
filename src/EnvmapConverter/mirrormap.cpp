@@ -13,7 +13,7 @@ std::tuple<float, float, CubemapFace> MirrorMap::GetUVFromDir(const aten::vec3& 
     //         | /                            |
     //         |/                            /
     //  scene  +-------->z   @ mirror ball  /+u
-    // 
+    //
     //  * The direction of +x is -u direction. So, we need to flip u.
     //
     //  * The vector which is reflected by the normal on the mirror ball is the direction to the scene.

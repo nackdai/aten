@@ -4,7 +4,7 @@
 
 class AngularMap : public SingleEnvMap {
 public:
-    AngularMap() : SingleEnvMap(EnvMapType::Equirect) {}
+    AngularMap() : SingleEnvMap(EnvMapType::Angular) {}
     virtual ~AngularMap() = default;
 
     AngularMap(const AngularMap&) = delete;

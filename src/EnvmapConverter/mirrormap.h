@@ -4,7 +4,7 @@
 
 class MirrorMap : public SingleEnvMap {
 public:
-    MirrorMap() : SingleEnvMap(EnvMapType::Equirect) {}
+    MirrorMap() : SingleEnvMap(EnvMapType::Mirror) {}
     virtual ~MirrorMap() = default;
 
     MirrorMap(const MirrorMap&) = delete;

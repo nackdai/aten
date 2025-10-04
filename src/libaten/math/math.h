@@ -187,6 +187,12 @@ namespace aten {
         return clamp(f, T(0), T(1));
     }
 
+    template <class T>
+    inline AT_HOST_DEVICE_API T lerp(T a, T b, float f)
+    {
+        return a * (1.0F - f) + b * f;
+    }
+
     inline AT_HOST_DEVICE_API bool isInvalid(float f)
     {
 #ifdef __CUDACC__

@@ -82,45 +82,6 @@ aten::vec3 AngularMap::GetDirFromXY(
     return dir;
 }
 
-aten::vec4 AngularMap::At(
-    float u, float v,
-    CubemapFace face/*= CubemapFace::Num*/) const
-{
-    std::ignore = face;
-
-    const auto color = tex_->at(u, v);
-    return color;
-}
-
-void AngularMap::Put(
-    const aten::vec4& color,
-    std::int32_t x, std::int32_t y,
-    CubemapFace face/*= CubemapFace::Num*/)
-{
-    AT_ASSERT(tex_);
-
-    if (tex_) {
-        const auto width = static_cast<float>(tex_->width());
-        const auto height = static_cast<float>(tex_->height());
-        const auto u = x / width;
-        const auto v = y / height;
-        tex_->put(color, u, v);
-    }
-}
-
-bool AngularMap::SaveAsPng(std::string_view filename) const
-{
-    AT_ASSERT(tex_);
-
-    bool result = false;
-
-    if (tex_) {
-        result = tex_->exportAsPNG(filename.data());
-    }
-
-    return result;
-}
-
 bool AngularMap::IsValidPos(int32_t x, int32_t y) const
 {
     // We assume the width is equal with height;

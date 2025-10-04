@@ -43,41 +43,9 @@ namespace aten
     public:
         void init(int32_t width, int32_t height, int32_t channels);
 
-        vec4 at(float u, float v) const
-        {
-            int32_t iu = static_cast<int32_t>(u * (width_ - 1));
-            int32_t iv = static_cast<int32_t>(v * (height_ - 1));
+        vec4 at(float u, float v) const;
 
-            // NOTE:
-            // Wrap as repeat.
-            const auto x = NormalizeToWrapRepeat(iu, width_ - 1);
-            const auto y = NormalizeToWrapRepeat(iv, height_ - 1);
-
-            uint32_t pos = y * width_ + x;
-
-            const auto clr = m_colors[pos];
-
-            // TODO
-            // Note use alpha channel...
-            uint32_t ch = std::min<uint32_t>(m_channels, 4);
-
-            vec4 ret;
-
-            if (ch >= 4) {
-                ret[3] = clr[3];
-            }
-            if (ch >= 3) {
-                ret[2] = clr[2];
-            }
-            if (ch >= 2) {
-                ret[1] = clr[1];
-            }
-            if (ch >= 1) {
-                ret[0] = clr[0];
-            }
-
-            return ret;
-        }
+        vec4 AtWithBilinear(float u, float v) const;
 
         void put(
             const aten::vec4& color,
@@ -193,6 +161,8 @@ namespace aten
         {
             m_id = static_cast<decltype(m_id)>(id);
         }
+
+        inline vec4 AtByXY(int32_t x, int32_t y) const;
 
         static int32_t NormalizeToWrapRepeat(int32_t value, int32_t wrap_size)
         {

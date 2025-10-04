@@ -33,6 +33,94 @@ namespace aten
         return ret;
     }
 
+    vec4 texture::AtByXY(int32_t x, int32_t y) const
+    {
+        uint32_t pos = y * width_ + x;
+
+        const auto clr = m_colors[pos];
+
+        // TODO
+        // Note use alpha channel...
+        uint32_t ch = std::min<uint32_t>(m_channels, 4);
+
+        vec4 ret;
+
+        if (ch >= 4) {
+            ret[3] = clr[3];
+        }
+        if (ch >= 3) {
+            ret[2] = clr[2];
+        }
+        if (ch >= 2) {
+            ret[1] = clr[1];
+        }
+        if (ch >= 1) {
+            ret[0] = clr[0];
+        }
+
+        return ret;
+    }
+
+    vec4 texture::at(float u, float v) const
+    {
+        int32_t iu = static_cast<int32_t>(u * (width_ - 1));
+        int32_t iv = static_cast<int32_t>(v * (height_ - 1));
+
+        // NOTE:
+        // Wrap as repeat.
+        const auto x = NormalizeToWrapRepeat(iu, width_ - 1);
+        const auto y = NormalizeToWrapRepeat(iv, height_ - 1);
+
+        return AtByXY(x, y);
+    }
+
+    vec4 texture::AtWithBilinear(float u, float v) const
+    {
+        const float fx = u * (width_ - 1);
+        const float fy = v * (height_ - 1);
+
+        // NOTE:
+        // 0.5 is center of texel.
+
+        float frac_x = fx - 0.5F - static_cast<int32_t>(fx);
+        float frac_y = fy - 0.5F - static_cast<int32_t>(fy);
+
+        const auto x = static_cast<int32_t>(fx);
+        const auto y = static_cast<int32_t>(fy);
+
+        auto nearest_x = x;
+        if (frac_x >= 0.5F) {
+            nearest_x = x + 1;
+        }
+        else {
+            nearest_x = x - 1;
+            frac_x = 1.0F - frac_x;
+        }
+
+        auto nearest_y = y;
+        if (frac_y >= 0.5F) {
+            nearest_y = y + 1;
+        }
+        else {
+            nearest_y = y - 1;
+            frac_y = 1.0F - frac_y;
+        }
+
+        nearest_x = aten::clamp(nearest_x, 0, width_ - 1);
+        nearest_y = aten::clamp(nearest_y, 0, height_ - 1);
+
+        const auto c00 = AtByXY(x, y);
+        const auto c10 = AtByXY(nearest_x, y);
+        const auto c01 = AtByXY(x, nearest_y);
+        const auto c11 = AtByXY(nearest_x, nearest_y);
+
+        const auto c0 = aten::lerp(c00, c10, frac_x);
+        const auto c1 = aten::lerp(c01, c11, frac_x);
+        const auto c = aten::lerp(c0, c1, frac_y);
+
+        return c;
+    }
+
     void texture::init(int32_t width, int32_t height, int32_t channels)
     {
         if (m_colors.empty()) {

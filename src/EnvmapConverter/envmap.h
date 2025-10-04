@@ -11,7 +11,6 @@ enum class EnvMapType : int {
     Angular,
     Mirror,
     CubeMap,
-    CrossMap,
     Invalid,
 };
 
@@ -107,6 +106,35 @@ public:
 
     template<typename TEnvMap>
     static TEnvMap* Create(std::int32_t width, std::int32_t height);
+
+    aten::vec4 At(
+        float u, float v,
+        CubemapFace face = CubemapFace::Num) const override;
+
+    void Put(
+        const aten::vec4& color,
+        std::int32_t x, std::int32_t y,
+        CubemapFace face = CubemapFace::Num) override;
+
+    bool SaveAsPng(std::string_view filename) const override;
+
+    int32_t width() const override
+    {
+        AT_ASSERT(tex_);
+        if (!tex_) {
+            return 0;
+        }
+        return tex_->width();
+    }
+
+    int32_t height() const override
+    {
+        AT_ASSERT(tex_);
+        if (!tex_) {
+            return 0;
+        }
+        return tex_->height();
+    }
 
 protected:
     std::shared_ptr<aten::texture> tex_;

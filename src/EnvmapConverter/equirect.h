@@ -23,33 +23,4 @@ public:
     aten::vec3 GetDirFromXY(
         int32_t x, int32_t y,
         CubemapFace face = CubemapFace::Num) const override final;
-
-    aten::vec4 At(
-        float u, float v,
-        CubemapFace face = CubemapFace::Num) const override final;
-
-    void Put(
-        const aten::vec4& color,
-        std::int32_t x, std::int32_t y,
-        CubemapFace face = CubemapFace::Num) override final;
-
-    bool SaveAsPng(std::string_view filename) const override final;
-
-    int32_t width() const override final
-    {
-        AT_ASSERT(tex_);
-        if (!tex_) {
-            return 0;
-        }
-        return tex_->width();
-    }
-
-    int32_t height() const override final
-    {
-        AT_ASSERT(tex_);
-        if (!tex_) {
-            return 0;
-        }
-        return tex_->height();
-    }
 };

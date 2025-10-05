@@ -124,7 +124,7 @@ public:
         }
 
         if (cmd.exist("height")) {
-            args_.width = cmd.get<int32_t>("height");
+            args_.height = cmd.get<int32_t>("height");
         }
         else {
             if (args_.out_type == EnvMapType::Equirect) {
@@ -169,7 +169,7 @@ int32_t main(int32_t argc, char* argv[])
         AT_ASSERT(false);
         return 1;
     }
-#else
+#elif 0
     // for debug
     std::array args = {
         "EnvmapConverter",
@@ -187,6 +187,78 @@ int32_t main(int32_t argc, char* argv[])
     if (!app->Run()) {
         AT_ASSERT(false);
         return 1;
+    }
+#else
+    // The equirect image is the master.
+    // And, we convert from the equirect image to other types.
+    // So, we have to list the equirect image first.
+    // There is not master for other types. The images are generated from the equirect image on the fly.
+    // So, the listed image files names are based on the equirect.
+    constexpr std::array datas = {
+        std::make_tuple(EnvMapType::Equirect, "equirect", "sphere_map_sample.png"),
+        std::make_tuple(EnvMapType::CubeMap, "cube", "cube_from_equirect.png"),
+        std::make_tuple(EnvMapType::Mirror, "mirror", "mirror_from_equirect.png"),
+        std::make_tuple(EnvMapType::Angular, "angular", "angular_from_equirect.png")
+    };
+
+    std::array args = {
+        "EnvmapConverter",
+        "-i", "sphere_map_sample.png",
+        "--in_type", "equirect",
+        "-o", "result.png",
+        "--out_type", "cube",
+        "-w", "512",
+        "-h", "512",
+    };
+
+    for (size_t i = 0; i < datas.size(); i++) {
+        const auto& in_data = datas[i];
+
+        const auto in_type_as_str = std::get<1>(in_data);
+
+        for (size_t n = 0; n < datas.size(); n++) {
+            if (n == i) {
+                continue;
+            }
+
+            const auto& out_data = datas[n];
+
+            const auto out_type = std::get<0>(out_data);
+
+            // Input.
+            args[2] = std::get<2>(in_data);
+            args[4] = in_type_as_str;
+
+            // Output.
+            args[8] = std::get<1>(out_data);;
+
+            std::string output(std::get<1>(out_data));
+            output += "_from_";
+            output += in_type_as_str;
+            output += ".png";
+
+            if (out_type == EnvMapType::Equirect) {
+                // width, height
+                args[10] = "1000";
+                args[12] = "500";
+            }
+            else {
+                // width, height
+                args[10] = "512";
+                args[12] = "512";
+            }
+
+            args[6] = output.data();
+
+            if (!app->ParseArgs(args.size(), args.data())) {
+                AT_ASSERT(false);
+                return 1;
+            }
+            if (!app->Run()) {
+                AT_ASSERT(false);
+                return 1;
+            }
+        }
     }
 #endif
 

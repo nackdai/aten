@@ -18,5 +18,7 @@ public:
         int32_t x, int32_t y,
         CubemapFace face = CubemapFace::Num) const override final;
 
+    aten::vec4 GetColorFromDir(const aten::vec3& dir) const override final;
+
     bool IsValidPos(int32_t x, int32_t y) const override final;
 };

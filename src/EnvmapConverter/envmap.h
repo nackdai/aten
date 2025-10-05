@@ -66,6 +66,12 @@ public:
         float u, float v,
         CubemapFace face = CubemapFace::Num) const = 0;
 
+    virtual aten::vec4 GetColorFromDir(const aten::vec3& dir) const
+    {
+        const auto [u, v, face] = GetUVFromDir(dir);
+        return At(u, v, face);
+    }
+
     virtual void Put(
         const aten::vec4& color,
         int32_t x, int32_t y,

@@ -90,9 +90,8 @@ void EnvMap::Convert(
                 }
 
                 const auto dir = dst->GetDirFromXY(x, y, static_cast<CubemapFace>(face));
-                const auto [u, v, target_face] = src->GetUVFromDir(dir);
 
-                const auto color = src->At(u, v, target_face);
+                const auto color = src->GetColorFromDir(dir);
                 dst->Put(color, x, y, static_cast<CubemapFace>(face));
             }
         }
@@ -143,7 +142,8 @@ aten::vec4 SingleEnvMap::At(
 {
     std::ignore = face;
 
-    const auto color = tex_->at(u, v);
+    //const auto color = tex_->at(u, v);
+    const auto color = tex_->AtWithBilinear(u, v);
     return color;
 }
 

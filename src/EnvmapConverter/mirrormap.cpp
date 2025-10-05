@@ -100,6 +100,17 @@ aten::vec3 MirrorMap::GetDirFromXY(
     return dir;
 }
 
+aten::vec4 MirrorMap::GetColorFromDir(const aten::vec3& dir) const
+{
+    if (dir.z <= -1.0F) {
+        // The direction is at the behind of the mirror ball.
+        return aten::vec4();
+    }
+
+    const auto [u, v, face] = GetUVFromDir(dir);
+    return At(u, v, face);
+}
+
 bool MirrorMap::IsValidPos(int32_t x, int32_t y) const
 {
     // We assume the width is equal with height;

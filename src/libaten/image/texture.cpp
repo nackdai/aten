@@ -76,6 +76,9 @@ namespace aten
 
     vec4 texture::AtWithBilinear(float u, float v) const
     {
+        // NOTE:
+        // https://learn.microsoft.com/en-us/windows/uwp/graphics-concepts/bilinear-texture-filtering
+
         const float fx = u * (width_ - 1);
         const float fy = v * (height_ - 1);
 

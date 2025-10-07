@@ -130,7 +130,7 @@ optional arguments:
 e.g.
 
 ```bash
-python3 ./tools/extract_file_from_vs_proj.py -v vs2019/libaten.vcxproj -o libaten.txt -b src/libaten
+python3 ./tools/extract_file_from_vs_proj.py -v vs_projects/libaten.vcxproj -o libaten.txt -b src/libaten
 ```
 
 ## install_cuda.ps1

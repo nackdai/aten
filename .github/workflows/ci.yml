@@ -11,7 +11,7 @@ on:
       - '.dockerignore'
       - 'asset/**'
       - 'gallery/**'
-      - 'vs2019/**'
+      - 'vs_projects/**'
       - '**.md'
   push:
     branches:

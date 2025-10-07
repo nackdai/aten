@@ -137,7 +137,7 @@ def dump_list(list: list[str]):
 def main():
     # NOTE:
     # e.g.
-    # python3 ./tools/extract_file_from_vs_proj.py -v vs2019/libaten.vcxproj -o libaten.txt -b src/libaten  # noqa: E501
+    # python3 ./tools/extract_file_from_vs_proj.py -v vs_projects/libaten.vcxproj -o libaten.txt -b src/libaten  # noqa: E501
     parser = argparse.ArgumentParser(
         description="Extract compile files from vs proj file",
     )

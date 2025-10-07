@@ -7,8 +7,8 @@ usage() {
   cat <<EOF 1>&2
 Usage: $0 <OPTIONS>
   -b <build_context>         : Docker build context.
-  -c <cuda_version>          : CUDA version. Default is 12.5.1
-  -u <ubuntu_version>        : Ubuntu version. Default is 22.04
+  -c <cuda_version>          : CUDA version. Default is "12.5.1"
+  -u <ubuntu_version>        : Ubuntu version. Default is "22.04"
   -p <image_tag_prefix>      : Prefix for image tag
   --clear_cache              : Build with clearing cache.
 

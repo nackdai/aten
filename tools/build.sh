@@ -3,6 +3,8 @@
 set -eu
 set -o pipefail
 
+CLANG_VERSION=17
+
 usage() {
   cat <<EOF 1>&2
 Usage: $0 [Options]
@@ -55,10 +57,10 @@ echo "Compute Capability: [${compute_capability}]"
 
 cmake_cmd="cmake \
   -D CMAKE_BUILD_TYPE=${build_type} \
-  -D CMAKE_CXX_COMPILER=/usr/bin/clang++-12 \
-  -D CMAKE_C_COMPILER=/usr/bin/clang-12 \
+  -D CMAKE_CXX_COMPILER=/usr/bin/clang++-${CLANG_VERSION} \
+  -D CMAKE_C_COMPILER=/usr/bin/clang-${CLANG_VERSION} \
   -D CMAKE_EXPORT_COMPILE_COMMANDS=ON \
-  -D CUDA_HOST_COMPILER=/usr/bin/clang-12 \
+  -D CUDA_HOST_COMPILER=/usr/bin/clang-${CLANG_VERSION} \
   -D CUDA_TARGET_COMPUTE_CAPABILITY=${compute_capability} \
   -G Ninja .."
 

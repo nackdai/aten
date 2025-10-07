@@ -14,7 +14,9 @@ set(glew_INCLUDE_DIRECTORIES
 set(nanovdb_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_SOURCE_DIR}/openvdb/nanovdb CACHE PATH "nanovdb path")
 
+option(CMAKE_BUILD_WITH_INSTALL_RPATH "" OFF)
 add_subdirectory(glew/build/cmake)
+
 # https://www.glfw.org/docs/latest/compile_guide.html#compile_deps_x11
 # Need to install xorg-dev
 add_subdirectory(glfw)
@@ -82,3 +84,6 @@ option(ASSIMP_BUILD_MMD_IMPORTER "" OFF)
 # clang newer than 13 deals with warnings "ordered-compare-function-pointers" "unused-but-set-variable" as error.
 # In order to disable it, specify -Wno-error=ordered-compare-function-pointers as compiler option.
 add_subdirectory(assimp)
+
+# Ignore the case that all warnings are treated as the error in assimp.
+target_compile_options(assimp PRIVATE -Wno-error)

@@ -1,5 +1,7 @@
-ARG from=nvidia/cudagl:11.4.2-devel-ubuntu20.04
+ARG from=ghcr.io/nackdai/aten/nvidia/cudagl:12.5.1-devel-ubuntu22.04
 FROM ${from}
+
+ARG ubuntu_codename="jammy"
 
 ENV NVIDIA_VISIBLE_DEVICES ${NVIDIA_VISIBLE_DEVICES:-all}
 ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
@@ -34,11 +36,11 @@ RUN apt-get update && apt-get install -y \
 # NOTE: When we specify 'all' option, installing some of packages is failed.
 
 # NOTE:
-# llvm.sh seems not to be relable...
+# llvm.sh seems not to be reliable...
 # https://github.com/llvm/llvm-project/issues/54676
-ARG clang_version=12
+ARG clang_version=17
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
-    && add-apt-repository -y "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-${clang_version} main" \
+    && add-apt-repository -y "deb http://apt.llvm.org/${ubuntu_codename}/ llvm-toolchain-${ubuntu_codename}-${clang_version} main" \
     && apt-get update -y \
     && apt-get install -y \
     libllvm${clang_version} \

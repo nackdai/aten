@@ -17,7 +17,7 @@ git submodule update --init --recursive
     - The first argument can be `Debug`, `Release`, etc.
     - The second argument can be `Community`, `Enterprise`, `BuildTools`, etc.
     - The defaults are `Release` and `Community`.
-3. Open `aten/vs2019/aten.sln`.
+3. Open `aten/vs_projects/aten.sln`.
 4. Build the projects with the `x64` configuration (not `x86`).
 
 The confirmed environment is `Visual Studio 2022` on Windows 10.

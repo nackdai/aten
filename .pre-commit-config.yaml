@@ -1,5 +1,5 @@
 fail_fast: true
-exclude: (.*3rdparty/.*|.*vs2019/.*|.*asset/.*|.*gallery/.*)
+exclude: (.*3rdparty/.*|.*vs_projects/.*|.*asset/.*|.*gallery/.*)
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

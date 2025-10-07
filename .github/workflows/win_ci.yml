@@ -53,6 +53,10 @@ jobs:
             tools/install_cuda.ps1
             .github/workflows/win_ci.yml
 
+      - name: Display changed files
+        run: |
+          echo "::notice::Changed files: ${{ steps.changed_files.outputs.changed_files }}"
+
   ci_on_windows:
     name: ci on windows
     runs-on: windows-2022

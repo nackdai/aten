@@ -3,6 +3,7 @@
 set -eu
 set -o pipefail
 
+THIS_DIR="$(cd "$(dirname "$0")" && pwd)"
 CLANG_VERSION=17
 
 usage() {
@@ -80,12 +81,16 @@ else
   python3 ./tools/docker_operator.py -i "${docker_image}" -n "${CONTAINER_NAME}" -c "mkdir -p build && cd build && ${cmake_cmd}"
 fi
 
-COMPILE_COMMANDS_JSON="compile_commands.json"
+# NOTE:
+# The element "directory" of the item is the same as the directory where cmake is run.
+# And, the content of "directory" and the directory where compile_commands.json is located must be same.
+# So, specify the directory where cmake is run to run clang-tidy.
+COMPILE_COMMANDS_JSON="./build/compile_commands.json"
 
 # Just exporting compile_commands.json, so finish here.
 if "${will_export_compile_commands_json}"; then
-  if [ -e "${PWD}/build/${COMPILE_COMMANDS_JSON}" ]; then
-    mv -f "${PWD}/build/${COMPILE_COMMANDS_JSON}" "${PWD}/${COMPILE_COMMANDS_JSON}"
+  if [ -e "${COMPILE_COMMANDS_JSON}" ]; then
+    echo "Generated ${COMPILE_COMMANDS_JSON}"
     exit 0
   else
     echo "Not generated ${COMPILE_COMMANDS_JSON}"

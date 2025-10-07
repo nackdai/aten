@@ -43,25 +43,29 @@ def is_target_file(file: str, target_files: list(str)) -> bool:
 
 
 def exec_clang_tidy(
-    file: str, header_filter: str, will_fix: bool  # noqa: FBT001
+    file: str,
+    header_filter: str,
+    extra_args: list[str]
 ) -> int:
     """Execute clang_tidy.
 
     Args:
         file: File for clang_tidy.
         header_filter: Header filter to be passed to clang_tidy "--header-filter" option.
-        will_fix: If the error happens, the error is fixed.
+        extra_args: Extra arguments passed to clang-tidy directly.
 
     Returns:
         If clang-tidy exits properly, returns 0. Otherwise, returns non 0.
     """
-    clang_tidy_cmd = ["clang-tidy-12", file]
-
-    if will_fix:
-        clang_tidy_cmd.append("--fix-errors")
+    clang_tidy_cmd = ["clang-tidy-17", file]
 
     if header_filter:
         clang_tidy_cmd.append(f"--header-filter={header_filter}")
+
+    for arg in extra_args:
+        clang_tidy_cmd.append(arg)
+
+    print(f"Executing: {' '.join(clang_tidy_cmd)}")
 
     proc = subprocess.Popen(
         clang_tidy_cmd,
@@ -77,14 +81,13 @@ def exec_clang_tidy(
 
     return proc.returncode
 
-
 def exec_clang_tidy_by_compile_commands_json(
     compile_commands_json: str,
     ignore_words: str,
     header_filter: str,
-    will_fix: bool,  # noqa: FBT001
-    fail_fast: bool,  # noqa: FBT001
+    fail_fast: bool,    # noqa: FBT001
     target_files: list[str],
+    extra_args: list[str],
 ) -> None:
     """Execute clang_tidy based on compile_commands.json file.
 
@@ -92,9 +95,9 @@ def exec_clang_tidy_by_compile_commands_json(
         compile_commands_json: Path to compile_commands.json file.
         ignore_words: Word list to be ignored.
         header_filter: Header filter to be passed to clang_tidy "--header-filter" option.
-        will_fix: If the error happens, the error is fixed.
         fail_fast: If the error happens, stop and fail immediately.
-        target_file: List of target files to run clang-tidy.
+        target_files: List of target files to run clang-tidy.
+        extra_args: Extra arguments passed to clang-tidy directly.
     """
     with open(compile_commands_json) as f:
         compilation_db = json.load(f)
@@ -110,7 +113,7 @@ def exec_clang_tidy_by_compile_commands_json(
             is_target = is_target_file(file, target_files)
 
             if is_target:
-                result = exec_clang_tidy(file, header_filter, will_fix)
+                result = exec_clang_tidy(file, header_filter, extra_args)
                 if result != 0 and fail_fast:
                     return
 
@@ -143,11 +146,11 @@ def main():
         default=[],
     )
     parser.add_argument(
-        "-f",
-        "--fix",
-        action="store_true",
-        help="Fix code",
-        default=False,
+        "-c",
+        "--compile_commands_json",
+        type=str,
+        help="Path to compile_commands.json. Default is ./compile_commands.json",
+        default="./compile_commands.json",
     )
     parser.add_argument(
         "--fail_fast",
@@ -155,6 +158,10 @@ def main():
         help="If error hapens, fails immediately",
         default=False,
     )
+    parser.add_argument(
+        "extra_args",
+        nargs=argparse.REMAINDER,
+        help="Arguments passed to clang-tidy directly",)
     args = parser.parse_args()
 
     # Compile ignore words.
@@ -165,21 +172,25 @@ def main():
         else:
             ignore_words += f"|{word}"
 
-    compile_commands_json = "compile_commands.json"
+    compile_commands_json = args.compile_commands_json
 
     # compile_commands.json need to be generated beforehand.
     if not os.path.exists(compile_commands_json):
         print(f"No {compile_commands_json}. Need to generate beforehand")
         sys.exit(1)
 
+    extra_args = args.extra_args
+    if extra_args and extra_args[0] == "--":
+        extra_args = extra_args[1:]
+
     try:
         exec_clang_tidy_by_compile_commands_json(
             compile_commands_json=compile_commands_json,
             ignore_words=ignore_words,
             header_filter=args.header_filter,
-            will_fix=args.fix,
             fail_fast=args.fail_fast,
             target_files=args.target_files,
+            extra_args=extra_args,
         )
     except KeyboardInterrupt:
         sys.exit(1)

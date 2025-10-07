@@ -3,15 +3,32 @@
 set -eu
 set -o pipefail
 
+THIS_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+docker_image=""
+header_filter="${PWD}/src"
+will_fix=false
+fail_fast=false
+cuda_arch="75"
+target_dir=""
+dir_to_compile_commands_json="${THIS_DIR}/../build"
+git_diff_commits=()
+
 usage() {
   cat <<EOF 1>&2
 Usage: $0 [Options]
 Options:
-  -d <docker_image>    : docker image to run build. Required.
-  -h <header_filter>   : Header filter. If nothing is specified, "src" is specified.
-  -g <commit> <commit> : Specify git diff files as clang-tidy target files.
-  -f                   : Fix code.
-  --fail_fast          : If the error happens, stop immediately
+  -d <docker_image>     : docker image to run build. Required.
+  -h <header_filter>    : Header filter. If nothing is specified, "src" is specified.
+  -g <commit> <commit>  : Specify git diff files as clang-tidy target files.
+  -t <target_dir>       : Specify target directory.
+                          If nothing is specified, all files in compile_commands.json are targeted.
+  -c <cuda_arch>        : Specify CUDA architecture.
+                          If nothing is specified, "${cuda_arch}(=7.5)" is specified.
+  -p <compile_commands.json located directory> : Specify directory to locate compile_commands.json.
+                                                 Default is "${dir_to_compile_commands_json}"
+  -f                    : Fix code.
+  --fail_fast           : If the error happens, stop immediately
 ex) $0 -d aten_dev:latest -g -h ${PWD}/src --fail_fast
 EOF
   exit 1
@@ -19,24 +36,18 @@ EOF
 
 CONTAINER_NAME=""
 kill_container() {
-  local contaner_name="${1}"
-  docker kill "${contaner_name}" >/dev/null 2>&1 || true
-  docker container rm "${contaner_name}" >/dev/null 2>&1 || true
+  local container_name="${1}"
+  docker kill "${container_name}" >/dev/null 2>&1 || true
+  docker container rm "${container_name}" >/dev/null 2>&1 || true
 }
 
 #trap 'kill_container ${CONTAINER_NAME}' EXIT ERR
-
-docker_image=""
-header_filter="${PWD}/src"
-will_fix=false
-fail_fast=false
-declare -a git_diff_commits=()
 
 # NOTE:
 # Long option
 # https://qiita.com/akameco/items/0e932d8ec372b87ccb34
 
-while getopts "d:h:gf-:" opt; do
+while getopts "d:h:t:c:p:gf-:" opt; do
   case "${opt}" in
     -)
       case "${OPTARG}" in
@@ -51,9 +62,12 @@ while getopts "d:h:gf-:" opt; do
     h)
       header_filter="${OPTARG}"
       ;;
+    t)
+      target_dir="${OPTARG}"
+      ;;
     g)
-      # OPTING causes unbound variable error in get opt. It is caused by "set -u".
-      # In order to suprress the error temporarily, call "set +u" here.
+      # OPTIND causes unbound variable error in get opt. It is caused by "set -u".
+      # In order to suppress the error temporarily, call "set +u" here.
       set +u
 
       # NOTE:
@@ -69,6 +83,12 @@ while getopts "d:h:gf-:" opt; do
     f)
       will_fix=true
       ;;
+    c)
+      cuda_arch="${OPTARG}"
+      ;;
+    p)
+      dir_to_compile_commands_json="${OPTARG}"
+      ;;
     \?)
       usage
       ;;
@@ -83,13 +103,12 @@ fi
 
 IGNORE_WORDS=("3rdparty" "imgui" "unittest")
 
-COMPILE_COMMANDS_JSON="compile_commands.json"
+COMPILE_COMMANDS_JSON="${dir_to_compile_commands_json}/compile_commands.json"
 
 # If compile_commands.json doesn't exist, generate.
 if [ ! -e "${COMPILE_COMMANDS_JSON}" ]; then
-  this_script_path="$(dirname -- "${BASH_SOURCE[0]}")"
-  if [ -e "${this_script_path}/build.sh" ]; then
-    "${this_script_path}"/build.sh -d "${docker_image}" -e
+  if [ -e "${THIS_DIR}/build.sh" ]; then
+    ${THIS_DIR}/build.sh -d "${docker_image}" -e
   else
     echo "No script to build ${COMPILE_COMMANDS_JSON}"
     exit 1
@@ -100,7 +119,7 @@ declare -a target_files=()
 
 if ((${#git_diff_commits[*]} > 0)); then
   if ((${#git_diff_commits[*]} != 2)); then
-    echo "2 commits need to be speified to -g option"
+    echo "2 commits need to be specified to -g option"
     exit 1
   fi
   # Get diff files by added or modified.
@@ -111,17 +130,28 @@ fi
 # In order to pass as arguments with option, insert option "-t" at top.
 if ((${#target_files[*]} > 0)); then
   target_files=("-t" "${target_files[@]:0}")
+elif [[ -d "${target_dir}" ]]; then
+  readarray -d '' target_files < <(find "${target_dir}" -name *.cpp -type f -print0)
 fi
 
-fix_option=""
-if "${will_fix}"; then
-  fix_option="-f"
-fi
-
-fail_fast_option=""
+options=()
 if "${fail_fast}"; then
-  fail_fast_option="--fail_fast"
+  options+=("--fail_fast")
 fi
+
+extra_args=()
+if "${will_fix}"; then
+  extra_args+=("--fix")
+fi
+
+# Specify compile_commands.json located directory.
+# The element "directory" of the item is the same as the directory where cmake is run.
+# And, the content of "directory" and the directory where compile_commands.json is located must be same.
+# So, specify the directory where cmake is run to run clang-tidy.
+extra_args+=("-p ${THIS_DIR}/../build")
+
+# Not to use OpenMP because clang-tidy seems not to support it well.
+extra_args+=("--extra-arg=-fno-openmp")
 
 # Treat last element of docker image name as container name.
 
@@ -140,8 +170,9 @@ docker exec "${CONTAINER_NAME}" bash -c \
   "python3 ./tools/run_clang_tidy.py \
     -i ${IGNORE_WORDS[*]} \
     --header_filter ${header_filter} \
-    ${fix_option} \
-    ${fail_fast_option} \
-    ${target_files[*]}"
+    -c ${COMPILE_COMMANDS_JSON} \
+    -t ${target_files[*]} \
+    ${options[*]} \
+    -- ${extra_args[*]}"
 
-kill_container "${CONTAINER_NAME}"
+#kill_container "${CONTAINER_NAME}"

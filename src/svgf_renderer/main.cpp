@@ -97,7 +97,7 @@ public:
 #endif
 
         {
-            auto aabb = scene_.getAccel()->getBoundingbox();
+            auto aabb = scene_.getAccel()->GetBoundingbox();
             auto d = aabb.getDiagonalLenght();
             renderer_.setHitDistanceLimit(d * 0.25f);
 
@@ -205,7 +205,7 @@ public:
 
         if (is_show_aabb_)
         {
-            rasterizer_aabb_.drawAABB(
+            rasterizer_aabb_.DrawAABB(
                 &camera_,
                 scene_.getAccel());
         }

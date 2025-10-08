@@ -14,22 +14,22 @@ namespace aten
 {
     void bvhnode::itemChanged(const hitable* sender)
     {
-        AT_ASSERT(m_item == sender);
+        AT_ASSERT(item_ == sender);
 
-        if (m_bvh) {
-            auto oldBox = m_aabb;
+        if (bvh_) {
+            auto oldBox = aabb_;
 
-            m_aabb = sender->getBoundingbox();
+            aabb_ = sender->GetBoundingbox();
 
             // TODO
-            bool isEqual = (memcmp(&oldBox, &m_aabb, sizeof(m_aabb)) == 0);
+            bool isEqual = (memcmp(&oldBox, &aabb_, sizeof(aabb_)) == 0);
 
             if (!isEqual) {
-                if (m_parent) {
-                    refitChildren(m_parent, true);
+                if (parent_) {
+                    refitChildren(parent_, true);
                 }
 
-                m_bvh->addToRefit(this);
+                bvh_->AddToRefit(this);
             }
         }
     }
@@ -37,17 +37,17 @@ namespace aten
     void bvhnode::refitChildren(bvhnode* node, bool propagate)
     {
         do {
-            auto oldbox = node->getBoundingbox();
+            auto oldbox = node->GetBoundingbox();
 
             const auto& left = node->getLeft();
             const auto& right = node->getRight();
 
             // Start with the left box.
-            auto newbox = left->getBoundingbox();
+            auto newbox = left->GetBoundingbox();
 
             // Expand.
             if (right) {
-                newbox.expand(right->getBoundingbox());
+                newbox.expand(right->GetBoundingbox());
             }
 
             // Set new box.
@@ -64,7 +64,7 @@ namespace aten
             return float(0);
         }
 
-        auto ret = node->getBoundingbox().computeSurfaceArea();
+        auto ret = node->GetBoundingbox().computeSurfaceArea();
         return ret;
     }
 
@@ -100,21 +100,21 @@ namespace aten
 
     void bvhnode::tryRotate(bvh* bvh)
     {
-        AT_ASSERT(m_bvh == bvh);
+        AT_ASSERT(bvh_ == bvh);
 
-        if (bvh->getRoot() == this) {
+        if (bvh->GetRoot() == this) {
             return;
         }
 
-        auto left = m_left;
-        auto right = m_right;
+        auto left = left_;
+        auto right = right_;
 
         // If we are not a grandparent, then we can't rotate, so queue our parent and bail out.
         if ((left && left->isLeaf())
             && (right && right->isLeaf()))
         {
-            if (m_parent) {
-                bvh->addToRefit(m_parent);
+            if (parent_) {
+                bvh->AddToRefit(parent_);
                 return;
             }
         }
@@ -170,8 +170,8 @@ namespace aten
                     opts[r] = Opt(AT_MATH_INF, Rot::None);
                 }
                 else {
-                    auto box = left->getBoundingbox();
-                    box.expand(right->getRight()->getBoundingbox());
+                    auto box = left->GetBoundingbox();
+                    box.expand(right->getRight()->GetBoundingbox());
 
                     auto s = computeSurfaceArea(right->getLeft()) + box.computeSurfaceArea();
 
@@ -188,8 +188,8 @@ namespace aten
                     opts[r] = Opt(AT_MATH_INF, Rot::None);
                 }
                 else {
-                    auto box = left->getBoundingbox();
-                    box.expand(right->getLeft()->getBoundingbox());
+                    auto box = left->GetBoundingbox();
+                    box.expand(right->getLeft()->GetBoundingbox());
 
                     auto s = computeSurfaceArea(right->getRight()) + box.computeSurfaceArea();
 
@@ -206,8 +206,8 @@ namespace aten
                     opts[r] = Opt(AT_MATH_INF, Rot::None);
                 }
                 else {
-                    auto box = right->getBoundingbox();
-                    box.expand(left->getRight()->getBoundingbox());
+                    auto box = right->GetBoundingbox();
+                    box.expand(left->getRight()->GetBoundingbox());
 
                     auto s = computeSurfaceArea(left->getLeft()) + box.computeSurfaceArea();
 
@@ -224,8 +224,8 @@ namespace aten
                     opts[r] = Opt(AT_MATH_INF, Rot::None);
                 }
                 else {
-                    auto box = right->getBoundingbox();
-                    box.expand(left->getLeft()->getBoundingbox());
+                    auto box = right->GetBoundingbox();
+                    box.expand(left->getLeft()->GetBoundingbox());
 
                     auto s = computeSurfaceArea(left->getRight()) + box.computeSurfaceArea();
 
@@ -244,11 +244,11 @@ namespace aten
                     opts[r] = Opt(AT_MATH_INF, Rot::None);
                 }
                 else {
-                    auto box0 = right->getRight()->getBoundingbox();
-                    box0.expand(left->getRight()->getBoundingbox());
+                    auto box0 = right->getRight()->GetBoundingbox();
+                    box0.expand(left->getRight()->GetBoundingbox());
 
-                    auto box1 = right->getLeft()->getBoundingbox();
-                    box1.expand(left->getLeft()->getBoundingbox());
+                    auto box1 = right->getLeft()->GetBoundingbox();
+                    box1.expand(left->getLeft()->GetBoundingbox());
 
                     auto s = box0.computeSurfaceArea() + box1.computeSurfaceArea();
 
@@ -264,11 +264,11 @@ namespace aten
                     opts[r] = Opt(AT_MATH_INF, Rot::None);
                 }
                 else {
-                    auto box0 = right->getLeft()->getBoundingbox();
-                    box0.expand(left->getRight()->getBoundingbox());
+                    auto box0 = right->getLeft()->GetBoundingbox();
+                    box0.expand(left->getRight()->GetBoundingbox());
 
-                    auto box1 = left->getLeft()->getBoundingbox();
-                    box1.expand(right->getRight()->getBoundingbox());
+                    auto box1 = left->getLeft()->GetBoundingbox();
+                    box1.expand(right->getRight()->GetBoundingbox());
 
                     auto s = box0.computeSurfaceArea() + box1.computeSurfaceArea();
 
@@ -291,13 +291,13 @@ namespace aten
         // Perform the best rotation.
         if (bestRot.rot == Rot::None) {
             // If the best rotation is no-rotation... we check our parents anyhow..
-            if (m_parent) {
-                bvh->addToRefit(m_parent);
+            if (parent_) {
+                bvh->AddToRefit(parent_);
             }
         }
         else {
-            if (m_parent) {
-                bvh->addToRefit(m_parent);
+            if (parent_) {
+                bvh->AddToRefit(parent_);
             }
 
             auto s = (sa - bestRot.sah) / sa;
@@ -321,53 +321,53 @@ namespace aten
                 // child to grandchild rotations
                 case Rot::L_RL:
                     swap = left;
-                    left = right->m_left;
-                    left->m_parent = this;
-                    right->m_left = swap;
-                    swap->m_parent = right.get();
+                    left = right->left_;
+                    left->parent_ = this;
+                    right->left_ = swap;
+                    swap->parent_ = right.get();
                     refitChildren(right, false);
                     break;
                 case Rot::L_RR:
                     swap = left;
-                    left = right->m_right;
-                    left->m_parent = this;
-                    right->m_right = swap;
-                    swap->m_parent = right.get();
+                    left = right->right_;
+                    left->parent_ = this;
+                    right->right_ = swap;
+                    swap->parent_ = right.get();
                     refitChildren(right, false);
                     break;
                 case Rot::R_LL:
                     swap = right;
-                    right = left->m_left;
-                    right->m_parent = this;
-                    left->m_left = swap;
-                    swap->m_parent = left.get();
+                    right = left->left_;
+                    right->parent_ = this;
+                    left->left_ = swap;
+                    swap->parent_ = left.get();
                     refitChildren(left, false);
                     break;
                 case Rot::R_LR:
                     swap = right;
-                    right = left->m_right;
-                    right->m_parent = this;
-                    left->m_right = swap;
-                    swap->m_parent = left.get();
+                    right = left->right_;
+                    right->parent_ = this;
+                    left->right_ = swap;
+                    swap->parent_ = left.get();
                     refitChildren(left, false);
                     break;
 
                 // grandchild to grandchild rotations
                 case Rot::LL_RR:
-                    swap = left->m_left;
-                    left->m_left = right->m_right;
-                    right->m_right = swap;
-                    left->m_left->m_parent = left.get();
-                    swap->m_parent = right.get();
+                    swap = left->left_;
+                    left->left_ = right->right_;
+                    right->right_ = swap;
+                    left->left_->parent_ = left.get();
+                    swap->parent_ = right.get();
                     refitChildren(left, false);
                     refitChildren(right, false);
                     break;
                 case Rot::LL_RL:
-                    swap = left->m_left;
-                    left->m_left = right->m_left;
-                    right->m_left = swap;
-                    left->m_left->m_parent = left.get();
-                    swap->m_parent = right.get();
+                    swap = left->left_;
+                    left->left_ = right->left_;
+                    right->left_ = swap;
+                    left->left_->parent_ = left.get();
+                    swap->parent_ = right.get();
                     refitChildren(left, false);
                     refitChildren(right, false);
                     break;
@@ -384,7 +384,7 @@ namespace aten
             case Rot::L_RR:
             case Rot::R_LL:
             case Rot::R_LR:
-                this->setDepth(m_depth);
+                this->setDepth(depth_);
                 this->propageteDepthToChildren();
                 break;
             case Rot::None:
@@ -399,26 +399,26 @@ namespace aten
     void bvh::update(const context& ctxt)
     {
         std::vector<bvhnode*> sweepNodes;
-        sweepNodes.reserve(m_refitNodes.size());
+        sweepNodes.reserve(refit_nodes_.size());
 
-        while (!m_refitNodes.empty()) {
+        while (!refit_nodes_.empty()) {
             int32_t maxdepth = -1;
 
-            for (const auto node : m_refitNodes) {
+            for (const auto node : refit_nodes_) {
                 maxdepth = std::max<int32_t>(node->getDepth(), maxdepth);
             }
 
             sweepNodes.clear();
 
-            auto it = m_refitNodes.begin();
+            auto it = refit_nodes_.begin();
 
-            while (it != m_refitNodes.end()) {
+            while (it != refit_nodes_.end()) {
                 auto node = *it;
                 int32_t depth = node->getDepth();
 
                 if (maxdepth == depth) {
                     sweepNodes.push_back(node);
-                    it = m_refitNodes.erase(it);
+                    it = refit_nodes_.erase(it);
                 }
                 else {
                     it++;

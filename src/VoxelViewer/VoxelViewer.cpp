@@ -104,7 +104,7 @@ void VoxelViewer::draw(
     bool isWireframe,
     uint32_t depth)
 {
-    shader_.prepareRender(nullptr, false);
+    shader_.PrepareRender(nullptr, false);
 
     CALL_GL_API(::glEnable(GL_DEPTH_TEST));
     CALL_GL_API(::glEnable(GL_CULL_FACE));
@@ -131,14 +131,14 @@ void VoxelViewer::draw(
 
     aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-    auto hMtxW2C = shader_.getHandle("mtx_W2C");
+    auto hMtxW2C = shader_.GetHandle("mtx_W2C");
     CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtx_W2C.a[0]));
 
     aten::mat4 mtx_L2W;
 
-    auto hMtxL2W = shader_.getHandle("mtx_L2W");
-    auto hColor = shader_.getHandle("color");
-    auto hNormal = shader_.getHandle("normal");
+    auto hMtxL2W = shader_.GetHandle("mtx_L2W");
+    auto hColor = shader_.GetHandle("color");
+    auto hNormal = shader_.GetHandle("normal");
 
     // NOTE
     // Box has 6 rectangles. Rectangle has 2 triangles.

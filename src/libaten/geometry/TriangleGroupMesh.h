@@ -95,7 +95,7 @@ namespace AT_NAME
             return triangles_;
         }
 
-        aten::aabb m_aabb;
+        aten::aabb aabb_;
 
     private:
         std::shared_ptr<material> mtrl_;

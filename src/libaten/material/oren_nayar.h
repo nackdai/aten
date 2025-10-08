@@ -20,7 +20,7 @@ namespace AT_NAME
             aten::texture* roughnessMap = nullptr)
             : material(param, aten::MaterialAttributeDiffuse)
         {
-            setTextures(albedoMap, normalMap, roughnessMap);
+            SetTextures(albedoMap, normalMap, roughnessMap);
         }
 
         OrenNayar(aten::Values& val);

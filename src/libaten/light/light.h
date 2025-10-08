@@ -15,7 +15,7 @@ namespace AT_NAME
     class Light {
     protected:
         Light(aten::LightType type, const aten::LightAttribute& attrib)
-            : m_param(type, attrib)
+            : param_(type, attrib)
         {}
         Light(aten::LightType type, const aten::LightAttribute& attrib, const aten::Values& val);
 
@@ -34,60 +34,60 @@ namespace AT_NAME
 
         void setPos(const aten::vec3& pos)
         {
-            m_param.pos = pos;
+            param_.pos = pos;
         }
 
         void setDir(const aten::vec3& dir)
         {
-            m_param.dir = normalize(dir);
+            param_.dir = normalize(dir);
         }
 
         void setLightColor(const aten::vec3& light_color)
         {
-            m_param.light_color = light_color;
+            param_.light_color = light_color;
         }
 
         const aten::vec3& GetPos() const
         {
-            return m_param.pos.v;
+            return param_.pos.v;
         }
 
         const aten::vec3& GetDir() const
         {
-            return m_param.dir.v;
+            return param_.dir.v;
         }
 
         const aten::vec3& getLightColor() const
         {
-            return m_param.light_color;
+            return param_.light_color;
         }
 
         bool is_singular() const
         {
-            return m_param.attrib.is_singular;
+            return param_.attrib.is_singular;
         }
 
         bool isInfinite() const
         {
-            return m_param.attrib.isInfinite;
+            return param_.attrib.isInfinite;
         }
 
         bool isIBL() const
         {
-            return m_param.attrib.isIBL;
+            return param_.attrib.isIBL;
         }
 
         const aten::LightParameter& param() const
         {
-            return m_param;
+            return param_;
         }
 
         aten::LightParameter& param()
         {
-            return m_param;
+            return param_;
         }
 
     protected:
-        aten::LightParameter m_param;
+        aten::LightParameter param_;
     };
 }

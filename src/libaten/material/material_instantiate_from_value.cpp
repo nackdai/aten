@@ -18,23 +18,23 @@ namespace AT_NAME {
         aten::Values& val)
         : material(type, attrib)
     {
-        m_param.baseColor = val.get("baseColor", m_param.baseColor);
-        m_param.standard.ior = val.get("ior", m_param.standard.ior);
+        param_.baseColor = val.get("baseColor", param_.baseColor);
+        param_.standard.ior = val.get("ior", param_.standard.ior);
 
         auto albedoMap = val.get<texture>("albedoMap");
         auto normalMap = val.get<texture>("normalMap");
 
-        setTextures(albedoMap.get(), normalMap.get(), nullptr);
+        SetTextures(albedoMap.get(), normalMap.get(), nullptr);
     }
 
     MicrofacetBeckman::MicrofacetBeckman(aten::Values& val)
         : material(aten::MaterialType::Beckman, MaterialAttributeMicrofacet, val)
     {
-        m_param.standard.roughness = val.get("roughness", m_param.standard.roughness);
-        m_param.standard.roughness = aten::clamp<float>(m_param.standard.roughness, 0, 1);
+        param_.standard.roughness = val.get("roughness", param_.standard.roughness);
+        param_.standard.roughness = aten::clamp<float>(param_.standard.roughness, 0, 1);
 
         auto roughnessMap = val.get<texture>("roughnessmap");
-        m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
+        param_.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
     }
 
     DisneyBRDF::DisneyBRDF(aten::Values& val)
@@ -42,19 +42,19 @@ namespace AT_NAME {
     {
         // TODO
         // Clamp parameters.
-        m_param.standard.subsurface = val.get("subsurface", m_param.standard.subsurface);
-        m_param.standard.metallic = val.get("metallic", m_param.standard.metallic);
-        m_param.standard.specular = val.get("specular", m_param.standard.specular);
-        m_param.standard.specularTint = val.get("specularTint", m_param.standard.specularTint);
-        m_param.standard.roughness = val.get("roughness", m_param.standard.roughness);
-        m_param.standard.anisotropic = val.get("anisotropic", m_param.standard.anisotropic);
-        m_param.standard.sheen = val.get("sheen", m_param.standard.sheen);
-        m_param.standard.sheenTint = val.get("sheenTint", m_param.standard.sheenTint);
-        m_param.standard.clearcoat = val.get("clearcoat", m_param.standard.clearcoat);
-        m_param.standard.clearcoatGloss = val.get("clearcoatGloss", m_param.standard.clearcoatGloss);
-        m_param.roughnessMap = val.get("roughnessmap", m_param.roughnessMap);
+        param_.standard.subsurface = val.get("subsurface", param_.standard.subsurface);
+        param_.standard.metallic = val.get("metallic", param_.standard.metallic);
+        param_.standard.specular = val.get("specular", param_.standard.specular);
+        param_.standard.specularTint = val.get("specularTint", param_.standard.specularTint);
+        param_.standard.roughness = val.get("roughness", param_.standard.roughness);
+        param_.standard.anisotropic = val.get("anisotropic", param_.standard.anisotropic);
+        param_.standard.sheen = val.get("sheen", param_.standard.sheen);
+        param_.standard.sheenTint = val.get("sheenTint", param_.standard.sheenTint);
+        param_.standard.clearcoat = val.get("clearcoat", param_.standard.clearcoat);
+        param_.standard.clearcoatGloss = val.get("clearcoatGloss", param_.standard.clearcoatGloss);
+        param_.roughnessMap = val.get("roughnessmap", param_.roughnessMap);
 
-        m_param.standard.ior = val.get("ior", m_param.standard.ior);
+        param_.standard.ior = val.get("ior", param_.standard.ior);
     }
 
     emissive::emissive(aten::Values& val)
@@ -64,11 +64,11 @@ namespace AT_NAME {
     MicrofacetGGX::MicrofacetGGX(aten::Values& val)
         : material(aten::MaterialType::GGX, MaterialAttributeMicrofacet, val)
     {
-        m_param.standard.roughness = val.get("roughness", m_param.standard.roughness);
-        m_param.standard.roughness = aten::clamp<float>(m_param.standard.roughness, 0, 1);
+        param_.standard.roughness = val.get("roughness", param_.standard.roughness);
+        param_.standard.roughness = aten::clamp<float>(param_.standard.roughness, 0, 1);
 
         auto roughnessMap = val.get<texture>("roughnessmap");
-        m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
+        param_.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
     }
 
     Diffuse::Diffuse(aten::Values& val)
@@ -82,17 +82,17 @@ namespace AT_NAME {
     OrenNayar::OrenNayar(aten::Values& val)
         : material(aten::MaterialType::OrneNayar, MaterialAttributeDiffuse, val)
     {
-        m_param.standard.roughness = val.get("roughness", m_param.standard.roughness);
-        m_param.standard.roughness = aten::clamp<float>(m_param.standard.roughness, 0, 1);
+        param_.standard.roughness = val.get("roughness", param_.standard.roughness);
+        param_.standard.roughness = aten::clamp<float>(param_.standard.roughness, 0, 1);
 
         auto roughnessMap = val.get<texture>("roughnessmap");
-        m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
+        param_.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
     }
 
     refraction::refraction(aten::Values& val)
         : material(aten::MaterialType::Refraction, MaterialAttributeRefraction, val)
     {
-        m_param.isIdealRefraction = val.get("isIdealRefraction", m_param.isIdealRefraction);
+        param_.is_ideal_refraction = val.get("is_ideal_refraction", param_.is_ideal_refraction);
     }
 
     specular::specular(aten::Values& val)
@@ -102,7 +102,7 @@ namespace AT_NAME {
     MicrofacetVelvet::MicrofacetVelvet(aten::Values& val)
         : material(aten::MaterialType::Velvet, MaterialAttributeMicrofacet, val)
     {
-        m_param.standard.roughness = val.get("roughness", m_param.standard.roughness);
-        m_param.standard.roughness = aten::clamp<float>(m_param.standard.roughness, 0, 1);
+        param_.standard.roughness = val.get("roughness", param_.standard.roughness);
+        param_.standard.roughness = aten::clamp<float>(param_.standard.roughness, 0, 1);
     }
 }

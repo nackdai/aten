@@ -72,7 +72,7 @@ namespace AT_NAME {
 
     struct PathAttribute {
         struct {
-            uint32_t isHit : 1;
+            uint32_t is_hit : 1;
             uint32_t is_terminated : 1;
             uint32_t is_singular : 1;
             uint32_t will_update_depth : 1;

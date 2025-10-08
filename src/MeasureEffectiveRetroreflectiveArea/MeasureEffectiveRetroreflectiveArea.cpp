@@ -260,7 +260,7 @@ void MeasureEffectiveRetroreflectiveArea::VisualizeForDebug(
     const aten::context& ctxt,
     const aten::Camera* cam)
 {
-    m_shader.prepareRender(nullptr, false);
+    m_shader.PrepareRender(nullptr, false);
 
     aten::RasterizeRenderer::clearBuffer(
         aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Stencil,
@@ -296,12 +296,12 @@ void MeasureEffectiveRetroreflectiveArea::VisualizeForDebug(
 
     aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-    auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+    auto hMtxW2C = m_shader.GetHandle("mtx_W2C");
     CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtx_W2C.a[0]));
 
-    auto hMtxL2W = m_shader.getHandle("mtx_L2W");
-    auto hColor = m_shader.getHandle("color");
-    auto hNormal = m_shader.getHandle("normal");
+    auto hMtxL2W = m_shader.GetHandle("mtx_L2W");
+    auto hColor = m_shader.GetHandle("color");
+    auto hNormal = m_shader.GetHandle("normal");
 
     // NOTE
     // Just only one triangle

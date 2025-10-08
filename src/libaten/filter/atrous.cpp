@@ -49,11 +49,11 @@ namespace aten
         return true;
     }
 
-    void ATrousDenoiser::ATrousPass::prepareRender(
+    void ATrousDenoiser::ATrousPass::PrepareRender(
         const void *pixels,
         bool revert)
     {
-        shader::prepareRender(pixels, revert);
+        shader::PrepareRender(pixels, revert);
 
         // Bind source tex handle.
         if (m_idx == 0)
@@ -82,21 +82,21 @@ namespace aten
         int32_t stepScale = 1 << m_idx;
         float clrSigmaScale = pow(2.0f, static_cast<float>(m_idx));
 
-        auto hStepScale = this->getHandle("stepScale");
+        auto hStepScale = this->GetHandle("stepScale");
         CALL_GL_API(::glUniform1i(hStepScale, stepScale));
 
-        auto hClrSigmaScale = this->getHandle("clrSigmaScale");
+        auto hClrSigmaScale = this->GetHandle("clrSigmaScale");
         CALL_GL_API(::glUniform1f(hClrSigmaScale, clrSigmaScale));
 
         // TODO
         // Sigma.
     }
 
-    void ATrousDenoiser::ATrousFinalPass::prepareRender(
+    void ATrousDenoiser::ATrousFinalPass::PrepareRender(
         const void *pixels,
         bool revert)
     {
-        shader::prepareRender(pixels, revert);
+        shader::PrepareRender(pixels, revert);
 
         // coarse.
         auto tex = m_body->m_pass[ITER - 1].getFbo().GetGLTextureHandle(0);

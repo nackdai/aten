@@ -11,7 +11,7 @@ namespace aten
 {
     accelerator::ResultIntersectTestByFrustum ThreadedBVH::intersectTestByFrustum(const frustum& f)
     {
-        return m_bvh.intersectTestByFrustum(f);
+        return bvh_.intersectTestByFrustum(f);
     }
 
     bool ThreadedBVH::hitMultiLevel(
@@ -53,7 +53,7 @@ namespace aten
                 break;
             }
 
-            bool isHit = false;
+            bool is_hit = false;
 
             if (node->isLeaf()) {
                 Intersection isectTmp;
@@ -79,7 +79,7 @@ namespace aten
 
                     int exid = node->mainExid;
 
-                    isHit = hit(
+                    is_hit = hit(
                         exid,
                         listThreadedBvhNode,
                         transformedRay,
@@ -89,17 +89,17 @@ namespace aten
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
                     auto prim = (hitable*)prims[(int)node->primid];
-                    isHit = prim->hit(r, t_min, t_max, isectTmp);
-                    if (isHit) {
+                    is_hit = prim->hit(r, t_min, t_max, isectTmp);
+                    if (is_hit) {
                         isectTmp.objid = s->id();
                     }
                 }
                 else {
                     // Hit test for a shape.
-                    isHit = s->hit(r, t_min, t_max, isectTmp);
+                    is_hit = s->hit(r, t_min, t_max, isectTmp);
                 }
 
-                if (isHit) {
+                if (is_hit) {
                     if (isectTmp.t < isect.t) {
                         isect = isectTmp;
                         t_max = isect.t;
@@ -107,10 +107,10 @@ namespace aten
                 }
             }
             else {
-                isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
+                is_hit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
             }
 
-            if (isHit) {
+            if (is_hit) {
                 nodeid = (int)node->hit;
             }
             else {

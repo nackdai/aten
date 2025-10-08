@@ -228,7 +228,7 @@ namespace aten
 
             curr_activated_post_proc_count++;
 
-            post_proc->prepareRender(prev_post_proc, pixels, willRevert);
+            post_proc->PrepareRender(prev_post_proc, pixels, willRevert);
 
             if (curr_activated_post_proc_count == count_enabled_post_procs) {
                 // We can assume that this post process is the last one and needs to bind with the default FBO.

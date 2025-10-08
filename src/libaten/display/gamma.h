@@ -16,7 +16,7 @@ namespace aten
         virtual ~GammaCorrection() {}
 
     public:
-        virtual void prepareRender(
+        virtual void PrepareRender(
             const void* pixels,
             bool revert) override final;
 

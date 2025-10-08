@@ -20,7 +20,7 @@
 
 namespace AT_NAME
 {
-    inline AT_DEVICE_API aten::vec4 material::sampleAlbedoMap(
+    inline AT_DEVICE_API aten::vec4 material::SampleAlbedoMap(
         const aten::MaterialParameter* mtrl,
         float u, float v,
         uint32_t lod/*= 0*/)
@@ -28,7 +28,7 @@ namespace AT_NAME
         return sampleTexture(mtrl->albedoMap, u, v, mtrl->baseColor, lod);
     }
 
-    inline AT_DEVICE_API void material::sampleMaterial(
+    inline AT_DEVICE_API void material::SampleMaterial(
         AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
@@ -90,7 +90,7 @@ namespace AT_NAME
         }
     }
 
-    inline AT_DEVICE_API float material::samplePDF(
+    inline AT_DEVICE_API float material::SamplePDF(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -148,7 +148,7 @@ namespace AT_NAME
         return pdf;
     }
 
-    inline AT_DEVICE_API AT_NAME::MaterialSampling material::sampleBSDF(
+    inline AT_DEVICE_API AT_NAME::MaterialSampling material::SampleBSDF(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -207,7 +207,7 @@ namespace AT_NAME
         return result;
     }
 
-    inline AT_DEVICE_API float material::applyNormal(
+    inline AT_DEVICE_API float material::ApplyNormal(
         const aten::MaterialParameter* mtrl,
         const int32_t normalMapIdx,
         const aten::vec3& orgNml,

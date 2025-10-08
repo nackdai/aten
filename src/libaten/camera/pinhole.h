@@ -72,7 +72,7 @@ namespace AT_NAME
          */
         virtual const aten::vec3 &GetPos() const override final
         {
-            return m_param.origin;
+            return param_.origin;
         }
 
         /**
@@ -80,7 +80,7 @@ namespace AT_NAME
          */
         virtual const aten::vec3 &GetDir() const override final
         {
-            return m_param.dir;
+            return param_.dir;
         }
 
         /**
@@ -88,7 +88,7 @@ namespace AT_NAME
          */
         virtual aten::vec3 &GetPos() override final
         {
-            return m_param.origin;
+            return param_.origin;
         }
 
         /**
@@ -96,17 +96,17 @@ namespace AT_NAME
          */
         virtual aten::vec3 &GetAt() override final
         {
-            return m_param.lookat;
+            return param_.lookat;
         }
 
         virtual const aten::CameraParameter &param() const override final
         {
-            return m_param;
+            return param_;
         }
 
         virtual float ComputePixelWidthAtDistance(float distance_from_camera) const override
         {
-            return Camera::ComputePixelWidthAtDistance(m_param, distance_from_camera);
+            return Camera::ComputePixelWidthAtDistance(param_, distance_from_camera);
         }
 
         void RevertRayToPixelPos(
@@ -145,6 +145,6 @@ namespace AT_NAME
             bool will_use_curr_camera_origin = false);
 
     private:
-        aten::CameraParameter m_param;
+        aten::CameraParameter param_;
     };
 }

@@ -41,7 +41,7 @@ namespace aten {
         template<class ACCEL> friend class AcceleratedScene;
 
     protected:
-        accelerator(AccelType type) : accel_type_{ type } {}
+        explicit accelerator(AccelType type) : accel_type_{ type } {}
 
     public:
         accelerator() = delete;
@@ -93,7 +93,7 @@ namespace aten {
         /**
          * @brief Build voxel data from the structure tree.
          */
-        virtual void buildVoxel(const context& ctxt)
+        virtual void BuildVoxel(const context& ctxt)
         {
             // Nothing is done.
             AT_ASSERT(false);
@@ -121,7 +121,7 @@ namespace aten {
         /**
          * @brief Draw all node's AABB in the structure tree.
          */
-        virtual void drawAABB(
+        virtual void DrawAABB(
             aten::hitable::FuncDrawAABB func,
             const aten::mat4& mtx_L2W)
         {
@@ -155,7 +155,7 @@ namespace aten {
         /**
          * @brief Export the built structure data.
          */
-        virtual bool exportTree(
+        virtual bool ExportTree(
             const context& ctxt,
             std::string_view path)
         {
@@ -166,7 +166,7 @@ namespace aten {
         /**
          * @brief Import the exported structure data.
          */
-        virtual bool importTree(
+        virtual bool ImportTree(
             const context& ctxt,
             std::string_view path,
             int32_t offsetTriIdx)

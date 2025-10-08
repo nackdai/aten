@@ -322,7 +322,7 @@ private:
 
         obj_aabb_.empty();
         for (const auto& obj : objs_) {
-            const auto& aabb = obj->getBoundingbox();
+            const auto& aabb = obj->GetBoundingbox();
             obj_aabb_.expand(aabb);
         }
 

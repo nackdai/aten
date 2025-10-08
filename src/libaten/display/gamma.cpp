@@ -3,13 +3,13 @@
 
 namespace aten
 {
-    void GammaCorrection::prepareRender(
+    void GammaCorrection::PrepareRender(
         const void* pixels,
         bool revert)
     {
-        Blitter::prepareRender(pixels, revert);
+        Blitter::PrepareRender(pixels, revert);
 
-        auto hGamma = getHandle("gamma");
+        auto hGamma = GetHandle("gamma");
         CALL_GL_API(::glUniform1f(hGamma, m_gamma));
     }
 }

@@ -72,25 +72,25 @@ namespace aten {
 
         void draw(
             Primitive mode,
-            int32_t idxOffset,
-            size_t primNum);
+            int32_t idx_offset,
+            size_t primitive_num);
 
-        void* beginRead()
+        void* BeginRead()
         {
-            return beginMap(true);
+            return BeginMap(true);
         }
-        void endRead()
+        void EndRead()
         {
-            endMap();
+            EndMap();
         }
 
         void* beginWrite()
         {
-            return beginMap(false);
+            return BeginMap(false);
         }
         void endWrite()
         {
-            endMap();
+            EndMap();
         }
 
         void clear();
@@ -100,19 +100,19 @@ namespace aten {
             return m_vtxNum;
         }
 
-        virtual uint32_t getVBOHandle() const
+        virtual uint32_t GetVBOHandle() const
         {
             return m_vbo;
         }
 
-        virtual bool isInitialized() const
+        virtual bool IsInitialized() const
         {
             return m_vbo > 0;
         }
 
     private:
-        void* beginMap(bool isRead);
-        void endMap();
+        void* BeginMap(bool isRead);
+        void EndMap();
 
     protected:
         uint32_t m_vbo{ 0 };
@@ -144,43 +144,43 @@ namespace aten {
             const void* data[],
             bool isDynamic = false);
 
-        const std::vector<uint32_t>& getVBOHandles() const
+        const std::vector<uint32_t>& GetVBOHandles() const
         {
-            return m_vbos;
+            return vbos_;
         }
 
-        uint32_t getHandleNum() const
+        uint32_t GetHandleNum() const
         {
-            return (uint32_t)m_vbos.size();
+            return (uint32_t)vbos_.size();
         }
 
-        void* beginRead(uint32_t idx)
+        void* BeginRead(uint32_t idx)
         {
-            return beginMap(true, idx);
+            return BeginMap(true, idx);
         }
-        void endRead(uint32_t idx)
+        void EndRead(uint32_t idx)
         {
-            endMap(idx);
+            EndMap(idx);
         }
 
-        virtual bool isInitialized() const final
+        bool IsInitialized() const final
         {
-            return getHandleNum() > 0;
+            return GetHandleNum() > 0;
         }
 
     private:
-        void* beginMap(bool isRead, uint32_t idx);
-        void endMap(uint32_t idx);
+        void* BeginMap(bool isRead, uint32_t idx);
+        void EndMap(uint32_t idx);
 
         // Hide interface.
-        virtual uint32_t getVBOHandle() const override final
+        uint32_t GetVBOHandle() const override final
         {
             AT_ASSERT(false);
             return m_vbo;
         }
 
     protected:
-        std::vector<uint32_t> m_vbos;
+        std::vector<uint32_t> vbos_;
     };
 
     //////////////////////////////////////////////////////////
@@ -192,11 +192,11 @@ namespace aten {
 
     public:
         void init(
-            uint32_t idxNum,
+            uint32_t idx_num,
             const void* data);
 
         void update(
-            uint32_t idxNum,
+            uint32_t idx_num,
             const void* data);
 
         void lock(void** dst);
@@ -205,29 +205,29 @@ namespace aten {
         void draw(
             const GeomVertexBuffer& vb,
             Primitive mode,
-            uint32_t idxOffset,
-            uint32_t primNum) const;
+            uint32_t idx_offset,
+            uint32_t primitive_num) const;
 
         void draw(
             const GeomMultiVertexBuffer& vb,
             Primitive mode,
-            uint32_t idxOffset,
-            uint32_t primNum) const;
+            uint32_t idx_offset,
+            uint32_t primitive_num) const;
 
     private:
         void draw(
             uint32_t vao,
             Primitive mode,
-            uint32_t idxOffset,
-            uint32_t primNum) const;
+            uint32_t idx_offset,
+            uint32_t primitive_num) const;
 
     protected:
-        uint32_t m_ibo{ 0 };
+        uint32_t ibo_{ 0 };
 
-        uint32_t m_idxNum{ 0 };
+        uint32_t idx_num_{ 0 };
 
-        bool m_isLockedIBO{ false };
+        bool is_locked_ibo_{ false };
 
-        uint32_t m_initIdxNum{ 0 };
+        uint32_t init_idx_num_{ 0 };
     };
 }

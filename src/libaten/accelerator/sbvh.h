@@ -77,7 +77,7 @@ namespace aten
         /**
          * @brief Bulid structure tree from the specified list.
          */
-        virtual void build(
+        void build(
             const context& ctxt,
             hitable** list,
             uint32_t num,
@@ -86,12 +86,12 @@ namespace aten
         /**
          * @brief Build voxels from the specified tree.
          */
-        virtual void buildVoxel(const context& ctxt) override final;
+        void BuildVoxel(const context& ctxt) override final;
 
         /**
          * @brief Test if a ray hits a object.
          */
-        virtual bool hit(
+        bool hit(
             const context& ctxt,
             const ray& r,
             float t_min, float t_max,
@@ -100,7 +100,7 @@ namespace aten
         /**
          * @brief Test if a ray hits a object.
          */
-        virtual bool HitWithLod(
+        bool HitWithLod(
             const context& ctxt,
             const ray& r,
             float t_min, float t_max,
@@ -111,14 +111,14 @@ namespace aten
         /**
          * @brief Export the built structure data.
          */
-        virtual bool exportTree(
+        bool ExportTree(
             const context& ctxt,
             std::string_view path) override final;
 
         /**
          * @brief Import the exported structure data.
          */
-        virtual bool importTree(
+        bool ImportTree(
             const context& ctxt,
             std::string_view path,
             int32_t offsetTriIdx) override final;
@@ -126,15 +126,15 @@ namespace aten
         /**
          * @brief Return the top layer acceleration structure.
          */
-        ThreadedBVH& getTopLayer()
+        ThreadedBVH& GetTopLayer()
         {
-            return m_bvh;
+            return bvh_;
         }
 
         /**
          * @brief Draw all node's AABB in the structure tree.
          */
-        virtual void drawAABB(
+        void DrawAABB(
             aten::hitable::FuncDrawAABB func,
             const aten::mat4& mtx_L2W) override final;
 
@@ -155,7 +155,7 @@ namespace aten
         /**
          * @brief Update the structure tree.
          */
-        virtual void update(const context& ctxt) override final;
+        void update(const context& ctxt) override final;
 
         /**
          * @brief Return all nodes.
@@ -165,7 +165,7 @@ namespace aten
             return m_threadedNodes;
         }
 
-        uint32_t getMaxDepth() const
+        uint32_t GetMaxDepth() const
         {
             return m_maxDepth;
         }
@@ -174,7 +174,7 @@ namespace aten
         /**
          * @brief Build the tree for the bottom layer.
          */
-        void buildAsNestedTree(
+        void BuildAsNestedTree(
             const context& ctxt,
             hitable** list,
             uint32_t num,
@@ -183,7 +183,7 @@ namespace aten
         /**
          * @brief Build the tree for the top layer.
          */
-        void buildAsTopLayerTree(
+        void BuildAsTopLayerTree(
             const context& ctxt,
             hitable** list,
             uint32_t num,
@@ -192,7 +192,7 @@ namespace aten
         /**
          * @brief Build the tree.
          */
-        void onBuild(
+        void OnBuild(
             const context& ctxt,
             hitable** list,
             uint32_t num);
@@ -228,7 +228,7 @@ namespace aten
                 return leaf;
             }
 
-            void setChild(int32_t leftId, int32_t rightId)
+            void SetChild(int32_t leftId, int32_t rightId)
             {
                 leaf = false;
                 left = leftId;
@@ -383,7 +383,7 @@ namespace aten
             const sbvh::SBVHNode& root);
 
     private:
-        ThreadedBVH m_bvh;
+        ThreadedBVH bvh_;
 
         // 分割最大数.
         uint32_t m_numBins{ 16 };

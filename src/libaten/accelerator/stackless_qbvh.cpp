@@ -15,9 +15,9 @@ namespace aten
         uint32_t num,
         aabb* bbox/*= nullptr*/)
     {
-        m_bvh.build(ctxt, list, num, bbox);
+        bvh_.build(ctxt, list, num, bbox);
 
-        setBoundingBox(m_bvh.getBoundingbox());
+        setBoundingBox(bvh_.GetBoundingbox());
 
         std::vector<accelerator*> listBvh;
         std::map<hitable*, accelerator*> nestedBvhMap;
@@ -25,7 +25,7 @@ namespace aten
         std::vector<std::vector<BvhNode>> listBvhNode;
 
         // Register to linear list to traverse bvhnode easily.
-        auto root = m_bvh.getRoot();
+        auto root = bvh_.GetRoot();
         listBvhNode.push_back(std::vector<BvhNode>());
         registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0], listBvh, nestedBvhMap);
 
@@ -33,7 +33,7 @@ namespace aten
             // TODO
             auto bvh = (aten::bvh*)listBvh[i];
 
-            root = bvh->getRoot();
+            root = bvh->GetRoot();
 
             hitable* parent = nullptr;
 
@@ -240,7 +240,7 @@ namespace aten
         auto node = bvhNode.node;
         auto nestParent = bvhNode.nestParent;
 
-        auto bbox = node->getBoundingbox();
+        auto bbox = node->GetBoundingbox();
         bbox = aten::aabb::transform(bbox, bvhNode.mtx_L2W);
 
         qbvhNode.leftChildrenIdx = 0;
@@ -302,7 +302,7 @@ namespace aten
 
             const auto node = bvhNode.node;
 
-            auto bbox = node->getBoundingbox();
+            auto bbox = node->GetBoundingbox();
             bbox = aten::aabb::transform(bbox, bvhNode.mtx_L2W);
 
             const auto& bmax = bbox.maxPos();
@@ -529,7 +529,7 @@ namespace aten
             if (pnode->isLeaf) {
                 Intersection isectTmp;
 
-                bool isHit = false;
+                bool is_hit = false;
 
                 auto s = ctxt.GetTransformable((int32_t)pnode->object_id);
 
@@ -550,7 +550,7 @@ namespace aten
                         transformedRay = r;
                     }
 
-                    isHit = hit(
+                    is_hit = hit(
                         ctxt,
                         (int32_t)pnode->exid,
                         listQbvhNode,
@@ -560,18 +560,18 @@ namespace aten
                 }
                 else if (pnode->primid >= 0) {
                     auto f = ctxt.GetTriangleInstance((int32_t)pnode->primid);
-                    isHit = f->hit(ctxt, r, t_min, t_max, isectTmp);
+                    is_hit = f->hit(ctxt, r, t_min, t_max, isectTmp);
 
-                    if (isHit) {
+                    if (is_hit) {
                         isectTmp.objid = s->id();
                     }
                 }
                 else {
                     // sphere, cube.
-                    isHit = s->hit(ctxt, r, t_min, t_max, isectTmp);
+                    is_hit = s->hit(ctxt, r, t_min, t_max, isectTmp);
                 }
 
-                if (isHit) {
+                if (is_hit) {
                     if (isectTmp.t < isect.t) {
                         isect = isectTmp;
                         t_max = isect.t;

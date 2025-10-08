@@ -17,14 +17,14 @@ namespace AT_NAME
         float t_min, float t_max,
         aten::Intersection& isect) const
     {
-        bool isHit = hit(&m_param, r, t_min, t_max, &isect);
+        bool is_hit = hit(&param_, r, t_min, t_max, &isect);
 
-        if (isHit) {
+        if (is_hit) {
             isect.objid = id();
             isect.mtrlid = mtrl_->id();
         }
 
-        return isHit;
+        return is_hit;
     }
 
     bool AT_HOST_DEVICE_API sphere::hit(

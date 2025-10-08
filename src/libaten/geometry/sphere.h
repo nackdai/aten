@@ -18,8 +18,8 @@ namespace AT_NAME
         {
             mtrl_ = mtrl;
 
-            m_param.sphere.center = center;
-            m_param.sphere.radius = radius;
+            param_.sphere.center = center;
+            param_.sphere.radius = radius;
 
             auto _min = center - radius;
             auto _max = center + radius;
@@ -50,12 +50,12 @@ namespace AT_NAME
 
         const aten::vec3& center() const
         {
-            return m_param.sphere.center;
+            return param_.sphere.center;
         }
 
         float radius() const
         {
-            return m_param.sphere.radius;
+            return param_.sphere.radius;
         }
 
         static AT_HOST_DEVICE_API void SamplePosAndNormal(

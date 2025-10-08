@@ -6,6 +6,8 @@
 #include "math/vec4.h"
 #include "math/ray.h"
 
+// NOLINTBEGIN(readability-identifier-length)
+
 namespace aten {
     class mat4 {
     public:
@@ -236,13 +238,13 @@ namespace aten {
 
         mat4& invert()
         {
-            // Gauss/Jordan–@‚Å‹‚ß‚é
+            // Gauss/Jordanï¿½@ï¿½Å‹ï¿½ï¿½ß‚ï¿½
             mat4 mtx = *this;
             mat4 dst;
 
             for (int32_t i = 0; i < 4; ++i) {
-                // ƒsƒ{ƒbƒg‘I‘ğ.
-                // NOTE: ‘ÎÛ‚Æ‚È‚é—ñ’†‚ÌÅ‘å’l‚ª‘ÎŠp’l‚É‚È‚é‚æ‚¤‚És‚ğ“ü‚ê‘Ö‚¦‚é.
+                // ï¿½sï¿½{ï¿½bï¿½gï¿½Iï¿½ï¿½.
+                // NOTE: ï¿½ÎÛ‚Æ‚È‚ï¿½ñ’†‚ÌÅ‘ï¿½lï¿½ï¿½ï¿½ÎŠpï¿½lï¿½É‚È‚ï¿½æ‚¤ï¿½Ésï¿½ï¿½ï¿½ï¿½ï¿½Ö‚ï¿½ï¿½ï¿½.
                 float f = aten::abs(mtx.m[i][i]);
                 for (int32_t j = i + 1; j < 4; ++j) {
                     if (f < aten::abs(mtx.m[j][i])) {
@@ -252,12 +254,12 @@ namespace aten {
                     }
                 }
 
-                // ‘ÎÛ‚Æ‚È‚és‚Ì‘ÎŠp’l‚ğ 1 ‚É‚·‚é.
+                // ï¿½ÎÛ‚Æ‚È‚ï¿½sï¿½Ì‘ÎŠpï¿½lï¿½ï¿½ 1 ï¿½É‚ï¿½ï¿½ï¿½.
                 f = 1.0f / mtx.m[i][i];
                 mtx.v[i] = scale(mtx.v[i], f);
                 dst.v[i] = scale(dst.v[i], f);
 
-                // ‘ÎÛ‚Æ‚È‚ç‚È‚¢—ñ‚Ì’l‚ğ 0 ‚É‚·‚é.
+                // ï¿½ÎÛ‚Æ‚È‚ï¿½È‚ï¿½ï¿½ï¿½Ì’lï¿½ï¿½ 0 ï¿½É‚ï¿½ï¿½ï¿½.
                 for (int32_t j = 0; j < 4; ++j) {
                     if (j != i) {
                         float temp = mtx.m[j][i];
@@ -397,8 +399,8 @@ namespace aten {
 
             vec3 vup = up;
             if (aten::abs(vz.x) < AT_MATH_EPSILON && aten::abs(vz.z) < AT_MATH_EPSILON) {
-                // UPƒxƒNƒgƒ‹‚Æ‚ÌŠOÏ‚ğŒvZ‚Å‚«‚È‚¢‚Ì‚ÅA
-                // V‚µ‚¢UPƒxƒNƒgƒ‹‚ğ‚Å‚Á‚¿‚ ‚°‚éEEE
+                // UPï¿½xï¿½Nï¿½gï¿½ï¿½ï¿½Æ‚ÌŠOï¿½Ï‚ï¿½ï¿½vï¿½Zï¿½Å‚ï¿½ï¿½È‚ï¿½ï¿½Ì‚ÅA
+                // ï¿½Vï¿½ï¿½ï¿½ï¿½UPï¿½xï¿½Nï¿½gï¿½ï¿½ï¿½ï¿½ï¿½Å‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Eï¿½Eï¿½E
                 if (up.y > 0.0f) {
                     vup = vec3(float(0), float(0), -vz.y);
                 }
@@ -586,13 +588,13 @@ namespace aten {
 
     inline AT_HOST_DEVICE_API vec3 operator*(const mat4& m, const vec3 v)
     {
-        vec3 ret = m.apply(v);
+        const vec3 ret = m.apply(v);
         return ret;
     }
 
     inline AT_HOST_DEVICE_API vec4 operator*(const mat4& m, const vec4 v)
     {
-        vec4 ret = m.apply(v);
+        const vec4 ret = m.apply(v);
         return ret;
     }
 
@@ -615,3 +617,5 @@ namespace aten {
         return ret;
     }
 }
+
+// NOLINTEND(readability-identifier-length)

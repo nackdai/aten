@@ -59,11 +59,11 @@ namespace aten
         comps[1] = GL_COLOR_ATTACHMENT1;
     }
 
-    void TAA::TAAPass::prepareRender(
+    void TAA::TAAPass::PrepareRender(
         const void* pixels,
         bool revert)
     {
-        shader::prepareRender(pixels, revert);
+        shader::PrepareRender(pixels, revert);
 
         GLuint srcTexHandle = m_body->getVisualizer()->GetGLTextureHandle();
         texture::bindAsGLTexture(srcTexHandle, 0, this);
@@ -76,19 +76,19 @@ namespace aten
         texture::bindAsGLTexture(m_body->m_motionDepthBuffer, 2, this);
 
         auto enableTAA = m_body->isEnableTAA();
-        auto hEnableTAA = this->getHandle("enableTAA");
+        auto hEnableTAA = this->GetHandle("enableTAA");
         CALL_GL_API(::glUniform1i(hEnableTAA, enableTAA));
 
         auto canShowDiff = m_body->canShowTAADiff();
-        auto hShowDiff = this->getHandle("showDiff");
+        auto hShowDiff = this->GetHandle("showDiff");
         CALL_GL_API(::glUniform1i(hShowDiff, canShowDiff));
     }
 
-    void TAA::FinalPass::prepareRender(
+    void TAA::FinalPass::PrepareRender(
         const void* pixels,
         bool revert)
     {
-        shader::prepareRender(pixels, revert);
+        shader::PrepareRender(pixels, revert);
 
         auto prevPass = this->getPrevPass();
 

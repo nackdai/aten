@@ -8,7 +8,7 @@
 
 namespace AT_NAME {
     Light::Light(aten::LightType type, const aten::LightAttribute& attrib, const aten::Values& val)
-        : m_param(type, attrib)
+        : param_(type, attrib)
     {
     }
 

@@ -2,7 +2,7 @@
 #include "visualizer/MultiPassPostProc.h"
 
 namespace aten {
-    void MultiPassPostProc::prepareRender(
+    void MultiPassPostProc::PrepareRender(
         const void* pixels,
         bool revert)
     {
@@ -17,7 +17,7 @@ namespace aten {
                 prevPass->getFbo().BindAsTexture();
             }
 
-            pass->prepareRender(prevPass, pixels, revert);
+            pass->PrepareRender(prevPass, pixels, revert);
 
             if (pass->getFbo().IsValid()) {
                 // Set FBO.

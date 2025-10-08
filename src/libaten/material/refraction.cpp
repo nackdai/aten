@@ -51,11 +51,11 @@ namespace AT_NAME
 
     bool refraction::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = editor->edit("ior", m_param.standard.ior, 0.01F, 10.0F);
-        auto b1 = editor->edit("color", m_param.baseColor);
-        auto b2 = editor->edit("is_ideal_reflaction", m_param.isIdealRefraction);
+        auto b0 = editor->edit("ior", param_.standard.ior, 0.01F, 10.0F);
+        auto b1 = editor->edit("color", param_.baseColor);
+        auto b2 = editor->edit("is_ideal_reflaction", param_.is_ideal_refraction);
 
-        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
+        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, normalMap);
 
         return b0 || b1 || b2;
     }
@@ -125,7 +125,7 @@ namespace AT_NAME
         const auto R = F;       // reflectance.
         const auto T = 1 - R;   // transmittance.
 
-        if (param.isIdealRefraction) {
+        if (param.is_ideal_refraction) {
             // Regardless any reflectance, refraction happens.
             result.pdf = 1.0F;
             result.dir = wo;

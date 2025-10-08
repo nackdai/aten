@@ -30,7 +30,7 @@ namespace AT_NAME
             aten::texture* roughnessMap = nullptr)
             : material(param, aten::MaterialAttributeMicrofacet)
         {
-            setTextures(albedoMap, normalMap, roughnessMap);
+            SetTextures(albedoMap, normalMap, roughnessMap);
         }
 
         Retroreflective(aten::Values& val);

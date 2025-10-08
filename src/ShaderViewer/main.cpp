@@ -105,10 +105,10 @@ public:
             ctxt_,
             [&](aten::RasterizeRenderer::FuncObjRenderer func) {
                 auto& shader = rasterizer_.getShader();
-                shader.setUniformVec3("pointLitPos", aten::vec3(0.0f, 0.0f, 50.0f));
-                shader.setUniformVec3("pointLitClr", aten::vec3(0.8f, 0.0f, 0.0f));
-                shader.setUniformVec3("pointLitAttr", aten::vec3(0.0f, 0.05f, 0.0f));
-                shader.setUniformVec3("cameraPos", camera_.GetPos());
+                shader.SetUniformVec3("pointLitPos", aten::vec3(0.0f, 0.0f, 50.0f));
+                shader.SetUniformVec3("pointLitClr", aten::vec3(0.8f, 0.0f, 0.0f));
+                shader.SetUniformVec3("pointLitAttr", aten::vec3(0.0f, 0.05f, 0.0f));
+                shader.SetUniformVec3("cameraPos", camera_.GetPos());
 
                 for (size_t i = obj_min; i < obj_max; i++) {
                     auto& obj = objs_[i];

@@ -77,8 +77,8 @@ protected:
 
     void getMinMaxPos(
         aten::FbxImporter* pImporter,
-        aten::vec4& vMin,
-        aten::vec4& vMax,
+        aten::vec4& v_min,
+        aten::vec4& v_max,
         const PrimitiveSetParam& sPrimSet);
 
     bool exportPrimitiveSet(

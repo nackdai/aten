@@ -40,7 +40,7 @@ AT_INLINE_RELEASE __device__ bool intersectStacklessBVHTriangles(
         boxmin_1 = make_float3(node2.x, node2.y, node2.z);
         boxmax_1 = make_float3(node3.x, node3.y, node3.z);
 
-        bool isHit = false;
+        bool is_hit = false;
 
         if (attrib.y >= 0) {
             int32_t primidx = (int32_t)attrib.y;
@@ -49,10 +49,10 @@ AT_INLINE_RELEASE __device__ bool intersectStacklessBVHTriangles(
             prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::TriangleParamter_float4_size + 1];
 
             isectTmp.t = AT_MATH_INF;
-            isHit = AT_NAME::triangle::hit(prim, *ctxt, r, &isectTmp);
+            is_hit = AT_NAME::triangle::hit(prim, *ctxt, r, &isectTmp);
 
             bool isIntersect = (Type == idaten::IntersectType::Any
-                ? isHit
+                ? is_hit
                 : isectTmp.t < isect->t);
 
             if (isIntersect) {
@@ -156,7 +156,7 @@ AT_INLINE_RELEASE __device__ bool intersectStacklessBVH(
         boxmin_1 = make_float3(node2.x, node2.y, node2.z);
         boxmax_1 = make_float3(node3.x, node3.y, node3.z);
 
-        bool isHit = false;
+        bool is_hit = false;
 
         if (attrib.x >= 0) {
             // Leaf.
@@ -175,19 +175,19 @@ AT_INLINE_RELEASE __device__ bool intersectStacklessBVH(
                     transformedRay = r;
                 }
 
-                isHit = intersectStacklessBVHTriangles<Type>(ctxt->nodes[(int32_t)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+                is_hit = intersectStacklessBVHTriangles<Type>(ctxt->nodes[(int32_t)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
             }
             else {
                 // TODO
                 // Only sphere...
-                //isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
+                //is_hit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
                 isectTmp.t = AT_MATH_INF;
-                isHit = AT_NAME::sphere::hit(s, r, t_min, t_max, &isectTmp);
+                is_hit = AT_NAME::sphere::hit(s, r, t_min, t_max, &isectTmp);
                 isectTmp.mtrlid = s->sphere.mtrl_id;
             }
 
             bool isIntersect = (Type == idaten::IntersectType::Any
-                ? isHit
+                ? is_hit
                 : isectTmp.t < isect->t);
 
             if (isIntersect) {
@@ -255,14 +255,14 @@ AT_INLINE_RELEASE __device__ bool intersectClosestStacklessBVH(
 {
     float t_min = AT_MATH_EPSILON;
 
-    bool isHit = intersectStacklessBVH<idaten::IntersectType::Closest>(
+    bool is_hit = intersectStacklessBVH<idaten::IntersectType::Closest>(
         ctxt->nodes[0],
         ctxt,
         r,
         t_min, t_max,
         isect);
 
-    return isHit;
+    return is_hit;
 }
 
 AT_INLINE_RELEASE __device__ bool intersectCloserStacklessBVH(
@@ -273,14 +273,14 @@ AT_INLINE_RELEASE __device__ bool intersectCloserStacklessBVH(
 {
     float t_min = AT_MATH_EPSILON;
 
-    bool isHit = intersectStacklessBVH<idaten::IntersectType::Closer>(
+    bool is_hit = intersectStacklessBVH<idaten::IntersectType::Closer>(
         ctxt->nodes[0],
         ctxt,
         r,
         t_min, t_max,
         isect);
 
-    return isHit;
+    return is_hit;
 }
 
 AT_INLINE_RELEASE __device__ bool intersectAnyStacklessBVH(
@@ -291,12 +291,12 @@ AT_INLINE_RELEASE __device__ bool intersectAnyStacklessBVH(
     float t_min = AT_MATH_EPSILON;
     float t_max = AT_MATH_INF;
 
-    bool isHit = intersectStacklessBVH<idaten::IntersectType::Any>(
+    bool is_hit = intersectStacklessBVH<idaten::IntersectType::Any>(
         ctxt->nodes[0],
         ctxt,
         r,
         t_min, t_max,
         isect);
 
-    return isHit;
+    return is_hit;
 }

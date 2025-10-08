@@ -228,11 +228,11 @@ namespace aten {
     {
         std::shared_ptr<material> mtrl;
 
-        if (aten::material::isDefaultMaterialName(type)) {
+        if (aten::material::IsDefaultMaterialName(type)) {
 
-            auto mtrlType = aten::material::getMaterialTypeFromMaterialTypeName(type);
+            auto mtrlType = aten::material::GetMaterialTypeFromMaterialTypeName(type);
 
-            if (aten::material::isValidMaterialType(mtrlType)) {
+            if (aten::material::IsValidMaterialType(mtrlType)) {
                 mtrl = ctxt.CreateMaterial(name, mtrlType, values);
             }
         }

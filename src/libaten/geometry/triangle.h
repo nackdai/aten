@@ -39,7 +39,7 @@ namespace AT_NAME
             const aten::ray& r,
             aten::Intersection* isect)
         {
-            bool isHit = false;
+            bool is_hit = false;
 
             const auto v0{ ctxt.GetPositionAsVec3(param.idx[0]) };
             const auto v1{ ctxt.GetPositionAsVec3(param.idx[1]) };
@@ -54,11 +54,11 @@ namespace AT_NAME
                     isect->a = res.a;
                     isect->b = res.b;
 
-                    isHit = true;
+                    is_hit = true;
                 }
             }
 
-            return isHit;
+            return is_hit;
         }
 
         template <class CONTEXT>

@@ -48,10 +48,10 @@ namespace aten
 
             const auto& ray = rays_[idx];
 
-            path_host_.paths.attrib[idx].isHit = false;
+            path_host_.paths.attrib[idx].is_hit = false;
 
             if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
-                path_host_.paths.attrib[idx].isHit = true;
+                path_host_.paths.attrib[idx].is_hit = true;
 
                 Nee(
                     idx,
@@ -181,7 +181,7 @@ namespace aten
                 }
 
                 // Apply normal map.
-                auto pre_sampled_r = material::applyNormal(
+                auto pre_sampled_r = material::ApplyNormal(
                     &mtrl,
                     mtrl.normalMap,
                     orienting_normal, orienting_normal,
@@ -189,7 +189,7 @@ namespace aten
                     ray.dir, sampler);
 
                 aten::MaterialSampling sampling;
-                material::sampleMaterial(
+                material::SampleMaterial(
                     &sampling,
                     &mtrl,
                     orienting_normal,
@@ -335,7 +335,7 @@ namespace aten
                 }
 
                 // Apply normal map.
-                auto pre_sampled_r = material::applyNormal(
+                auto pre_sampled_r = material::ApplyNormal(
                     &mtrl,
                     mtrl.normalMap,
                     orienting_normal, orienting_normal,
@@ -375,7 +375,7 @@ namespace aten
                 }
 
                 aten::MaterialSampling sampling;
-                material::sampleMaterial(
+                material::SampleMaterial(
                     &sampling,
                     &mtrl,
                     orienting_normal,

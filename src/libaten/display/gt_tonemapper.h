@@ -19,7 +19,7 @@ namespace aten
             int width, int height,
             std::string_view base_path);
 
-        virtual void prepareRender(
+        virtual void PrepareRender(
             const void* pixels,
             bool revert) override final;
 

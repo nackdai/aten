@@ -2,43 +2,43 @@
 #include "visualizer/atengl.h"
 
 namespace aten {
-    void Magnifier::prepareRender(
+    void Magnifier::PrepareRender(
         const void* pixels,
         bool revert)
     {
-        shader::prepareRender(pixels, revert);
+        shader::PrepareRender(pixels, revert);
 
-        auto handle = getHandle("image");
+        auto handle = GetHandle("image");
         if (handle >= 0) {
             CALL_GL_API(glUniform1i(handle, 0));
         }
 
-        handle = getHandle("screen_res");
+        handle = GetHandle("screen_res");
         if (handle >= 0) {
             CALL_GL_API(glUniform2fv(handle, 1, reinterpret_cast<const GLfloat*>(&screen_res_)));
         }
 
-        handle = getHandle("center_pos");
+        handle = GetHandle("center_pos");
         if (handle >= 0) {
             CALL_GL_API(glUniform2fv(handle, 1, reinterpret_cast<const GLfloat*>(&center_pos_)));
         }
 
-        handle = getHandle("magnification");
+        handle = GetHandle("magnification");
         if (handle >= 0) {
             CALL_GL_API(glUniform1f(handle, magnification_));
         }
 
-        handle = getHandle("radius");
+        handle = GetHandle("radius");
         if (handle >= 0) {
             CALL_GL_API(glUniform1f(handle, radius_));
         }
 
-        handle = getHandle("circle_line_width");
+        handle = GetHandle("circle_line_width");
         if (handle >= 0) {
             CALL_GL_API(glUniform1f(handle, circle_line_width_));
         }
 
-        handle = getHandle("circle_line_color");
+        handle = GetHandle("circle_line_color");
         if (handle >= 0) {
             CALL_GL_API(glUniform3fv(handle, 1, reinterpret_cast<const GLfloat*>(&circle_line_color_)));
         }

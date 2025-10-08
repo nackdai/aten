@@ -64,7 +64,7 @@ __global__ void fillAOV(
     AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
 
     aten::Intersection isect;
-    bool isHit = intersectClosest(&ctxt, camsample.r, &isect);
+    bool is_hit = intersectClosest(&ctxt, camsample.r, &isect);
 
     float4 clr = make_float4(1);
 
@@ -151,9 +151,9 @@ __global__ void pickPixel(
     AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
 
     aten::Intersection isect;
-    bool isHit = intersectClosest(&ctxt, camsample.r, &isect);
+    bool is_hit = intersectClosest(&ctxt, camsample.r, &isect);
 
-    if (isHit) {
+    if (is_hit) {
         const auto idx = getIdx(ix, iy, width);
 
         auto normalDepth = aovNormalDepth[idx];

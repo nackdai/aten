@@ -29,7 +29,7 @@ namespace idaten
 			real pdfb;
 			int samples;
 
-			bool isHit;
+			bool is_hit;
 			bool isTerminate;
 			bool isSingular;
 			bool isKill;

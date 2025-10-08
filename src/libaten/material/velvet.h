@@ -18,7 +18,7 @@ namespace AT_NAME
             aten::texture* normalMap = nullptr)
             : material(param, aten::MaterialAttributeMicrofacet)
         {
-            setTextures(albedoMap, normalMap, nullptr);
+            SetTextures(albedoMap, normalMap, nullptr);
         }
 
         MicrofacetVelvet(aten::Values& val);

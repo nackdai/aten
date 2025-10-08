@@ -126,7 +126,7 @@ namespace aten {
 
         auto offsetByte = m_vtxOffset * m_vtxStride;
 
-        auto program = shd->getProgramHandle();
+        auto program = shd->GetProgramHandle();
 
         for (uint32_t i = 0; i < attribNum; i++) {
 #if 0
@@ -186,20 +186,20 @@ namespace aten {
         GL_POINTS,
     };
 
-    inline int32_t computeVtxNum(Primitive mode, size_t primNum)
+    inline int32_t computeVtxNum(Primitive mode, size_t primitive_num)
     {
         size_t vtxNum = 0;
 
         switch (mode)
         {
         case Primitive::Triangles:
-            vtxNum = primNum * 3;
+            vtxNum = primitive_num * 3;
             break;
         case Primitive::Lines:
-            vtxNum = primNum * 2;
+            vtxNum = primitive_num * 2;
             break;
         case Primitive::Points:
-            vtxNum = primNum;
+            vtxNum = primitive_num;
             break;
         default:
             AT_ASSERT(false);
@@ -211,21 +211,21 @@ namespace aten {
 
     void GeomVertexBuffer::draw(
         Primitive mode,
-        int32_t idxOffset,
-        size_t primNum)
+        int32_t idx_offset,
+        size_t primitive_num)
     {
         AT_ASSERT(m_vao > 0);
 
         CALL_GL_API(::glBindVertexArray(m_vao));
 
-        auto vtxNum = computeVtxNum(mode, primNum);
+        auto vtxNum = computeVtxNum(mode, primitive_num);
 
         const int32_t prim_idx = static_cast<int32_t>(mode);
 
-        CALL_GL_API(::glDrawArrays(prims[prim_idx], idxOffset, vtxNum));
+        CALL_GL_API(::glDrawArrays(prims[prim_idx], idx_offset, vtxNum));
     }
 
-    void* GeomVertexBuffer::beginMap(bool isRead)
+    void* GeomVertexBuffer::BeginMap(bool isRead)
     {
         AT_ASSERT(m_vbo > 0);
         AT_ASSERT(!m_isMapping);
@@ -240,7 +240,7 @@ namespace aten {
         return ret;
     }
 
-    void GeomVertexBuffer::endMap()
+    void GeomVertexBuffer::EndMap()
     {
         AT_ASSERT(m_vbo > 0);
         AT_ASSERT(m_isMapping);
@@ -293,7 +293,7 @@ namespace aten {
         const void* data[],
         bool isDynamic/*= false*/)
     {
-        AT_ASSERT(m_vbos.empty());
+        AT_ASSERT(vbos_.empty());
         AT_ASSERT(m_vao == 0);
 
         CALL_GL_API(::glGenVertexArrays(1, &m_vao));
@@ -305,7 +305,7 @@ namespace aten {
 
             AT_ASSERT(vbo > 0);
 
-            m_vbos.push_back(vbo);
+            vbos_.push_back(vbo);
 
             CALL_GL_API(::glBindBuffer(GL_ARRAY_BUFFER, vbo));
 
@@ -332,28 +332,28 @@ namespace aten {
         m_vtxNum = vtxNum;
     }
 
-    void* GeomMultiVertexBuffer::beginMap(bool isRead, uint32_t idx)
+    void* GeomMultiVertexBuffer::BeginMap(bool isRead, uint32_t idx)
     {
-        AT_ASSERT(!m_vbos.empty());
+        AT_ASSERT(!vbos_.empty());
         AT_ASSERT(!m_isMapping);
 
         void* ret = nullptr;
 
         if (!m_isMapping) {
-            CALL_GL_API(ret = ::glMapNamedBuffer(m_vbos[idx], isRead ? GL_READ_ONLY : GL_WRITE_ONLY));
+            CALL_GL_API(ret = ::glMapNamedBuffer(vbos_[idx], isRead ? GL_READ_ONLY : GL_WRITE_ONLY));
             m_isMapping = true;
         }
 
         return ret;
     }
 
-    void GeomMultiVertexBuffer::endMap(uint32_t idx)
+    void GeomMultiVertexBuffer::EndMap(uint32_t idx)
     {
-        AT_ASSERT(!m_vbos.empty());
+        AT_ASSERT(!vbos_.empty());
         AT_ASSERT(m_isMapping);
 
         if (m_isMapping) {
-            CALL_GL_API(::glUnmapNamedBuffer(m_vbos[idx]));
+            CALL_GL_API(::glUnmapNamedBuffer(vbos_[idx]));
             m_isMapping = false;
         }
     }
@@ -362,24 +362,24 @@ namespace aten {
 
     GeomIndexBuffer::~GeomIndexBuffer()
     {
-        if (m_ibo > 0) {
-            CALL_GL_API(::glDeleteBuffers(1, &m_ibo));
+        if (ibo_ > 0) {
+            CALL_GL_API(::glDeleteBuffers(1, &ibo_));
         }
     }
 
     void GeomIndexBuffer::init(
-        uint32_t idxNum,
+        uint32_t idx_num,
         const void* data)
     {
-        CALL_GL_API(::glGenBuffers(1, &m_ibo));
+        CALL_GL_API(::glGenBuffers(1, &ibo_));
 
-        auto size = sizeof(GLuint) * idxNum;
+        auto size = sizeof(GLuint) * idx_num;
 
-        m_idxNum = idxNum;
+        idx_num_ = idx_num;
 
-        m_initIdxNum = idxNum;
+        init_idx_num_ = idx_num;
 
-        CALL_GL_API(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo));
+        CALL_GL_API(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_));
 
         CALL_GL_API(::glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,
@@ -389,19 +389,19 @@ namespace aten {
     }
 
     void GeomIndexBuffer::update(
-        uint32_t idxNum,
+        uint32_t idx_num,
         const void* data)
     {
-        AT_ASSERT(m_ibo > 0);
-        AT_ASSERT(idxNum <= m_initIdxNum);
+        AT_ASSERT(ibo_ > 0);
+        AT_ASSERT(idx_num <= init_idx_num_);
 
-        auto size = sizeof(GLuint) * idxNum;
+        auto size = sizeof(GLuint) * idx_num;
 
-        m_idxNum = idxNum;
+        idx_num_ = idx_num;
 
         if (size > 0) {
             CALL_GL_API(::glNamedBufferSubData(
-                m_ibo,
+                ibo_,
                 (GLintptr)0,
                 size,
                 data));
@@ -412,67 +412,67 @@ namespace aten {
     {
         void* tmp = nullptr;
 
-        auto lockSize = sizeof(GLuint) * m_idxNum;
+        auto lockSize = sizeof(GLuint) * idx_num_;
 
         CALL_GL_API(tmp = ::glMapNamedBufferRange(
-            m_ibo,
+            ibo_,
             0,
             lockSize,
             GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
 
         *dst = tmp;
 
-        m_isLockedIBO = true;
+        is_locked_ibo_ = true;
     }
 
     void GeomIndexBuffer::unlock()
     {
-        if (m_isLockedIBO) {
-            CALL_GL_API(::glUnmapNamedBuffer(m_ibo));
+        if (is_locked_ibo_) {
+            CALL_GL_API(::glUnmapNamedBuffer(ibo_));
         }
 
-        m_isLockedIBO = false;
+        is_locked_ibo_ = false;
     }
 
     void GeomIndexBuffer::draw(
         const GeomVertexBuffer& vb,
         Primitive mode,
-        uint32_t idxOffset,
-        uint32_t primNum) const
+        uint32_t idx_offset,
+        uint32_t primitive_num) const
     {
-        draw(vb.m_vao, mode, idxOffset, primNum);
+        draw(vb.m_vao, mode, idx_offset, primitive_num);
     }
 
     void GeomIndexBuffer::draw(
         const GeomMultiVertexBuffer& vb,
         Primitive mode,
-        uint32_t idxOffset,
-        uint32_t primNum) const
+        uint32_t idx_offset,
+        uint32_t primitive_num) const
     {
-        draw(vb.m_vao, mode, idxOffset, primNum);
+        draw(vb.m_vao, mode, idx_offset, primitive_num);
     }
 
     void GeomIndexBuffer::draw(
         uint32_t vao,
         Primitive mode,
-        uint32_t idxOffset,
-        uint32_t primNum) const
+        uint32_t idx_offset,
+        uint32_t primitive_num) const
     {
-        AT_ASSERT(m_ibo > 0);
+        AT_ASSERT(ibo_ > 0);
         AT_ASSERT(vao > 0);
 
         CALL_GL_API(::glBindVertexArray(vao));
-        CALL_GL_API(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo));
+        CALL_GL_API(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_));
 
-        auto offsetByte = idxOffset * sizeof(GLuint);
+        auto offsetByte = idx_offset * sizeof(GLuint);
 
-        auto idxNum = computeVtxNum(mode, primNum);
+        auto idx_num = computeVtxNum(mode, primitive_num);
 
         const int32_t prim_idx = static_cast<int32_t>(mode);
 
         CALL_GL_API(::glDrawElements(
             prims[prim_idx],
-            idxNum,
+            idx_num,
             GL_UNSIGNED_INT,
             (const GLvoid*)offsetByte));
     }

@@ -39,11 +39,11 @@ namespace aten
 
         const auto& ray = rays_[idx];
 
-        path_host_.paths.attrib[idx].isHit = false;
+        path_host_.paths.attrib[idx].is_hit = false;
 
         Intersection isect;
         if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
-            path_host_.paths.attrib[idx].isHit = true;
+            path_host_.paths.attrib[idx].is_hit = true;
 
             if (bounce == 0) {
                 aten::span reservoirs(reservoirs_.GetCurrParams());
@@ -136,7 +136,7 @@ namespace aten
 
         // Apply normal map.
         int32_t normalMap = mtrl.normalMap;
-        const auto pre_sampled_r = AT_NAME::material::applyNormal(
+        const auto pre_sampled_r = AT_NAME::material::ApplyNormal(
             &mtrl,
             normalMap,
             orienting_normal, orienting_normal,
@@ -217,7 +217,7 @@ namespace aten
             paths.sampler[idx]);
 
         aten::MaterialSampling sampling;
-        material::sampleMaterial(
+        material::SampleMaterial(
             &sampling,
             &mtrl,
             orienting_normal,

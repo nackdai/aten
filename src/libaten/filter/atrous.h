@@ -54,7 +54,7 @@ namespace aten {
             virtual ~ATrousPass() {}
 
         public:
-            virtual void prepareRender(
+            virtual void PrepareRender(
                 const void* pixels,
                 bool revert) override;
 
@@ -72,7 +72,7 @@ namespace aten {
         };
 
         class ATrousFinalPass : public ATrousPass {
-            virtual void prepareRender(
+            virtual void PrepareRender(
                 const void* pixels,
                 bool revert) override;
         };

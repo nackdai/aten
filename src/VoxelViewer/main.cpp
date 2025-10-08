@@ -78,7 +78,7 @@ public:
         auto sbvh = reinterpret_cast<aten::sbvh*>(objs_[0]->getInternalAccelerator());
 
         if (voxels_.empty()) {
-            auto maxDepth = sbvh->getMaxDepth();
+            auto maxDepth = sbvh->GetMaxDepth();
             voxels_.resize(maxDepth);
 
             // NOTE
@@ -107,7 +107,7 @@ public:
         }
 
         {
-            ImGui::SliderInt("Depth", &draw_voxel_depth_, 1, sbvh->getMaxDepth());
+            ImGui::SliderInt("Depth", &draw_voxel_depth_, 1, sbvh->GetMaxDepth());
             ImGui::Checkbox("Wireframe,", &is_wireframe_);
             ImGui::Checkbox("Draw mesh,", &is_draw_wesh_);
         }

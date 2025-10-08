@@ -145,7 +145,7 @@ namespace aten {
             Intersection& isect) const;
 
     private:
-        bvh m_bvh;
+        bvh bvh_;
 
         std::vector<std::vector<StacklessQbvhNode>> m_listQbvhNode;
     };

@@ -38,11 +38,11 @@ namespace aten {
             virtual ~PostProc() {}
 
         public:
-            virtual void prepareRender(
+            virtual void PrepareRender(
                 const void* pixels,
                 bool revert) override
             {
-                shader::prepareRender(pixels, revert);
+                shader::PrepareRender(pixels, revert);
             }
 
             virtual PixelFormat inFormat() const = 0;
@@ -73,13 +73,13 @@ namespace aten {
                 return m_prevPass;
             }
 
-            void prepareRender(
+            void PrepareRender(
                 PostProc* prevPass,
                 const void* pixels,
                 bool revert)
             {
                 m_prevPass = prevPass;
-                prepareRender(pixels, revert);
+                PrepareRender(pixels, revert);
             }
 
             bool IsEnabled() const

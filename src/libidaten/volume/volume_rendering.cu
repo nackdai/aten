@@ -98,8 +98,8 @@ namespace vpt
 
         bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
 
-        // Œð·ˆÊ’u‚Ì–@ü.
-        // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ðl—¶.
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½Ì–@ï¿½ï¿½.
+        // ï¿½ï¿½ï¿½Ì‚ï¿½ï¿½ï¿½Ìƒï¿½ï¿½Cï¿½Ì“ï¿½ï¿½oï¿½ï¿½ï¿½lï¿½ï¿½.
         aten::vec3 orienting_normal = rec.normal;
 
         AT_NAME::FillMaterial(
@@ -165,7 +165,7 @@ namespace vpt
 
                 // Apply normal map.
                 int32_t normalMap = shMtrls[threadIdx.x].normalMap;
-                auto pre_sampled_r = AT_NAME::material::applyNormal(
+                auto pre_sampled_r = AT_NAME::material::ApplyNormal(
                     &shMtrls[threadIdx.x],
                     normalMap,
                     orienting_normal, orienting_normal,
@@ -211,7 +211,7 @@ namespace vpt
 
                 AT_NAME::MaterialSampling sampling;
 
-                AT_NAME::material::sampleMaterial(
+                AT_NAME::material::SampleMaterial(
                     &sampling,
                     &shMtrls[threadIdx.x],
                     orienting_normal,

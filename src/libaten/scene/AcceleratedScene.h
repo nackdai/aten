@@ -27,7 +27,7 @@ namespace aten {
             aten::aabb bbox;
 
             for (const auto& t : m_list) {
-                bbox = aten::aabb::merge(bbox, t->getBoundingbox());
+                bbox = aten::aabb::merge(bbox, t->GetBoundingbox());
             }
 
             if (!m_list.empty()) {
@@ -54,9 +54,9 @@ namespace aten {
             aten::HitStopType hit_stop_type = aten::HitStopType::Closest) const override final
         {
             isect.t = t_max;
-            auto isHit = m_accel.HitWithLod(ctxt, r, t_min, t_max, enableLod, isect, hit_stop_type);
+            auto is_hit = m_accel.HitWithLod(ctxt, r, t_min, t_max, enableLod, isect, hit_stop_type);
 
-            return isHit;
+            return is_hit;
         }
 
         ACCEL* getAccel()
@@ -79,7 +79,7 @@ namespace aten {
         {
             aten::aabb bbox;
             for (const auto& t : m_list) {
-                bbox = aten::aabb::merge(bbox, t->getBoundingbox());
+                bbox = aten::aabb::merge(bbox, t->GetBoundingbox());
             }
             return bbox;
         }

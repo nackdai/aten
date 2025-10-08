@@ -42,7 +42,7 @@ __global__ void genPath(
 	const auto idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
-	path.isHit = false;
+	path.is_hit = false;
 
 	if (path.isKill) {
 		path.isTerminate = true;
@@ -104,7 +104,7 @@ __global__ void hitTestPrimaryRayInScreenSpace(
 	const auto idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
-	path.isHit = false;
+	path.is_hit = false;
 
 	hitbools[idx] = 0;
 
@@ -162,11 +162,11 @@ __global__ void hitTestPrimaryRayInScreenSpace(
 
 		isects[idx].t = (camPos - vp).length();
 
-		path.isHit = true;
+		path.is_hit = true;
 		hitbools[idx] = 1;
 	}
 	else {
-		path.isHit = false;
+		path.is_hit = false;
 		hitbools[idx] = 0;
 	}
 }
@@ -410,7 +410,7 @@ __global__ void hitTestInScreenSpace(
 	const auto idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
-	path.isHit = false;
+	path.is_hit = false;
 
 	hitbools[idx] = 0;
 	notIntersectBools[idx] = 0;
@@ -492,7 +492,7 @@ __global__ void hitTestInScreenSpace(
 #endif
 	}
 
-	path.isHit = isIntersect;
+	path.is_hit = isIntersect;
 	hitbools[idx] = isIntersect ? 1 : 0;
 	notIntersectBools[idx] = isIntersect ? 0 : 1;
 }
@@ -564,7 +564,7 @@ __global__ void hitTest(
 		idx = getIdx(ix, iy, width);
 
 		auto& path = paths[idx];
-		path.isHit = false;
+		path.is_hit = false;
 
 		hitbools[idx] = 0;
 
@@ -574,7 +574,7 @@ __global__ void hitTest(
 
 		aten::Intersection isect;
 
-		bool isHit = intersectClosest(&ctxt, rays[idx], &isect);
+		bool is_hit = intersectClosest(&ctxt, rays[idx], &isect);
 
 		//isects[idx].t = isect.t;
 		isects[idx].objid = isect.objid;
@@ -584,9 +584,9 @@ __global__ void hitTest(
 		isects[idx].a = isect.a;
 		isects[idx].b = isect.b;
 
-		path.isHit = isHit;
+		path.is_hit = is_hit;
 
-		hitbools[idx] = isHit ? 1 : 0;
+		hitbools[idx] = is_hit ? 1 : 0;
 	} while (true);
 }
 
@@ -606,7 +606,7 @@ __global__ void shadeMiss(
 
 	auto& path = paths[idx];
 
-	if (!path.isTerminate && !path.isHit) {
+	if (!path.isTerminate && !path.is_hit) {
 		// TODO
 		auto bg = aten::vec3(0);
 
@@ -641,7 +641,7 @@ __global__ void shadeMissWithEnvmap(
 
 	auto& path = paths[idx];
 
-	if (!path.isTerminate && !path.isHit) {
+	if (!path.isTerminate && !path.is_hit) {
 		auto r = rays[idx];
 
 		auto uv = AT_NAME::envmap::convertDirectionToUV(r.dir);
@@ -842,14 +842,14 @@ __global__ void shade(
 #else
 		aten::ray shadowRay(shadowRayOrg, shadowRayDir);
 
-		bool isHit = intersectCloser(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
+		bool is_hit = intersectCloser(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
 
-		if (isHit) {
+		if (is_hit) {
 			hitobj = (void*)&ctxt.shapes[isectTmp.objid];
 		}
 
-		isHit = AT_NAME::scene::hitLight(
-			isHit,
+		is_hit = AT_NAME::scene::hitLight(
+			is_hit,
 			light.attrib,
 			lightobj,
 			distToLight,
@@ -857,13 +857,13 @@ __global__ void shade(
 			isectTmp.t,
 			hitobj);
 
-		if (isHit)
+		if (is_hit)
 #endif
 		{
 			auto cosShadow = dot(orienting_normal, dirToLight);
 
-			real pdfb = samplePDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-			auto bsdf = sampleBSDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+			real pdfb = SamplePDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+			auto bsdf = SampleBSDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 
 			bsdf *= path.throughput;
 
@@ -931,7 +931,7 @@ __global__ void shade(
 
 	AT_NAME::MaterialSampling sampling;
 
-	sampleMaterial(
+	SampleMaterial(
 		&sampling,
 		&ctxt,
 		&mtrl,
@@ -1016,15 +1016,15 @@ __global__ void hitShadowRay(
 
 		aten::Intersection isectTmp;
 
-		bool isHit = false;
-		isHit = intersectCloser(&ctxt, shadowRay, &isectTmp, shadowRay.distToLight - AT_MATH_EPSILON);
+		bool is_hit = false;
+		is_hit = intersectCloser(&ctxt, shadowRay, &isectTmp, shadowRay.distToLight - AT_MATH_EPSILON);
 
-		if (isHit) {
+		if (is_hit) {
 			hitobj = &ctxt.shapes[isectTmp.objid];
 		}
 
-		isHit = AT_NAME::scene::hitLight(
-			isHit,
+		is_hit = AT_NAME::scene::hitLight(
+			is_hit,
 			light->attrib,
 			lightobj,
 			shadowRay.distToLight,
@@ -1032,7 +1032,7 @@ __global__ void hitShadowRay(
 			isectTmp.t,
 			hitobj);
 
-		if (isHit) {
+		if (is_hit) {
 			paths[idx].contrib += shadowRay.lightcontrib;
 		}
 	}

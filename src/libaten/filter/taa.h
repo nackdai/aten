@@ -66,7 +66,7 @@ namespace aten {
             virtual ~TAAPass() {}
 
         public:
-            virtual void prepareRender(
+            virtual void PrepareRender(
                 const void* pixels,
                 bool revert) override;
 
@@ -88,7 +88,7 @@ namespace aten {
             virtual ~FinalPass() {}
 
         public:
-            virtual void prepareRender(
+            virtual void PrepareRender(
                 const void* pixels,
                 bool revert) override;
 

@@ -10,9 +10,9 @@ namespace AT_NAME {
         : Light(aten::LightType::Area, aten::LightAttributeArea)
     {
         m_obj = obj;
-        m_param.arealight_objid = obj->id();
-        m_param.light_color = light_color;
-        m_param.intensity = intensity;
-        m_param.scale = scale;
+        param_.arealight_objid = obj->id();
+        param_.light_color = light_color;
+        param_.intensity = intensity;
+        param_.scale = scale;
     }
 }

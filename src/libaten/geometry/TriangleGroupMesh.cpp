@@ -24,13 +24,13 @@ namespace AT_NAME
             const auto &faceParam = f->GetParam();
             area += faceParam.area;
 
-            const auto &faabb = f->getBoundingbox();
+            const auto &faabb = f->GetBoundingbox();
 
             boxmin = aten::vmin(faabb.minPos(), boxmin);
             boxmax = aten::vmax(faabb.maxPos(), boxmax);
         }
 
-        m_aabb.init(boxmin, boxmax);
+        aabb_.init(boxmin, boxmax);
 
         // For rasterize rendering.
         if (ctxt.IsWindowInitialized())

@@ -29,7 +29,7 @@ namespace aten
 
         while (depth < max_depth_) {
             if (scene->hit(ctxt, inRay, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
-                path_host_.paths.attrib[idx].isHit = true;
+                path_host_.paths.attrib[idx].is_hit = true;
 
                 AT_NAME::ao::ShandeAO(
                     idx,

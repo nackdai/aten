@@ -87,13 +87,13 @@ void StylizedHighlight::InitDebugVisual(
 
 void StylizedHighlight::PreRender(aten::shader& shader, const aten::PinholeCamera& camera)
 {
-    auto h_translation_dt = shader.getHandle("translation_dt");
+    auto h_translation_dt = shader.GetHandle("translation_dt");
     CALL_GL_API(::glUniform1f(h_translation_dt, half_trans_t_));
 
-    auto h_scale_t = shader.getHandle("scale_t");
+    auto h_scale_t = shader.GetHandle("scale_t");
     CALL_GL_API(::glUniform1f(h_scale_t, half_scale_));
 
-    auto h_split_t = shader.getHandle("split_t");
+    auto h_split_t = shader.GetHandle("split_t");
     CALL_GL_API(::glUniform1f(h_split_t, half_split_t_));
 }
 
@@ -133,7 +133,7 @@ void StylizedHighlight::UpdateHalfVectors()
         half_vtx.emplace_back(aten::vec4(p + half, 1.0F));
     }
 
-    if (vb_halfs_.isInitialized()) {
+    if (vb_halfs_.IsInitialized()) {
         vb_halfs_.update(half_vtx.size(), half_vtx.data());
     }
     else {
@@ -151,7 +151,7 @@ void StylizedHighlight::DrawDebugVisual(
     const aten::context& ctxt,
     const aten::Camera& cam)
 {
-    shader_.prepareRender(nullptr, false);
+    shader_.PrepareRender(nullptr, false);
 
     auto camparam = cam.param();
 
@@ -177,11 +177,11 @@ void StylizedHighlight::DrawDebugVisual(
 
     aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-    auto hMtxW2C = shader_.getHandle("mtx_W2C");
+    auto hMtxW2C = shader_.GetHandle("mtx_W2C");
     CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtx_W2C.a[0]));
 
-    auto hMtxL2W = shader_.getHandle("mtx_L2W");
-    auto hColor = shader_.getHandle("color");
+    auto hMtxL2W = shader_.GetHandle("mtx_L2W");
+    auto hColor = shader_.GetHandle("color");
 
     CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, mtx_L2W.data()));
 

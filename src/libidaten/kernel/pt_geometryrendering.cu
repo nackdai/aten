@@ -55,9 +55,9 @@ __global__ void renderAOV(
 	aten::hitrecord rec;
 	aten::Intersection isect;
 
-	bool isHit = intersectClosest(&ctxt, ray, &isect);
+	bool is_hit = intersectClosest(&ctxt, ray, &isect);
 
-	if (isHit) {
+	if (is_hit) {
 		auto obj = &ctxt.shapes[isect.objid];
 		evalHitResult(&ctxt, obj, ray, &rec, &isect);
 

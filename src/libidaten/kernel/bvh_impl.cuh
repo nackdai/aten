@@ -31,7 +31,7 @@ AT_INLINE_RELEASE __device__ bool intersectBVHTriangles(
         boxmin = make_float3(node0.x, node0.y, node0.z);
         boxmax = make_float3(node1.x, node1.y, node1.z);
 
-        bool isHit = false;
+        bool is_hit = false;
 
         if (attrib.y >= 0) {
             int32_t primidx = (int32_t)attrib.y;
@@ -40,10 +40,10 @@ AT_INLINE_RELEASE __device__ bool intersectBVHTriangles(
             prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::TriangleParamter_float4_size + 1];
 
             isectTmp.t = AT_MATH_INF;
-            isHit = AT_NAME::triangle::hit(prim, *ctxt, r, &isectTmp);
+            is_hit = AT_NAME::triangle::hit(prim, *ctxt, r, &isectTmp);
 
             bool isIntersect = (Type == idaten::IntersectType::Any
-                ? isHit
+                ? is_hit
                 : isectTmp.t < isect->t);
 
             if (isIntersect) {
@@ -65,10 +65,10 @@ AT_INLINE_RELEASE __device__ bool intersectBVHTriangles(
             }
         }
         else {
-            isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
+            is_hit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
         }
 
-        if (isHit) {
+        if (is_hit) {
             nodeid = (int32_t)node0.w;
         }
         else {
@@ -119,7 +119,7 @@ AT_INLINE_RELEASE __device__ bool intersectBVH(
         boxmin = make_float3(node0.x, node0.y, node0.z);
         boxmax = make_float3(node1.x, node1.y, node1.z);
 
-        bool isHit = false;
+        bool is_hit = false;
 
 #ifdef ENABLE_PLANE_LOOP_BVH
         if (attrib.x >= 0 || attrib.y >= 0) {
@@ -162,10 +162,10 @@ AT_INLINE_RELEASE __device__ bool intersectBVH(
                 prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::TriangleParamter_float4_size + 1];
 
                 isectTmp.t = AT_MATH_INF;
-                isHit = AT_NAME::triangle::hit(prim, *ctxt, transformedRay, &isectTmp);
+                is_hit = AT_NAME::triangle::hit(prim, *ctxt, transformedRay, &isectTmp);
 
                 bool isIntersect = (Type == idaten::IntersectType::Any
-                    ? isHit
+                    ? is_hit
                     : isectTmp.t < isect->t);
 
                 if (isIntersect) {
@@ -188,10 +188,10 @@ AT_INLINE_RELEASE __device__ bool intersectBVH(
             }
         }
         else {
-            isHit = aten::aabb::hit(transformedRay, boxmin, boxmax, t_min, t_max, &t);
+            is_hit = aten::aabb::hit(transformedRay, boxmin, boxmax, t_min, t_max, &t);
         }
 
-        if (isHit) {
+        if (is_hit) {
             nodeid = (int32_t)node0.w;
         }
         else {
@@ -199,7 +199,7 @@ AT_INLINE_RELEASE __device__ bool intersectBVH(
         }
 
         if (nodeid < 0 && toplayerHit >= 0) {
-            nodeid = isHit ? toplayerHit : toplayerMiss;
+            nodeid = is_hit ? toplayerHit : toplayerMiss;
             toplayerHit = -1;
             toplayerMiss = -1;
             node = ctxt->nodes[0];
@@ -224,20 +224,20 @@ AT_INLINE_RELEASE __device__ bool intersectBVH(
                         transformedRay = r;
                     }
 
-                    isHit = intersectBVHTriangles<Type>(ctxt->nodes[(int32_t)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+                    is_hit = intersectBVHTriangles<Type>(ctxt->nodes[(int32_t)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
                 }
             }
             else {
                 // TODO
                 // Only sphere...
-                //isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
+                //is_hit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
                 isectTmp.t = AT_MATH_INF;
-                isHit = hitSphere(s, r, t_min, t_max, &isectTmp);
+                is_hit = hitSphere(s, r, t_min, t_max, &isectTmp);
                 isectTmp.mtrlid = s->mtrl.idx;
             }
 
             bool isIntersect = (Type == idaten::IntersectType::Any
-                ? isHit
+                ? is_hit
                 : isectTmp.t < isect->t);
 
             if (isIntersect) {
@@ -255,10 +255,10 @@ AT_INLINE_RELEASE __device__ bool intersectBVH(
             }
         }
         else {
-            isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
+            is_hit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
         }
 
-        if (isHit) {
+        if (is_hit) {
             nodeid = (int32_t)node0.w;
         }
         else {
@@ -283,13 +283,13 @@ AT_INLINE_RELEASE __device__ bool intersectBVH(
 
     float t_min = AT_MATH_EPSILON;
 
-    bool isHit = intersectBVH<idaten::IntersectType::Closest>(
+    bool is_hit = intersectBVH<idaten::IntersectType::Closest>(
         ctxt,
         r,
         t_min, t_max,
         isect);
 
-    return isHit;
+    return is_hit;
 }
 
 AT_INLINE_RELEASE __device__ bool intersectCloserBVH(
@@ -305,13 +305,13 @@ AT_INLINE_RELEASE __device__ bool intersectCloserBVH(
 
     float t_min = AT_MATH_EPSILON;
 
-    bool isHit = intersectBVH<idaten::IntersectType::Closer>(
+    bool is_hit = intersectBVH<idaten::IntersectType::Closer>(
         ctxt,
         r,
         t_min, t_max,
         isect);
 
-    return isHit;
+    return is_hit;
 }
 
 AT_INLINE_RELEASE __device__ bool intersectAnyBVH(
@@ -327,11 +327,11 @@ AT_INLINE_RELEASE __device__ bool intersectAnyBVH(
     float t_min = AT_MATH_EPSILON;
     float t_max = AT_MATH_INF;
 
-    bool isHit = intersectBVH<idaten::IntersectType::Any>(
+    bool is_hit = intersectBVH<idaten::IntersectType::Any>(
         ctxt,
         r,
         t_min, t_max,
         isect);
 
-    return isHit;
+    return is_hit;
 }

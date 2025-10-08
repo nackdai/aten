@@ -208,7 +208,7 @@ namespace npr_kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        if (paths.attrib[idx].is_terminated || paths.attrib[idx].isHit) {
+        if (paths.attrib[idx].is_terminated || paths.attrib[idx].is_hit) {
             return;
         }
 

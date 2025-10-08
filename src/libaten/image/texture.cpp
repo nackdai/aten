@@ -13,7 +13,7 @@ namespace aten
     {
         init(width, height, channels);
         if (!name.empty()) {
-            m_name = name;
+            name_ = name;
         }
     }
 
@@ -221,7 +221,7 @@ namespace aten
         // shaderはバインドされていること.
 
         std::string texuniform = std::string("s") + std::to_string(stage);
-        auto handle = shd->getHandle(texuniform.c_str());
+        auto handle = shd->GetHandle(texuniform.c_str());
         if (handle >= 0) {
             CALL_GL_API(::glUniform1i(handle, stage));
 

@@ -79,7 +79,7 @@ namespace aten
             m_meshs[i].initGLResources(shd, isGPUSkinning, m_vbs);
         }
 
-        if (m_vbForGPUSkinning.isInitialized()) {
+        if (m_vbForGPUSkinning.IsInitialized()) {
             return;
         }
 

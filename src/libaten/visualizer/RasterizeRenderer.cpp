@@ -48,25 +48,25 @@ namespace aten
 
     bool RasterizeRenderer::init(
         int32_t width, int32_t height,
-        std::string_view pathVS,
-        std::string_view pathFS)
+        std::string_view path_vs,
+        std::string_view path_fs)
     {
         width_ = width;
         height_ = height;
 
-        return m_shader.init(width, height, pathVS, pathFS);
+        return m_shader.init(width, height, path_vs, path_fs);
     }
 
     bool RasterizeRenderer::init(
         int32_t width, int32_t height,
-        std::string_view pathVS,
-        std::string_view pathGS,
-        std::string_view pathFS)
+        std::string_view path_vs,
+        std::string_view path_gs,
+        std::string_view path_fs)
     {
         width_ = width;
         height_ = height;
 
-        return m_shader.init(width, height, pathVS, pathGS, pathFS);
+        return m_shader.init(width, height, path_vs, path_gs, path_fs);
     }
 
     void RasterizeRenderer::prepareDraw(const Camera* cam)
@@ -93,9 +93,9 @@ namespace aten
 
         aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-        m_shader.prepareRender(nullptr, false);
+        m_shader.PrepareRender(nullptr, false);
 
-        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        auto hMtxW2C = m_shader.GetHandle("mtx_W2C");
         CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
     }
 
@@ -155,12 +155,12 @@ namespace aten
             m_mtxPrevW2C = mtx_W2C;
         }
 
-        m_shader.prepareRender(nullptr, false);
+        m_shader.PrepareRender(nullptr, false);
 
-        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        auto hMtxW2C = m_shader.GetHandle("mtx_W2C");
         CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
-        auto hPrevMtxW2C = m_shader.getHandle("mtxPrevW2C");
+        auto hPrevMtxW2C = m_shader.GetHandle("mtxPrevW2C");
         CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, (const GLfloat*)&m_mtxPrevW2C.a[0]));
 
         AT_ASSERT(fbo.IsValid());
@@ -186,16 +186,16 @@ namespace aten
         // For object (which means "not" deformable).
         scene->render(
             [&](const aten::mat4& mtx_L2W, const aten::mat4& mtx_prev_L2W, int32_t objid, int32_t primid) {
-                auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+                auto hMtxL2W = m_shader.GetHandle("mtx_L2W");
                 CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
 
-                auto hPrevMtxL2W = m_shader.getHandle("mtx_prev_L2W");
+                auto hPrevMtxL2W = m_shader.GetHandle("mtx_prev_L2W");
                 CALL_GL_API(::glUniformMatrix4fv(hPrevMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_prev_L2W.a[0]));
 
-                auto hObjId = m_shader.getHandle("objid");
+                auto hObjId = m_shader.GetHandle("objid");
                 CALL_GL_API(::glUniform1i(hObjId, objid));
 
-                auto hPrimId = m_shader.getHandle("primid");
+                auto hPrimId = m_shader.GetHandle("primid");
                 CALL_GL_API(::glUniform1i(hPrimId, primid));
             },
             [](const std::shared_ptr<hitable>& target) {
@@ -206,26 +206,26 @@ namespace aten
         // For deformable.
         if (exShader)
         {
-            exShader->prepareRender(nullptr, false);
+            exShader->PrepareRender(nullptr, false);
 
-            hMtxW2C = exShader->getHandle("mtx_W2C");
+            hMtxW2C = exShader->GetHandle("mtx_W2C");
             CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
-            hPrevMtxW2C = exShader->getHandle("mtxPrevW2C");
+            hPrevMtxW2C = exShader->GetHandle("mtxPrevW2C");
             CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, (const GLfloat*)&m_mtxPrevW2C.a[0]));
 
             scene->render(
                 [&](const aten::mat4& mtx_L2W, const aten::mat4& mtx_prev_L2W, int32_t objid, int32_t primid) {
-                    auto hMtxL2W = exShader->getHandle("mtx_L2W");
+                    auto hMtxL2W = exShader->GetHandle("mtx_L2W");
                     CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
 
-                    auto hPrevMtxL2W = exShader->getHandle("mtx_prev_L2W");
+                    auto hPrevMtxL2W = exShader->GetHandle("mtx_prev_L2W");
                     CALL_GL_API(::glUniformMatrix4fv(hPrevMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_prev_L2W.a[0]));
 
-                    auto hObjId = exShader->getHandle("objid");
+                    auto hObjId = exShader->GetHandle("objid");
                     CALL_GL_API(::glUniform1i(hObjId, objid));
 
-                    auto hPrimId = exShader->getHandle("primid");
+                    auto hPrimId = exShader->GetHandle("primid");
                     CALL_GL_API(::glUniform1i(hPrimId, primid));
                 },
                 [](const std::shared_ptr<hitable>& target) {
@@ -289,15 +289,15 @@ namespace aten
         {{1, 1, 1, 1}, {0, 0, 0}, {1, 0, 0}},
     };
 
-    void RasterizeRenderer::drawAABB(
+    void RasterizeRenderer::DrawAABB(
         const Camera* cam,
         accelerator* accel)
     {
         prepareForDrawAABB(cam);
 
-        auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+        auto hMtxL2W = m_shader.GetHandle("mtx_L2W");
 
-        accel->drawAABB(
+        accel->DrawAABB(
             [&](const aten::mat4& mtx_L2W) {
                 // Draw.
                 CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
@@ -306,13 +306,13 @@ namespace aten
             aten::mat4::Identity);
     }
 
-    void RasterizeRenderer::drawAABB(
+    void RasterizeRenderer::DrawAABB(
         const Camera* cam,
         const aabb& bbox)
     {
         prepareForDrawAABB(cam);
 
-        auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+        auto hMtxL2W = m_shader.GetHandle("mtx_L2W");
 
         aten::mat4 mtxScale;
         mtxScale.asScale(bbox.size());
@@ -330,7 +330,7 @@ namespace aten
     void RasterizeRenderer::prepareForDrawAABB(const Camera* cam)
     {
         // Initialize vb.
-        if (!m_boxvb.isInitialized()) {
+        if (!m_boxvb.IsInitialized()) {
             m_boxvb.init(
                 sizeof(aten::vertex),
                 AT_COUNTOF(boxvtx),
@@ -338,7 +338,7 @@ namespace aten
                 (void*)boxvtx);
         }
 
-        m_shader.prepareRender(nullptr, false);
+        m_shader.PrepareRender(nullptr, false);
 
         auto camparam = cam->param();
 
@@ -362,7 +362,7 @@ namespace aten
 
         aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        auto hMtxW2C = m_shader.GetHandle("mtx_W2C");
         CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
     }
 
@@ -395,13 +395,13 @@ namespace aten
 
         aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-        m_shader.prepareRender(nullptr, false);
+        m_shader.PrepareRender(nullptr, false);
 
         // Not modify local to world matrix...
-        auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+        auto hMtxL2W = m_shader.GetHandle("mtx_L2W");
         CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
 
-        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        auto hMtxW2C = m_shader.GetHandle("mtx_W2C");
         CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
         if (isWireFrame) {
@@ -416,9 +416,9 @@ namespace aten
 
         ctxt.build();
 
-        auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
-        auto hColor = m_shader.getHandle("color");
-        auto hMtrlId = m_shader.getHandle("materialId");
+        auto hHasAlbedo = m_shader.GetHandle("hasAlbedo");
+        auto hColor = m_shader.GetHandle("color");
+        auto hMtrlId = m_shader.GetHandle("materialId");
 
         obj.draw(
             [&](const aten::vec3& color, const aten::texture* albedo, int32_t mtrlid) {
@@ -471,13 +471,13 @@ namespace aten
 
         aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-        m_shader.prepareRender(nullptr, false);
+        m_shader.PrepareRender(nullptr, false);
 
         // Not modify local to world matrix...
-        auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+        auto hMtxL2W = m_shader.GetHandle("mtx_L2W");
         CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
 
-        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        auto hMtxW2C = m_shader.GetHandle("mtx_W2C");
         CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
         if (isWireFrame) {
@@ -492,9 +492,9 @@ namespace aten
 
         ctxt.build();
 
-        auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
-        auto hColor = m_shader.getHandle("color");
-        auto hMtrlId = m_shader.getHandle("materialId");
+        auto hHasAlbedo = m_shader.GetHandle("hasAlbedo");
+        auto hColor = m_shader.GetHandle("color");
+        auto hMtrlId = m_shader.GetHandle("materialId");
 
         renderFunc(
             [&](const AT_NAME::PolygonObject&obj) {
@@ -581,13 +581,13 @@ namespace aten
 
         aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-        m_shader.prepareRender(nullptr, false);
+        m_shader.PrepareRender(nullptr, false);
 
         // Not modify local to world matrix...
-        auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+        auto hMtxL2W = m_shader.GetHandle("mtx_L2W");
         CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mat4::Identity.a[0]));
 
-        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        auto hMtxW2C = m_shader.GetHandle("mtx_W2C");
         CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
         // Set default frame buffer.
@@ -633,7 +633,7 @@ namespace aten
             }
         }
 
-        auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
+        auto hHasAlbedo = m_shader.GetHandle("hasAlbedo");
 
         for (int32_t i = 0; i < m_ib.size(); i++)
         {
@@ -689,9 +689,9 @@ namespace aten
 
         aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-        m_shader.prepareRender(nullptr, false);
+        m_shader.PrepareRender(nullptr, false);
 
-        auto hMtxW2C = m_shader.getHandle("mtx_W2C");
+        auto hMtxW2C = m_shader.GetHandle("mtx_W2C");
         CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
         // Set default frame buffer.
@@ -711,7 +711,7 @@ namespace aten
 
         scene->render(
             [&](const aten::mat4& mtx_L2W, const aten::mat4& mtx_prev_L2W, int32_t objid, int32_t primid) {
-                auto hMtxL2W = m_shader.getHandle("mtx_L2W");
+                auto hMtxL2W = m_shader.GetHandle("mtx_L2W");
                 CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtx_L2W.a[0]));
             },
             [](const std::shared_ptr<hitable>& target) {
@@ -726,7 +726,7 @@ namespace aten
 
     void RasterizeRenderer::setColor(const vec4& color)
     {
-        auto hColor = m_shader.getHandle("color");
+        auto hColor = m_shader.GetHandle("color");
         CALL_GL_API(::glUniform4f(hColor, color.x, color.y, color.z, 1.0f));
     }
 }

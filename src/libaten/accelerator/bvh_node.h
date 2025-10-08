@@ -34,15 +34,15 @@ namespace aten {
         /**
          * @brief Return a AABB which the node has.
          */
-        const aabb& getBoundingbox() const
+        const aabb& GetBoundingbox() const
         {
 #if 0
-            if (m_item) {
-                return m_item->getTransformedBoundingBox();
+            if (item_) {
+                return item_->getTransformedBoundingBox();
             }
-            return m_aabb;
+            return aabb_;
 #else
-            return m_aabb;
+            return aabb_;
 #endif
         }
 
@@ -51,7 +51,7 @@ namespace aten {
          */
         void setBoundingBox(const aabb& bbox)
         {
-            m_aabb = bbox;
+            aabb_ = bbox;
         }
 
         /**
@@ -59,7 +59,7 @@ namespace aten {
          */
         bool isLeaf() const
         {
-            return (!m_left && !m_right);
+            return (!left_ && !right_);
         }
 
         /**
@@ -67,11 +67,11 @@ namespace aten {
          */
         std::shared_ptr<const bvhnode> getLeft() const
         {
-            return m_left;
+            return left_;
         }
         bvhnode* getLeft()
         {
-            return m_left.get();
+            return left_.get();
         }
 
         /**
@@ -79,25 +79,25 @@ namespace aten {
         */
         std::shared_ptr<const bvhnode> getRight() const
         {
-            return m_right;
+            return right_;
         }
         bvhnode* getRight()
         {
-            return m_right.get();
+            return right_.get();
         }
 
         void setParent(const std::shared_ptr<bvhnode>& parent)
         {
-            m_parent = parent.get();
+            parent_ = parent.get();
         }
         void setParent(bvhnode* parent)
         {
-            m_parent = parent;
+            parent_ = parent;
         }
 
         bvhnode* getParent()
         {
-            return m_parent;
+            return parent_;
         }
 
         /**
@@ -105,7 +105,7 @@ namespace aten {
          */
         hitable* getItem()
         {
-            return m_item;
+            return item_;
         }
 
         /**
@@ -113,7 +113,7 @@ namespace aten {
          */
         int32_t getTraversalOrder() const
         {
-            return m_traverseOrder;
+            return traverse_order_;
         }
 
         /**
@@ -121,7 +121,7 @@ namespace aten {
          */
         void setTraversalOrder(int32_t order)
         {
-            m_traverseOrder = order;
+            traverse_order_ = order;
         }
 
         /**
@@ -129,7 +129,7 @@ namespace aten {
          */
         int32_t getExternalId() const
         {
-            return m_externalId;
+            return external_id_;
         }
 
         /**
@@ -137,7 +137,7 @@ namespace aten {
         */
         void setExternalId(int32_t exid)
         {
-            m_externalId = exid;
+            external_id_ = exid;
         }
 
         /**
@@ -145,7 +145,7 @@ namespace aten {
          */
         int32_t getSubExternalId() const
         {
-            return m_subExternalId;
+            return sub_external_id_;
         }
 
         /**
@@ -153,7 +153,7 @@ namespace aten {
          */
         void setSubExternalId(int32_t exid)
         {
-            m_subExternalId = exid;
+            sub_external_id_ = exid;
         }
 
         /**
@@ -161,7 +161,7 @@ namespace aten {
          */
         int32_t getChildrenNum() const
         {
-            return m_childrenNum;
+            return children_num_;
         }
 
         /**
@@ -170,7 +170,7 @@ namespace aten {
         void setChildrenNum(int32_t num)
         {
             AT_ASSERT((0 <= num) && (num <= 4));
-            m_childrenNum = num;
+            children_num_ = num;
         }
 
         /**
@@ -178,7 +178,7 @@ namespace aten {
          */
         hitable** getChildren()
         {
-            return m_children;
+            return children_;
         }
 
         /**
@@ -186,7 +186,7 @@ namespace aten {
          */
         void registerChild(hitable* child, int32_t idx)
         {
-            m_children[idx] = child;
+            children_[idx] = child;
         }
 
     private:
@@ -195,7 +195,7 @@ namespace aten {
          */
         void setDepth(int32_t depth)
         {
-            m_depth = depth;
+            depth_ = depth;
         }
 
         /**
@@ -203,13 +203,13 @@ namespace aten {
         */
         void propageteDepthToChildren()
         {
-            if (m_left) {
-                m_left->setDepth(m_depth + 1);
-                m_left->propageteDepthToChildren();
+            if (left_) {
+                left_->setDepth(depth_ + 1);
+                left_->propageteDepthToChildren();
             }
-            if (m_right) {
-                m_right->setDepth(m_depth + 1);
-                m_right->propageteDepthToChildren();
+            if (right_) {
+                right_->setDepth(depth_ + 1);
+                right_->propageteDepthToChildren();
             }
         }
 
@@ -218,7 +218,7 @@ namespace aten {
          */
         int32_t getDepth() const
         {
-            return m_depth;
+            return depth_;
         }
 
         /**
@@ -243,58 +243,58 @@ namespace aten {
 
         void setIsCandidate(bool c)
         {
-            m_isCandidate = c;
+            is_candidate_ = c;
         }
         bool isCandidate() const
         {
-            return m_isCandidate;
+            return is_candidate_;
         }
 
         /**
          * @brief Draw AABB.
          */
-        void drawAABB(
+        void DrawAABB(
             aten::hitable::FuncDrawAABB func,
             const aten::mat4& mtx_L2W) const;
 
     protected:
-        std::shared_ptr<bvhnode> m_left;
-        std::shared_ptr<bvhnode> m_right;
+        std::shared_ptr<bvhnode> left_;
+        std::shared_ptr<bvhnode> right_;
 
         // NOTE
         // To avoid circular reference, I can't use shared_ptr for this.
         // On the other hand, I need to replace this value frequently for bvh updating.
         // Therefore, it is difficult to define this as weak_ptr.
-        bvhnode* m_parent;
+        bvhnode* parent_;
 
-        aabb m_aabb;
+        aabb aabb_;
 
         union {
             struct {
-                hitable* m_item;
+                hitable* item_;
                 hitable* padding[3];
             };
-            hitable* m_children[4];
+            hitable* children_[4];
         };
 
         // Order to traversal tree for threaded bvh
-        int32_t m_traverseOrder{ -1 };
+        int32_t traverse_order_{ -1 };
 
         // Index of an external tree
-        int32_t m_externalId{ -1 };
+        int32_t external_id_{ -1 };
 
         // Count of children which the node has, for multi bvh.
-        int32_t m_childrenNum{ 0 };
+        int32_t children_num_{ 0 };
 
         // Index of an external sub tree (it is for LOD).
-        int32_t m_subExternalId{ -1 };
+        int32_t sub_external_id_{ -1 };
 
         // Depth in the tree which the node belonges to
-        int32_t m_depth{ 0 };
+        int32_t depth_{ 0 };
 
         // BVH which the node belongs to.
-        bvh* m_bvh{ nullptr };
+        bvh* bvh_{ nullptr };
 
-        bool m_isCandidate{ false };
+        bool is_candidate_{ false };
     };
 }

@@ -28,13 +28,13 @@ namespace AT_NAME
         float t_min, float t_max,
         aten::Intersection& isect) const
     {
-        bool isHit = hit(
+        bool is_hit = hit(
             param_,
             ctxt,
             r,
             &isect);
 
-        if (isHit) {
+        if (is_hit) {
             // Temporary, notify triangle id to the parent object.
             isect.objid = m_id;
 
@@ -43,7 +43,7 @@ namespace AT_NAME
             isect.mtrlid = param_.mtrlid;
         }
 
-        return isHit;
+        return is_hit;
     }
 
     void triangle::build(

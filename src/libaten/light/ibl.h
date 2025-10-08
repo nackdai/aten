@@ -36,7 +36,7 @@ namespace AT_NAME {
         {
             if (bg_.envmap_tex_idx != bg.envmap_tex_idx) {
                 bg_ = bg;
-                m_param.envmapidx = bg.envmap_tex_idx;
+                param_.envmapidx = bg.envmap_tex_idx;
 
                 AT_ASSERT(bg.envmap_tex_idx >= 0);
                 auto envmap = ctxt.GetTexture(bg.envmap_tex_idx);

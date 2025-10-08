@@ -54,7 +54,7 @@ namespace idaten
 
     private:
         template <class T>
-        void onBuild(
+        void OnBuild(
             idaten::CudaTextureResource& dst,
             TypedCudaMemory<aten::TriangleParameter>& triangles,
             int32_t triIdOffset,

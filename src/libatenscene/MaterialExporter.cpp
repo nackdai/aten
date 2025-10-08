@@ -113,7 +113,7 @@ namespace aten
 
             {
                 auto xmlMtrlAttribElem = xmlDoc.NewElement("type");
-                xmlMtrlAttribElem->SetText(aten::material::getMaterialTypeName(info.param.type));
+                xmlMtrlAttribElem->SetText(aten::material::GetMaterialTypeName(info.param.type));
                 xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
             }
 

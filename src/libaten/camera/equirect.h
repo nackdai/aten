@@ -22,8 +22,8 @@ namespace aten {
 
             // カメラ座標ベクトル.
             m_dir = normalize(lookat - origin);
-            m_right = normalize(cross(m_dir, up));
-            m_up = cross(m_right, m_dir);
+            right_ = normalize(cross(m_dir, up));
+            m_up = cross(right_, m_dir);
 
             // 値を保持.
             m_at = lookat;
@@ -72,7 +72,7 @@ namespace aten {
         vec3 m_origin;
 
         vec3 m_dir;
-        vec3 m_right;
+        vec3 right_;
         vec3 m_up;
 
         vec3 m_at;

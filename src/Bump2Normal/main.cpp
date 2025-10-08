@@ -190,13 +190,13 @@ private:
         Normal2BumpBlitter() = default;
         ~Normal2BumpBlitter() = default;
 
-        void prepareRender(
+        void PrepareRender(
             const void* pixels,
             bool revert) override
         {
-            aten::Blitter::prepareRender(pixels, revert);
+            aten::Blitter::PrepareRender(pixels, revert);
 
-            setUniformFloat("scale", scale);
+            SetUniformFloat("scale", scale);
         }
 
         float scale{ 1.0f };

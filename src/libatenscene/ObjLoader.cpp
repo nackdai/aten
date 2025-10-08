@@ -113,7 +113,7 @@ namespace aten
                 obj = aten::TransformableFactory::createObject(ctxt);
             }
             if (obj->getName().empty()) {
-                obj->setName(shape.name);
+                obj->SetName(shape.name);
             }
         };
 
@@ -268,7 +268,7 @@ namespace aten
                         if (mtrl->param().type == aten::MaterialType::Emissive) {
                             // Export as the seprated object which has an emissive material.
                             auto emitobj(aten::TransformableFactory::createObject(ctxt));
-                            emitobj->setName(shape.name);
+                            emitobj->SetName(shape.name);
                             emitobj->appendShape(aten_shape);
                             emitobj->setBoundingBox(aten::aabb(shape_bbox_min, shape_bbox_max));
                             objs.push_back(std::move(emitobj));
@@ -427,7 +427,7 @@ namespace aten
                 else if (mtrl->param().type == aten::MaterialType::Emissive) {
                     // Export the object which has an emissive material as the emissive object.
                     auto emitobj(aten::TransformableFactory::createObject(ctxt));
-                    emitobj->setName(shape.name);
+                    emitobj->SetName(shape.name);
                     emitobj->appendShape(aten_shape);
                     emitobj->setBoundingBox(aten::aabb(shape_bbox_min, shape_bbox_max));
                     objs.push_back(std::move(emitobj));

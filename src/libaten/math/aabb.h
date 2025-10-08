@@ -93,7 +93,7 @@ namespace aten {
             float& t_result,
             aten::vec3& nml)
         {
-            bool isHit = hit(r, _min, _max, t_min, t_max, &t_result);
+            bool is_hit = hit(r, _min, _max, t_min, t_max, &t_result);
 
             // NOTE
             // https://www.gamedev.net/forums/topic/551816-finding-the-aabb-surface-normal-from-an-intersection-point-on-aabb/
@@ -133,7 +133,7 @@ namespace aten {
                 nml = sign.z * aten::vec3(0, 0, 1);
             }
 
-            return isHit;
+            return is_hit;
         }
 
         bool isIn(const vec3& p) const
@@ -173,19 +173,19 @@ namespace aten {
             return m_max;
         }
 
-        AT_HOST_DEVICE_API vec3 getCenter() const
+        AT_HOST_DEVICE_API vec3 GetCenter() const
         {
             vec3 center = (m_min + m_max) * 0.5F;
             return center;
         }
 
         static vec3 computeFaceSurfaceArea(
-            const vec3& vMin,
-            const vec3& vMax)
+            const vec3& v_min,
+            const vec3& v_max)
         {
-            auto dx = aten::abs(vMax.x - vMin.x);
-            auto dy = aten::abs(vMax.y - vMin.y);
-            auto dz = aten::abs(vMax.z - vMin.z);
+            auto dx = aten::abs(v_max.x - v_min.x);
+            auto dy = aten::abs(v_max.y - v_min.y);
+            auto dz = aten::abs(v_max.z - v_min.z);
 
             return vec3(dy * dz, dz * dx, dx * dy);
         }
@@ -196,12 +196,12 @@ namespace aten {
         }
 
         static float computeSurfaceArea(
-            const vec3& vMin,
-            const vec3& vMax)
+            const vec3& v_min,
+            const vec3& v_max)
         {
-            auto dx = aten::abs(vMax.x - vMin.x);
-            auto dy = aten::abs(vMax.y - vMin.y);
-            auto dz = aten::abs(vMax.z - vMin.z);
+            auto dx = aten::abs(v_max.x - v_min.x);
+            auto dy = aten::abs(v_max.y - v_min.y);
+            auto dz = aten::abs(v_max.z - v_min.z);
 
             // ６面の面積を計算するが、AABBは対称なので、３面の面積を計算して２倍すればいい.
             auto area = dx * dy;
@@ -306,46 +306,46 @@ namespace aten {
 
         static aabb transform(const aabb& box, const aten::mat4& mtx_L2W)
         {
-            vec3 center = box.getCenter();
+            vec3 center = box.GetCenter();
 
-            vec3 vMin = box.minPos() - center;
-            vec3 vMax = box.maxPos() - center;
+            vec3 v_min = box.minPos() - center;
+            vec3 v_max = box.maxPos() - center;
 
-            vec3 pts[8] = {
-                vec3(vMin.x, vMin.y, vMin.z),
-                vec3(vMax.x, vMin.y, vMin.z),
-                vec3(vMin.x, vMax.y, vMin.z),
-                vec3(vMax.x, vMax.y, vMin.z),
-                vec3(vMin.x, vMin.y, vMax.z),
-                vec3(vMax.x, vMin.y, vMax.z),
-                vec3(vMin.x, vMax.y, vMax.z),
-                vec3(vMax.x, vMax.y, vMax.z),
+            std::array pts = {
+                vec3(v_min.x, v_min.y, v_min.z),
+                vec3(v_max.x, v_min.y, v_min.z),
+                vec3(v_min.x, v_max.y, v_min.z),
+                vec3(v_max.x, v_max.y, v_min.z),
+                vec3(v_min.x, v_min.y, v_max.z),
+                vec3(v_max.x, v_min.y, v_max.z),
+                vec3(v_min.x, v_max.y, v_max.z),
+                vec3(v_max.x, v_max.y, v_max.z),
             };
 
-            vec3 newMin = vec3(AT_MATH_INF);
-            vec3 newMax = vec3(-AT_MATH_INF);
+            vec3 new_min = vec3(AT_MATH_INF);
+            vec3 new_max = vec3(-AT_MATH_INF);
 
             for (int32_t i = 0; i < 8; i++) {
                 vec3 v = mtx_L2W.apply(pts[i]);
 
-                newMin = vec3(
-                    std::min(newMin.x, v.x),
-                    std::min(newMin.y, v.y),
-                    std::min(newMin.z, v.z));
-                newMax = vec3(
-                    std::max(newMax.x, v.x),
-                    std::max(newMax.y, v.y),
-                    std::max(newMax.z, v.z));
+                new_min = vec3(
+                    std::min(new_min.x, v.x),
+                    std::min(new_min.y, v.y),
+                    std::min(new_min.z, v.z));
+                new_max = vec3(
+                    std::max(new_max.x, v.x),
+                    std::max(new_max.y, v.y),
+                    std::max(new_max.z, v.z));
             }
 
-            aabb ret(newMin + center, newMax + center);
+            aabb ret(new_min + center, new_max + center);
 
             return ret;
         }
 
         AT_HOST_DEVICE_API float ComputeSphereRadiusToCover() const
         {
-            const auto center = getCenter();
+            const auto center = GetCenter();
             const auto radius = length(m_max - center);
             return radius;
         }

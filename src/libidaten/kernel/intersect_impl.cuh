@@ -162,7 +162,7 @@ AT_INLINE_RELEASE __device__ int32_t hit4AABBWith1Ray(
     auto t1 = aten::vmin(aten::vmin(tmaxX, tmaxY), aten::vmin(tmaxZ, make_float4(t_max)));
     auto t0 = aten::vmax(aten::vmax(tminX, tminY), aten::vmax(tminZ, make_float4(t_min)));
 
-    union isHit {
+    union is_hit {
         struct {
             uint8_t _0 : 1;
             uint8_t _1 : 1;

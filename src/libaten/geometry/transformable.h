@@ -18,23 +18,23 @@ namespace aten
 
         transformable(ObjectType type)
         {
-            m_param.type = type;
+            param_.type = type;
         }
 
     public:
         ObjectType getType() const
         {
-            return m_param.type;
+            return param_.type;
         }
 
         const ObjectParameter& GetParam() const
         {
-            return m_param;
+            return param_;
         }
 
         ObjectParameter& GetParam()
         {
-            return m_param;
+            return param_;
         }
 
         virtual void getMatrices(
@@ -50,7 +50,7 @@ namespace aten
             return m_id;
         }
 
-        void setName(std::string_view name)
+        void SetName(std::string_view name)
         {
             name_.assign(name);
         }
@@ -76,7 +76,7 @@ namespace aten
     protected:
         int32_t m_id{ -1 };
 
-        ObjectParameter m_param;
+        ObjectParameter param_;
 
         std::string name_;
     };

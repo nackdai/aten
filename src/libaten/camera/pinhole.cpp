@@ -9,7 +9,7 @@ namespace AT_NAME {
         float vfov,    // vertical fov.
         int32_t width, int32_t height)
     {
-        m_param = CreateCameraParam(
+        param_ = CreateCameraParam(
             origin, lookat, up,
             vfov,
             0.0F, 0.0F,
@@ -24,7 +24,7 @@ namespace AT_NAME {
         float z_near, float z_far,
         int32_t width, int32_t height)
     {
-        m_param = CreateCameraParam(
+        param_ = CreateCameraParam(
             origin, lookat, up,
             vfov,
             z_near, z_far,
@@ -77,12 +77,12 @@ namespace AT_NAME {
     void PinholeCamera::update()
     {
         init(
-            m_param.origin,
-            m_param.lookat,
-            m_param.up,
-            m_param.vfov,
-            m_param.width,
-            m_param.height);
+            param_.origin,
+            param_.lookat,
+            param_.up,
+            param_.vfov,
+            param_.width,
+            param_.height);
     }
 
     CameraSampleResult PinholeCamera::sample(
@@ -90,7 +90,7 @@ namespace AT_NAME {
         aten::sampler* sampler) const
     {
         CameraSampleResult result;
-        sample(&result, &m_param, s, t);
+        sample(&result, &param_, s, t);
         return result;
     }
 
@@ -130,13 +130,13 @@ namespace AT_NAME {
         //    d
         // cosθ = x / d => x = d / cosθ
 
-        float c = dot(ray.dir, m_param.dir);
-        float dist = m_param.dist / c;
+        float c = dot(ray.dir, param_.dir);
+        float dist = param_.dist / c;
 
-        aten::vec3 screenPos = m_param.origin + ray.dir * dist - m_param.center;
+        aten::vec3 screenPos = param_.origin + ray.dir * dist - param_.center;
 
-        float u = dot(screenPos, m_param.right) + m_param.width * float(0.5);
-        float v = dot(screenPos, m_param.up) + m_param.height * float(0.5);
+        float u = dot(screenPos, param_.right) + param_.width * float(0.5);
+        float v = dot(screenPos, param_.up) + param_.height * float(0.5);
 
         px = (int32_t)u;
         py = (int32_t)v;
@@ -150,14 +150,14 @@ namespace AT_NAME {
         const aten::vec3& pos_on_lens,
         const aten::vec3& pos_on_object_plane) const
     {
-        float pdf = float(1) / (m_param.width * m_param.height);
+        float pdf = float(1) / (param_.width * param_.height);
 
         aten::vec3 v = hit_point - pos_on_lens;
 
         {
             aten::vec3 dir = normalize(v);
-            const float cosTheta = dot(dir, m_param.dir);
-            const float dist = m_param.dist / (cosTheta + float(0.0001));
+            const float cosTheta = dot(dir, param_.dir);
+            const float dist = param_.dist / (cosTheta + float(0.0001));
             const float dist2 = dist * dist;
             pdf = pdf / (cosTheta / dist2);
         }
@@ -181,15 +181,15 @@ namespace AT_NAME {
         const aten::vec3& pos_on_lens,
         const aten::vec3& pos_on_object_plane) const
     {
-        const float W = float(1) / (m_param.width * m_param.height);
+        const float W = float(1) / (param_.width * param_.height);
 
         aten::vec3 v = hit_point - pos_on_lens;
         const float dist = length(v);
         v = normalize(v);
 
         // imagesensor -> lens
-        const float c0 = dot(v, m_param.dir);
-        const float d0 = m_param.dist / c0;
+        const float c0 = dot(v, param_.dir);
+        const float d0 = param_.dist / c0;
         const float G0 = c0 / (d0 * d0);
 
         // hitpoint -> camera
@@ -214,14 +214,14 @@ namespace AT_NAME {
 
         RevertRayToPixelPos(r, px, py);
 
-        if ((px >= 0) && (px < m_param.width)
-            && (py >= 0) && (py < m_param.height))
+        if ((px >= 0) && (px < param_.width)
+            && (py >= 0) && (py < param_.height))
         {
             x = px;
             y = py;
 
-            float u = (float)x / (float)m_param.width;
-            float v = (float)y / (float)m_param.height;
+            float u = (float)x / (float)param_.width;
+            float v = (float)y / (float)param_.height;
 
             auto camsample = sample(u, v, nullptr);
             pos_on_lens = camsample.pos_on_lens;
@@ -239,14 +239,14 @@ namespace AT_NAME {
         bool will_use_curr_camera_origin/*= false*/)
     {
         aten::vec3 cam_origin, lookat;
-        aten::tie(cam_origin, lookat) = PinholeCamera::FitBoundingBox(m_param, bounding_box, will_use_curr_camera_origin);
+        aten::tie(cam_origin, lookat) = PinholeCamera::FitBoundingBox(param_, bounding_box, will_use_curr_camera_origin);
 
         Initalize(
             cam_origin, lookat,
             aten::vec3(0, 1, 0),
-            m_param.vfov,
-            m_param.znear, m_param.zfar,
-            m_param.width, m_param.height);
+            param_.vfov,
+            param_.znear, param_.zfar,
+            param_.width, param_.height);
     }
 
     aten::tuple<aten::vec3, aten::vec3> PinholeCamera::FitBoundingBox(
@@ -254,7 +254,7 @@ namespace AT_NAME {
         const aten::aabb& bounding_box,
         bool will_use_curr_camera_look_direction/*= false*/)
     {
-        const auto bbox_center = bounding_box.getCenter();
+        const auto bbox_center = bounding_box.GetCenter();
 
         const float theta = aten::Deg2Rad(param.vfov);
         const auto distance = bounding_box.ComputeDistanceToCoverBoundingSphere(theta);

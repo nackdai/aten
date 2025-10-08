@@ -16,22 +16,22 @@ namespace aten
         return Blitter::init(width, height, vs, fs);
     }
 
-    void GTTonemapper::prepareRender(
+    void GTTonemapper::PrepareRender(
         const void* pixels,
         bool revert)
     {
-        Blitter::prepareRender(pixels, revert);
+        Blitter::PrepareRender(pixels, revert);
 
-        auto h_end_of_toe = getHandle(name_end_of_toe);
+        auto h_end_of_toe = GetHandle(name_end_of_toe);
         CALL_GL_API(::glUniform1f(h_end_of_toe, end_of_toe_));
 
-        auto h_contrast_param = getHandle(name_contrast_param);
+        auto h_contrast_param = GetHandle(name_contrast_param);
         CALL_GL_API(::glUniform1f(h_contrast_param, contrast_param_));
 
-        auto h_max_monitor_luminance = getHandle(name_max_monitor_luminance);
+        auto h_max_monitor_luminance = GetHandle(name_max_monitor_luminance);
         CALL_GL_API(::glUniform1f(h_max_monitor_luminance, max_monitor_luminance_));
 
-        auto h_range_of_linear = getHandle(name_range_of_linear);
+        auto h_range_of_linear = GetHandle(name_range_of_linear);
         CALL_GL_API(::glUniform1f(h_range_of_linear, range_of_linear_));
     }
 

@@ -45,14 +45,14 @@ namespace aten {
 
         bool init(
             int32_t width, int32_t height,
-            std::string_view pathVS,
-            std::string_view pathFS);
+            std::string_view path_vs,
+            std::string_view path_fs);
 
         bool init(
             int32_t width, int32_t height,
-            std::string_view pathVS,
-            std::string_view pathGS,
-            std::string_view pathFS);
+            std::string_view path_vs,
+            std::string_view path_gs,
+            std::string_view path_fs);
 
         void release()
         {
@@ -71,11 +71,11 @@ namespace aten {
             FBO& fbo,
             shader* exShader = nullptr);
 
-        void drawAABB(
+        void DrawAABB(
             const Camera* cam,
             accelerator* accel);
 
-        void drawAABB(
+        void DrawAABB(
             const Camera* cam,
             const aabb& bbox);
 

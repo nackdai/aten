@@ -27,10 +27,10 @@ namespace AT_NAME {
             const float scale = 1.0F)
             : Light(aten::LightType::Point, aten::LightAttributeSingluar)
         {
-            m_param.pos = pos;
-            m_param.light_color = light_color;
-            m_param.intensity = intensity;
-            m_param.scale = scale;
+            param_.pos = pos;
+            param_.light_color = light_color;
+            param_.intensity = intensity;
+            param_.scale = scale;
         }
 
         PointLight(aten::Values& val);

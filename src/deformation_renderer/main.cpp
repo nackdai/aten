@@ -45,7 +45,7 @@ public:
     {
         m_bvh.build(ctxt, list, num, bbox);
 
-        setBoundingBox(m_bvh.getBoundingbox());
+        setBoundingBox(m_bvh.GetBoundingbox());
     }
 
     virtual bool hit(
@@ -215,7 +215,7 @@ public:
                 bg);
 
 #ifdef ENABLE_SVGF
-            auto aabb = scene_.getAccel()->getBoundingbox();
+            auto aabb = scene_.getAccel()->GetBoundingbox();
             auto d = aabb.getDiagonalLenght();
             renderer_.setHitDistanceLimit(d * 0.25f);
 
@@ -256,7 +256,7 @@ public:
 
             lbvh_.init(maxTriNum);
 
-            const auto& sceneBbox = scene_.getAccel()->getBoundingbox();
+            const auto& sceneBbox = scene_.getAccel()->GetBoundingbox();
             auto& nodes = renderer_.getCudaTextureResourceForBvhNodes();
             auto& vtxPos = renderer_.getCudaTextureResourceForVtxPos();
 
@@ -359,7 +359,7 @@ public:
         auto visualizerTime = aten::GLProfiler::end();
 
         if (is_show_aabb_) {
-            rasterizer_aabb_.drawAABB(
+            rasterizer_aabb_.DrawAABB(
                 &camera_,
                 scene_.getAccel());
         }

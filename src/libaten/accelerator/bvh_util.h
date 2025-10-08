@@ -27,7 +27,7 @@ namespace aten {
                     // 本来ならこのキャストは不正だが、BVHであることは自明なので.
                     auto bvh = *reinterpret_cast<aten::bvh**>(&accel);
 
-                    ret = bvh->getRoot();
+                    ret = bvh->GetRoot();
                 }
             }
 

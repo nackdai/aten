@@ -90,14 +90,14 @@ namespace aten
         aabb* bbox)
     {
         if (is_nested_) {
-            buildAsNestedTree(ctxt, list, num, bbox);
+            BuildAsNestedTree(ctxt, list, num, bbox);
         }
         else {
-            buildAsTopLayerTree(ctxt, list, num, bbox);
+            BuildAsTopLayerTree(ctxt, list, num, bbox);
         }
     }
 
-    void sbvh::buildAsNestedTree(
+    void sbvh::BuildAsNestedTree(
         const context& ctxt,
         hitable** list,
         uint32_t num,
@@ -126,13 +126,13 @@ namespace aten
             }
         }
         else {
-            onBuild(ctxt, list, num);
+            OnBuild(ctxt, list, num);
 
             makeTreelet();
         }
     }
 
-    void sbvh::buildAsTopLayerTree(
+    void sbvh::BuildAsTopLayerTree(
         const context& ctxt,
         hitable** list,
         uint32_t num,
@@ -141,14 +141,14 @@ namespace aten
         AT_ASSERT(!is_nested_);
 
         // Tell not to build bottome layer.
-        m_bvh.disableLayer();
+        bvh_.disableLayer();
 
         // Build top layer bvh.
-        m_bvh.build(ctxt, list, num, bbox);
+        bvh_.build(ctxt, list, num, bbox);
 
-        auto boundingBox = m_bvh.getBoundingbox();
+        auto boundingBox = bvh_.GetBoundingbox();
 
-        const auto& nestedBvh = m_bvh.getNestedAccel();
+        const auto& nestedBvh = bvh_.getNestedAccel();
 
         // NOTE
         // GPGPU処理用に threaded bvh(top layer) と sbvh を同じメモリ空間上に格納するため、１つのリストで管理する.
@@ -156,7 +156,7 @@ namespace aten
         m_threadedNodes.resize(nestedBvh.size() + 1);
 
         // Copy top layer bvh nodes to the array which SBVH has.
-        const auto& toplayer = m_bvh.getNodes()[0];
+        const auto& toplayer = bvh_.getNodes()[0];
         m_threadedNodes[0].resize(toplayer.size());
         memcpy(&m_threadedNodes[0][0], &toplayer[0], toplayer.size() * sizeof(ThreadedSbvhNode));
 
@@ -164,14 +164,14 @@ namespace aten
         for (int32_t i = 0; i < nestedBvh.size(); i++) {
             auto accel = nestedBvh[i];
 
-            auto box = accel->getBoundingbox();
+            auto box = accel->GetBoundingbox();
             boundingBox.expand(box);
 
             if (accel->getAccelType() == AccelType::Sbvh) {
                 // TODO
                 auto bvh = (sbvh*)nestedBvh[i];
 
-                bvh->buildVoxel(ctxt);
+                bvh->BuildVoxel(ctxt);
 
                 std::vector<int32_t> indices;
                 bvh->convert(
@@ -186,7 +186,7 @@ namespace aten
         setBoundingBox(boundingBox);
     }
 
-    void sbvh::onBuild(
+    void sbvh::OnBuild(
         const context& ctxt,
         hitable** list,
         uint32_t num)
@@ -351,7 +351,7 @@ namespace aten
                         node.refIds.begin(),
                         node.refIds.end(),
                         [bestAxis, this](const uint32_t a, const uint32_t b) {
-                            return m_refs[a].bbox.getCenter()[bestAxis] < m_refs[b].bbox.getCenter()[bestAxis];
+                            return m_refs[a].bbox.GetCenter()[bestAxis] < m_refs[b].bbox.GetCenter()[bestAxis];
                         });
 
                     // 分割AABBの大きさをリセット.
@@ -394,7 +394,7 @@ namespace aten
 
             // dont with this object, deallocate memory for the current node.
             node.refIds.clear();
-            node.setChild(leftIdx, rightIdx);
+            node.SetChild(leftIdx, rightIdx);
 
             // copy node data to left and right children.
             // ここで push_back することで、std::vector 内部のメモリ構造が変わることがあるので、参照である node の変更はこの前までに終わらせること.
@@ -444,7 +444,7 @@ namespace aten
         for (uint32_t i = 0; i < refNum; i++) {
             auto id = node.refIds[i];
             const auto& ref = m_refs[id];
-            auto center = ref.bbox.getCenter();
+            auto center = ref.bbox.GetCenter();
             bbCentroid.expand(center);
         }
 
@@ -477,7 +477,7 @@ namespace aten
                 auto id = node.refIds[i];
                 const auto& ref = m_refs[id];
 
-                auto center = ref.bbox.getCenter();
+                auto center = ref.bbox.GetCenter();
 
                 // 分割情報(bins)へのインデックス.
                 // 最小端点から三角形AABBの中心への距離を軸の長さで正規化することで計算.
@@ -793,7 +793,7 @@ namespace aten
         for (int32_t i = 0; i < refNum; i++) {
             const auto id = node.refIds[i];
             const auto& ref = m_refs[id];
-            auto centroid = ref.bbox.getCenter();
+            auto centroid = ref.bbox.GetCenter();
             bbCentroid.expand(centroid);
         }
 
@@ -804,7 +804,7 @@ namespace aten
             const auto id = node.refIds[i];
             const auto& ref = m_refs[id];
 
-            auto center = ref.bbox.getCenter();
+            auto center = ref.bbox.GetCenter();
 
             // 分割情報(bins)へのインデックス.
             // 最小端点から三角形AABBの中心への距離を軸の長さで正規化することで計算.
@@ -990,7 +990,7 @@ namespace aten
         Intersection& isect,
         aten::HitStopType hit_stop_type/*= aten::HitStopType::Closest*/) const
     {
-        const auto& topLayerBvhNode = m_bvh.getNodes()[0];
+        const auto& topLayerBvhNode = bvh_.getNodes()[0];
 
         float hitt = AT_MATH_INF;
 
@@ -1008,7 +1008,7 @@ namespace aten
                 break;
             }
 
-            bool isHit = false;
+            bool is_hit = false;
 
             if (node->isLeaf()) {
                 Intersection isectTmp;
@@ -1042,7 +1042,7 @@ namespace aten
                     exid = hasLod && enableLod ? AT_BVHNODE_LOD_EXID(exid) : AT_BVHNODE_MAIN_EXID(exid);
                     //exid = AT_BVHNODE_LOD_EXID(exid);
 
-                    isHit = hit(
+                    is_hit = hit(
                         ctxt,
                         exid,
                         transformedRay,
@@ -1053,17 +1053,17 @@ namespace aten
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
                     auto prim = ctxt.GetTriangleInstance((int32_t)node->primid);
-                    isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
-                    if (isHit) {
+                    is_hit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
+                    if (is_hit) {
                         isectTmp.objid = s->id();
                     }
                 }
                 else {
                     // Hit test for a shape.
-                    isHit = s->hit(ctxt, r, t_min, t_max, isectTmp);
+                    is_hit = s->hit(ctxt, r, t_min, t_max, isectTmp);
                 }
 
-                if (isHit) {
+                if (is_hit) {
                     float tmp_t_max = hit_stop_type == aten::HitStopType::Any
                         ? AT_MATH_INF
                         : t_max;
@@ -1082,10 +1082,10 @@ namespace aten
                 }
             }
             else {
-                isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
+                is_hit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
             }
 
-            if (isHit) {
+            if (is_hit) {
                 nodeid = (int32_t)node->hit;
             }
             else {
@@ -1119,16 +1119,16 @@ namespace aten
                 break;
             }
 
-            bool isHit = false;
+            bool is_hit = false;
 
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
 #if (SBVH_TRIANGLE_NUM == 1)
                 auto prim = ctxt.GetTriangleInstance((int32_t)node->triid);
-                isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
+                is_hit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
 
-                if (isHit) {
+                if (is_hit) {
                     const auto& primParam = prim->GetParam();
                     isectTmp.meshid = primParam.mesh_id;
                 }
@@ -1145,14 +1145,14 @@ namespace aten
                     auto hit = prim->hit(r, t_min, tmpTmax, isectTmp);
 
                     if (hit) {
-                        isHit = true;
+                        is_hit = true;
                         tmpTmax = isectTmp.t;
                         isectTmp.meshid = prim->param.gemoid;
                     }
                 }
 #endif
 
-                if (isHit) {
+                if (is_hit) {
                     if (isectTmp.t < isect.t) {
                         isect = isectTmp;
                         t_max = isect.t;
@@ -1166,11 +1166,11 @@ namespace aten
 
                 float t_result = 0.0f;
                 aten::vec3 nml;
-                isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, t_result, nml);
+                is_hit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, t_result, nml);
 
                 // TODO
                 // Fixed depth for debug...
-                if (isHit && voxeldepth == 3) {
+                if (is_hit && voxeldepth == 3) {
                     Intersection isectTmp;
 
                     isectTmp.isVoxel = true;
@@ -1190,7 +1190,7 @@ namespace aten
                     isectTmp.objid = 1;
 
                     // LODにヒットしたので、子供（詳細）は探索しないようにする.
-                    isHit = false;
+                    is_hit = false;
 
                     if (isectTmp.t < isect.t) {
                         isect = isectTmp;
@@ -1200,10 +1200,10 @@ namespace aten
             }
 #endif
             else {
-                isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
+                is_hit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
             }
 
-            if (isHit) {
+            if (is_hit) {
                 nodeid = (int32_t)node->hit;
             }
             else {
@@ -1231,7 +1231,7 @@ namespace aten
         float boxmax[3];
     };
 
-    bool sbvh::exportTree(
+    bool sbvh::ExportTree(
         const context& ctxt,
         std::string_view path)
     {
@@ -1239,7 +1239,7 @@ namespace aten
 
         // Build voxel.
         if (!m_treelets.empty() && !m_nodes.empty()) {
-            buildVoxel(ctxt);
+            BuildVoxel(ctxt);
         }
 
         std::vector<int32_t> indices;
@@ -1265,7 +1265,7 @@ namespace aten
                     const auto& mtrl = ctxt.GetMaterialInstance(treelet.mtrlid);
                     AT_ASSERT(mtrl);
 
-                    mtrlMap.insert(std::make_pair(treelet.mtrlid, mtrl->nameString()));
+                    mtrlMap.insert(std::make_pair(treelet.mtrlid, mtrl->GetNameString()));
                 }
             }
         }
@@ -1287,7 +1287,7 @@ namespace aten
 
             header.cntMtrlForVoxel = (uint32_t)mtrlMap.size();
 
-            auto bbox = getBoundingbox();
+            auto bbox = GetBoundingbox();
             auto boxmin = bbox.minPos();
             auto boxmax = bbox.maxPos();
 
@@ -1339,7 +1339,7 @@ namespace aten
         return true;
     }
 
-    bool sbvh::importTree(
+    bool sbvh::ImportTree(
         const context& ctxt,
         std::string_view path,
         int32_t offsetTriIdx)
@@ -1452,7 +1452,7 @@ namespace aten
         func(mtx);
     }
 
-    void sbvh::drawAABB(
+    void sbvh::DrawAABB(
         aten::hitable::FuncDrawAABB func,
         const aten::mat4& mtx_L2W)
     {
@@ -1493,11 +1493,11 @@ namespace aten
 
     void sbvh::update(const context& ctxt)
     {
-        m_bvh.update(ctxt);
+        bvh_.update(ctxt);
 
         // Only for top layer...
 
-        const auto& toplayer = m_bvh.getNodes()[0];
+        const auto& toplayer = bvh_.getNodes()[0];
 
         AT_ASSERT(m_threadedNodes[0].size() == toplayer.size());
 

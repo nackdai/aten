@@ -98,7 +98,7 @@ namespace aten {
             aten::HitStopType hit_stop_type = aten::HitStopType::Closest) const;
 
     private:
-        bvh m_bvh;
+        bvh bvh_;
 
         std::vector<std::vector<StacklessBvhNode>> m_listStacklessBvhNode;
     };

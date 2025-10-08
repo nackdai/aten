@@ -88,7 +88,7 @@ namespace aten
     void context::build()
     {
         if (!vertices_.empty()
-            && !vertex_buffer_.isInitialized())
+            && !vertex_buffer_.IsInitialized())
         {
             vertex_buffer_.init(
                 sizeof(vertex),
@@ -111,7 +111,7 @@ namespace aten
 
             if (mtrl) {
                 AddMaterial(mtrl);
-                mtrl->setName(name);
+                mtrl->SetName(name);
             }
         }
 
@@ -137,7 +137,7 @@ namespace aten
 
             if (mtrl) {
                 AddMaterial(mtrl);
-                mtrl->setName(name);
+                mtrl->SetName(name);
             }
         }
 

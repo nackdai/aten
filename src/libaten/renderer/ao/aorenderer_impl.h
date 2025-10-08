@@ -60,7 +60,7 @@ namespace ao {
             rec.mtrlid, rec.isVoxel);
 
         // Apply normal map.
-        AT_NAME::material::applyNormal(
+        AT_NAME::material::ApplyNormal(
             &mtrl,
             mtrl.normalMap,
             orienting_normal, orienting_normal,
@@ -79,11 +79,11 @@ namespace ao {
 
             aten::Intersection ao_isect;
 
-            bool isHit = false;
+            bool is_hit = false;
 
             if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
                 if (scene) {
-                    isHit = scene->hit(ctxt, ao_ray, AT_MATH_EPSILON, ao_radius, ao_isect);
+                    is_hit = scene->hit(ctxt, ao_ray, AT_MATH_EPSILON, ao_radius, ao_isect);
                 }
             }
             else {
@@ -91,10 +91,10 @@ namespace ao {
                 // Dummy to build with clang.
                 auto intersectClosest = [](auto... args) -> bool { return true; };
 #endif
-                isHit = intersectClosest(&ctxt, ao_ray, &ao_isect, ao_radius);
+                is_hit = intersectClosest(&ctxt, ao_ray, &ao_isect, ao_radius);
             }
 
-            if (isHit) {
+            if (is_hit) {
                 if (c > 0.0f) {
                     ao_color += aten::vec3(ao_isect.t / ao_radius * c / pdfb);
                 }
@@ -120,7 +120,7 @@ namespace ao {
         bool is_first_bounce,
         AT_NAME::Path& paths)
     {
-        if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].isHit) {
+        if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].is_hit) {
             _detail::CopyVec(paths.contrib[idx].contrib, aten::vec3(1));
 
             paths.attrib[idx].is_terminated = true;

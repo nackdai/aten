@@ -44,7 +44,7 @@ namespace restir {
             const auto cosLight = aten::abs(dot(nmlLight, -dirToLight));
             const auto dist2 = aten::sqr(lightsample.dist_to_light);
 
-            const auto mtrl_eval_result = AT_NAME::material::sampleBSDF(
+            const auto mtrl_eval_result = AT_NAME::material::SampleBSDF(
                 &mtrl, normal,
                 ray_dir, dirToLight,
                 u, v,
@@ -84,7 +84,7 @@ namespace restir {
         {
             aten::vec3 dirToLight = lightsample.dir;
 
-            auto pdf = AT_NAME::material::samplePDF(&mtrl, normal, ray_dir, dirToLight, u, v);
+            auto pdf = AT_NAME::material::SamplePDF(&mtrl, normal, ray_dir, dirToLight, u, v);
             if (pdf == 0.0f) {
                 return 0.0f;
             }
@@ -220,7 +220,7 @@ namespace restir {
         aten::span<AT_NAME::ShadowRay>& shadowRays,
         SCENE* scene = nullptr)
     {
-        bool isHit = false;
+        bool is_hit = false;
 
         if (reservoir.IsValid()) {
 
@@ -235,10 +235,10 @@ namespace restir {
             shadowRays[idx].distToLight = dist;
             shadowRays[idx].raydir /= dist;
 
-            isHit = AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays[idx], scene);
+            is_hit = AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays[idx], scene);
         }
 
-        if (!isHit) {
+        if (!is_hit) {
             // NOTE:
             // In the function to combine the streams of multiple reservoirs (Alg.4), M is used to compute sum of samples.
             // So, M should not be cleared. It means we can't use Reservoir::clear here.

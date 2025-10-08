@@ -18,21 +18,21 @@ namespace AT_NAME
     bool DisneyBRDF::edit(aten::IMaterialParamEditor* editor)
     {
         bool is_update = false;
-        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, subsurface, 0, 1);
-        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, metallic, 0, 1);
-        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, specular, 0, 1);
-        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, specularTint, 0, 1);
-        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0, 1);
-        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, anisotropic, 0, 1);
-        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, sheen, 0, 1);
-        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, sheenTint, 0, 1);
-        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, clearcoat, 0, 1);
-        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, clearcoatGloss, 0, 1);
-        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, float(0.01), float(10));
-        is_update |= AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, subsurface, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, metallic, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, specular, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, specularTint, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, roughness, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, anisotropic, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, sheen, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, sheenTint, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, clearcoat, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, clearcoatGloss, 0, 1);
+        is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, ior, float(0.01), float(10));
+        is_update |= AT_EDIT_MATERIAL_PARAM(editor, param_, baseColor);
 
-        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
-        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
+        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, albedoMap);
+        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, normalMap);
 
         return is_update;
     }

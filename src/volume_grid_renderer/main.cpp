@@ -116,7 +116,7 @@ public:
             aten::vec3(0.0F), aten::vec3(0.0F), aten::vec3(1.0F));
         scene_.add(obj);
 
-        camera_.FitBoundingBox(grid_obj->getBoundingbox());
+        camera_.FitBoundingBox(grid_obj->GetBoundingbox());
 
         scene_.build(ctxt_);
 
@@ -132,7 +132,7 @@ public:
 
 #ifdef DEVICE_RENDERING
         {
-            auto aabb = scene_.getAccel()->getBoundingbox();
+            auto aabb = scene_.getAccel()->GetBoundingbox();
             auto d = aabb.getDiagonalLenght();
             renderer_.setHitDistanceLimit(d * 1.0F);
 

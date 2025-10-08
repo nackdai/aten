@@ -20,8 +20,8 @@ namespace aten
             : transformable(ObjectType::Instance), m_obj(obj)
         {
             init_matrices(ctxt);
-            m_param.object_id = m_obj->id();
-            setBoundingBox(m_obj->getBoundingbox());
+            param_.object_id = m_obj->id();
+            setBoundingBox(m_obj->GetBoundingbox());
         }
 
         instance(const std::shared_ptr<OBJ>& obj, context& ctxt, const mat4& mtx_L2W)
@@ -77,14 +77,14 @@ namespace aten
             ray transformdRay(org, dir);
 
             // Hit test in local coordinate.
-            auto isHit = m_obj->hit(ctxt, transformdRay, t_min, t_max, isect);
+            auto is_hit = m_obj->hit(ctxt, transformdRay, t_min, t_max, isect);
 
-            if (isHit) {
+            if (is_hit) {
                 // returnTo this instance's id.
                 isect.objid = id();
             }
 
-            return isHit;
+            return is_hit;
         }
 
         virtual const hitable* getHasObject() const override final
@@ -112,7 +112,7 @@ namespace aten
 
         virtual aabb getTransformedBoundingBox() const override
         {
-            return aabb::transform(m_obj->getBoundingbox(), *m_mtx_L2W);
+            return aabb::transform(m_obj->GetBoundingbox(), *m_mtx_L2W);
         }
 
         virtual void render(
@@ -126,11 +126,11 @@ namespace aten
             m_obj->render(func, ctxt, *m_mtx_L2W, m_mtx_prev_L2W, id(), triOffset);
         }
 
-        virtual void drawAABB(
+        virtual void DrawAABB(
             aten::hitable::FuncDrawAABB func,
             const aten::mat4& mtx_L2W) override final
         {
-            m_obj->drawAABB(func, *m_mtx_L2W);
+            m_obj->DrawAABB(func, *m_mtx_L2W);
         }
 
         virtual bool isDeformable() const override final
@@ -221,7 +221,7 @@ namespace aten
             // e.g. If the index to mtx_L2W is 2. the index to mtx_W2L is 3.
             // So, just keeping the index to one variable mtx_id is enough. No need to keep the two indices.
 
-            aten::tie(m_param.mtx_id, m_mtx_L2W) = ctxt.CreateMatrix();
+            aten::tie(param_.mtx_id, m_mtx_L2W) = ctxt.CreateMatrix();
             aten::tie(std::ignore, m_mtx_W2L) = ctxt.CreateMatrix();
         }
 
@@ -244,17 +244,17 @@ namespace aten
     inline instance<PolygonObject>::instance(const std::shared_ptr<PolygonObject>& obj, context& ctxt)
         : transformable(ObjectType::Instance), m_obj(obj)
     {
-        m_param.object_id = m_obj->id();
+        param_.object_id = m_obj->id();
         m_obj->build(ctxt);
-        setBoundingBox(m_obj->getBoundingbox());
+        setBoundingBox(m_obj->GetBoundingbox());
     }
 
     template<>
     inline instance<deformable>::instance(const std::shared_ptr<deformable>& obj, context& ctxt)
         : transformable(ObjectType::Instance), m_obj(obj)
     {
-        m_param.object_id = m_obj->id();
+        param_.object_id = m_obj->id();
         m_obj->build();
-        setBoundingBox(m_obj->getBoundingbox());
+        setBoundingBox(m_obj->GetBoundingbox());
     }
 }

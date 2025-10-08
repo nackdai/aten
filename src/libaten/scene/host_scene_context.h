@@ -599,7 +599,7 @@ namespace aten
             auto found = std::find_if(
                 assets.begin(), assets.end(),
                 [name](const auto& t) {
-                    if (t->nameString() == name) {
+                    if (t->GetNameString() == name) {
                         return true;
                     }
                     return false;

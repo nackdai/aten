@@ -98,7 +98,7 @@ namespace AT_NAME
             result->bsdf = bsdf(param, externalAlbedo);
         }
 
-        static AT_DEVICE_API float computeFresnel(
+        static AT_DEVICE_API float ComputeFresnel(
             const aten::MaterialParameter* mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,

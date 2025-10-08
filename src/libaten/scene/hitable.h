@@ -21,7 +21,7 @@ namespace aten {
         hitable(std::string_view name = {})
         {
             if (!name.empty()) {
-                m_name = name;
+                name_ = name;
             }
         }
         virtual ~hitable() = default;
@@ -33,18 +33,18 @@ namespace aten {
             float t_min, float t_max,
             Intersection& isect) const = 0;
 
-        virtual const aabb& getBoundingbox() const
+        virtual const aabb& GetBoundingbox() const
         {
-            return m_aabb;
+            return aabb_;
         }
         void setBoundingBox(const aabb& bbox)
         {
-            m_aabb = bbox;
+            aabb_ = bbox;
         }
 
         virtual aabb getTransformedBoundingBox() const
         {
-            return m_aabb;
+            return aabb_;
         }
 
         virtual const hitable* getHasObject() const
@@ -85,7 +85,7 @@ namespace aten {
 
         using FuncDrawAABB = std::function<void(const aten::mat4&)>;
 
-        virtual void drawAABB(
+        virtual void DrawAABB(
             FuncDrawAABB func,
             const aten::mat4& mtx_L2W)
         {
@@ -108,13 +108,13 @@ namespace aten {
             return false;
         }
 
-        void setName(std::string_view name)
+        void SetName(std::string_view name)
         {
-            m_name = name;
+            name_ = name;
         }
         const char* name()
         {
-            return m_name.c_str();
+            return name_.c_str();
         }
 
     protected:
@@ -126,8 +126,8 @@ namespace aten {
         }
 
     private:
-        std::string m_name;
-        aabb m_aabb;
+        std::string name_;
+        aabb aabb_;
 
         NotifyChanged m_onNotifyChanged;
     };

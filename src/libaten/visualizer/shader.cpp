@@ -92,17 +92,17 @@ namespace aten {
 
     bool shader::init(
         int32_t width, int32_t height,
-        std::string_view pathVS,
-        std::string_view pathFS)
+        std::string_view path_vs,
+        std::string_view path_fs)
     {
-        auto vs = createShader(pathVS, GL_VERTEX_SHADER);
+        auto vs = createShader(path_vs, GL_VERTEX_SHADER);
         AT_VRETURN(vs != 0, false);
 
-        auto fs = createShader(pathFS, GL_FRAGMENT_SHADER);
+        auto fs = createShader(path_fs, GL_FRAGMENT_SHADER);
         AT_VRETURN(fs != 0, false);
 
-        m_program = createProgram(vs, fs);
-        AT_VRETURN(m_program != 0, false);
+        program_ = createProgram(vs, fs);
+        AT_VRETURN(program_ != 0, false);
 
         width_ = width;
         height_ = height;
@@ -112,21 +112,21 @@ namespace aten {
 
     bool shader::init(
         int32_t width, int32_t height,
-        std::string_view pathVS,
-        std::string_view pathGS,
-        std::string_view pathFS)
+        std::string_view path_vs,
+        std::string_view path_gs,
+        std::string_view path_fs)
     {
-        auto vs = createShader(pathVS, GL_VERTEX_SHADER);
+        auto vs = createShader(path_vs, GL_VERTEX_SHADER);
         AT_VRETURN(vs != 0, false);
 
-        auto fs = createShader(pathFS, GL_FRAGMENT_SHADER);
+        auto fs = createShader(path_fs, GL_FRAGMENT_SHADER);
         AT_VRETURN(fs != 0, false);
 
-        auto gs = createShader(pathGS, GL_GEOMETRY_SHADER);
+        auto gs = createShader(path_gs, GL_GEOMETRY_SHADER);
         AT_VRETURN(gs != 0, false);
 
-        m_program = createProgram(vs, fs, gs);
-        AT_VRETURN(m_program != 0, false);
+        program_ = createProgram(vs, fs, gs);
+        AT_VRETURN(program_ != 0, false);
 
         width_ = width;
         height_ = height;
@@ -134,38 +134,38 @@ namespace aten {
         return true;
     }
 
-    void shader::prepareRender(
+    void shader::PrepareRender(
         const void* pixels,
         bool revert)
     {
-        CALL_GL_API(::glUseProgram(m_program));
+        CALL_GL_API(::glUseProgram(program_));
     }
 
-    int32_t shader::getHandle(std::string_view name)
+    int32_t shader::GetHandle(std::string_view name)
     {
-        auto handle = ::glGetUniformLocation(m_program, name.data());
+        auto handle = ::glGetUniformLocation(program_, name.data());
         return handle;
     }
 
-    void shader::setUniformFloat(std::string_view name, float f)
+    void shader::SetUniformFloat(std::string_view name, float f)
     {
-        auto handle = getHandle(name);
+        auto handle = GetHandle(name);
         if (handle >= 0) {
             CALL_GL_API(::glUniform1f(handle, (float)f));
         }
     }
 
-    void shader::setUniformInt(std::string_view name, int32_t i)
+    void shader::SetUniformInt(std::string_view name, int32_t i)
     {
-        auto handle = getHandle(name);
+        auto handle = GetHandle(name);
         if (handle >= 0) {
             CALL_GL_API(::glUniform1i(handle, i));
         }
     }
 
-    void shader::setUniformVec3(std::string_view name, const vec3& v)
+    void shader::SetUniformVec3(std::string_view name, const vec3& v)
     {
-        auto handle = getHandle(name);
+        auto handle = GetHandle(name);
         if (handle >= 0) {
             CALL_GL_API(::glUniform3f(handle, v.x, v.y, v.z));
         }

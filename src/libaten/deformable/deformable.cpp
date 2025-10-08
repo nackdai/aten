@@ -70,7 +70,7 @@ namespace aten
         virtual void applyMatrix(uint32_t idx, const mat4& mtx) override final
         {
             if (m_handleMtxJoint < 0) {
-                m_handleMtxJoint = m_shd->getHandle("mtxJoint");
+                m_handleMtxJoint = m_shd->GetHandle("mtxJoint");
                 m_mtxs.reserve(4);
             }
 
@@ -230,10 +230,10 @@ namespace aten
 
     bool DeformableRenderer::init(
         int32_t width, int32_t height,
-        std::string_view pathVS,
-        std::string_view pathFS)
+        std::string_view path_vs,
+        std::string_view path_fs)
     {
-        return m_shd.init(width, height, pathVS, pathFS);
+        return m_shd.init(width, height, path_vs, path_fs);
     }
 
     void DeformableRenderer::render(
@@ -248,7 +248,7 @@ namespace aten
         CALL_GL_API(::glBlendEquation(GL_FUNC_ADD));
         CALL_GL_API(::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-        m_shd.prepareRender(nullptr, false);
+        m_shd.PrepareRender(nullptr, false);
 
         {
             auto camparam = cam->param();
@@ -273,7 +273,7 @@ namespace aten
 
             aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
-            auto hMtxW2C = m_shd.getHandle("mtx_W2C");
+            auto hMtxW2C = m_shd.GetHandle("mtx_W2C");
             CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtx_W2C.a[0]));
 
             // NOTE

@@ -18,41 +18,41 @@ namespace aten {
     public:
         bool init(
             int32_t width, int32_t height,
-            std::string_view pathVS,
-            std::string_view pathFS);
+            std::string_view path_vs,
+            std::string_view path_fs);
 
         bool init(
             int32_t width, int32_t height,
-            std::string_view pathVS,
-            std::string_view pathGS,
-            std::string_view pathFS);
+            std::string_view path_vs,
+            std::string_view path_gs,
+            std::string_view path_fs);
 
-        virtual void prepareRender(
+        virtual void PrepareRender(
             const void* pixels,
             bool revert);
 
-        int32_t getHandle(std::string_view name);
+        int32_t GetHandle(std::string_view name);
 
-        uint32_t getProgramHandle() const
+        uint32_t GetProgramHandle() const
         {
-            return m_program;
+            return program_;
         }
 
         bool IsInitialized() const
         {
-            return (m_program > 0);
+            return (program_ > 0);
         }
 
-        void setUniformFloat(std::string_view name, float f);
-        void setUniformInt(std::string_view name, int32_t i);
-        void setUniformBool(std::string_view name, bool b)
+        void SetUniformFloat(std::string_view name, float f);
+        void SetUniformInt(std::string_view name, int32_t i);
+        void SetUniformBool(std::string_view name, bool b)
         {
-            setUniformInt(name, (int32_t)b);
+            SetUniformInt(name, static_cast<int32_t>(b));
         }
-        void setUniformVec3(std::string_view name, const vec3& v);
+        void SetUniformVec3(std::string_view name, const vec3& v);
 
     protected:
-        uint32_t m_program{ 0 };
+        uint32_t program_{ 0 };
         uint32_t width_{ 0 };
         uint32_t height_{ 0 };
     };

@@ -56,9 +56,9 @@ namespace aten
 
         helper->commitChanges(isGPUSkinning, m_triOffset);
 
-        uint32_t primNum = m_desc.numIdx / 3;
+        uint32_t primitive_num = m_desc.numIdx / 3;
 
-        m_ib.draw(*vertex_buffer_, aten::Primitive::Triangles, 0, primNum);
+        m_ib.draw(*vertex_buffer_, aten::Primitive::Triangles, 0, primitive_num);
     }
 
     void DeformPrimitives::getIndices(std::vector<uint32_t>& indices) const

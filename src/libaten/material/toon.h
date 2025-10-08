@@ -25,7 +25,7 @@ namespace AT_NAME
             aten::texture* normalMap = nullptr)
             : material(param, aten::MaterialAttributeDiffuse)
         {
-            setTextures(albedoMap, normalMap, nullptr);
+            SetTextures(albedoMap, normalMap, nullptr);
         }
         ~Toon() = default;
 

@@ -27,10 +27,10 @@ namespace AT_NAME {
             const float scale = 1.0F)
             : Light(aten::LightType::Direction, aten::LightAttributeDirectional)
         {
-            m_param.dir = normalize(dir);
-            m_param.light_color = light_color;
-            m_param.intensity = intensity;
-            m_param.scale = scale;
+            param_.dir = normalize(dir);
+            param_.light_color = light_color;
+            param_.intensity = intensity;
+            param_.scale = scale;
         }
 
         DirectionalLight(aten::Values& val);

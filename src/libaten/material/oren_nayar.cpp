@@ -146,12 +146,12 @@ namespace AT_NAME {
 
     bool OrenNayar::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param.standard, roughness);
-        auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+        auto b0 = AT_EDIT_MATERIAL_PARAM(editor, param_.standard, roughness);
+        auto b1 = AT_EDIT_MATERIAL_PARAM(editor, param_, baseColor);
 
-        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
-        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
-        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, roughnessMap);
+        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, albedoMap);
+        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, normalMap);
+        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, roughnessMap);
 
         return b0 || b1;
     }

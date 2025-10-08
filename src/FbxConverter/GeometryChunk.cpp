@@ -981,8 +981,8 @@ bool GeometryChunkExporter::exportMesh(
 
         pImporter->beginMesh((uint32_t)i);
 
-        aten::vec4 vMin(AT_MATH_INF);
-        aten::vec4 vMax(-AT_MATH_INF);
+        aten::vec4 v_min(AT_MATH_INF);
+        aten::vec4 v_max(-AT_MATH_INF);
 
         for (size_t n = 0; n < sMesh.subset.size(); n++) {
             const PrimitiveSetParam& sPrimSet = sMesh.subset[n];
@@ -996,16 +996,16 @@ bool GeometryChunkExporter::exportMesh(
             // Get min and max position in primitives.
             getMinMaxPos(
                 pImporter,
-                vMin, vMax,
+                v_min, v_max,
                 sPrimSet);
         }
 
         pImporter->endMesh();
 
         // Compute center position in meshset.
-        sMeshInfo.center[0] = (vMin.x + vMax.x) * 0.5f;
-        sMeshInfo.center[1] = (vMin.y + vMax.y) * 0.5f;
-        sMeshInfo.center[2] = (vMin.z + vMax.z) * 0.5f;
+        sMeshInfo.center[0] = (v_min.x + v_max.x) * 0.5f;
+        sMeshInfo.center[1] = (v_min.y + v_max.y) * 0.5f;
+        sMeshInfo.center[2] = (v_min.z + v_max.z) * 0.5f;
 
         // Get material information.
         pImporter->getMaterialForMesh(
@@ -1026,8 +1026,8 @@ bool GeometryChunkExporter::exportMesh(
 
 void GeometryChunkExporter::getMinMaxPos(
     aten::FbxImporter* pImporter,
-    aten::vec4& vMin,
-    aten::vec4& vMax,
+    aten::vec4& v_min,
+    aten::vec4& v_max,
     const PrimitiveSetParam& sPrimSet)
 {
     for (size_t i = 0; i < sPrimSet.tri.size(); i++) {
@@ -1044,13 +1044,13 @@ void GeometryChunkExporter::getMinMaxPos(
                 aten::MeshVertexFormat::Position);
             AT_ASSERT(bIsExist);
 
-            vMin.x = std::min(vMin.x, vec.x);
-            vMin.y = std::min(vMin.y, vec.y);
-            vMin.z = std::min(vMin.z, vec.z);
+            v_min.x = std::min(v_min.x, vec.x);
+            v_min.y = std::min(v_min.y, vec.y);
+            v_min.z = std::min(v_min.z, vec.z);
 
-            vMax.x = std::max(vMax.x, vec.x);
-            vMax.y = std::max(vMax.y, vec.y);
-            vMax.z = std::max(vMax.z, vec.z);
+            v_max.x = std::max(v_max.x, vec.x);
+            v_max.y = std::max(v_max.y, vec.y);
+            v_max.z = std::max(v_max.z, vec.z);
         }
     }
 }

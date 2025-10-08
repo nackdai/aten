@@ -64,7 +64,7 @@ namespace AT_NAME
         param.standard.clearcoat = value.get("clearcoat", param.standard.clearcoat);
         param.standard.clearcoatGloss = value.get("clearcoatGloss", param.standard.clearcoatGloss);
 
-        param.isIdealRefraction = value.get("isIdealRefraction", param.isIdealRefraction);
+        param.is_ideal_refraction = value.get("is_ideal_refraction", param.is_ideal_refraction);
 
         return CreateMaterialWithMaterialParameter(
             param, albedoMap.get(), normalMap.get(), roughnessMap.get());
@@ -120,7 +120,7 @@ namespace AT_NAME
             break;
         default:
             mtrl = new AT_NAME::material();
-            mtrl->m_param = param;
+            mtrl->param_ = param;
             break;
         }
 
@@ -129,12 +129,12 @@ namespace AT_NAME
         return ret;
     }
 
-    const char* material::getMaterialTypeName(aten::MaterialType type)
+    const char* material::GetMaterialTypeName(aten::MaterialType type)
     {
         return mtrl_type_info[static_cast<size_t>(type)].c_str();
     }
 
-    aten::MaterialType material::getMaterialTypeFromMaterialTypeName(std::string_view name)
+    aten::MaterialType material::GetMaterialTypeFromMaterialTypeName(std::string_view name)
     {
         std::string lowerName{ name };
         std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
@@ -151,7 +151,7 @@ namespace AT_NAME
         return aten::MaterialType::MaterialTypeMax;
     }
 
-    bool material::isDefaultMaterialName(const std::string& name)
+    bool material::IsDefaultMaterialName(const std::string& name)
     {
         auto lower = name;
         std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
@@ -166,31 +166,31 @@ namespace AT_NAME
         return false;
     }
 
-    bool material::isValidMaterialType(aten::MaterialType type)
+    bool material::IsValidMaterialType(aten::MaterialType type)
     {
         return (0 <= static_cast<int32_t>(type)
             && static_cast<int32_t>(type) < static_cast<int32_t>(aten::MaterialType::MaterialTypeMax));
     }
 
-    void material::setTextures(
+    void material::SetTextures(
         aten::texture* albedoMap,
         aten::texture* normalMap,
         aten::texture* roughnessMap)
     {
-        m_param.albedoMap = albedoMap ? albedoMap->id() : -1;
-        m_param.normalMap = normalMap ? normalMap->id() : -1;
-        m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
+        param_.albedoMap = albedoMap ? albedoMap->id() : -1;
+        param_.normalMap = normalMap ? normalMap->id() : -1;
+        param_.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
     }
 
-    AT_DEVICE_API bool material::isTranslucentByAlpha(
+    AT_DEVICE_API bool material::IsTranslucentByAlpha(
         const aten::MaterialParameter& param,
         float u, float v)
     {
-        auto alpha = getTranslucentAlpha(param, u, v);
+        auto alpha = GetTranslucentAlpha(param, u, v);
         return alpha < float(1);
     }
 
-    AT_DEVICE_API float material::getTranslucentAlpha(
+    AT_DEVICE_API float material::GetTranslucentAlpha(
         const aten::MaterialParameter& param,
         float u, float v)
     {

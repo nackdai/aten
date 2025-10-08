@@ -11,7 +11,7 @@ namespace aten {
         virtual ~MultiPassPostProc() {}
 
     protected:
-        virtual void prepareRender(
+        virtual void PrepareRender(
             const void* pixels,
             bool revert) override;
 

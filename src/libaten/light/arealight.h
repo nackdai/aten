@@ -74,7 +74,7 @@ namespace AT_NAME {
                 return;
             }
 
-            bool isHit = false;
+            bool is_hit = false;
 
             const auto& obj = ctxt.GetObject(param.arealight_objid);
 
@@ -106,12 +106,12 @@ namespace AT_NAME {
                     isect.b = result.b;
 
                     // We can treat as hit.
-                    isHit = true;
+                    is_hit = true;
                 }
                 else {
                     // No triangle means object shape is geometric form.
                     // Currently, support only sphere.
-                    isHit = sphere::hit(&obj, r, AT_MATH_EPSILON, AT_MATH_INF, &isect);
+                    is_hit = sphere::hit(&obj, r, AT_MATH_EPSILON, AT_MATH_INF, &isect);
                 }
             }
             else {
@@ -127,10 +127,10 @@ namespace AT_NAME {
                 // i.e. We don't use normal vector with adding offset to ray.
                 r = aten::ray(org, dir);
 
-                isHit = sphere::hit(&obj, r, AT_MATH_EPSILON, AT_MATH_INF, &isect);
+                is_hit = sphere::hit(&obj, r, AT_MATH_EPSILON, AT_MATH_INF, &isect);
             }
 
-            if (isHit) {
+            if (is_hit) {
                 AT_NAME::evaluate_hit_result(rec, obj, ctxt, r, isect);
 
                 sample(

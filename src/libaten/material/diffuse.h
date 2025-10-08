@@ -18,7 +18,7 @@ namespace AT_NAME
             aten::texture* normalMap = nullptr)
             : material(param, aten::MaterialAttributeDiffuse)
         {
-            setTextures(albedoMap, normalMap, nullptr);
+            SetTextures(albedoMap, normalMap, nullptr);
         }
 
         Diffuse(aten::Values& val);
@@ -71,10 +71,10 @@ namespace AT_NAME
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final
         {
-            AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
-            AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
+            AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, albedoMap);
+            AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, normalMap);
 
-            return AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+            return AT_EDIT_MATERIAL_PARAM(editor, param_, baseColor);
         }
 
         /**

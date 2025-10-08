@@ -20,9 +20,9 @@ namespace aten {
         uint32_t num,
         aabb* bbox/*= nullptr*/)
     {
-        m_bvh.build(ctxt, list, num, bbox);
+        bvh_.build(ctxt, list, num, bbox);
 
-        setBoundingBox(m_bvh.getBoundingbox());
+        setBoundingBox(bvh_.GetBoundingbox());
 
         std::vector<accelerator*> listBvh;
         std::map<hitable*, accelerator*> nestedBvhMap;
@@ -30,7 +30,7 @@ namespace aten {
         std::vector<std::vector<StacklessBvhNodeEntry>> listBvhNode;
 
         // Register to linear list to traverse bvhnode easily.
-        auto root = m_bvh.getRoot();
+        auto root = bvh_.GetRoot();
         listBvhNode.push_back(std::vector<StacklessBvhNodeEntry>());
         registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0], listBvh, nestedBvhMap);
 
@@ -38,7 +38,7 @@ namespace aten {
             // TODO
             auto bvh = (aten::bvh*)listBvh[i];
 
-            root = bvh->getRoot();
+            root = bvh->GetRoot();
 
             hitable* parent = nullptr;
 
@@ -118,7 +118,7 @@ namespace aten {
             // NOTE
             // Differ set hit/miss index.
 
-            auto bbox = node->getBoundingbox();
+            auto bbox = node->GetBoundingbox();
             bbox = aten::aabb::transform(bbox, entry.mtx_L2W);
 
             // Parent id.
@@ -184,11 +184,11 @@ namespace aten {
                 auto left = node->getLeft();
                 auto right = node->getRight();
 
-                stacklessBvhNode.boxmax_0 = left ? aten::vec4(left->getBoundingbox().maxPos(), 0) : aten::vec4(0);
-                stacklessBvhNode.boxmin_0 = left ? aten::vec4(left->getBoundingbox().minPos(), 0) : aten::vec4(0);
+                stacklessBvhNode.boxmax_0 = left ? aten::vec4(left->GetBoundingbox().maxPos(), 0) : aten::vec4(0);
+                stacklessBvhNode.boxmin_0 = left ? aten::vec4(left->GetBoundingbox().minPos(), 0) : aten::vec4(0);
 
-                stacklessBvhNode.boxmax_1 = right ? aten::vec4(right->getBoundingbox().maxPos(), 0) : aten::vec4(0);
-                stacklessBvhNode.boxmin_1 = right ? aten::vec4(right->getBoundingbox().minPos(), 0) : aten::vec4(0);
+                stacklessBvhNode.boxmax_1 = right ? aten::vec4(right->GetBoundingbox().maxPos(), 0) : aten::vec4(0);
+                stacklessBvhNode.boxmin_1 = right ? aten::vec4(right->GetBoundingbox().minPos(), 0) : aten::vec4(0);
 
                 stacklessBvhNode.child_0 = (float)(left ? left->getTraversalOrder() : -1);
                 stacklessBvhNode.child_1 = (float)(right ? right->getTraversalOrder() : -1);
@@ -232,7 +232,7 @@ namespace aten {
                 break;
             }
 
-            bool isHit = false;
+            bool is_hit = false;
 
             if (node->isLeaf()) {
                 Intersection isectTmp;
@@ -256,7 +256,7 @@ namespace aten {
                         transformedRay = r;
                     }
 
-                    isHit = hit(
+                    is_hit = hit(
                         ctxt,
                         (int32_t)node->exid,
                         listStacklessBvhNode,
@@ -267,17 +267,17 @@ namespace aten {
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
                     auto prim = ctxt.GetTriangleInstance((int32_t)node->primid);
-                    isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
-                    if (isHit) {
+                    is_hit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
+                    if (is_hit) {
                         isectTmp.objid = s->id();
                     }
                 }
                 else {
                     // Hit test for a shape.
-                    isHit = s->hit(ctxt, r, t_min, t_max, isectTmp);
+                    is_hit = s->hit(ctxt, r, t_min, t_max, isectTmp);
                 }
 
-                if (isHit) {
+                if (is_hit) {
                     float tmp_t_max = hit_stop_type == aten::HitStopType::Any
                         ? AT_MATH_INF
                         : t_max;

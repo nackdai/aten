@@ -27,7 +27,7 @@ struct Path {
 	aten::ray ray;
 	aten::vec3 throughput;
 	aten::Intersection isect;
-	bool isHit;
+	bool is_hit;
 	bool isTerminate;
 };
 
@@ -55,7 +55,7 @@ __global__ void genPathRayTracing(
 
 	path.ray = camsample.r;
 	path.throughput = aten::vec3(1);
-	path.isHit = false;
+	path.is_hit = false;
 	path.isTerminate = false;
 }
 
@@ -80,7 +80,7 @@ __global__ void hitTestRayTracing(
 	const auto idx = iy * width + ix;
 
 	auto& path = paths[idx];
-	path.isHit = false;
+	path.is_hit = false;
 
 	if (path.isTerminate) {
 		return;
@@ -101,7 +101,7 @@ __global__ void hitTestRayTracing(
 
 	aten::Intersection isect;
 
-	bool isHit = intersectClosest(&ctxt, path.ray, &isect);
+	bool is_hit = intersectClosest(&ctxt, path.ray, &isect);
 
 	path.isect.t = isect.t;
 	path.isect.objid = isect.objid;
@@ -110,7 +110,7 @@ __global__ void hitTestRayTracing(
 	path.isect.a = isect.a;
 	path.isect.b = isect.b;
 
-	path.isHit = isHit;
+	path.is_hit = is_hit;
 }
 
 __global__ void raytracing(
@@ -154,7 +154,7 @@ __global__ void raytracing(
 
 	shadowRays[idx].isActive = false;
 
-	if (!path.isHit) {
+	if (!path.is_hit) {
 		return;
 	}
 	if (path.isTerminate) {
@@ -187,7 +187,7 @@ __global__ void raytracing(
 	if (mtrl->attrib.isSingular || mtrl->attrib.isTranslucent) {
 		AT_NAME::MaterialSampling sampling;
 
-		sampleMaterial(
+		SampleMaterial(
 			&sampling,
 			&ctxt,
 			mtrl,
@@ -290,14 +290,14 @@ __global__ void hitShadowRay(
 		auto& path = paths[idx];
 
 		aten::Intersection isect;
-		bool isHit = intersectClosest(&ctxt, shadowRay, &isect);
+		bool is_hit = intersectClosest(&ctxt, shadowRay, &isect);
 
 		real distHitObjToRayOrg = AT_MATH_INF;
 		const aten::GeomParameter* hitobj = nullptr;
 
 		aten::hitrecord rec;
 
-		if (isHit) {
+		if (is_hit) {
 			hitobj = &ctxt.shapes[isect.objid];
 
 #if 0
@@ -311,7 +311,7 @@ __global__ void hitShadowRay(
 		auto lightobj = (light->objid >= 0 ? &ctxt.shapes[light->objid] : nullptr);
 
 		shadowRay.isActive = AT_NAME::scene::hitLight(
-			isHit,
+			is_hit,
 			light->attrib,
 			lightobj,
 			shadowRay.distToLight,

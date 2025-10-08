@@ -22,38 +22,38 @@ namespace AT_NAME
 {
     bool Toon::edit(aten::IMaterialParamEditor* editor)
     {
-        auto is_updated = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0.01F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, 0.01F, 10.0F);
+        auto is_updated = AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, roughness, 0.01F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.standard, ior, 0.01F, 10.0F);
 
         // Toon type.
         static std::vector<const char*> toon_type_list = {
             "Diffuse",
             "Specular",
         };
-        auto toon_type = static_cast<int32_t>(m_param.toon.toon_type);
+        auto toon_type = static_cast<int32_t>(param_.toon.toon_type);
         is_updated |= editor->edit("toon_type", toon_type_list, toon_type);
-        m_param.toon.toon_type = static_cast<aten::ToonParameter::ToonType>(toon_type);
+        param_.toon.toon_type = static_cast<aten::ToonParameter::ToonType>(toon_type);
 
         // Stylized highlight.
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_translation_dt, -1.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_translation_db, -1.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_scale_t, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_scale_b, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_split_t, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_split_b, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_square_sharp, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_square_magnitude, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.toon, highligt_translation_dt, -1.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.toon, highligt_translation_db, -1.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.toon, highligt_scale_t, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.toon, highligt_scale_b, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.toon, highlight_split_t, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.toon, highlight_split_b, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.toon, highlight_square_sharp, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.toon, highlight_square_magnitude, 0.0F, 1.0F);
 
         // Rim light.
         {
-            bool enable_rim_light = m_param.toon.enable_rim_light;
+            bool enable_rim_light = param_.toon.enable_rim_light;
             is_updated |= editor->edit("enable_rim_light", enable_rim_light);
-            m_param.toon.enable_rim_light = enable_rim_light;
+            param_.toon.enable_rim_light = enable_rim_light;
         }
-        is_updated |= AT_EDIT_MATERIAL_PARAM(editor, m_param.toon, rim_light_color);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, rim_light_width, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, rim_light_softness, 0.0F, 1.0F);
-        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, rim_light_spread, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM(editor, param_.toon, rim_light_color);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.toon, rim_light_width, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.toon, rim_light_softness, 0.0F, 1.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.toon, rim_light_spread, 0.0F, 1.0F);
 
         return is_updated;
     }

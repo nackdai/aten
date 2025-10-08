@@ -173,13 +173,13 @@ namespace AT_NAME
 
     bool MicrofacetRefraction::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = editor->edit("roughness", m_param.standard.roughness, 0.001F, 1.0F);
-        auto b1 = editor->edit("ior", m_param.standard.ior, 0.01F, 10.0F);
-        auto b2 = editor->edit("baseColor", m_param.baseColor);
+        auto b0 = editor->edit("roughness", param_.standard.roughness, 0.001F, 1.0F);
+        auto b1 = editor->edit("ior", param_.standard.ior, 0.01F, 10.0F);
+        auto b2 = editor->edit("baseColor", param_.baseColor);
 
-        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
-        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
-        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, roughnessMap);
+        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, albedoMap);
+        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, normalMap);
+        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, roughnessMap);
 
         return b0 || b1 || b2;
     }

@@ -114,7 +114,7 @@ namespace kernel {
                 localPoolRayCount -= WARP_SIZE;
             }
 
-            paths.attrib[idx].isHit = false;
+            paths.attrib[idx].is_hit = false;
 
             hitbools[idx] = 0;
 
@@ -135,7 +135,7 @@ namespace kernel {
             bool enableLod = false;
             int32_t depth = 9;
 
-            bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max, enableLod, depth);
+            bool is_hit = intersectClosest(&ctxt, rays[idx], &isect, t_max, enableLod, depth);
 
 #if 0
             isects[idx].t = isect.t;
@@ -153,13 +153,13 @@ namespace kernel {
                 && !paths.attrib[idx].is_singular
                 && isect.t > hitDistLimit)
             {
-                isHit = false;
+                is_hit = false;
                 paths.attrib[idx].is_terminated = true;
             }
 
-            paths.attrib[idx].isHit = isHit;
+            paths.attrib[idx].is_hit = is_hit;
 
-            hitbools[idx] = isHit ? 1 : 0;
+            hitbools[idx] = is_hit ? 1 : 0;
         } while (true);
 #else
         const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -171,7 +171,7 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        paths.attrib[idx].isHit = false;
+        paths.attrib[idx].is_hit = false;
 
         hitbools[idx] = 0;
 
@@ -195,7 +195,7 @@ namespace kernel {
             t_max = hitDistLimit;
         }
 
-        bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max);
+        bool is_hit = intersectClosest(&ctxt, rays[idx], &isect, t_max);
 
 #if 0
         isects[idx].t = isect.t;
@@ -214,12 +214,12 @@ namespace kernel {
             && !paths.attrib[idx].is_singular
             && isect.t > hitDistLimit)
         {
-            isHit = false;
+            is_hit = false;
         }
 
-        paths.attrib[idx].isHit = isHit;
+        paths.attrib[idx].is_hit = is_hit;
 
-        hitbools[idx] = isHit ? 1 : 0;
+        hitbools[idx] = is_hit ? 1 : 0;
 #endif
     }
 
@@ -246,7 +246,7 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        paths.attrib[idx].isHit = false;
+        paths.attrib[idx].is_hit = false;
 
         hitbools[idx] = 0;
 
@@ -309,11 +309,11 @@ namespace kernel {
 
             isects[idx].t = (camPos - vp).length();
 
-            paths.attrib[idx].isHit = true;
+            paths.attrib[idx].is_hit = true;
             hitbools[idx] = 1;
         }
         else {
-            paths.attrib[idx].isHit = false;
+            paths.attrib[idx].is_hit = false;
             hitbools[idx] = 0;
         }
     }

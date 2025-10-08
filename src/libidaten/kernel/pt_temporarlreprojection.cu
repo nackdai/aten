@@ -249,7 +249,7 @@ __global__ void makePathMask(
 	const auto idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
-	path.isHit = false;
+	path.is_hit = false;
 
 	if (path.isKill) {
 		path.isTerminate = true;
@@ -332,7 +332,7 @@ __global__ void genPathTemporalReprojection(
 		return;
 	}
 
-	paths[idx].isHit = false;
+	paths[idx].is_hit = false;
 	paths[idx].isTerminate = true;
 
 	if (idx >= hitnum) {
@@ -342,7 +342,7 @@ __global__ void genPathTemporalReprojection(
 	idx = hitindices[idx];
 
 	auto& path = paths[idx];
-	path.isHit = false;
+	path.is_hit = false;
 
 	if (path.isKill) {
 		path.isTerminate = true;

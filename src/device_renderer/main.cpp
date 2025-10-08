@@ -86,7 +86,7 @@ public:
 #endif
 
         {
-            auto aabb = scene_.getAccel()->getBoundingbox();
+            auto aabb = scene_.getAccel()->GetBoundingbox();
             auto d = aabb.getDiagonalLenght();
             renderer_.setHitDistanceLimit(d * distance_limit_ratio_);
 
@@ -180,7 +180,7 @@ public:
                 ctxt_,
                 &scene_,
                 &camera_);
-            rasterizer_aabb_.drawAABB(
+            rasterizer_aabb_.DrawAABB(
                 &camera_,
                 scene_.getAccel());
         }
@@ -221,7 +221,7 @@ public:
 
             if (ImGui::SliderFloat("Distance Limit Ratio", &distance_limit_ratio_, 0.1f, 1.0f))
             {
-                auto aabb = scene_.getAccel()->getBoundingbox();
+                auto aabb = scene_.getAccel()->GetBoundingbox();
                 auto d = aabb.getDiagonalLenght();
                 renderer_.setHitDistanceLimit(d * distance_limit_ratio_);
             }

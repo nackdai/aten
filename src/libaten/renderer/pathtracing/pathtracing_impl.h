@@ -37,7 +37,7 @@ namespace AT_NAME
 
     inline AT_DEVICE_API void ClearPathAttribute(PathAttribute& attrib)
     {
-        attrib.isHit = false;
+        attrib.is_hit = false;
         attrib.is_terminated = false;
         attrib.is_singular = false;
         attrib.will_update_depth = true;
@@ -165,7 +165,7 @@ namespace AT_NAME
             ? paths.throughput[idx].depth_count
             : bounce;
 
-        if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].isHit) {
+        if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].is_hit) {
             if (bounce == 0) {
                 if (!aov_normal_depth.empty() && !aov_albedo_meshid.empty())
                 {
@@ -201,7 +201,7 @@ namespace AT_NAME
             ? paths.throughput[idx].depth_count
             : bounce;
 
-        if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].isHit) {
+        if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].is_hit) {
             aten::vec3 dir = ray.dir;
 
             if (bounce == 0) {
@@ -370,7 +370,7 @@ namespace AT_NAME
 
         aten::Intersection isect;
 
-        bool isHit = false;
+        bool is_hit = false;
 
         aten::ray r(shadow_ray.rayorg, shadow_ray.raydir);
 
@@ -378,7 +378,7 @@ namespace AT_NAME
             // NOTE:
             // operation has to be related with template arg SCENE.
             if (scene) {
-                isHit = scene->hit(ctxt, r, AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON, isect);
+                is_hit = scene->hit(ctxt, r, AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON, isect);
             }
         }
         else {
@@ -386,15 +386,15 @@ namespace AT_NAME
             // Dummy to build with clang.
             auto intersectCloser = [](auto... args) -> bool { return true; };
 #endif
-            isHit = intersectCloser(&ctxt, r, &isect, distToLight - AT_MATH_EPSILON, enableLod);
+            is_hit = intersectCloser(&ctxt, r, &isect, distToLight - AT_MATH_EPSILON, enableLod);
         }
 
-        if (isHit) {
+        if (is_hit) {
             hitobj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));
         }
 
-        isHit = AT_NAME::scene::hitLight(
-            isHit,
+        is_hit = AT_NAME::scene::hitLight(
+            is_hit,
             light.attrib,
             lightobj,
             distToLight,
@@ -402,11 +402,11 @@ namespace AT_NAME
             isect.t,
             hitobj);
 
-        if (isHit) {
+        if (is_hit) {
             _detail::AddVec3(paths.contrib[idx].contrib, shadow_ray.lightcontrib);
         }
 
-        return isHit;
+        return is_hit;
     }
 
     inline AT_DEVICE_API bool HitImplicitLight(
@@ -541,9 +541,9 @@ namespace AT_NAME
             return false;
         }
 
-        if (AT_NAME::material::isTranslucentByAlpha(mtrl, u, v))
+        if (AT_NAME::material::IsTranslucentByAlpha(mtrl, u, v))
         {
-            const auto alpha = AT_NAME::material::getTranslucentAlpha(mtrl, u, v);
+            const auto alpha = AT_NAME::material::GetTranslucentAlpha(mtrl, u, v);
             auto r = sampler.nextSample();
 
             if (r >= alpha) {
@@ -673,7 +673,7 @@ namespace AT_NAME
         }
 
         // Apply normal map.
-        auto pre_sampled_r = material::applyNormal(
+        auto pre_sampled_r = material::ApplyNormal(
             &mtrl,
             mtrl.normalMap,
             orienting_normal, orienting_normal,
@@ -714,7 +714,7 @@ namespace AT_NAME
             paths.sampler[idx]);
 
         AT_NAME::MaterialSampling sampling;
-        material::sampleMaterial(
+        material::SampleMaterial(
             &sampling,
             &mtrl,
             orienting_normal,

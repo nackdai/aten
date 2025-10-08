@@ -101,12 +101,12 @@ namespace aten
 
         const char* name() const
         {
-            return m_name.c_str();
+            return name_.c_str();
         }
 
-        const std::string& nameString() const
+        const std::string& GetNameString() const
         {
-            return m_name;
+            return name_;
         }
 
         bool initAsGLTexture();
@@ -195,6 +195,6 @@ namespace aten
         TextureFilterMode filter_mode_{ TextureFilterMode::Point };
         TextureAddressMode address_mode_{ TextureAddressMode::Clamp };
 
-        std::string m_name;
+        std::string name_;
     };
 }

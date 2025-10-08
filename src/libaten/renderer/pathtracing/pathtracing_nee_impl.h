@@ -28,8 +28,8 @@ namespace AT_NAME
     {
         auto cosShadow = dot(surface_nml, light_sample.dir);
 
-        float path_pdf{ AT_NAME::material::samplePDF(&surface_mtrl, surface_nml, wi, light_sample.dir, hit_u, hit_v) };
-        auto mtrl_eval_result{ AT_NAME::material::sampleBSDF(&surface_mtrl, surface_nml, wi, light_sample.dir, hit_u, hit_v, pre_sampled_random) };
+        float path_pdf{ AT_NAME::material::SamplePDF(&surface_mtrl, surface_nml, wi, light_sample.dir, hit_u, hit_v) };
+        auto mtrl_eval_result{ AT_NAME::material::SampleBSDF(&surface_mtrl, surface_nml, wi, light_sample.dir, hit_u, hit_v, pre_sampled_random) };
 
         if (mtrl_eval_result.pdf > 0) {
             path_pdf = mtrl_eval_result.pdf;

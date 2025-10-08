@@ -296,7 +296,7 @@ public:
                 bool b1 = ImGui::Checkbox("NormalMap", &enable_normal_map_);
 
                 if (b0 || b1) {
-                    mtrl->setTextures(
+                    mtrl->SetTextures(
                         enable_albedo_map_ ? albedo_map_ : nullptr,
                         enable_normal_map_ ? normal_map_ : nullptr,
                         nullptr);
@@ -541,7 +541,7 @@ private:
         //albedo_map_ = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");
         //normal_map_ = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
 
-        obj->getShapes()[0]->GetMaterial()->setTextures(albedo_map_, normal_map_, nullptr);
+        obj->getShapes()[0]->GetMaterial()->SetTextures(albedo_map_, normal_map_, nullptr);
 #else
         constexpr const char* asset_path = "../../asset/cornellbox/bunny_in_box.obj";
 
@@ -569,7 +569,7 @@ private:
             }
 
             auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(param, nullptr, nullptr, nullptr);
-            mtrl->setName(name.data());
+            mtrl->SetName(name.data());
             return mtrl;
         }, true, true);
 

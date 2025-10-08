@@ -10,23 +10,23 @@ void RimLight::PreRender(aten::shader& shader, const aten::PinholeCamera& camera
 {
     // TODO;
     rim_light_pos_ = aten::vec3(0, 0, 20);
-    auto h_light_pos = shader.getHandle("light_pos");
+    auto h_light_pos = shader.GetHandle("light_pos");
     CALL_GL_API(::glUniform3f(h_light_pos, rim_light_pos_.x, rim_light_pos_.y, rim_light_pos_.z));
 
-    auto h_light_color = shader.getHandle("light_color");
+    auto h_light_color = shader.GetHandle("light_color");
     CALL_GL_API(::glUniform3f(h_light_color, rim_light_color_.x, rim_light_color_.y, rim_light_color_.z));
 
     const auto& cam_param = camera.param();
-    auto h_eye = shader.getHandle("eye");
+    auto h_eye = shader.GetHandle("eye");
     CALL_GL_API(::glUniform3f(h_eye, cam_param.origin.x, cam_param.origin.y, cam_param.origin.z));
 
-    auto h_width = shader.getHandle("width");
+    auto h_width = shader.GetHandle("width");
     CALL_GL_API(::glUniform1f(h_width, width_));
 
-    auto h_softness = shader.getHandle("softness");
+    auto h_softness = shader.GetHandle("softness");
     CALL_GL_API(::glUniform1f(h_softness, softness_));
 
-    auto h_spread = shader.getHandle("spread");
+    auto h_spread = shader.GetHandle("spread");
     CALL_GL_API(::glUniform1f(h_spread, spread_));
 }
 

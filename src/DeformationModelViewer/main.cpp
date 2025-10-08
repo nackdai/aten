@@ -162,7 +162,7 @@ public:
         }
 
         if (is_show_aabb_) {
-            rasterizer_aabb_.drawAABB(
+            rasterizer_aabb_.DrawAABB(
                 &camera_,
                 aten::aabb(aabbMin, aabbMax));
         }

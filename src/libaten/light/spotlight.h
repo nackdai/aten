@@ -33,11 +33,11 @@ namespace AT_NAME {
             const float scale = 1.0F)
             : Light(aten::LightType::Spot, aten::LightAttributeSingluar)
         {
-            m_param.pos = pos;
-            m_param.dir = normalize(dir);
-            m_param.light_color = light_color;
-            m_param.intensity = intensity;
-            m_param.scale = scale;
+            param_.pos = pos;
+            param_.dir = normalize(dir);
+            param_.light_color = light_color;
+            param_.intensity = intensity;
+            param_.scale = scale;
 
             setSpotlightFactor(inner_angle, outer_angle);
         }
@@ -51,8 +51,8 @@ namespace AT_NAME {
             float inner_angle,    // Umbra angle of spotlight in radians.
             float outer_angle)    // Penumbra angle of spotlight in radians.
         {
-            m_param.innerAngle = aten::clamp<float>(inner_angle, 0, AT_MATH_PI - AT_MATH_EPSILON);
-            m_param.outerAngle = aten::clamp<float>(outer_angle, inner_angle, AT_MATH_PI - AT_MATH_EPSILON);
+            param_.innerAngle = aten::clamp<float>(inner_angle, 0, AT_MATH_PI - AT_MATH_EPSILON);
+            param_.outerAngle = aten::clamp<float>(outer_angle, inner_angle, AT_MATH_PI - AT_MATH_EPSILON);
         }
 
         static AT_HOST_DEVICE_API void sample(

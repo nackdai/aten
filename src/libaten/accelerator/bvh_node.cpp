@@ -11,16 +11,16 @@
 
 namespace aten {
     bvhnode::bvhnode(const std::shared_ptr<bvhnode>& parent, hitable* item, bvh* bvh)
-        : m_parent(parent.get())
+        : parent_(parent.get())
     {
-        m_children[0] = m_children[1] = m_children[2] = m_children[3] = nullptr;
-        m_item = item;
+        children_[0] = children_[1] = children_[2] = children_[3] = nullptr;
+        item_ = item;
 
-        if (m_item) {
-            m_item->setFuncNotifyChanged(std::bind(&bvhnode::itemChanged, this, std::placeholders::_1));
+        if (item_) {
+            item_->setFuncNotifyChanged(std::bind(&bvhnode::itemChanged, this, std::placeholders::_1));
         }
 
-        m_bvh = bvh;
+        bvh_ = bvh;
     }
 
     bool bvhnode::hit(
@@ -30,55 +30,55 @@ namespace aten {
         Intersection& isect) const
     {
 #if 0
-        if (m_item) {
-            return m_item->hit(r, t_min, t_max, isect);
+        if (item_) {
+            return item_->hit(r, t_min, t_max, isect);
         }
 #else
-        if (m_childrenNum > 0) {
-            bool isHit = false;
+        if (children_num_ > 0) {
+            bool is_hit = false;
 
-            for (int32_t i = 0; i < m_childrenNum; i++) {
+            for (int32_t i = 0; i < children_num_; i++) {
                 Intersection isectTmp;
                 isectTmp.t = AT_MATH_INF;
-                auto res = m_children[i]->hit(ctxt, r, t_min, t_max, isectTmp);
+                auto res = children_[i]->hit(ctxt, r, t_min, t_max, isectTmp);
 
                 if (res) {
                     if (isectTmp.t < isect.t) {
                         isect = isectTmp;
                         t_max = isect.t;
 
-                        isHit = true;
+                        is_hit = true;
                     }
                 }
             }
 
-            return isHit;
+            return is_hit;
         }
-        else if (m_item) {
-            return m_item->hit(ctxt, r, t_min, t_max, isect);
+        else if (item_) {
+            return item_->hit(ctxt, r, t_min, t_max, isect);
         }
 #endif
         else {
-            auto bbox = getBoundingbox();
-            auto isHit = bbox.hit(r, t_min, t_max);
+            auto bbox = GetBoundingbox();
+            auto is_hit = bbox.hit(r, t_min, t_max);
 
-            if (isHit) {
-                isHit = bvh::onHit(ctxt, this, r, t_min, t_max, isect);
+            if (is_hit) {
+                is_hit = bvh::OnHit(ctxt, this, r, t_min, t_max, isect);
             }
 
-            return isHit;
+            return is_hit;
         }
     }
 
-    void bvhnode::drawAABB(
+    void bvhnode::DrawAABB(
         aten::hitable::FuncDrawAABB func,
         const aten::mat4& mtx_L2W) const
     {
-        if (m_item && m_item->getHasObject()) {
-            m_item->drawAABB(func, mtx_L2W);
+        if (item_ && item_->getHasObject()) {
+            item_->DrawAABB(func, mtx_L2W);
         }
         else {
-            auto transofrmedBox = aten::aabb::transform(m_aabb, mtx_L2W);
+            auto transofrmedBox = aten::aabb::transform(aabb_, mtx_L2W);
 
             aten::mat4 mtxScale;
             mtxScale.asScale(transofrmedBox.size());

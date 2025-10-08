@@ -21,9 +21,9 @@ namespace AT_NAME
             : transformable(aten::ObjectType::Polygons)
         {}
 
-        virtual ~PolygonObject() = default;
+        ~PolygonObject() = default;
 
-        virtual bool hit(
+        bool hit(
             const aten::context& ctxt,
             const aten::ray& r,
             float t_min, float t_max,
@@ -66,12 +66,12 @@ namespace AT_NAME
             rec.mtrlid = isect.mtrlid;
         }
 
-        virtual aten::accelerator* getInternalAccelerator() override final
+        aten::accelerator* getInternalAccelerator() override final
         {
             return m_accel.get();
         }
 
-        virtual void render(
+        void render(
             aten::hitable::FuncPreDraw func,
             const aten::context& ctxt,
             const aten::mat4& mtx_L2W,
@@ -83,7 +83,7 @@ namespace AT_NAME
             AT_NAME::FuncObjectMeshDraw func,
             const aten::context& ctxt) const;
 
-        virtual void drawAABB(
+        void DrawAABB(
             aten::hitable::FuncDrawAABB func,
             const aten::mat4& mtx_L2W) override final;
 
@@ -96,11 +96,11 @@ namespace AT_NAME
 
         void buildForRasterizeRendering(const aten::context& ctxt);
 
-        virtual void collectTriangles(std::vector<aten::TriangleParameter>& triangles) const override final;
+        void collectTriangles(std::vector<aten::TriangleParameter>& triangles) const override final;
 
-        virtual uint32_t getTriangleCount() const override final
+        uint32_t getTriangleCount() const override final
         {
-            return m_param.triangle_num;
+            return param_.triangle_num;
         }
 
         void build(const aten::context& ctxt);
@@ -123,7 +123,7 @@ namespace AT_NAME
             auto v1{ ctxt.GetPositionAsVec4(tri_param.idx[1]) };
             auto v2{ ctxt.GetPositionAsVec4(tri_param.idx[2]) };
 
-            v0.w = v1.w = v2.w = float(1);
+            v0.w = v1.w = v2.w = 1.0F;
 
             float orignalLen = (v1 - v0).length();
 

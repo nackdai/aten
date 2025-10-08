@@ -101,7 +101,7 @@ namespace aten
         return lambda1 >= 0.0f && lambda2 >= 0.0f && lambda1 + lambda2 <= 1.0f;
     }
 
-    void sbvh::buildVoxel(const context& ctxt)
+    void sbvh::BuildVoxel(const context& ctxt)
     {
         for (auto it = m_treelets.begin(); it != m_treelets.end(); it++) {
             auto& treelet = it->second;

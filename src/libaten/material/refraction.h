@@ -21,7 +21,7 @@ namespace AT_NAME
             aten::texture* normalMap = nullptr)
             : material(param, aten::MaterialAttributeRefraction)
         {
-            setTextures(nullptr, normalMap, nullptr);
+            SetTextures(nullptr, normalMap, nullptr);
         }
 
         refraction(aten::Values& val);

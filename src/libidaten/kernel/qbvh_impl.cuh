@@ -38,7 +38,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
         int32_t isLeaf = (int32_t)node.y;
         int32_t numChildren = (int32_t)node.z;
 
-        bool isHit = false;
+        bool is_hit = false;
 
         if (isLeaf) {
             int32_t primidx = (int32_t)attrib.y;
@@ -47,10 +47,10 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
             prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::TriangleParamter_float4_size + 1];
 
             isectTmp.t = AT_MATH_INF;
-            isHit = AT_NAME::triangle::hit(prim, *ctxt, r, &isectTmp);
+            is_hit = AT_NAME::triangle::hit(prim, *ctxt, r, &isectTmp);
 
             bool isIntersect = (Type == idaten::IntersectType::Any
-                ? isHit
+                ? is_hit
                 : isectTmp.t < isect->t);
 
             if (isIntersect) {
@@ -137,7 +137,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
         int32_t isLeaf = (int32_t)node.y;
         int32_t numChildren = (int32_t)node.z;
 
-        bool isHit = false;
+        bool is_hit = false;
 
         if (isLeaf) {
             // Leaf.
@@ -156,7 +156,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
                     transformedRay = r;
                 }
 
-                isHit = intersectQBVHTriangles<Type>(
+                is_hit = intersectQBVHTriangles<Type>(
                     stack, stackpos,
                     ctxt->nodes[(int32_t)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
             }
@@ -164,12 +164,12 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
                 // TODO
                 // Only sphere...
                 isectTmp.t = AT_MATH_INF;
-                isHit = AT_NAME::sphere::hit(s, r, t_min, t_max, &isectTmp);
+                is_hit = AT_NAME::sphere::hit(s, r, t_min, t_max, &isectTmp);
                 isectTmp.mtrlid = s->sphere.mtrl_id;
             }
 
             bool isIntersect = (Type == idaten::IntersectType::Any
-                ? isHit
+                ? is_hit
                 : isectTmp.t < isect->t);
 
             if (isIntersect) {
@@ -220,14 +220,14 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
 {
     float t_min = AT_MATH_EPSILON;
 
-    bool isHit = intersectQBVH<idaten::IntersectType::Closest>(
+    bool is_hit = intersectQBVH<idaten::IntersectType::Closest>(
         ctxt->nodes[0],
         ctxt,
         r,
         t_min, t_max,
         isect);
 
-    return isHit;
+    return is_hit;
 }
 
 AT_CUDA_INLINE __device__ bool intersectCloserQBVH(
@@ -238,14 +238,14 @@ AT_CUDA_INLINE __device__ bool intersectCloserQBVH(
 {
     float t_min = AT_MATH_EPSILON;
 
-    bool isHit = intersectQBVH<idaten::IntersectType::Closer>(
+    bool is_hit = intersectQBVH<idaten::IntersectType::Closer>(
         ctxt->nodes[0],
         ctxt,
         r,
         t_min, t_max,
         isect);
 
-    return isHit;
+    return is_hit;
 }
 
 AT_CUDA_INLINE __device__ bool intersectAnyQBVH(
@@ -256,12 +256,12 @@ AT_CUDA_INLINE __device__ bool intersectAnyQBVH(
     float t_min = AT_MATH_EPSILON;
     float t_max = AT_MATH_INF;
 
-    bool isHit = intersectQBVH<idaten::IntersectType::Any>(
+    bool is_hit = intersectQBVH<idaten::IntersectType::Any>(
         ctxt->nodes[0],
         ctxt,
         r,
         t_min, t_max,
         isect);
 
-    return isHit;
+    return is_hit;
 }

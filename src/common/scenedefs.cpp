@@ -1308,7 +1308,7 @@ void HomogeneousMediumRefractionBunnyScene::makeScene(
         }
 
         auto mtrl = ctxt.CreateMaterialWithMaterialParameter(name, param, nullptr, nullptr, nullptr);
-        mtrl->setName(name.data());
+        mtrl->SetName(name.data());
 
         if (name == "material_0") {
             mtrl->param().is_medium = true;

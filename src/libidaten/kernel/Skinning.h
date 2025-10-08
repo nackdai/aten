@@ -18,7 +18,7 @@ namespace idaten
             aten::SkinningVertex* vertices,
             uint32_t vtxNum,
             uint32_t* indices,
-            uint32_t idxNum,
+            uint32_t idx_num,
             const aten::GeomMultiVertexBuffer* vb);
 
         void initWithTriangles(

@@ -62,7 +62,7 @@ namespace AT_NAME {
         }
 
         static inline AT_HOST_DEVICE_API bool hitLight(
-            bool isHit,
+            bool is_hit,
             aten::LightAttribute attrib,
             const void* lightobj,
             float distToLight,
@@ -75,7 +75,7 @@ namespace AT_NAME {
 
             if (lightobj) {
                 // Area Light.
-                if (isHit) {
+                if (is_hit) {
 #if 0
                     hitrecord tmpRec;
                     if (lightobj->hit(r, t_min, t_max, tmpRec)) {
@@ -100,12 +100,12 @@ namespace AT_NAME {
             }
 
             if (attrib.isInfinite) {
-                return !isHit;
+                return !is_hit;
             }
             else if (attrib.is_singular) {
                 //auto distToLight = (lightPos - r.org).length();
 
-                if (isHit && hitt < distToLight) {
+                if (is_hit && hitt < distToLight) {
                     // Ray hits something, and the distance to the object is near than the distance to the light.
                     return false;
                 }
@@ -117,13 +117,13 @@ namespace AT_NAME {
 
             return false;
 #else
-            //if (isHit && hitobj == lightobj) {
+            //if (is_hit && hitobj == lightobj) {
             if (hitobj == lightobj) {
                 return true;
             }
 
             if (attrib.isInfinite) {
-                return !isHit;
+                return !is_hit;
             }
             else if (attrib.is_singular) {
                 return hitt > distToLight;

@@ -214,7 +214,7 @@ namespace aten
         MaterialAttribute attrib;
 
         uint16_t id;
-        bool isIdealRefraction{ false };
+        bool is_ideal_refraction{ false };
         bool is_medium{ false };
 
         int32_t albedoMap{ -1 };
@@ -263,7 +263,7 @@ namespace aten
 
             attrib = rhs.attrib;
 
-            isIdealRefraction = rhs.isIdealRefraction;
+            is_ideal_refraction = rhs.is_ideal_refraction;
             is_medium = rhs.is_medium;
 
             albedoMap = rhs.albedoMap;
@@ -353,15 +353,15 @@ namespace AT_NAME
         material(
             aten::MaterialType type,
             const aten::MaterialAttribute& attrib)
-            : m_param(type, attrib)
+            : param_(type, attrib)
         {}
 
         material(
             const aten::MaterialParameter& param,
             const aten::MaterialAttribute& attrib)
         {
-            m_param = param;
-            m_param.attrib = attrib;
+            param_ = param;
+            param_.attrib = attrib;
         }
 
         material(
@@ -386,36 +386,36 @@ namespace AT_NAME
 
         int32_t id() const
         {
-            return m_param.id;
+            return param_.id;
         }
 
-        void setTextures(
+        void SetTextures(
             aten::texture* albedoMap,
             aten::texture* normalMap,
             aten::texture* roughnessMap);
 
         const aten::MaterialParameter& param() const
         {
-            return m_param;
+            return param_;
         }
         aten::MaterialParameter& param()
         {
-            return m_param;
+            return param_;
         }
 
-        void setName(std::string_view name)
+        void SetName(std::string_view name)
         {
-            m_name = name;
+            name_ = name;
         }
 
         const char* name() const
         {
-            return m_name.c_str();
+            return name_.c_str();
         }
 
-        const std::string& nameString() const
+        const std::string& GetNameString() const
         {
-            return m_name;
+            return name_;
         }
 
         virtual bool edit(aten::IMaterialParamEditor* editor)
@@ -424,23 +424,23 @@ namespace AT_NAME
             return false;
         }
 
-        static const char* getMaterialTypeName(aten::MaterialType type);
+        static const char* GetMaterialTypeName(aten::MaterialType type);
 
-        static aten::MaterialType getMaterialTypeFromMaterialTypeName(std::string_view name);
+        static aten::MaterialType GetMaterialTypeFromMaterialTypeName(std::string_view name);
 
-        static bool isDefaultMaterialName(const std::string& name);
+        static bool IsDefaultMaterialName(const std::string& name);
 
-        static bool isValidMaterialType(aten::MaterialType type);
+        static bool IsValidMaterialType(aten::MaterialType type);
 
-        static AT_DEVICE_API bool isTranslucentByAlpha(
+        static AT_DEVICE_API bool IsTranslucentByAlpha(
             const aten::MaterialParameter& param,
             float u, float v);
 
-        static AT_DEVICE_API float getTranslucentAlpha(
+        static AT_DEVICE_API float GetTranslucentAlpha(
             const aten::MaterialParameter& param,
             float u, float v);
 
-        static AT_DEVICE_API float computeFresnel(
+        static AT_DEVICE_API float ComputeFresnel(
             float ni, float nt,
             const aten::vec3& wi,
             const aten::vec3& normal)
@@ -584,12 +584,12 @@ namespace AT_NAME
                 || mtrl.type == aten::MaterialType::Toon;
         }
 
-        static AT_DEVICE_API aten::vec4 sampleAlbedoMap(
+        static AT_DEVICE_API aten::vec4 SampleAlbedoMap(
             const aten::MaterialParameter* mtrl,
             float u, float v,
             uint32_t lod = 0);
 
-        static AT_DEVICE_API void sampleMaterial(
+        static AT_DEVICE_API void SampleMaterial(
             AT_NAME::MaterialSampling* result,
             const aten::MaterialParameter* mtrl,
             const aten::vec3& normal,
@@ -604,14 +604,14 @@ namespace AT_NAME
             bool is_light_path = false);
 #endif
 
-        static AT_DEVICE_API float samplePDF(
+        static AT_DEVICE_API float SamplePDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
             float u, float v);
 
-        static AT_DEVICE_API AT_NAME::MaterialSampling sampleBSDF(
+        static AT_DEVICE_API AT_NAME::MaterialSampling SampleBSDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -619,7 +619,7 @@ namespace AT_NAME
             float u, float v,
             float pre_sampled_r);
 
-        static AT_DEVICE_API float applyNormal(
+        static AT_DEVICE_API float ApplyNormal(
             const aten::MaterialParameter* mtrl,
             const int32_t normalMapIdx,
             const aten::vec3& orgNml,
@@ -635,9 +635,9 @@ namespace AT_NAME
             const aten::vec3& le);
 
     protected:
-        aten::MaterialParameter m_param;
+        aten::MaterialParameter param_;
 
         // For debug.
-        std::string m_name;
+        std::string name_;
     };
 }

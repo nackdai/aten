@@ -234,7 +234,7 @@ namespace AT_NAME {
         result.dir = AT_NAME::Background::ConvertUVToDirection(u, v);
 
         result.light_color = AT_NAME::Background::SampleFromUVWithTexture(u, v, bg_, envmap);
-        result.light_color *= m_param.scale;
+        result.light_color *= param_.scale;
 #elif 0
         auto uv = AT_NAME::envmap::ConvertDirectionToUV(nml);
 

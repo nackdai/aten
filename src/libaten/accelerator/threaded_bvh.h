@@ -88,11 +88,11 @@ namespace aten
         /**
          * @brief Draw all node's AABB in the structure tree.
          */
-        virtual void drawAABB(
+        virtual void DrawAABB(
             aten::hitable::FuncDrawAABB func,
             const aten::mat4& mtx_L2W) override final
         {
-            m_bvh.drawAABB(func, mtx_L2W);
+            bvh_.DrawAABB(func, mtx_L2W);
         }
 
         /**
@@ -138,7 +138,7 @@ namespace aten
         /**
          * @brief Build the tree for the bottom layer.
          */
-        void buildAsNestedTree(
+        void BuildAsNestedTree(
             const context& ctxt,
             hitable** list,
             uint32_t num,
@@ -147,7 +147,7 @@ namespace aten
         /**
          * @brief Build the tree for the top layer.
          */
-        void buildAsTopLayerTree(
+        void BuildAsTopLayerTree(
             const context& ctxt,
             hitable** list,
             uint32_t num,
@@ -204,7 +204,7 @@ namespace aten
             std::vector<ThreadedBvhNodeEntry>& nodes);
 
     private:
-        bvh m_bvh;
+        bvh bvh_;
 
         // Flag whether thereaded bvh will build bottom layer.
         bool m_enableLayer{ true };

@@ -7,7 +7,7 @@
 namespace AT_NAME
 {
     // MEMO
-    // ApplyNormal‚Åflakes_normal‚ðŒvŽZ‚µ‚ÄAŠO‚É“n‚µ‚Ä‚¢‚é‚Ì‚ÅA“à•”“I‚ÉŒvŽZ•s—vH
+    // ApplyNormalï¿½ï¿½flakes_normalï¿½ï¿½ï¿½vï¿½Zï¿½ï¿½ï¿½ÄAï¿½Oï¿½É“nï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½Ì‚ÅAï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½ÉŒvï¿½Zï¿½sï¿½vï¿½H
 
     // TODO
     // Standardize API.
@@ -32,7 +32,7 @@ namespace AT_NAME
         const auto& V = -wi;
         const auto& N = normal;
 
-        auto fresnel = material::computeFresnel(
+        auto fresnel = material::ComputeFresnel(
             float(1), param->carpaint.clearcoat_ior,
             V, N);
 
@@ -70,7 +70,7 @@ namespace AT_NAME
         auto r0 = pre_sampled_r;
         auto r1 = sampler->nextSample();
 
-        auto fresnel = material::computeFresnel(
+        auto fresnel = material::ComputeFresnel(
             float(1), param->carpaint.clearcoat_ior,
             V, N);
 
@@ -133,7 +133,7 @@ namespace AT_NAME
         const aten::vec3 N = normal;
         const aten::vec3 H = normalize(L + V);
 
-        auto fresnel = material::computeFresnel(
+        auto fresnel = material::ComputeFresnel(
             float(1), param->carpaint.clearcoat_ior,
             V, N);
 
@@ -222,7 +222,7 @@ namespace AT_NAME
         if (sampler) {
             auto r0 = sampler->nextSample();
 
-            auto fresnel = material::computeFresnel(float(1), param->carpaint.clearcoat_ior, V, N);
+            auto fresnel = material::ComputeFresnel(float(1), param->carpaint.clearcoat_ior, V, N);
 
             if (r0 < fresnel) {
                 newNml = N;
@@ -252,19 +252,19 @@ namespace AT_NAME
 
     bool CarPaint::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, clearcoat_ior, float(0.01), float(10));
-        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, clearcoat_roughness, float(0.01), float(1.0));
-        auto b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_scale, float(100), float(1000));
-        auto b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_size, float(0.1), float(1.0));
-        auto b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_size_variance, float(0.0), float(1.0));
-        auto b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_normal_orientation, float(0.0), float(1.0));
-        auto b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_color_multiplier, float(0.1), float(10.0));
-        auto b7 = AT_EDIT_MATERIAL_PARAM(editor, m_param.carpaint, clearcoat_color);
-        auto b8 = AT_EDIT_MATERIAL_PARAM(editor, m_param.carpaint, flakes_color);
-        auto b9 = AT_EDIT_MATERIAL_PARAM(editor, m_param.carpaint, diffuse_color);
+        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.carpaint, clearcoat_ior, float(0.01), float(10));
+        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.carpaint, clearcoat_roughness, float(0.01), float(1.0));
+        auto b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.carpaint, flake_scale, float(100), float(1000));
+        auto b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.carpaint, flake_size, float(0.1), float(1.0));
+        auto b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.carpaint, flake_size_variance, float(0.0), float(1.0));
+        auto b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.carpaint, flake_normal_orientation, float(0.0), float(1.0));
+        auto b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, param_.carpaint, flake_color_multiplier, float(0.1), float(10.0));
+        auto b7 = AT_EDIT_MATERIAL_PARAM(editor, param_.carpaint, clearcoat_color);
+        auto b8 = AT_EDIT_MATERIAL_PARAM(editor, param_.carpaint, flakes_color);
+        auto b9 = AT_EDIT_MATERIAL_PARAM(editor, param_.carpaint, diffuse_color);
 
-        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
-        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
+        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, albedoMap);
+        AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, param_, normalMap);
 
         return b0 || b1 || b2 || b3 || b4 || b5 || b6 || b7 || b8 || b9;
     }

@@ -150,17 +150,17 @@ namespace idaten
         aten::SkinningVertex* vertices,
         uint32_t vtxNum,
         uint32_t* indices,
-        uint32_t idxNum,
+        uint32_t idx_num,
         const aten::GeomMultiVertexBuffer* vb)
     {
         vertices_.resize(vtxNum);
         vertices_.writeFromHostToDeviceByNum(vertices, vtxNum);
 
-        m_indices.resize(idxNum);
-        m_indices.writeFromHostToDeviceByNum(indices, idxNum);
+        m_indices.resize(idx_num);
+        m_indices.writeFromHostToDeviceByNum(indices, idx_num);
 
         if (vb) {
-            auto handles = vb->getVBOHandles();
+            auto handles = vb->GetVBOHandles();
 
             m_interopVBO.resize(handles.size());
 
@@ -191,7 +191,7 @@ namespace idaten
         triangles_.writeFromHostToDeviceByNum(tris, triNum);
 
         if (vb) {
-            auto handles = vb->getVBOHandles();
+            auto handles = vb->GetVBOHandles();
 
             // NOTE
             // Only support position, normal, previous position.

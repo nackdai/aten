@@ -17,8 +17,8 @@ namespace aten {
         const hitable* ah = *(hitable**)a;
         const hitable* bh = *(hitable**)b;
 
-        auto left = ah->getBoundingbox();
-        auto right = bh->getBoundingbox();
+        auto left = ah->GetBoundingbox();
+        auto right = bh->GetBoundingbox();
 
         if (left.minPos().x < right.minPos().x) {
             return -1;
@@ -33,8 +33,8 @@ namespace aten {
         hitable* ah = *(hitable**)a;
         hitable* bh = *(hitable**)b;
 
-        auto left = ah->getBoundingbox();
-        auto right = bh->getBoundingbox();
+        auto left = ah->GetBoundingbox();
+        auto right = bh->GetBoundingbox();
 
         if (left.minPos().y < right.minPos().y) {
             return -1;
@@ -49,8 +49,8 @@ namespace aten {
         hitable* ah = *(hitable**)a;
         hitable* bh = *(hitable**)b;
 
-        auto left = ah->getBoundingbox();
-        auto right = bh->getBoundingbox();
+        auto left = ah->GetBoundingbox();
+        auto right = bh->GetBoundingbox();
 
         if (left.minPos().z < right.minPos().z) {
             return -1;
@@ -107,8 +107,8 @@ namespace aten {
 
         sortList(list, num, axis);
 
-        m_root = std::make_shared<bvhnode>(nullptr, nullptr, this);
-        buildBySAH(m_root, list, num, 0, m_root);
+        root_ = std::make_shared<bvhnode>(nullptr, nullptr, this);
+        BuildBySAH(root_, list, num, 0, root_);
     }
 
     bool bvh::hit(
@@ -117,30 +117,30 @@ namespace aten {
         float t_min, float t_max,
         Intersection& isect) const
     {
-        bool isHit = onHit(ctxt, m_root.get(), r, t_min, t_max, isect);
-        return isHit;
+        bool is_hit = OnHit(ctxt, root_.get(), r, t_min, t_max, isect);
+        return is_hit;
     }
 
-    const aabb& bvh::getBoundingbox() const
+    const aabb& bvh::GetBoundingbox() const
     {
-        if (m_root) {
-            return m_root->getBoundingbox();
+        if (root_) {
+            return root_->GetBoundingbox();
         }
         static const aabb tmp;
         return tmp;
     }
 
-    std::shared_ptr<bvhnode> bvh::getRoot() const
+    std::shared_ptr<bvhnode> bvh::GetRoot() const
     {
-        return m_root;
+        return root_;
     }
 
-    bvhnode* bvh::getRoot()
+    bvhnode* bvh::GetRoot()
     {
-        return m_root.get();
+        return root_.get();
     }
 
-    bool bvh::onHit(
+    bool bvh::OnHit(
         const context& ctxt,
         const bvhnode* root,
         const ray& r,
@@ -184,12 +184,12 @@ namespace aten {
                 }
             }
             else {
-                if (node->getBoundingbox().hit(r, t_min, t_max)) {
-                    if (node->m_left) {
-                        stackbuf[stackpos++] = node->m_left.get();
+                if (node->GetBoundingbox().hit(r, t_min, t_max)) {
+                    if (node->left_) {
+                        stackbuf[stackpos++] = node->left_.get();
                     }
-                    if (node->m_right) {
-                        stackbuf[stackpos++] = node->m_right.get();
+                    if (node->right_) {
+                        stackbuf[stackpos++] = node->right_.get();
                     }
 
                     if (stackpos > stacksize) {
@@ -210,7 +210,7 @@ namespace aten {
         vec.erase(vec.begin());
     }
 
-    void bvh::buildBySAH(
+    void bvh::BuildBySAH(
         const std::shared_ptr<bvhnode>& root,
         hitable** list,
         uint32_t num,
@@ -225,38 +225,38 @@ namespace aten {
         AT_ASSERT(num > 0);
 
         // 全体を覆うAABBを計算.
-        root->m_aabb = list[0]->getBoundingbox();
+        root->aabb_ = list[0]->GetBoundingbox();
         for (uint32_t i = 1; i < num; i++) {
-            auto bbox = list[i]->getBoundingbox();
-            root->m_aabb = aabb::merge(root->m_aabb, bbox);
+            auto bbox = list[i]->GetBoundingbox();
+            root->aabb_ = aabb::merge(root->aabb_, bbox);
         }
 
         if (num == 1) {
             // １個しかないので、これだけで終了.
-            root->m_left = std::make_shared<bvhnode>(parent, list[0], this);
+            root->left_ = std::make_shared<bvhnode>(parent, list[0], this);
 
-            root->m_left->setBoundingBox(list[0]->getBoundingbox());
-            root->m_left->setDepth(depth + 1);
+            root->left_->setBoundingBox(list[0]->GetBoundingbox());
+            root->left_->setDepth(depth + 1);
 
             return;
         }
         else if (num == 2) {
             // ２個だけのときは適当にソートして、終了.
-            auto bbox = list[0]->getBoundingbox();
-            bbox = aabb::merge(bbox, list[1]->getBoundingbox());
+            auto bbox = list[0]->GetBoundingbox();
+            bbox = aabb::merge(bbox, list[1]->GetBoundingbox());
 
             int32_t axis = findLongestAxis(bbox);
 
             sortList(list, num, axis);
 
-            root->m_left = std::make_shared<bvhnode>(parent, list[0], this);
-            root->m_right = std::make_shared<bvhnode>(parent, list[1], this);
+            root->left_ = std::make_shared<bvhnode>(parent, list[0], this);
+            root->right_ = std::make_shared<bvhnode>(parent, list[1], this);
 
-            root->m_left->setBoundingBox(list[0]->getBoundingbox());
-            root->m_right->setBoundingBox(list[1]->getBoundingbox());
+            root->left_->setBoundingBox(list[0]->GetBoundingbox());
+            root->right_->setBoundingBox(list[1]->GetBoundingbox());
 
-            root->m_left->setDepth(depth + 1);
-            root->m_right->setDepth(depth + 1);
+            root->left_->setDepth(depth + 1);
+            root->right_->setDepth(depth + 1);
 
             return;
         }
@@ -278,7 +278,7 @@ namespace aten {
         int32_t bestSplitIndex = -1;
 
         // ノード全体のAABBの表面積
-        auto rootSurfaceArea = root->m_aabb.computeSurfaceArea();
+        auto rootSurfaceArea = root->aabb_.computeSurfaceArea();
 
         for (int32_t axis = 0; axis < 3; axis++) {
             // ポリゴンリストを、それぞれのAABBの中心座標を使い、axis でソートする.
@@ -309,7 +309,7 @@ namespace aten {
                     pop_front(s2);
 
                     // 移したポリゴンのAABBをマージしてs1のAABBとする.
-                    auto bbox = p->getBoundingbox();
+                    auto bbox = p->GetBoundingbox();
                     s1bbox = aabb::merge(s1bbox, bbox);
                 }
             }
@@ -343,7 +343,7 @@ namespace aten {
                     s1.pop_back();
 
                     // 移したポリゴンのAABBをマージしてS2のAABBとする.
-                    auto bbox = p->getBoundingbox();
+                    auto bbox = p->GetBoundingbox();
                     s2bbox = aabb::merge(s2bbox, bbox);
                 }
             }
@@ -355,11 +355,11 @@ namespace aten {
             sortList(list, num, bestAxis);
 
             // 左右の子ノードを作成.
-            root->m_left = std::make_shared<bvhnode>(root, nullptr, this);
-            root->m_right = std::make_shared<bvhnode>(root, nullptr, this);
+            root->left_ = std::make_shared<bvhnode>(root, nullptr, this);
+            root->right_ = std::make_shared<bvhnode>(root, nullptr, this);
 
-            root->m_left->setDepth(depth + 1);
-            root->m_right->setDepth(depth + 1);
+            root->left_->setDepth(depth + 1);
+            root->right_->setDepth(depth + 1);
 
             // リストを分割.
             int32_t leftListNum = bestSplitIndex;
@@ -368,8 +368,8 @@ namespace aten {
             AT_ASSERT(rightListNum > 0);
 
             // 再帰処理
-            buildBySAH(root->m_left, list, leftListNum, depth + 1, root->m_left);
-            buildBySAH(root->m_right, list + leftListNum, rightListNum, depth + 1, root->m_right);
+            BuildBySAH(root->left_, list, leftListNum, depth + 1, root->left_);
+            BuildBySAH(root->right_, list + leftListNum, rightListNum, depth + 1, root->right_);
         }
 #else
         struct BuildInfo {
@@ -394,11 +394,11 @@ namespace aten {
         while (info.node != nullptr)
         {
             // 全体を覆うAABBを計算.
-            info.node->setBoundingBox(info.list[0]->getBoundingbox());
+            info.node->setBoundingBox(info.list[0]->GetBoundingbox());
             for (uint32_t i = 1; i < info.num; i++) {
-                auto bbox = info.list[i]->getBoundingbox();
+                auto bbox = info.list[i]->GetBoundingbox();
                 info.node->setBoundingBox(
-                    aabb::merge(info.node->getBoundingbox(), bbox));
+                    aabb::merge(info.node->GetBoundingbox(), bbox));
             }
 
 #ifdef ENABLE_BVH_MULTI_TRIANGLES
@@ -435,9 +435,9 @@ namespace aten {
 #else
             if (info.num == 1) {
                 // １個しかないので、これだけで終了.
-                info.node->m_left = new bvhnode(info.node, info.list[0]);
+                info.node->left_ = new bvhnode(info.node, info.list[0]);
 
-                info.node->m_left->setBoundingBox(info.list[0]->getBoundingbox());
+                info.node->left_->setBoundingBox(info.list[0]->GetBoundingbox());
 
                 info = stacks.back();
                 stacks.pop_back();
@@ -446,18 +446,18 @@ namespace aten {
             else if (info.num == 2) {
                 // ２個だけのときは適当にソートして、終了.
 
-                auto bbox = info.list[0]->getBoundingbox();
-                bbox = aabb::merge(bbox, info.list[1]->getBoundingbox());
+                auto bbox = info.list[0]->GetBoundingbox();
+                bbox = aabb::merge(bbox, info.list[1]->GetBoundingbox());
 
                 int32_t axis = findLongestAxis(bbox);
 
                 sortList(info.list, info.num, axis);
 
-                info.node->m_left = new bvhnode(info.node, info.list[0]);
-                info.node->m_right = new bvhnode(info.node, info.list[1]);
+                info.node->left_ = new bvhnode(info.node, info.list[0]);
+                info.node->right_ = new bvhnode(info.node, info.list[1]);
 
-                info.node->m_left->setBoundingBox(info.list[0]->getBoundingbox());
-                info.node->m_right->setBoundingBox(info.list[1]->getBoundingbox());
+                info.node->left_->setBoundingBox(info.list[0]->GetBoundingbox());
+                info.node->right_->setBoundingBox(info.list[1]->GetBoundingbox());
 
                 info = stacks.back();
                 stacks.pop_back();
@@ -482,7 +482,7 @@ namespace aten {
             int32_t bestSplitIndex = -1;
 
             // ノード全体のAABBの表面積
-            auto rootSurfaceArea = info.node->getBoundingbox().computeSurfaceArea();
+            auto rootSurfaceArea = info.node->GetBoundingbox().computeSurfaceArea();
 
             for (int32_t axis = 0; axis < 3; axis++) {
                 // ポリゴンリストを、それぞれのAABBの中心座標を使い、axis でソートする.
@@ -513,7 +513,7 @@ namespace aten {
                         pop_front(s2);
 
                         // 移したポリゴンのAABBをマージしてs1のAABBとする.
-                        auto bbox = p->getBoundingbox();
+                        auto bbox = p->GetBoundingbox();
                         s1bbox = aabb::merge(s1bbox, bbox);
                     }
                 }
@@ -547,7 +547,7 @@ namespace aten {
                         s1.pop_back();
 
                         // 移したポリゴンのAABBをマージしてS2のAABBとする.
-                        auto bbox = p->getBoundingbox();
+                        auto bbox = p->GetBoundingbox();
                         s2bbox = aabb::merge(s2bbox, bbox);
                     }
                 }
@@ -559,8 +559,8 @@ namespace aten {
                 sortList(info.list, info.num, bestAxis);
 
                 // 左右の子ノードを作成.
-                info.node->m_left = new bvhnode(info.node);
-                info.node->m_right = new bvhnode(info.node);
+                info.node->left_ = new bvhnode(info.node);
+                info.node->right_ = new bvhnode(info.node);
 
                 // リストを分割.
                 int32_t leftListNum = bestSplitIndex;
@@ -570,8 +570,8 @@ namespace aten {
 
                 auto _list = info.list;
 
-                auto _left = info.node->m_left;
-                auto _right = info.node->m_right;
+                auto _left = info.node->left_;
+                auto _right = info.node->right_;
 
                 info = BuildInfo(_left, _list, leftListNum);
                 stacks.push_back(BuildInfo(_right, _list + leftListNum, rightListNum));
@@ -585,16 +585,16 @@ namespace aten {
 #endif
     }
 
-    void bvh::drawAABB(
+    void bvh::DrawAABB(
         aten::hitable::FuncDrawAABB func,
         const aten::mat4& mtx_L2W)
     {
-        auto node = m_root;
+        auto node = root_;
 
         static const size_t stacksize = 64;
         std::array<std::shared_ptr<bvhnode>, stacksize> stackbuf;
 
-        stackbuf[0] = m_root;
+        stackbuf[0] = root_;
         int32_t stackpos = 1;
 
         while (stackpos > 0) {
@@ -602,10 +602,10 @@ namespace aten {
 
             stackpos -= 1;
 
-            node->drawAABB(func, mtx_L2W);
+            node->DrawAABB(func, mtx_L2W);
 
-            auto left = node->m_left;
-            auto right = node->m_right;
+            auto left = node->left_;
+            auto right = node->right_;
 
             if (left) {
                 stackbuf[stackpos++] = left;
@@ -618,13 +618,13 @@ namespace aten {
 
     bool bvh::IsBuilt() const
     {
-        return static_cast<bool>(m_root);
+        return static_cast<bool>(root_);
     }
 
     std::optional<aten::aabb> bvh::GetBoundingBox() const
     {
         if (IsBuilt()) {
-            return m_root->getBoundingbox();
+            return root_->GetBoundingbox();
         }
         AT_ASSERT(false);
         return std::nullopt;

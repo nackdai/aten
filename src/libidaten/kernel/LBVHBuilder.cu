@@ -717,7 +717,7 @@ namespace idaten
     }
 
     template <class T>
-    void LBVHBuilder::onBuild(
+    void LBVHBuilder::OnBuild(
         idaten::CudaTextureResource& dst,
         TypedCudaMemory<aten::TriangleParameter>& triangles,
         int32_t triIdOffset,
@@ -859,7 +859,7 @@ namespace idaten
 
         auto vtxPos = texRscVtxPos.bind();
 
-        onBuild(dst, triangles, triIdOffset, sceneBbox, vtxPos, vtxOffset, threadedBvhNodes);
+        OnBuild(dst, triangles, triIdOffset, sceneBbox, vtxPos, vtxOffset, threadedBvhNodes);
 
         texRscVtxPos.unbind();
     }
@@ -879,7 +879,7 @@ namespace idaten
         size_t bytes = 0;
         vboVtxPos.bind((void**)&vtxPos, bytes);
 
-        onBuild(dst, triangles, triIdOffset, sceneBbox, vtxPos, vtxOffset, threadedBvhNodes);
+        OnBuild(dst, triangles, triIdOffset, sceneBbox, vtxPos, vtxOffset, threadedBvhNodes);
 
         vboVtxPos.unbind();
         vboVtxPos.unmap();

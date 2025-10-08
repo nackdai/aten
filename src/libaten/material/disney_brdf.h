@@ -31,22 +31,22 @@ namespace AT_NAME
             aten::texture* roughnessMap = nullptr)
             : material(aten::MaterialParameter(), aten::MaterialAttributeMicrofacet)
         {
-            m_param.type = aten::MaterialType::Disney;
-            m_param.baseColor = baseColor;
-            m_param.standard.subsurface = aten::saturate(subsurface);
-            m_param.standard.metallic = aten::saturate(metallic);
-            m_param.standard.specular = aten::saturate(specular);
-            m_param.standard.specularTint = aten::saturate(specularTint);
-            m_param.standard.roughness = aten::saturate(roughness);
-            m_param.standard.anisotropic = aten::saturate(anisotropic);
-            m_param.standard.sheen = aten::saturate(sheen);
-            m_param.standard.sheenTint = aten::saturate(sheenTint);
-            m_param.standard.clearcoat = aten::saturate(clearcoat);
-            m_param.standard.clearcoatGloss = aten::saturate(clearcoatGloss);
+            param_.type = aten::MaterialType::Disney;
+            param_.baseColor = baseColor;
+            param_.standard.subsurface = aten::saturate(subsurface);
+            param_.standard.metallic = aten::saturate(metallic);
+            param_.standard.specular = aten::saturate(specular);
+            param_.standard.specularTint = aten::saturate(specularTint);
+            param_.standard.roughness = aten::saturate(roughness);
+            param_.standard.anisotropic = aten::saturate(anisotropic);
+            param_.standard.sheen = aten::saturate(sheen);
+            param_.standard.sheenTint = aten::saturate(sheenTint);
+            param_.standard.clearcoat = aten::saturate(clearcoat);
+            param_.standard.clearcoatGloss = aten::saturate(clearcoatGloss);
 
-            m_param.standard.ior = ior;
+            param_.standard.ior = ior;
 
-            setTextures(albedoMap, normalMap, roughnessMap);
+            SetTextures(albedoMap, normalMap, roughnessMap);
         }
 
         DisneyBRDF(
@@ -56,21 +56,21 @@ namespace AT_NAME
             aten::texture* roughnessMap = nullptr)
             : material(param, aten::MaterialAttributeMicrofacet)
         {
-            m_param.baseColor = param.baseColor;
-            m_param.standard.subsurface = aten::saturate(param.standard.subsurface);
-            m_param.standard.metallic = aten::saturate(param.standard.metallic);
-            m_param.standard.specular = aten::saturate(param.standard.specular);
-            m_param.standard.specularTint = aten::saturate(param.standard.specularTint);
-            m_param.standard.roughness = aten::saturate(param.standard.roughness);
-            m_param.standard.anisotropic = aten::saturate(param.standard.anisotropic);
-            m_param.standard.sheen = aten::saturate(param.standard.sheen);
-            m_param.standard.sheenTint = aten::saturate(param.standard.sheenTint);
-            m_param.standard.clearcoat = aten::saturate(param.standard.clearcoat);
-            m_param.standard.clearcoatGloss = aten::saturate(param.standard.clearcoatGloss);
+            param_.baseColor = param.baseColor;
+            param_.standard.subsurface = aten::saturate(param.standard.subsurface);
+            param_.standard.metallic = aten::saturate(param.standard.metallic);
+            param_.standard.specular = aten::saturate(param.standard.specular);
+            param_.standard.specularTint = aten::saturate(param.standard.specularTint);
+            param_.standard.roughness = aten::saturate(param.standard.roughness);
+            param_.standard.anisotropic = aten::saturate(param.standard.anisotropic);
+            param_.standard.sheen = aten::saturate(param.standard.sheen);
+            param_.standard.sheenTint = aten::saturate(param.standard.sheenTint);
+            param_.standard.clearcoat = aten::saturate(param.standard.clearcoat);
+            param_.standard.clearcoatGloss = aten::saturate(param.standard.clearcoatGloss);
 
-            m_param.standard.ior = param.standard.ior;
+            param_.standard.ior = param.standard.ior;
 
-            setTextures(albedoMap, normalMap, roughnessMap);
+            SetTextures(albedoMap, normalMap, roughnessMap);
         }
 
         DisneyBRDF(aten::Values& val);

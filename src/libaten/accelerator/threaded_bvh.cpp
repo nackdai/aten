@@ -22,14 +22,14 @@ namespace aten
         aabb* bbox)
     {
         if (is_nested_) {
-            buildAsNestedTree(ctxt, list, num, bbox);
+            BuildAsNestedTree(ctxt, list, num, bbox);
         }
         else {
-            buildAsTopLayerTree(ctxt, list, num, bbox);
+            BuildAsTopLayerTree(ctxt, list, num, bbox);
         }
     }
 
-    void ThreadedBVH::buildAsNestedTree(
+    void ThreadedBVH::BuildAsNestedTree(
         const context& ctxt,
         hitable** list,
         uint32_t num,
@@ -37,16 +37,16 @@ namespace aten
     {
         AT_ASSERT(is_nested_);
 
-        m_bvh.build(ctxt, list, num, bbox);
+        bvh_.build(ctxt, list, num, bbox);
 
-        setBoundingBox(m_bvh.getBoundingbox());
+        setBoundingBox(bvh_.GetBoundingbox());
 
         std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
 
         // Convert to linear list.
         registerBvhNodeToLinearList(
             ctxt,
-            m_bvh.getRoot(),
+            bvh_.GetRoot(),
             threadedBvhNodeEntries);
 
         std::vector<int32_t> listParentId;
@@ -67,7 +67,7 @@ namespace aten
             m_listThreadedBvhNode[0]);
     }
 
-    void ThreadedBVH::buildAsTopLayerTree(
+    void ThreadedBVH::BuildAsTopLayerTree(
         const context& ctxt,
         hitable** list,
         uint32_t num,
@@ -75,16 +75,16 @@ namespace aten
     {
         AT_ASSERT(!is_nested_);
 
-        m_bvh.build(ctxt, list, num, bbox);
+        bvh_.build(ctxt, list, num, bbox);
 
-        setBoundingBox(m_bvh.getBoundingbox());
+        setBoundingBox(bvh_.GetBoundingbox());
 
         std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
 
         // Register to linear list to traverse bvhnode easily.
         registerBvhNodeToLinearList(
             ctxt,
-            m_bvh.getRoot(),
+            bvh_.GetRoot(),
             threadedBvhNodeEntries);
 
         // Convert from map to vector.
@@ -185,7 +185,7 @@ namespace aten
             // NOTE
             // Differ set hit/miss index.
 
-            auto bbox = node->getBoundingbox();
+            auto bbox = node->GetBoundingbox();
             bbox = aten::aabb::transform(bbox, entry.mtx_L2W);
 
             auto parent = node->getParent();
@@ -370,7 +370,7 @@ namespace aten
                 break;
             }
 
-            bool isHit = false;
+            bool is_hit = false;
 
             if (node->isLeaf()) {
                 Intersection isectTmp;
@@ -398,7 +398,7 @@ namespace aten
                     int32_t exid = *(int32_t*)(&node->exid);
                     exid = AT_BVHNODE_MAIN_EXID(exid);
 
-                    isHit = hit(
+                    is_hit = hit(
                         ctxt,
                         exid,
                         listThreadedBvhNode,
@@ -406,25 +406,25 @@ namespace aten
                         t_min, t_max,
                         isectTmp);
 
-                    if (isHit) {
+                    if (is_hit) {
                         isectTmp.objid = s->id();
                     }
                 }
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
                     auto prim = ctxt.GetTriangleInstance((int32_t)node->primid);
-                    isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
-                    if (isHit) {
+                    is_hit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
+                    if (is_hit) {
                         // Set dummy to return if ray hit.
                         isectTmp.objid = s ? s->id() : 1;
                     }
                 }
                 else {
                     // Hit test for a shape.
-                    isHit = s->hit(ctxt, r, t_min, t_max, isectTmp);
+                    is_hit = s->hit(ctxt, r, t_min, t_max, isectTmp);
                 }
 
-                if (isHit) {
+                if (is_hit) {
                     float tmp_t_max = hit_stop_type == aten::HitStopType::Any
                         ? AT_MATH_INF
                         : t_max;
@@ -442,10 +442,10 @@ namespace aten
                 }
             }
             else {
-                isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
+                is_hit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
             }
 
-            if (isHit) {
+            if (is_hit) {
                 nodeid = (int32_t)node->hit;
             }
             else {
@@ -458,11 +458,11 @@ namespace aten
 
     void ThreadedBVH::update(const context& ctxt)
     {
-        m_bvh.update(ctxt);
+        bvh_.update(ctxt);
 
-        setBoundingBox(m_bvh.getBoundingbox());
+        setBoundingBox(bvh_.GetBoundingbox());
 
-        auto root = m_bvh.getRoot();
+        auto root = bvh_.GetRoot();
         std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
         registerBvhNodeToLinearList(ctxt, root, threadedBvhNodeEntries);
 
@@ -479,7 +479,7 @@ namespace aten
             // NOTE
             // Differ set hit/miss index.
 
-            auto bbox = node->getBoundingbox();
+            auto bbox = node->GetBoundingbox();
 
             auto parent = node->getParent();
             int32_t parentId = parent ? parent->getTraversalOrder() : -1;

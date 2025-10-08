@@ -18,7 +18,7 @@ jobs:
     name: check_diff
     runs-on: ubuntu-22.04
     outputs:
-      should_build_image: ${{ steps.check_change_docker_file.outputs.should_build_image }}
+      should_build_image: ${{ steps.check_image_time.outputs.should_build_image }}
       should_build_source: ${{ steps.changed_files_to_build_source.outputs.any_modified }}
     if: github.ref != 'refs/heads/main'
     steps:
@@ -73,7 +73,6 @@ jobs:
       - name: Check docker image build time
         id: check_image_time
         if: ${{ steps.check_change_docker_file.outputs.any_modified == 'true' }}
-        continue-on-error: true
         run: |
           docker pull ghcr.io/${{ github.repository }}/aten
           file_change_date=$(git log -1 --pretty="format:%ct" ./docker/)

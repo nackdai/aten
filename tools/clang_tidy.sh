@@ -108,7 +108,7 @@ COMPILE_COMMANDS_JSON="${dir_to_compile_commands_json}/compile_commands.json"
 # If compile_commands.json doesn't exist, generate.
 if [ ! -e "${COMPILE_COMMANDS_JSON}" ]; then
   if [ -e "${THIS_DIR}/build.sh" ]; then
-    ${THIS_DIR}/build.sh -d "${docker_image}" -e
+    "${THIS_DIR}"/build.sh -d "${docker_image}" -e
   else
     echo "No script to build ${COMPILE_COMMANDS_JSON}"
     exit 1
@@ -131,7 +131,7 @@ fi
 if ((${#target_files[*]} > 0)); then
   target_files=("-t" "${target_files[@]:0}")
 elif [[ -d "${target_dir}" ]]; then
-  readarray -d '' target_files < <(find "${target_dir}" -name *.cpp -type f -print0)
+  readarray -d '' target_files < <(find "${target_dir}" -name "*.cpp" -type f -print0)
 fi
 
 options=()

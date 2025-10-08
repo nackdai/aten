@@ -3,7 +3,6 @@
 set -eu
 set -o pipefail
 
-THIS_DIR="$(cd "$(dirname "$0")" && pwd)"
 CLANG_VERSION=17
 
 usage() {

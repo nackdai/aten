@@ -42,11 +42,7 @@ def is_target_file(file: str, target_files: list(str)) -> bool:
     return len(file_in) > 0
 
 
-def exec_clang_tidy(
-    file: str,
-    header_filter: str,
-    extra_args: list[str]
-) -> int:
+def exec_clang_tidy(file: str, header_filter: str, extra_args: list[str]) -> int:
     """Execute clang_tidy.
 
     Args:
@@ -81,11 +77,12 @@ def exec_clang_tidy(
 
     return proc.returncode
 
+
 def exec_clang_tidy_by_compile_commands_json(
     compile_commands_json: str,
     ignore_words: str,
     header_filter: str,
-    fail_fast: bool,    # noqa: FBT001
+    fail_fast: bool,  # noqa: FBT001
     target_files: list[str],
     extra_args: list[str],
 ) -> None:
@@ -161,7 +158,8 @@ def main():
     parser.add_argument(
         "extra_args",
         nargs=argparse.REMAINDER,
-        help="Arguments passed to clang-tidy directly",)
+        help="Arguments passed to clang-tidy directly",
+    )
     args = parser.parse_args()
 
     # Compile ignore words.

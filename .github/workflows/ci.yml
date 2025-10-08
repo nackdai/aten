@@ -80,8 +80,10 @@ jobs:
           image_build_date=$(docker inspect -f '{{ .Created }}' ghcr.io/${{ github.repository }}/aten | xargs -i date --utc --date="{}" +%s)
           echo "::notice::File [${file_change_date}] DockerImage [${image_build_date}]"
           if [[ "${file_change_date}" -gt "${image_build_date}" ]]; then
+            echo "::notice::Docker image should be rebuilt."
             echo "should_build_image=true" >> $GITHUB_OUTPUT
           else
+            echo "::notice::No need to rebuild the Docker image."
             echo "should_build_image=false" >> $GITHUB_OUTPUT
           fi
 
@@ -89,7 +91,7 @@ jobs:
     name: build_docker
     runs-on: ubuntu-22.04
     needs: check_diff
-    if: contains(needs.check_diff.outputs.should_build_image, 'true')
+    if: ${{ needs.check_diff.outputs.should_build_image == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3

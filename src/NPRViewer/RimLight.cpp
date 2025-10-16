@@ -32,13 +32,7 @@ void RimLight::PreRender(aten::shader& shader, const aten::PinholeCamera& camera
 
 void RimLight::EditParameter()
 {
-    std::array f = { rim_light_color_.x, rim_light_color_.y, rim_light_color_.z };
-    ImGui::ColorEdit3("Rim Light Color", f.data());
-
-    rim_light_color_.x = f[0];
-    rim_light_color_.y = f[1];
-    rim_light_color_.z = f[2];
-
+    ImGui::ColorEdit3("Rim Light Color", &rim_light_color_.x);
     ImGui::SliderFloat("width", &width_, 0, 1);
     ImGui::SliderFloat("softness", &softness_, 0.0, 1);
     ImGui::SliderFloat("spread", &spread_, 0.0, 1);

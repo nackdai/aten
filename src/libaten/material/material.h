@@ -53,7 +53,9 @@ namespace aten
 
         MaterialTypeMax,
 
+        // TODO:
         // From here, the followings are specialized materials.
+        // If possible, the followings should be split into another enum class.
         Volume,
         ToonSpecular,
     };

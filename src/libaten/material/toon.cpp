@@ -340,6 +340,10 @@ namespace AT_NAME
         const aten::vec3& V,
         const aten::vec3& L)
     {
+        // NOTE:
+        // Stylized hightlight for Cartoon Rendering and Animation.
+        // http://ivizlab.sfu.ca/arya/Papers/IEEE/C%20G%20&%20A/2003/July/Stylized%20Highlights%20for%20Cartoon%20Rendering.pdf
+
         auto H = normalize(L + V);
 
         // Stylized hightlight.

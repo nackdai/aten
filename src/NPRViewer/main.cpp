@@ -9,6 +9,8 @@
 
 #include "StylizedHighlight.h"
 #include "RimLight.h"
+#include "NPRShading.h"
+#include "ToonBsdf.h"
 
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
@@ -19,6 +21,8 @@ public:
     enum class NPRType : int32_t {
         StylizedHighlight,
         RimLight,
+        NPRShading,
+        ToonBsdf,
         Max,
     };
 
@@ -70,6 +74,19 @@ public:
             WIDTH, HEIGHT,
             "../shader/drawobj_vs.glsl",
             "../shader/drawobj_fs.glsl");
+
+        // NPRShading.
+        npr_shading_.Init(
+            WIDTH, HEIGHT,
+            "npr_shading_vs.glsl",
+            "npr_shading_fs.glsl");
+
+        // ToonBsdf.
+        toon_bsdf_.Init(
+            WIDTH, HEIGHT,
+            "toon_bsdf.vert",
+            //"toon_specular_bsdf.frag");
+            "toon_bsdf.frag");
 
         return true;
     }
@@ -129,9 +146,11 @@ public:
         ImGui::Text("max(%.3f, %.3f, %.3f)", aabb_max.x, aabb_max.y, aabb_max.z);
         ImGui::Text("min(%.3f, %.3f, %.3f)", aabb_min.x, aabb_min.y, aabb_min.z);
 
-        constexpr std::array npr_types = {
+        constexpr std::array<const char*, static_cast<size_t>(NPRType::Max)> npr_types = {
             "StylizedHightlight",
             "RimLight",
+            "NPRShading",
+            "ToonBsdf",
         };
         if (ImGui::Combo("type", reinterpret_cast<int32_t*>(&type_), npr_types.data(), static_cast<int32_t>(npr_types.size()))) {
             // TODO
@@ -351,10 +370,14 @@ private:
     NPRType type_{ static_cast<NPRType>(0) };
     StylizedHighlight stylized_hightlight_;
     RimLight rim_light_;
+    NPRShading npr_shading_;
+    ToonBsdf toon_bsdf_;
 
     std::array<NPRModule*, static_cast<size_t>(NPRType::Max)> npr_ = {
         &stylized_hightlight_,
         &rim_light_,
+        &npr_shading_,
+        &toon_bsdf_,
     };
 
     std::vector<std::shared_ptr<aten::PolygonObject>> objs_;

@@ -4,11 +4,15 @@
     <ClCompile Include="..\src\NPRViewer\main.cpp" />
     <ClCompile Include="..\src\NPRViewer\RimLight.cpp" />
     <ClCompile Include="..\src\NPRViewer\StylizedHighlight.cpp" />
+    <ClCompile Include="..\src\NPRViewer\NPRShading.cpp" />
+    <ClCompile Include="..\src\NPRViewer\ToonBsdf.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\NPRViewer\NPRModule.h" />
     <ClInclude Include="..\src\NPRViewer\RimLight.h" />
     <ClInclude Include="..\src\NPRViewer\StylizedHighlight.h" />
+    <ClInclude Include="..\src\NPRViewer\NPRShading.h" />
+    <ClInclude Include="..\src\NPRViewer\ToonBsdf.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\NPRViewer\highlight_fs.glsl">
@@ -21,6 +25,21 @@
       <Filter>shader</Filter>
     </None>
     <None Include="..\src\NPRViewer\rimlight_vs.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRViewer\npr_shading_vs.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRViewer\npr_shading_fs.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRViewer\toon_bsdf.vert">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRViewer\toon_bsdf.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRViewer\toon_specular_bsdf.frag">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>

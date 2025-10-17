@@ -110,7 +110,7 @@ namespace AT_NAME
         }
 
         // NOTE:
-        // ACP
+        // Global Illumination-Aware Stylised Shading
         // https://diglib.eg.org/server/api/core/bitstreams/d84134e0-af8c-4db6-a13a-dc854294f6aa/content
 
         // Convert RGB to XYZ.

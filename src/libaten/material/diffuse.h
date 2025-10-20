@@ -128,6 +128,10 @@ namespace AT_NAME
          */
         static AT_DEVICE_API aten::vec3 ComputeBRDF()
         {
+            // Normalized diffuse BRDF.
+            // https://www.project-asura.com/articles/d3d11/d3d11_004.html
+
+            // Albedo color is applied in the caller side.
             return aten::vec3(1.0F) / AT_MATH_PI;
         }
     };

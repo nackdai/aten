@@ -58,8 +58,8 @@ public:
         // StylizedHighlight.
         stylized_hightlight_.Init(
             WIDTH, HEIGHT,
-            "highlight_vs.glsl",
-            "highlight_fs.glsl");
+            "highlight.vert",
+            "highlight.frag");
         stylized_hightlight_.InitDebugVisual(
             WIDTH, HEIGHT,
             "../shader/drawobj_vs.glsl",
@@ -68,8 +68,8 @@ public:
         // RimLight.
         rim_light_.Init(
             WIDTH, HEIGHT,
-            "rimlight_vs.glsl",
-            "rimlight_fs.glsl");
+            "rimlight.vert",
+            "rimlight.frag");
         rim_light_.InitDebugVisual(
             WIDTH, HEIGHT,
             "../shader/drawobj_vs.glsl",
@@ -78,8 +78,8 @@ public:
         // NPRShading.
         npr_shading_.Init(
             WIDTH, HEIGHT,
-            "npr_shading_vs.glsl",
-            "npr_shading_fs.glsl");
+            "npr_shading.vert",
+            "npr_shading.frag");
 
         // ToonBsdf.
         toon_bsdf_.Init(

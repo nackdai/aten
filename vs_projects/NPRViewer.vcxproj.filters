@@ -15,22 +15,22 @@
     <ClInclude Include="..\src\NPRViewer\ToonBsdf.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\NPRViewer\highlight_fs.glsl">
+    <None Include="..\src\NPRViewer\highlight.frag">
       <Filter>shader</Filter>
     </None>
-    <None Include="..\src\NPRViewer\highlight_vs.glsl">
+    <None Include="..\src\NPRViewer\highlight.vert">
       <Filter>shader</Filter>
     </None>
-    <None Include="..\src\NPRViewer\rimlight_fs.glsl">
+    <None Include="..\src\NPRViewer\rimlight.frag">
       <Filter>shader</Filter>
     </None>
-    <None Include="..\src\NPRViewer\rimlight_vs.glsl">
+    <None Include="..\src\NPRViewer\rimlight.vert">
       <Filter>shader</Filter>
     </None>
-    <None Include="..\src\NPRViewer\npr_shading_vs.glsl">
+    <None Include="..\src\NPRViewer\npr_shading.vert">
       <Filter>shader</Filter>
     </None>
-    <None Include="..\src\NPRViewer\npr_shading_fs.glsl">
+    <None Include="..\src\NPRViewer\npr_shading.frag">
       <Filter>shader</Filter>
     </None>
     <None Include="..\src\NPRViewer\toon_bsdf.vert">

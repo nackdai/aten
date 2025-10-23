@@ -61,25 +61,21 @@ namespace AT_NAME
     AT_DEVICE_API aten::vec3 Toon::ComputeBRDF(
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& param,
-        const aten::LightSampleResult* light_sample,
+        const aten::LightSampleResult* sampled_light,
         aten::sampler& sampler,
         const aten::vec3& hit_pos,
         const aten::vec3& normal,
         const aten::vec3& wi,
-        float u, float v,
-        float& pdf)
+        float u, float v)
     {
-        // TODO
-        constexpr float w_min = 0.01F;
-        constexpr float y_min = 0.0F;
-        constexpr float y_max = 1.0F;
+        // The target light is sepcified beforehand and it is only one.
+        // So, light selected pdf is always 1.
+        constexpr float light_selected_pdf = 1.0F;
 
-        aten::vec3 radiance(0.0F);
-        pdf = 0.0F;
+        aten::vec3 toon_term{ 0.0F };
 
-        if (light_sample) {
-            // TODO
-            // How can we configure base material type.
+        if (sampled_light) {
+            // Diffuse.
             aten::MaterialParameter base_mtrl = param;
             if (param.toon.toon_type == aten::ToonParameter::ToonType::Diffuse) {
                 base_mtrl.type = aten::MaterialType::Diffuse;
@@ -88,61 +84,35 @@ namespace AT_NAME
                 base_mtrl.type = aten::MaterialType::ToonSpecular;
             }
 
-            // The target light is sepcified beforehand and it is only one.
-            // So, light selected pdf is always 1.
-            constexpr float light_selected_pdf = 1.0F;
-
             // Compute radiance.
             // The target light is singular, and then MIS in ComputeRadianceNEE is always 1.0.
             auto res = ComputeRadianceNEE(
                 wi, normal,
                 base_mtrl, 0.0F, u, v,
-                light_selected_pdf, *light_sample);
+                light_selected_pdf,
+                *sampled_light);
+
             if (res) {
-                radiance = res.value();
-                if (param.toon.toon_type == aten::ToonParameter::ToonType::Diffuse) {
-                    pdf = Diffuse::ComputePDF(normal, light_sample->dir);
-                }
-                else {
-                    pdf = ToonSpecular::ComputePDF(param, normal, wi, light_sample->dir, u, v);
+                auto radiance = res.value();
+
+                float lum_y = aten::clamp(color::luminance(radiance), 0.0F, 1.0F);
+
+                if (!aten::isClose(lum_y, 0.0F, 1e-9F, 1e-3F)) {
+                    const auto hsv = color::RGBtoHSV(radiance);
+                    const auto color = color::HSVtoRGB(aten::vec3(hsv.r, hsv.g, 1));
+
+                    lum_y = pow(lum_y, 1.0 / 2.2);
+
+                    const auto remap = AT_NAME::sampleTexture(param.toon.remap_texture, 0.5F, lum_y, aten::vec4(1.0F));
+
+                    toon_term = remap * color;
                 }
             }
         }
 
-        // NOTE:
-        // Global Illumination-Aware Stylised Shading
-        // https://diglib.eg.org/server/api/core/bitstreams/d84134e0-af8c-4db6-a13a-dc854294f6aa/content
+        const auto rim_light_term = ComputeRimLight(ctxt, param, hit_pos, normal, wi);
 
-        // Convert RGB to XYZ.
-        const auto xyz = color::sRGBtoXYZ(radiance);
-        const auto y = xyz.y;
-
-        // To avoid too dark, compare with the minimum weight.
-        const auto weight = aten::saturate(aten::max(y, w_min));
-
-        // Compute texture coord (1D, vertical) for remap texture.
-        auto remap_v = 0.0F;
-        if (y_max <= y) {
-            remap_v = 1.0F;
-        }
-        else if (y <= y_min) {
-            remap_v = 0.0F;
-        }
-        else {
-            remap_v = (y - y_min) / (y_max - y_min);
-        }
-
-        const auto remap = AT_NAME::sampleTexture(param.toon.remap_texture, 0.5F, remap_v, aten::vec4(radiance));
-
-        // TODO
-        // According to the paper, weight is necessary.
-        // But, it causes the gradation, color change etc from ramp color...
-        // According to the paper, multiplying pdf seems to be necessary as well.
-        // But, it darken the result....
-        //aten::vec3 bsdf = weight * remap * pdf;
-        aten::vec3 bsdf = weight * remap;
-
-        return bsdf;
+        return toon_term + rim_light_term;
     }
 
     namespace _detail {
@@ -170,7 +140,7 @@ namespace AT_NAME
 
     }
 
-    AT_DEVICE_API aten::vec3 Toon::PostProcess(
+    AT_DEVICE_API aten::vec3 Toon::ComputeRimLight(
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& param,
         const aten::vec3& hit_pos,

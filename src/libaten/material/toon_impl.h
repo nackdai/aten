@@ -27,7 +27,6 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& wi,
         float u, float v,
-        float& pdf,
         SCENE* scene/*= nullptr*/)
     {
         // Pick target light.
@@ -73,7 +72,7 @@ namespace AT_NAME
             brdf = ComputeBRDF(
                 ctxt, param,
                 is_hit ? nullptr : &light_sample,
-                sampler, hit_pos, normal, wi, u, v, pdf);
+                sampler, hit_pos, normal, wi, u, v);
         }
 
         return brdf;

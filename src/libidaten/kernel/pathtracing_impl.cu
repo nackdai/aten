@@ -110,7 +110,7 @@ namespace pt {
         }
 
         // Implicit conection to light.
-        auto is_hit_implicit_light = AT_NAME::HitTeminateMaterial(
+        auto is_hit_implicit_light = AT_NAME::HitTeminatedMaterial(
             ctxt, paths.sampler[idx],
             isect.objid,
             isBackfacing,
@@ -172,6 +172,7 @@ namespace pt {
 
         AT_NAME::material::sampleMaterial(
             &sampling,
+            paths.throughput[idx].throughput,
             &shMtrls[threadIdx.x],
             orienting_normal,
             ray.dir,

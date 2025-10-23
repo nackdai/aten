@@ -279,6 +279,7 @@ public:
                 "CarPaint",
                 "Disney",
                 "Toon",
+                "StylizedBrdf",
             };
             if (mtrl) {
                 int32_t mtrlType = static_cast<int32_t>(mtrl->param().type);
@@ -509,7 +510,9 @@ private:
     void MakeScene(aten::scene* scene)
     {
         aten::MaterialParameter mtrl_param;
-        mtrl_param.type = aten::MaterialType::Retroreflective;
+        mtrl_param.type = aten::MaterialType::StylizedBrdf;
+        mtrl_param.toon.toon_type = aten::MaterialType::Diffuse;
+        mtrl_param.toon.remap_texture = 0;
 #ifdef WHITE_FURNACE_TEST
         mtrl_param.baseColor = aten::vec3(1.0F);
 #else

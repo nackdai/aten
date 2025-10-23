@@ -34,10 +34,12 @@ namespace AT_NAME
             ? &ctxt.GetLight(param.toon.target_light_idx)
             : nullptr;
 
+#if 0
         // Allow only singular light.
         target_light = target_light && target_light->attrib.is_singular
             ? target_light
             : nullptr;
+#endif
 
         aten::vec3 brdf{ 0.0F };
 
@@ -69,10 +71,18 @@ namespace AT_NAME
                 is_hit = intersectCloser(&ctxt, r, &isect, light_sample.dist_to_light - AT_MATH_EPSILON, 0);
             }
 
-            brdf = ComputeBRDF(
-                ctxt, param,
-                is_hit ? nullptr : &light_sample,
-                sampler, hit_pos, normal, wi, u, v);
+            if (param.type == aten::MaterialType::Toon) {
+                brdf = Toon::ComputeBRDF(
+                    ctxt, param,
+                    is_hit ? nullptr : &light_sample,
+                    sampler, hit_pos, normal, wi, u, v);
+            }
+            else if (param.type == aten::MaterialType::StylizedBrdf) {
+                brdf = StylizedBrdf::ComputeBRDF(
+                    ctxt, param,
+                    is_hit ? nullptr : &light_sample,
+                    sampler, hit_pos, normal, wi, u, v);
+            }
         }
 
         return brdf;

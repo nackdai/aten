@@ -282,7 +282,7 @@ namespace AT_NAME
         const AT_NAME::context& ctxt,
         int32_t bounce,
         aten::sampler& sampler,
-        const AT_NAME::PathThroughput& throughtput,
+        const AT_NAME::PathThroughput& throughput,
         const aten::MaterialParameter& mtrl,
         const aten::ray& ray,
         const aten::vec3& hit_pos,
@@ -320,12 +320,13 @@ namespace AT_NAME
         shadow_ray.lightcontrib = aten::vec3(0);
 
         auto radiance = ComputeRadianceNEE(
+            throughput.throughput,
             ray.dir, hit_nml,
             mtrl, pre_sampled_r, hit_u, hit_v,
             lightSelectPdf, sampleres);
         if (radiance.has_value()) {
             const auto& r = radiance.value();
-            shadow_ray.lightcontrib = throughtput.throughput * r * static_cast<aten::vec3>(external_albedo);
+            shadow_ray.lightcontrib = throughput.throughput * r * static_cast<aten::vec3>(external_albedo);
             isShadowRayActive = true;
         }
 
@@ -468,7 +469,7 @@ namespace AT_NAME
     }
 
     template <class SCENE = void>
-    inline AT_DEVICE_API bool HitTeminateMaterial(
+    inline AT_DEVICE_API bool HitTeminatedMaterial(
         const AT_NAME::context& ctxt,
         aten::sampler& sampler,
         int32_t hit_obj_id,
@@ -482,7 +483,7 @@ namespace AT_NAME
         const aten::MaterialParameter& hit_target_mtrl,
         SCENE* scene = nullptr)
     {
-        const auto is_teminate_mtrl = material::IsTerminateMaterial(hit_target_mtrl);
+        const auto is_teminate_mtrl = material::IsTerminatedMaterial(hit_target_mtrl);
         if (!is_teminate_mtrl) {
             return false;
         }
@@ -498,6 +499,7 @@ namespace AT_NAME
                 path_contrib, path_attrib, path_throughput,
                 ray, hrec, hit_target_mtrl);
         case aten::MaterialType::Toon:
+        case aten::MaterialType::StylizedBrdf:
         {
             // Treat toon as a light.
             const auto toon_bsdf = Toon::bsdf(
@@ -709,6 +711,7 @@ namespace AT_NAME
         AT_NAME::MaterialSampling sampling;
         material::sampleMaterial(
             &sampling,
+            paths.throughput[idx].throughput,
             &mtrl,
             orienting_normal,
             ray.dir,

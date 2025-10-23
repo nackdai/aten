@@ -123,7 +123,7 @@ namespace aten
         shadow_ray.isActive = false;
 
         // Implicit conection to light.
-        auto is_hit_implicit_light = AT_NAME::HitTeminateMaterial(
+        auto is_hit_implicit_light = AT_NAME::HitTeminatedMaterial(
             ctxt, paths.sampler[idx],
             isect.objid,
             isBackfacing,
@@ -181,6 +181,7 @@ namespace aten
         aten::MaterialSampling sampling;
         material::sampleMaterial(
             &sampling,
+            paths.throughput[idx].throughput,
             &mtrl,
             orienting_normal,
             ray.dir,

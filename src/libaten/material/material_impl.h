@@ -15,6 +15,7 @@
 #include "material/microfacet_refraction.h"
 #include "material/disney_brdf.h"
 #include "material/retroreflective.h"
+#include "material/toon.h"
 #include "material/toon_specular.h"
 #include "material/car_paint.h"
 
@@ -30,6 +31,7 @@ namespace AT_NAME
 
     inline AT_DEVICE_API void material::sampleMaterial(
         AT_NAME::MaterialSampling* result,
+        const aten::vec3& throughput,
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -97,7 +99,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         float u, float v)
     {
-        float pdf = float(0);
+        float pdf = 0.0F;
 
         switch (mtrl->type) {
         case aten::MaterialType::Emissive:
@@ -149,6 +151,7 @@ namespace AT_NAME
     }
 
     inline AT_DEVICE_API AT_NAME::MaterialSampling material::sampleBSDF(
+        const aten::vec3& throughput,
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,

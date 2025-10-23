@@ -1,3 +1,5 @@
+#include <map>
+
 #include "material/toon.h"
 
 #include "light/light.h"
@@ -26,13 +28,25 @@ namespace AT_NAME
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, 0.01F, 10.0F);
 
         // Toon type.
-        static std::vector<const char*> toon_type_list = {
+        constexpr std::array toon_type_str = {
             "Diffuse",
             "Specular",
         };
-        auto toon_type = static_cast<int32_t>(m_param.toon.toon_type);
-        is_updated |= editor->edit("toon_type", toon_type_list, toon_type);
-        m_param.toon.toon_type = static_cast<aten::ToonParameter::ToonType>(toon_type);
+        constexpr std::array toon_types = {
+            aten::MaterialType::Diffuse,
+            aten::MaterialType::Specular,
+        };
+
+        int32_t toon_type = 0;
+
+        const auto it = std::find(toon_types.begin(), toon_types.end(), m_param.toon.toon_type);
+        AT_ASSERT(it != toon_types.end());
+        if (it != toon_types.end()) {
+            toon_type = static_cast<int32_t>(std::distance(toon_types.begin(), it));
+        }
+
+        is_updated |= editor->edit("toon_type", toon_type_str.data(), toon_type_str.size(), toon_type);
+        m_param.toon.toon_type = toon_types[toon_type];
 
         // Stylized highlight.
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_translation_dt, -1.0F, 1.0F);
@@ -77,7 +91,7 @@ namespace AT_NAME
         if (sampled_light) {
             // Diffuse.
             aten::MaterialParameter base_mtrl = param;
-            if (param.toon.toon_type == aten::ToonParameter::ToonType::Diffuse) {
+            if (param.toon.toon_type == aten::MaterialType::Diffuse) {
                 base_mtrl.type = aten::MaterialType::Diffuse;
             }
             else {

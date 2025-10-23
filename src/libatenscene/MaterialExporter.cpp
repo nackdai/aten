@@ -71,7 +71,7 @@ namespace aten
             }
         }
 
-        bool edit(std::string_view name, const std::vector<const char*>& elements, int32_t& param) override final
+        bool edit(std::string_view name, const char* const* elements, size_t size, int32_t& param) override final
         {
             // TODO
             AT_ASSERT(false);

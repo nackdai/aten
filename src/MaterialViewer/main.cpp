@@ -60,9 +60,9 @@ public:
         ImGui::Text("[%s] : (%s)", name.data(), str.empty() ? "none" : str.data());
     }
 
-    bool edit(std::string_view name, const std::vector<const char*>& elements, int32_t& param) override final
+    bool edit(std::string_view name, const char* const* elements, size_t size, int32_t& param) override final
     {
-        const auto ret = ImGui::Combo(name.data(), &param, elements.data(), static_cast<int32_t>(elements.size()));
+        const auto ret = ImGui::Combo(name.data(), &param, elements, size);
         return ret;
     }
 };

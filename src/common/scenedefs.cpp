@@ -1459,7 +1459,7 @@ void ToonSimpleSphereScene::makeScene(
         mtrl_param.toon.rim_light_width = 0.25F;
         mtrl_param.toon.rim_light_softness = 0.5F;
         mtrl_param.toon.rim_light_spread = 0.6F;
-        mtrl_param.toon.toon_type = aten::ToonParameter::ToonType::Specular;
+        mtrl_param.toon.toon_type = aten::MaterialType::Specular;
 
         auto objs = aten::ObjLoader::Load(asset_path, ctxt,
             [&](std::string_view name, aten::context& ctxt,
@@ -1530,7 +1530,7 @@ void ToonCornellBoxScene::makeScene(
             mtrl_param.standard.ior = 2.3F;
             mtrl_param.toon.target_light_idx = 0;
             mtrl_param.toon.remap_texture = 1;
-            mtrl_param.toon.toon_type = aten::ToonParameter::ToonType::Diffuse;
+            mtrl_param.toon.toon_type = aten::MaterialType::Diffuse;
 
             auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
                 name,
@@ -1546,7 +1546,7 @@ void ToonCornellBoxScene::makeScene(
             mtrl_param.standard.ior = 2.3F;
             mtrl_param.toon.target_light_idx = 0;
             mtrl_param.toon.remap_texture = 2;
-            mtrl_param.toon.toon_type = aten::ToonParameter::ToonType::Diffuse;
+            mtrl_param.toon.toon_type = aten::MaterialType::Diffuse;
 
             auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
                 name,
@@ -1562,7 +1562,7 @@ void ToonCornellBoxScene::makeScene(
             mtrl_param.standard.ior = 2.3F;
             mtrl_param.toon.target_light_idx = 0;
             mtrl_param.toon.remap_texture = 0;
-            mtrl_param.toon.toon_type = aten::ToonParameter::ToonType::Diffuse;
+            mtrl_param.toon.toon_type = aten::MaterialType::Diffuse;
 
             auto mtrl = ctxt.CreateMaterialWithMaterialParameter(
                 name,

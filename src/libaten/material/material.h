@@ -119,11 +119,6 @@ namespace aten
     };
 
     struct ToonParameter {
-        enum class ToonType : int32_t {
-            Diffuse,
-            Specular,
-        };
-
         int32_t target_light_idx{ -1 };
         int32_t remap_texture{ -1 };
         float highligt_translation_dt{ 0.0F };
@@ -142,7 +137,7 @@ namespace aten
         float rim_light_spread{ 0.0F };
         vec3 rim_light_color{ 0.0F };
 
-        ToonType toon_type{ ToonType::Diffuse };
+        MaterialType toon_type{ MaterialType::Diffuse };
         bool enable_rim_light{ false };
         int8_t padding[3];
         int32_t padding_1[2];
@@ -296,7 +291,7 @@ namespace aten
         virtual bool edit(std::string_view name, bool& param) = 0;
         virtual bool edit(std::string_view name, vec3& param) = 0;
         virtual bool edit(std::string_view name, vec4& param) = 0;
-        virtual bool edit(std::string_view name, const std::vector<const char*>& elements, int32_t& param) = 0;
+        virtual bool edit(std::string_view name, const char* const* elements, size_t size, int32_t& param) = 0;
 
         void editTex(std::string_view name, int32_t texid)
         {

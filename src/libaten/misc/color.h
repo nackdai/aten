@@ -101,6 +101,84 @@ namespace AT_NAME {
 
             return aten::vec3(r, g, b);
         }
+
+        static AT_DEVICE_API aten::vec3 RGBtoHSV(const aten::vec3& rgb)
+        {
+            aten::vec3 hsv;
+            float minc = aten::min(rgb.r, aten::min(rgb.g, rgb.b));
+            float maxc = aten::max(rgb.r, aten::max(rgb.g, rgb.b));
+            hsv.z = maxc;
+            float delta = maxc - minc;
+            if (delta < 0.00001F || maxc < 0.00001F) {
+                hsv.x = 0.0F;
+                hsv.y = 0.0F;
+                return hsv;
+            }
+            hsv.y = delta / maxc;
+            if (rgb.r >= maxc) {
+                hsv.x = (rgb.g - rgb.b) / delta;
+            }
+            else if (rgb.g >= maxc) {
+                hsv.x = 2.0F + (rgb.b - rgb.r) / delta;
+            }
+            else {
+                hsv.x = 4.0F + (rgb.r - rgb.g) / delta;
+            }
+            hsv.x *= 60.0F;
+            if (hsv.x < 0.0F) {
+                hsv.x += 360.0F;
+            }
+            return hsv;
+        }
+
+        static AT_DEVICE_API aten::vec3 HSVtoRGB(const aten::vec3& hsv)
+        {
+            float hh, p, q, t, ff;
+            int32_t i;
+
+            aten::vec3 rgb;
+            if (hsv.y <= 0.0F) {
+                rgb = aten::vec3(hsv.z, hsv.z, hsv.z);
+                return rgb;
+            }
+
+            hh = hsv.x;
+            if (hh >= 360.0F) {
+                hh = 0.0F;
+            }
+
+            hh /= 60.0F;
+            i = static_cast<int32_t>(hh);
+            ff = hh - static_cast<float>(i);
+
+            p = hsv.z * (1.0F - hsv.y);
+            q = hsv.z * (1.0F - (hsv.y * ff));
+            t = hsv.z * (1.0F - (hsv.y * (1.0F - ff)));
+
+            switch (i) {
+            case 0:
+                rgb = aten::vec3(hsv.z, t, p);
+                break;
+            case 1:
+                rgb = aten::vec3(q, hsv.z, p);
+                break;
+            case 2:
+                rgb = aten::vec3(p, hsv.z, t);
+                break;
+            case 3:
+                rgb = aten::vec3(p, q, hsv.z);
+                break;
+            case 4:
+                rgb = aten::vec3(t, p, hsv.z);
+                break;
+            case 5:
+            default:
+                rgb = aten::vec3(hsv.z, p, q);
+                break;
+            }
+
+            return rgb;
+        }
     };
 
     class ColorEncoder {
@@ -140,13 +218,23 @@ namespace AT_NAME {
 
         float FromLinear(const float v) const override
         {
+            return ConvertFromLinear(v);
+        }
+
+        float ToLinear(const float v) const override
+        {
+            return ConvertToLinear(v);
+        }
+
+        static AT_HOST_DEVICE_API float ConvertFromLinear(const float v)
+        {
             if (v <= 0.0031308F) {
                 return v * 12.92F;
             }
             return 1.055F * aten::pow(v, 1 / 2.4F) - 0.055F;
         }
 
-        float ToLinear(const float v) const override
+        static AT_HOST_DEVICE_API float ConvertToLinear(const float v)
         {
             if (v <= 0.04045F) {
                 return v / 12.92F;

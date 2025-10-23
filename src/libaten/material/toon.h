@@ -39,15 +39,7 @@ namespace AT_NAME
             const aten::vec3& normal,
             const aten::vec3& wi,
             float u, float v,
-            float& pdf,
             SCENE* scene = nullptr);
-
-        static AT_DEVICE_API aten::vec3 PostProcess(
-            const AT_NAME::context& ctxt,
-            const aten::MaterialParameter& param,
-            const aten::vec3& hit_pos,
-            const aten::vec3& normal,
-            const aten::vec3& wi);
 
         bool edit(aten::IMaterialParamEditor* editor) override final;
 
@@ -60,7 +52,13 @@ namespace AT_NAME
             const aten::vec3& hit_pos,
             const aten::vec3& normal,
             const aten::vec3& wi,
-            float u, float v,
-            float& pdf);
+            float u, float v);
+
+        static AT_DEVICE_API aten::vec3 ComputeRimLight(
+            const AT_NAME::context& ctxt,
+            const aten::MaterialParameter& param,
+            const aten::vec3& hit_pos,
+            const aten::vec3& normal,
+            const aten::vec3& wi);
     };
 }

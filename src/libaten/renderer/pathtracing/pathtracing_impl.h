@@ -447,8 +447,8 @@ namespace AT_NAME
                 auto pdfLight = 1 / hit_area;
 
                 // If logic comes here, light has area.
-                // But, samling is fully based on solid angle (path) because of brdf sampling in previous bounce.
-                // So, convert area PDF to solid angle PDF.
+                // But, sampling is fully based on solid angle (path) because the brdf sampling comes from the previous bounce and it's solid angle base sampling.
+                // So, area PDF has to be converted to solid angle PDF.
                 pdfLight = pdfLight * dist2 / cosLight;
 
                 weight = _detail::ComputeBalanceHeuristic(path_throughput.pdfb, pdfLight);
@@ -500,20 +500,13 @@ namespace AT_NAME
         case aten::MaterialType::Toon:
         {
             // Treat toon as a light.
-            float toon_pdf = 0.0F;
             const auto toon_bsdf = Toon::bsdf(
                 ctxt, hit_target_mtrl, sampler,
                 hrec.p, hrec.normal, ray.dir,
                 0.0f, 0.0f,
-                toon_pdf,
                 scene);
-            const auto contrib = path_throughput.throughput * toon_bsdf;
-            _detail::AddVec3(path_contrib.contrib, contrib);
 
-            const auto post_processed_additional_color = Toon::PostProcess(
-                ctxt, hit_target_mtrl,
-                hrec.p, hrec.normal, ray.dir);
-            _detail::AddVec3(path_contrib.contrib, post_processed_additional_color);
+            _detail::AddVec3(path_contrib.contrib, toon_bsdf);
 
             path_attrib.is_terminated = true;
             return true;

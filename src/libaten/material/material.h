@@ -50,6 +50,7 @@ namespace aten
         CarPaint,
         Disney,
         Toon,
+        StylizedBrdf,
 
         MaterialTypeMax,
 
@@ -140,7 +141,9 @@ namespace aten
         MaterialType toon_type{ MaterialType::Diffuse };
         bool enable_rim_light{ false };
         int8_t padding[3];
-        int32_t padding_1[2];
+
+        float stylized_y_min{ 0.0F };
+        float stylized_y_max{ 1.0F };
     };
 
     struct CarPaintMaterialParameter {
@@ -580,10 +583,11 @@ namespace AT_NAME
          * @param[in] mtrl Material parameter to be checked.
          * @return If the material need to terminate ray traverse, returns true. Otherwise, returns false.
          */
-        static AT_DEVICE_API bool IsTerminateMaterial(const aten::MaterialParameter& mtrl)
+        static AT_DEVICE_API bool IsTerminatedMaterial(const aten::MaterialParameter& mtrl)
         {
             return mtrl.type == aten::MaterialType::Emissive
-                || mtrl.type == aten::MaterialType::Toon;
+                || mtrl.type == aten::MaterialType::Toon
+                || mtrl.type == aten::MaterialType::StylizedBrdf;
         }
 
         static AT_DEVICE_API aten::vec4 sampleAlbedoMap(
@@ -593,6 +597,7 @@ namespace AT_NAME
 
         static AT_DEVICE_API void sampleMaterial(
             AT_NAME::MaterialSampling* result,
+            const aten::vec3& throughput,
             const aten::MaterialParameter* mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -614,6 +619,7 @@ namespace AT_NAME
             float u, float v);
 
         static AT_DEVICE_API AT_NAME::MaterialSampling sampleBSDF(
+            const aten::vec3& throughput,
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,

@@ -7,6 +7,7 @@
 #include "material/diffuse.h"
 #include "material/ggx.h"
 #include "material/material.h"
+#include "material/material_impl.h"
 #include "material/sample_texture.h"
 #include "material/toon_specular.h"
 #include "misc/color.h"
@@ -104,6 +105,7 @@ namespace AT_NAME
             // Compute radiance.
             // The target light is singular, and then MIS in ComputeRadianceNEE is always 1.0.
             auto res = ComputeRadianceNEE(
+                aten::vec3(1.0F),
                 wi, normal,
                 base_mtrl, 0.0F, u, v,
                 light_selected_pdf,
@@ -118,7 +120,7 @@ namespace AT_NAME
                     const auto hsv = color::RGBtoHSV(radiance);
                     const auto color = color::HSVtoRGB(aten::vec3(hsv.r, hsv.g, 1));
 
-                    lum_y = pow(lum_y, 1.0 / 2.2);
+                    lum_y = pow(lum_y, 1.0F / 2.2F);
 
                     const auto remap = AT_NAME::sampleTexture(param.toon.remap_texture, 0.5F, lum_y, aten::vec4(1.0F));
 
@@ -133,13 +135,7 @@ namespace AT_NAME
     }
 
     namespace _detail {
-        inline AT_DEVICE_API float bezier(float B0, float B1, float B2, float t)
-        {
-            float P = (B0 - 2 * B1 + B2) * t * t + (-2 * B0 + 2 * B1) * t + B0;
-            return P;
-        }
-
-        inline AT_DEVICE_API float bezier_smoothstep(float edge0, float edge1, float mid, float t, float s)
+        AT_DEVICE_API float bezier_smoothstep(float edge0, float edge1, float mid, float t, float s)
         {
             if (t <= edge0) {
                 return 0;
@@ -151,7 +147,10 @@ namespace AT_NAME
             t = (t - edge0) / (edge1 - edge0);
             t *= s;
 
-            float P = bezier(0, mid, 1, t);
+            float B0 = 0.0F;
+            float B1 = mid;
+            float B2 = 1.0F;
+            float P = (B0 - 2 * B1 + B2) * t * t + (-2 * B0 + 2 * B1) * t + B0;
             return P;
         }
 
@@ -270,5 +269,106 @@ namespace AT_NAME
         H = normalize(H);
 
         return H;
+    }
+}
+
+//////////////////////////////////////////
+
+namespace AT_NAME
+{
+    AT_DEVICE_API aten::vec3 StylizedBrdf::ComputeBRDF(
+        const AT_NAME::context& ctxt,
+        const aten::MaterialParameter& param,
+        const aten::LightSampleResult* sampled_light,
+        aten::sampler& sampler,
+        const aten::vec3& hit_pos,
+        const aten::vec3& normal,
+        const aten::vec3& wi,
+        float u, float v)
+    {
+        // The target light is sepcified beforehand and it is only one.
+        // So, light selected pdf is always 1.
+        constexpr float light_selected_pdf = 1.0F;
+
+        aten::vec3 toon_term{ 0.0F };
+
+        if (sampled_light) {
+            // Diffuse.
+            aten::MaterialParameter base_mtrl = param;
+            if (param.toon.toon_type == aten::MaterialType::Diffuse) {
+                base_mtrl.type = aten::MaterialType::Diffuse;
+            }
+            else {
+                base_mtrl.type = aten::MaterialType::ToonSpecular;
+            }
+
+            const auto pdf = material::samplePDF(&base_mtrl, normal, wi, sampled_light->dir, u, v);
+
+            // Compute radiance.
+            // The target light is singular, and then MIS in ComputeRadianceNEE is always 1.0.
+            auto res = ComputeRadianceNEE(
+                aten::vec3(1.0F),
+                wi, normal,
+                base_mtrl, 0.0F, u, v,
+                light_selected_pdf,
+                *sampled_light);
+
+            if (res) {
+                // NOTE:
+                // Global Illumination-Aware Stylised Shading
+                // https://diglib.eg.org/server/api/core/bitstreams/d84134e0-af8c-4db6-a13a-dc854294f6aa/content
+
+                // TODO
+                constexpr float W_MIN = 0.01F;
+
+                const auto radiance = res.value();
+
+                // Convert RGB to XYZ.
+                const auto xyz = color::sRGBtoXYZ(radiance);
+                const auto y = xyz.y;
+
+                // To avoid too dark, compare with the minimum weight.
+                const auto weight = aten::max(y, W_MIN);
+
+                const auto y_min = aten::max(0.0F, aten::min(param.toon.stylized_y_min, param.toon.stylized_y_max));
+                const auto y_max = aten::max(param.toon.stylized_y_min, param.toon.stylized_y_max);
+
+                // Compute texture coord (1D, vertical) for remap texture.
+                auto remap_v = 0.0F;
+                if (y_max <= y) {
+                    remap_v = 1.0F;
+                }
+                else if (y <= y_min) {
+                    remap_v = 0.0F;
+                }
+                else {
+                    remap_v = (y - y_min) / (y_max - y_min);
+                }
+
+                const auto remap = AT_NAME::sampleTexture(param.toon.remap_texture, 0.5F, remap_v, aten::vec4(radiance));
+
+                toon_term = weight * remap * pdf;
+            }
+        }
+
+        const auto rim_light_term = ComputeRimLight(ctxt, param, hit_pos, normal, wi);
+
+        return toon_term + rim_light_term;
+    }
+
+    bool StylizedBrdf::edit(aten::IMaterialParamEditor* editor)
+    {
+        bool is_updated = Toon::edit(editor);
+
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, stylized_y_min, 0.0F, 10.0F);
+        is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, stylized_y_max, 0.0F, 10.0F);
+
+        const auto tmp_min = aten::min(m_param.toon.stylized_y_min, m_param.toon.stylized_y_max);
+        const auto tmp_max = aten::max(m_param.toon.stylized_y_min, m_param.toon.stylized_y_max);
+
+        m_param.toon.stylized_y_min = tmp_min;
+        m_param.toon.stylized_y_max = tmp_max;
+
+        return is_updated;
     }
 }

@@ -18,13 +18,16 @@ namespace AT_NAME
     class Toon : public material {
         friend class material;
 
-    private:
+    protected:
         Toon(
             const aten::MaterialParameter& param,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
-            : material(param, aten::MaterialAttributeDiffuse)
         {
+            m_param = param;
+            m_param.attrib = param.toon.toon_type == aten::MaterialType::Diffuse
+                ? aten::MaterialAttributeDiffuse
+                : aten::MaterialAttributeMicrofacet;
             setTextures(albedoMap, normalMap, nullptr);
         }
         ~Toon() = default;
@@ -41,9 +44,9 @@ namespace AT_NAME
             float u, float v,
             SCENE* scene = nullptr);
 
-        bool edit(aten::IMaterialParamEditor* editor) override final;
+        bool edit(aten::IMaterialParamEditor* editor) override;
 
-    private:
+    protected:
         static AT_DEVICE_API aten::vec3 ComputeBRDF(
             const AT_NAME::context& ctxt,
             const aten::MaterialParameter& param,
@@ -60,5 +63,33 @@ namespace AT_NAME
             const aten::vec3& hit_pos,
             const aten::vec3& normal,
             const aten::vec3& wi);
+    };
+
+    class StylizedBrdf : public Toon {
+        friend class material;
+        friend class Toon;
+
+    private:
+        StylizedBrdf(
+            const aten::MaterialParameter& param,
+            aten::texture* albedoMap = nullptr,
+            aten::texture* normalMap = nullptr)
+            : Toon(param, albedoMap, normalMap)
+        {}
+        ~StylizedBrdf() = default;
+
+    public:
+        bool edit(aten::IMaterialParamEditor* editor) override;
+
+    protected:
+        static AT_DEVICE_API aten::vec3 ComputeBRDF(
+            const AT_NAME::context& ctxt,
+            const aten::MaterialParameter& param,
+            const aten::LightSampleResult* light_sample,
+            aten::sampler& sampler,
+            const aten::vec3& hit_pos,
+            const aten::vec3& normal,
+            const aten::vec3& wi,
+            float u, float v);
     };
 }

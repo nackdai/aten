@@ -191,6 +191,7 @@ namespace aten
                 aten::MaterialSampling sampling;
                 material::sampleMaterial(
                     &sampling,
+                    paths.throughput[idx].throughput,
                     &mtrl,
                     orienting_normal,
                     ray.dir,
@@ -364,6 +365,7 @@ namespace aten
 
                     if (is_visilbe_to_light) {
                         auto radiance = AT_NAME::ComputeRadianceNEE(
+                            paths.throughput[idx].throughput,
                             ray.dir, orienting_normal,
                             mtrl, pre_sampled_r, rec.u, rec.v,
                             light_select_prob, light_sample);
@@ -377,6 +379,7 @@ namespace aten
                 aten::MaterialSampling sampling;
                 material::sampleMaterial(
                     &sampling,
+                    paths.throughput[idx].throughput,
                     &mtrl,
                     orienting_normal,
                     ray.dir,

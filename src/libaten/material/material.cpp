@@ -118,6 +118,9 @@ namespace AT_NAME
         case aten::MaterialType::Toon:
             mtrl = new AT_NAME::Toon(param, albedoMap, normalMap);
             break;
+        case aten::MaterialType::StylizedBrdf:
+            mtrl = new AT_NAME::StylizedBrdf(param, albedoMap, normalMap);
+            break;
         default:
             mtrl = new AT_NAME::material();
             mtrl->m_param = param;

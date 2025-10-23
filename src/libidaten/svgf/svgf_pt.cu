@@ -184,6 +184,7 @@ namespace svgf_kernel {
 
         AT_NAME::material::sampleMaterial(
             &sampling,
+            paths.throughput[idx].throughput,
             &shMtrls[threadIdx.x],
             orienting_normal,
             ray.dir,

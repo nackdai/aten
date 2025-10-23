@@ -198,6 +198,7 @@ namespace vpt
 
                     if (is_visilbe_to_light) {
                         auto radiance = AT_NAME::ComputeRadianceNEE(
+                            paths.throughput[idx].throughput,
                             ray.dir, orienting_normal,
                             shMtrls[threadIdx.x], pre_sampled_r, rec.u, rec.v,
                             light_select_prob, light_sample);
@@ -213,6 +214,7 @@ namespace vpt
 
                 AT_NAME::material::sampleMaterial(
                     &sampling,
+                    paths.throughput[idx].throughput,
                     &shMtrls[threadIdx.x],
                     orienting_normal,
                     ray.dir,

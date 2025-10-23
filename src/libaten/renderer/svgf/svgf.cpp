@@ -220,6 +220,7 @@ namespace aten
         aten::MaterialSampling sampling;
         material::sampleMaterial(
             &sampling,
+            paths.throughput[idx].throughput,
             &mtrl,
             orienting_normal,
             ray.dir,

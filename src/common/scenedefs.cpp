@@ -1507,7 +1507,7 @@ void ToonCornellBoxScene::makeScene(
     auto light = std::make_shared<aten::PointLight>(
         aten::vec3(0.0F, 1.98F, 0.0F),
         aten::vec3(1.0F, 1.0F, 1.0F),
-        1000.0f);
+        10.0f);
 
     ctxt.AddLight(light);
 
@@ -1524,7 +1524,7 @@ void ToonCornellBoxScene::makeScene(
 
         if (name == "leftWall") {
             aten::MaterialParameter mtrl_param;
-            mtrl_param.type = aten::MaterialType::Toon;
+            mtrl_param.type = aten::MaterialType::StylizedBrdf;
             mtrl_param.baseColor = aten::vec3(1.0000f, 1.0000f, 1.0000f);
             mtrl_param.standard.roughness = 0.15F;
             mtrl_param.standard.ior = 2.3F;
@@ -1540,7 +1540,7 @@ void ToonCornellBoxScene::makeScene(
         }
         else if (name == "rightWall") {
             aten::MaterialParameter mtrl_param;
-            mtrl_param.type = aten::MaterialType::Toon;
+            mtrl_param.type = aten::MaterialType::StylizedBrdf;
             mtrl_param.baseColor = aten::vec3(1.0000f, 1.0000f, 1.0000f);
             mtrl_param.standard.roughness = 0.15F;
             mtrl_param.standard.ior = 2.3F;
@@ -1556,7 +1556,7 @@ void ToonCornellBoxScene::makeScene(
         }
         else {
             aten::MaterialParameter mtrl_param;
-            mtrl_param.type = aten::MaterialType::Toon;
+            mtrl_param.type = aten::MaterialType::StylizedBrdf;
             mtrl_param.baseColor = aten::vec3(1.0000f, 1.0000f, 1.0000f);
             mtrl_param.standard.roughness = 0.15F;
             mtrl_param.standard.ior = 2.3F;

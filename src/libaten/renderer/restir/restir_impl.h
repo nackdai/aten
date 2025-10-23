@@ -45,6 +45,7 @@ namespace restir {
             const auto dist2 = aten::sqr(lightsample.dist_to_light);
 
             const auto mtrl_eval_result = AT_NAME::material::sampleBSDF(
+                aten::vec3(1.0F),
                 &mtrl, normal,
                 ray_dir, dirToLight,
                 u, v,

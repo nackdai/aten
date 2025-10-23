@@ -179,82 +179,6 @@ namespace AT_NAME
         return post_processed_additional_color;
     }
 
-    namespace blinn {
-        inline  AT_DEVICE_API float ComputeDistribution(
-            const float shininess,
-            const aten::vec3& N,
-            const aten::vec3& H)
-        {
-            const auto a = shininess;
-            const auto NdotH = dot(N, H);
-
-            // NOTE
-            // http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
-            // https://agraphicsguynotes.com/posts/sample_microfacet_brdf/
-            auto D = (a + 2) / (2 * AT_MATH_PI);
-            D *= aten::pow(NdotH, a);
-            D *= (NdotH > 0 ? 1 : 0);
-
-            return D;
-        }
-
-        inline  AT_DEVICE_API float ComputePDF(
-            const aten::MaterialParameter& param,
-            const aten::vec3& N,
-            const aten::vec3& L,
-            const aten::vec3& H)
-        {
-            const auto costheta = dot(N, H);
-
-            const auto D = ComputeDistribution(param.standard.shininess, N, H);
-
-            // For Jacobian |dwh/dwo|
-            const auto denom = 4 * aten::abs(dot(L, H));
-
-            const auto pdf = denom > 0 ? (D * costheta) / denom : 0;
-
-            return pdf;
-        }
-
-        inline AT_DEVICE_API aten::vec3 ComputeBRDF(
-            const aten::MaterialParameter& param,
-            const aten::vec3& N,
-            const aten::vec3& V,
-            const aten::vec3& L,
-            const aten::vec3& H)
-        {
-            // Assume index of refraction of the medie on the incident side is vacuum.
-            const auto ni = 1.0F;
-            const auto nt = param.standard.ior;
-
-            auto NdotH = aten::abs(dot(N, H));
-            auto VdotH = aten::abs(dot(V, H));
-            auto NdotL = aten::abs(dot(N, L));
-            auto NdotV = aten::abs(dot(N, V));
-
-            const auto F = material::ComputeSchlickFresnel(ni, nt, L, H);
-
-            auto denom = 4 * NdotL * NdotV;
-
-            const auto D = ComputeDistribution(param.standard.shininess, N, H);
-
-            // Compute G.
-            auto G{ 1.0F };
-            {
-                // Cook-Torrance geometry function.
-                // http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
-
-                auto G1 = 2 * NdotH * NdotL / VdotH;
-                auto G2 = 2 * NdotH * NdotV / VdotH;
-                G = aten::min(1.0F, aten::min(G1, G2));
-            }
-
-            const auto brdf = denom > AT_MATH_EPSILON ? F * G * D / denom : 0.0F;
-
-            return aten::vec3(brdf);
-        }
-    }
-
     AT_DEVICE_API float ToonSpecular::ComputePDF(
         const aten::MaterialParameter& param,
         const aten::vec3& normal,
@@ -267,12 +191,7 @@ namespace AT_NAME
         const auto N = normal;
 
         const auto H = ComputeHalfVector(param, N, V, L);
-
-#if 0
-        const auto pdf = blinn::ComputePDF(param, N, L, H);
-#else
         const auto pdf = MicrofacetGGX::ComputePDFWithHalfVector(param.standard.roughness, N, H, L);
-#endif
         return pdf;
     }
 
@@ -289,17 +208,10 @@ namespace AT_NAME
 
         const auto H = ComputeHalfVector(param, N, V, L);
 
-#if 0
-        const auto brdf = blinn::ComputeBRDF(
-            param,
-            N, V, L, H);
-#else
         const auto brdf = MicrofacetGGX::ComputeBRDFWithHalfVector(
             param.standard.roughness,
             param.standard.ior,
             N, V, L, H);
-#endif
-
 
         return brdf;
     }
@@ -319,30 +231,6 @@ namespace AT_NAME
         // Stylized hightlight.
         aten::vec3 t, b;
         aten::tie(t, b) = aten::GetTangentCoordinate(N);
-
-#if 0
-        // NOTE:
-        // The result from GetTangentCoordinate is:
-        //    +------>b
-        //   /|
-        //  / |
-        // n  t
-        // It's fully right hand coordiante as expected.
-        // But, this is not intuitive to translate the half vector.
-        // To translate the half vector intuitively like the following:
-        //    b
-        //    |
-        //    |
-        //    +------>t
-        //   /
-        //  /
-        // n
-        // We rotate t and b around n.
-        aten::mat4 rot;
-        rot.asRotateByZ(AT_MATH_PI * 0.5F);
-        t = rot.apply(t);
-        b = rot.apply(b);
-#endif
 
         // Translation.
         H = H + param.toon.highligt_translation_dt * t + param.toon.highligt_translation_db * b;

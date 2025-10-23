@@ -298,6 +298,12 @@ namespace aten {
         return x * (1 - a) + y * a;
     }
 
+    // Neary Equal. Same as python's math.isclose
+    inline AT_HOST_DEVICE_API bool isClose(float A, float B, float relTol = 1e-9F, float absTol = 0.0F)
+    {
+        return aten::abs(A - B) <= aten::max(relTol * aten::max(aten::abs(A), aten::abs(B)), absTol);
+    }
+
     // Neary Equal.
     inline AT_HOST_DEVICE_API bool isClose(float A, float B, int32_t maxUlps)
     {

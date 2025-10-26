@@ -293,6 +293,11 @@ namespace aten
         virtual bool edit(std::string_view name, vec4& param) = 0;
         virtual bool edit(std::string_view name, const char* const* elements, size_t size, int32_t& param) = 0;
 
+        virtual bool CollapsingHeader(std::string_view name)
+        {
+            return true;
+        }
+
         void editTex(std::string_view name, int32_t texid)
         {
             if (texid >= 0) {

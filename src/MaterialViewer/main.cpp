@@ -65,6 +65,11 @@ public:
         const auto ret = ImGui::Combo(name.data(), &param, elements, size);
         return ret;
     }
+
+    bool CollapsingHeader(std::string_view name) override final
+    {
+        return ImGui::CollapsingHeader(name.data());
+    }
 };
 
 class MaterialViewerApp {

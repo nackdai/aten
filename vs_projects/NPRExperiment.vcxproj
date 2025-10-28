@@ -15,29 +15,29 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\NPRViewer\main.cpp" />
-    <ClCompile Include="..\src\NPRViewer\NPRShading.cpp" />
-    <ClCompile Include="..\src\NPRViewer\RimLight.cpp" />
-    <ClCompile Include="..\src\NPRViewer\StylizedHighlight.cpp" />
-    <ClCompile Include="..\src\NPRViewer\ToonBsdf.cpp" />
+    <ClCompile Include="..\src\NPRExperiment\main.cpp" />
+    <ClCompile Include="..\src\NPRExperiment\NPRShading.cpp" />
+    <ClCompile Include="..\src\NPRExperiment\RimLight.cpp" />
+    <ClCompile Include="..\src\NPRExperiment\StylizedHighlight.cpp" />
+    <ClCompile Include="..\src\NPRExperiment\ToonBsdf.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\NPRViewer\NPRModule.h" />
-    <ClInclude Include="..\src\NPRViewer\NPRShading.h" />
-    <ClInclude Include="..\src\NPRViewer\RimLight.h" />
-    <ClInclude Include="..\src\NPRViewer\StylizedHighlight.h" />
-    <ClInclude Include="..\src\NPRViewer\ToonBsdf.h" />
+    <ClInclude Include="..\src\NPRExperiment\NPRModule.h" />
+    <ClInclude Include="..\src\NPRExperiment\NPRShading.h" />
+    <ClInclude Include="..\src\NPRExperiment\RimLight.h" />
+    <ClInclude Include="..\src\NPRExperiment\StylizedHighlight.h" />
+    <ClInclude Include="..\src\NPRExperiment\ToonBsdf.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\NPRViewer\highlight.frag" />
-    <None Include="..\src\NPRViewer\highlight.vert" />
-    <None Include="..\src\NPRViewer\npr_shading.frag" />
-    <None Include="..\src\NPRViewer\npr_shading.vert" />
-    <None Include="..\src\NPRViewer\rimlight.frag" />
-    <None Include="..\src\NPRViewer\rimlight.vert" />
-    <None Include="..\src\NPRViewer\toon_bsdf.frag" />
-    <None Include="..\src\NPRViewer\toon_bsdf.vert" />
-    <None Include="..\src\NPRViewer\toon_specular_bsdf.frag" />
+    <None Include="..\src\NPRExperiment\highlight.frag" />
+    <None Include="..\src\NPRExperiment\highlight.vert" />
+    <None Include="..\src\NPRExperiment\npr_shading.frag" />
+    <None Include="..\src\NPRExperiment\npr_shading.vert" />
+    <None Include="..\src\NPRExperiment\rimlight.frag" />
+    <None Include="..\src\NPRExperiment\rimlight.vert" />
+    <None Include="..\src\NPRExperiment\toon_bsdf.frag" />
+    <None Include="..\src\NPRExperiment\toon_bsdf.vert" />
+    <None Include="..\src\NPRExperiment\toon_specular_bsdf.frag" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4DD37EDF-3FD6-4764-BEAF-B034711A1473}</ProjectGuid>

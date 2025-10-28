@@ -95,7 +95,6 @@ namespace aten
 
             float shininess = 0.0f;
             if (assimp_mtrl->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS) {
-                AT_ASSERT(false);
                 mtrl_param.type = MaterialType::Beckman;
                 mtrl_param.standard.roughness = shininess;
             }

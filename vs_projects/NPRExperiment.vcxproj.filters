@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\src\NPRExperiment\main.cpp" />
+    <ClCompile Include="..\src\NPRExperiment\RimLight.cpp" />
+    <ClCompile Include="..\src\NPRExperiment\StylizedHighlight.cpp" />
+    <ClCompile Include="..\src\NPRExperiment\NPRShading.cpp" />
+    <ClCompile Include="..\src\NPRExperiment\ToonBsdf.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\NPRExperiment\NPRModule.h" />
+    <ClInclude Include="..\src\NPRExperiment\RimLight.h" />
+    <ClInclude Include="..\src\NPRExperiment\StylizedHighlight.h" />
+    <ClInclude Include="..\src\NPRExperiment\NPRShading.h" />
+    <ClInclude Include="..\src\NPRExperiment\ToonBsdf.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\NPRExperiment\highlight.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRExperiment\highlight.vert">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRExperiment\rimlight.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRExperiment\rimlight.vert">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRExperiment\npr_shading.vert">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRExperiment\npr_shading.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRExperiment\toon_bsdf.vert">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRExperiment\toon_bsdf.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\NPRExperiment\toon_specular_bsdf.frag">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="shader">
+      <UniqueIdentifier>{35c61925-e9ec-40ee-ac32-aad8c308d055}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -24,7 +24,7 @@ namespace AT_NAME
 {
     const std::array<std::string, static_cast<size_t>(aten::MaterialType::MaterialTypeMax)> material::mtrl_type_info = { {
         "emissive",
-        "Diffuse",
+        "diffuse",
         "ornenayar",
         "specular",
         "refraction",

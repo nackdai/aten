@@ -233,9 +233,9 @@ namespace aten
         std::shared_ptr<mat4> m_mtx_W2L;    // inverted.
         mat4 m_mtx_prev_L2W;
 
-        vec3 m_trans;
-        vec3 m_rot;
-        vec3 m_scale{ aten::vec3(1, 1, 1) };
+        vec3 m_trans{ 0.0F };
+        vec3 m_rot{ 0.0F };
+        vec3 m_scale{ 1.0F };
 
         bool m_isDirty{ false };
     };

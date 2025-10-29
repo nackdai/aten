@@ -159,10 +159,6 @@ namespace aten
         struct ThreadedBvhNodeEntry {
             bvhnode* node;
             aten::mat4 mtx_L2W;
-
-            ThreadedBvhNodeEntry(bvhnode* n, const aten::mat4& m)
-                : node(n), mtx_L2W(m)
-            {}
         };
 
         /**
@@ -209,11 +205,13 @@ namespace aten
         // Flag whether thereaded bvh will build bottom layer.
         bool m_enableLayer{ true };
 
+        // Linear list to register bvh nodes.
         std::vector<std::vector<ThreadedBvhNode>> m_listThreadedBvhNode;
 
         // List for bottom layer.
         std::vector<accelerator*> m_nestedBvh;
 
+        // Map to register the pair for bottom layer and its id.
         std::map<int32_t, accelerator*> m_mapNestedBvh;
     };
 }

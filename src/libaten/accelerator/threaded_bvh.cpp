@@ -37,13 +37,14 @@ namespace aten
     {
         AT_ASSERT(is_nested_);
 
+        // Build as the simple BVH.
         m_bvh.build(ctxt, list, num, bbox);
 
         setBoundingBox(m_bvh.getBoundingbox());
 
         std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
 
-        // Convert to linear list.
+        // Register bvh nodes tree to linear list temporarily by traversing bvhnode.
         registerBvhNodeToLinearList(
             ctxt,
             m_bvh.getRoot(),
@@ -67,6 +68,7 @@ namespace aten
             m_listThreadedBvhNode[0]);
     }
 
+    // Build all objects in the top layer tree.
     void ThreadedBVH::buildAsTopLayerTree(
         const context& ctxt,
         hitable** list,
@@ -75,28 +77,32 @@ namespace aten
     {
         AT_ASSERT(!is_nested_);
 
+        // Build as the simple BVH.
         m_bvh.build(ctxt, list, num, bbox);
 
         setBoundingBox(m_bvh.getBoundingbox());
 
         std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
 
-        // Register to linear list to traverse bvhnode easily.
+        // Register bvh nodes tree to linear list temporarily by traversing bvhnode.
         registerBvhNodeToLinearList(
             ctxt,
             m_bvh.getRoot(),
             threadedBvhNodeEntries);
 
-        // Convert from map to vector.
+        // Bottom layer BVHs are stored as map.
+        // In registerBvhNodeToLinearList, we can't register it to the linear list in order.
+        // So, we registered it temporarily in map and we expand it and register it to the linear list.
         if (!m_mapNestedBvh.empty()) {
+            // Allocate the linear list.
             m_nestedBvh.resize(m_mapNestedBvh.size());
 
             for (auto it = m_mapNestedBvh.begin(); it != m_mapNestedBvh.end(); it++) {
                 int32_t exid = it->first;
                 auto accel = it->second;
 
-                // NOTE
-                // 0 は上位レイヤーで使用しているので、-1する.
+                // NOTE:
+                // 0 is used for the top layer.
                 m_nestedBvh[exid - 1] = accel;
             }
 
@@ -114,7 +120,7 @@ namespace aten
             m_listThreadedBvhNode.resize(1);
         }
 
-        // Register bvh node for gpu.
+        // Register bvh nodes from the temporal list to the actual list with filling the information.
         registerThreadedBvhNode(
             ctxt,
             false,
@@ -122,10 +128,11 @@ namespace aten
             m_listThreadedBvhNode[0],
             listParentId);
 
-        // Set traverse order for linear bvh.
+        // Set traverse order to linear bvh.
         setOrder(threadedBvhNodeEntries, listParentId, m_listThreadedBvhNode[0]);
 
-        // Copy nested threaded bvh nodes to top layer tree.
+        // To make one linear list to include all nodes regardless of top or bottom,
+        // combine nested (bottom layer) threaded bvh nodes to top layer linear list.
         if (m_enableLayer) {
             for (int32_t i = 0; i < m_nestedBvh.size(); i++) {
                 auto node = m_nestedBvh[i];
@@ -134,13 +141,13 @@ namespace aten
                 if (node->getAccelType() == AccelType::ThreadedBvh) {
                     auto threadedBvh = static_cast<ThreadedBVH*>(node);
 
-                    auto& threadedBvhNodes = threadedBvh->m_listThreadedBvhNode[0];
+                    auto& linear_list_threaded_bvh_nodes = threadedBvh->m_listThreadedBvhNode[0];
 
                     // NODE
-                    // m_listThreadedBvhNode[0] is for top layer.
+                    // linear_list_threaded_bvh_nodes[0] is for top layer.
                     std::copy(
-                        threadedBvhNodes.begin(),
-                        threadedBvhNodes.end(),
+                        linear_list_threaded_bvh_nodes.begin(),
+                        linear_list_threaded_bvh_nodes.end(),
                         std::back_inserter(m_listThreadedBvhNode[i + 1]));
                 }
             }
@@ -174,20 +181,26 @@ namespace aten
         std::vector<ThreadedBvhNode>& threadedBvhNodes,
         std::vector<int32_t>& listParentId)
     {
+        // The nods in threadedBvhNodeEntries are still the temporal node.
+        // We need to fill the necessary information for the actual usage.
+        // Therefore, we retrieve the node from threadedBvhNodeEntries
+        // and fill the information to the node and store it to threadedBvhNodes.
+
+        // Allocate lists.
         threadedBvhNodes.reserve(threadedBvhNodeEntries.size());
         listParentId.reserve(threadedBvhNodeEntries.size());
 
         for (const auto& entry : threadedBvhNodeEntries) {
             auto node = entry.node;
 
-            ThreadedBvhNode gpunode;
-
-            // NOTE
-            // Differ set hit/miss index.
+            ThreadedBvhNode real_node;
 
             auto bbox = node->getBoundingbox();
             bbox = aten::aabb::transform(bbox, entry.mtx_L2W);
 
+            // Keep idx of node's parent.
+            // The node is stored linearly in order.
+            // Therefore, the order to store the idx of node's parent is the same as the order in the node linear list.
             auto parent = node->getParent();
             int32_t parentId = parent ? parent->getTraversalOrder() : -1;
             listParentId.push_back(parentId);
@@ -195,44 +208,48 @@ namespace aten
             if (node->isLeaf()) {
                 hitable* item = node->getItem();
 
-                // 自分自身のIDを取得.
-                gpunode.object_id = (float)ctxt.FindTransformableIdxFromPointer(item);
+                // Obtain self index.
+                real_node.object_id = static_cast<float>(ctxt.FindTransformableIdxFromPointer(item));
 
-                // インスタンスの実体を取得.
+                // Get the actual object entity.
                 auto internalObj = item->getHasObject();
 
                 if (internalObj) {
                     item = const_cast<hitable*>(internalObj);
                 }
 
-                gpunode.meshid = (float)item->GetMeshId();
+                real_node.meshid = static_cast<float>(item->GetMeshId());
 
                 if (isPrimitiveLeaf) {
                     // Leaves of this tree are primitive.
-                    gpunode.primid = (float)ctxt.FindTriangleIdxFromPointer(item);
-                    gpunode.exid = -1.0f;
+                    real_node.primid = static_cast<float>(ctxt.FindTriangleIdxFromPointer(item));
+                    real_node.exid = -1.0f;
                 }
                 else {
+                    // This node specifies to another bvh tree.
                     auto exid = node->getExternalId();
+
+                    // subexid means LOD.
                     auto subexid = node->getSubExternalId();
 
                     if (exid >= 0) {
-                        gpunode.noExternal = false;
-                        gpunode.hasLod = (subexid >= 0);
-                        gpunode.mainExid = exid;
-                        gpunode.lodExid = (subexid >= 0 ? subexid : 0);
+                        real_node.noExternal = false;
+                        real_node.hasLod = (subexid >= 0);
+                        real_node.mainExid = exid;
+                        real_node.lodExid = (subexid >= 0 ? subexid : 0);
                     }
                     else {
                         // In this case, the item which node keeps is sphere/cube.
-                        gpunode.exid = -1.0f;
+                        real_node.exid = -1.0f;
                     }
                 }
             }
 
-            gpunode.boxmax = aten::vec4(bbox.maxPos(), 0);
-            gpunode.boxmin = aten::vec4(bbox.minPos(), 0);
+            real_node.boxmax = aten::vec4(bbox.maxPos(), 0);
+            real_node.boxmin = aten::vec4(bbox.minPos(), 0);
 
-            threadedBvhNodes.push_back(gpunode);
+            // Register to the actual bvh linear list.
+            threadedBvhNodes.push_back(real_node);
         }
     }
 
@@ -241,37 +258,41 @@ namespace aten
         const std::vector<int32_t>& listParentId,
         std::vector<ThreadedBvhNode>& threadedBvhNodes)
     {
+        // Threaded BVH has the hit/miss instead of left/right.
+        // And, for GPU, how to specify such kind of node should not be the poniter but the index.
+        // In this API, we fill the index.
+
         auto num = threadedBvhNodes.size();
 
         for (int32_t n = 0; n < num; n++) {
-            auto node = threadedBvhNodeEntries[n].node;
-            auto& gpunode = threadedBvhNodes[n];
+            auto entry_node = threadedBvhNodeEntries[n].node;
+            auto& real_node = threadedBvhNodes[n];
 
             bvhnode* next = nullptr;
             if (n + 1 < num) {
                 next = threadedBvhNodeEntries[n + 1].node;
             }
 
-            if (node->isLeaf()) {
+            if (entry_node->isLeaf()) {
                 // Hit/Miss.
                 // Always the next node in the array.
                 if (next) {
-                    gpunode.hit = (float)next->getTraversalOrder();
-                    gpunode.miss = (float)next->getTraversalOrder();
+                    real_node.hit = static_cast<float>(next->getTraversalOrder());
+                    real_node.miss = static_cast<float>(next->getTraversalOrder());
                 }
                 else {
-                    gpunode.hit = -1;
-                    gpunode.miss = -1;
+                    real_node.hit = -1;
+                    real_node.miss = -1;
                 }
             }
             else {
                 // Hit.
                 // Always the next node in the array.
                 if (next) {
-                    gpunode.hit = (float)next->getTraversalOrder();
+                    real_node.hit = static_cast<float>(next->getTraversalOrder());
                 }
                 else {
-                    gpunode.hit = -1;
+                    real_node.hit = -1;
                 }
 
                 // Miss.
@@ -286,7 +307,7 @@ namespace aten
                     bvhnode* left = parent->getLeft();
                     bvhnode* right = parent->getRight();
 
-                    bool isLeft = (left == node);
+                    bool isLeft = (left == entry_node);
 
                     if (isLeft) {
                         // Internal, left: sibling node.
@@ -294,7 +315,7 @@ namespace aten
                         isLeft = (sibling != nullptr);
 
                         if (isLeft) {
-                            gpunode.miss = (float)sibling->getTraversalOrder();
+                            real_node.miss = static_cast<float>(sibling->getTraversalOrder());
                         }
                     }
 
@@ -316,13 +337,13 @@ namespace aten
                                 auto sibling = _right;
                                 if (sibling) {
                                     if (sibling != curParent) {
-                                        gpunode.miss = (float)sibling->getTraversalOrder();
+                                        real_node.miss = (float)sibling->getTraversalOrder();
                                         break;
                                     }
                                 }
                             }
                             else {
-                                gpunode.miss = -1;
+                                real_node.miss = -1;
                                 break;
                             }
 
@@ -331,7 +352,7 @@ namespace aten
                     }
                 }
                 else {
-                    gpunode.miss = -1;
+                    real_node.miss = -1;
                 }
             }
         }
@@ -474,7 +495,7 @@ namespace aten
         for (auto& entry : threadedBvhNodeEntries) {
             auto node = entry.node;
 
-            ThreadedBvhNode gpunode;
+            ThreadedBvhNode real_node;
 
             // NOTE
             // Differ set hit/miss index.
@@ -489,8 +510,8 @@ namespace aten
                 hitable* item = node->getItem();
 
                 // 自分自身のIDを取得.
-                gpunode.object_id = (float)ctxt.FindTransformableIdxFromPointer(item);
-                AT_ASSERT(gpunode.object_id >= 0);
+                real_node.object_id = (float)ctxt.FindTransformableIdxFromPointer(item);
+                AT_ASSERT(real_node.object_id >= 0);
 
                 // インスタンスの実体を取得.
                 auto internalObj = item->getHasObject();
@@ -499,31 +520,32 @@ namespace aten
                     item = const_cast<hitable*>(internalObj);
                 }
 
-                gpunode.meshid = (float)item->GetMeshId();
+                real_node.meshid = (float)item->GetMeshId();
 
                 int32_t exid = node->getExternalId();
                 int32_t subexid = node->getSubExternalId();
 
                 if (exid < 0) {
-                    gpunode.exid = -1.0f;
+                    real_node.exid = -1.0f;
                 }
                 else {
-                    gpunode.noExternal = false;
-                    gpunode.hasLod = (subexid >= 0);
-                    gpunode.mainExid = (exid >= 0 ? exid : 0);
-                    gpunode.lodExid = (subexid >= 0 ? subexid : 0);
+                    real_node.noExternal = false;
+                    real_node.hasLod = (subexid >= 0);
+                    real_node.mainExid = (exid >= 0 ? exid : 0);
+                    real_node.lodExid = (subexid >= 0 ? subexid : 0);
                 }
             }
 
-            gpunode.boxmax = aten::vec4(bbox.maxPos(), 0);
-            gpunode.boxmin = aten::vec4(bbox.minPos(), 0);
+            real_node.boxmax = aten::vec4(bbox.maxPos(), 0);
+            real_node.boxmin = aten::vec4(bbox.minPos(), 0);
 
-            m_listThreadedBvhNode[0].push_back(gpunode);
+            m_listThreadedBvhNode[0].push_back(real_node);
         }
 
         setOrder(threadedBvhNodeEntries, listParentId, m_listThreadedBvhNode[0]);
     }
 
+    // Register bvh nodes tree to linear list by traversing bvh.
     void ThreadedBVH::registerBvhNodeToLinearList(
         const context& ctxt,
         bvhnode* node,
@@ -533,11 +555,16 @@ namespace aten
             return;
         }
 
+        // Get traversal order.
+        // The nodes are registered linearly.
+        // So, just the size of the linear node list is the order.
         int32_t order = static_cast<int32_t>(nodes.size());
         node->setTraversalOrder(order);
 
         mat4 mtx_L2W;
 
+        // There is a possibility that the node doesn't have the actual entity.
+        // e.g. root of the tree.
         auto item = node->getItem();
         auto idx = ctxt.FindTransformableIdxFromPointer(item);
 
@@ -550,9 +577,13 @@ namespace aten
             if (t->GetParam().type == ObjectType::Instance) {
                 // TODO
                 auto obj = const_cast<hitable*>(t->getHasObject());
+
+                // In this case, subobj means LOD of the actual obj.
                 auto subobj = const_cast<hitable*>(t->getHasSecondObject());
 
-                // NOTE
+                // exid is idx for bottom later BVH.
+                // In this timing, we can't get its index in order.
+                // NOTE:
                 // 0 is for top layer, so need to add 1.
                 int32_t exid = ctxt.FindPolygonalTransformableOrderFromPointer(obj) + 1;
                 int32_t subexid = subobj ? ctxt.FindPolygonalTransformableOrderFromPointer(subobj) + 1 : -1;
@@ -560,13 +591,19 @@ namespace aten
                 node->setExternalId(exid);
                 node->setSubExternalId(subexid);
 
+                // 
                 auto accel = obj->getInternalAccelerator();
 
-                // Keep nested bvh.
+                // Keep nested (bottom layer) BVH in map.
+                // In this timing, we can't get its index in order.
+                // It means we can't register it in the linear list directly.
+                // So, we need to register it to map temporariy as the pair of the idx and the bottom layer.
+                // It will be expanded and registered to the linear list later.
                 if (m_mapNestedBvh.find(exid) == m_mapNestedBvh.end()) {
                     m_mapNestedBvh.insert(std::pair<int32_t, accelerator*>(exid, accel));
                 }
 
+                // If there is LOD.
                 if (subobj) {
                     accel = subobj->getInternalAccelerator();
 
@@ -577,8 +614,12 @@ namespace aten
             }
         }
 
-        nodes.push_back(ThreadedBvhNodeEntry(node, mtx_L2W));
+        // Register linearly.
+        // But, in this case, the registered element is still temporal one.
+        // It will be converted to the finalized one later.
+        nodes.push_back(ThreadedBvhNodeEntry{ node, mtx_L2W });
 
+        // Traverse to left and right recursively.
         registerBvhNodeToLinearList(ctxt, node->getLeft(), nodes);
         registerBvhNodeToLinearList(ctxt, node->getRight(), nodes);
     }

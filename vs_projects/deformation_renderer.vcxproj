@@ -15,7 +15,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\common\scenedefs.cpp" />
     <ClCompile Include="..\src\deformation_renderer\main.cpp" />
   </ItemGroup>
   <ItemGroup>

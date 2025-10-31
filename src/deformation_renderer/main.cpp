@@ -14,6 +14,7 @@
 #include "atenscene.h"
 #include "idaten.h"
 
+#include "../common/app_misc.h"
 #include "../common/scenedefs.h"
 
 //#pragma optimize( "", off)
@@ -25,6 +26,111 @@ constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
 constexpr const char* TITLE = "deform_mdl_";
 
+class DeformScene {
+public:
+    static aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<aten::DeformAnimation>> makeScene(
+        aten::context& ctxt, aten::scene* scene)
+    {
+        auto mdl = aten::TransformableFactory::createDeformable(ctxt);
+        mdl->read("../../asset/converted_unitychan/unitychan_gpu.mdl");
+
+        aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
+        aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt);
+
+        auto deformMdl = aten::TransformableFactory::createInstance<aten::deformable>(ctxt, mdl, aten::mat4::Identity);
+        scene->add(deformMdl);
+
+        aten::ImageLoader::setBasePath("./");
+
+        auto deformAnm = std::make_shared<aten::DeformAnimation>();
+        deformAnm->read("../../asset/converted_unitychan/unitychan_WAIT00.anm");
+
+        return aten::make_tuple(deformMdl, deformAnm);
+    }
+
+
+    static void getCameraPosAndAt(
+        aten::vec3& pos,
+        aten::vec3& at,
+        float& fov)
+    {
+        pos = aten::vec3(0.f, 1.f, 1.5f);
+        at = aten::vec3(0.f, 1.f, 0.f);
+        fov = 45.0f;
+    }
+
+};
+
+class DeformInBoxScene {
+public:
+    static aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<aten::DeformAnimation>> makeScene(
+        aten::context& ctxt, aten::scene* scene)
+    {
+#if 1
+        {
+            auto emit = CreateMaterial("light", ctxt, aten::MaterialType::Emissive, aten::vec3(1.0f, 1.0f, 1.0f));
+
+            CreateMaterial("backWall", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.580000f, 0.568000f, 0.544000f));
+            CreateMaterial("ceiling", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.580000f, 0.568000f, 0.544000f));
+            CreateMaterial("floor", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.580000f, 0.568000f, 0.544000f));
+            CreateMaterial("leftWall", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.504000f, 0.052000f, 0.040000f));
+            CreateMaterial("rightWall", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.112000f, 0.360000f, 0.072800f));
+
+            auto objs = aten::ObjLoader::Load("../../asset/cornellbox/box.obj", ctxt, nullptr, nullptr, false);
+
+            auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
+                ctxt,
+                objs[0],
+                aten::vec3(0.0f),
+                aten::vec3(0.0f),
+                aten::vec3(1.0f));
+            scene->add(light);
+
+            auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 400.0f);
+            ctxt.AddLight(areaLight);
+
+            auto box = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[1], aten::mat4::Identity);
+            scene->add(box);
+        }
+#endif
+
+        auto mdl = aten::TransformableFactory::createDeformable(ctxt);
+        mdl->read("../../asset/converted_unitychan/unitychan_gpu.mdl");
+
+        aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
+        aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt);
+
+        auto deformMdl = aten::TransformableFactory::createInstance<aten::deformable>(ctxt, mdl, aten::mat4::Identity);
+        scene->add(deformMdl);
+
+        aten::ImageLoader::setBasePath("./");
+
+        auto deformAnm = std::make_shared<aten::DeformAnimation>();
+        deformAnm->read("../../asset/converted_unitychan/unitychan_WAIT00.anm");
+
+        return aten::make_tuple(deformMdl, deformAnm);
+    }
+
+    static void getCameraPosAndAt(
+        aten::vec3& pos,
+        aten::vec3& at,
+        float& fov)
+    {
+        pos = aten::vec3(0.f, 1.f, 3.f);
+        at = aten::vec3(0.f, 1.f, 0.f);
+        fov = 45;
+    }
+};
+
+#define Scene DeformScene
+//#define Scene DeformInBoxScene
+
+// NOTE:
+// Dummy for deformable.
+// To compute animation and reflect it to bvh, we need to build lbvh per tick.
+// It means we call lbvh's build per update().
+// It's apart from the theory for the static bvh.
+// Therefore, to create accelerator, we inject this as the dummy and have the acutal bvh separately.
 class Lbvh : aten::accelerator {
 public:
     Lbvh() : aten::accelerator(aten::AccelType::UserDefs) {}
@@ -43,9 +149,7 @@ public:
         uint32_t num,
         aten::aabb* bbox = nullptr) override final
     {
-        m_bvh.build(ctxt, list, num, bbox);
-
-        setBoundingBox(m_bvh.getBoundingbox());
+        return;
     }
 
     virtual bool hit(
@@ -69,8 +173,6 @@ public:
         AT_ASSERT(false);
         return false;
     }
-
-    aten::bvh m_bvh;
 };
 
 class DeformationRendererApp {
@@ -225,71 +327,8 @@ public:
 #endif
         }
 
-        // For LBVH.
-        if (deform_mdl_) {
-            skinning_.setVtxOffset(vtx_offset_);
-            lbvh_.init(advanceTriNum);
-        }
-        else
-        {
-            std::vector<std::vector<aten::TriangleParameter>> triangles;
-            std::vector<int32_t> triIdOffsets;
-
-            int32_t triangleCount = 0;
-
-            ctxt_.TraverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::ObjectType type) {
-                if (type == aten::ObjectType::Polygons) {
-                    triangles.push_back(std::vector<aten::TriangleParameter>());
-                    auto pos = triangles.size() - 1;
-
-                    s->collectTriangles(triangles[pos]);
-
-                    triIdOffsets.push_back(triangleCount);
-                    triangleCount += static_cast<int32_t>(triangles[pos].size());
-                }
-            });
-
-            uint32_t maxTriNum = 0;
-            for (const auto& tris : triangles) {
-                maxTriNum = std::max<uint32_t>(maxTriNum, tris.size());
-            }
-
-            lbvh_.init(maxTriNum);
-
-            const auto& sceneBbox = scene_.getAccel()->getBoundingbox();
-            auto& nodes = renderer_.getCudaTextureResourceForBvhNodes();
-            auto& vtxPos = renderer_.getCudaTextureResourceForVtxPos();
-
-            // TODO
-            // もし、GPUBvh が SBVH だとした場合.
-            // ここで取得するノード配列は SBVH のノードである、ThreadedSbvhNode となる.
-            // しかし、LBVHBuilder::build で渡すことができるのは、ThreadBVH のノードである ThreadedBvhNode である.
-            // そのため、現状、ThreadedBvhNode に無理やりキャストしている.
-            // もっとスマートな方法を考えたい.
-            // If GPUBvh is SBVH, what we can retrieve the array of ThreadedSbvhNode as SBVH node type.
-            // But, what we can pass to LBVHBuilder::build is ThreadedBvhNode of ThreadBVH's node.
-            // So, we need to reinterpret cast ThreadedSbvhNode to ThreadedBvhNode.
-            // It's not safe and we neeed to consider the safer way.
-
-            auto& cpunodes = scene_.getAccel()->getNodes();
-
-            for (int32_t i = 0; i < triangles.size(); i++)
-            {
-                auto& tris = triangles[i];
-                auto triIdOffset = triIdOffsets[i];
-
-                // NOTE
-                // 0 is for top layer.
-                lbvh_.build(
-                    nodes[i + 1],
-                    tris,
-                    triIdOffset,
-                    sceneBbox,
-                    vtxPos,
-                    0,
-                    (std::vector<aten::ThreadedBvhNode>*) & cpunodes[i + 1]);
-            }
-        }
+        skinning_.setVtxOffset(vtx_offset_);
+        lbvh_.init(advanceTriNum);
 
 #ifdef ENABLE_SVGF
         renderer_.SetMode((idaten::SVGFPathTracing::Mode)curr_rendering_mode_);
@@ -585,75 +624,68 @@ public:
 private:
     void update(int32_t frame)
     {
-        if (deform_mdl_) {
-            auto mdl = deform_mdl_->getHasObjectAsRealType();
+        auto mdl = deform_mdl_->getHasObjectAsRealType();
 
-            if (defrom_anm_) {
-                aten::mat4 mtx_L2W;
-                mtx_L2W.asScale(0.01f);
-                mdl->update(mtx_L2W, timeline_.getTime(), defrom_anm_.get());
-            }
-            else {
-                mdl->update(aten::mat4(), 0, nullptr);
-            }
+        aten::mat4 mtx_L2W;
+        mtx_L2W.asScale(0.01f);
+        mdl->update(mtx_L2W, timeline_.getTime(), defrom_anm_.get());
 
-            timeline_.advance(1.0f / 60.0f);
+        timeline_.advance(1.0f / 60.0f);
 
-            const auto& mtx = mdl->getMatrices();
-            skinning_.update(&mtx[0], mtx.size());
+        const auto& mtx = mdl->getMatrices();
+        skinning_.update(&mtx[0], mtx.size());
 
-            aten::vec3 aabbMin, aabbMax;
+        aten::vec3 aabbMin, aabbMax;
 
-            bool isRestart = (frame == 1);
+        bool isRestart = (frame == 1);
 
-            // NOTE
-            // Add verted offset, in the first frame.
-            // In "skinning_.compute", vertex offset is added to triangle paremters.
-            // Added vertex offset is valid permanently, so specify vertex offset just only one time.
-            skinning_.compute(aabbMin, aabbMax, isRestart);
+        // NOTE
+        // Add verted offset, in the first frame.
+        // In "skinning_.compute", vertex offset is added to triangle paremters.
+        // Added vertex offset is valid permanently, so specify vertex offset just only one time.
+        skinning_.compute(aabbMin, aabbMax, isRestart);
 
-            mdl->setBoundingBox(aten::aabb(aabbMin, aabbMax));
-            deform_mdl_->update(true);
+        mdl->setBoundingBox(aten::aabb(aabbMin, aabbMax));
+        deform_mdl_->update(true);
 
-            const auto sceneBbox = aten::aabb(aabbMin, aabbMax);
-            auto& nodes = renderer_.getCudaTextureResourceForBvhNodes();
+        const auto sceneBbox = aten::aabb(aabbMin, aabbMax);
+        auto& nodes = renderer_.getCudaTextureResourceForBvhNodes();
 
-            auto& vtxPos = skinning_.getInteropVBO()[0];
-            auto& tris = skinning_.getTriangles();
+        auto& vtxPos = skinning_.getInteropVBO()[0];
+        auto& tris = skinning_.getTriangles();
 
-            // TODO
-            size_t deformPos = nodes.size() - 1;
+        // TODO
+        size_t deformPos = nodes.size() - 1;
 
-            // NOTE
-            // Vertex offset was added in "skinning_.compute".
-            // But, in "lbvh_.build", vertex index have to be handled as zero based index.
-            // Vertex offset have to be removed from vertex index.
-            // So, specify minus vertex offset.
-            // This is work around, too complicated...
-            lbvh_.build(
-                nodes[deformPos],
-                tris,
-                tri_offset_,
-                sceneBbox,
-                vtxPos,
-                -vtx_offset_,
-                nullptr);
+        // NOTE
+        // Vertex offset was added in "skinning_.compute".
+        // But, in "lbvh_.build", vertex index have to be handled as zero based index.
+        // Vertex offset have to be removed from vertex index.
+        // So, specify minus vertex offset.
+        // This is work around, too complicated...
+        lbvh_.build(
+            nodes[deformPos],
+            tris,
+            tri_offset_,
+            sceneBbox,
+            vtxPos,
+            -vtx_offset_,
+            nullptr);
 
-            // Copy computed vertices, triangles to the tracer.
-            renderer_.updateGeometry(
-                skinning_.getInteropVBO(),
-                vtx_offset_,
-                skinning_.getTriangles(),
-                tri_offset_);
+        // Copy computed vertices, triangles to the tracer.
+        renderer_.updateGeometry(
+            skinning_.getInteropVBO(),
+            vtx_offset_,
+            skinning_.getTriangles(),
+            tri_offset_);
 
-            {
-                auto accel = scene_.getAccel();
-                accel->update(ctxt_);
+        {
+            auto accel = scene_.getAccel();
+            accel->update(ctxt_);
 
-                const auto& nodes = scene_.getAccel()->getNodes();
+            const auto& nodes = scene_.getAccel()->getNodes();
 
-                renderer_.updateBVH(ctxt_, nodes);
-            }
+            renderer_.updateBVH(ctxt_, nodes);
         }
     }
 
@@ -715,10 +747,6 @@ private:
 
 int32_t main()
 {
-    AT_ASSERT_LOG(
-        (std::is_same_v<Scene, DeformScene> || std::is_same_v<Scene, DeformInBoxScene>),
-        "Allow only deformable scene");
-
     aten::timer::init();
     aten::OMPUtil::setThreadNum(DeformationRendererApp::ThreadNum);
 

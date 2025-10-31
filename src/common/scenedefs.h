@@ -138,28 +138,6 @@ public:
         float& fov);
 };
 
-class DeformScene {
-public:
-    static aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<aten::DeformAnimation>> makeScene(
-        aten::context& ctxt, aten::scene* scene);
-
-    static void getCameraPosAndAt(
-        aten::vec3& pos,
-        aten::vec3& at,
-        float& fov);
-};
-
-class DeformInBoxScene {
-public:
-    static aten::tuple<std::shared_ptr<aten::instance<aten::deformable>>, std::shared_ptr<aten::DeformAnimation>> makeScene(
-        aten::context& ctxt, aten::scene* scene);
-
-    static void getCameraPosAndAt(
-        aten::vec3& pos,
-        aten::vec3& at,
-        float& fov);
-};
-
 class AlphaBlendedObjCornellBoxScene {
 public:
     static void makeScene(aten::context& ctxt, aten::scene* scene);
@@ -278,13 +256,11 @@ void MakeScene(T&& obj, aten::context& ctxt, aten::scene* scene)
 //#define Scene HideLightScene
 //#define Scene DisneyMaterialTestScene
 //#define Scene ObjCornellBoxScene
-//#define Scene SponzaScene
+#define Scene SponzaScene
 //#define Scene BunnyScene
-//#define Scene DeformScene
-//#define Scene DeformInBoxScene
 //#define Scene AlphaBlendedObjCornellBoxScene
 //#define Scene CryteckSponzaScene
-#define Scene ManyLightCryteckSponzaScene
+//#define Scene ManyLightCryteckSponzaScene
 //#define Scene CornellBoxSmokeScene
 //#define Scene CornellBoxHomogeneousMediumScene
 //#define Scene HomogeneousMediumRefractionBunnyScene

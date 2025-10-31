@@ -254,7 +254,7 @@ namespace aten
         : transformable(ObjectType::Instance), m_obj(obj)
     {
         m_param.object_id = m_obj->id();
-        m_obj->build();
+        m_obj->build(ctxt);
         setBoundingBox(m_obj->getBoundingbox());
     }
 }

@@ -153,7 +153,7 @@ namespace aten
         return m_sklController.getMatrices();
     }
 
-    void deformable::build()
+    void deformable::build(aten::context& ctxt)
     {
         if (!m_accel) {
             m_accel = accelerator::createAccelerator(AccelType::UserDefs);
@@ -166,6 +166,37 @@ namespace aten
         setBoundingBox(aabb(
             aten::vec3(desc.minVtx[0], desc.minVtx[1], desc.minVtx[2]),
             aten::vec3(desc.maxVtx[0], desc.maxVtx[1], desc.maxVtx[2])));
+
+        if (m_accel->getAccelType() != AccelType::UserDefs) {
+            auto bbox = getBoundingbox();
+
+            std::vector<SkinningVertex> skin_vtx;
+            std::vector<uint32_t> indices;
+            std::vector<TriangleParameter> tri_params;
+
+            m_mesh.getGeometryData(
+                ctxt,
+                skin_vtx, indices, tri_params);
+
+            for (const auto& sv : skin_vtx) {
+                aten::vertex vtx{
+                    sv.position,
+                    sv.normal,
+                    aten::vec3(sv.uv[0], sv.uv[1], 0),
+                };
+                ctxt.AddVertex(vtx);
+            }
+
+            std::vector<triangle*> tris;
+
+            for (const auto& tri_param : tri_params) {
+                auto tri = ctxt.CreateTriangle(tri_param);
+                tris.emplace_back(tri.get());
+            }
+
+            m_accel->asNested();
+            m_accel->build(ctxt, reinterpret_cast<hitable**>(tris.data()), tris.size(), &bbox);
+        }
     }
 
     class DeformMeshRenderHelperEx : public IDeformMeshRenderHelper {

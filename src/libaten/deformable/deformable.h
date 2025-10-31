@@ -43,7 +43,7 @@ namespace aten
             float time,
             DeformAnimation* anm);
 
-        void build();
+        void build(aten::context& ctxt);
 
         void getGeometryData(
             const context& ctxt,

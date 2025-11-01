@@ -117,6 +117,11 @@ namespace aten {
             return m_name.c_str();
         }
 
+        virtual void ApplyScaleToObj(aten::context& ctxt, const aten::vec3& scale)
+        {
+            AT_ASSERT(false);
+        }
+
     protected:
         void onNotifyChanged()
         {

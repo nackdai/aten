@@ -1,6 +1,6 @@
 #pragma once
 
-#include <atomic>
+#include <optional>
 
 #include "types.h"
 #include "math/mat4.h"
@@ -160,9 +160,10 @@ namespace AT_NAME
         virtual int32_t GetMeshId() const override;
 
         void build(
-            const aten::context& ctxt,
+            aten::context& ctxt,
             int32_t mtrlid,
-            int32_t geomid);
+            int32_t geomid,
+            std::optional<aten::vec3> scale);
 
         aten::aabb ComputeAABB(const aten::context& ctxt) const;
 
@@ -178,8 +179,9 @@ namespace AT_NAME
 
     private:
         static std::shared_ptr<triangle> create(
-            const aten::context& ctxt,
-            const aten::TriangleParameter& param);
+            aten::context& ctxt,
+            const aten::TriangleParameter& param,
+            std::optional<aten::vec3> scale);
 
         template <class T>
         auto updateIndex(T id)
@@ -187,6 +189,14 @@ namespace AT_NAME
         {
             m_id = static_cast<decltype(m_id)>(id);
         }
+
+        void BuildTriangle(
+            const context& ctxt,
+            const aten::vertex& v0,
+            const aten::vertex& v1,
+            const aten::vertex& v2,
+            int32_t mtrlid,
+            int32_t geomid);
 
     private:
         aten::TriangleParameter param_;

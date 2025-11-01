@@ -103,7 +103,7 @@ namespace AT_NAME
             return m_param.triangle_num;
         }
 
-        void build(const aten::context& ctxt);
+        void build(aten::context& ctxt, std::optional<aten::vec3> scale);
 
         template <class CONTEXT>
         static AT_HOST_DEVICE_API void SamplePosAndNormal(

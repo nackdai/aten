@@ -223,6 +223,16 @@ namespace aten
         }
 
         /**
+        * @brief Replace the specified vertex.
+        * @param[in] idx Index to be replaced.
+        * @param[in] vtx Vertex to replcae.
+        */
+        void ReplaceVertex(int32_t idx, const aten::vertex& vtx)
+        {
+            vertices_[idx] = vtx;
+        }
+
+        /**
          * @brief Get the vertices as list.
          * @return Vertices as list.
          */
@@ -344,9 +354,12 @@ namespace aten
         /**
          * @brief Create a triangle instance.
          * @param[in] param Triangle parameter to create a triangle instance.
+         * @param[in] scale Value to scale triangle and its vertices. If this is nullopt, nothing happens.
          * @return Created triangle instance.
          */
-        std::shared_ptr<AT_NAME::triangle> CreateTriangle(const aten::TriangleParameter& param);
+        std::shared_ptr<AT_NAME::triangle> CreateTriangle(
+            const aten::TriangleParameter& param,
+            std::optional<aten::vec3> scale = std::nullopt);
 
         /**
          * @brief Add a triangle instance to the scene.

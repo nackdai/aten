@@ -34,10 +34,11 @@ namespace AT_NAME
         /**
          * @brief Build TriangleGroupMesh.
          *
-         * @param ctxt Instance of scene context.
+         * @param[in] ctxt Instance of scene context.
+         * @param[in] scale Value to scale triangles and those vertices. If this is invalid, nothing happens.
          * @return Area of this mesh.
          */
-        float build(const aten::context& ctxt);
+        float build(aten::context& ctxt, std::optional<aten::vec3> scale);
 
         /**
          * @breif Set a material for the traiangle group.

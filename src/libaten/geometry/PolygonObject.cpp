@@ -8,7 +8,7 @@
 
 namespace AT_NAME
 {
-    void PolygonObject::build(const context& ctxt)
+    void PolygonObject::build(context& ctxt, std::optional<aten::vec3> scale)
     {
         if (m_param.triangle_num > 0) {
             // Builded already.
@@ -30,7 +30,7 @@ namespace AT_NAME
         aabb bbox;
 
         for (const auto& s : m_shapes) {
-            auto mesh_area = s->build(ctxt);
+            auto mesh_area = s->build(ctxt, scale);
 
             m_param.area += mesh_area;
             triangles += (uint32_t)s->triangles_.size();
@@ -65,7 +65,7 @@ namespace AT_NAME
         uint32_t triangles = 0;
 
         for (const auto& s : m_shapes) {
-            s->build(ctxt);
+            s->build(const_cast<context&>(ctxt), std::nullopt);
 
             triangles += (uint32_t)s->triangles_.size();
         }
@@ -133,7 +133,7 @@ namespace AT_NAME
         m_accel = aten::accelerator::createAccelerator();
         m_accel->enableExporting();
 
-        build(ctxt);
+        build(const_cast<context&>(ctxt), std::nullopt);
 
         if (m_accel) {
             result = m_accel->exportTree(ctxt, path);

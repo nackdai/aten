@@ -20,19 +20,39 @@ namespace aten
             : transformable(ObjectType::Instance), m_obj(obj)
         {
             init_matrices(ctxt);
+
             m_param.object_id = m_obj->id();
+            m_obj->build(ctxt, std::nullopt);
             setBoundingBox(m_obj->getBoundingbox());
+
+            setBoundingBox(getTransformedBoundingBox());
         }
 
         instance(const std::shared_ptr<OBJ>& obj, context& ctxt, const mat4& mtx_L2W)
-            : instance(obj, ctxt)
+            : transformable(ObjectType::Instance), m_obj(obj)
         {
             init_matrices(ctxt);
 
-            *m_mtx_L2W = mtx_L2W;
+            aten::vec3 scale;
+            aten::mat4 mtx_rot;
+            aten::vec3 trans;
+            aten::tie(scale, mtx_rot, trans) = mtx_L2W.Decompose();
 
-            *m_mtx_W2L = mtx_L2W;
+            aten::mat4 mtx_trans;
+            mtx_trans.asTrans(trans);
+
+            *m_mtx_L2W = mtx_trans * mtx_rot;
+
+            *m_mtx_W2L = *m_mtx_L2W;
             m_mtx_W2L->invert();
+
+            const bool no_scale = CheckNoScale(scale);
+
+            m_param.object_id = m_obj->id();
+            m_obj->build(
+                ctxt,
+                no_scale ? std::nullopt : std::make_optional(scale));
+            setBoundingBox(m_obj->getBoundingbox());
 
             setBoundingBox(getTransformedBoundingBox());
         }
@@ -43,18 +63,34 @@ namespace aten
             const vec3& trans,
             const vec3& rot,
             const vec3& scale)
-            : instance(obj, ctxt)
+            : transformable(ObjectType::Instance), m_obj(obj)
         {
             init_matrices(ctxt);
 
-            m_trans = trans;
-            m_rot = rot;
-            m_scale= scale;
+            aten::mat4 mtx_trans;
+            mtx_trans.asTrans(trans);
 
-            updateMatrix();
+            aten::mat4 mtx_rot_x;
+            mtx_rot_x.asRotateByX(rot.x);
+
+            aten::mat4 mtx_rot_y;
+            mtx_rot_y.asRotateByX(rot.y);
+
+            aten::mat4 mtx_rot_z;
+            mtx_rot_z.asRotateByX(rot.z);
+
+            *m_mtx_L2W = mtx_trans * mtx_rot_x * mtx_rot_y * mtx_rot_z;
 
             *m_mtx_W2L = *m_mtx_L2W;
             m_mtx_W2L->invert();
+
+            const bool no_scale = CheckNoScale(scale);
+
+            m_param.object_id = m_obj->id();
+            m_obj->build(
+                ctxt,
+                no_scale ? std::nullopt : std::make_optional(scale));
+            setBoundingBox(m_obj->getBoundingbox());
 
             setBoundingBox(getTransformedBoundingBox());
         }
@@ -138,9 +174,13 @@ namespace aten
             return m_obj->isDeformable();
         }
 
-        virtual void update(bool isForcibly = false)
+        virtual void update(aten::context& ctxt, bool isForcibly = false)
         {
             if (m_isDirty || isForcibly) {
+                // TODO:
+                // Not implement ApplyScaleToObj in PolygonObject and deformable classes yet...
+                ApplyScaleToObj(ctxt);
+
                 updateMatrix();
                 setBoundingBox(getTransformedBoundingBox());
                 onNotifyChanged();
@@ -225,6 +265,30 @@ namespace aten
             aten::tie(std::ignore, m_mtx_W2L) = ctxt.CreateMatrix();
         }
 
+        static bool CheckNoScale(const aten::vec3& scale)
+        {
+            return aten::isClose(scale.x, 1.0F)
+                && aten::isClose(scale.y, 1.0F)
+                && aten::isClose(scale.z, 1.0F);
+        }
+
+        void ApplyScaleToObj(aten::context& ctxt)
+        {
+            // TODO:
+            // Not sure how we should do for LOD yet....
+            // So, if lod is available, raise the assertion.
+            AT_ASSERT(!m_lod);
+
+            if (m_obj && !m_lod) {
+                const auto no_scale = CheckNoScale(m_scale);
+                if (!no_scale) {
+                    // TODO:
+                    // Not implement ApplyScaleToObj in PolygonObject and deformable classes yet...
+                    //m_obj->ApplyScaleToObj(ctxt, m_scale);
+                }
+            }
+        }
+
     private:
         std::shared_ptr<OBJ> m_obj;
         std::shared_ptr<OBJ> m_lod;
@@ -239,22 +303,4 @@ namespace aten
 
         bool m_isDirty{ false };
     };
-
-    template<>
-    inline instance<PolygonObject>::instance(const std::shared_ptr<PolygonObject>& obj, context& ctxt)
-        : transformable(ObjectType::Instance), m_obj(obj)
-    {
-        m_param.object_id = m_obj->id();
-        m_obj->build(ctxt);
-        setBoundingBox(m_obj->getBoundingbox());
-    }
-
-    template<>
-    inline instance<deformable>::instance(const std::shared_ptr<deformable>& obj, context& ctxt)
-        : transformable(ObjectType::Instance), m_obj(obj)
-    {
-        m_param.object_id = m_obj->id();
-        m_obj->build(ctxt);
-        setBoundingBox(m_obj->getBoundingbox());
-    }
 }

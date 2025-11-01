@@ -13,6 +13,7 @@ namespace aten
 
         // z == 1, compute plane normal in float-time.
         // z == -1, there is no texture coordinate.
+        // It's used while loading mesh data. It's not used on the fly.
         vec3 uv;
     };
 }

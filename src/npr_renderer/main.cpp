@@ -20,11 +20,17 @@
 //#pragma optimize( "", off)
 
 #define ENABLE_ENVMAP
-#define ENABLE_SVGF
+#define DEVICE_RENDERING
 
+#ifdef DEVICE_RENDERING
 constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
-constexpr const char* TITLE = "deform_mdl_";
+#else
+constexpr int32_t WIDTH = 512;
+constexpr int32_t HEIGHT = 512;
+#endif
+
+constexpr const char* TITLE = "NPR renderer";
 
 class DeformScene {
 public:
@@ -53,8 +59,13 @@ public:
         aten::vec3& at,
         float& fov)
     {
-        pos = aten::vec3(0.f, 1.f, 1.5f);
-        at = aten::vec3(0.f, 1.f, 0.f);
+#ifdef DEVICE_RENDERING
+        pos = aten::vec3(0.f, 1.0f, 1.5f);
+        at = aten::vec3(0.f, 1.0f, 0.f);
+#else
+        pos = aten::vec3(0.f, 1.3f, 0.5f);
+        at = aten::vec3(0.f, 1.3f, 0.f);
+#endif
         fov = 45.0f;
     }
 };
@@ -124,7 +135,6 @@ public:
 #else
         auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, aten::vec4(0));
 #endif
-
         auto mdl = deform_mdl_->getHasObjectAsRealType();
 
         mdl->initGLResources(&shader_raasterize_deformable_);
@@ -136,12 +146,16 @@ public:
             camparam.znear = float(0.1);
             camparam.zfar = float(10000.0);
 
+#ifdef DEVICE_RENDERING
             renderer_.UpdateSceneData(
                 visualizer_->GetGLTextureHandle(),
                 WIDTH, HEIGHT,
                 camparam, ctxt_, nodes,
                 0, 0,
                 bg);
+#else
+            renderer_.SetBG(bg);
+#endif
         }
 
         {
@@ -153,10 +167,12 @@ public:
 
             accel->update(ctxt_);
 
+#ifdef DEVICE_RENDERING
             const auto& nodes = scene_.getAccel()->getNodes();
 
             // Set the created bvh data.
             renderer_.updateBVH(ctxt_, nodes);
+#endif
         }
 
         return true;
@@ -175,7 +191,9 @@ public:
             camparam.znear = float(0.1);
             camparam.zfar = float(10000.0);
 
+#ifdef DEVICE_RENDERING
             renderer_.updateCamera(camparam);
+#endif
             is_camera_dirty_ = false;
 
             visualizer_->clear();
@@ -188,10 +206,23 @@ public:
         aten::timer timer;
         timer.begin();
 
+#ifdef DEVICE_RENDERING
         renderer_.render(
             WIDTH, HEIGHT,
             max_samples_,
             max_bounce_);
+#else
+        aten::Destination dst;
+        {
+            dst.width = WIDTH;
+            dst.height = HEIGHT;
+            dst.maxDepth = 5;
+            dst.russianRouletteDepth = 3;
+            dst.sample = 1;
+            dst.buffer = &buffer_;
+        }
+        renderer_.render(ctxt_, dst, &scene_, &camera_);
+#endif
 
         auto cudaelapsed = timer.end();
 
@@ -206,7 +237,11 @@ public:
             1.0f,
             0);
 
+#ifdef DEVICE_RENDERING
         visualizer_->render(false);
+#else
+        visualizer_->renderPixelData(buffer_.image().data(), camera_.NeedRevert());
+#endif
 
         auto visualizerTime = aten::GLProfiler::end();
 
@@ -384,9 +419,12 @@ private:
 
     std::shared_ptr<aten::instance<aten::deformable>> deform_mdl_;
 
+#ifdef DEVICE_RENDERING
     idaten::PathTracing renderer_;
-
+#else
+    aten::PathTracing renderer_;
     aten::FilmProgressive buffer_{ WIDTH, HEIGHT };
+#endif
 
     std::shared_ptr<aten::visualizer> visualizer_;
 
@@ -399,7 +437,13 @@ private:
 
     aten::shader shader_raasterize_deformable_;
 
-    bool will_show_gui_{ true };
+    bool will_show_gui_
+#ifdef DEVICE_RENDERING
+    { true };
+#else
+    { false };
+#endif
+
     bool will_take_screen_shot_{ false };
     int32_t screen_shot_count_{ 0 };
 

@@ -37,7 +37,9 @@ public:
         aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
         aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt);
 
-        auto deformMdl = aten::TransformableFactory::createInstance<aten::deformable>(ctxt, mdl, aten::mat4::Identity);
+        auto deformMdl = aten::TransformableFactory::createInstance<aten::deformable>(
+            ctxt, mdl,
+            aten::vec3(0), aten::vec3(0), aten::vec3(0.01F));
         scene->add(deformMdl);
 
         aten::ImageLoader::setBasePath("./");
@@ -55,10 +57,7 @@ public:
         at = aten::vec3(0.f, 1.f, 0.f);
         fov = 45.0f;
     }
-
 };
-
-#define Scene DeformScene
 
 class DeformationRendererApp {
 public:
@@ -100,7 +99,7 @@ public:
             "../shader/simple3d_fs.glsl");
         aten::vec3 pos, at;
         float vfov;
-        Scene::getCameraPosAndAt(pos, at, vfov);
+        DeformScene::getCameraPosAndAt(pos, at, vfov);
 
         camera_.init(
             pos,
@@ -112,7 +111,7 @@ public:
         aten::accelerator::setUserDefsInternalAccelCreator([] {
             return std::make_shared<aten::GPUBvh>();
         });
-        deform_mdl_ = Scene::makeScene(ctxt_, &scene_);
+        deform_mdl_ = DeformScene::makeScene(ctxt_, &scene_);
         scene_.build(ctxt_);
 
 #ifdef ENABLE_ENVMAP
@@ -146,16 +145,9 @@ public:
         }
 
         {
-            auto mdl = deform_mdl_->getHasObjectAsRealType();
+            /*deform_mdl_->setScale(aten::vec3(0.01F));
 
-            //aten::mat4 mtx_L2W;
-            //mtx_L2W.asScale(0.01f);
-            //mdl->update(mtx_L2W, 0.0F, nullptr);
-
-            //deform_mdl_->setTrans(aten::vec3(0.0F, 0.0F, 0.0F));
-            //deform_mdl_->setScale(aten::vec3(0.75F));
-
-            //deform_mdl_->update(true);
+            deform_mdl_->update(ctxt_, true);*/
 
             auto accel = scene_.getAccel();
 
@@ -355,7 +347,7 @@ public:
             {
                 aten::vec3 pos, at;
                 float vfov;
-                Scene::getCameraPosAndAt(pos, at, vfov);
+                DeformScene::getCameraPosAndAt(pos, at, vfov);
 
                 camera_.init(
                     pos,

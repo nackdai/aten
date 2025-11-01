@@ -235,7 +235,7 @@ public:
 #ifdef DEVICE_RENDERING
         if (will_show_gui_)
         {
-            ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", renderer_.frame(), 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", renderer_.GetFrameCount(), 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
             auto is_input_samples = ImGui::SliderInt("Samples", &max_samples_, 1, 100);
             auto is_input_bounce = ImGui::SliderInt("Bounce", &max_bounce_, 1, 10);

@@ -23,7 +23,7 @@ namespace idaten {
             m_frame = 1;
         }
 
-        uint32_t frame() const
+        uint32_t GetFrameCount() const
         {
             return m_frame;
         }

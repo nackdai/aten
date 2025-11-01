@@ -164,7 +164,7 @@ public:
 
     bool Run()
     {
-        auto frame = renderer_.frame();
+        auto frame = renderer_.GetFrameCount();
 
         update(frame);
 
@@ -230,7 +230,7 @@ public:
 
         if (will_show_gui_)
         {
-            ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", renderer_.frame(), 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", frame, 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Text("cuda : %.3f ms (avg : %.3f ms)", cudaelapsed, avg_cuda_time_);
             ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * max_samples_) / float(1000 * 1000) * (float(1000) / cudaelapsed));
 

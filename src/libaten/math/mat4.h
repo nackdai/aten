@@ -450,6 +450,10 @@ namespace aten {
             return asScale(vec3(x, y, z));
         }
 
+        aten::tuple<aten::vec3, aten::mat4, aten::vec3> Decompose() const;
+
+        float DeterminantAs3x3() const;
+
         mat4& lookat(
             const vec3& eye,
             const vec3& at,

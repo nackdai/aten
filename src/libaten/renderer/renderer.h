@@ -56,6 +56,11 @@ namespace aten
             return frame_count_;
         }
 
+        void reset() noexcept
+        {
+            frame_count_ = 1;
+        }
+
         void SetEnableEnvmap(bool b)
         {
             enable_envmap_ = b;

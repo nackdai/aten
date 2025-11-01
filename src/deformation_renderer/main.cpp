@@ -626,6 +626,13 @@ private:
     {
         auto mdl = deform_mdl_->getHasObjectAsRealType();
 
+        // NOTE:
+        // Apply local to world matrix to vertices is done in LBVHBuilder.
+        // Therefore, no need to care of local to world matrix in instance class.
+
+        // TODO:
+        // Ideally, regardless of any bvh, how to deal with local to world matrix should be standardized.
+
         aten::mat4 mtx_L2W;
         mtx_L2W.asScale(0.01f);
         mdl->update(mtx_L2W, timeline_.getTime(), defrom_anm_.get());
@@ -646,7 +653,7 @@ private:
         skinning_.compute(aabbMin, aabbMax, isRestart);
 
         mdl->setBoundingBox(aten::aabb(aabbMin, aabbMax));
-        deform_mdl_->update(true);
+        deform_mdl_->update(ctxt_, true);
 
         const auto sceneBbox = aten::aabb(aabbMin, aabbMax);
         auto& nodes = renderer_.getCudaTextureResourceForBvhNodes();

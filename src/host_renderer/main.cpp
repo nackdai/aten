@@ -126,7 +126,7 @@ public:
             t.y += d;
 
             movable_obj_->setTrans(t);
-            movable_obj_->update();
+            movable_obj_->update(ctxt_);
 
             auto* accel = scene_.getAccel();
             accel->update(ctxt_);

@@ -153,7 +153,7 @@ namespace aten
         return m_sklController.getMatrices();
     }
 
-    void deformable::build(aten::context& ctxt)
+    void deformable::build(aten::context& ctxt, std::optional<aten::vec3> scale)
     {
         if (!m_accel) {
             m_accel = accelerator::createAccelerator(AccelType::UserDefs);
@@ -190,7 +190,7 @@ namespace aten
             std::vector<triangle*> tris;
 
             for (const auto& tri_param : tri_params) {
-                auto tri = ctxt.CreateTriangle(tri_param);
+                auto tri = ctxt.CreateTriangle(tri_param, scale);
                 tris.emplace_back(tri.get());
             }
 

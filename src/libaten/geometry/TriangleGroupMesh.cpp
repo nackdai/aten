@@ -7,7 +7,7 @@
 
 namespace AT_NAME
 {
-    float TriangleGroupMesh::build(const context &ctxt)
+    float TriangleGroupMesh::build(context &ctxt, std::optional<aten::vec3> scale)
     {
         aten::vec3 boxmin(AT_MATH_INF, AT_MATH_INF, AT_MATH_INF);
         aten::vec3 boxmax(-AT_MATH_INF, -AT_MATH_INF, -AT_MATH_INF);
@@ -19,7 +19,7 @@ namespace AT_NAME
 
         for (const auto f : triangles_)
         {
-            f->build(ctxt, mtrlid, geomid);
+            f->build(ctxt, mtrlid, geomid, scale);
 
             const auto &faceParam = f->GetParam();
             area += faceParam.area;

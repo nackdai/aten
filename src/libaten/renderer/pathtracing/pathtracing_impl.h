@@ -5,6 +5,7 @@
 #include "defs.h"
 #include "camera/camera.h"
 #include "camera/pinhole.h"
+#include "geometry/EvaluateHitResult.h"
 #include "light/ibl.h"
 #include "light/light_impl.h"
 #include "math/ray.h"
@@ -42,6 +43,7 @@ namespace AT_NAME
         attrib.is_singular = false;
         attrib.will_update_depth = true;
         attrib.does_use_throughput_depth = false;
+        attrib.is_accumulating_alpha_blending = true;
         attrib.last_hit_mtrl_idx = -1;
     }
 
@@ -80,6 +82,9 @@ namespace AT_NAME
         paths.throughput[idx].pdfb = 1.0f;
         paths.throughput[idx].depth_count = 0;
         paths.throughput[idx].mediums.clear();
+
+        paths.throughput[idx].alpha_blend_radiance_on_the_way = aten::vec3(0.0F);
+        paths.throughput[idx].transmission = 1.0F;
 
         ClearPathAttribute(paths.attrib[idx]);
 
@@ -176,6 +181,8 @@ namespace AT_NAME
                 }
             }
 
+            paths.attrib[idx].is_accumulating_alpha_blending = false;
+
             auto contrib = paths.throughput[idx].throughput * bg;
             _detail::AddVec3(paths.contrib[idx].contrib, contrib);
 
@@ -238,6 +245,8 @@ namespace AT_NAME
                 auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, bg.avgIllum);
                 misW = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
             }
+
+            paths.attrib[idx].is_accumulating_alpha_blending = false;
 
             auto contrib = paths.throughput[idx].throughput * misW * emit;
             _detail::AddVec3(paths.contrib[idx].contrib, contrib);
@@ -369,42 +378,78 @@ namespace AT_NAME
         // So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
         const aten::ObjectParameter* hitobj = lightobj;
 
-        aten::Intersection isect;
-
         bool isHit = false;
 
         aten::ray r(shadow_ray.rayorg, shadow_ray.raydir);
 
-        if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
-            // NOTE:
-            // operation has to be related with template arg SCENE.
-            if (scene) {
-                isHit = scene->hit(ctxt, r, AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON, isect);
+        int32_t loop_cnt = 0;
+
+        // NOTE:
+        // For safety, jump out the while loop forcibly.
+        while (loop_cnt < 10) {
+            loop_cnt += 1;
+
+            aten::Intersection isect;
+
+            isHit = false;
+
+            if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
+                // NOTE:
+                // operation has to be related with template arg SCENE.
+                if (scene) {
+                    isHit = scene->hit(ctxt, r, AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON, isect);
+                }
             }
-        }
-        else {
+            else {
 #ifndef __CUDACC__
-            // Dummy to build with clang.
-            auto intersectCloser = [](auto... args) -> bool { return true; };
+                // Dummy to build with clang.
+                auto intersectCloser = [](auto... args) -> bool { return true; };
 #endif
-            isHit = intersectCloser(&ctxt, r, &isect, distToLight - AT_MATH_EPSILON, enableLod);
+                isHit = intersectCloser(&ctxt, r, &isect, distToLight - AT_MATH_EPSILON, enableLod);
+            }
+
+            if (isHit) {
+                hitobj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));
+
+                // If the sequence achieves this API, the ray achieves the non-alpha translucented object
+                // And then, it means we can ignore the alpha translucented object.
+                if (!paths.attrib[idx].is_accumulating_alpha_blending)
+                {
+                    aten::hitrecord rec;
+                    AT_NAME::evaluate_hit_result(rec, *hitobj, ctxt, r, isect);
+
+                    const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
+                    if (AT_NAME::material::isTranslucentByAlpha(mtrl, rec.u, rec.v)) {
+                        // To go path through the object, specfy the oppoiste normal.
+                        auto orienting_normal = rec.normal;
+                        const bool is_same_facing = dot(rec.normal, shadow_ray.raydir) > 0.0F;
+                        if (!is_same_facing) {
+                            orienting_normal = -orienting_normal;
+                        }
+                        //r = aten::ray(rec.p, shadow_ray.raydir, orienting_normal);
+                        r = aten::ray(rec.p, shadow_ray.raydir, shadow_ray.raydir);
+                        continue;
+                    }
+                }
+            }
+
+            isHit = AT_NAME::scene::hitLight(
+                isHit,
+                light.attrib,
+                lightobj,
+                distToLight,
+                distHitObjToRayOrg,
+                isect.t,
+                hitobj);
+
+            break;
         }
 
         if (isHit) {
-            hitobj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));
-        }
-
-        isHit = AT_NAME::scene::hitLight(
-            isHit,
-            light.attrib,
-            lightobj,
-            distToLight,
-            distHitObjToRayOrg,
-            isect.t,
-            hitobj);
-
-        if (isHit) {
-            _detail::AddVec3(paths.contrib[idx].contrib, shadow_ray.lightcontrib);
+            aten::vec3 contrib{
+                paths.throughput[idx].transmission * shadow_ray.lightcontrib + paths.throughput[idx].alpha_blend_radiance_on_the_way
+            };
+            _detail::AddVec3(paths.contrib[idx].contrib, contrib);
         }
 
         return isHit;
@@ -508,7 +553,10 @@ namespace AT_NAME
                 0.0f, 0.0f,
                 scene);
 
-            _detail::AddVec3(path_contrib.contrib, toon_bsdf);
+            aten::vec3 contrib{
+                path_throughput.transmission * toon_bsdf + path_throughput.alpha_blend_radiance_on_the_way
+            };
+            _detail::AddVec3(path_contrib.contrib, contrib);
 
             path_attrib.is_terminated = true;
             return true;
@@ -531,25 +579,42 @@ namespace AT_NAME
         AT_NAME::PathAttribute& path_attrib,
         AT_NAME::PathThroughput& path_throughput)
     {
+        // TODO:
+        // How to deal with the alpha material on the other hand of the translucent material like refraction.
+
         // If the material itself is originally translucent, we don't care alpha translucency.
         if (mtrl.attrib.is_translucent) {
             return false;
         }
 
-        if (AT_NAME::material::isTranslucentByAlpha(mtrl, u, v))
-        {
-            const auto alpha = AT_NAME::material::getTranslucentAlpha(mtrl, u, v);
-            auto r = sampler.nextSample();
+        const auto alpha = AT_NAME::material::getTranslucentAlpha(mtrl, u, v);
 
-            if (r >= alpha) {
-                // Just through the object.
-                // NOTE
-                // Ray go through to the opposite direction. So, we need to specify inverted normal.
-                ray = aten::ray(hit_pos, ray.dir, -hit_nml);
-                path_throughput.throughput *= static_cast<aten::vec3>(mtrl.baseColor);
-                path_attrib.is_singular = true;
-                return true;
+        if (alpha < 1.0F)
+        {
+            // Just through the object.
+            // NOTE:
+            // Ray go through to the opposite direction. So, we need to specify inverted normal.
+            // Even if accumulating alpha blending already has been stopped but the hit object has alpha translucent material,
+            // we skip the following shadeing sequence.
+            // It means the ray go through to the opposite direction as if the hit object is ignored.
+            ray = aten::ray(hit_pos, ray.dir, -hit_nml);
+
+            if (path_attrib.is_accumulating_alpha_blending)
+            {
+                const auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, u, v, aten::vec4(1.0F));
+                const aten::vec3 alpha_belended_radiance{
+                    path_throughput.transmission * mtrl.baseColor * albedo * alpha
+                };
+                _detail::AddVec3(path_throughput.alpha_blend_radiance_on_the_way, alpha_belended_radiance);
+                path_throughput.transmission *= (1.0F - alpha);
             }
+
+            path_attrib.is_singular = true;
+            return true;
+        }
+        else {
+            // If hit to non-alpha material, stop to accumulate alpha transmission.
+            path_attrib.is_accumulating_alpha_blending = false;
         }
 
         return false;
@@ -599,7 +664,10 @@ namespace AT_NAME
         auto c = dot(ray_along_normal, static_cast<aten::vec3>(next_dir));
 
         if (pdfb > 0 && c > 0) {
-            paths.throughput[idx].throughput *= bsdf * c / pdfb;
+            aten::vec3 contrib{ albedo * bsdf * c / pdfb };
+            contrib = paths.throughput[idx].transmission * contrib + paths.throughput[idx].alpha_blend_radiance_on_the_way;
+
+            paths.throughput[idx].throughput *= contrib;
             paths.throughput[idx].throughput /= russian_prob;
         }
         else {
@@ -607,7 +675,6 @@ namespace AT_NAME
             return;
         }
 
-        paths.throughput[idx].throughput *= albedo;
         paths.throughput[idx].pdfb = pdfb;
         paths.attrib[idx].is_singular = mtrl.attrib.is_singular;
         paths.attrib[idx].last_hit_mtrl_idx = mtrl.id;

@@ -31,10 +31,14 @@ namespace AT_NAME {
     using MediumStack = aten::stack<int32_t, MedisumStackSize>;
 
     struct PathThroughput {
-        aten::vec3 throughput;
+        aten::vec3 throughput{ 1.0F };
         float pdfb{ 1.0F };
         int32_t depth_count{ 0 };
         MediumStack mediums;
+        struct {
+            aten::vec3 alpha_blend_radiance_on_the_way{ 0.0F };
+            float transmission{ 1.0F };
+        };
     };
 
     struct PathContrib {
@@ -77,6 +81,7 @@ namespace AT_NAME {
             uint32_t is_singular : 1;
             uint32_t will_update_depth : 1;
             uint32_t does_use_throughput_depth : 1;
+            uint32_t is_accumulating_alpha_blending : 1;
         };
 
         int32_t last_hit_mtrl_idx{ -1 };

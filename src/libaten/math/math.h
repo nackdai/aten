@@ -12,7 +12,7 @@ constexpr auto AT_MATH_PI_2 = AT_MATH_PI * 2;
 constexpr auto AT_MATH_PI_HALF = AT_MATH_PI * 0.5F;
 
 constexpr auto AT_MATH_INF = std::numeric_limits<float>::max();
-constexpr auto AT_MATH_EPSILON = 1e-3F;
+constexpr auto AT_MATH_EPSILON = 1e-9F;
 
 namespace aten {
     constexpr inline AT_HOST_DEVICE_API float Deg2Rad(float d)

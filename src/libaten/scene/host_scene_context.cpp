@@ -11,8 +11,6 @@
 
 namespace aten
 {
-    const context* context::s_pinnedCtxt = nullptr;
-
     const aten::ObjectParameter& context::GetObject(uint32_t idx) const noexcept
     {
         return GetTransformable(idx)->GetParam();

@@ -1,6 +1,7 @@
 #include "defs.h"
 
 AT_INLINE_RELEASE AT_DEVICE_API aten::vec4 sampleTexture(
+    const AT_NAME::context& ctxt,
     const int32_t texid,
     float u, float v,
     const aten::vec4& defaultValue,
@@ -10,8 +11,7 @@ AT_INLINE_RELEASE AT_DEVICE_API aten::vec4 sampleTexture(
 
 #ifdef __CUDACC__
     if (texid >= 0) {
-        cudaTextureObject_t tex = (cudaTextureObject_t)texid;
-        auto clr = tex2DLod<float4>(tex, u, v, lod);
+        auto clr = tex2DLod<float4>(ctxt.textures[texid], u, v, lod);
         ret = aten::vec4(clr.x, clr.y, clr.z, clr.w);
     }
 #endif

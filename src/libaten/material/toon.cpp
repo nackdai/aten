@@ -107,6 +107,7 @@ namespace AT_NAME
             // Compute radiance.
             // The target light is singular, and then MIS in ComputeRadianceNEE is always 1.0.
             auto res = ComputeRadianceNEE(
+                ctxt,
                 aten::vec3(1.0F),
                 wi, normal,
                 base_mtrl, 0.0F, u, v,
@@ -124,9 +125,9 @@ namespace AT_NAME
 
                     lum_y = pow(lum_y, 1.0F / 2.2F);
 
-                    const auto remap = AT_NAME::sampleTexture(param.toon.remap_texture, 0.5F, lum_y, aten::vec4(1.0F));
+                    const auto remap = AT_NAME::sampleTexture(ctxt, param.toon.remap_texture, 0.5F, lum_y, aten::vec4(1.0F));
 
-                    toon_term = remap * color;
+                    toon_term = remap;
                 }
             }
         }
@@ -304,11 +305,12 @@ namespace AT_NAME
                 base_mtrl.type = aten::MaterialType::ToonSpecular;
             }
 
-            const auto pdf = material::samplePDF(&base_mtrl, normal, wi, sampled_light->dir, u, v);
+            const auto pdf = material::samplePDF(ctxt, &base_mtrl, normal, wi, sampled_light->dir, u, v);
 
             // Compute radiance.
             // The target light is singular, and then MIS in ComputeRadianceNEE is always 1.0.
             auto res = ComputeRadianceNEE(
+                ctxt,
                 aten::vec3(1.0F),
                 wi, normal,
                 base_mtrl, 0.0F, u, v,
@@ -330,7 +332,7 @@ namespace AT_NAME
                 const auto y = xyz.y;
 
                 // To avoid too dark, compare with the minimum weight.
-                const auto weight = aten::max(y, W_MIN);
+                const auto weight = aten::clamp(y, W_MIN, 1.0F);
 
                 const auto y_min = aten::max(0.0F, aten::min(param.toon.stylized_y_min, param.toon.stylized_y_max));
                 const auto y_max = aten::max(param.toon.stylized_y_min, param.toon.stylized_y_max);
@@ -347,7 +349,7 @@ namespace AT_NAME
                     remap_v = (y - y_min) / (y_max - y_min);
                 }
 
-                const auto remap = AT_NAME::sampleTexture(param.toon.remap_texture, 0.5F, remap_v, aten::vec4(radiance));
+                const auto remap = AT_NAME::sampleTexture(ctxt, param.toon.remap_texture, 0.5F, remap_v, aten::vec4(radiance));
 
                 toon_term = weight * remap * pdf;
             }

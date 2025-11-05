@@ -35,9 +35,7 @@ namespace aten
             scene* scene,
             Camera* camera)
         {
-            context::PinContext(&ctxt);
             OnRender(ctxt, dst, scene, camera);
-            context::removePinnedContext();
             frame_count_++;
         }
 

@@ -90,11 +90,12 @@ namespace pt {
             rec.mtrlid,
             rec.isVoxel);
 
-        auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, shMtrls[threadIdx.x].baseColor, bounce);
+        auto albedo = AT_NAME::sampleTexture(ctxt, shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, shMtrls[threadIdx.x].baseColor, bounce);
 
         // Apply normal map.
         int32_t normalMap = shMtrls[threadIdx.x].normalMap;
         auto pre_sampled_r = AT_NAME::material::applyNormal(
+            ctxt,
             &shMtrls[threadIdx.x],
             normalMap,
             orienting_normal, orienting_normal,
@@ -131,6 +132,7 @@ namespace pt {
 
         // Check transparency or translucency.
         auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
+            ctxt,
             shMtrls[threadIdx.x],
             rec.u, rec.v, rec.p,
             orienting_normal,
@@ -172,6 +174,7 @@ namespace pt {
 
         AT_NAME::material::sampleMaterial(
             &sampling,
+            ctxt,
             paths.throughput[idx].throughput,
             &shMtrls[threadIdx.x],
             orienting_normal,

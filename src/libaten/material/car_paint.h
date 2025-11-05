@@ -64,6 +64,7 @@ namespace AT_NAME
             float pre_sampled_r);
 
         static AT_DEVICE_API aten::vec3 bsdf(
+            const AT_NAME::context& ctxt,
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -82,6 +83,7 @@ namespace AT_NAME
 
         static AT_DEVICE_API void sample(
             AT_NAME::MaterialSampling* result,
+            const AT_NAME::context& ctxt,
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,

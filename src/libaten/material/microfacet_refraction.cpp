@@ -45,6 +45,7 @@ namespace AT_NAME
 
     AT_DEVICE_API void MicrofacetRefraction::sample(
         AT_NAME::MaterialSampling& result,
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter& param,
         const aten::vec3& n,
         const aten::vec3& wi,
@@ -52,6 +53,7 @@ namespace AT_NAME
         const float u, const float v)
     {
         auto roughness = AT_NAME::sampleTexture(
+            ctxt,
             param.roughnessMap,
             u, v,
             aten::vec4(param.standard.roughness));

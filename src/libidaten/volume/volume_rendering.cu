@@ -161,11 +161,12 @@ namespace vpt
                 rays[idx] = aten::ray(rec.p, ray.dir, ray_base_nml);
             }
             else {
-                auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, shMtrls[threadIdx.x].baseColor, bounce);
+                auto albedo = AT_NAME::sampleTexture(ctxt, shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, shMtrls[threadIdx.x].baseColor, bounce);
 
                 // Apply normal map.
                 int32_t normalMap = shMtrls[threadIdx.x].normalMap;
                 auto pre_sampled_r = AT_NAME::material::applyNormal(
+                    ctxt,
                     &shMtrls[threadIdx.x],
                     normalMap,
                     orienting_normal, orienting_normal,
@@ -198,6 +199,7 @@ namespace vpt
 
                     if (is_visilbe_to_light) {
                         auto radiance = AT_NAME::ComputeRadianceNEE(
+                            ctxt,
                             paths.throughput[idx].throughput,
                             ray.dir, orienting_normal,
                             shMtrls[threadIdx.x], pre_sampled_r, rec.u, rec.v,
@@ -214,6 +216,7 @@ namespace vpt
 
                 AT_NAME::material::sampleMaterial(
                     &sampling,
+                    ctxt,
                     paths.throughput[idx].throughput,
                     &shMtrls[threadIdx.x],
                     orienting_normal,

@@ -40,6 +40,7 @@ namespace AT_NAME
     }
 
     AT_DEVICE_API aten::vec3 MicrofacetVelvet::bsdf(
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -47,6 +48,7 @@ namespace AT_NAME
         float u, float v)
     {
         auto roughness = AT_NAME::sampleTexture(
+            ctxt,
             param->roughnessMap,
             u, v,
             aten::vec4(param->standard.roughness));
@@ -196,6 +198,7 @@ namespace AT_NAME
 
     AT_DEVICE_API void MicrofacetVelvet::sample(
         AT_NAME::MaterialSampling* result,
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -209,6 +212,7 @@ namespace AT_NAME
         result->pdf = ComputePDF(normal, result->dir);
 
         const auto roughness = AT_NAME::sampleTexture(
+            ctxt,
             param->roughnessMap,
             u, v,
             aten::vec4(param->standard.roughness));

@@ -3,8 +3,9 @@
 #include <vector>
 
 #include "light/light.h"
-#include "misc/color.h"
+#include "material/diffuse.h"
 #include "material/sample_texture.h"
+#include "misc/color.h"
 #include "renderer/background.h"
 #include "scene/host_scene_context.h"
 
@@ -81,6 +82,7 @@ namespace AT_NAME {
             aten::sampler* sampler,
             uint32_t lod)
         {
+#if 0
             const auto& n = nml;
 
             aten::vec3 t, b;
@@ -88,13 +90,6 @@ namespace AT_NAME {
 
             const float r1 = sampler->nextSample();
             const float r2 = sampler->nextSample();
-
-            // TODO
-            float scene_radius = 10000.0F;
-            const auto& scene_bbox = ctxt.GetSceneBoundingBox();
-            if (scene_bbox.IsValid()) {
-                scene_radius = scene_bbox.ComputeDistanceToCoverBoundingSphere(aten::Deg2Rad(30.0F));
-            }
 
             const auto costheta = aten::sqrt(1 - r1);
             const auto sintheta = aten::sqrt(r1);
@@ -104,10 +99,22 @@ namespace AT_NAME {
             const auto sinphi = aten::sin(phi);
 
             result.dir = normalize(t * sintheta * cosphi + b * sintheta * sinphi + n * costheta);
+#else
+            const float r1 = sampler->nextSample();
+            const float r2 = sampler->nextSample();
+            result.dir = Diffuse::SampleDirection(nml, r1, r2);
+#endif
 
             const auto uv = AT_NAME::Background::ConvertDirectionToUV(result.dir);
             const auto u = uv.x;
             const auto v = uv.y;
+
+            // TODO
+            float scene_radius = 10000.0F;
+            const auto& scene_bbox = ctxt.GetSceneBoundingBox();
+            if (scene_bbox.IsValid()) {
+                scene_radius = scene_bbox.ComputeDistanceToCoverBoundingSphere(aten::Deg2Rad(30.0F));
+            }
 
             result.pos = org + scene_radius * result.dir;
 

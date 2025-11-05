@@ -82,6 +82,8 @@ namespace AT_NAME {
             uint32_t will_update_depth : 1;
             uint32_t does_use_throughput_depth : 1;
             uint32_t is_accumulating_alpha_blending : 1;
+            uint32_t has_applied_alpha_blending_in_nee : 1;
+            uint32_t has_applied_alpha_blending_next_bounce : 1;
         };
 
         int32_t last_hit_mtrl_idx{ -1 };

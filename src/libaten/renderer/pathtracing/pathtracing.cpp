@@ -164,11 +164,11 @@ namespace aten
 
         // Explicit conection to light.
         AT_NAME::FillShadowRay(
+            idx,
             shadow_ray,
             ctxt,
             bounce,
-            paths.sampler[idx],
-            paths.throughput[idx],
+            paths,
             mtrl,
             ray,
             rec.p, orienting_normal,

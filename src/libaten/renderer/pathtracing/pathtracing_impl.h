@@ -44,6 +44,8 @@ namespace AT_NAME
         attrib.will_update_depth = true;
         attrib.does_use_throughput_depth = false;
         attrib.is_accumulating_alpha_blending = true;
+        attrib.has_applied_alpha_blending_in_nee = false;
+        attrib.has_applied_alpha_blending_next_bounce = false;
         attrib.last_hit_mtrl_idx = -1;
     }
 
@@ -287,11 +289,11 @@ namespace AT_NAME
     }
 
     inline AT_DEVICE_API void FillShadowRay(
+        const int32_t idx,
         AT_NAME::ShadowRay& shadow_ray,
         const AT_NAME::context& ctxt,
         int32_t bounce,
-        aten::sampler& sampler,
-        const AT_NAME::PathThroughput& throughput,
+        const AT_NAME::Path& paths,
         const aten::MaterialParameter& mtrl,
         const aten::ray& ray,
         const aten::vec3& hit_pos,
@@ -300,6 +302,8 @@ namespace AT_NAME
         const aten::vec4& external_albedo,
         float pre_sampled_r = float(0))
     {
+        aten::sampler& sampler = paths.sampler[idx];
+
         shadow_ray.isActive = false;
 
         aten::LightSampleResult sampleres;
@@ -328,15 +332,15 @@ namespace AT_NAME
         shadow_ray.distToLight = distToLight;
         shadow_ray.lightcontrib = aten::vec3(0);
 
-        auto radiance = ComputeRadianceNEE(
-            ctxt,
-            throughput.throughput,
+        auto radiance = ComputeRadianceNEEWithAlphaBlending(
+            idx,
+            ctxt, paths,
             ray.dir, hit_nml,
             mtrl, pre_sampled_r, hit_u, hit_v,
             lightSelectPdf, sampleres);
         if (radiance.has_value()) {
             const auto& r = radiance.value();
-            shadow_ray.lightcontrib = throughput.throughput * r * static_cast<aten::vec3>(external_albedo);
+            shadow_ray.lightcontrib = paths.throughput[idx].throughput * r * static_cast<aten::vec3>(external_albedo);
             isShadowRayActive = true;
         }
 
@@ -447,11 +451,10 @@ namespace AT_NAME
         }
 
         if (is_hit_to_light) {
-            aten::vec3 contrib{
-                paths.throughput[idx].transmission * shadow_ray.lightcontrib + paths.throughput[idx].alpha_blend_radiance_on_the_way
-            };
-            _detail::AddVec3(paths.contrib[idx].contrib, contrib);
+            _detail::AddVec3(paths.contrib[idx].contrib, shadow_ray.lightcontrib);
         }
+
+        paths.attrib[idx].has_applied_alpha_blending_in_nee = true;
 
         return is_hit_to_light;
     }
@@ -667,7 +670,10 @@ namespace AT_NAME
 
         if (pdfb > 0 && c > 0) {
             aten::vec3 contrib{ albedo * bsdf * c / pdfb };
-            contrib = paths.throughput[idx].transmission * contrib + paths.throughput[idx].alpha_blend_radiance_on_the_way;
+            if (!paths.attrib[idx].has_applied_alpha_blending_next_bounce) {
+                contrib = paths.throughput[idx].transmission * contrib + paths.throughput[idx].alpha_blend_radiance_on_the_way;
+                paths.attrib[idx].has_applied_alpha_blending_next_bounce = true;
+            }
 
             paths.throughput[idx].throughput *= contrib;
             paths.throughput[idx].throughput /= russian_prob;
@@ -763,11 +769,11 @@ namespace AT_NAME
 
         // Explicit conection to light.
         AT_NAME::FillShadowRay(
+            idx,
             shadow_ray,
             ctxt,
             bounce,
-            paths.sampler[idx],
-            paths.throughput[idx],
+            paths,
             mtrl,
             ray,
             rec.p, orienting_normal,

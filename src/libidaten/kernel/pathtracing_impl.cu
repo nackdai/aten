@@ -151,11 +151,11 @@ namespace pt {
 
         // Explicit conection to light.
         AT_NAME::FillShadowRay(
+            idx,
             shShadowRays[threadIdx.x],
             ctxt,
             bounce,
-            paths.sampler[idx],
-            paths.throughput[idx],
+            paths,
             shMtrls[threadIdx.x],
             ray,
             rec.p, orienting_normal,

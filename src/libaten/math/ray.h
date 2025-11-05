@@ -20,6 +20,11 @@ namespace aten
 
             //AT_ASSERT(dot(dir, normal) >= float(0.0));
 
+            org = Offset(o, normal);
+        }
+
+        static AT_HOST_DEVICE_API vec3 Offset(const vec3& o, const vec3& normal)
+        {
             constexpr float origin = float(1.0) / float(32.0);
             constexpr float float_scale = float(1.0) / float(65536.0);
             constexpr float int_scale = float(256.0);
@@ -62,7 +67,7 @@ namespace aten
                 intAsFloat(floatAsInt(o.y) + (o.y < float(0) ? -of_iy : of_iy)),
                 intAsFloat(floatAsInt(o.z) + (o.z < float(0) ? -of_iz : of_iz)));
 
-            org = vec3(
+            return vec3(
                 aten::abs(o.x) < origin ? o.x + float_scale * normal.x : p_i.x,
                 aten::abs(o.y) < origin ? o.y + float_scale * normal.y : p_i.y,
                 aten::abs(o.z) < origin ? o.z + float_scale * normal.z : p_i.z);

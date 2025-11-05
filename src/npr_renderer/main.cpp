@@ -20,6 +20,7 @@
 //#pragma optimize( "", off)
 
 #define ENABLE_ENVMAP
+#define TAKE_SC_EVERY_FRAME false
 #define DEVICE_RENDERING
 
 #ifdef DEVICE_RENDERING
@@ -60,8 +61,8 @@ public:
         float& fov)
     {
 #ifdef DEVICE_RENDERING
-        pos = aten::vec3(0.f, 1.0f, 1.5f);
-        at = aten::vec3(0.f, 1.0f, 0.f);
+        pos = aten::vec3(0.f, 1.3f, 0.5f);
+        at = aten::vec3(0.f, 1.3f, 0.f);
 #else
         pos = aten::vec3(0.f, 1.3f, 0.5f);
         at = aten::vec3(0.f, 1.3f, 0.f);
@@ -207,16 +208,21 @@ public:
         timer.begin();
 
 #ifdef DEVICE_RENDERING
-        renderer_.render(
-            WIDTH, HEIGHT,
-            max_samples_,
-            max_bounce_);
+        if (is_view_texture_) {
+            renderer_.viewTextures(view_texture_idx_, WIDTH, HEIGHT);
+        }
+        else {
+            renderer_.render(
+                WIDTH, HEIGHT,
+                max_samples_,
+                max_bounce_);
+        }
 #else
         aten::Destination dst;
         {
             dst.width = WIDTH;
             dst.height = HEIGHT;
-            dst.maxDepth = 5;
+            dst.maxDepth = 6;
             dst.russianRouletteDepth = 3;
             dst.sample = 1;
             dst.buffer = &buffer_;
@@ -257,7 +263,7 @@ public:
 
             visualizer_->takeScreenshot(screen_shot_file_name);
 
-            will_take_screen_shot_ = false;
+            will_take_screen_shot_ = TAKE_SC_EVERY_FRAME;
             screen_shot_count_++;
 
             AT_PRINTF("Take Screenshot[%s]\n", screen_shot_file_name.c_str());
@@ -278,6 +284,23 @@ public:
             {
                 renderer_.reset();
             }
+
+#ifdef DEVICE_RENDERING
+            auto enable_progressive = renderer_.IsEnableProgressive();
+            if (ImGui::Checkbox("Progressive", &enable_progressive))
+            {
+                renderer_.SetEnableProgressive(enable_progressive);
+            }
+
+            auto is_view_texture = is_view_texture_;
+            if (ImGui::Checkbox("View texture", &is_view_texture)) {
+                is_view_texture_ = is_view_texture;
+            }
+            if (is_view_texture_) {
+                const auto tex_num = ctxt_.GetTextureNum();
+                ImGui::SliderInt("View texture", &view_texture_idx_, 0, tex_num - 1);
+            }
+#endif
 
             auto cam = camera_.param();
             ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
@@ -444,19 +467,22 @@ private:
     { false };
 #endif
 
-    bool will_take_screen_shot_{ false };
+    bool will_take_screen_shot_{ TAKE_SC_EVERY_FRAME };
     int32_t screen_shot_count_{ 0 };
 
     int32_t max_samples_{ 1 };
-    int32_t max_bounce_{ 5 };
+    int32_t max_bounce_{ 6 };
     bool is_show_aabb_{ false };
 
     bool is_mouse_l_btn_down_{ false };
     bool is_mouse_r_btn_down_{ false };
     int32_t prev_mouse_pos_x_{ 0 };
     int32_t prev_mouse_pos_y_{ 0 };
+
+    bool is_view_texture_{ false };
+    int32_t view_texture_idx_{ 0 };
 };
-    
+
 int32_t main()
 {
     aten::timer::init();

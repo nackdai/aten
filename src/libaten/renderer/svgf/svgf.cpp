@@ -126,7 +126,7 @@ namespace aten
         // それにより、フィルタがおもったようにかからずフィルタの品質が下がってしまう問題が発生する.
         if (bounce == 0) {
             // texture color
-            auto texcolor = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
+            auto texcolor = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
             AT_NAME::FillBasicAOVs(
                 aov_normal_depth[idx], orienting_normal, rec, mtx_W2C,
@@ -142,7 +142,7 @@ namespace aten
             const auto& last_hit_mtrl = ctxt.GetMaterial(paths.attrib[idx].last_hit_mtrl_idx);
             if (last_hit_mtrl.type == aten::MaterialType::Specular) {
                 // texture color.
-                auto texcolor = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
+                auto texcolor = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
                 // TODO
                 // No good idea to compute reflected depth.
@@ -156,7 +156,7 @@ namespace aten
             }
         }
 
-        auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
+        auto albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
 
         auto& shadow_ray = shadow_rays[idx];
         shadow_ray.isActive = false;
@@ -180,6 +180,7 @@ namespace aten
 
         // Apply normal map.
         auto pre_sampled_r = material::applyNormal(
+            ctxt,
             &mtrl,
             mtrl.normalMap,
             orienting_normal, orienting_normal,
@@ -188,6 +189,7 @@ namespace aten
 
         // Check transparency or translucency.
         auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
+            ctxt,
             mtrl,
             rec.u, rec.v, rec.p,
             orienting_normal,
@@ -220,6 +222,7 @@ namespace aten
         aten::MaterialSampling sampling;
         material::sampleMaterial(
             &sampling,
+            ctxt,
             paths.throughput[idx].throughput,
             &mtrl,
             orienting_normal,

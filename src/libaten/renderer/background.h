@@ -75,7 +75,7 @@ namespace AT_NAME
             // In GPU, sampleTexture requires texture id of CUDA. So, arguments is different.
             aten::vec4 result{ tex2D<float4>(ctxt.textures[bg_resource.envmap_tex_idx], u, v) };
 #else
-            const auto result = AT_NAME::sampleTexture(bg_resource.envmap_tex_idx, u, v, aten::vec4(1));
+            const auto result = AT_NAME::sampleTexture(ctxt, bg_resource.envmap_tex_idx, u, v, aten::vec4(1));
 #endif
             return result * bg_resource.multiplyer;
         }

@@ -29,6 +29,7 @@ namespace restir {
          * @return Radiance.
          */
         inline AT_DEVICE_API auto ComputeRadiance(
+            const AT_NAME::context& ctxt,
             const aten::LightSampleResult& lightsample,
             const aten::LightAttribute& light_attrib,
             const aten::vec3& normal,
@@ -45,6 +46,7 @@ namespace restir {
             const auto dist2 = aten::sqr(lightsample.dist_to_light);
 
             const auto mtrl_eval_result = AT_NAME::material::sampleBSDF(
+                ctxt,
                 aten::vec3(1.0F),
                 &mtrl, normal,
                 ray_dir, dirToLight,
@@ -75,6 +77,7 @@ namespace restir {
          * @return Target PDF.
          */
         inline AT_DEVICE_API float ComputeTargetPDF(
+            const AT_NAME::context& ctxt,
             const aten::LightSampleResult& lightsample,
             const aten::LightAttribute& light_attrib,
             const aten::vec3& normal,
@@ -85,12 +88,13 @@ namespace restir {
         {
             aten::vec3 dirToLight = lightsample.dir;
 
-            auto pdf = AT_NAME::material::samplePDF(&mtrl, normal, ray_dir, dirToLight, u, v);
+            auto pdf = AT_NAME::material::samplePDF(ctxt, &mtrl, normal, ray_dir, dirToLight, u, v);
             if (pdf == 0.0f) {
                 return 0.0f;
             }
 
             auto energy = ComputeRadiance(
+                ctxt,
                 lightsample, light_attrib,
                 normal, ray_dir, mtrl,
                 u, v,
@@ -164,6 +168,7 @@ namespace restir {
 
             // p_hat
             auto target_pdf = _detail::ComputeTargetPDF(
+                ctxt,
                 lightsample, light.attrib,
                 normal, ray_dir,
                 mtrl,
@@ -383,6 +388,7 @@ namespace restir {
                     // Compute target pdf at the center pixel with the output sample in neighor's reservoir.
                     // In this case, "the output sample in neighor's reservoir" mean the sampled light of the neighor pixel.
                     const auto target_pdf = _detail::ComputeTargetPDF(
+                        ctxt,
                         lightsample,
                         light.attrib,
                         self_info.nml, self_info.wi,
@@ -520,6 +526,7 @@ namespace restir {
                         // Compute target pdf at the center pixel with the output sample in neighor's reservoir.
                         // In this case, "the output sample in neighor's reservoir" mean the sampled light of the neighor pixel.
                         const auto target_pdf = _detail::ComputeTargetPDF(
+                            ctxt,
                             lightsample,
                             light.attrib,
                             self_info.nml, self_info.wi,
@@ -592,6 +599,7 @@ namespace restir {
             const auto cosLight = aten::abs(dot(nml_on_light, -point_to_light));
 
             const auto le = _detail::ComputeRadiance(
+                ctxt,
                 reservoir.light_sample_, light.attrib,
                 orienting_normal, restir_info.wi,
                 mtrl,

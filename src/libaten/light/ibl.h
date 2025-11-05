@@ -134,7 +134,7 @@ namespace AT_NAME {
                 param.envmapidx;
 #endif
 
-            const auto luminance = AT_NAME::sampleTexture(envmapidx, u, v, aten::vec4(1), lod);
+            const auto luminance = AT_NAME::sampleTexture(ctxt, envmapidx, u, v, aten::vec4(1), lod);
 
             result.light_color = param.scale * luminance;
         }

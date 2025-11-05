@@ -117,7 +117,7 @@ namespace aten
             ctxt,
             rec.mtrlid, rec.isVoxel);
 
-        auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, mtrl.baseColor, bounce);
+        auto albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, rec.u, rec.v, mtrl.baseColor, bounce);
 
         auto& shadow_ray = shadow_rays[idx];
         shadow_ray.isActive = false;
@@ -141,6 +141,7 @@ namespace aten
 
         // Apply normal map.
         auto pre_sampled_r = material::applyNormal(
+            ctxt,
             &mtrl,
             mtrl.normalMap,
             orienting_normal, orienting_normal,
@@ -149,6 +150,7 @@ namespace aten
 
         // Check transparency or translucency.
         auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
+            ctxt,
             mtrl,
             rec.u, rec.v, rec.p,
             orienting_normal,
@@ -181,6 +183,7 @@ namespace aten
         aten::MaterialSampling sampling;
         material::sampleMaterial(
             &sampling,
+            ctxt,
             paths.throughput[idx].throughput,
             &mtrl,
             orienting_normal,

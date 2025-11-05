@@ -22,15 +22,17 @@
 namespace AT_NAME
 {
     inline AT_DEVICE_API aten::vec4 material::sampleAlbedoMap(
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* mtrl,
         float u, float v,
         uint32_t lod/*= 0*/)
     {
-        return sampleTexture(mtrl->albedoMap, u, v, mtrl->baseColor, lod);
+        return sampleTexture(ctxt, mtrl->albedoMap, u, v, mtrl->baseColor, lod);
     }
 
     inline AT_DEVICE_API void material::sampleMaterial(
         AT_NAME::MaterialSampling* result,
+        const AT_NAME::context& ctxt,
         const aten::vec3& throughput,
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
@@ -56,7 +58,7 @@ namespace AT_NAME
             AT_NAME::Diffuse::sample(result, mtrl, normal, wi, sampler);
             break;
         case aten::MaterialType::OrneNayar:
-            AT_NAME::OrenNayar::sample(result, mtrl, normal, wi, sampler, u, v);
+            AT_NAME::OrenNayar::sample(result, ctxt, mtrl, normal, wi, sampler, u, v);
             break;
         case aten::MaterialType::Specular:
             AT_NAME::specular::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v);
@@ -65,22 +67,22 @@ namespace AT_NAME
             AT_NAME::refraction::sample(result, mtrl, normal, wi, orgnormal, sampler);
             break;
         case aten::MaterialType::GGX:
-            AT_NAME::MicrofacetGGX::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v);
+            AT_NAME::MicrofacetGGX::sample(result, ctxt, mtrl, normal, wi, orgnormal, sampler, u, v);
             break;
         case aten::MaterialType::Beckman:
-            AT_NAME::MicrofacetBeckman::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v);
+            AT_NAME::MicrofacetBeckman::sample(result, ctxt, mtrl, normal, wi, orgnormal, sampler, u, v);
             break;
         case aten::MaterialType::Velvet:
-            AT_NAME::MicrofacetVelvet::sample(result, mtrl, normal, wi, sampler, u, v);
+            AT_NAME::MicrofacetVelvet::sample(result, ctxt, mtrl, normal, wi, sampler, u, v);
             break;
         case aten::MaterialType::Microfacet_Refraction:
-            AT_NAME::MicrofacetRefraction::sample(*result, *mtrl, normal, wi, sampler, u, v);
+            AT_NAME::MicrofacetRefraction::sample(*result, ctxt, *mtrl, normal, wi, sampler, u, v);
             break;
         case aten::MaterialType::Retroreflective:
             AT_NAME::Retroreflective::sample(*result, *mtrl, normal, wi, sampler, u, v);
             break;
         case aten::MaterialType::CarPaint:
-            AT_NAME::CarPaint::sample(result, mtrl, normal, wi, orgnormal, sampler, pre_sampled_r, u, v, is_light_path);
+            AT_NAME::CarPaint::sample(result, ctxt, mtrl, normal, wi, orgnormal, sampler, pre_sampled_r, u, v, is_light_path);
             break;
         case aten::MaterialType::Disney:
             AT_NAME::DisneyBRDF::sample(*result, *mtrl, normal, wi, sampler, u, v);
@@ -93,6 +95,7 @@ namespace AT_NAME
     }
 
     inline AT_DEVICE_API float material::samplePDF(
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -118,10 +121,10 @@ namespace AT_NAME
             pdf = AT_NAME::refraction::pdf(mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::GGX:
-            pdf = AT_NAME::MicrofacetGGX::pdf(mtrl, normal, wi, wo, u, v);
+            pdf = AT_NAME::MicrofacetGGX::pdf(ctxt, mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::Beckman:
-            pdf = AT_NAME::MicrofacetBeckman::pdf(mtrl, normal, wi, wo, u, v);
+            pdf = AT_NAME::MicrofacetBeckman::pdf(ctxt, mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::Velvet:
             pdf = AT_NAME::MicrofacetVelvet::pdf(mtrl, normal, wi, wo, u, v);
@@ -151,6 +154,7 @@ namespace AT_NAME
     }
 
     inline AT_DEVICE_API AT_NAME::MaterialSampling material::sampleBSDF(
+        const AT_NAME::context& ctxt,
         const aten::vec3& throughput,
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
@@ -169,7 +173,7 @@ namespace AT_NAME
             result.bsdf = AT_NAME::Diffuse::bsdf(mtrl);
             break;
         case aten::MaterialType::OrneNayar:
-            result.bsdf = AT_NAME::OrenNayar::bsdf(mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::OrenNayar::bsdf(ctxt, mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::Specular:
             result.bsdf = AT_NAME::specular::bsdf(mtrl, normal, wi, wo, u, v);
@@ -178,13 +182,13 @@ namespace AT_NAME
             result.bsdf = AT_NAME::refraction::bsdf(mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::GGX:
-            result.bsdf = AT_NAME::MicrofacetGGX::bsdf(mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::MicrofacetGGX::bsdf(ctxt, mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::Beckman:
-            result.bsdf = AT_NAME::MicrofacetBeckman::bsdf(mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::MicrofacetBeckman::bsdf(ctxt, mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::Velvet:
-            result.bsdf = AT_NAME::MicrofacetVelvet::bsdf(mtrl, normal, wi, wo, u, v);
+            result.bsdf = AT_NAME::MicrofacetVelvet::bsdf(ctxt, mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::Microfacet_Refraction:
             result.bsdf = AT_NAME::MicrofacetRefraction::bsdf(*mtrl, normal, wi, wo, u, v);
@@ -193,7 +197,7 @@ namespace AT_NAME
             result = AT_NAME::Retroreflective::bsdf(*mtrl, normal, wi, wo, u, v);
             break;
         case aten::MaterialType::CarPaint:
-            result.bsdf = AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, pre_sampled_r);
+            result.bsdf = AT_NAME::CarPaint::bsdf(ctxt, mtrl, normal, wi, wo, u, v, pre_sampled_r);
             break;
         case aten::MaterialType::Disney:
             result = AT_NAME::DisneyBRDF::bsdf(*mtrl, normal, wi, wo, u, v);
@@ -211,6 +215,7 @@ namespace AT_NAME
     }
 
     inline AT_DEVICE_API float material::applyNormal(
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* mtrl,
         const int32_t normalMapIdx,
         const aten::vec3& orgNml,
@@ -228,7 +233,7 @@ namespace AT_NAME
                 sampler);
         }
         else {
-            AT_NAME::applyNormalMap(normalMapIdx, orgNml, newNml, u, v);
+            AT_NAME::applyNormalMap(ctxt, normalMapIdx, orgNml, newNml, u, v);
             return float(-1);
         }
     }
@@ -269,9 +274,9 @@ namespace AT_NAME
                     std::is_integral_v<std::remove_pointer_t<decltype(CONTEXT::textures)>>,
                     "context::textures has to be integral");
                 if constexpr (std::is_integral_v<std::remove_pointer_t<decltype(CONTEXT::textures)>>) {
-                    dst_mtrl.albedoMap = static_cast<int32_t>(dst_mtrl.albedoMap >= 0 ? ctxt.textures[dst_mtrl.albedoMap] : -1);
+                    /*dst_mtrl.albedoMap = static_cast<int32_t>(dst_mtrl.albedoMap >= 0 ? ctxt.textures[dst_mtrl.albedoMap] : -1);
                     dst_mtrl.normalMap = static_cast<int32_t>(dst_mtrl.normalMap >= 0 ? ctxt.textures[dst_mtrl.normalMap] : -1);
-                    dst_mtrl.roughnessMap = static_cast<int32_t>(dst_mtrl.roughnessMap >= 0 ? ctxt.textures[dst_mtrl.roughnessMap] : -1);
+                    dst_mtrl.roughnessMap = static_cast<int32_t>(dst_mtrl.roughnessMap >= 0 ? ctxt.textures[dst_mtrl.roughnessMap] : -1);*/
 
                     dst_mtrl.toon.remap_texture = static_cast<int32_t>(dst_mtrl.toon.remap_texture >= 0 ? ctxt.textures[dst_mtrl.toon.remap_texture] : -1);
                 }

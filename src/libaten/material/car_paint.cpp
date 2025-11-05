@@ -108,6 +108,7 @@ namespace AT_NAME
     }
 
     AT_DEVICE_API aten::vec3 CarPaint::bsdf(
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -115,7 +116,7 @@ namespace AT_NAME
         float u, float v,
         float pre_sampled_r)
     {
-        const auto albedo = AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(float(1)));
+        const auto albedo = AT_NAME::sampleTexture(ctxt, param->albedoMap, u, v, aten::vec4(float(1)));
         return bsdf(param, normal, wi, wo, u, v, albedo, pre_sampled_r);
     }
 
@@ -177,6 +178,7 @@ namespace AT_NAME
 
     AT_DEVICE_API void CarPaint::sample(
         AT_NAME::MaterialSampling* result,
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -188,7 +190,7 @@ namespace AT_NAME
     {
         result->dir = sampleDirection(param, normal, wi, u, v, sampler, pre_sampled_r);
         result->pdf = pdf(param, normal, wi, result->dir, u, v);
-        result->bsdf = bsdf(param, normal, wi, result->dir, u, v, pre_sampled_r);
+        result->bsdf = bsdf(ctxt, param, normal, wi, result->dir, u, v, pre_sampled_r);
     }
 
     AT_DEVICE_API void CarPaint::sample(

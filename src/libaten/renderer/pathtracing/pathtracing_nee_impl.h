@@ -18,6 +18,7 @@ namespace AT_NAME
     }
 
     inline AT_DEVICE_API std::optional<aten::vec3> ComputeRadianceNEE(
+        const AT_NAME::context& ctxt,
         const aten::vec3& throughput,
         const aten::vec3& wi,
         const aten::vec3& surface_nml,
@@ -29,8 +30,8 @@ namespace AT_NAME
     {
         auto cosShadow = dot(surface_nml, light_sample.dir);
 
-        float path_pdf{ AT_NAME::material::samplePDF(&surface_mtrl, surface_nml, wi, light_sample.dir, hit_u, hit_v) };
-        auto mtrl_eval_result{ AT_NAME::material::sampleBSDF(throughput, &surface_mtrl, surface_nml, wi, light_sample.dir, hit_u, hit_v, pre_sampled_random) };
+        float path_pdf{ AT_NAME::material::samplePDF(ctxt, &surface_mtrl, surface_nml, wi, light_sample.dir, hit_u, hit_v) };
+        auto mtrl_eval_result{ AT_NAME::material::sampleBSDF(ctxt, throughput, &surface_mtrl, surface_nml, wi, light_sample.dir, hit_u, hit_v, pre_sampled_random) };
 
         if (mtrl_eval_result.pdf > 0) {
             path_pdf = mtrl_eval_result.pdf;

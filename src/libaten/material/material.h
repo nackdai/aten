@@ -438,10 +438,12 @@ namespace AT_NAME
         static bool isValidMaterialType(aten::MaterialType type);
 
         static AT_DEVICE_API bool isTranslucentByAlpha(
+            const AT_NAME::context& ctxt,
             const aten::MaterialParameter& param,
             float u, float v);
 
         static AT_DEVICE_API float getTranslucentAlpha(
+            const AT_NAME::context& ctxt,
             const aten::MaterialParameter& param,
             float u, float v);
 
@@ -591,12 +593,14 @@ namespace AT_NAME
         }
 
         static AT_DEVICE_API aten::vec4 sampleAlbedoMap(
+            const AT_NAME::context& ctxt,
             const aten::MaterialParameter* mtrl,
             float u, float v,
             uint32_t lod = 0);
 
         static AT_DEVICE_API void sampleMaterial(
             AT_NAME::MaterialSampling* result,
+            const AT_NAME::context& ctxt,
             const aten::vec3& throughput,
             const aten::MaterialParameter* mtrl,
             const aten::vec3& normal,
@@ -612,6 +616,7 @@ namespace AT_NAME
 #endif
 
         static AT_DEVICE_API float samplePDF(
+            const AT_NAME::context& ctxt,
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -619,6 +624,7 @@ namespace AT_NAME
             float u, float v);
 
         static AT_DEVICE_API AT_NAME::MaterialSampling sampleBSDF(
+            const AT_NAME::context& ctxt,
             const aten::vec3& throughput,
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
@@ -628,6 +634,7 @@ namespace AT_NAME
             float pre_sampled_r);
 
         static AT_DEVICE_API float applyNormal(
+            const AT_NAME::context& ctxt,
             const aten::MaterialParameter* mtrl,
             const int32_t normalMapIdx,
             const aten::vec3& orgNml,

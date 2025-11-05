@@ -97,7 +97,7 @@ namespace svgf_kernel {
         // それにより、フィルタがおもったようにかからずフィルタの品質が下がってしまう問題が発生する.
         if (bounce == 0) {
             // texture color
-            auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
+            auto texcolor = AT_NAME::sampleTexture(ctxt, shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
             AT_NAME::FillBasicAOVs(
                 aovNormalDepth[idx], orienting_normal, rec, mtx_W2C,
@@ -113,7 +113,7 @@ namespace svgf_kernel {
             const auto& last_hit_mtrl = ctxt.GetMaterial(paths.attrib[idx].last_hit_mtrl_idx);
             if (last_hit_mtrl.type == aten::MaterialType::Specular) {
                 // texture color.
-                auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
+                auto texcolor = AT_NAME::sampleTexture(ctxt, shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
                 // TODO
                 // No good idea to compute reflected depth.
@@ -147,6 +147,7 @@ namespace svgf_kernel {
         // Apply normal map.
         int32_t normalMap = shMtrls[threadIdx.x].normalMap;
         auto pre_sample_r = AT_NAME::material::applyNormal(
+            ctxt,
             &shMtrls[threadIdx.x],
             normalMap,
             orienting_normal, orienting_normal,
@@ -184,6 +185,7 @@ namespace svgf_kernel {
 
         AT_NAME::material::sampleMaterial(
             &sampling,
+            ctxt,
             paths.throughput[idx].throughput,
             &shMtrls[threadIdx.x],
             orienting_normal,

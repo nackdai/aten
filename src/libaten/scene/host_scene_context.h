@@ -482,23 +482,6 @@ namespace aten
          */
         void InitAllTextureAsGLTexture();
 
-
-        static void PinContext(const context* ctxt)
-        {
-            s_pinnedCtxt = ctxt;
-        }
-
-        static void removePinnedContext()
-        {
-            s_pinnedCtxt = nullptr;
-        }
-
-        static const context* getPinnedContext()
-        {
-            AT_ASSERT(s_pinnedCtxt);
-            return s_pinnedCtxt;
-        }
-
         /**
          * @brief Create an empty matrix and then add it to the scene context.
          * @return Tuple to store the index to the created matrix and the created matrix instance.

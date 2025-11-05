@@ -12,6 +12,7 @@ namespace AT_NAME
     // http://qiita.com/_Pheema_/items/f1ffb2e38cc766e6e668
 
     AT_DEVICE_API float MicrofacetGGX::pdf(
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* param,
         const aten::vec3& n,
         const aten::vec3& wi,
@@ -19,6 +20,7 @@ namespace AT_NAME
         float u, float v)
     {
         auto roughness = AT_NAME::sampleTexture(
+            ctxt,
             param->roughnessMap,
             u, v,
             aten::vec4(param->standard.roughness));
@@ -28,6 +30,7 @@ namespace AT_NAME
     }
 
     AT_DEVICE_API aten::vec3 MicrofacetGGX::sampleDirection(
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -35,6 +38,7 @@ namespace AT_NAME
         aten::sampler* sampler)
     {
         auto roughness = AT_NAME::sampleTexture(
+            ctxt,
             param->roughnessMap,
             u, v,
             aten::vec4(param->standard.roughness));
@@ -48,6 +52,7 @@ namespace AT_NAME
     }
 
     AT_DEVICE_API aten::vec3 MicrofacetGGX::bsdf(
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -55,6 +60,7 @@ namespace AT_NAME
         float u, float v)
     {
         auto roughness = AT_NAME::sampleTexture(
+            ctxt,
             param->roughnessMap,
             u, v,
             aten::vec4(param->standard.roughness));
@@ -67,6 +73,7 @@ namespace AT_NAME
 
     AT_DEVICE_API void MicrofacetGGX::sample(
         AT_NAME::MaterialSampling* result,
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -75,6 +82,7 @@ namespace AT_NAME
         float u, float v)
     {
         auto roughness = AT_NAME::sampleTexture(
+            ctxt,
             param->roughnessMap,
             u, v,
             aten::vec4(param->standard.roughness));

@@ -113,13 +113,14 @@ namespace AT_NAME {
     }
 
     AT_DEVICE_API aten::vec3 OrenNayar::bsdf(
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
         float u, float v)
     {
-        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
+        auto roughness = AT_NAME::sampleTexture(ctxt, param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
 
         auto bsdf = computeBsdf(
             roughness.r,
@@ -133,6 +134,7 @@ namespace AT_NAME {
 
     AT_DEVICE_API void OrenNayar::sample(
         AT_NAME::MaterialSampling* result,
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -141,7 +143,7 @@ namespace AT_NAME {
     {
         result->dir = sampleDirection(param, normal, wi, u, v, sampler);
         result->pdf = pdf(param, normal, wi, result->dir, u, v);
-        result->bsdf = bsdf(param, normal, wi, result->dir, u, v);
+        result->bsdf = bsdf(ctxt, param, normal, wi, result->dir, u, v);
     }
 
     bool OrenNayar::edit(aten::IMaterialParamEditor* editor)

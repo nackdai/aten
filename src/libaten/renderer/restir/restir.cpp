@@ -132,11 +132,12 @@ namespace aten
             ctxt,
             rec.mtrlid, rec.isVoxel);
 
-        auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
+        auto albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
 
         // Apply normal map.
         int32_t normalMap = mtrl.normalMap;
         const auto pre_sampled_r = AT_NAME::material::applyNormal(
+            ctxt,
             &mtrl,
             normalMap,
             orienting_normal, orienting_normal,
@@ -219,6 +220,7 @@ namespace aten
         aten::MaterialSampling sampling;
         material::sampleMaterial(
             &sampling,
+            ctxt,
             paths.throughput[idx].throughput,
             &mtrl,
             orienting_normal,

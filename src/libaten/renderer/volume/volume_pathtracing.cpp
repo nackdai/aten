@@ -174,7 +174,7 @@ namespace aten
                 rays[idx] = aten::ray(rec.p, ray.dir, ray_base_nml);
             }
             else {
-                auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, mtrl.baseColor, bounce);
+                auto albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, rec.u, rec.v, mtrl.baseColor, bounce);
 
                 if (!mtrl.attrib.is_translucent && isBackfacing) {
                     orienting_normal = -orienting_normal;
@@ -182,6 +182,7 @@ namespace aten
 
                 // Apply normal map.
                 auto pre_sampled_r = material::applyNormal(
+                    ctxt,
                     &mtrl,
                     mtrl.normalMap,
                     orienting_normal, orienting_normal,
@@ -191,6 +192,7 @@ namespace aten
                 aten::MaterialSampling sampling;
                 material::sampleMaterial(
                     &sampling,
+                    ctxt,
                     paths.throughput[idx].throughput,
                     &mtrl,
                     orienting_normal,
@@ -329,7 +331,7 @@ namespace aten
                 rays[idx] = aten::ray(rec.p, ray.dir, ray_base_nml);
             }
             else {
-                auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, mtrl.baseColor, bounce);
+                auto albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, rec.u, rec.v, mtrl.baseColor, bounce);
 
                 if (!mtrl.attrib.is_translucent && isBackfacing) {
                     orienting_normal = -orienting_normal;
@@ -337,6 +339,7 @@ namespace aten
 
                 // Apply normal map.
                 auto pre_sampled_r = material::applyNormal(
+                    ctxt,
                     &mtrl,
                     mtrl.normalMap,
                     orienting_normal, orienting_normal,
@@ -365,6 +368,7 @@ namespace aten
 
                     if (is_visilbe_to_light) {
                         auto radiance = AT_NAME::ComputeRadianceNEE(
+                            ctxt,
                             paths.throughput[idx].throughput,
                             ray.dir, orienting_normal,
                             mtrl, pre_sampled_r, rec.u, rec.v,
@@ -379,6 +383,7 @@ namespace aten
                 aten::MaterialSampling sampling;
                 material::sampleMaterial(
                     &sampling,
+                    ctxt,
                     paths.throughput[idx].throughput,
                     &mtrl,
                     orienting_normal,

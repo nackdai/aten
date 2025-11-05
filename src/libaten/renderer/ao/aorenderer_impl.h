@@ -61,6 +61,7 @@ namespace ao {
 
         // Apply normal map.
         AT_NAME::material::applyNormal(
+            ctxt,
             &mtrl,
             mtrl.normalMap,
             orienting_normal, orienting_normal,

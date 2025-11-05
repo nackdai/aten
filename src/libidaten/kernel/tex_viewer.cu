@@ -27,10 +27,13 @@ __global__ void textureViewer(
     float u = ix / (float)width;
     float v = iy / (float)height;
 
-    auto texclr = AT_NAME::sampleTexture(textures[texIdx], u, v, aten::vec4(1.0f));
+    AT_NAME::context ctxt;
+    ctxt.textures = textures;
+
+    auto texclr = AT_NAME::sampleTexture(ctxt, texIdx, u, v, aten::vec4(1, 0, 0, 1));
 
     surf2Dwrite(
-        make_float4(texclr.r, texclr.g, texclr.b, 1.0f),
+        make_float4(texclr.r, texclr.g, texclr.b, texclr.a),
         outSurface,
         ix * sizeof(float4), iy,
         cudaBoundaryModeTrap);

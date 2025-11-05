@@ -66,7 +66,7 @@ namespace svgf {
             || _detail::NeedFillAOVBySingularMtrl<NeedCheckSingularMtrlBounce>(idx, bounce, paths))
         {
             // texture color
-            auto texcolor = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
+            auto texcolor = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
             AT_NAME::FillBasicAOVs(
                 aov_normal_depth[idx], normal, rec, mtxW2C,

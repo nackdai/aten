@@ -329,6 +329,7 @@ namespace AT_NAME
         shadow_ray.lightcontrib = aten::vec3(0);
 
         auto radiance = ComputeRadianceNEE(
+            ctxt,
             throughput.throughput,
             ray.dir, hit_nml,
             mtrl, pre_sampled_r, hit_u, hit_v,
@@ -419,7 +420,7 @@ namespace AT_NAME
                     AT_NAME::evaluate_hit_result(rec, *hitobj, ctxt, r, isect);
 
                     const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
-                    if (AT_NAME::material::isTranslucentByAlpha(mtrl, rec.u, rec.v)) {
+                    if (AT_NAME::material::isTranslucentByAlpha(ctxt, mtrl, rec.u, rec.v)) {
                         // To go path through the object, specfy the oppoiste normal.
                         auto orienting_normal = rec.normal;
                         const bool is_same_facing = dot(rec.normal, shadow_ray.raydir) > 0.0F;
@@ -570,6 +571,7 @@ namespace AT_NAME
     }
 
     inline AT_DEVICE_API bool CheckMaterialTranslucentByAlpha(
+        const AT_NAME::context& ctxt,
         const aten::MaterialParameter& mtrl,
         float u, float v,
         const aten::vec3& hit_pos,
@@ -587,7 +589,7 @@ namespace AT_NAME
             return false;
         }
 
-        const auto alpha = AT_NAME::material::getTranslucentAlpha(mtrl, u, v);
+        const auto alpha = AT_NAME::material::getTranslucentAlpha(ctxt, mtrl, u, v);
 
         if (alpha < 1.0F)
         {
@@ -601,7 +603,7 @@ namespace AT_NAME
 
             if (path_attrib.is_accumulating_alpha_blending)
             {
-                const auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, u, v, aten::vec4(1.0F));
+                const auto albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, u, v, aten::vec4(1.0F));
                 const aten::vec3 alpha_belended_radiance{
                     path_throughput.transmission * mtrl.baseColor * albedo * alpha
                 };
@@ -713,7 +715,7 @@ namespace AT_NAME
             ctxt,
             rec.mtrlid, rec.isVoxel);
 
-        auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
+        auto albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
 
         shadow_ray.isActive = false;
 
@@ -736,6 +738,7 @@ namespace AT_NAME
 
         // Apply normal map.
         auto pre_sampled_r = material::applyNormal(
+            ctxt,
             &mtrl,
             mtrl.normalMap,
             orienting_normal, orienting_normal,
@@ -745,6 +748,7 @@ namespace AT_NAME
         if constexpr (ENABLE_ALPHA_TRANLUCENT) {
             // Check transparency or translucency.
             auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
+                ctxt,
                 mtrl,
                 rec.u, rec.v, rec.p,
                 orienting_normal,
@@ -778,6 +782,7 @@ namespace AT_NAME
         AT_NAME::MaterialSampling sampling;
         material::sampleMaterial(
             &sampling,
+            ctxt,
             paths.throughput[idx].throughput,
             &mtrl,
             orienting_normal,

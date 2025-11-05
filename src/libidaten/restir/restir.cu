@@ -107,11 +107,12 @@ __global__ void shade(
         rec.mtrlid,
         rec.isVoxel);
 
-    auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
+    auto albedo = AT_NAME::sampleTexture(ctxt, shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
 
     // Apply normal map.
     int32_t normalMap = shMtrls[threadIdx.x].normalMap;
     const auto pre_sampled_r = AT_NAME::material::applyNormal(
+        ctxt,
         &shMtrls[threadIdx.x],
         normalMap,
         orienting_normal, orienting_normal,
@@ -196,6 +197,7 @@ __global__ void shade(
 
     AT_NAME::material::sampleMaterial(
         &sampling,
+        ctxt,
         paths.throughput[idx].throughput,
         &shMtrls[threadIdx.x],
         orienting_normal,

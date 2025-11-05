@@ -318,7 +318,7 @@ namespace AT_NAME
         auto dirToLight = normalize(sampleres.dir);
         auto distToLight = length(posLight - hit_pos);
 
-        auto shadowRayOrg = hit_pos + AT_MATH_EPSILON * hit_nml;
+        auto shadowRayOrg = aten::ray::Offset(hit_pos, hit_nml);
         auto tmp = hit_pos + dirToLight - shadowRayOrg;
         auto shadowRayDir = normalize(tmp);
 
@@ -378,7 +378,7 @@ namespace AT_NAME
         // So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
         const aten::ObjectParameter* hitobj = lightobj;
 
-        bool isHit = false;
+        bool is_hit_to_light = false;
 
         aten::ray r(shadow_ray.rayorg, shadow_ray.raydir);
 
@@ -391,7 +391,7 @@ namespace AT_NAME
 
             aten::Intersection isect;
 
-            isHit = false;
+            bool isHit = false;
 
             if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
                 // NOTE:
@@ -426,14 +426,14 @@ namespace AT_NAME
                         if (!is_same_facing) {
                             orienting_normal = -orienting_normal;
                         }
-                        //r = aten::ray(rec.p, shadow_ray.raydir, orienting_normal);
-                        r = aten::ray(rec.p, shadow_ray.raydir, shadow_ray.raydir);
+                        r = aten::ray(rec.p, shadow_ray.raydir, orienting_normal);
+                        //r = aten::ray(rec.p, shadow_ray.raydir, shadow_ray.raydir);
                         continue;
                     }
                 }
             }
 
-            isHit = AT_NAME::scene::hitLight(
+            is_hit_to_light = AT_NAME::scene::hitLight(
                 isHit,
                 light.attrib,
                 lightobj,
@@ -445,14 +445,14 @@ namespace AT_NAME
             break;
         }
 
-        if (isHit) {
+        if (is_hit_to_light) {
             aten::vec3 contrib{
                 paths.throughput[idx].transmission * shadow_ray.lightcontrib + paths.throughput[idx].alpha_blend_radiance_on_the_way
             };
             _detail::AddVec3(paths.contrib[idx].contrib, contrib);
         }
 
-        return isHit;
+        return is_hit_to_light;
     }
 
     inline AT_DEVICE_API bool HitImplicitLight(

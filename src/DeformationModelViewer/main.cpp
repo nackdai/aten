@@ -84,7 +84,7 @@ public:
 
         // TODO
         aten::vec3 pos(0, 71, 225);
-        aten::vec3 at(0, 71, 216);
+        aten::vec3 at(0, 71, 0);
         float vfov = float(45);
 
         camera_.init(
@@ -206,7 +206,7 @@ public:
                 camera_,
                 prev_mouse_pos_x_, prev_mouse_pos_y_,
                 x, y,
-                float(0.001));
+                float(0.1));
             is_camera_dirty_ = true;
         }
 

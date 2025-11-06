@@ -44,8 +44,6 @@ namespace AT_NAME
         attrib.will_update_depth = true;
         attrib.does_use_throughput_depth = false;
         attrib.is_accumulating_alpha_blending = true;
-        attrib.has_applied_alpha_blending_in_nee = false;
-        attrib.has_applied_alpha_blending_next_bounce = false;
         attrib.last_hit_mtrl_idx = -1;
     }
 
@@ -183,10 +181,10 @@ namespace AT_NAME
                 }
             }
 
-            paths.attrib[idx].is_accumulating_alpha_blending = false;
-
             auto contrib = paths.throughput[idx].throughput * bg;
             _detail::AddVec3(paths.contrib[idx].contrib, contrib);
+
+            paths.attrib[idx].is_accumulating_alpha_blending = false;
 
             paths.attrib[idx].is_terminated = true;
         }
@@ -248,10 +246,10 @@ namespace AT_NAME
                 misW = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
             }
 
-            paths.attrib[idx].is_accumulating_alpha_blending = false;
-
             auto contrib = paths.throughput[idx].throughput * misW * emit;
             _detail::AddVec3(paths.contrib[idx].contrib, contrib);
+
+            paths.attrib[idx].is_accumulating_alpha_blending = false;
 
             paths.attrib[idx].is_terminated = true;
         }
@@ -416,25 +414,20 @@ namespace AT_NAME
             if (isHit) {
                 hitobj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));
 
-                // If the sequence achieves this API, the ray achieves the non-alpha translucented object
-                // And then, it means we can ignore the alpha translucented object.
-                if (!paths.attrib[idx].is_accumulating_alpha_blending)
-                {
-                    aten::hitrecord rec;
-                    AT_NAME::evaluate_hit_result(rec, *hitobj, ctxt, r, isect);
+                aten::hitrecord rec;
+                AT_NAME::evaluate_hit_result(rec, *hitobj, ctxt, r, isect);
 
-                    const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
-                    if (AT_NAME::material::isTranslucentByAlpha(ctxt, mtrl, rec.u, rec.v)) {
-                        // To go path through the object, specfy the oppoiste normal.
-                        auto orienting_normal = rec.normal;
-                        const bool is_same_facing = dot(rec.normal, shadow_ray.raydir) > 0.0F;
-                        if (!is_same_facing) {
-                            orienting_normal = -orienting_normal;
-                        }
-                        r = aten::ray(rec.p, shadow_ray.raydir, orienting_normal);
-                        //r = aten::ray(rec.p, shadow_ray.raydir, shadow_ray.raydir);
-                        continue;
+                const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
+                if (AT_NAME::material::isTranslucentByAlpha(ctxt, mtrl, rec.u, rec.v)) {
+                    // To go path through the object, specfy the oppoiste normal.
+                    auto orienting_normal = rec.normal;
+                    const bool is_same_facing = dot(rec.normal, shadow_ray.raydir) > 0.0F;
+                    if (!is_same_facing) {
+                        orienting_normal = -orienting_normal;
                     }
+                    r = aten::ray(rec.p, shadow_ray.raydir, orienting_normal);
+                    //r = aten::ray(rec.p, shadow_ray.raydir, shadow_ray.raydir);
+                    continue;
                 }
             }
 
@@ -453,8 +446,6 @@ namespace AT_NAME
         if (is_hit_to_light) {
             _detail::AddVec3(paths.contrib[idx].contrib, shadow_ray.lightcontrib);
         }
-
-        paths.attrib[idx].has_applied_alpha_blending_in_nee = true;
 
         return is_hit_to_light;
     }
@@ -592,7 +583,8 @@ namespace AT_NAME
             return false;
         }
 
-        const auto alpha = AT_NAME::material::getTranslucentAlpha(ctxt, mtrl, u, v);
+        const auto albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, u, v, aten::vec4(1.0F));
+        const auto alpha = albedo.a;
 
         if (alpha < 1.0F)
         {
@@ -606,7 +598,6 @@ namespace AT_NAME
 
             if (path_attrib.is_accumulating_alpha_blending)
             {
-                const auto albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, u, v, aten::vec4(1.0F));
                 const aten::vec3 alpha_belended_radiance{
                     path_throughput.transmission * mtrl.baseColor * albedo * alpha
                 };
@@ -618,7 +609,7 @@ namespace AT_NAME
             return true;
         }
         else {
-            // If hit to non-alpha material, stop to accumulate alpha transmission.
+            // If ray hits to non-alpha face, terminate to accumulate alpha transmission.
             path_attrib.is_accumulating_alpha_blending = false;
         }
 
@@ -670,16 +661,19 @@ namespace AT_NAME
 
         if (pdfb > 0 && c > 0) {
             aten::vec3 contrib{ albedo * bsdf * c / pdfb };
-            if (!paths.attrib[idx].has_applied_alpha_blending_next_bounce) {
-                contrib = paths.throughput[idx].transmission * contrib + paths.throughput[idx].alpha_blend_radiance_on_the_way;
-                paths.attrib[idx].has_applied_alpha_blending_next_bounce = true;
-            }
+            contrib = paths.throughput[idx].transmission * contrib + paths.throughput[idx].alpha_blend_radiance_on_the_way;
 
             paths.throughput[idx].throughput *= contrib;
             paths.throughput[idx].throughput /= russian_prob;
         }
         else {
             paths.attrib[idx].is_terminated = true;
+        }
+
+        paths.throughput[idx].transmission = 1.0F;
+        paths.throughput[idx].alpha_blend_radiance_on_the_way = aten::vec3(0.0F);
+
+        if (paths.attrib[idx].is_terminated) {
             return;
         }
 

@@ -144,9 +144,7 @@ namespace AT_NAME
                 ? cosShadow * cosLight
                 : cosShadow * cosLight / dist2;
 
-            if (!paths.attrib[idx].has_applied_alpha_blending_in_nee) {
-                bsdf = paths.throughput[idx].transmission * bsdf + paths.throughput[idx].alpha_blend_radiance_on_the_way;
-            }
+            bsdf = paths.throughput[idx].transmission * bsdf + paths.throughput[idx].alpha_blend_radiance_on_the_way;
 
             // NOTE:
             // 3point rendering equation.

@@ -110,6 +110,8 @@ namespace idaten {
 #endif
             }
             ctxt_host_->tex.resize(tex_num);
+
+            ctxt_host_->ctxt.enable_alpha_blending = scene_ctxt.enable_alpha_blending;
         }
 
         if (proxy_get_grid_from_host_scene_context) {

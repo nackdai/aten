@@ -49,6 +49,8 @@ namespace idaten {
 
         aten::aabb scene_bounding_box;
 
+        bool enable_alpha_blending{ false };
+
         __device__ const float4 GetPosition(uint32_t idx) const noexcept
         {
 #ifdef __CUDA_ARCH__

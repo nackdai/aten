@@ -21,7 +21,7 @@
 
 #define ENABLE_ENVMAP
 #define TAKE_SC_EVERY_FRAME false
-#define DEVICE_RENDERING
+//#define DEVICE_RENDERING
 
 #ifdef DEVICE_RENDERING
 constexpr int32_t WIDTH = 1280;
@@ -95,6 +95,8 @@ public:
 
     bool Init()
     {
+        ctxt_.enable_alpha_blending = true;
+
         visualizer_ = aten::visualizer::init(WIDTH, HEIGHT);
 
         gamma_.init(

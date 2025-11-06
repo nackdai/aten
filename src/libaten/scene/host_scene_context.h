@@ -44,6 +44,11 @@ namespace aten
         context& operator=(context&&) = delete;
 
         /**
+        * @brief Control if alpha blending is enabled.
+        */
+        bool enable_alpha_blending{ false };
+
+        /**
          * @brief Get the vertex position by index.
          * @note w specifies u of uv cooridnate of the vertex.
          * @param[in] idx Index to the vertex position.

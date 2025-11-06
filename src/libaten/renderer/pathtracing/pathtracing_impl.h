@@ -83,8 +83,7 @@ namespace AT_NAME
         paths.throughput[idx].depth_count = 0;
         paths.throughput[idx].mediums.clear();
 
-        paths.throughput[idx].alpha_blend_radiance_on_the_way = aten::vec3(0.0F);
-        paths.throughput[idx].transmission = 1.0F;
+        ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
         ClearPathAttribute(paths.attrib[idx]);
 
@@ -181,10 +180,12 @@ namespace AT_NAME
                 }
             }
 
-            auto contrib = paths.throughput[idx].throughput * bg;
+            auto contrib = ApplyAlphaBlend(bg, paths.throughput[idx]);
+            contrib *= paths.throughput[idx].throughput;
+
             _detail::AddVec3(paths.contrib[idx].contrib, contrib);
 
-            paths.attrib[idx].is_accumulating_alpha_blending = false;
+            ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
             paths.attrib[idx].is_terminated = true;
         }
@@ -246,10 +247,12 @@ namespace AT_NAME
                 misW = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
             }
 
-            auto contrib = paths.throughput[idx].throughput * misW * emit;
+            auto contrib = ApplyAlphaBlend(misW * emit, paths.throughput[idx]);
+            contrib *= paths.throughput[idx].throughput;
+
             _detail::AddVec3(paths.contrib[idx].contrib, contrib);
 
-            paths.attrib[idx].is_accumulating_alpha_blending = false;
+            ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
             paths.attrib[idx].is_terminated = true;
         }
@@ -589,8 +592,12 @@ namespace AT_NAME
             return false;
         }
 
+        // NOTE:
+        // material::getTranslucentAlpha returns the multiplied alpha.
+        // Why we call sampleTexture to get alpha value instead of calling material::getTranslucentAlpha is retrieving albedo color and alpha in the same time.
+        // Therefore, we need to compute the multiplied alpha value.
         const auto albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, u, v, aten::vec4(1.0F));
-        const auto alpha = albedo.a;
+        const auto alpha = albedo.a * mtrl.baseColor.a;
 
         if (alpha < 1.0F)
         {
@@ -667,7 +674,7 @@ namespace AT_NAME
 
         if (pdfb > 0 && c > 0) {
             aten::vec3 contrib{ albedo * bsdf * c / pdfb };
-            contrib = paths.throughput[idx].transmission * contrib + paths.throughput[idx].alpha_blend_radiance_on_the_way;
+            contrib = ApplyAlphaBlend(contrib, paths.throughput[idx]);
 
             paths.throughput[idx].throughput *= contrib;
             paths.throughput[idx].throughput /= russian_prob;
@@ -676,8 +683,7 @@ namespace AT_NAME
             paths.attrib[idx].is_terminated = true;
         }
 
-        paths.throughput[idx].transmission = 1.0F;
-        paths.throughput[idx].alpha_blend_radiance_on_the_way = aten::vec3(0.0F);
+        ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
         if (paths.attrib[idx].is_terminated) {
             return;

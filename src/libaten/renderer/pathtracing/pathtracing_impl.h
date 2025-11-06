@@ -414,20 +414,22 @@ namespace AT_NAME
             if (isHit) {
                 hitobj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));
 
-                aten::hitrecord rec;
-                AT_NAME::evaluate_hit_result(rec, *hitobj, ctxt, r, isect);
+                if (ctxt.enable_alpha_blending) {
+                    aten::hitrecord rec;
+                    AT_NAME::evaluate_hit_result(rec, *hitobj, ctxt, r, isect);
 
-                const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
-                if (AT_NAME::material::isTranslucentByAlpha(ctxt, mtrl, rec.u, rec.v)) {
-                    // To go path through the object, specfy the oppoiste normal.
-                    auto orienting_normal = rec.normal;
-                    const bool is_same_facing = dot(rec.normal, shadow_ray.raydir) > 0.0F;
-                    if (!is_same_facing) {
-                        orienting_normal = -orienting_normal;
+                    const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
+                    if (AT_NAME::material::isTranslucentByAlpha(ctxt, mtrl, rec.u, rec.v)) {
+                        // To go path through the object, specfy the oppoiste normal.
+                        auto orienting_normal = rec.normal;
+                        const bool is_same_facing = dot(rec.normal, shadow_ray.raydir) > 0.0F;
+                        if (!is_same_facing) {
+                            orienting_normal = -orienting_normal;
+                        }
+                        r = aten::ray(rec.p, shadow_ray.raydir, orienting_normal);
+                        //r = aten::ray(rec.p, shadow_ray.raydir, shadow_ray.raydir);
+                        continue;
                     }
-                    r = aten::ray(rec.p, shadow_ray.raydir, orienting_normal);
-                    //r = aten::ray(rec.p, shadow_ray.raydir, shadow_ray.raydir);
-                    continue;
                 }
             }
 
@@ -577,6 +579,10 @@ namespace AT_NAME
     {
         // TODO:
         // How to deal with the alpha material on the other hand of the translucent material like refraction.
+
+        if (!ctxt.enable_alpha_blending) {
+            return false;
+        }
 
         // If the material itself is originally translucent, we don't care alpha translucency.
         if (mtrl.attrib.is_translucent) {

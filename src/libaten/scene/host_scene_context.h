@@ -9,6 +9,7 @@
 #include <variant>
 #include <vector>
 
+#include "accelerator/GpuPayloadDefs.h"
 #include "geometry/geomparam.h"
 #include "geometry/vertex.h"
 #include "light/light_parameter.h"
@@ -567,9 +568,26 @@ namespace aten
             mtrl->param().id = static_cast<uint16_t>(materials_.size() - 1);
         }
 
-    private:
-        static const context* s_pinnedCtxt;
+        /**
+         * @brief Copy BVH nodes to the context.
+         * @param[in] src Source BVH nodes.
+         */
+        void CopyBvhNodes(const std::vector<std::vector<GPUBvhNode>>& src)
+        {
+            nodes_ = src;
+        }
 
+        /**
+         * @brief Get the BVH nodes by index.
+         * @param[in] idx Index to the BVH nodes.
+         * @return BVH nodes.
+         */
+        const std::vector<GPUBvhNode>& GetBvhNodes(size_t idx) const
+        {
+            return nodes_[idx];
+        }
+
+    private:
         std::vector<aten::vertex> vertices_;
 
         aten::GeomVertexBuffer vertex_buffer_;
@@ -580,6 +598,8 @@ namespace aten
         std::vector<std::shared_ptr<aten::texture>> textures_;
         std::vector<std::shared_ptr<aten::mat4>> matrices_;
         std::vector<std::shared_ptr<AT_NAME::Light>> lights_;
+
+        std::vector<std::vector<GPUBvhNode>> nodes_;
 
         // NOTE:
         // This variable for AT_NAME::Grid needs to be defined with the template.

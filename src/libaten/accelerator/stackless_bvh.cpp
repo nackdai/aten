@@ -6,6 +6,7 @@
 #include "accelerator/bvh_util.h"
 #include "geometry/transformable.h"
 #include "geometry/PolygonObject.h"
+#include "scene/host_scene_context.h"
 
 //#pragma optimize( "", off)
 
@@ -102,7 +103,7 @@ namespace aten {
     }
 
     void StacklessBVH::registerThreadedBvhNode(
-        const context& ctxt,
+        const aten::context& ctxt,
         bool isPrimitiveLeaf,
         const std::vector<StacklessBvhNodeEntry>& listBvhNode,
         std::vector<StacklessBvhNode>& listStacklessBvhNode)

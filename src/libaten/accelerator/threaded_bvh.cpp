@@ -7,6 +7,7 @@
 #include "accelerator/bvh_util.h"
 #include "geometry/transformable.h"
 #include "geometry/PolygonObject.h"
+#include "scene/host_scene_context.h"
 
 //#pragma optimize( "", off)
 
@@ -175,7 +176,7 @@ namespace aten
     }
 
     void ThreadedBVH::registerThreadedBvhNode(
-        const context& ctxt,
+        const aten::context& ctxt,
         bool isPrimitiveLeaf,
         const std::vector<ThreadedBvhNodeEntry>& threadedBvhNodeEntries,
         std::vector<ThreadedBvhNode>& threadedBvhNodes,
@@ -591,7 +592,7 @@ namespace aten
                 node->setExternalId(exid);
                 node->setSubExternalId(subexid);
 
-                // 
+                //
                 auto accel = obj->getInternalAccelerator();
 
                 // Keep nested (bottom layer) BVH in map.

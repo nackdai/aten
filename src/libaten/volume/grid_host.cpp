@@ -7,6 +7,7 @@
 #pragma warning(pop)
 
 #include "geometry/transformable_factory.h"
+#include "geometry/TriangleGroupMesh.h"
 #include "scene/host_scene_context.h"
 #include "volume/grid.h"
 

@@ -1,8 +1,11 @@
 #include <iterator>
 
 #include "geometry/PolygonObject.h"
-#include "math/intersect.h"
+
 #include "accelerator/accelerator.h"
+#include "geometry/TriangleGroupMesh.h"
+#include "image/texture.h"
+#include "math/intersect.h"
 
 //#define ENABLE_LINEAR_HITTEST
 
@@ -109,7 +112,7 @@ namespace AT_NAME
     }
 
     void PolygonObject::draw(
-        AT_NAME::FuncObjectMeshDraw func,
+        std::function<void(const aten::vec3&, const aten::texture*, int32_t)> func,
         const context& ctxt) const
     {
         for (auto& s : m_shapes) {
@@ -162,5 +165,16 @@ namespace AT_NAME
                 triangles.push_back(tri->GetParam());
             }
         }
+    }
+
+    void PolygonObject::appendShape(const std::shared_ptr<TriangleGroupMesh>& shape)
+    {
+        AT_ASSERT(shape);
+        m_shapes.push_back(shape);
+    }
+
+    const std::vector<std::shared_ptr<TriangleGroupMesh>>& PolygonObject::getShapes() const
+    {
+        return m_shapes;
     }
 }

@@ -9,6 +9,7 @@
 
 #include "accelerator/sbvh.h"
 #include "accelerator/bvh_util.h"
+#include "scene/host_scene_context.h"
 
 //#pragma optimize( "", off)
 
@@ -983,7 +984,7 @@ namespace aten
     }
 
     bool sbvh::HitWithLod(
-        const context& ctxt,
+        const aten::context& ctxt,
         const ray& r,
         float t_min, float t_max,
         bool enableLod,

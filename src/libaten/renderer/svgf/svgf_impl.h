@@ -6,8 +6,9 @@
 #include "math/mat4.h"
 #include "misc/span.h"
 #include "misc/tuple.h"
-#include "renderer/pathtracing/pathtracing_impl.h"
 #include "renderer/pathtracing/pt_params.h"
+
+#include "math/cuda_host_common_math.h"
 
 namespace AT_NAME {
 namespace svgf {
@@ -59,8 +60,8 @@ namespace svgf {
         const aten::mat4& mtxW2C,
         const aten::vec3& normal,
         aten::MaterialParameter& mtrl,
-        aten::span<AT_NAME::_detail::v4>& aov_normal_depth,
-        aten::span<AT_NAME::_detail::v4>& aov_texclr_meshid)
+        aten::span<aten::v4>& aov_normal_depth,
+        aten::span<aten::v4>& aov_texclr_meshid)
     {
         if (bounce == 0
             || _detail::NeedFillAOVBySingularMtrl<NeedCheckSingularMtrlBounce>(idx, bounce, paths))
@@ -98,17 +99,17 @@ namespace svgf {
      * @return Contribution as RGB.
      */
     template <bool IsFirstFrameExecution>
-    inline AT_DEVICE_API AT_NAME::_detail::v4 PrepareForDenoise(
+    inline AT_DEVICE_API aten::v4 PrepareForDenoise(
         const int32_t idx,
         const AT_NAME::Path& paths,
-        aten::span<AT_NAME::_detail::v4>& temporary_color_buffer,
-        aten::span<AT_NAME::_detail::v4> aov_color_variance = nullptr,
-        aten::span<AT_NAME::_detail::v4> aov_moment_temporalweight = nullptr)
+        aten::span<aten::v4>& temporary_color_buffer,
+        aten::span<aten::v4> aov_color_variance = nullptr,
+        aten::span<aten::v4> aov_moment_temporalweight = nullptr)
     {
         const auto& c = paths.contrib[idx].v;
 
-        AT_NAME::_detail::v4 contrib;
-        AT_NAME::_detail::CopyVec(contrib, c);
+        aten::v4 contrib;
+        aten::CopyVec(contrib, c);
         contrib /= c.w; // w is number of sample.
 
         if constexpr (IsFirstFrameExecution) {
@@ -118,7 +119,7 @@ namespace svgf {
             aov_moment_temporalweight[idx].y += lum;
             aov_moment_temporalweight[idx].z += 1;  // frame count,
 
-            aov_color_variance[idx] = AT_NAME::_detail::MakeVec4(
+            aov_color_variance[idx] = aten::MakeVec4(
                 contrib.x, contrib.y, contrib.z, aov_color_variance[idx].w);
         }
 
@@ -142,9 +143,9 @@ namespace svgf {
      * @return Tuple for the excracted center pixle data, normal, depth, mesh id, contribution.
      */
     template <bool WillDivideContribByW = true, class Span_v4>
-    inline AT_DEVICE_API aten::tuple<AT_NAME::_detail::v3, float, int32_t, AT_NAME::_detail::v4> ExtractCenterPixel(
+    inline AT_DEVICE_API aten::tuple<aten::v3, float, int32_t, aten::v4> ExtractCenterPixel(
         int32_t idx,
-        const aten::const_span<AT_NAME::_detail::v4>& contribs,
+        const aten::const_span<aten::v4>& contribs,
         Span_v4& aov_normal_depth,
         Span_v4& aov_texclr_meshid)
     {
@@ -157,12 +158,12 @@ namespace svgf {
         // Pixel color of this frame.
         const auto& contrib = contribs[idx];
 
-        auto curr_color{ AT_NAME::_detail::MakeVec4<AT_NAME::_detail::v4>(contrib.x, contrib.y, contrib.z, 1.0f) };
+        auto curr_color{ aten::MakeVec4<aten::v4>(contrib.x, contrib.y, contrib.z, 1.0f) };
         if constexpr (WillDivideContribByW) {
             curr_color /= contrib.w;
         }
 
-        auto center_normal = AT_NAME::_detail::MakeVec3(nml_depth.x, nml_depth.y, nml_depth.z);
+        auto center_normal = aten::MakeVec3(nml_depth.x, nml_depth.y, nml_depth.z);
 
         return aten::make_tuple(center_normal, center_depth, center_meshid, curr_color);
     }
@@ -177,18 +178,18 @@ namespace svgf {
      * @param[out] aov_moment_temporalweight Destination buffer to store moment of color luminance and temporal weight. If the pixle is background, only moments is updated with 1.
      * @return If the pixel is background, returns the color in the arguments directly. Otherwise, returns nullopt.
      */
-    inline AT_DEVICE_API std::optional<AT_NAME::_detail::v4> UpdateAOVIfBackgroundPixel(
+    inline AT_DEVICE_API std::optional<aten::v4> UpdateAOVIfBackgroundPixel(
         const int32_t idx,
-        const AT_NAME::_detail::v4& color,
+        const aten::v4& color,
         const int32_t center_meshid,
-        aten::span<AT_NAME::_detail::v4>& aov_color_variance,
-        aten::span<AT_NAME::_detail::v4>& aov_moment_temporalweight)
+        aten::span<aten::v4>& aov_color_variance,
+        aten::span<aten::v4>& aov_moment_temporalweight)
     {
         if (center_meshid < 0) {
             // This case can be treated as background.
             aov_color_variance[idx] = color;
 
-            aov_moment_temporalweight[idx] = AT_NAME::_detail::MakeVec4(1, 1, 1, aov_moment_temporalweight[idx].w);
+            aov_moment_temporalweight[idx] = aten::MakeVec4(1.0F, 1.0F, 1.0F, aov_moment_temporalweight[idx].w);
 
             return color;
         }
@@ -208,12 +209,12 @@ namespace svgf {
     inline AT_DEVICE_API void AccumulateMoments(
         const int32_t idx,
         const float weight,
-        const aten::const_span<AT_NAME::_detail::v4>& curr_aov_color_variance,
-        aten::span<AT_NAME::_detail::v4>& curr_aov_moment_temporalweight,
-        const aten::const_span<AT_NAME::_detail::v4>& prev_aov_moment_temporalweight)
+        const aten::const_span<aten::v4>& curr_aov_color_variance,
+        aten::span<aten::v4>& curr_aov_moment_temporalweight,
+        const aten::const_span<aten::v4>& prev_aov_moment_temporalweight)
     {
         const auto& color_variance = curr_aov_color_variance[idx];
-        auto curr_color = AT_NAME::_detail::MakeVec3(color_variance.x, color_variance.y, color_variance.z);
+        auto curr_color = aten::MakeVec3(color_variance.x, color_variance.y, color_variance.z);
 
         // TODO
         // 現フレームと過去フレームが同率で加算されるため、どちらかに強い影響がでると影響が弱まるまでに非常に時間がかかる.
@@ -225,7 +226,7 @@ namespace svgf {
 
         // accumulate moments.
         float lum = AT_NAME::color::luminance(curr_color.x, curr_color.y, curr_color.z);
-        auto center_moment = AT_NAME::_detail::MakeVec3(lum * lum, lum, 0);
+        auto center_moment = aten::MakeVec3(lum * lum, lum, 0);
 
         // 積算フレーム数のリセット.
         // Reset the accumurate frame count.
@@ -233,7 +234,7 @@ namespace svgf {
 
         if (weight > 0.0f) {
             auto moment_temporalweight = prev_aov_moment_temporalweight[idx];;
-            auto prev_moment = AT_NAME::_detail::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z);
+            auto prev_moment = aten::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z);
 
             // 積算フレーム数を１増やす.
             // Advance the frame count to accumulate.
@@ -272,25 +273,25 @@ namespace svgf {
      * @return Tuple for weight to merge the colors and the reporjected color.
      */
     template <class BufferForMotionDepth>
-    inline AT_DEVICE_API aten::tuple<float, AT_NAME::_detail::v4> TemporalReprojection(
+    inline AT_DEVICE_API aten::tuple<float, aten::v4> TemporalReprojection(
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
         const float threshold_normal,
         const float threshold_depth,
-        const AT_NAME::_detail::v3& center_normal,
+        const aten::v3& center_normal,
         const float center_depth,
         const int32_t center_meshid,
-        const AT_NAME::_detail::v4& center_color,
-        aten::span<AT_NAME::_detail::v4>& curr_aov_color_variance,
-        aten::span<AT_NAME::_detail::v4>& curr_aov_moment_temporalweight,
-        const aten::const_span<AT_NAME::_detail::v4>& prev_aov_normal_depth,
-        const aten::const_span<AT_NAME::_detail::v4>& prev_aov_texclr_meshid,
-        const aten::const_span<AT_NAME::_detail::v4>& prev_aov_color_variance,
+        const aten::v4& center_color,
+        aten::span<aten::v4>& curr_aov_color_variance,
+        aten::span<aten::v4>& curr_aov_moment_temporalweight,
+        const aten::const_span<aten::v4>& prev_aov_normal_depth,
+        const aten::const_span<aten::v4>& prev_aov_texclr_meshid,
+        const aten::const_span<aten::v4>& prev_aov_color_variance,
         BufferForMotionDepth& motion_detph_buffer)
     {
         const auto idx = _detail::GetIdx(ix, iy, width);
 
-        auto sum = AT_NAME::_detail::MakeVec4(0, 0, 0, 0);
+        auto sum = aten::MakeVec4(0, 0, 0, 0);
         float weight = 0.0f;
         auto curr_color{ center_color };
 
@@ -300,7 +301,7 @@ namespace svgf {
                 int32_t xx = clamp(ix + x, 0, static_cast<int32_t>(width - 1));
                 int32_t yy = clamp(iy + y, 0, static_cast<int32_t>(height - 1));
 
-                AT_NAME::_detail::v4 motion_depth;
+                aten::v4 motion_depth;
                 if constexpr (std::is_class_v<std::remove_reference_t<decltype(motion_detph_buffer)>>) {
                     motion_depth = motion_detph_buffer[idx];
                 }
@@ -323,7 +324,7 @@ namespace svgf {
 
                 const float prev_depth = nml_depth.w;
                 const int32_t prev_meshid = (int32_t)texclr_meshid.w;
-                const auto prev_normal{ AT_NAME::_detail::MakeVec3(nml_depth.x, nml_depth.y, nml_depth.z) };
+                const auto prev_normal{ aten::MakeVec3(nml_depth.x, nml_depth.y, nml_depth.z) };
 
                 // TODO
                 // 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
@@ -375,8 +376,8 @@ namespace svgf {
     inline AT_DEVICE_API std::optional<float> RecomputeTemporalWeightFromSurroundingPixels(
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_moment_temporalweight)
+        const aten::const_span<aten::v4>& aov_texclr_meshid,
+        const aten::const_span<aten::v4>& aov_moment_temporalweight)
     {
         const auto idx = _detail::GetIdx(ix, iy, width);
 
@@ -421,15 +422,15 @@ namespace svgf {
      * @param[in,out] aov_moment_temporalweight AOV buffer to store moments and temporal weight.
      * @return Estivated variance. If the pixel is background, returns zero vector.
      */
-    inline AT_DEVICE_API AT_NAME::_detail::v4 EstimateVariance(
+    inline AT_DEVICE_API aten::v4 EstimateVariance(
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
         const aten::mat4& mtx_C2V,
         const float camera_distance,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_normal_depth,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
-        aten::span<AT_NAME::_detail::v4>& aov_color_variance,
-        aten::span<AT_NAME::_detail::v4>& aov_moment_temporalweight)
+        const aten::const_span<aten::v4>& aov_normal_depth,
+        const aten::const_span<aten::v4>& aov_texclr_meshid,
+        aten::span<aten::v4>& aov_color_variance,
+        aten::span<aten::v4>& aov_moment_temporalweight)
     {
         const int32_t idx = _detail::GetIdx(ix, iy, width);
 
@@ -449,12 +450,12 @@ namespace svgf {
             aov_moment_temporalweight[idx].y = 0;
             aov_moment_temporalweight[idx].z = 1;
 
-            return AT_NAME::_detail::MakeVec4(0, 0, 0, 0);
+            return aten::MakeVec4(0, 0, 0, 0);
         }
 
         const float pixel_distance_ratio = (center_depth / camera_distance) * height;
 
-        auto center_moment{ AT_NAME::_detail::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z) };
+        auto center_moment{ aten::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z) };
 
         int32_t frame = static_cast<int32_t>(center_moment.z);
 
@@ -472,9 +473,9 @@ namespace svgf {
             // If the pixel is disoccluded, the frame count is reset as 1.
             // So, just checking whether the frame count is less than 4 satisfies the both condition.
 
-            auto center_normal{ AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z) };
+            auto center_normal{ aten::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z) };
 
-            auto moment_sum{ AT_NAME::_detail::MakeVec3(center_moment.x, center_moment.y, center_moment.z) };
+            auto moment_sum{ aten::MakeVec3(center_moment.x, center_moment.y, center_moment.z) };
             float weight = 1.0f;
 
             int32_t radius = frame > 1 ? 2 : 3;
@@ -492,12 +493,12 @@ namespace svgf {
                         const auto& texclr_meshid = aov_texclr_meshid[sample_idx];
                         const auto& moment_temporalweight = aov_moment_temporalweight[sample_idx];
 
-                        const auto sample_nml{ AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z) };
+                        const auto sample_nml{ aten::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z) };
                         const float sample_depth = normal_depth.w;
                         const int32_t sample_meshid = static_cast<int32_t>(texclr_meshid.w);
                         const auto& sample_color = aov_color_variance[sample_idx];
 
-                        auto moment{ AT_NAME::_detail::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z) };
+                        auto moment{ aten::MakeVec3(moment_temporalweight.x, moment_temporalweight.y, moment_temporalweight.z) };
                         moment /= moment.z;
 
                         const auto uv_length = aten::sqrt(static_cast<float>(u * u + v * v));
@@ -528,7 +529,7 @@ namespace svgf {
         color.w = variance;
         aov_color_variance[idx] = color;
 
-        return AT_NAME::_detail::MakeVec4(variance, variance, variance, 1);
+        return aten::MakeVec4(variance, variance, variance, 1);
     }
 
     /**
@@ -546,7 +547,7 @@ namespace svgf {
     inline AT_DEVICE_API float Exec3x3GaussFilter(
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,
-        const aten::const_span<AT_NAME::_detail::v4>& buffer,
+        const aten::const_span<aten::v4>& buffer,
         MemberVar member_var)
     {
         static constexpr float kernel_array[] = {
@@ -605,21 +606,21 @@ namespace svgf {
      *        If the pixel is background but this API is not calles as the final iteration, returns the valid optiaonal but no value.
      *        If the pixel is not background, returns nullopt.
      */
-    inline AT_DEVICE_API std::optional<std::optional<AT_NAME::_detail::v4>> CheckIfBackgroundPixelForAtrous(
+    inline AT_DEVICE_API std::optional<std::optional<aten::v4>> CheckIfBackgroundPixelForAtrous(
         const bool is_final_iter,
         const int32_t idx,
-        const AT_NAME::_detail::v4& center_color,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
-        aten::span< AT_NAME::_detail::v4>& color_variance_buffer)
+        const aten::v4& center_color,
+        const aten::const_span<aten::v4>& aov_texclr_meshid,
+        aten::span<aten::v4>& color_variance_buffer)
     {
-        std::optional<AT_NAME::_detail::v4> result;
+        std::optional<aten::v4> result;
 
         const auto center_meshid = aov_texclr_meshid[idx].w;
 
         if (center_meshid < 0) {
             // If mesh id is negative, the pixel is the background.
             // So, just output the background pixel.
-            color_variance_buffer[idx] = AT_NAME::_detail::MakeVec4(center_color.x, center_color.y, center_color.z, 0.0f);
+            color_variance_buffer[idx] = aten::MakeVec4(center_color.x, center_color.y, center_color.z, 0.0f);
 
             // TODO:
             // Is the following necessary?
@@ -659,19 +660,19 @@ namespace svgf {
      * @param[in] camera_distance Distance from camera origin to the screen.
      * @return A-trous wavelet filtered color.
      */
-    inline AT_DEVICE_API AT_NAME::_detail::v4 ExecAtrousWaveletFilter(
+    inline AT_DEVICE_API aten::v4 ExecAtrousWaveletFilter(
         bool is_first_iter,
         const int32_t ix, const int32_t iy,
         const int32_t width, const int32_t height,
         float gauss_filtered_variance,
-        const AT_NAME::_detail::v3& center_normal,
+        const aten::v3& center_normal,
         const float center_depth,
         const int32_t center_meshid,
-        const AT_NAME::_detail::v4& center_color,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_normal_depth,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_color_variance,
-        const aten::const_span<AT_NAME::_detail::v4>& color_variance_buffer,
+        const aten::v4& center_color,
+        const aten::const_span<aten::v4>& aov_normal_depth,
+        const aten::const_span<aten::v4>& aov_texclr_meshid,
+        const aten::const_span<aten::v4>& aov_color_variance,
+        const aten::const_span<aten::v4>& color_variance_buffer,
         const int32_t filter_iter_count,
         const float camera_distance)
     {
@@ -747,7 +748,7 @@ namespace svgf {
             const auto& normal_depth = aov_normal_depth[qidx];
             const auto& texclr_meshid = aov_texclr_meshid[qidx];
 
-            const auto normal{ AT_NAME::_detail::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z) };
+            const auto normal{ aten::MakeVec3(normal_depth.x, normal_depth.y, normal_depth.z) };
 
             const auto depth = normal_depth.w;
             const int32_t meshid = static_cast<int32_t>(texclr_meshid.w);
@@ -778,7 +779,7 @@ namespace svgf {
         sumC /= weight;
         sumV /= (weight * weight);
 
-        return AT_NAME::_detail::MakeVec4(sumC.x, sumC.y, sumC.z, sumV);
+        return aten::MakeVec4(sumC.x, sumC.y, sumC.z, sumV);
     }
 
     /**
@@ -794,13 +795,13 @@ namespace svgf {
      * @param[out] next_color_variance_buffer Buffer to store the filtered_color_variance for the next A-trous wavelt filter iteration.
      * @return If is_final_iter is true, returns the albedo multiplied color as the SVGF result for displaying. Otherwise, returns nullopt.
      */
-    inline AT_DEVICE_API std::optional<AT_NAME::_detail::v4> PostProcessForAtrousFilter(
+    inline AT_DEVICE_API std::optional<aten::v4> PostProcessForAtrousFilter(
         bool is_first_iter, bool is_final_iter,
         const int32_t idx,
-        const AT_NAME::_detail::v4& filtered_color_variance,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_texclr_meshid,
-        aten::span< AT_NAME::_detail::v4>& temporary_color_buffer,
-        aten::span< AT_NAME::_detail::v4>& next_color_variance_buffer)
+        const aten::v4& filtered_color_variance,
+        const aten::const_span<aten::v4>& aov_texclr_meshid,
+        aten::span< aten::v4>& temporary_color_buffer,
+        aten::span< aten::v4>& next_color_variance_buffer)
     {
         next_color_variance_buffer[idx] = filtered_color_variance;
 
@@ -835,8 +836,8 @@ namespace svgf {
     template <int32_t CopyElementNumPerItem>
     inline AT_DEVICE_API constexpr void CopyVectorBuffer(
         const int32_t idx,
-        const aten::const_span<AT_NAME::_detail::v4>& src,
-        aten::span<AT_NAME::_detail::v4>& dst)
+        const aten::const_span<aten::v4>& src,
+        aten::span<aten::v4>& dst)
     {
         const auto& src_v = src[idx];
         auto& dst_v = dst[idx];

@@ -106,7 +106,7 @@ namespace ao {
         }
 
         ao_color /= ao_num_rays;
-        _detail::CopyVec(paths.contrib[idx].contrib, ao_color);
+        aten::CopyVec(paths.contrib[idx].contrib, ao_color);
     }
 
     /**
@@ -122,7 +122,7 @@ namespace ao {
         AT_NAME::Path& paths)
     {
         if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].isHit) {
-            _detail::CopyVec(paths.contrib[idx].contrib, aten::vec3(1));
+            aten::CopyVec(paths.contrib[idx].contrib, aten::vec3(1));
 
             paths.attrib[idx].is_terminated = true;
         }

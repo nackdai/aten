@@ -5,11 +5,13 @@
 #include "types.h"
 #include "math/mat4.h"
 #include "geometry/triangle.h"
-#include "geometry/TriangleGroupMesh.h"
 #include "geometry/transformable.h"
 
 namespace AT_NAME
 {
+    class TriangleGroupMesh;
+    class texture;
+
     /**
      * @brief Object is polygons to have the multiple materials.
      */
@@ -80,7 +82,7 @@ namespace AT_NAME
             uint32_t triOffset) override final;
 
         void draw(
-            AT_NAME::FuncObjectMeshDraw func,
+            std::function<void(const aten::vec3&, const aten::texture*, int32_t)> func,
             const aten::context& ctxt) const;
 
         virtual void drawAABB(
@@ -150,16 +152,9 @@ namespace AT_NAME
             result->area = area;
         }
 
-        void appendShape(const std::shared_ptr<TriangleGroupMesh>& shape)
-        {
-            AT_ASSERT(shape);
-            m_shapes.push_back(shape);
-        }
+        void appendShape(const std::shared_ptr<TriangleGroupMesh>& shape);
 
-        const std::vector<std::shared_ptr<TriangleGroupMesh>>& getShapes() const
-        {
-            return m_shapes;
-        }
+        const std::vector<std::shared_ptr<TriangleGroupMesh>>& getShapes() const;
 
     private:
         std::vector<std::shared_ptr<TriangleGroupMesh>> m_shapes;

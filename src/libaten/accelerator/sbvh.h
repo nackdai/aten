@@ -38,6 +38,10 @@ namespace aten
 
         float voxeldepth{ AT_DISABLE_VOXEL };    ///< If hasVoxel < -1, the node is used as voxel.
 
+        // TODO
+        // In ThreadedBvhNode, this is meshid.
+        // But, here, it is material id.
+        // This doesn't work well.
         float mtrlid{ -1 };
 
         bool isLeaf() const

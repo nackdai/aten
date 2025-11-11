@@ -10,6 +10,8 @@
 #include "misc/stack.h"
 #include "sampler/sampler.h"
 
+#include "math/cuda_host_common_math.h"
+
 #ifdef __AT_CUDA__
 #include "cuda/cudadefs.h"
 #include "cuda/cudamemory.h"
@@ -17,16 +19,6 @@
 #endif
 
 namespace AT_NAME {
-    namespace _detail {
-#ifdef __AT_CUDA__
-        using v4 = float4;
-        using v3 = float3;
-#else
-        using v4 = aten::vec4;
-        using v3 = aten::vec3;
-#endif
-    };
-
     static constexpr size_t MedisumStackSize = 8;
     using MediumStack = aten::stack<int32_t, MedisumStackSize>;
 
@@ -43,9 +35,9 @@ namespace AT_NAME {
 
     struct PathContrib {
         union {
-            _detail::v4 v;
+            aten::v4 v;
             struct {
-                _detail::v3 contrib;
+                aten::v3 contrib;
                 float samples;
             };
         };

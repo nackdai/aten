@@ -70,7 +70,7 @@ namespace npr {
         const auto weight = _detail::ComputeBalanceHeuristic(pdfb, pdf_feature_line);
         const auto contrib = paths.throughput[idx].throughput * weight * line_color;
 
-        _detail::CopyVec(paths.contrib[idx].contrib, contrib);
+        aten::CopyVec(paths.contrib[idx].contrib, contrib);
 
         // Line is treated as light. So, query path need to be killed and termnated not to bounce anymore.
         paths.attrib[idx].is_terminated = true;

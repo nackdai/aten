@@ -311,7 +311,7 @@ namespace restir {
         const AT_NAME::ReSTIRInfo& self_info,
         const aten::const_span<AT_NAME::Reservoir>& prev_reservoirs,
         const aten::const_span<AT_NAME::ReSTIRInfo>& prev_infos,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_albedo_meshid,
+        const aten::const_span<aten::v4>& aov_albedo_meshid,
         MotionDepthBufferType& motion_detph_buffer)
     {
         const auto ix = idx % width;
@@ -336,7 +336,7 @@ namespace restir {
         // In this case, self reservoir's M should be number of light sampling.
         const auto maxM = 20 * combined_reservoir.M;
 
-        AT_NAME::_detail::v4 motion_depth;
+        aten::v4 motion_depth;
         if constexpr (std::is_class_v<std::remove_reference_t<decltype(motion_detph_buffer)>>) {
             motion_depth = motion_detph_buffer[idx];
         }
@@ -446,7 +446,7 @@ namespace restir {
         AT_NAME::Reservoir& combined_reservoir,
         const aten::const_span<AT_NAME::Reservoir>& reservoirs,
         const aten::const_span<AT_NAME::ReSTIRInfo>& infos,
-        const aten::const_span<AT_NAME::_detail::v4>& aov_albedo_meshid)
+        const aten::const_span<aten::v4>& aov_albedo_meshid)
     {
         const auto ix = idx % width;
         const auto iy = idx / width;
@@ -580,7 +580,7 @@ namespace restir {
         const Reservoir& reservoir,
         const ReSTIRInfo& restir_info,
         const aten::MaterialParameter& mtrl,
-        const AT_NAME::_detail::v4& albedo_meshid)
+        const aten::v4& albedo_meshid)
     {
         if (reservoir.IsValid()) {
             const auto& orienting_normal = restir_info.nml;

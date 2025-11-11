@@ -3,6 +3,7 @@
 #include "material/material_impl.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
+#include "renderer/pathtracing/pathtracing_impl.h"
 #include "renderer/svgf/svgf_impl.h"
 
 //#define RELEASE_DEBUG

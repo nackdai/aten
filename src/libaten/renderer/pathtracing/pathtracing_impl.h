@@ -29,13 +29,10 @@
 #include "renderer/pathtracing/pt_params.h"
 #include "renderer/pathtracing/pathtracing_nee_impl.h"
 
+#include "math/cuda_host_common_math.h"
+
 namespace AT_NAME
 {
-#ifndef __CUDACC__
-    inline aten::vec3 make_float3(float x, float y, float z) { return { x, y, z }; }
-    inline aten::vec4 make_float4(float x, float y, float z, float w) { return { x, y, z, w }; }
-#endif
-
     inline AT_DEVICE_API void ClearPathAttribute(PathAttribute& attrib)
     {
         attrib.isHit = false;
@@ -90,72 +87,6 @@ namespace AT_NAME
         paths.contrib[idx].samples += 1;
     }
 
-    namespace _detail {
-        template <class A, class B>
-        inline AT_DEVICE_API void AddVec3(A& dst, const B& add)
-        {
-            if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec3>) {
-                dst += add;
-            }
-            else {
-                dst += make_float3(add.x, add.y, add.z);
-            }
-        }
-
-        // NOTE:
-        // If template type A doesn't have the member variable "w", we can deal with it as vector 3 type.
-        // Otherwise, we can deal with it as vector 4 type.
-
-        template <class T>
-        using HasMemberWOp = decltype(std::declval<T>().w);
-
-        template <class A, class B>
-        inline AT_DEVICE_API auto CopyVec(A& dst, const B& src)
-            -> std::enable_if_t<!aten::is_detected<HasMemberWOp, A>::value, void>
-        {
-            if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec3>) {
-                dst = src;
-            }
-            else {
-                dst = make_float3(src.x, src.y, src.z);
-            }
-        }
-
-        template <class A, class B>
-        inline AT_DEVICE_API auto CopyVec(A& dst, const B& src)
-            -> std::enable_if_t<aten::is_detected<HasMemberWOp, A>::value, void>
-        {
-            if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec4>) {
-                dst = src;
-            }
-            else {
-                dst = make_float4(src.x, src.y, src.z, src.w);
-            }
-        }
-
-        template <class T = _detail::v3>
-        inline AT_DEVICE_API T MakeVec3(float x, float y, float z)
-        {
-            if constexpr (std::is_same_v<T, aten::vec3>) {
-                return { x, y, z };
-            }
-            else {
-                return make_float3(x, y, z);
-            }
-        }
-
-        template <class T = _detail::v4>
-        inline AT_DEVICE_API T MakeVec4(float x, float y, float z, float w)
-        {
-            if constexpr (std::is_same_v<T, aten::vec4>) {
-                return { x, y, z, w };
-            }
-            else {
-                return make_float4(x, y, z, w);
-            }
-        }
-    }
-
     template <class AOV_BUFFER_TYPE = aten::vec4>
     inline AT_DEVICE_API void ShadeMiss(
         int32_t idx,
@@ -183,7 +114,7 @@ namespace AT_NAME
             auto contrib = ApplyAlphaBlend(bg, paths.throughput[idx]);
             contrib *= paths.throughput[idx].throughput;
 
-            _detail::AddVec3(paths.contrib[idx].contrib, contrib);
+            aten::AddVec3(paths.contrib[idx].contrib, contrib);
 
             ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
@@ -250,7 +181,7 @@ namespace AT_NAME
             auto contrib = ApplyAlphaBlend(misW * emit, paths.throughput[idx]);
             contrib *= paths.throughput[idx].throughput;
 
-            _detail::AddVec3(paths.contrib[idx].contrib, contrib);
+            aten::AddVec3(paths.contrib[idx].contrib, contrib);
 
             ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
@@ -449,7 +380,7 @@ namespace AT_NAME
         }
 
         if (is_hit_to_light) {
-            _detail::AddVec3(paths.contrib[idx].contrib, shadow_ray.lightcontrib);
+            aten::AddVec3(paths.contrib[idx].contrib, shadow_ray.lightcontrib);
         }
 
         return is_hit_to_light;
@@ -506,7 +437,7 @@ namespace AT_NAME
         // Therefore, no need to compute it again here.
 
         auto contrib{ path_throughput.throughput * weight * light_color };
-        _detail::AddVec3(path_contrib.contrib, contrib);
+        aten::AddVec3(path_contrib.contrib, contrib);
 
         // When ray hit the light, tracing will finish.
         path_attrib.is_terminated = true;
@@ -556,7 +487,7 @@ namespace AT_NAME
             aten::vec3 contrib{
                 path_throughput.transmission * toon_bsdf + path_throughput.alpha_blend_radiance_on_the_way
             };
-            _detail::AddVec3(path_contrib.contrib, contrib);
+            aten::AddVec3(path_contrib.contrib, contrib);
 
             path_attrib.is_terminated = true;
             return true;
@@ -614,7 +545,7 @@ namespace AT_NAME
                 const aten::vec3 alpha_belended_radiance{
                     path_throughput.transmission * mtrl.baseColor * albedo * alpha
                 };
-                _detail::AddVec3(path_throughput.alpha_blend_radiance_on_the_way, alpha_belended_radiance);
+                aten::AddVec3(path_throughput.alpha_blend_radiance_on_the_way, alpha_belended_radiance);
                 path_throughput.transmission *= (1.0F - alpha);
             }
 

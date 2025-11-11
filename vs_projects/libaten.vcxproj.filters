@@ -556,6 +556,9 @@
     <ClInclude Include="..\src\libaten\display\srgb_oetf.h">
       <Filter>display</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\math\cuda_host_common_math.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

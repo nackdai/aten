@@ -163,7 +163,7 @@ namespace AT_NAME
                     const auto Ls = transmittance * phase_f * G * light_sample.light_color / light_sample.pdf / light_select_prob;
 
                     const auto contrib = paths.throughput[idx].throughput * Ls;
-                    _detail::AddVec3(paths.contrib[idx].contrib, contrib);
+                    aten::AddVec3(paths.contrib[idx].contrib, contrib);
                 }
             }
         }

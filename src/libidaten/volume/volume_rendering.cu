@@ -207,7 +207,7 @@ namespace vpt
                         if (radiance.has_value()) {
                             const auto& r = radiance.value();
                             const auto contrib = paths.throughput[idx].throughput * transmittance* r* static_cast<aten::vec3>(albedo);
-                            AT_NAME::_detail::AddVec3(paths.contrib[idx].contrib, contrib);
+                            aten::AddVec3(paths.contrib[idx].contrib, contrib);
                         }
                     }
                 }

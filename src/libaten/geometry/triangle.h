@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "types.h"
+#include "math/intersect.h"
 #include "math/mat4.h"
 #include "geometry/geomparam.h"
 #include "geometry/transformable.h"

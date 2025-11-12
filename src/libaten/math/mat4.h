@@ -220,7 +220,7 @@ namespace aten {
             return ret;
         }
 
-        inline ray applyRay(const ray& r) const
+        inline AT_HOST_DEVICE_API ray applyRay(const ray& r) const
         {
             vec3 org = r.org;
             vec3 dir = r.dir;

@@ -17,6 +17,8 @@
 #include "renderer/aov.h"
 #include "scene/scene.h"
 
+#include "accelerator/threaded_bvh_traverser.h"
+
 #ifdef __CUDACC__
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -279,14 +281,13 @@ namespace AT_NAME
         shadow_ray.isActive = isShadowRayActive;
     }
 
-    template <class SCENE = void>
     inline AT_DEVICE_API bool HitShadowRay(
         int32_t idx,
         int32_t bounce,
         const AT_NAME::context& ctxt,
         AT_NAME::Path paths,
-        const AT_NAME::ShadowRay& shadow_ray,
-        SCENE* scene = nullptr)
+        const AT_NAME::ShadowRay& shadow_ray
+    )
     {
         if (paths.attrib[idx].is_terminated) {
             return false;
@@ -328,22 +329,11 @@ namespace AT_NAME
 
             aten::Intersection isect;
 
-            bool isHit = false;
-
-            if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
-                // NOTE:
-                // operation has to be related with template arg SCENE.
-                if (scene) {
-                    isHit = scene->hit(ctxt, r, AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON, isect);
-                }
-            }
-            else {
-#ifndef __CUDACC__
-                // Dummy to build with clang.
-                auto intersectCloser = [](auto... args) -> bool { return true; };
-#endif
-                isHit = intersectCloser(&ctxt, r, &isect, distToLight - AT_MATH_EPSILON, enableLod);
-            }
+            bool isHit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                isect,
+                ctxt,
+                r,
+                AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON, -1);
 
             if (isHit) {
                 hitobj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));

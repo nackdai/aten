@@ -70,7 +70,7 @@ namespace aten
                     russian_roulette_depth_, bounce);
 
                 std::ignore = AT_NAME::HitShadowRay(
-                    idx, bounce, ctxt, path_host_.paths, shadow_rays_[idx], scene);
+                    idx, bounce, ctxt, path_host_.paths, shadow_rays_[idx]);
             }
         }
         else {

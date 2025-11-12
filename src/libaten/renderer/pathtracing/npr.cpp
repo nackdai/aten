@@ -140,7 +140,7 @@ namespace aten
                         idx, paths, ctxt, rays, shadow_rays,
                         isect, scene, rrDepth, depth);
                     AT_NAME::HitShadowRay(
-                        idx, depth, ctxt, paths, shadow_rays[idx], scene);
+                        idx, depth, ctxt, paths, shadow_rays[idx]);
                 }
             }
             else {

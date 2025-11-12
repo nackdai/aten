@@ -102,10 +102,12 @@ namespace aten
             const AT_NAME::context& ctxt,
             const aten::ray r,
             float t_min, float t_max,
-            bool enable_lod,
-            int32_t depth
+            int32_t lod_depth
         )
         {
+            isect.isVoxel = false;
+
+            const bool enable_lod = (lod_depth >= 0);
             float hit_t = AT_MATH_INF;
 
             using BvhNodesTypeBase = decltype(std::declval<AT_NAME::context>().GetBvhNodes(0));

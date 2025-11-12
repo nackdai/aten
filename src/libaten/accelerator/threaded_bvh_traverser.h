@@ -3,6 +3,7 @@
 #include "defs.h"
 
 #include "accelerator/threaded_bvh.h"
+#include "accelerator/sbvh.h"
 #include "scene/hit_parameter.h"
 #include "renderer/pathtracing/pt_params.h"
 
@@ -24,10 +25,11 @@ namespace aten {
     };
 }
 
-namespace AT_NAME
+namespace aten
 {
     // Threaded BVH Traverser.
     // This class can work for both ThreadedBVH and SBVH.
+    template <bool IS_SBVH = false >
     class ThreadedBvhTraverser {
     private:
         ThreadedBvhTraverser() = default;
@@ -58,14 +60,16 @@ namespace AT_NAME
         )
         {
 #ifdef __CUDACC__
+            constexpr int32_t BvhNodeSize = sizeof(ThreadedBvhNode) / (sizeof(float) * 4);
+
             // xyz : boxmin, z: hit
-            auto node0 = tex1Dfetch<float4>(nodes_list, aten::GPUBvhNodeSize * nodeid + 0);
+            auto node0 = tex1Dfetch<float4>(nodes_list, BvhNodeSize * nodeid + 0);
 
             // xyz : boxmax, z: miss
-            auto node1 = tex1Dfetch<float4>(nodes_list, aten::GPUBvhNodeSize * nodeid + 1);
+            auto node1 = tex1Dfetch<float4>(nodes_list, BvhNodeSize * nodeid + 1);
 
             // x : object_id, y : primid, z : exid, w : meshid
-            auto attrib = tex1Dfetch<float4>(nodes_list, aten::GPUBvhNodeSize * nodeid + 2);
+            auto attrib = tex1Dfetch<float4>(nodes_list, BvhNodeSize * nodeid + 2);
 
             node.boxmin = aten::vec3(node0.x, node0.y, node0.z);
             node.hit = node0.w;
@@ -204,6 +208,63 @@ namespace AT_NAME
                         }
                     }
                 }
+                else if (enable_lod && !is_traversing_top_layer) {
+                    // Node is voxeld as LOD in only SBVH.
+                    if constexpr (IS_SBVH) {
+                        // TODO
+                        aten::ThreadedSbvhNode sbvh_node = reinterpret_cast<aten::ThreadedSbvhNode&>(node);
+                        if (AT_IS_VOXEL(sbvh_node.voxeldepth)) {
+                            int32_t voxeldepth = static_cast<int32_t>(AT_GET_VOXEL_DEPTH(sbvh_node.voxeldepth));
+
+                            float t_result = 0.0f;
+                            aten::vec3 nml;
+                            is_hit = aten::aabb::hit(
+                                r,
+                                sbvh_node.boxmin, sbvh_node.boxmax,
+                                t_min, t_max, t_result,
+                                nml);
+
+                            bool is_intersect = (Type == aten::IntersectType::Any
+                                ? is_hit
+                                : is_hit && t_result < isect.t);
+
+                            if (is_intersect && voxeldepth >= lod_depth) {
+                                aten::Intersection isect_tmp;
+
+                                isect_tmp.isVoxel = true;
+
+                                // TODO
+                                // L2W matrix.
+
+                                isect_tmp.t = t_result;
+
+                                isect_tmp.nml_x = nml.x;
+                                isect_tmp.nml_y = nml.y;
+                                isect_tmp.nml_z = nml.z;
+
+                                isect_tmp.mtrlid = static_cast<int32_t>(sbvh_node.mtrlid);
+
+                                // Dummy value, return ray hit voxel.
+                                // Negative value is used as false. So, use positive value here.
+                                isect_tmp.objid = 1;
+
+                                if (isect_tmp.t < isect.t) {
+                                    isect = isect_tmp;
+                                    t_max = isect.t;
+                                }
+
+                                // If ray hits to LOD voxel, the traversal ends here.
+                                is_hit = false;
+
+                                if constexpr (Type == aten::IntersectType::Closer
+                                    || Type == aten::IntersectType::Any)
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
                 else {
                     is_hit = aten::aabb::hit(transformed_ray, node.boxmin, node.boxmax, t_min, t_max, &hit_t);
                 }
@@ -232,4 +293,14 @@ namespace AT_NAME
             return (isect.objid >= 0);
         }
     };
+
+    // TODO
+    // Define in one place like GpuPayloadDefs.h.
+#if defined(GPGPU_TRAVERSE_THREADED_BVH)
+    using BvhTraverser = ThreadedBvhTraverser<false>;
+#elif defined(GPGPU_TRAVERSE_SBVH)
+    using BvhTraverser = ThreadedBvhTraverser<true>;
+#else
+    static_assert(false, "Unknown BVH traverser type.");
+#endif
 }

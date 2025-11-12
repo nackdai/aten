@@ -549,25 +549,6 @@ namespace aten
             return scene_bounding_box_;
         }
 
-    private:
-        /**
-         * @brief Add a texture instance.
-         * @param[in] tex Texture instance to be added.
-         */
-        void AddTexture(const std::shared_ptr<texture>& tex);
-
-        /**
-         * @brief Add a material to the scene.
-         * @param[in] mtrl The material to be added.
-         */
-        void AddMaterial(std::shared_ptr<AT_NAME::material> mtrl)
-        {
-            AT_ASSERT(mtrl);
-            materials_.push_back(mtrl);
-            AT_ASSERT(materials_.size() < std::numeric_limits<decltype(MaterialParameter::id)>::max());
-            mtrl->param().id = static_cast<uint16_t>(materials_.size() - 1);
-        }
-
         /**
          * @brief Copy BVH nodes to the context.
          * @param[in] src Source BVH nodes.
@@ -585,6 +566,25 @@ namespace aten
         const std::vector<GPUBvhNode>& GetBvhNodes(size_t idx) const
         {
             return nodes_[idx];
+        }
+
+    private:
+        /**
+         * @brief Add a texture instance.
+         * @param[in] tex Texture instance to be added.
+         */
+        void AddTexture(const std::shared_ptr<texture>& tex);
+
+        /**
+         * @brief Add a material to the scene.
+         * @param[in] mtrl The material to be added.
+         */
+        void AddMaterial(std::shared_ptr<AT_NAME::material> mtrl)
+        {
+            AT_ASSERT(mtrl);
+            materials_.push_back(mtrl);
+            AT_ASSERT(materials_.size() < std::numeric_limits<decltype(MaterialParameter::id)>::max());
+            mtrl->param().id = static_cast<uint16_t>(materials_.size() - 1);
         }
 
     private:

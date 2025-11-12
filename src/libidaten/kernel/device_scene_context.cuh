@@ -128,6 +128,11 @@ namespace idaten {
             return textures[idx];
         }
 
+        __device__ cudaTextureObject_t GetBvhNodes(int32_t idx) const noexcept
+        {
+            return nodes[idx];
+        }
+
         __device__ const idaten::GridHolder* GetGrid() const noexcept
         {
             return &grid_holder;

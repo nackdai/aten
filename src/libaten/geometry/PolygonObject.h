@@ -7,10 +7,13 @@
 #include "geometry/triangle.h"
 #include "geometry/transformable.h"
 
+namespace aten {
+    class texture;
+}
+
 namespace AT_NAME
 {
     class TriangleGroupMesh;
-    class texture;
 
     /**
      * @brief Object is polygons to have the multiple materials.

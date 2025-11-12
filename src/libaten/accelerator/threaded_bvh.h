@@ -33,7 +33,7 @@ namespace aten
 
         float meshid{ -1 };        ///< Mesh id.
 
-        bool isLeaf() const
+        bool AT_DEVICE_API isLeaf() const
         {
             return (object_id >= 0 || primid >= 0);
         }

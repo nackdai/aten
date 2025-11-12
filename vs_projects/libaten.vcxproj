@@ -140,6 +140,7 @@
     <ClInclude Include="..\src\libaten\accelerator\bvh_util.h" />
     <ClInclude Include="..\src\libaten\accelerator\GpuPayloadDefs.h" />
     <ClInclude Include="..\src\libaten\accelerator\sbvh.h" />
+    <ClInclude Include="..\src\libaten\accelerator\threaded_bvh_traverser.h" />
     <ClInclude Include="..\src\libaten\accelerator\stackless_bvh.h" />
     <ClInclude Include="..\src\libaten\accelerator\threaded_bvh.h" />
     <ClInclude Include="..\src\libaten\aten.h" />

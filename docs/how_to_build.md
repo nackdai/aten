@@ -20,7 +20,7 @@ git submodule update --init --recursive
 3. Open `aten/vs_projects/aten.sln`.
 4. Build the projects with the `x64` configuration (not `x86`).
 
-The confirmed environment is `Visual Studio 2022` on Windows 10.
+The confirmed environment is `Visual Studio 2022` on Windows 11.
 
 ## Linux
 

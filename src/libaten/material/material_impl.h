@@ -238,20 +238,9 @@ namespace AT_NAME
         }
     }
 
-    namespace detail {
-        template <class T, class HasVariable = void>
-        struct has_texture_variable : public std::false_type {};
-
-        template <class T>
-        struct has_texture_variable<
-            T,
-            std::void_t<decltype(T::textures)>> : public std::true_type {};
-    }
-
-    template <class CONTEXT>
     inline AT_DEVICE_API bool FillMaterial(
         aten::MaterialParameter& dst_mtrl,
-        const CONTEXT& ctxt,
+        const AT_NAME::context& ctxt,
         const int32_t mtrl_id,
         const bool is_voxel)
     {
@@ -266,20 +255,6 @@ namespace AT_NAME
             }
             else {
                 dst_mtrl = ctxt.GetMaterial(static_cast<uint32_t>(mtrl_id));
-            }
-            // Check if `context` class has `textures` variable.
-            if constexpr (detail::has_texture_variable<CONTEXT>::value) {
-                // Check if `context::textures` is `int32_t` type.
-                static_assert(
-                    std::is_integral_v<std::remove_pointer_t<decltype(CONTEXT::textures)>>,
-                    "context::textures has to be integral");
-                if constexpr (std::is_integral_v<std::remove_pointer_t<decltype(CONTEXT::textures)>>) {
-                    /*dst_mtrl.albedoMap = static_cast<int32_t>(dst_mtrl.albedoMap >= 0 ? ctxt.textures[dst_mtrl.albedoMap] : -1);
-                    dst_mtrl.normalMap = static_cast<int32_t>(dst_mtrl.normalMap >= 0 ? ctxt.textures[dst_mtrl.normalMap] : -1);
-                    dst_mtrl.roughnessMap = static_cast<int32_t>(dst_mtrl.roughnessMap >= 0 ? ctxt.textures[dst_mtrl.roughnessMap] : -1);*/
-
-                    dst_mtrl.toon.remap_texture = static_cast<int32_t>(dst_mtrl.toon.remap_texture >= 0 ? ctxt.textures[dst_mtrl.toon.remap_texture] : -1);
-                }
             }
         }
         else {

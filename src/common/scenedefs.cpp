@@ -887,6 +887,8 @@ void BunnyScene::getCameraPosAndAt(
 
 void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
+    ctxt.enable_alpha_blending = true;
+
     auto back = CreateMaterial("backWall", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.580000f, 0.568000f, 0.544000f));
     back->param().baseColor.a = 0.0f;
 
@@ -914,7 +916,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
         aten::vec3(1.0f));
     scene->add(light);
 
-    auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 400.0f);
+    auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 100.0f);
     ctxt.AddLight(areaLight);
 
     for (int32_t i = 1; i < objs.size(); i++) {

@@ -132,16 +132,7 @@ namespace AT_NAME {
             // that the distance to light is 1.0 is helpful.
             result.dist_to_light = 1.0F;
 
-            // envmapidx is index to array of textures in context.
-            // In GPU, sampleTexture requires texture id of CUDA. So, arguments is different.
-            auto envmapidx =
-#ifdef __CUDACC__
-                ctxt.textures[param.envmapidx];
-#else
-                param.envmapidx;
-#endif
-
-            const auto luminance = AT_NAME::sampleTexture(ctxt, envmapidx, u, v, aten::vec4(1), lod);
+            const auto luminance = AT_NAME::sampleTexture(ctxt, param.envmapidx, u, v, aten::vec4(1), lod);
 
             result.light_color = param.scale * luminance;
         }

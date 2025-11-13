@@ -162,6 +162,7 @@ public:
                 0, 0,
                 bg);
 #else
+            ctxt_.CopyBvhNodes(scene_.getAccel()->getNodes());
             renderer_.SetBG(bg);
 #endif
         }

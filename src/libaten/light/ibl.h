@@ -55,8 +55,8 @@ namespace AT_NAME {
 
             // NOTE:
             // Sphere uniform sampling.
-            // Sample one point on sphere.
-            pdf /= (4.0f * AT_MATH_PI);
+            // Sample one point on "hemisphere".
+            pdf /= (2.0f * AT_MATH_PI);
 
             return pdf;
         }
@@ -123,8 +123,8 @@ namespace AT_NAME {
 
             // NOTE:
             // Sphere uniform sampling.
-            // Sample one point on sphere.
-            result.pdf = 1.0f / (4.0f * AT_MATH_PI);
+            // Sample one point on "hemisphere".
+            result.pdf = 1.0f / (2.0f * AT_MATH_PI);
 
             // NOTE:
             // Theoretically this has to be inf.

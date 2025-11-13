@@ -42,11 +42,10 @@ namespace AT_NAME
             return bg;
         }
 
-        template <class Context>
-        static AT_HOST_DEVICE_API aten::vec4 SampleFromRay(
+        static AT_DEVICE_API aten::vec4 SampleFromRay(
             const aten::vec3& in_ray,
             const aten::BackgroundResource& bg_resource,
-            const Context& ctxt)
+            const AT_NAME::context& ctxt)
         {
             if (bg_resource.envmap_tex_idx < 0) {
                 return bg_resource.bg_color;
@@ -58,11 +57,10 @@ namespace AT_NAME
             return SampleFromUV(uv.x, uv.y, bg_resource, ctxt);
         }
 
-        template <class Context>
-        static AT_HOST_DEVICE_API aten::vec4 SampleFromUV(
+        static AT_DEVICE_API aten::vec4 SampleFromUV(
             const float u, const float v,
             const aten::BackgroundResource& bg_resource,
-            const Context& ctxt)
+            const AT_NAME::context& ctxt)
         {
             if (bg_resource.envmap_tex_idx < 0) {
                 return bg_resource.bg_color;
@@ -70,13 +68,7 @@ namespace AT_NAME
 
             // TODO:
             // Texture LOD.
-#ifdef __CUDACC__
-            // envmapidx is index to array of textures in context.
-            // In GPU, sampleTexture requires texture id of CUDA. So, arguments is different.
-            aten::vec4 result{ tex2D<float4>(ctxt.textures[bg_resource.envmap_tex_idx], u, v) };
-#else
             const auto result = AT_NAME::sampleTexture(ctxt, bg_resource.envmap_tex_idx, u, v, aten::vec4(1));
-#endif
             return result * bg_resource.multiplyer;
         }
 

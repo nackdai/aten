@@ -121,9 +121,6 @@
     <ClInclude Include="..\src\libaten\material\sample_texture.h">
       <Filter>aten\material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\sample_texture_impl.cuh">
-      <Filter>kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\disney_brdf.h">
       <Filter>aten\material</Filter>
     </ClInclude>
@@ -410,9 +407,6 @@
       <Filter>aten\material</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\intersect.cu">
-      <Filter>kernel</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\sample_texture_impl.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\svgf\svgf_pt.cu">

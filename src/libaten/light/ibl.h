@@ -72,11 +72,10 @@ namespace AT_NAME {
             const aten::vec3& nml,
             aten::sampler* sampler) const;
 
-        template <class CONTEXT>
         static AT_DEVICE_API void sample(
             aten::LightSampleResult& result,
             const aten::LightParameter& param,
-            const CONTEXT& ctxt,
+            const AT_NAME::context& ctxt,
             const aten::vec3& org,
             const aten::vec3& nml,
             aten::sampler* sampler,

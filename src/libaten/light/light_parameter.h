@@ -21,7 +21,7 @@ namespace aten {
         vec3 dir;                       ///< Light direction to light position.
         float dist_to_light{ 0.0F };    ///< Distnace to light position.
         vec3 nml;                       ///< Light object surface normal.
-        vec3 light_color;               ///< Light color.
+        vec3 light_color{ 0.0F };       ///< Light color.
         float pdf{ 0.0F };              ///< Light sampling pdf.
         LightAttribute attrib;          ///< Light attribute.
     };

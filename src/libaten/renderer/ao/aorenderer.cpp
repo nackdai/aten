@@ -1,5 +1,6 @@
 #include "renderer/ao/aorenderer.h"
 
+#include "accelerator/threaded_bvh_traverser.h"
 #include "material/diffuse.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
@@ -28,14 +29,20 @@ namespace aten
         int32_t depth = 0;
 
         while (depth < max_depth_) {
-            if (scene->hit(ctxt, inRay, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
+            bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                isect,
+                ctxt,
+                inRay,
+                AT_MATH_EPSILON, AT_MATH_INF);
+
+            if (is_hit) {
                 path_host_.paths.attrib[idx].isHit = true;
 
                 AT_NAME::ao::ShandeAO(
                     idx,
                     GetFrameCount(), rnd,
                     m_numAORays, m_AORadius,
-                    path_host_.paths, ctxt, inRay, isect, scene);
+                    path_host_.paths, ctxt, inRay, isect);
             }
             else {
                 bool is_first_bounce = (depth == 0);

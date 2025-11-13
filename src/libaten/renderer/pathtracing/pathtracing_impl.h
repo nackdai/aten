@@ -333,7 +333,7 @@ namespace AT_NAME
                 isect,
                 ctxt,
                 r,
-                AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON, -1);
+                AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON);
 
             if (isHit) {
                 hitobj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));

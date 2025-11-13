@@ -8,6 +8,7 @@
 
 #include "renderer/volume/volume_pathtracing.h"
 
+#include "accelerator/threaded_bvh_traverser.h"
 #include "material/material_impl.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
@@ -44,13 +45,19 @@ namespace aten
 
             bool willContinue = true;
             bool will_update_depth = false;
-            Intersection isect;
 
             const auto& ray = rays_[idx];
 
             path_host_.paths.attrib[idx].isHit = false;
 
-            if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
+            Intersection isect;
+            bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                isect,
+                ctxt,
+                ray,
+                AT_MATH_EPSILON, AT_MATH_INF);
+
+            if (is_hit) {
                 path_host_.paths.attrib[idx].isHit = true;
 
                 Nee(
@@ -363,8 +370,7 @@ namespace aten
                         ctxt, *sampler,
                         light_sample,
                         rec.p, orienting_normal,
-                        paths.throughput[idx].mediums,
-                        scene);
+                        paths.throughput[idx].mediums);
 
                     if (is_visilbe_to_light) {
                         auto radiance = AT_NAME::ComputeRadianceNEE(

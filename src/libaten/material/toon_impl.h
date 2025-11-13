@@ -11,6 +11,8 @@
 #include "scene/host_scene_context.h"
 #endif
 
+#include "accelerator/threaded_bvh_traverser.h"
+
 namespace AT_NAME
 {
     // NOTE:
@@ -50,26 +52,15 @@ namespace AT_NAME
             aten::LightSampleResult light_sample;
             AT_NAME::Light::sample(light_sample, *target_light, ctxt, hit_pos, normal, &sampler);
 
-            bool is_hit = false;
-
             aten::ray r(hit_pos, light_sample.dir, normal);
 
             aten::Intersection isect;
 
-            if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
-                // NOTE:
-                // operation has to be related with template arg SCENE.
-                if (scene) {
-                    is_hit = scene->hit(ctxt, r, AT_MATH_EPSILON, light_sample.dist_to_light - AT_MATH_EPSILON, isect);
-                }
-            }
-            else {
-#ifndef __CUDACC__
-                // Dummy to build with clang.
-                auto intersectCloser = [](auto... args) -> bool { return true; };
-#endif
-                is_hit = intersectCloser(&ctxt, r, &isect, light_sample.dist_to_light - AT_MATH_EPSILON, 0);
-            }
+            bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closer>(
+                isect,
+                ctxt,
+                r,
+                AT_MATH_EPSILON, light_sample.dist_to_light - AT_MATH_EPSILON);
 
             if (param.type == aten::MaterialType::Toon) {
                 brdf = Toon::ComputeBRDF(

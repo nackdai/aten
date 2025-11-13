@@ -2,8 +2,7 @@
 
 #include "defs.h"
 
-#include "accelerator/threaded_bvh.h"
-#include "accelerator/sbvh.h"
+#include "accelerator/GpuPayloadDefs.h"
 #include "scene/hit_parameter.h"
 #include "renderer/pathtracing/pt_params.h"
 

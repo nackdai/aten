@@ -91,22 +91,6 @@ namespace AT_NAME {
         aten::sampler* sampler;
     };
 
-    inline AT_DEVICE_API aten::vec3 ApplyAlphaBlend(
-        const aten::vec3& c,
-        const PathThroughput& throughput)
-    {
-        return throughput.transmission * c + throughput.alpha_blend_radiance_on_the_way;
-    }
-
-    inline AT_DEVICE_API void ClearAlphaBlend(
-        PathThroughput& throughput,
-        PathAttribute& attrib)
-    {
-        throughput.transmission = 1.0F;
-        throughput.alpha_blend_radiance_on_the_way = aten::vec3(0.0F);
-        attrib.is_accumulating_alpha_blending = false;
-    }
-
     struct PathHost {
         Path paths;
 

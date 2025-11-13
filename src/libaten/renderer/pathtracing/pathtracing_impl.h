@@ -33,6 +33,24 @@
 
 namespace AT_NAME
 {
+    namespace _detail_pathtracing_impl {
+        inline AT_DEVICE_API aten::vec3 ApplyAlphaBlend(
+            const aten::vec3& c,
+            const PathThroughput& throughput)
+        {
+            return throughput.transmission * c + throughput.alpha_blend_radiance_on_the_way;
+        }
+
+        inline AT_DEVICE_API void ClearAlphaBlend(
+        PathThroughput& throughput,
+        PathAttribute& attrib)
+        {
+            throughput.transmission = 1.0F;
+            throughput.alpha_blend_radiance_on_the_way = aten::vec3(0.0F);
+            attrib.is_accumulating_alpha_blending = false;
+        }
+    }
+
     inline AT_DEVICE_API void ClearPathAttribute(PathAttribute& attrib)
     {
         attrib.isHit = false;
@@ -80,7 +98,7 @@ namespace AT_NAME
         paths.throughput[idx].depth_count = 0;
         paths.throughput[idx].mediums.clear();
 
-        ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
+        _detail_pathtracing_impl::ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
         ClearPathAttribute(paths.attrib[idx]);
 
@@ -111,12 +129,12 @@ namespace AT_NAME
                 }
             }
 
-            auto contrib = ApplyAlphaBlend(bg, paths.throughput[idx]);
+            auto contrib = _detail_pathtracing_impl::ApplyAlphaBlend(bg, paths.throughput[idx]);
             contrib *= paths.throughput[idx].throughput;
 
             aten::AddVec3(paths.contrib[idx].contrib, contrib);
 
-            ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
+            _detail_pathtracing_impl::ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
             paths.attrib[idx].is_terminated = true;
         }
@@ -178,12 +196,12 @@ namespace AT_NAME
                 misW = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
             }
 
-            auto contrib = ApplyAlphaBlend(misW * emit, paths.throughput[idx]);
+            auto contrib = _detail_pathtracing_impl::ApplyAlphaBlend(misW * emit, paths.throughput[idx]);
             contrib *= paths.throughput[idx].throughput;
 
             aten::AddVec3(paths.contrib[idx].contrib, contrib);
 
-            ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
+            _detail_pathtracing_impl::ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
             paths.attrib[idx].is_terminated = true;
         }
@@ -255,8 +273,7 @@ namespace AT_NAME
         auto distToLight = length(posLight - hit_pos);
 
         auto shadowRayOrg = aten::ray::Offset(hit_pos, hit_nml);
-        auto tmp = hit_pos + dirToLight - shadowRayOrg;
-        auto shadowRayDir = normalize(tmp);
+        auto shadowRayDir = dirToLight;
 
         shadow_ray.rayorg = shadowRayOrg;
         shadow_ray.raydir = shadowRayDir;
@@ -266,13 +283,14 @@ namespace AT_NAME
 
         auto radiance = ComputeRadianceNEEWithAlphaBlending(
             idx,
+            external_albedo,
             ctxt, paths,
             ray.dir, hit_nml,
             mtrl, pre_sampled_r, hit_u, hit_v,
             lightSelectPdf, sampleres);
         if (radiance.has_value()) {
             const auto& r = radiance.value();
-            shadow_ray.lightcontrib = paths.throughput[idx].throughput * r * static_cast<aten::vec3>(external_albedo);
+            shadow_ray.lightcontrib = paths.throughput[idx].throughput * r;
             isShadowRayActive = true;
         }
 
@@ -316,6 +334,8 @@ namespace AT_NAME
 
         bool is_hit_to_light = false;
 
+        // NOTE:
+        // Offset is already applied to shadow_ray.rayorg in FillShadowRay.
         aten::ray r(shadow_ray.rayorg, shadow_ray.raydir);
 
         int32_t loop_cnt = 0;
@@ -592,8 +612,9 @@ namespace AT_NAME
         auto c = dot(ray_along_normal, static_cast<aten::vec3>(next_dir));
 
         if (pdfb > 0 && c > 0) {
-            aten::vec3 contrib{ albedo * bsdf * c / pdfb };
-            contrib = ApplyAlphaBlend(contrib, paths.throughput[idx]);
+            aten::vec3 contrib{
+                (paths.throughput[idx].transmission * albedo + paths.throughput[idx].alpha_blend_radiance_on_the_way) * bsdf * c / pdfb
+            };
 
             paths.throughput[idx].throughput *= contrib;
             paths.throughput[idx].throughput /= russian_prob;
@@ -602,7 +623,7 @@ namespace AT_NAME
             paths.attrib[idx].is_terminated = true;
         }
 
-        ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
+        _detail_pathtracing_impl::ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
         if (paths.attrib[idx].is_terminated) {
             return;

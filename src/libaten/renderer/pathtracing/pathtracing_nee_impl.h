@@ -86,6 +86,7 @@ namespace AT_NAME
 
     inline AT_DEVICE_API std::optional<aten::vec3> ComputeRadianceNEEWithAlphaBlending(
         const int32_t idx,
+        const aten::vec3& albedo,
         const AT_NAME::context& ctxt,
         const AT_NAME::Path& paths,
         const aten::vec3& wi,
@@ -144,7 +145,10 @@ namespace AT_NAME
                 ? cosShadow * cosLight
                 : cosShadow * cosLight / dist2;
 
-            bsdf = ApplyAlphaBlend(bsdf, paths.throughput[idx]);
+            // NOTE:
+            // Adding alpha_blend_radiance_on_the_way simply to the computed contribution makes it brighter.
+            // So, multiply it to be affected by bsdf.
+            bsdf *= (paths.throughput[idx].transmission * albedo + paths.throughput[idx].alpha_blend_radiance_on_the_way);
 
             // NOTE:
             // 3point rendering equation.

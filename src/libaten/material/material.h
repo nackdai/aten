@@ -592,12 +592,6 @@ namespace AT_NAME
                 || mtrl.type == aten::MaterialType::StylizedBrdf;
         }
 
-        static AT_DEVICE_API aten::vec4 sampleAlbedoMap(
-            const AT_NAME::context& ctxt,
-            const aten::MaterialParameter* mtrl,
-            float u, float v,
-            uint32_t lod = 0);
-
         static AT_DEVICE_API void sampleMaterial(
             AT_NAME::MaterialSampling* result,
             const AT_NAME::context& ctxt,

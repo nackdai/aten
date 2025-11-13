@@ -42,7 +42,6 @@
 #include "light/directionallight.h"
 #include "light/spotlight.h"
 #include "light/arealight.h"
-#include "light/ibl.h"
 
 #include "scene/scene.h"
 #include "scene/hit_parameter.h"
@@ -52,7 +51,6 @@
 #include "geometry/EvaluateHitResult.h"
 
 #include "renderer/aov.h"
-#include "renderer/background.h"
 #include "renderer/npr/feature_line.h"
 
 #include "sampler/sampler.h"

@@ -5,28 +5,14 @@
 #include "math/vec4.h"
 #include "image/texture.h"
 
+// TODO
+// Use __CUDACC__ macro instead of __AT_CUDA__.
 #ifdef __AT_CUDA__
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 
 #include "kernel/device_scene_context.cuh"
-
-namespace AT_NAME {
-    AT_DEVICE_API aten::vec4 sampleTexture(
-        const AT_NAME::context& ctxt,
-        const int32_t texid,
-        float u, float v,
-        const aten::vec4& defaultValue,
-        int32_t lod = 0);
-
-#ifndef __AT_DEBUG__
-#include "kernel/sample_texture_impl.cuh"
-#endif
-}
-#else
-
-#include "scene/host_scene_context.h"
 
 namespace AT_NAME {
     inline AT_DEVICE_API aten::vec4 sampleTexture(
@@ -36,9 +22,32 @@ namespace AT_NAME {
         const aten::vec4& defaultValue,
         int32_t lod = 0)
     {
+        auto ret = defaultValue;
+
+#ifdef __CUDACC__
+        if (texid >= 0) {
+            auto clr = tex2DLod<float4>(ctxt.textures[texid], u, v, lod);
+            ret = aten::vec4(clr.x, clr.y, clr.z, clr.w);
+        }
+#endif
+
+        return ret;
+    }
+}
+#else
+
+#include "scene/host_scene_context.h"
+
+namespace AT_NAME {
+    inline aten::vec4 sampleTexture(
+        const AT_NAME::context& ctxt,
+        const int32_t texid,
+        float u, float v,
+        const aten::vec4& defaultValue,
+        int32_t lod = 0)
+    {
         aten::vec4 ret = defaultValue;
 
-        // TODO
         if (texid >= 0) {
             auto tex = ctxt.GetTexture(texid);
             if (tex) {

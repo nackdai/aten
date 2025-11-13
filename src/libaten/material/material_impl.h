@@ -21,15 +21,6 @@
 
 namespace AT_NAME
 {
-    inline AT_DEVICE_API aten::vec4 material::sampleAlbedoMap(
-        const AT_NAME::context& ctxt,
-        const aten::MaterialParameter* mtrl,
-        float u, float v,
-        uint32_t lod/*= 0*/)
-    {
-        return sampleTexture(ctxt, mtrl->albedoMap, u, v, mtrl->baseColor, lod);
-    }
-
     inline AT_DEVICE_API void material::sampleMaterial(
         AT_NAME::MaterialSampling* result,
         const AT_NAME::context& ctxt,

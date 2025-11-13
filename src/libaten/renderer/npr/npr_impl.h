@@ -171,10 +171,10 @@ namespace npr {
             // Get merrics.
             aten::MaterialParameter mtrl_tmp;
             AT_NAME::FillMaterial(mtrl_tmp, ctxt,hrec_query.mtrlid, hrec_query.isVoxel);
-            const auto query_albedo = material::sampleAlbedoMap(ctxt, &mtrl_tmp, hrec_query.u, hrec_query.v);
+            const auto query_albedo = AT_NAME::sampleTexture(ctxt, mtrl_tmp.albedoMap, hrec_query.u, hrec_query.v, mtrl_tmp.baseColor);
 
             AT_NAME::FillMaterial(mtrl_tmp, ctxt, hrec_sample.mtrlid, hrec_sample.isVoxel);
-            const auto sample_albedo = material::sampleAlbedoMap(ctxt, &mtrl_tmp, hrec_sample.u, hrec_sample.v);
+            const auto sample_albedo = AT_NAME::sampleTexture(ctxt, mtrl_tmp.albedoMap, hrec_sample.u, hrec_sample.v, mtrl_tmp.baseColor);
 
             const auto query_depth = length(hrec_query.p - cam_org);
             const auto sample_depth = length(hrec_sample.p - cam_org);

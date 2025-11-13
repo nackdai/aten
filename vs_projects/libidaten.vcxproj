@@ -89,14 +89,10 @@
     <ClInclude Include="..\src\libidaten\cuda\helper_math.h" />
     <ClInclude Include="..\src\libidaten\idaten.h" />
     <ClInclude Include="..\src\libidaten\idaten_namespace.h" />
-    <ClInclude Include="..\src\libidaten\kernel\accelerator.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\bluenoiseSampler.cuh" />
-    <ClInclude Include="..\src\libidaten\kernel\bvh.cuh" />
-    <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\device_scene_context.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\GenMipMaps.h" />
     <ClInclude Include="..\src\libidaten\kernel\intersect.cuh" />
-    <ClInclude Include="..\src\libidaten\kernel\intersecttype.h" />
     <ClInclude Include="..\src\libidaten\kernel\intersect_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\LBVHBuilder.h" />
     <ClInclude Include="..\src\libidaten\kernel\MortonCode.cuh" />
@@ -107,11 +103,7 @@
     <ClInclude Include="..\src\libidaten\kernel\RadixSort.h" />
     <ClInclude Include="..\src\libidaten\kernel\renderer.h" />
     <ClInclude Include="..\src\libidaten\kernel\sample_texture_impl.cuh" />
-    <ClInclude Include="..\src\libidaten\kernel\sbvh.cuh" />
-    <ClInclude Include="..\src\libidaten\kernel\sbvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\Skinning.h" />
-    <ClInclude Include="..\src\libidaten\kernel\stackless_bvh.cuh" />
-    <ClInclude Include="..\src\libidaten\kernel\stackless_bvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\StreamCompaction.h" />
     <ClInclude Include="..\src\libidaten\npr\npr_pathtracing.h" />
     <ClInclude Include="..\src\libidaten\restir\restir.h" />
@@ -258,22 +250,10 @@
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\sbvh.cu">
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\Skinning.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\stackless_bvh.cu">
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\tex_viewer.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
@@ -340,12 +320,6 @@
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\src\libidaten\kernel\bvh.cu">
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\StreamCompaction.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>

@@ -11,7 +11,6 @@
 #ifdef __CUDACC__
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
-#include "kernel/accelerator.cuh"
 #include "kernel/device_scene_context.cuh"
 #else
 #include "scene/host_scene_context.h"

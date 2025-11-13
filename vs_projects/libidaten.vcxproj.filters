@@ -130,24 +130,6 @@
     <ClInclude Include="..\src\libaten\sampler\cmj.h">
       <Filter>aten\sampler</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\bvh.cuh">
-      <Filter>kernel\accelerator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh">
-      <Filter>kernel\accelerator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\accelerator.cuh">
-      <Filter>kernel\accelerator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\intersecttype.h">
-      <Filter>kernel\accelerator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\stackless_bvh.cuh">
-      <Filter>kernel\accelerator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\stackless_bvh_impl.cuh">
-      <Filter>kernel\accelerator</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\geometry\sphere.h">
       <Filter>aten\geometry</Filter>
     </ClInclude>
@@ -159,12 +141,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\pt_common.h">
       <Filter>kernel\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\sbvh.cuh">
-      <Filter>kernel\accelerator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\sbvh_impl.cuh">
-      <Filter>kernel\accelerator</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libidaten\svgf\svgf.h">
       <Filter>svgf</Filter>
@@ -453,15 +429,6 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\svgf\svgf_debug.cu">
       <Filter>svgf</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\bvh.cu">
-      <Filter>kernel\accelerator</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\stackless_bvh.cu">
-      <Filter>kernel\accelerator</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\sbvh.cu">
-      <Filter>kernel\accelerator</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\disney_brdf.cpp">
       <Filter>aten\material</Filter>

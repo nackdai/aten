@@ -2,7 +2,6 @@
 
 #include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
-#include "kernel/accelerator.cuh"
 #include "kernel/StreamCompaction.h"
 #include "kernel/pt_common.h"
 
@@ -64,7 +63,9 @@ __global__ void fillAOV(
     AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
 
     aten::Intersection isect;
-    bool isHit = intersectClosest(&ctxt, camsample.r, &isect);
+    bool isHit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+        isect, ctxt, camsample.r,
+        AT_MATH_EPSILON, AT_MATH_INF);
 
     float4 clr = make_float4(1);
 
@@ -151,7 +152,9 @@ __global__ void pickPixel(
     AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
 
     aten::Intersection isect;
-    bool isHit = intersectClosest(&ctxt, camsample.r, &isect);
+    bool isHit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+        isect, ctxt, camsample.r,
+        AT_MATH_EPSILON, AT_MATH_INF);
 
     if (isHit) {
         const auto idx = getIdx(ix, iy, width);

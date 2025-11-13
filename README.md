@@ -69,6 +69,10 @@ Idaten is a Japanese god who runs fast.
   - To keep things easy and simple, SIMD is not used.
 - Some comments are still in Japanese.
 
+## Getting started
+
+[Getting started](docs/getting_started.md)
+
 ## How to Build
 
 [How to Build](docs/how_to_build.md)

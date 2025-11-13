@@ -2,6 +2,9 @@
 
 #include "atenscene.h"
 
+// NOTE:
+// https://horo.ch/docs/mine/pdf/Mb-Am-Sph.pdf
+
 std::tuple<float, float, CubemapFace> AngularMap::GetUVFromDir(const aten::vec3& dir) const
 {
     float u = 0.0F;

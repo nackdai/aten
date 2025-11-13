@@ -2,6 +2,9 @@
 
 #include "atenscene.h"
 
+// NOTE:
+// https://horo.ch/docs/mine/pdf/Mb-Am-Sph.pdf
+
 std::tuple<float, float, CubemapFace> MirrorMap::GetUVFromDir(const aten::vec3& dir) const
 {
     // We assume the followings:

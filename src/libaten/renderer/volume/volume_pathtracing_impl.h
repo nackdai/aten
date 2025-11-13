@@ -1,6 +1,8 @@
 #pragma once
 
 #include "defs.h"
+
+#include "accelerator/threaded_bvh_traverser.h"
 #include "material/material.h"
 #include "math/ray.h"
 #include "math/vec3.h"
@@ -146,8 +148,7 @@ namespace AT_NAME
                     ctxt, paths.sampler[idx],
                     light_sample,
                     next_ray.org, nml,
-                    paths.throughput[idx].mediums,
-                    scene);
+                    paths.throughput[idx].mediums);
 
                 if (is_visilbe_to_light) {
                     const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
@@ -179,15 +180,14 @@ namespace AT_NAME
         }
     }
 
-    template <class SCENE = void>
     inline AT_DEVICE_API aten::tuple<bool, float> TraverseRayInMedium(
         const AT_NAME::context& ctxt,
         aten::sampler& sampler,
         const aten::LightSampleResult& light_sample,
         const aten::vec3& start_point,
         const aten::vec3& surface_nml,
-        AT_NAME::MediumStack medium_stack,
-        SCENE* scene = nullptr)
+        AT_NAME::MediumStack medium_stack
+    )
     {
         float transmittance = 1.0F;
 
@@ -206,24 +206,13 @@ namespace AT_NAME
         auto t_max = distance_to_light - AT_MATH_EPSILON;
 
         while (true) {
-            bool is_hit = false;
-
             aten::Intersection isect;
 
-            if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
-                // NOTE:
-                // operation has to be related with template arg SCENE.
-                if (scene) {
-                    is_hit = scene->hit(ctxt, ray, AT_MATH_EPSILON, t_max, isect, aten::HitStopType::Closer);
-                }
-            }
-            else {
-#ifndef __CUDACC__
-                // Dummy to build with clang.
-                auto intersectCloser = [](auto... args) -> bool { return true; };
-#endif
-                is_hit = intersectCloser(&ctxt, ray, &isect, t_max, false);
-            }
+            bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closer>(
+                isect,
+                ctxt,
+                ray,
+                AT_MATH_EPSILON, t_max);
 
             if (is_hit) {
                 const auto& hit_obj = ctxt.GetObject(isect.objid);

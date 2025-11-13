@@ -1,5 +1,6 @@
 #include "renderer/restir/restir.h"
 
+#include "accelerator/threaded_bvh_traverser.h"
 #include "material/material_impl.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
@@ -42,7 +43,13 @@ namespace aten
         path_host_.paths.attrib[idx].isHit = false;
 
         Intersection isect;
-        if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
+        bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+            isect,
+            ctxt,
+            ray,
+            AT_MATH_EPSILON, AT_MATH_INF);
+
+        if (is_hit) {
             path_host_.paths.attrib[idx].isHit = true;
 
             if (bounce == 0) {

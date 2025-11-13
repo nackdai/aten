@@ -102,7 +102,7 @@ namespace aten
             const AT_NAME::context& ctxt,
             const aten::ray r,
             float t_min, float t_max,
-            int32_t lod_depth
+            int32_t lod_depth = -1
         )
         {
             isect.isVoxel = false;

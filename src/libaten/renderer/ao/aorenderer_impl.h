@@ -1,5 +1,6 @@
 #pragma once
 
+#include "accelerator/threaded_bvh_traverser.h"
 #include "geometry/EvaluateHitResult.h"
 #include "material/material_impl.h"
 #include "renderer/pathtracing/pt_params.h"
@@ -32,7 +33,6 @@ namespace ao {
      * @param[in] isect Scene intersection information.
      * @param[in,out] scene Scene instance. Only for running on host.
      */
-    template <class SCENE = void>
     inline AT_DEVICE_API void ShandeAO(
         int32_t idx,
         uint32_t frame, uint32_t rnd,
@@ -40,8 +40,8 @@ namespace ao {
         AT_NAME::Path& paths,
         const context& ctxt,
         const aten::ray& ray,
-        const aten::Intersection& isect,
-        SCENE* scene = nullptr)
+        const aten::Intersection& isect
+    )
     {
         auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
         paths.sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 5 * 300, scramble);
@@ -80,20 +80,11 @@ namespace ao {
 
             aten::Intersection ao_isect;
 
-            bool isHit = false;
-
-            if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
-                if (scene) {
-                    isHit = scene->hit(ctxt, ao_ray, AT_MATH_EPSILON, ao_radius, ao_isect);
-                }
-            }
-            else {
-#ifndef __CUDACC__
-                // Dummy to build with clang.
-                auto intersectClosest = [](auto... args) -> bool { return true; };
-#endif
-                isHit = intersectClosest(&ctxt, ao_ray, &ao_isect, ao_radius);
-            }
+            bool isHit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                ao_isect,
+                ctxt,
+                ao_ray,
+                AT_MATH_EPSILON, ao_radius);
 
             if (isHit) {
                 if (c > 0.0f) {

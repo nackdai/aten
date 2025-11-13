@@ -2,6 +2,7 @@
 
 #include "renderer/pathtracing/pathtracing.h"
 
+#include "accelerator/threaded_bvh_traverser.h"
 #include "material/material_impl.h"
 #include "renderer/pathtracing/pathtracing_impl.h"
 #include "renderer/npr/npr_impl.h"
@@ -67,7 +68,14 @@ namespace aten
 
             float hit_point_distance = 0;
 
-            if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
+            // Check if the query ray hits any object.
+            bool is_query_ray_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                isect,
+                ctxt,
+                ray,
+                AT_MATH_EPSILON, AT_MATH_INF);
+
+            if (is_query_ray_hit) {
                 const auto& obj = ctxt.GetObject(isect.objid);
                 AT_NAME::evaluate_hit_result(hrec_query, obj, ctxt, ray, isect);
 
@@ -99,9 +107,15 @@ namespace aten
                         continue;
                     }
 
+                    // Check if the sample ray hits any object.
                     Intersection isect_sample_ray;
+                    bool is_sample_ray_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                        isect_sample_ray,
+                        ctxt,
+                        sample_ray,
+                        AT_MATH_EPSILON, AT_MATH_INF);
 
-                    if (scene->hit(ctxt, sample_ray, AT_MATH_EPSILON, AT_MATH_INF, isect_sample_ray)) {
+                    if (is_sample_ray_hit) {
                         // Query ray hits and then sample ray hits.
                         aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::npr::EvaluateQueryAndSampleRayHit(
                             sample_ray_descs[i],
@@ -169,8 +183,15 @@ namespace aten
                         continue;
                     }
 
+                    // Check if the sample ray hits any object.
                     Intersection isect_sample_ray;
-                    if (scene->hit(ctxt, sample_ray, AT_MATH_EPSILON, AT_MATH_INF, isect_sample_ray)) {
+                    bool is_sample_ray_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                        isect_sample_ray,
+                        ctxt,
+                        sample_ray,
+                        AT_MATH_EPSILON, AT_MATH_INF);
+
+                    if (is_sample_ray_hit) {
                         // Query ray doesn't hit, but sample ray hits.
                         aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::npr::EvaluateQueryRayNotHitButSampleRayHit(
                             ctxt, ray,

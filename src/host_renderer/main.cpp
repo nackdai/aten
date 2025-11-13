@@ -101,6 +101,8 @@ public:
         renderer_.enableFeatureLine(true);
 #endif
 
+        ctxt_.CopyBvhNodes(scene_.getAccel()->getNodes());
+
         return true;
     }
 

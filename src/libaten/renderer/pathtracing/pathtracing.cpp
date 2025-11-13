@@ -2,6 +2,7 @@
 
 #include "renderer/pathtracing/pathtracing.h"
 
+#include "accelerator/threaded_bvh_traverser.h"
 #include "material/material_impl.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
@@ -37,7 +38,13 @@ namespace aten
 
             path_host_.paths.attrib[idx].isHit = false;
 
-            if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
+            bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                isect,
+                ctxt,
+                ray,
+                AT_MATH_EPSILON, AT_MATH_INF);
+
+            if (is_hit) {
                 if (depth == 0 && first_hrec) {
                     const auto& obj = ctxt.GetObject(isect.objid);
                     AT_NAME::evaluate_hit_result(*first_hrec, obj, ctxt, ray, isect);

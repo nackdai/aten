@@ -1,6 +1,5 @@
 #include "npr/npr_pathtracing.h"
 
-#include "kernel/accelerator.cuh"
 #include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
 #include "kernel/pt_common.h"
@@ -136,7 +135,10 @@ namespace npr_kernel {
 
             aten::Intersection isect_sample_ray;
 
-            auto is_hit = intersectClosest(&ctxt, sample_ray, &isect_sample_ray);
+            auto is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                isect_sample_ray, ctxt, sample_ray,
+                AT_MATH_EPSILON, AT_MATH_INF);
+
             if (is_hit) {
                 // Query ray hits and then sample ray hits.
                 aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::npr::EvaluateQueryAndSampleRayHit(
@@ -254,7 +256,10 @@ namespace npr_kernel {
 
             aten::Intersection isect_sample_ray;
 
-            auto is_hit = intersectClosest(&ctxt, sample_ray, &isect_sample_ray);
+            auto is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                isect_sample_ray, ctxt, sample_ray,
+                AT_MATH_EPSILON, AT_MATH_INF);
+
             if (is_hit) {
                 // Query ray doesn't hit, but sample ray hits.
                 aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = AT_NAME::npr::EvaluateQueryRayNotHitButSampleRayHit(

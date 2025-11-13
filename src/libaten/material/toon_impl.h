@@ -6,7 +6,6 @@
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "kernel/device_scene_context.cuh"
-#include "kernel/accelerator.cuh"
 #else
 #include "scene/host_scene_context.h"
 #endif

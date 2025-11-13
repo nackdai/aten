@@ -7,7 +7,6 @@
 #include "kernel/persistent_thread.h"
 #include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
-#include "kernel/accelerator.cuh"
 #include "kernel/renderer.h"
 #include "kernel/pt_standard_impl.h"
 
@@ -195,7 +194,9 @@ namespace kernel {
             t_max = hitDistLimit;
         }
 
-        bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max);
+        bool isHit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+            isect, ctxt, rays[idx],
+            AT_MATH_EPSILON, t_max);
 
 #if 0
         isects[idx].t = isect.t;

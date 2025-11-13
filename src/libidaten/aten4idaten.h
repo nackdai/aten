@@ -4,6 +4,7 @@
 #include "types.h"
 
 #include "accelerator/GpuPayloadDefs.h"
+#include "accelerator/threaded_bvh_traverser.h"
 
 #include "camera/camera.h"
 #include "camera/pinhole.h"

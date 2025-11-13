@@ -21,7 +21,7 @@ namespace aten {
         aten::vec3 c2{ v[2] };
 
         aten::vec3 out_scale;
-    
+
         out_scale.x = length(c0);
         auto r0 = c0 / out_scale.x;
 

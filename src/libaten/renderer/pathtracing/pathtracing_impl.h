@@ -11,7 +11,6 @@
 #include "math/ray.h"
 #include "material/material.h"
 #include "material/material_impl.h"
-#include "material/toon_impl.h"
 #include "misc/tuple.h"
 #include "misc/type_traits.h"
 #include "renderer/aov.h"
@@ -470,8 +469,8 @@ namespace AT_NAME
             const auto toon_bsdf = Toon::bsdf(
                 ctxt, hit_target_mtrl, sampler,
                 hrec.p, hrec.normal, ray.dir,
-                0.0f, 0.0f,
-                scene);
+                0.0f, 0.0f
+            );
 
             aten::vec3 contrib{
                 path_throughput.transmission * toon_bsdf + path_throughput.alpha_blend_radiance_on_the_way

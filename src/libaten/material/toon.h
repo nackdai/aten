@@ -33,16 +33,15 @@ namespace AT_NAME
         ~Toon() = default;
 
     public:
-        template <class SCENE = void>
-        static inline AT_DEVICE_API aten::vec3 bsdf(
+        static AT_DEVICE_API aten::vec3 bsdf(
             const AT_NAME::context& ctxt,
             const aten::MaterialParameter& param,
             aten::sampler& sampler,
             const aten::vec3& hit_pos,
             const aten::vec3& normal,
             const aten::vec3& wi,
-            float u, float v,
-            SCENE* scene = nullptr);
+            float u, float v
+        );
 
         bool edit(aten::IMaterialParamEditor* editor) override;
 

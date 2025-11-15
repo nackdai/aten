@@ -18,7 +18,7 @@ jobs:
     name: check_diff
     runs-on: ubuntu-22.04
     outputs:
-      should_build_image: ${{ steps.check_image_time.outputs.should_build_image }}
+      should_build_image: ${{ steps.set_outputs.outputs.should_build_image }}
       should_build_source: ${{ steps.changed_files_to_build_source.outputs.any_modified }}
     if: github.ref != 'refs/heads/main'
     steps:
@@ -37,7 +37,7 @@ jobs:
           files_ignore: |
             .devcontainer/**
             .dockerignore
-            .github/win_ci.yml
+            .github/workflows/win_ci.yml
             .gitignore
             .home/**
             asset/**
@@ -52,61 +52,23 @@ jobs:
         uses: step-security/changed-files@v46
         with:
           files: |
+            .github/workflows/build_docker.yml
             docker/**/Dockerfile
             docker/build_docker_image.sh
 
-      - name: Display changed files
+      - name: Display changed files and set outputs
+        id: set_outputs
         run: |
           echo "::notice::Changed files to build source: ${{ steps.changed_files_to_build_source.outputs.all_modified_files }}"
           echo "::notice::Changed files to build Docker image: ${{ steps.check_change_docker_file.outputs.all_modified_files }}"
-
-      - name: Login to GitHub Container Registry
-        id: login
-        if: ${{ steps.check_change_docker_file.outputs.any_modified == 'true' }}
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # Compare the last modified time of the docker directory and the created time of the docker image as unit time.
-      - name: Check docker image build time
-        id: check_image_time
-        if: ${{ steps.check_change_docker_file.outputs.any_modified == 'true' }}
-        run: |
-          docker pull ghcr.io/${{ github.repository }}/aten
-          file_change_date=$(git log -1 --pretty="format:%ct" ./docker/)
-          image_build_date=$(docker inspect -f '{{ .Created }}' ghcr.io/${{ github.repository }}/aten | xargs -i date --utc --date="{}" +%s)
-          echo "::notice::File [${file_change_date}] DockerImage [${image_build_date}]"
-          if [[ "${file_change_date}" -gt "${image_build_date}" ]]; then
-            echo "::notice::Docker image should be rebuilt."
-            echo "should_build_image=true" >> $GITHUB_OUTPUT
-          else
-            echo "::notice::No need to rebuild the Docker image."
-            echo "should_build_image=false" >> $GITHUB_OUTPUT
-          fi
+          echo "should_build_image=${{ steps.check_change_docker_file.outputs.any_modified }}" >> $GITHUB_OUTPUT
 
   build_docker:
     name: build_docker
-    runs-on: ubuntu-22.04
     needs: check_diff
-    if: ${{ needs.check_diff.outputs.should_build_image == 'true' }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: true
-
-      # Run the following step if Dockerfile is modified.
-      - name: Build images
-        id: build_image
-        run: |
-          ./docker/build_docker_image.sh -b ./docker/ -p "ghcr.io/${{ github.repository }}/"
-
-      - name: Push images
-        run: |
-          docker push ghcr.io/${{ github.repository }}/aten:latest
-          docker push ghcr.io/${{ github.repository }}/aten_dev:latest
+    uses: ./.github/workflows/build_docker.yml
+    with:
+      any_modified: ${{ needs.check_diff.outputs.should_build_image }}
 
   check_build_trigger:
     name: check_build_trigger
@@ -120,8 +82,10 @@ jobs:
         id: set_ci_trigger
         run: |
           if [[ "${{ needs.check_diff.outputs.should_build_source }}" == 'true' || "${{ needs.check_diff.outputs.should_build_image }}" == 'true' ]]; then
+            echo "::notice::Need to Run ci job."
             echo "should_run_build=true" >> $GITHUB_OUTPUT
           else
+            echo "::notice::No need to Run ci job."
             echo "should_run_build=false" >> $GITHUB_OUTPUT
           fi
 
@@ -129,7 +93,7 @@ jobs:
     name: ci
     runs-on: ubuntu-22.04
     needs: [build_docker, check_build_trigger]
-    if: ${{ ! failure() }}
+    if: ${{ needs.check_build_trigger.outputs.should_run_build == 'true' }}
     container:
       image: ghcr.io/${{ github.repository }}/aten_dev:latest
       credentials:
@@ -153,7 +117,6 @@ jobs:
           pre-commit run -a
 
       - name: Configure
-        if: ${{ needs.check_build_trigger.outputs.should_run_build == 'true' }}
         run: |
           mkdir -p build
           cd build
@@ -161,7 +124,6 @@ jobs:
           ./RunCMake.sh Release 75
 
       - name: Build
-        if: ${{ needs.check_build_trigger.outputs.should_run_build == 'true' }}
         run: |
           cd build
           ninja -j 4

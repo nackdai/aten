@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD024 -->
 # Python development
 
 ## pyenv
@@ -24,6 +25,44 @@ eval "$(pyenv init -)"
 
 Refer to [this Japanese article](https://qiita.com/probabilityhill/items/9a22f395a1e93206c846).
 
+### Install python via pyenv
+
+* List the installable python versions:
+
+```sh
+pyenv install --list
+```
+
+* Install the specific python version:
+
+```sh
+pyenv install <version>
+```
+
+e.g.
+
+```sh
+pyenv install 3.12.12
+```
+
+* Change which version use:
+
+```sh
+pyenv global 3.12.12
+```
+
+or
+
+```sh
+pyenv local 3.12.12
+```
+
+* List the changeable python versions:
+
+```sh
+pyenv versions
+```
+
 ## venv
 
 We can create a local virtual environment with:
@@ -37,7 +76,7 @@ accidental commits.
 
 To activate the virtual environment:
 
-- **Linux**
+### Linux
 
 ```bash
 source .venv/bin/activate
@@ -49,7 +88,7 @@ or
 . .venv/bin/activate
 ```
 
-- **Windows**
+### Windows
 
 We can activate the virtual environment in both PowerShell and cmd with:
 
@@ -62,6 +101,10 @@ To deactivate the virtual environment on any platform:
 ```bash
 deactivate
 ```
+
+### If python version is changed
+
+`venv` needs to be deactivated and then needs to be activated again.
 
 ## Install a project in editable mode
 

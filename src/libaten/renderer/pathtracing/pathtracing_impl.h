@@ -452,7 +452,6 @@ namespace AT_NAME
         return true;
     }
 
-    template <class SCENE = void>
     inline AT_DEVICE_API bool HitTeminatedMaterial(
         const AT_NAME::context& ctxt,
         aten::sampler& sampler,
@@ -464,8 +463,7 @@ namespace AT_NAME
         AT_NAME::PathThroughput& path_throughput,
         const aten::ray& ray,
         const aten::hitrecord& hrec,
-        const aten::MaterialParameter& hit_target_mtrl,
-        SCENE* scene = nullptr)
+        const aten::MaterialParameter& hit_target_mtrl)
     {
         const auto is_teminate_mtrl = material::IsTerminatedMaterial(hit_target_mtrl);
         if (!is_teminate_mtrl) {
@@ -637,7 +635,7 @@ namespace AT_NAME
         rays[idx] = aten::ray(rec.p, next_dir, ray_along_normal);
     }
 
-    template <class SCENE = void, bool ENABLE_ALPHA_TRANLUCENT = false>
+    template <bool ENABLE_ALPHA_TRANLUCENT = false>
     inline AT_DEVICE_API void ShadePathTracing(
         int32_t idx,
         const AT_NAME::context& ctxt,
@@ -647,8 +645,7 @@ namespace AT_NAME
         aten::MaterialParameter& mtrl,
         AT_NAME::ShadowRay& shadow_ray,
         int32_t rrDepth,
-        int32_t bounce,
-        SCENE* scene = nullptr)
+        int32_t bounce)
     {
         const auto& ray = rays[idx];
         auto* sampler = &paths.sampler[idx];

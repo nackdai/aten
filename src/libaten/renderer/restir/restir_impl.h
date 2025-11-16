@@ -215,7 +215,7 @@ namespace restir {
      * @param[in,out] restir_info Storage to refer parameters for ReSTIR.
      * @param[in,out] shadowRays
      */
-    template <class CONTEXT, class SCENE = void>
+    template <class CONTEXT>
     inline AT_DEVICE_API void EvaluateVisibility(
         int32_t idx,
         int32_t bounce,
@@ -223,8 +223,7 @@ namespace restir {
         const CONTEXT& ctxt,
         AT_NAME::Reservoir& reservoir,
         AT_NAME::ReSTIRInfo& restir_info,
-        aten::span<AT_NAME::ShadowRay>& shadowRays,
-        SCENE* scene = nullptr)
+        aten::span<AT_NAME::ShadowRay>& shadowRays)
     {
         bool isHit = false;
 

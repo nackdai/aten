@@ -136,8 +136,7 @@ namespace aten
             isBackfacing,
             bounce,
             paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
-            ray, rec, mtrl,
-            scene);
+            ray, rec, mtrl);
         if (is_hit_implicit_light) {
             return;
         }

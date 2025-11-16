@@ -264,8 +264,7 @@ namespace aten
             ctxt,
             reservoirs[idx],
             restir_infos[idx],
-            shadow_rays,
-            scene);
+            shadow_rays);
     }
 
     void ReSTIRRenderer::ApplySpatialReuse(

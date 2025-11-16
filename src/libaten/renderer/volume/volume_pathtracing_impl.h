@@ -223,15 +223,13 @@ namespace AT_NAME
         return aten::make_tuple(true, transmittance);
     }
 
-    template <class SCENE = void>
     inline AT_DEVICE_API void TraverseShadowRay(
         int32_t idx,
         const AT_NAME::ShadowRay& shadow_ray,
         const int32_t max_depth,
         AT_NAME::Path& paths,
         const AT_NAME::context& ctxt,
-        const aten::Intersection& isect,
-        SCENE* scene = nullptr)
+        const aten::Intersection& isect)
     {
         if (shadow_ray.isActive) {
             const auto bounce = paths.throughput[idx].depth_count;

@@ -56,16 +56,9 @@ jobs:
             echo "need_build_image=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Set build image flag
-        id: check_build_image
-        if: ${{ inputs.any_modified != 'true' }}
-        run: |
-          echo "::notice::Force to build Docker image."
-          echo "need_build_image=true" >> "$GITHUB_OUTPUT"
-
       - name: Build images
         id: build_image
-        if: ${{ (steps.check_image_time.outputs.need_build_image == 'true') || (steps.check_build_image.outputs.need_build_image == 'true') }}
+        if: ${{ (steps.check_image_time.outputs.need_build_image == 'true') || (github.event_name == 'workflow_dispatch') }}
         run: |
           ./docker/build_docker_image.sh -b ./docker/ -p "ghcr.io/${{ github.repository }}/"
           echo "need_to_push=true" >> "$GITHUB_OUTPUT"

@@ -10,10 +10,12 @@
 #include "geometry/NoHitableMesh.h"
 #include "geometry/vertex.h"
 
+namespace aten {
+    class context;
+}
+
 namespace AT_NAME
 {
-    class context;
-
     /**
      * @brief Triangle.
      */
@@ -194,7 +196,7 @@ namespace AT_NAME
         }
 
         void BuildTriangle(
-            const AT_NAME::context& ctxt,
+            const aten::context& ctxt,
             const aten::vertex& v0,
             const aten::vertex& v1,
             const aten::vertex& v2,

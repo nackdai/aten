@@ -7,10 +7,10 @@
 
 //#define ENABLE_LINEAR_HITTEST
 
-namespace AT_NAME
+namespace aten
 {
     std::shared_ptr<triangle> triangle::create(
-        context& ctxt,
+        aten::context& ctxt,
         const aten::TriangleParameter& param_,
         std::optional<aten::vec3> scale)
     {
@@ -24,7 +24,7 @@ namespace AT_NAME
     }
 
     bool triangle::hit(
-        const context& ctxt,
+        const aten::context& ctxt,
         const aten::ray& r,
         float t_min, float t_max,
         aten::Intersection& isect) const
@@ -48,7 +48,7 @@ namespace AT_NAME
     }
 
     void triangle::build(
-        context& ctxt,
+        aten::context& ctxt,
         int32_t mtrlid,
         int32_t geomid,
         std::optional<aten::vec3> scale)
@@ -103,7 +103,7 @@ namespace AT_NAME
     }
 
     void triangle::BuildTriangle(
-        const context& ctxt,
+        const aten::context& ctxt,
         const aten::vertex& v0,
         const aten::vertex& v1,
         const aten::vertex& v2,
@@ -136,7 +136,7 @@ namespace AT_NAME
         return param_.mesh_id;
     }
 
-    aabb triangle::ComputeAABB(const context& ctxt) const
+    aabb triangle::ComputeAABB(const aten::context& ctxt) const
     {
         const auto& v0 = ctxt.GetVertex(param_.idx[0]);
         const auto& v1 = ctxt.GetVertex(param_.idx[1]);

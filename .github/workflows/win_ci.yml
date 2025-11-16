@@ -35,7 +35,7 @@ jobs:
       any_modified: ${{ steps.changed_files.outputs.any_modified }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5.0.0
         with:
           submodules: true
 
@@ -65,7 +65,7 @@ jobs:
     if: ${{ needs.check_ci_on_windows.outputs.any_modified == 'true' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5.0.0
         with:
           submodules: true
 

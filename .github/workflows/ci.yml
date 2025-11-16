@@ -23,7 +23,7 @@ jobs:
     if: github.ref != 'refs/heads/main'
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5.0.0
         with:
           fetch-depth: 0
 
@@ -61,7 +61,7 @@ jobs:
         run: |
           echo "::notice::Changed files to build source: ${{ steps.changed_files_to_build_source.outputs.all_modified_files }}"
           echo "::notice::Changed files to build Docker image: ${{ steps.check_change_docker_file.outputs.all_modified_files }}"
-          echo "should_build_image=${{ steps.check_change_docker_file.outputs.any_modified }}" >> $GITHUB_OUTPUT
+          echo "should_build_image=${{ steps.check_change_docker_file.outputs.any_modified }}" >> "$GITHUB_OUTPUT"
 
   build_docker:
     name: build_docker
@@ -83,10 +83,10 @@ jobs:
         run: |
           if [[ "${{ needs.check_diff.outputs.should_build_source }}" == 'true' || "${{ needs.check_diff.outputs.should_build_image }}" == 'true' ]]; then
             echo "::notice::Need to Run ci job."
-            echo "should_run_build=true" >> $GITHUB_OUTPUT
+            echo "should_run_build=true" >> "$GITHUB_OUTPUT"
           else
             echo "::notice::No need to Run ci job."
-            echo "should_run_build=false" >> $GITHUB_OUTPUT
+            echo "should_run_build=false" >> "$GITHUB_OUTPUT"
           fi
 
   ci:
@@ -104,16 +104,16 @@ jobs:
       - name: Set permission
         shell: bash
         run: |
-          chown -R $(id -u):$(id -g) ${GITHUB_WORKSPACE}
+          chown -R "$(id -u)":"$(id -g)" "${GITHUB_WORKSPACE}"
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5.0.0
         with:
           submodules: true
 
       - name: lint
         run: |
-          git config --global --add safe.directory ${GITHUB_WORKSPACE}
+          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
           pre-commit run -a
 
       - name: Configure

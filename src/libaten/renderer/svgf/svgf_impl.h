@@ -10,6 +10,15 @@
 
 #include "math/cuda_host_common_math.h"
 
+
+#ifdef __CUDACC__
+#include "cuda/cudadefs.h"
+#include "cuda/helper_math.h"
+#include "kernel/device_scene_context.cuh"
+#else
+#include "scene/host_scene_context.h"
+#endif
+
 namespace AT_NAME {
 namespace svgf {
     namespace _detail
@@ -54,6 +63,7 @@ namespace svgf {
     inline AT_DEVICE_API bool FillAOVs(
         const int32_t idx,
         const int32_t bounce,
+        const AT_NAME::context& ctxt,
         const AT_NAME::Path& paths,
         const aten::hitrecord& rec,
         const aten::Intersection& isect,

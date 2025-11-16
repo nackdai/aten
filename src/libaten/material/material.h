@@ -14,6 +14,7 @@
 
 namespace AT_NAME {
     class Light;
+    class context;
 }
 
 namespace aten {

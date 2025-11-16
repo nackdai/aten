@@ -9,6 +9,7 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
+#include "accelerator/threaded_bvh_traverser.h"
 #include "renderer/pathtracing/pt_params.h"
 #include "renderer/npr/npr_impl.h"
 

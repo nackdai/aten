@@ -10,6 +10,7 @@
 #include "kernel/renderer.h"
 #include "kernel/pt_standard_impl.h"
 
+#include "accelerator/threaded_bvh_traverser.h"
 #include "renderer/aov.h"
 #include "renderer/pathtracing/pathtracing_impl.h"
 #include "renderer/pathtracing/pt_params.h"

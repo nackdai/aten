@@ -96,7 +96,6 @@ cuda_add_library(
   ../libaten/material/specular.h
   ../libaten/material/toon.cpp
   ../libaten/material/toon.h
-  ../libaten/material/toon_impl.h
   ../libaten/material/toon_specular.h
   ../libaten/material/velvet.cpp
   ../libaten/material/velvet.h
@@ -162,17 +161,12 @@ cuda_add_library(
   kernel/Skinning.h
   kernel/StreamCompaction.cu
   kernel/StreamCompaction.h
-  kernel/accelerator.cuh
   kernel/bluenoiseSampler.cuh
-  kernel/bvh.cu
-  kernel/bvh.cuh
-  kernel/bvh_impl.cuh
   kernel/device_scene_context.cpp
   kernel/device_scene_context.cuh
   kernel/intersect.cu
   kernel/intersect.cuh
   kernel/intersect_impl.cuh
-  kernel/intersecttype.h
   kernel/pathtracing.cpp
   kernel/pathtracing.h
   kernel/pathtracing_impl.cu
@@ -182,14 +176,6 @@ cuda_add_library(
   kernel/pt_standard_impl.h
   kernel/renderer.cpp
   kernel/renderer.h
-  kernel/sample_texture_impl.cu
-  kernel/sample_texture_impl.cuh
-  kernel/sbvh.cu
-  kernel/sbvh.cuh
-  kernel/sbvh_impl.cuh
-  kernel/stackless_bvh.cu
-  kernel/stackless_bvh.cuh
-  kernel/stackless_bvh_impl.cuh
   kernel/tex_viewer.cu
   npr/npr_pathtracing.cu
   npr/npr_pathtracing.h

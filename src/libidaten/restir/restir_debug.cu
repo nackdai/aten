@@ -11,6 +11,7 @@
 #include "cuda/cudamemory.h"
 
 #include "aten4idaten.h"
+#include "accelerator/threaded_bvh_traverser.h"
 #include "renderer/pathtracing/pt_params.h"
 
 __global__ void fillAOV(

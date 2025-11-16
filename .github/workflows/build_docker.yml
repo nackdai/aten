@@ -27,13 +27,13 @@ jobs:
       did_build_image: ${{ steps.push_image.outputs.did_build_image }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5.0.0
         with:
           submodules: true
 
       - name: Login to GitHub Container Registry
         id: login
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -50,10 +50,10 @@ jobs:
           echo "::notice::File [${file_change_date}] DockerImage [${image_build_date}]"
           if [[ "${file_change_date}" -gt "${image_build_date}" ]]; then
             echo "::notice::Docker image should be rebuilt."
-            echo "need_build_image=true" >> $GITHUB_OUTPUT
+            echo "need_build_image=true" >> "$GITHUB_OUTPUT"
           else
             echo "::notice::No need to rebuild the Docker image."
-            echo "need_build_image=false" >> $GITHUB_OUTPUT
+            echo "need_build_image=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Set build image flag
@@ -61,14 +61,14 @@ jobs:
         if: ${{ inputs.any_modified != 'true' }}
         run: |
           echo "::notice::Force to build Docker image."
-          echo "need_build_image=true" >> $GITHUB_OUTPUT
+          echo "need_build_image=true" >> "$GITHUB_OUTPUT"
 
       - name: Build images
         id: build_image
         if: ${{ (steps.check_image_time.outputs.need_build_image == 'true') || (steps.check_build_image.outputs.need_build_image == 'true') }}
         run: |
           ./docker/build_docker_image.sh -b ./docker/ -p "ghcr.io/${{ github.repository }}/"
-          echo "need_to_push=true" >> $GITHUB_OUTPUT
+          echo "need_to_push=true" >> "$GITHUB_OUTPUT"
 
       - name: Push images
         id: push_image
@@ -76,4 +76,4 @@ jobs:
         run: |
           docker push ghcr.io/${{ github.repository }}/aten:latest
           docker push ghcr.io/${{ github.repository }}/aten_dev:latest
-          echo "did_build_image=true" >> $GITHUB_OUTPUT
+          echo "did_build_image=true" >> "$GITHUB_OUTPUT"

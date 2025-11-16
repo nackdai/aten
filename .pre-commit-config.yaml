@@ -36,6 +36,11 @@ repos:
       - id: cmake-lint
         args: ['--linelength=150']
 
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.8
+    hooks:
+      - id: actionlint
+
   - repo: https://github.com/pycqa/isort
     rev: 5.12.0
     hooks:

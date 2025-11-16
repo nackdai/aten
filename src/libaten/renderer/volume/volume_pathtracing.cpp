@@ -242,7 +242,7 @@ namespace aten
             idx,
             shadow_ray,
             max_depth,
-            paths, ctxt, isect, scene);
+            paths, ctxt, isect);
     }
 
     void VolumePathTracing::Nee(

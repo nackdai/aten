@@ -301,9 +301,19 @@ namespace idaten
         int32_t width, int32_t height,
         int32_t bounce)
     {
-        hitTest(
-            width, height,
-            bounce);
+        if (bounce == 0
+            && CanSSRTHitTest()
+            && g_buffer_.IsValid())
+        {
+            hitTestOnScreenSpace(
+                width, height,
+                g_buffer_);
+        }
+        else {
+            hitTest(
+                width, height,
+                bounce);
+        }
     }
 
     void PathTracingImplBase::onShade(

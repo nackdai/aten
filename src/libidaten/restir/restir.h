@@ -58,7 +58,10 @@ namespace idaten
             int32_t mtrlid;
         };
 
-        ReSTIRPathTracing() = default;
+        ReSTIRPathTracing()
+        {
+            can_ssrt_hit_test_ = true;
+        }
         virtual ~ReSTIRPathTracing() = default;
 
         virtual void render(
@@ -135,16 +138,6 @@ namespace idaten
             return isValid;
         }
 
-        bool CanSSRTHitTest() const
-        {
-            return m_canSSRTHitTest;
-        }
-
-        void SetCanSSRTHitTest(bool f)
-        {
-            m_canSSRTHitTest = f;
-        }
-
         bool IsEnableProgressive() const
         {
             return m_enableProgressive;
@@ -213,7 +206,6 @@ namespace idaten
         AT_NAME::MatricesForRendering mtxs_;
 
         // G-Buffer rendered by OpenGL.
-        idaten::CudaGLSurface m_gbuffer;
         idaten::CudaGLSurface m_motionDepthBuffer;
 
         idaten::TypedCudaMemory<PickedInfo> m_pick;
@@ -226,6 +218,5 @@ namespace idaten
         AOVMode m_aovMode{ AOVMode::WireFrame };
 
         bool m_isListedTextureObject{ false };
-        bool m_canSSRTHitTest{ true };
     };
 }

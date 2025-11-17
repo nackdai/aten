@@ -43,7 +43,7 @@ namespace idaten
         GLuint gltexGbuffer,
         GLuint gltexMotionDepthbuffer)
     {
-        m_gbuffer.init(gltexGbuffer, idaten::CudaGLRscRegisterType::ReadOnly);
+        PathTracingImplBase::SetGBuffer(gltexGbuffer);
         params_.motion_depth_buffer.init(gltexMotionDepthbuffer, idaten::CudaGLRscRegisterType::ReadOnly);
     }
 

@@ -32,7 +32,10 @@ namespace idaten
         };
 
     public:
-        SVGFPathTracing() {}
+        SVGFPathTracing()
+        {
+            can_ssrt_hit_test_ = true;
+        }
         virtual ~SVGFPathTracing() {}
 
     public:
@@ -121,16 +124,6 @@ namespace idaten
             m_nmlThresholdTF = aten::clamp(th, 0.0f, 1.0f);
         }
 
-        bool CanSSRTHitTest() const
-        {
-            return m_canSSRTHitTest;
-        }
-
-        void SetCanSSRTHitTest(bool f)
-        {
-            m_canSSRTHitTest = f;
-        }
-
         uint32_t getAtrousIterCount() const
         {
             return params_.atrous_iter_cnt;
@@ -150,10 +143,6 @@ namespace idaten
         void onDenoise(
             int32_t width, int32_t height,
             cudaSurfaceObject_t outputSurf);
-
-        void onHitTest(
-            int32_t width, int32_t height,
-            int32_t bounce)  override;
 
         void missShade(
             int32_t width, int32_t height,
@@ -216,9 +205,6 @@ namespace idaten
     protected:
         AT_NAME::SVGFParams<idaten::TypedCudaMemory<float4>, idaten::CudaGLSurface> params_;
 
-        // G-Buffer rendered by OpenGL.
-        idaten::CudaGLSurface m_gbuffer;
-
         idaten::TypedCudaMemory<PickedInfo> m_pick;
 
         bool m_willPicklPixel{ false };
@@ -231,6 +217,5 @@ namespace idaten
         float m_nmlThresholdTF{ 0.98f };
 
         bool m_isListedTextureObject{ false };
-        bool m_canSSRTHitTest{ true };
     };
 }

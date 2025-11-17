@@ -64,12 +64,28 @@ namespace idaten
             cudaSurfaceObject_t output_surface,
             int32_t width, int32_t height);
 
+        void SetGBuffer(GLuint gltexGbuffer);
+
+        bool CanSSRTHitTest() const
+        {
+            return can_ssrt_hit_test_;
+        }
+
+        void SetCanSSRTHitTest(bool f)
+        {
+            can_ssrt_hit_test_ = f;
+        }
+
     protected:
         // AOV buffer
         using AOVHostBuffer = AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, AT_NAME::AOVBufferType::NumBasicAovBuffer>;
         AOVHostBuffer aov_;
 
+        // G-Buffer rendered by OpenGL.
+        idaten::CudaGLSurface g_buffer_;
+
         bool m_enableProgressive{ false };
+        bool can_ssrt_hit_test_{ false };
     };
 
     class PathTracing : public PathTracingImplBase {

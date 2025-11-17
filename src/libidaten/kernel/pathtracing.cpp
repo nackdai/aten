@@ -16,6 +16,11 @@
 
 namespace idaten
 {
+    void PathTracingImplBase::SetGBuffer(GLuint gltexGbuffer)
+    {
+        g_buffer_.init(gltexGbuffer, idaten::CudaGLRscRegisterType::ReadOnly);
+    }
+
     void PathTracing::UpdateSceneData(
         GLuint gltex,
         int32_t width, int32_t height,

@@ -250,22 +250,6 @@ namespace svgf_kernel {
 
 namespace idaten
 {
-    void SVGFPathTracing::onHitTest(
-        int32_t width, int32_t height,
-        int32_t bounce)
-    {
-        if (bounce == 0 && m_canSSRTHitTest) {
-            hitTestOnScreenSpace(
-                width, height,
-                m_gbuffer);
-        }
-        else {
-            hitTest(
-                width, height,
-                bounce);
-        }
-    }
-
     void SVGFPathTracing::onShade(
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height,

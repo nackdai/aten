@@ -68,8 +68,6 @@ public:
                 "../shader/skinning_fs.glsl");
         }
 
-        mdl_->initGLResourcesWithDeformableRenderer(renderer_);
-
         aten::ImageLoader::setBasePath(args_.tex_dir.c_str());
 
         if (!aten::MaterialLoader::load(args_.mtrl.c_str(), ctxt_)) {
@@ -96,6 +94,14 @@ public:
             WIDTH, HEIGHT);
 
         if (is_gpu_skinning) {
+            // NOTE:
+            // To compute skinning all vertices together,
+            // the deformable model has one vertex buffer for gpu skinning.
+            // The vertex buffer is firstly empty.
+            // The computed vertices by gpu skinning are sotred in that vertex buffer.
+            // And then, the deformable model can be rendered with the vertex buffer
+            // regardless of rasterization or ray tracing.
+            mdl_->initGLResourcesWithDeformableRenderer(renderer_);
             auto& vb = mdl_->getVBForGPUSkinning();
 
             std::vector<aten::SkinningVertex> vtx;

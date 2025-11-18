@@ -37,6 +37,11 @@ public:
         aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
         aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt);
 
+        for (auto& tex : ctxt.GetTextures()) {
+            tex->SetFilterMode(aten::TextureFilterMode::Linear);
+            tex->SetAddressMode(aten::TextureAddressMode::Wrap);
+        }
+
         auto deformMdl = aten::TransformableFactory::createInstance<aten::deformable>(ctxt, mdl, aten::mat4::Identity);
         scene->add(deformMdl);
 

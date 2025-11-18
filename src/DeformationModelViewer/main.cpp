@@ -29,6 +29,7 @@ public:
             return false;
         }
 #else
+        //args_.input = "../../asset/converted_unitychan/unitychan_gpu.mdl";
         args_.input = "../../asset/converted_unitychan/unitychan_gpu.mdl";
         args_.tex_dir = "../../asset/unitychan/Texture";
         args_.mtrl = "../../asset/converted_unitychan/unitychan_mtrl.xml";
@@ -136,7 +137,6 @@ public:
 
         if (is_gpu_skinning) {
             const auto& mtx = mdl_->getMatrices();
-            skinning_.update(&mtx[0], mtx.size());
             skinning_.update(&mtx[0], mtx.size());
             skinning_.compute(aabbMin, aabbMax);
         }

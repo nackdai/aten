@@ -29,6 +29,18 @@ namespace idaten
             m_enableProgressive = b;
         }
 
+        void SetGBuffer(GLuint gltexGbuffer);
+
+        bool CanSSRTHitTest() const
+        {
+            return can_ssrt_hit_test_;
+        }
+
+        void SetCanSSRTHitTest(bool f)
+        {
+            can_ssrt_hit_test_ = f;
+        }
+
     protected:
         virtual void onHitTest(
             int32_t width, int32_t height,
@@ -63,18 +75,6 @@ namespace idaten
         virtual void DisplayAOV(
             cudaSurfaceObject_t output_surface,
             int32_t width, int32_t height);
-
-        void SetGBuffer(GLuint gltexGbuffer);
-
-        bool CanSSRTHitTest() const
-        {
-            return can_ssrt_hit_test_;
-        }
-
-        void SetCanSSRTHitTest(bool f)
-        {
-            can_ssrt_hit_test_ = f;
-        }
 
     protected:
         // AOV buffer

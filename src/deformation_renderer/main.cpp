@@ -278,8 +278,14 @@ public:
         {
             auto mdl = deform_mdl_->getHasObjectAsRealType();
 
+            // NOTE:
+            // To compute skinning all vertices together,
+            // the deformable model has one vertex buffer for gpu skinning.
+            // The vertex buffer is firstly empty.
+            // The computed vertices by gpu skinning are sotred in that vertex buffer.
+            // And then, the deformable model can be rendered with the vertex buffer
+            // regardless of rasterization or ray tracing.
             mdl->initGLResources(&shader_raasterize_deformable_);
-
             auto& vb = mdl->getVBForGPUSkinning();
 
             std::vector<aten::SkinningVertex> vtx;

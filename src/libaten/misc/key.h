@@ -41,11 +41,11 @@ namespace aten {
             _T ret = 0;
             _T k = 1;
 
-            for (uint32_t i = 0; ; ++i) {
-                if (str[i] == '\0') {
+            for (const auto c : str) {
+                if (c == 0) {
                     break;
                 }
-                ret += (str[i] * (k *= 31L));
+                ret += (c * (k *= 31L));
             }
 
             return ret;

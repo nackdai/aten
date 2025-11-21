@@ -30,6 +30,7 @@ exclude = [
     "3rdparty/**",
     "*.ipynb",
     ".venv",
+    "experiment",
 ]
 
 [tool.ruff.lint]

@@ -354,7 +354,8 @@ namespace AT_NAME
         // So, light selected pdf is always 1.
         constexpr float light_selected_pdf = 1.0F;
 
-        aten::vec3 toon_term{ 0.0F };
+        aten::vec3 radiance{ 0.0F };
+        float pdf = 1.0F;
 
         if (sampled_light) {
             // Diffuse.
@@ -366,7 +367,7 @@ namespace AT_NAME
                 base_mtrl.type = aten::MaterialType::ToonSpecular;
             }
 
-            const auto pdf = material::samplePDF(ctxt, &base_mtrl, normal, wi, sampled_light->dir, u, v);
+            pdf = material::samplePDF(ctxt, &base_mtrl, normal, wi, sampled_light->dir, u, v);
 
             // Compute radiance.
             // The target light is singular, and then MIS in ComputeRadianceNEE is always 1.0.
@@ -379,46 +380,48 @@ namespace AT_NAME
                 *sampled_light);
 
             if (res) {
-                // NOTE:
-                // Global Illumination-Aware Stylised Shading
-                // https://diglib.eg.org/server/api/core/bitstreams/d84134e0-af8c-4db6-a13a-dc854294f6aa/content
-
-                // TODO
-                constexpr float W_MIN = 0.01F;
-
-                const auto radiance = res.value();
-
-                // Convert RGB to XYZ.
-                const auto xyz = color::sRGBtoXYZ(radiance);
-                const auto y = xyz.y;
-
-                // To avoid too dark, compare with the minimum weight.
-                const auto weight = aten::clamp(y, W_MIN, 1.0F);
-
-                const auto y_min = aten::max(0.0F, aten::min(param.toon.stylized_y_min, param.toon.stylized_y_max));
-                const auto y_max = aten::max(param.toon.stylized_y_min, param.toon.stylized_y_max);
-
-                // Compute texture coord (1D, vertical) for remap texture.
-                auto remap_v = 0.0F;
-                if (y_max <= y) {
-                    remap_v = 1.0F;
-                }
-                else if (y <= y_min) {
-                    remap_v = 0.0F;
-                }
-                else {
-                    remap_v = (y - y_min) / (y_max - y_min);
-                }
-
-                const auto remap = AT_NAME::sampleTexture(ctxt, param.toon.remap_texture, 0.5F, remap_v, aten::vec4(radiance));
-
-                toon_term = weight * remap * pdf;
+                radiance = res.value();
             }
         }
 
+        // NOTE:
+        // Global Illumination-Aware Stylised Shading
+        // https://diglib.eg.org/server/api/core/bitstreams/d84134e0-af8c-4db6-a13a-dc854294f6aa/content
+
+        // TODO
+        constexpr float W_MIN = 0.01F;
+
+        // Convert RGB to XYZ.
+        const auto xyz = color::sRGBtoXYZ(radiance);
+        const auto y = xyz.y;
+
+        // To avoid too dark, compare with the minimum weight.
+        const auto weight = aten::clamp(y, W_MIN, 1.0F);
+
+        const auto y_min = aten::max(0.0F, aten::min(param.toon.stylized_y_min, param.toon.stylized_y_max));
+        const auto y_max = aten::max(param.toon.stylized_y_min, param.toon.stylized_y_max);
+
+        // Compute texture coord (1D, vertical) for remap texture.
+        auto remap_v = 0.0F;
+        if (y_max <= y) {
+            remap_v = 1.0F;
+        }
+        else if (y <= y_min) {
+            remap_v = 0.0F;
+        }
+        else {
+            remap_v = (y - y_min) / (y_max - y_min);
+        }
+
+        const auto remap = AT_NAME::sampleTexture(ctxt, param.toon.remap_texture, remap_v, 0.5F, aten::vec4(radiance));
+
+        aten::vec3 toon_term{ weight * remap * pdf };
+
         const auto rim_light_term = ComputeRimLight(ctxt, param, hit_pos, normal, wi);
 
-        return toon_term + rim_light_term;
+        const auto albedo = AT_NAME::sampleTexture(ctxt, param.albedoMap, u, v, aten::vec4(1.0F));
+
+        return (toon_term + rim_light_term) * albedo;
     }
 
     bool StylizedBrdf::edit(aten::IMaterialParamEditor* editor)

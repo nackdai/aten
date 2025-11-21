@@ -93,4 +93,27 @@ namespace idaten
     {
         // Nothing is done...
     }
+
+    bool CudaGLBuffer::ReadFromDeviceToHost(void* dst, size_t bytes)
+    {
+        bool result = false;
+
+        map();
+
+        void* device_data = nullptr;
+        size_t data_bytes = 0;
+        bind(reinterpret_cast<void**>(&device_data), data_bytes);
+
+        bytes = bytes == 0 ? data_bytes : bytes;
+        AT_ASSERT(bytes <= data_bytes);
+
+        if (bytes <= data_bytes) {
+            result = checkCudaErrors(cudaMemcpy(dst, device_data, bytes, cudaMemcpyDefault));
+        }
+
+        unbind();
+        unmap();
+
+        return result;
+    }
 }

@@ -113,6 +113,8 @@ namespace idaten
             CudaGLResource::unmap();
         }
 
+        bool ReadFromDeviceToHost(void* dst, size_t bytes);
+
     private:
         GLuint m_glbuffer{ 0 };
     };

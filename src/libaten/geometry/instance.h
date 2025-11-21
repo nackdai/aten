@@ -130,7 +130,7 @@ namespace aten
 
         OBJ* getHasObjectAsRealType()
         {
-            return m_obj.get();
+            return m_obj;
         }
 
         virtual const hitable* getHasSecondObject() const override final

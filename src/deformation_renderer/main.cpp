@@ -276,7 +276,7 @@ public:
         // Initialize skinning.
         if (deform_mdl_)
         {
-            auto mdl = deform_mdl_->getHasObjectAsRealType();
+            auto mdl = deform_mdl_->GetHasObjectAsRealType();
 
             // NOTE:
             // To compute skinning all vertices together,
@@ -344,8 +344,9 @@ public:
 #ifdef ENABLE_SVGF
         renderer_.SetMode((idaten::SVGFPathTracing::Mode)curr_rendering_mode_);
         renderer_.SetAOVMode((aten::SVGFAovMode)curr_aov_mode_);
-        //renderer_.SetCanSSRTHitTest(false);
 #endif
+
+        renderer_.SetCanSSRTHitTest(true);
 
         return true;
     }
@@ -635,7 +636,7 @@ public:
 private:
     void update(int32_t frame)
     {
-        auto mdl = deform_mdl_->getHasObjectAsRealType();
+        auto mdl = deform_mdl_->GetHasObjectAsRealType();
 
         // NOTE:
         // Apply local to world matrix to vertices is done in LBVHBuilder.
@@ -657,10 +658,12 @@ private:
 
         bool isRestart = (frame == 1);
 
-        // NOTE
-        // Add verted offset, in the first frame.
-        // In "skinning_.compute", vertex offset is added to triangle paremters.
-        // Added vertex offset is valid permanently, so specify vertex offset just only one time.
+        // NOTE:
+        // We specified the vertex offset.
+        // In "skinning_.compute", the the vertex offset is added to triangle paremters.
+        // The specified vertex offset can be assumed as that it's valid permanently.
+        // So, specifying the vertex offset just only one time is enough.
+        // It means we don't need to specify the vertex offset per update.
         skinning_.compute(aabbMin, aabbMax, isRestart);
 
         mdl->setBoundingBox(aten::aabb(aabbMin, aabbMax));

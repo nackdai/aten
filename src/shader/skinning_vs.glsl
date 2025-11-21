@@ -9,9 +9,9 @@ layout(location = 3) in vec2 uv;
 layout(location = 4) in vec4 blendIndex;
 layout(location = 5) in vec4 blendWeight;
 
-// NOTE
-// �O���[�o���}�g���N�X�v�Z���Ƀ��[�g�� local to world �}�g���N�X�͏�Z�ς�.
-// ���̂��߁A�V�F�[�_�ł͌v�Z����K�v���Ȃ��̂ŁA�V�F�[�_�ɓn����Ă��Ȃ�.
+// NOTE:
+// グローバルマトリクス計算時にルートに local to world マトリクスは乗算済み.
+// そのため、シェーダでは計算する必要がないので、シェーダに渡されてこない.
 
 uniform mat4 mtxJoint[48];
 uniform mat4 mtx_W2C;

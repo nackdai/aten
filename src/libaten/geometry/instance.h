@@ -79,6 +79,9 @@ namespace aten
             aten::mat4 mtx_rot_z;
             mtx_rot_z.asRotateByX(rot.z);
 
+            // TODO:
+            // We still doesn't support scaling in bvh traverse.
+            // So, scale is ignored to construct local to world matrix for bvh traverse.
             *m_mtx_L2W = mtx_trans * mtx_rot_x * mtx_rot_y * mtx_rot_z;
 
             *m_mtx_W2L = *m_mtx_L2W;
@@ -87,9 +90,9 @@ namespace aten
             const bool no_scale = CheckNoScale(scale);
 
             m_param.object_id = m_obj->id();
-            m_obj->build(
-                ctxt,
-                no_scale ? std::nullopt : std::make_optional(scale));
+                m_obj->build(
+                    ctxt,
+                    no_scale ? std::nullopt : std::make_optional(scale));
             setBoundingBox(m_obj->getBoundingbox());
 
             setBoundingBox(getTransformedBoundingBox());
@@ -128,7 +131,7 @@ namespace aten
             return m_obj.get();
         }
 
-        OBJ* getHasObjectAsRealType()
+        std::shared_ptr<OBJ> GetHasObjectAsRealType()
         {
             return m_obj;
         }

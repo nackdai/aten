@@ -45,7 +45,7 @@ namespace AT_NAME
         {
             const auto& faceParam = ctxt.GetTriangle(isect.triangle_id);
 
-            AT_NAME::triangle::EvaluateHitResult(ctxt, faceParam, &rec, faceParam, &isect);
+            AT_NAME::triangle::EvaluateHitResult(ctxt, faceParam, &rec, &isect);
 
             auto p0{ ctxt.GetPositionAsVec4(faceParam.idx[0]) };
             auto p1{ ctxt.GetPositionAsVec4(faceParam.idx[1]) };

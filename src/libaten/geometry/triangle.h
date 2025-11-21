@@ -71,7 +71,6 @@ namespace AT_NAME
             const CONTEXT& ctxt,
             const aten::TriangleParameter& tri,
             aten::hitrecord* rec,
-            const aten::TriangleParameter& param,
             const aten::Intersection* isect)
         {
             const auto p0{ ctxt.GetPositionAsVec4(tri.idx[0]) };
@@ -108,7 +107,7 @@ namespace AT_NAME
             rec->u = c * u0 + a * u1 + b * u2;
             rec->v = c * v0 + a * v1 + b * v2;
 
-            if (param.needNormal > 0) {
+            if (tri.needNormal > 0) {
                 auto e01 = p1 - p0;
                 auto e02 = p2 - p0;
 
@@ -117,7 +116,7 @@ namespace AT_NAME
                 rec->normal = normalize(cross(e01, e02));
             }
 
-            rec->area = param.area;
+            rec->area = tri.area;
         }
 
         template <class CONTEXT>

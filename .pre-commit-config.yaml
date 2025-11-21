@@ -13,6 +13,7 @@ repos:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
 
+  # Run the installed shfmt and shellcheck.
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 2.1.5
     hooks:
@@ -21,6 +22,22 @@ repos:
       - id: shellcheck
         args: [-e, SC2230]
         exclude: .envrc
+
+  # TODO:
+  # Run the shfmt and shellcheck locally.
+  # On the other hand, shellcheck-precommit seems to depend on docker.
+  # If we run it in the docker container, it's failed.
+  # To enable running it, we need to modify Dockerfile, CI workflow etc.
+  # - repo: https://github.com/scop/pre-commit-shfmt
+  #   rev: v3.12.0-2
+  #   hooks:
+  #     - id: shfmt
+  #       args: [-i, "2", -ci]
+  # - repo: https://github.com/koalaman/shellcheck-precommit
+  #   rev: v0.11.0
+  #   hooks:
+  #     - id: shellcheck
+  #       args: [-e, SC2230]
 
   # NOTE:
   # To run markdownlint even in windows stably, use markdownlint-cli not markdownlint-cli2.

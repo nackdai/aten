@@ -70,9 +70,10 @@ namespace aten
                 mtrlid, geomid);
 
             // Check if the normal needs to be computed on the fly while traversing bvh.
-            const bool need_compute_normal_on_the_fly = v0.uv.z > 0 || v1.uv.z > 0 || v1.uv.z > 0;
+            const bool need_compute_normal_on_the_fly = param_.needNormal;
 
-            // If no, normal has to be computed here.
+            // If no, normal won't be computed while rendering.
+            // In that case, normal needs to be here.
             if (!need_compute_normal_on_the_fly) {
                 auto e0 = v1.pos - v0.pos;
                 auto e1 = v2.pos - v0.pos;

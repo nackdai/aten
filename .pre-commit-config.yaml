@@ -13,11 +13,23 @@ repos:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
 
-  - repo: https://github.com/jumanjihouse/pre-commit-hooks
-    rev: 2.1.5
+  # - repo: https://github.com/jumanjihouse/pre-commit-hooks
+  #   rev: 2.1.5
+  #   hooks:
+  #     - id: shfmt
+  #       args: [-i, "2", -ci]
+  #     - id: shellcheck
+  #       args: [-e, SC2230]
+
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.12.0-2
     hooks:
       - id: shfmt
         args: [-i, "2", -ci]
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.11.0
+    hooks:
       - id: shellcheck
         args: [-e, SC2230]
 

@@ -51,6 +51,16 @@ namespace idaten
             return triangles_;
         }
 
+        size_t GetVerticesNum() const
+        {
+            return vertices_.num();
+        }
+
+        size_t GetTrianglesNum() const
+        {
+            return triangles_.num();
+        }
+
         void setVtxOffset(int32_t offset);
 
     private:

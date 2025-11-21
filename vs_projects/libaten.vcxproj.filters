@@ -887,5 +887,8 @@
     <None Include="..\src\shader\srgb_oetf_fs.glsl">
       <Filter>shader</Filter>
     </None>
+    <None Include="..\src\shader\ssrt_deformable_vs.glsl">
+      <Filter>shader\ssrt</Filter>
+    </None>
   </ItemGroup>
 </Project>

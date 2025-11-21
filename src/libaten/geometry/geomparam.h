@@ -81,7 +81,11 @@ namespace aten
             struct {
                 int32_t needNormal; ///< Flag to describe if normal needs to be computed on the fly.
                 int32_t mtrlid;     ///< Material id.
-                int32_t mesh_id;    ///< Belonged mesh id. (Mesh = Triangle group to have same material).
+                /**
+                 * @brief Belonged mesh id. (Mesh = Triangle group to have same material).
+                 * This is unique in the entire scene.
+                 */
+                int32_t mesh_id;
                 float padding;
             };
         };

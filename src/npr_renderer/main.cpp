@@ -56,6 +56,12 @@ public:
 
         aten::ImageLoader::setBasePath("./");
 
+        auto* mtrl_hair = ctxt.GetMaterialByName("hair");
+        mtrl_hair->stencil_type = aten::StencilType::STENCIL;
+
+        auto* mtrl_eyeline = ctxt.GetMaterialByName("eyeline");
+        mtrl_eyeline->stencil_type = aten::StencilType::ALWAYS;
+
         return deformMdl;
     }
 
@@ -106,12 +112,6 @@ public:
 
         visualizer_->addPostProc(&gamma_);
 
-        shader_raasterize_deformable_.init(
-            WIDTH, HEIGHT,
-            "./ssrt_deformable_vs.glsl",
-            "../shader/ssrt_gs.glsl",
-            "../shader/ssrt_fs.glsl");
-
         rasterizer_aabb_.init(
             WIDTH, HEIGHT,
             "../shader/simple3d_vs.glsl",
@@ -144,8 +144,6 @@ public:
         auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, aten::vec4(0));
 #endif
         auto mdl = deform_mdl_->GetHasObjectAsRealType();
-
-        mdl->initGLResources(&shader_raasterize_deformable_);
 
         {
             const auto& nodes = scene_.getAccel()->getNodes();
@@ -465,8 +463,6 @@ private:
     aten::TAA taa_;
 
     aten::RasterizeRenderer rasterizer_aabb_;
-
-    aten::shader shader_raasterize_deformable_;
 
     bool will_show_gui_
 #ifdef DEVICE_RENDERING

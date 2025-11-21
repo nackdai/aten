@@ -154,6 +154,18 @@ namespace aten
             rec.u, rec.v,
             ray.dir, sampler);
 
+        // Check stencil.
+        auto is_stencil = AT_NAME::CheckStencil(
+            rays[idx], paths.attrib[idx],
+            bounce,
+            ctxt,
+            rec.p, orienting_normal,
+            mtrl
+        );
+        if (is_stencil) {
+            return;
+        }
+
         // Check transparency or translucency.
         auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
             ctxt,

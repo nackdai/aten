@@ -76,8 +76,12 @@ namespace aten
                     isect, scene,
                     russian_roulette_depth_, bounce);
 
+                const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
+
                 std::ignore = AT_NAME::HitShadowRay(
-                    idx, bounce, ctxt, path_host_.paths, shadow_rays_[idx]);
+                    idx, bounce,
+                    ctxt, mtrl,
+                    path_host_.paths, shadow_rays_[idx]);
             }
         }
         else {

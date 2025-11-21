@@ -14,28 +14,28 @@ __global__ void computeSkinning(
     aten::vec4* dstNml,
     aten::vec4* dstPrev)
 {
-    const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
+    auto idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (idx >= vtxNum) {
         return;
     }
 
-    const auto* vtx = &vertices[idx];
+    const auto& vtx = vertices[idx];
 
-    aten::vec4 srcPos = vtx->position;
-    aten::vec4 srcNml = aten::vec4(vtx->normal, 0);
+    aten::vec4 nml{ vtx.normal, 0 };
 
     aten::vec4 resultPos(0);
     aten::vec4 resultNml(0);
 
+#pragma unroll
     for (int32_t i = 0; i < 4; i++) {
-        int32_t idx = int32_t(vtx->blendIndex[i]);
-        float weight = vtx->blendWeight[i];
+        const int32_t idx = static_cast<int32_t>(vtx.blendIndex[i]);
+        const float weight = vtx.blendWeight[i];
 
-        aten::mat4 mtx = matrices[idx];
+        const auto& mtx = matrices[idx];
 
-        resultPos += weight * mtx * vtx->position;
-        resultNml += weight * mtx * srcNml;
+        resultPos += weight * mtx * vtx.position;
+        resultNml += weight * mtx * nml;
     }
 
     resultNml = normalize(resultNml);
@@ -49,8 +49,8 @@ __global__ void computeSkinning(
         dstPrev[idx].w = 1.0f;
     }
 
-    dstPos[idx] = aten::vec4(resultPos.x, resultPos.y, resultPos.z, vtx->uv[0]);
-    dstNml[idx] = aten::vec4(resultNml.x, resultNml.y, resultNml.z, vtx->uv[1]);
+    dstPos[idx] = aten::vec4(resultPos.x, resultPos.y, resultPos.z, vtx.uv[0]);
+    dstNml[idx] = aten::vec4(resultNml.x, resultNml.y, resultNml.z, vtx.uv[1]);
 }
 
 __global__ void setTriangleParam(
@@ -239,13 +239,16 @@ namespace idaten
             // Only support position, normal.
 
             m_interopVBO[0].map();
-            m_interopVBO[0].bind((void**)&dstPos, vtxbytes);
+            m_interopVBO[0].bind(
+                reinterpret_cast<void**>(&dstPos), vtxbytes);
 
             m_interopVBO[1].map();
-            m_interopVBO[1].bind((void**)&dstNml, vtxbytes);
+            m_interopVBO[1].bind(
+                reinterpret_cast<void**>(&dstNml), vtxbytes);
 
             m_interopVBO[2].map();
-            m_interopVBO[2].bind((void**)&dstPrev, vtxbytes);
+            m_interopVBO[2].bind(
+                reinterpret_cast<void**>(&dstPrev), vtxbytes);
         }
         else {
             dstPos = m_dstPos.data();

@@ -132,6 +132,8 @@ public:
 
             auto* accel = scene_.getAccel();
             accel->update(ctxt_);
+
+            ctxt_.CopyBvhNodes(accel->getNodes());
         }
     }
 
@@ -152,7 +154,7 @@ public:
 
     bool Run()
     {
-        // update();
+        update();
 
         ctxt_.UpdateSceneBoundingBox(scene_);
 

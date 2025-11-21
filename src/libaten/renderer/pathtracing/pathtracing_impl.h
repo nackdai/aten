@@ -500,7 +500,7 @@ namespace AT_NAME
             const auto toon_bsdf = Toon::bsdf(
                 ctxt, hit_target_mtrl, sampler,
                 hrec.p, hrec.normal, ray.dir,
-                0.0f, 0.0f
+                hrec.u, hrec.v
             );
 
             aten::vec3 contrib{

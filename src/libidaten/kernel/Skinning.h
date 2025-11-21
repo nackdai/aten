@@ -39,8 +39,7 @@ namespace idaten
 
         bool getComputedResult(
             aten::vec4* pos,
-            aten::vec4* nml,
-            uint32_t num);
+            aten::vec4* nml);
 
         std::vector<CudaGLBuffer>& getInteropVBO()
         {

@@ -346,16 +346,25 @@ namespace idaten
 
     bool Skinning::getComputedResult(
         aten::vec4* pos,
-        aten::vec4* nml,
-        uint32_t num)
+        aten::vec4* nml)
     {
-        AT_ASSERT(m_dstPos.bytes() > 0);
-        AT_ASSERT(m_dstNml.bytes() > 0);
+        bool result = false;
 
-        m_dstPos.readFromDeviceToHostByNum(pos, num);
-        m_dstNml.readFromDeviceToHostByNum(nml, num);
+        if (m_interopVBO.empty()) {
+            AT_ASSERT(m_dstPos.bytes() > 0);
+            AT_ASSERT(m_dstNml.bytes() > 0);
+            // TODO:
+            // Check read size properly.
+            result = (m_dstPos.readFromDeviceToHostByNum(pos, m_dstPos.num()) > 0);
+            result |= (m_dstNml.readFromDeviceToHostByNum(nml, m_dstNml.num()) > 0);
+        }
+        else {
+            // Pass 0 to argument `bytes` means retrieving all data.
+            result = m_interopVBO[0].ReadFromDeviceToHost(pos, 0);
+            result |= m_interopVBO[1].ReadFromDeviceToHost(nml, 0);
+        }
 
-        return true;
+        return result;
     }
 
     void Skinning::setVtxOffset(int32_t offset)

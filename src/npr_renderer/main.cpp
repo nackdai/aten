@@ -143,7 +143,7 @@ public:
 #else
         auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, aten::vec4(0));
 #endif
-        auto mdl = deform_mdl_->getHasObjectAsRealType();
+        auto mdl = deform_mdl_->GetHasObjectAsRealType();
 
         mdl->initGLResources(&shader_raasterize_deformable_);
 

@@ -151,7 +151,7 @@ namespace AT_NAME
         // So, light selected pdf is always 1.
         constexpr float light_selected_pdf = 1.0F;
 
-        aten::vec3 toon_term{ 0.0F };
+        aten::vec3 radiance{ 0.0F };
 
         if (sampled_light) {
             // Diffuse.
@@ -174,26 +174,28 @@ namespace AT_NAME
                 *sampled_light);
 
             if (res) {
-                auto radiance = res.value();
-
-                float lum_y = aten::clamp(color::luminance(radiance), 0.0F, 1.0F);
-
-                if (!aten::isClose(lum_y, 0.0F, 1e-9F, 1e-3F)) {
-                    const auto hsv = color::RGBtoHSV(radiance);
-                    const auto color = color::HSVtoRGB(aten::vec3(hsv.r, hsv.g, 1));
-
-                    lum_y = pow(lum_y, 1.0F / 2.2F);
-
-                    const auto remap = AT_NAME::sampleTexture(ctxt, param.toon.remap_texture, 0.5F, lum_y, aten::vec4(1.0F));
-
-                    toon_term = remap;
-                }
+                radiance = res.value();
             }
         }
 
+        float lum_y = aten::clamp(color::luminance(radiance), 0.0F, 1.0F);
+
+        // TODO:
+        // If we simply multiply color and remap, it might make the result 0.
+        // e.g. remap (1, 0, 0) * color (0, 1, 0) = result (0, 0, 0)
+        // So, disable to multiply at this moment.
+        //const auto hsv = color::RGBtoHSV(radiance);
+        //const auto color = color::HSVtoRGB(aten::vec3(hsv.r, hsv.g, 1));
+
+        lum_y = aten::clamp(aten::pow(lum_y, 1.0F / 2.2F), 0.0F, 1.0F);
+
+        const auto remap = AT_NAME::sampleTexture(ctxt, param.toon.remap_texture, lum_y, 0.5F, aten::vec4(1.0F));
+        aten::vec3 toon_term = remap;
+
         const auto rim_light_term = ComputeRimLight(ctxt, param, hit_pos, normal, wi);
 
-        return toon_term + rim_light_term;
+        const auto albedo = AT_NAME::sampleTexture(ctxt, param.albedoMap, u, v, aten::vec4(1.0F));
+        return (toon_term + rim_light_term) * albedo;
     }
 
     namespace _detail {

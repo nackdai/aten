@@ -74,7 +74,6 @@ namespace AT_NAME {
             uint32_t will_update_depth : 1;
             uint32_t does_use_throughput_depth : 1;
 
-            // NOTE:
             // If ray hits non-alpha (alpha value is greaer equal 1) face, terminate alpha blending sequence.
             // If we continues to accumulate, the reflected ray throughput accumulates the alpha blended color and it makes the pixel brighter.
             // Not to cause it, we need to termniate immediately.

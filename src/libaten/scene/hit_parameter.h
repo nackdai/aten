@@ -9,12 +9,16 @@ namespace aten {
         float area{ 0.0F };
 
         vec3 normal;
-        int32_t mtrlid{ -1 };
+        int32_t mtrlid{ -1 };   ///< Index to the material.
 
         // texture coordinate.
         float u{ 0.0F };
         float v{ 0.0F };
 
+        /**
+         * @brief Index to the polygon group belonged to the same material.
+         * This is unique in the entire scene.
+         */
         int32_t meshid{ -1 };
 
         bool isVoxel{ false };
@@ -22,19 +26,23 @@ namespace aten {
     };
 
     struct Intersection {
-        float t{ AT_MATH_INF };
+        float t{ AT_MATH_INF }; ///< Distance from the ray origin.
 
-        int32_t objid{ -1 };
+        int32_t objid{ -1 };    ///< Index to the root object.
 
-        int32_t mtrlid{ -1 };
+        int32_t mtrlid{ -1 };   ///< Index to the material.
 
+        /**
+         * @brief Index to the polygon group belonged to the same material.
+         * This is unique in the entire scene.
+         */
         int32_t meshid{ -1 };
 
         union {
             // For triangle.
             struct {
                 int32_t triangle_id;    ///< Hit triangle id.
-                float a, b;              ///< Barycentric on hit triangle.
+                float a, b;             ///< Barycentric on hit triangle.
             };
             // Fox voxel.
             struct {

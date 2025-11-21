@@ -143,6 +143,9 @@ namespace aten
                         // Hit the bottom later bbox.
                         // Start to traverse the bottom layer.
                         if (obj.mtx_id >= 0) {
+                            // NOTE:
+                            // The local to world matrix is stored at obj.mtx_id.
+                            // The inverse (i.e. world to local) matrix is stored at obj.mtx_id + 1.
                             const auto& mtx_W2L = ctxt.GetMatrix(obj.mtx_id + 1);
                             transformed_ray = mtx_W2L.applyRay(r);
                         }

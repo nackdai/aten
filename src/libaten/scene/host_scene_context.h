@@ -148,6 +148,16 @@ namespace aten
             return GetMaterialInstance(idx)->param();
         }
 
+        aten::MaterialParameter* GetMaterialByName(std::string_view name) const noexcept
+        {
+            for (const auto& mtrl : materials_) {
+                if (name == mtrl->name()) {
+                    return &mtrl->param();
+                }
+            }
+            return nullptr;
+        }
+
         /**
          * @brief Get the list of the material paremeter.
          * @return List of the material paremeter.

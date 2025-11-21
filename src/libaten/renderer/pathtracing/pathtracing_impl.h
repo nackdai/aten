@@ -566,6 +566,67 @@ namespace AT_NAME
         return false;
     }
 
+    inline AT_DEVICE_API bool CheckStencil(
+        aten::ray& curr_ray,
+        PathAttribute& path_attrib,
+        const int32_t bounce,
+        const AT_NAME::context& ctxt,
+        const aten::vec3& hit_pos,
+        const aten::vec3& hit_nml,
+        const aten::MaterialParameter& mtrl
+    )
+    {
+        if (mtrl.stencil_type == aten::StencilType::STENCIL) {
+            int x = 0;
+        }
+
+        if (bounce > 0
+            || mtrl.stencil_type != aten::StencilType::STENCIL
+        ) {
+            return false;
+        }
+
+        constexpr size_t MAX_LOOKUPS = 10;
+
+        // Just through the object.
+        // Ray go through to the opposite direction. So, we need to specify inverted normal.
+        aten::ray ray(hit_pos, curr_ray.dir, -hit_nml);
+
+        for (size_t i = 0; i < MAX_LOOKUPS; i++) {
+            aten::Intersection isect;
+            bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                isect, ctxt, ray,
+                AT_MATH_EPSILON, AT_MATH_INF
+            );
+
+            if (is_hit) {
+                const auto& hit_mtrl = ctxt.GetMaterial(isect.mtrlid);
+                if (hit_mtrl.stencil_type == aten::StencilType::ALWAYS) {
+                    // TODO:
+                    // Unfortunately, it's hard to replace the current original evaludate resulted before stencil check.
+                    // So, just update ray expected to hit the none stencil object which is found here.
+                    curr_ray = ray;
+                    return true;
+                }
+                else if (hit_mtrl.stencil_type == aten::StencilType::NONE) {
+                    return false;
+                }
+                else {
+                    // Prepare for next.
+                    aten::hitrecord rec;
+                    const auto& obj = ctxt.GetObject(isect.objid);
+                    AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
+
+                    // Just through the object.
+                    // Ray go through to the opposite direction. So, we need to specify inverted normal.
+                    ray = aten::ray(rec.p, ray.dir, -rec.normal);
+                }
+            }
+        }
+
+        return false;
+    }
+
     inline AT_DEVICE_API float ComputeRussianProbability(
         int32_t bounce,
         int32_t rr_bounce,

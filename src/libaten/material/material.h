@@ -208,6 +208,12 @@ namespace aten
         aten::vec3 le;
     };
 
+    enum class StencilType : int32_t {
+        NONE = 0,
+        ALWAYS = 1,
+        STENCIL = 2,
+    };
+
     struct MaterialParameter {
         aten::vec4 baseColor;   // サーフェイスカラー，通常テクスチャマップによって供給される.
         MaterialType type;
@@ -221,6 +227,8 @@ namespace aten
         int32_t albedoMap{ -1 };
         int32_t normalMap{ -1 };
         int32_t roughnessMap{ -1 };
+
+        StencilType stencil_type{ StencilType::NONE };
 
         union {
             StandardMaterialParameter standard;
@@ -270,6 +278,8 @@ namespace aten
             albedoMap = rhs.albedoMap;
             normalMap = rhs.normalMap;
             roughnessMap = rhs.roughnessMap;
+
+            stencil_type = rhs.stencil_type;
 
             if (type == MaterialType::CarPaint) {
                 carpaint = rhs.carpaint;

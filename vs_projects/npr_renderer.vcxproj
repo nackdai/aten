@@ -20,9 +20,6 @@
   <ItemGroup>
     <ClInclude Include="..\src\common\scenedefs.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\src\npr_renderer\ssrt_deformable_vs.glsl" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{119B5EF2-25F8-4F38-AEE7-3DAED11247EC}</ProjectGuid>
     <RootNamespace>npr_renderer</RootNamespace>

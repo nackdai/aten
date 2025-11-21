@@ -6,7 +6,7 @@
 namespace idaten {
     namespace cuda {
         template< class T >
-        void check(T result, char const *const func, const char *const file, int32_t const line)
+        bool check(T result, char const *const func, const char *const file, int32_t const line)
         {
             if (result)
             {
@@ -47,11 +47,14 @@ namespace idaten {
 
                 // Make sure we call CUDA Device Reset before exiting.
                 exit(EXIT_FAILURE);
+
+                return false;
             }
+            return true;
         }
 
         template <>
-        inline void check(CUresult result, char const *const func, const char *const file, int32_t const line)
+        inline bool check(CUresult result, char const *const func, const char *const file, int32_t const line)
         {
             if (result)
             {
@@ -74,7 +77,10 @@ namespace idaten {
 
                 // Make sure we call CUDA Device Reset before exiting.
                 exit(EXIT_FAILURE);
+
+                return false;
             }
+            return true;
         }
     }
 }

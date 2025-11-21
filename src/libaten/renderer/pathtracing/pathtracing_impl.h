@@ -301,6 +301,7 @@ namespace AT_NAME
         int32_t idx,
         int32_t bounce,
         const AT_NAME::context& ctxt,
+        const aten::MaterialParameter& surface_mtrl,
         AT_NAME::Path paths,
         const AT_NAME::ShadowRay& shadow_ray
     )
@@ -338,13 +339,15 @@ namespace AT_NAME
         // Offset is already applied to shadow_ray.rayorg in FillShadowRay.
         aten::ray r(shadow_ray.rayorg, shadow_ray.raydir);
 
-        int32_t loop_cnt = 0;
+        // At least one hit test to the light is necessary.
+        size_t max_lookups = ctxt.enable_alpha_blending ? 10 : 1;
+
+        const bool need_stencil_check = surface_mtrl.stencil_type == aten::StencilType::ALWAYS;
+        max_lookups = need_stencil_check ? 10 : max_lookups;
 
         // NOTE:
         // For safety, jump out the while loop forcibly.
-        while (loop_cnt < 10) {
-            loop_cnt += 1;
-
+        for (size_t i = 0; i < max_lookups; i++) {
             aten::Intersection isect;
 
             bool isHit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
@@ -356,22 +359,32 @@ namespace AT_NAME
             if (isHit) {
                 hitobj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));
 
-                if (ctxt.enable_alpha_blending) {
-                    aten::hitrecord rec;
-                    AT_NAME::evaluate_hit_result(rec, *hitobj, ctxt, r, isect);
+                aten::hitrecord rec;
+                AT_NAME::evaluate_hit_result(rec, *hitobj, ctxt, r, isect);
 
-                    const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
-                    if (AT_NAME::material::isTranslucentByAlpha(ctxt, mtrl, rec.u, rec.v)) {
-                        // To go path through the object, specfy the oppoiste normal.
-                        auto orienting_normal = rec.normal;
-                        const bool is_same_facing = dot(rec.normal, shadow_ray.raydir) > 0.0F;
-                        if (!is_same_facing) {
-                            orienting_normal = -orienting_normal;
-                        }
-                        r = aten::ray(rec.p, shadow_ray.raydir, orienting_normal);
-                        //r = aten::ray(rec.p, shadow_ray.raydir, shadow_ray.raydir);
-                        continue;
+                const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
+
+                bool is_ignore_hit = false;
+
+                if (need_stencil_check) {
+                    if (mtrl.stencil_type == aten::StencilType::STENCIL) {
+                        is_ignore_hit = true;
                     }
+                }
+                else if (AT_NAME::material::isTranslucentByAlpha(ctxt, mtrl, rec.u, rec.v)) {
+                    is_ignore_hit = true;
+                }
+
+                if (is_ignore_hit) {
+                    auto orienting_normal = rec.normal;
+                    const bool is_same_facing = dot(rec.normal, shadow_ray.raydir) > 0.0F;
+                    if (!is_same_facing) {
+                        orienting_normal = -orienting_normal;
+                    }
+
+                    // To go path through the object, specfy the oppoiste normal.
+                    r = aten::ray(rec.p, shadow_ray.raydir, orienting_normal);
+                    continue;
                 }
             }
 

@@ -54,8 +54,12 @@ namespace aten
                     params_.mtxs.GetW2C(),
                     aov_normal_depth, aov_albedo_meshid);
 
+                const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
+
                 std::ignore = AT_NAME::HitShadowRay(
-                    idx, depth, ctxt, path_host_.paths, shadow_rays_[idx]);
+                    idx, depth,
+                    ctxt, mtrl,
+                    path_host_.paths, shadow_rays_[idx]);
 
                 willContinue = !path_host_.paths.attrib[idx].is_terminated;
             }

@@ -153,8 +153,13 @@ namespace aten
                     shade(
                         idx, paths, ctxt, rays, shadow_rays,
                         isect, scene, rrDepth, depth);
+
+                    const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
+
                     AT_NAME::HitShadowRay(
-                        idx, depth, ctxt, paths, shadow_rays[idx]);
+                        idx, depth,
+                        ctxt, mtrl,
+                        paths, shadow_rays[idx]);
                 }
             }
             else {

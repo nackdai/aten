@@ -129,6 +129,18 @@ namespace pt {
 
         shShadowRays[threadIdx.x].isActive = false;
 
+        // Check stencil.
+        auto is_stencil = AT_NAME::CheckStencil(
+            rays[idx], paths.attrib[idx],
+            bounce,
+            ctxt,
+            rec.p, orienting_normal,
+            shMtrls[threadIdx.x]
+        );
+        if (is_stencil) {
+            return;
+        }
+
         // Check transparency or translucency.
         auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
             ctxt,
@@ -200,6 +212,7 @@ namespace pt {
         const aten::LightParameter* __restrict__ lights,
         const aten::TriangleParameter* __restrict__ prims,
         const aten::mat4* __restrict__ matrices,
+        const aten::Intersection* __restrict__ isects,
         idaten::Path paths,
         int32_t* hitindices,
         int32_t* hitnum,
@@ -219,7 +232,13 @@ namespace pt {
         ctxt.prims = prims;
         ctxt.matrices = matrices;
 
-        AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays[idx]);
+        const auto& isect = isects[idx];
+        const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
+
+        AT_NAME::HitShadowRay(
+            idx, bounce,
+            ctxt, mtrl,
+            paths, shadowRays[idx]);
     }
 
     __global__ void gather(
@@ -369,6 +388,7 @@ namespace idaten
             ctxt_host_->lightparam.data(),
             ctxt_host_->primparams.data(),
             ctxt_host_->mtxparams.data(),
+            m_isects.data(),
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
             m_shadowRays.data());

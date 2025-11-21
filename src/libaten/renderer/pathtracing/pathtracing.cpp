@@ -57,8 +57,13 @@ namespace aten
                     path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
                     isect, scene, m_rrDepth, depth);
 
+                const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
+
                 std::ignore = AT_NAME::HitShadowRay(
-                    idx, depth, ctxt, path_host_.paths, shadow_rays_[idx]);
+                    idx, depth,
+                    ctxt, mtrl,
+                    path_host_.paths,
+                    shadow_rays_[idx]);
 
                 willContinue = !path_host_.paths.attrib[idx].is_terminated;
             }

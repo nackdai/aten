@@ -240,7 +240,12 @@ namespace restir {
             shadowRays[idx].distToLight = dist;
             shadowRays[idx].raydir /= dist;
 
-            isHit = AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays[idx]);
+            const auto& mtrl = ctxt.GetMaterial(restir_info.mtrl_idx);
+
+            isHit = AT_NAME::HitShadowRay(
+                idx, bounce,
+                ctxt, mtrl,
+                paths, shadowRays[idx]);
         }
 
         if (!isHit) {

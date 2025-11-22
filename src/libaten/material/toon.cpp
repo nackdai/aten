@@ -12,6 +12,7 @@
 #include "material/sample_texture.h"
 #include "material/toon_specular.h"
 #include "misc/color.h"
+#include "renderer/pathtracing/pathtracing_impl.h"
 #include "renderer/pathtracing/pathtracing_nee_impl.h"
 
 #ifdef __CUDACC__
@@ -112,24 +113,22 @@ namespace AT_NAME
 
             aten::ray r(hit_pos, light_sample.dir, normal);
 
-            aten::Intersection isect;
-
-            bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closer>(
-                isect,
-                ctxt,
-                r,
-                AT_MATH_EPSILON, light_sample.dist_to_light - AT_MATH_EPSILON);
+            bool is_hit_to_target_light = AT_NAME::HitTestToTargetLight(
+                ctxt, r,
+                *target_light, light_sample.dist_to_light,
+                param
+            );
 
             if (param.type == aten::MaterialType::Toon) {
                 brdf = Toon::ComputeBRDF(
                     ctxt, param,
-                    is_hit ? nullptr : &light_sample,
+                    is_hit_to_target_light ? &light_sample : nullptr,
                     sampler, hit_pos, normal, wi, u, v);
             }
             else if (param.type == aten::MaterialType::StylizedBrdf) {
                 brdf = StylizedBrdf::ComputeBRDF(
                     ctxt, param,
-                    is_hit ? nullptr : &light_sample,
+                    is_hit_to_target_light ? &light_sample : nullptr,
                     sampler, hit_pos, normal, wi, u, v);
             }
         }

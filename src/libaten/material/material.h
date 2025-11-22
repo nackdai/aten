@@ -363,8 +363,6 @@ namespace AT_NAME
     class material {
         friend class context;
 
-        static const std::array<std::string, static_cast<size_t>(aten::MaterialType::MaterialTypeMax)> mtrl_type_info;
-
     protected:
         material(
             aten::MaterialType type,

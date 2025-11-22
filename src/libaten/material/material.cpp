@@ -22,20 +22,25 @@
 
 namespace AT_NAME
 {
-    const std::array<std::string, static_cast<size_t>(aten::MaterialType::MaterialTypeMax)> material::mtrl_type_info = { {
-        "emissive",
-        "diffuse",
-        "ornenayar",
-        "specular",
-        "refraction",
-        "ggx",
-        "beckman",
-        "velvet"
-        "microfacet_refraction",
-        "retroreflective",
-        "carpaint",
-        "disney_brdf",
-    } };
+    namespace {
+        const std::array mtrl_type_info = {
+            "emissive",
+            "diffuse",
+            "ornenayar",
+            "specular",
+            "refraction",
+            "ggx",
+            "beckman",
+            "velvet",
+            "microfacet_refraction",
+            "retroreflective",
+            "carpaint",
+            "disney_brdf",
+            "toon",
+            "stylized_brdf",
+        };
+        AT_STATICASSERT(static_cast<size_t>(aten::MaterialType::MaterialTypeMax) == mtrl_type_info.size());
+    }
 
     std::shared_ptr<material> material::CreateMaterial(
         aten::MaterialType type,
@@ -134,7 +139,7 @@ namespace AT_NAME
 
     const char* material::getMaterialTypeName(aten::MaterialType type)
     {
-        return mtrl_type_info[static_cast<size_t>(type)].c_str();
+        return mtrl_type_info[static_cast<size_t>(type)];
     }
 
     aten::MaterialType material::getMaterialTypeFromMaterialTypeName(std::string_view name)

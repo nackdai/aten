@@ -7,7 +7,7 @@
 
 namespace AT_NAME
 {
-    float TriangleGroupMesh::build(context &ctxt, std::optional<aten::vec3> scale)
+    float TriangleGroupMesh::build(context &ctxt, const std::optional<aten::vec3>& scale)
     {
         aten::vec3 boxmin(AT_MATH_INF, AT_MATH_INF, AT_MATH_INF);
         aten::vec3 boxmax(-AT_MATH_INF, -AT_MATH_INF, -AT_MATH_INF);

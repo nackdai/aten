@@ -153,7 +153,7 @@ namespace aten
         return m_sklController.getMatrices();
     }
 
-    void deformable::build(aten::context& ctxt, std::optional<aten::vec3> scale)
+    void deformable::build(aten::context& ctxt, const std::optional<aten::vec3>& scale)
     {
         if (!m_accel) {
             m_accel = accelerator::createAccelerator(AccelType::UserDefs);

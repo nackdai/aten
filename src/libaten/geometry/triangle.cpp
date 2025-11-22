@@ -69,6 +69,7 @@ namespace aten
                 v0, v1, v2,
                 mtrlid, geomid);
 
+#if 0
             // Check if the normal needs to be computed on the fly while traversing bvh.
             const bool need_compute_normal_on_the_fly = param_.needNormal;
 
@@ -87,6 +88,7 @@ namespace aten
                 e1 = v1.pos - v2.pos;
                 v2.nml = normalize(cross(e0, e1));
             }
+#endif
 
             ctxt.ReplaceVertex(param_.idx[0], v0);
             ctxt.ReplaceVertex(param_.idx[1], v1);

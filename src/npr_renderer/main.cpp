@@ -21,7 +21,7 @@
 
 #define ENABLE_ENVMAP
 #define TAKE_SC_EVERY_FRAME false
-//#define DEVICE_RENDERING
+#define DEVICE_RENDERING
 
 #ifdef DEVICE_RENDERING
 constexpr int32_t WIDTH = 1280;
@@ -38,11 +38,19 @@ public:
     static std::shared_ptr<aten::instance<aten::deformable>> makeScene(
         aten::context& ctxt, aten::scene* scene)
     {
+        // NOTE:
+        // The part of the normals in unitychan model seems to be broken.
+        // That's the part of the hair.
+        // It's not sure it happens from the original model or it happens while converting the model data.
+        // If we re-compute it by computing cross the edges of the triangle, it's fixed.
+        // But, it causes the non smooth normal.
+
         auto mdl = aten::TransformableFactory::createDeformable(ctxt);
         mdl->read("../../asset/converted_unitychan/unitychan_gpu.mdl");
 
         aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
-        aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt);
+        //aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt);
+        aten::MaterialLoader::load("unitychan_toon_test_mtrl.xml", ctxt);
 
         for (auto& tex : ctxt.GetTextures()) {
             tex->SetFilterMode(aten::TextureFilterMode::Linear);
@@ -54,17 +62,26 @@ public:
             aten::vec3(0), aten::vec3(0), aten::vec3(0.01F));
         scene->add(deformMdl);
 
-        aten::ImageLoader::setBasePath("./");
-
         auto* mtrl_hair = ctxt.GetMaterialByName("hair");
         mtrl_hair->stencil_type = aten::StencilType::STENCIL;
 
         auto* mtrl_eyeline = ctxt.GetMaterialByName("eyeline");
         mtrl_eyeline->stencil_type = aten::StencilType::ALWAYS;
 
+        aten::ImageLoader::load("FO_CLOTH1.tga", ctxt);
+
+#if 1
+        auto* mtrl_face = ctxt.GetMaterialByName("face");
+        AT_ASSERT(mtrl_face->type == aten::MaterialType::Toon);
+        mtrl_face->toon.toon_type = aten::MaterialType::Diffuse;
+        mtrl_face->toon.remap_texture = ctxt.GetTextureNum() - 1;
+        mtrl_face->toon.target_light_idx = 0;
+#endif
+
+        aten::ImageLoader::setBasePath("./");
+
         return deformMdl;
     }
-
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -79,6 +96,51 @@ public:
         at = aten::vec3(0.f, 1.3f, 0.f);
 #endif
         fov = 45.0f;
+    }
+};
+
+class MaterialParamEditor : public aten::IMaterialParamEditor {
+public:
+    MaterialParamEditor() = default;
+    ~MaterialParamEditor() = default;
+
+public:
+    bool edit(std::string_view name, float& param, float _min, float _max) override final
+    {
+        return ImGui::SliderFloat(name.data(), &param, _min, _max);
+    }
+
+    bool edit(std::string_view name, bool& param) override final
+    {
+        return ImGui::Checkbox(name.data(), &param);
+    }
+
+    bool edit(std::string_view name, aten::vec3& param) override final
+    {
+        const auto ret = ImGui::ColorEdit3(name.data(), reinterpret_cast<float*>(&param));
+        return ret;
+    }
+
+    bool edit(std::string_view name, aten::vec4& param) override final
+    {
+        const auto ret = ImGui::ColorEdit4(name.data(), reinterpret_cast<float*>(&param));
+        return ret;
+    }
+
+    void edit(std::string_view name, std::string_view str) override final
+    {
+        ImGui::Text("[%s] : (%s)", name.data(), str.empty() ? "none" : str.data());
+    }
+
+    bool edit(std::string_view name, const char* const* elements, size_t size, int32_t& param) override final
+    {
+        const auto ret = ImGui::Combo(name.data(), &param, elements, size);
+        return ret;
+    }
+
+    bool CollapsingHeader(std::string_view name) override final
+    {
+        return ImGui::CollapsingHeader(name.data());
     }
 };
 
@@ -133,16 +195,19 @@ public:
         deform_mdl_ = DeformScene::makeScene(ctxt_, &scene_);
         scene_.build(ctxt_);
 
-#ifdef ENABLE_ENVMAP
-        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
-        auto bg = AT_NAME::Background::CreateBackgroundResource(envmap);
+        // IBL
+        scene_light_.is_ibl = true;
+        scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
+        auto bg = AT_NAME::Background::CreateBackgroundResource(scene_light_.envmap_texture, aten::vec4(0));
+        scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
+        scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
 
-        auto ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
+        // PointLight
+        scene_light_.point_light = std::make_shared<aten::PointLight>(
+            aten::vec3(0.0, 0.0, 50.0),
+            aten::vec3(1.0, 1.0, 1.0),
+            4000.0f);
 
-        scene_.addImageBasedLight(ctxt_, ibl);
-#else
-        auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, aten::vec4(0));
-#endif
         auto mdl = deform_mdl_->GetHasObjectAsRealType();
 
         {
@@ -163,6 +228,8 @@ public:
             ctxt_.CopyBvhNodes(scene_.getAccel()->getNodes());
             renderer_.SetBG(bg);
 #endif
+
+            renderer_.SetEnableEnvmap(scene_light_.is_ibl);
         }
 
         {
@@ -275,8 +342,11 @@ public:
             AT_PRINTF("Take Screenshot[%s]\n", screen_shot_file_name.c_str());
         }
 
+#ifdef DEVICE_RENDERING
         if (will_show_gui_)
         {
+            bool need_renderer_reset = false;
+
             ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", frame, 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Text("cuda : %.3f ms (avg : %.3f ms)", cudaelapsed, avg_cuda_time_);
             ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * max_samples_) / float(1000 * 1000) * (float(1000) / cudaelapsed));
@@ -291,7 +361,45 @@ public:
                 renderer_.reset();
             }
 
-#ifdef DEVICE_RENDERING
+            constexpr std::array light_types = { "IBL", "PointLight" };
+            int32_t lighttype = scene_light_.is_ibl ? 0 : 1;
+            if (ImGui::Combo("light", &lighttype, light_types.data(), static_cast<int32_t>(light_types.size()))) {
+                ctxt_.ClearAllLights();
+
+                auto next_is_envmap = lighttype == 0;
+                if (next_is_envmap) {
+                    ctxt_.AddLight(scene_light_.ibl);
+                }
+                else {
+                    ctxt_.AddLight(scene_light_.point_light);
+                }
+
+                need_renderer_reset = true;
+
+                scene_light_.is_ibl = next_is_envmap;
+                renderer_.SetEnableEnvmap(scene_light_.is_ibl);
+                renderer_.updateLight(ctxt_);
+            }
+
+            if (!scene_light_.is_ibl) {
+                auto& point_light = ctxt_.GetLightInstance(0);
+                auto& light_param = point_light->param();
+
+                bool is_updated = false;
+                is_updated |= ImGui::ColorEdit3("LightColor", reinterpret_cast<float*>(&light_param.light_color));
+                is_updated |= ImGui::SliderFloat("LightIntensity", &light_param.intensity, 0.0F, 10000.0F);
+                if (is_updated) {
+                    renderer_.updateLight(ctxt_);
+                }
+            }
+
+            const auto& mtrl_param = ctxt_.GetMaterialByName("face");
+            auto mtrl = ctxt_.GetMaterialInstance(mtrl_param->id);
+            if (mtrl->edit(&mtrl_param_editor_)) {
+                need_renderer_reset = true;
+                renderer_.updateMaterial(ctxt_.GetMetarialParemeters());
+            }
+
             auto enable_progressive = renderer_.IsEnableProgressive();
             if (ImGui::Checkbox("Progressive", &enable_progressive))
             {
@@ -306,12 +414,16 @@ public:
                 const auto tex_num = ctxt_.GetTextureNum();
                 ImGui::SliderInt("View texture", &view_texture_idx_, 0, tex_num - 1);
             }
-#endif
 
             auto cam = camera_.param();
             ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
             ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
+
+            if (need_renderer_reset) {
+                renderer_.reset();
+            }
         }
+#endif
 
         return true;
     }
@@ -463,6 +575,16 @@ private:
     aten::TAA taa_;
 
     aten::RasterizeRenderer rasterizer_aabb_;
+
+    struct SceneLight {
+        bool is_ibl{ false };
+
+        std::shared_ptr<aten::texture> envmap_texture;
+        std::shared_ptr<aten::ImageBasedLight> ibl;
+        std::shared_ptr<aten::PointLight> point_light;
+    } scene_light_;
+
+    MaterialParamEditor mtrl_param_editor_;
 
     bool will_show_gui_
 #ifdef DEVICE_RENDERING

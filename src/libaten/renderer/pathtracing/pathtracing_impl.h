@@ -297,47 +297,28 @@ namespace AT_NAME
         shadow_ray.isActive = isShadowRayActive;
     }
 
-    inline AT_DEVICE_API bool HitShadowRay(
-        int32_t idx,
-        int32_t bounce,
+    inline AT_DEVICE_API bool HitTestToTargetLight(
         const AT_NAME::context& ctxt,
-        const aten::MaterialParameter& surface_mtrl,
-        AT_NAME::Path paths,
-        const AT_NAME::ShadowRay& shadow_ray
+        const aten::ray& original_ray,
+        const aten::LightParameter& target_light,
+        const float distance_to_target_light,
+        const aten::MaterialParameter& surface_mtrl
     )
     {
-        if (paths.attrib[idx].is_terminated) {
-            return false;
-        }
+        bool is_hit_to_light = false;
 
-        if (!shadow_ray.isActive) {
-            return false;
-        }
-
-        // TODO
-        bool enableLod = (bounce >= 2);
-
-        aten::hitrecord tmpRec;
-
-        const auto targetLightId = shadow_ray.targetLightId;
-        const auto distToLight = shadow_ray.distToLight;
-
-        const auto& light = ctxt.GetLight(targetLightId);
-        const auto lightobj = (light.IsValidLightObjectId()
-            ? &ctxt.GetObject(static_cast<uint32_t>(light.arealight_objid))
+        const auto target_light_obj = (target_light.IsValidLightObjectId()
+            ? &ctxt.GetObject(static_cast<uint32_t>(target_light.arealight_objid))
             : nullptr);
 
         float distHitObjToRayOrg = AT_MATH_INF;
+        const auto distToLight = distance_to_target_light;
 
         // Ray aim to the area light.
         // So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-        const aten::ObjectParameter* hitobj = lightobj;
+        const aten::ObjectParameter* hitobj = target_light_obj;
 
-        bool is_hit_to_light = false;
-
-        // NOTE:
-        // Offset is already applied to shadow_ray.rayorg in FillShadowRay.
-        aten::ray r(shadow_ray.rayorg, shadow_ray.raydir);
+        aten::ray r{ original_ray };
 
         // At least one hit test to the light is necessary.
         size_t max_lookups = ctxt.enable_alpha_blending ? 10 : 1;
@@ -377,21 +358,21 @@ namespace AT_NAME
 
                 if (is_ignore_hit) {
                     auto orienting_normal = rec.normal;
-                    const bool is_same_facing = dot(rec.normal, shadow_ray.raydir) > 0.0F;
+                    const bool is_same_facing = dot(rec.normal, original_ray.dir) > 0.0F;
                     if (!is_same_facing) {
                         orienting_normal = -orienting_normal;
                     }
 
                     // To go path through the object, specfy the oppoiste normal.
-                    r = aten::ray(rec.p, shadow_ray.raydir, orienting_normal);
+                    r = aten::ray(rec.p, original_ray.dir, orienting_normal);
                     continue;
                 }
             }
 
             is_hit_to_light = AT_NAME::scene::hitLight(
                 isHit,
-                light.attrib,
-                lightobj,
+                target_light.attrib,
+                target_light_obj,
                 distToLight,
                 distHitObjToRayOrg,
                 isect.t,
@@ -399,6 +380,44 @@ namespace AT_NAME
 
             break;
         }
+
+        return is_hit_to_light;
+    }
+
+    inline AT_DEVICE_API bool HitShadowRay(
+        int32_t idx,
+        int32_t bounce,
+        const AT_NAME::context& ctxt,
+        const aten::MaterialParameter& surface_mtrl,
+        AT_NAME::Path paths,
+        const AT_NAME::ShadowRay& shadow_ray
+    )
+    {
+        if (paths.attrib[idx].is_terminated) {
+            return false;
+        }
+
+        if (!shadow_ray.isActive) {
+            return false;
+        }
+
+        // TODO
+        bool enableLod = (bounce >= 2);
+
+        const auto targetLightId = shadow_ray.targetLightId;
+        const auto distToLight = shadow_ray.distToLight;
+
+        const auto& light = ctxt.GetLight(targetLightId);
+
+        // NOTE:
+        // Offset is already applied to shadow_ray.rayorg in FillShadowRay.
+        aten::ray r(shadow_ray.rayorg, shadow_ray.raydir);
+
+        const auto is_hit_to_light = HitTestToTargetLight(
+            ctxt, r,
+            light, distToLight,
+            surface_mtrl
+        );
 
         if (is_hit_to_light) {
             aten::AddVec3(paths.contrib[idx].contrib, shadow_ray.lightcontrib);

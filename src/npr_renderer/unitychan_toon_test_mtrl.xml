@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <material>
+        <name>face</name>
+        <type>toon</type>
+        <albedoMap>face_00.tga</albedoMap>
+        <baseColor>1.0 1.0 1.0</baseColor>
+    </material>
+    <material>
+        <name>eyebase</name>
+        <type>diffuse</type>
+        <albedoMap>eyeline_00.tga</albedoMap>
+        <baseColor>1.0 1.0 1.0</baseColor>
+    </material>
+    <material>
+        <name>eye_L1</name>
+        <type>diffuse</type>
+        <albedoMap>eye_iris_L_00.tga</albedoMap>
+        <baseColor>1.0 1.0 1.0</baseColor>
+    </material>
+    <material>
+        <name>eye_R1</name>
+        <type>diffuse</type>
+        <albedoMap>eye_iris_R_00.tga</albedoMap>
+        <baseColor>1.0 1.0 1.0</baseColor>
+    </material>
+    <material>
+        <name>body</name>
+        <type>diffuse</type>
+        <normalMap>body_01_NRM.tga</normalMap>
+        <albedoMap>body_01.tga</albedoMap>
+        <baseColor>1.0 1.0 1.0</baseColor>
+    </material>
+    <material>
+        <name>eyeline</name>
+        <type>diffuse</type>
+        <albedoMap>eyeline_00.tga</albedoMap>
+        <baseColor>1.0 1.0 1.0</baseColor>
+    </material>
+    <material>
+        <name>hair</name>
+        <type>diffuse</type>
+        <normalMap>hair_01_NRM.tga</normalMap>
+        <albedoMap>hair_01.tga</albedoMap>
+        <baseColor>1.0 1.0 1.0</baseColor>
+    </material>
+    <material>
+        <name>skin1</name>
+        <type>diffuse</type>
+        <albedoMap>skin_01.tga</albedoMap>
+        <baseColor>1.0 1.0 1.0</baseColor>
+    </material>
+    <material>
+        <name>mat_cheek</name>
+        <type>diffuse</type>
+        <albedoMap>cheek_00.tga</albedoMap>
+        <baseColor>1.0 1.0 1.0</baseColor>
+    </material>
+</root>

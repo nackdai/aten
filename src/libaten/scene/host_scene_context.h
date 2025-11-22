@@ -375,7 +375,7 @@ namespace aten
          */
         std::shared_ptr<AT_NAME::triangle> CreateTriangle(
             const aten::TriangleParameter& param,
-            std::optional<aten::vec3> scale = std::nullopt);
+            const std::optional<aten::vec3>& scale = std::nullopt);
 
         /**
          * @brief Add a triangle instance to the scene.

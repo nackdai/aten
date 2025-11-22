@@ -167,7 +167,7 @@ namespace AT_NAME
             aten::context& ctxt,
             int32_t mtrlid,
             int32_t geomid,
-            std::optional<aten::vec3> scale);
+            const std::optional<aten::vec3>& scale);
 
         aten::aabb ComputeAABB(const aten::context& ctxt) const;
 
@@ -185,7 +185,7 @@ namespace AT_NAME
         static std::shared_ptr<triangle> create(
             aten::context& ctxt,
             const aten::TriangleParameter& param,
-            std::optional<aten::vec3> scale);
+            const std::optional<aten::vec3>& scale);
 
         template <class T>
         auto updateIndex(T id)

@@ -11,7 +11,7 @@
 
 namespace AT_NAME
 {
-    void PolygonObject::build(context& ctxt, std::optional<aten::vec3> scale)
+    void PolygonObject::build(context& ctxt, const std::optional<aten::vec3>& scale)
     {
         if (m_param.triangle_num > 0) {
             // Builded already.

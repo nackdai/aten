@@ -165,7 +165,7 @@ namespace aten
 
     std::shared_ptr<AT_NAME::triangle> context::CreateTriangle(
         const aten::TriangleParameter& param,
-        std::optional<aten::vec3> scale)
+        const std::optional<aten::vec3>& scale)
     {
         auto f = AT_NAME::triangle::create(*this, param, scale);
         AT_ASSERT(f);

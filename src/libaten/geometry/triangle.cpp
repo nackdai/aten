@@ -12,7 +12,7 @@ namespace aten
     std::shared_ptr<triangle> triangle::create(
         aten::context& ctxt,
         const aten::TriangleParameter& param_,
-        std::optional<aten::vec3> scale)
+        const std::optional<aten::vec3>& scale)
     {
         auto f = std::make_shared<triangle>();
 
@@ -51,7 +51,7 @@ namespace aten
         aten::context& ctxt,
         int32_t mtrlid,
         int32_t geomid,
-        std::optional<aten::vec3> scale)
+        const std::optional<aten::vec3>& scale)
     {
         if (scale.has_value()) {
             auto v0 = ctxt.GetVertex(param_.idx[0]);

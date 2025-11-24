@@ -88,13 +88,8 @@ public:
         aten::vec3& at,
         float& fov)
     {
-#ifdef DEVICE_RENDERING
         pos = aten::vec3(0.f, 1.3f, 0.5f);
         at = aten::vec3(0.f, 1.3f, 0.f);
-#else
-        pos = aten::vec3(0.f, 1.3f, 0.5f);
-        at = aten::vec3(0.f, 1.3f, 0.f);
-#endif
         fov = 45.0f;
     }
 };
@@ -196,17 +191,23 @@ public:
         scene_.build(ctxt_);
 
         // IBL
-        scene_light_.is_ibl = true;
+        scene_light_.is_ibl = false;
         scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
         auto bg = AT_NAME::Background::CreateBackgroundResource(scene_light_.envmap_texture, aten::vec4(0));
         scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
-        scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
 
         // PointLight
         scene_light_.point_light = std::make_shared<aten::PointLight>(
             aten::vec3(0.0, 0.0, 50.0),
             aten::vec3(1.0, 1.0, 1.0),
             4000.0f);
+
+        if (scene_light_.is_ibl) {
+            scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
+        }
+        else {
+            ctxt_.AddLight(scene_light_.point_light);
+        }
 
         auto mdl = deform_mdl_->GetHasObjectAsRealType();
 
@@ -361,6 +362,8 @@ public:
                 renderer_.reset();
             }
 
+            ImGui::Spacing();
+
             constexpr std::array light_types = { "IBL", "PointLight" };
             int32_t lighttype = scene_light_.is_ibl ? 0 : 1;
             if (ImGui::Combo("light", &lighttype, light_types.data(), static_cast<int32_t>(light_types.size()))) {
@@ -393,12 +396,16 @@ public:
                 }
             }
 
+            ImGui::Spacing();
+
             const auto& mtrl_param = ctxt_.GetMaterialByName("face");
             auto mtrl = ctxt_.GetMaterialInstance(mtrl_param->id);
             if (mtrl->edit(&mtrl_param_editor_)) {
                 need_renderer_reset = true;
                 renderer_.updateMaterial(ctxt_.GetMetarialParemeters());
             }
+
+            ImGui::Spacing();
 
             auto enable_progressive = renderer_.IsEnableProgressive();
             if (ImGui::Checkbox("Progressive", &enable_progressive))

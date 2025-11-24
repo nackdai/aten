@@ -352,7 +352,7 @@ namespace AT_NAME
                         is_ignore_hit = true;
                     }
                 }
-                else if (AT_NAME::material::isTranslucentByAlpha(ctxt, mtrl, rec.u, rec.v)) {
+                if (AT_NAME::material::isTranslucentByAlpha(ctxt, mtrl, rec.u, rec.v)) {
                     is_ignore_hit = true;
                 }
 

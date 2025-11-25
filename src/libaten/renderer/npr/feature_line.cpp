@@ -1,5 +1,6 @@
 #include "renderer/npr/feature_line.h"
 #include "geometry/EvaluateHitResult.h"
+#include "scene/host_scene_context.h"
 
 namespace aten {
 namespace npr {
@@ -61,6 +62,22 @@ namespace npr {
             0.0f, 1.0f);
         const auto result = color * (float(1) - edge_strengh);
         return result;
+    }
+
+    bool FeatureLine::EditFeatureLineConfig(
+        aten::IMaterialParamEditor* editor,
+        aten::FeatureLineConfig& config
+    )
+    {
+        bool is_updated = false;
+        if (editor->CollapsingHeader("FeatureLine")) {
+            is_updated |= AT_EDIT_MATERIAL_PARAM(editor, config, enabled);
+            is_updated |= AT_EDIT_MATERIAL_PARAM(editor, config, line_color);
+            is_updated |= editor->edit("line_width", config.line_width, 1.0F, 10.0F);
+            is_updated |= editor->edit("albedo_threshold", config.albedo_threshold, 0.1F, 1.0F);
+            is_updated |= editor->edit("normal_threshold", config.normal_threshold, 0.1F, 1.0F);
+        }
+        return is_updated;
     }
 }
 }

@@ -109,6 +109,10 @@ namespace aten
         int32_t rrDepth,
         int32_t bounce)
     {
+        if (paths.attrib[idx].is_terminated) {
+            return;
+        }
+
         auto* sampler = &paths.sampler[idx];
 
         const auto& ray = rays[idx];
@@ -278,6 +282,13 @@ namespace aten
         if (shadow_rays_.empty()) {
             shadow_rays_.resize(width * height);
         }
+
+        if (enable_feature_line_) {
+            if (feature_line_sample_ray_infos_.size() == 0) {
+                feature_line_sample_ray_infos_.resize(width * height);
+            }
+        }
+
         path_host_.init(width, height);
         path_host_.Clear(GetFrameCount());
 
@@ -326,11 +337,8 @@ namespace aten
                         if (enable_feature_line_) {
                             radiance_with_feature_line(
                                 idx,
-                                path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
-                                m_rrDepth, m_maxDepth,
-                                camera,
-                                scene,
-                                bg_);
+                                x, y, width, height,
+                                ctxt, scene, camsample);
                         }
                         else {
                             radiance(

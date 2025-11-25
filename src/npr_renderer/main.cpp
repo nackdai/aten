@@ -158,7 +158,8 @@ public:
 
     bool Init()
     {
-        ctxt_.enable_alpha_blending = true;
+        ctxt_.scene_rendering_config.enable_alpha_blending = true;
+        ctxt_.scene_rendering_config.feature_line.enabled = true;
 
         visualizer_ = aten::visualizer::init(WIDTH, HEIGHT);
 
@@ -407,6 +408,14 @@ public:
 
             ImGui::Spacing();
 
+            if (aten::npr::FeatureLine::EditFeatureLineConfig(
+                &mtrl_param_editor_, ctxt_.scene_rendering_config.feature_line))
+            {
+                renderer_.UpdateSceneRenderingConfig(ctxt_);
+            }
+
+            ImGui::Spacing();
+
             auto enable_progressive = renderer_.IsEnableProgressive();
             if (ImGui::Checkbox("Progressive", &enable_progressive))
             {
@@ -568,7 +577,7 @@ private:
     std::shared_ptr<aten::instance<aten::deformable>> deform_mdl_;
 
 #ifdef DEVICE_RENDERING
-    idaten::PathTracing renderer_;
+    idaten::NPRPathTracing renderer_;
 #else
     aten::PathTracing renderer_;
     aten::FilmProgressive buffer_{ WIDTH, HEIGHT };

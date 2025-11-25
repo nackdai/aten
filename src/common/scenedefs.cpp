@@ -887,7 +887,7 @@ void BunnyScene::getCameraPosAndAt(
 
 void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    ctxt.enable_alpha_blending = true;
+    ctxt.scene_rendering_config.enable_alpha_blending = true;
 
     auto back = CreateMaterial("backWall", ctxt, aten::MaterialType::Diffuse, aten::vec3(0.580000f, 0.568000f, 0.544000f));
     back->param().baseColor.a = 0.0f;

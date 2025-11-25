@@ -11,7 +11,7 @@ const aten::vec4 BGColor(0.0F);
 
 //#define ENABLE_IBL
 // #define ENABLE_EVERY_FRAME_SC
-//#define ENABLE_FEATURE_LINE
+#define ENABLE_FEATURE_LINE
 
 class HostRendererApp {
 public:
@@ -98,7 +98,9 @@ public:
         renderer_.SetBG(bg);
 
 #ifdef ENABLE_FEATURE_LINE
-        renderer_.enableFeatureLine(true);
+        ctxt_.scene_rendering_config.feature_line.enabled = true;
+        ctxt_.scene_rendering_config.feature_line.line_color = aten::vec3(0.0F, 1.0F, 0.0F);
+        ctxt_.scene_rendering_config.feature_line.line_width = 2.0F;
 #endif
 
         ctxt_.CopyBvhNodes(scene_.getAccel()->getNodes());

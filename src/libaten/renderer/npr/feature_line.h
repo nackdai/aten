@@ -44,6 +44,26 @@ namespace npr {
         // http://lines.rexwe.st/
 
         /**
+         * @brief Description how to generate sample ray.
+         */
+        struct SampleRayDesc
+        {
+            float u{ 0 };                 ///< U on disc coordinate.
+            float v{ 0 };                 ///< V on disc coordinate.
+            bool is_terminated{ false }; ///< Flag if ray is termanted.
+            uint8_t padding_0[3]{ 0, 0, 0 };
+
+            aten::vec3 prev_ray_hit_pos; ///< Hit point in previous bounce.
+            float ray_org_x;              ///< Origin X of sample ray.
+
+            aten::vec3 prev_ray_hit_nml; ///< Normal at hit point in previous bounce.
+            float ray_org_y;              ///< Origin Y of sample ray.
+
+            aten::vec3 ray_dir; ///< Direction of sample ray.
+            float ray_org_z;     ///< Origin Z of sample ray.
+        };
+
+        /**
          * @brief Description of disc at query ray hit point.
          */
         struct Disc
@@ -53,6 +73,13 @@ namespace npr {
 
             aten::vec3 normal;            ///< Normal of disc.
             float accumulated_distance{0}; ///< Accumulated distance at disc.
+        };
+
+        template <size_t SampleRayNum>
+        struct SampleRayInfo {
+            static constexpr size_t size = SampleRayNum;
+            std::array<SampleRayDesc, SampleRayNum> descs;
+            Disc disc;
         };
 
         /**
@@ -122,26 +149,6 @@ namespace npr {
 
             return disc;
         }
-
-        /**
-         * @brief Description how to generate sample ray.
-         */
-        struct SampleRayDesc
-        {
-            float u{0};                 ///< U on disc coordinate.
-            float v{0};                 ///< V on disc coordinate.
-            bool is_terminated{false}; ///< Flag if ray is termanted.
-            uint8_t padding_0[3]{0, 0, 0};
-
-            aten::vec3 prev_ray_hit_pos; ///< Hit point in previous bounce.
-            float ray_org_x;              ///< Origin X of sample ray.
-
-            aten::vec3 prev_ray_hit_nml; ///< Normal at hit point in previous bounce.
-            float ray_org_y;              ///< Origin Y of sample ray.
-
-            aten::vec3 ray_dir; ///< Direction of sample ray.
-            float ray_org_z;     ///< Origin Z of sample ray.
-        };
 
         /**
          * @brief Store the sample ray in sample ray description.

@@ -5,6 +5,7 @@
 #include "camera/camera.h"
 #include "light/pointlight.h"
 #include "renderer/pathtracing/pt_params.h"
+#include "renderer/npr/feature_line.h"
 
 namespace aten
 {
@@ -49,17 +50,13 @@ namespace aten
             const aten::CameraParameter& camera,
             aten::hitrecord* first_hrec = nullptr);
 
-        static void radiance_with_feature_line(
+        void radiance_with_feature_line(
             int32_t idx,
-            Path& paths,
+            int32_t ix, int32_t iy,
+            int32_t width, int32_t height,
             const context& ctxt,
-            ray* rays,
-            aten::ShadowRay* shadow_rays,
-            int32_t rrDepth,
-            int32_t maxDepth,
-            Camera* cam,
             scene* scene,
-            aten::BackgroundResource& bg);
+            const aten::CameraParameter& camera);
 
         static void shadeMiss(
             const aten::context& ctxt,
@@ -75,6 +72,9 @@ namespace aten
         std::vector<aten::ray> rays_;
 
         std::vector<aten::ShadowRay> shadow_rays_;
+
+        static constexpr size_t SampleRayNum = 8;
+        std::vector<aten::npr::FeatureLine::SampleRayInfo<SampleRayNum>> feature_line_sample_ray_infos_;
 
         int32_t m_maxDepth{ 1 };
 

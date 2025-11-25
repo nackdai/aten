@@ -21,6 +21,51 @@ constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
 constexpr const char* TITLE = "idaten";
 
+class MaterialParamEditor : public aten::IMaterialParamEditor {
+public:
+    MaterialParamEditor() = default;
+    ~MaterialParamEditor() = default;
+
+public:
+    bool edit(std::string_view name, float& param, float _min, float _max) override final
+    {
+        return ImGui::SliderFloat(name.data(), &param, _min, _max);
+    }
+
+    bool edit(std::string_view name, bool& param) override final
+    {
+        return ImGui::Checkbox(name.data(), &param);
+    }
+
+    bool edit(std::string_view name, aten::vec3& param) override final
+    {
+        const auto ret = ImGui::ColorEdit3(name.data(), reinterpret_cast<float*>(&param));
+        return ret;
+    }
+
+    bool edit(std::string_view name, aten::vec4& param) override final
+    {
+        const auto ret = ImGui::ColorEdit4(name.data(), reinterpret_cast<float*>(&param));
+        return ret;
+    }
+
+    void edit(std::string_view name, std::string_view str) override final
+    {
+        ImGui::Text("[%s] : (%s)", name.data(), str.empty() ? "none" : str.data());
+    }
+
+    bool edit(std::string_view name, const char* const* elements, size_t size, int32_t& param) override final
+    {
+        const auto ret = ImGui::Combo(name.data(), &param, elements, size);
+        return ret;
+    }
+
+    bool CollapsingHeader(std::string_view name) override final
+    {
+        return ImGui::CollapsingHeader(name.data());
+    }
+};
+
 class DeviceRendererApp {
 public:
     static constexpr int32_t ThreadNum
@@ -233,18 +278,11 @@ public:
             ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
 
 #ifdef ENABLE_NPR
-            auto is_enable_feature_line = renderer_.isEnableFatureLine();
-            if (ImGui::Checkbox("FeatureLine on/off", &is_enable_feature_line))
+            ImGui::Spacing();
+            if (aten::npr::FeatureLine::EditFeatureLineConfig(
+                &param_editor_, ctxt_.scene_rendering_config.feature_line))
             {
-                renderer_.enableFatureLine(is_enable_feature_line);
-            }
-            if (is_enable_feature_line)
-            {
-                auto line_width = renderer_.getFeatureLineWidth();
-                if (ImGui::SliderFloat("LineWidth", &line_width, 1, 10))
-                {
-                    renderer_.setFeatureLineWidth(line_width);
-                }
+                renderer_.UpdateSceneRenderingConfig(ctxt_);
             }
 #endif
         }
@@ -455,6 +493,8 @@ private:
 
     aten::RasterizeRenderer rasterizer_;
     aten::RasterizeRenderer rasterizer_aabb_;
+
+    MaterialParamEditor param_editor_;
 
     bool will_show_gui_{ true };
     bool will_take_screen_shot_{ false };

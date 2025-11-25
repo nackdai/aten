@@ -321,7 +321,7 @@ namespace AT_NAME
         aten::ray r{ original_ray };
 
         // At least one hit test to the light is necessary.
-        size_t max_lookups = ctxt.enable_alpha_blending ? 10 : 1;
+        size_t max_lookups = ctxt.scene_rendering_config.enable_alpha_blending ? 10 : 1;
 
         const bool need_stencil_check = surface_mtrl.stencil_type == aten::StencilType::ALWAYS;
         max_lookups = need_stencil_check ? 10 : max_lookups;
@@ -552,7 +552,7 @@ namespace AT_NAME
         // TODO:
         // How to deal with the alpha material on the other hand of the translucent material like refraction.
 
-        if (!ctxt.enable_alpha_blending) {
+        if (!ctxt.scene_rendering_config.enable_alpha_blending) {
             return false;
         }
 

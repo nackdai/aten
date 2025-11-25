@@ -18,6 +18,7 @@
 #include "misc/tuple.h"
 #include "misc/type_traits.h"
 #include "image/texture.h"
+#include "renderer/scene_rendering_config.h"
 #include "visualizer/GeomDataBuffer.h"
 
 namespace AT_NAME {
@@ -44,10 +45,7 @@ namespace aten
         context& operator=(const context&) = delete;
         context& operator=(context&&) = delete;
 
-        /**
-        * @brief Control if alpha blending is enabled.
-        */
-        bool enable_alpha_blending{ false };
+        aten::SceneRenderingConfig scene_rendering_config;
 
         /**
          * @brief Get the vertex position by index.

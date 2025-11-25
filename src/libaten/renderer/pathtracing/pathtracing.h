@@ -25,10 +25,6 @@ namespace aten
             m_noisetex.push_back(tex);
         }
 
-        virtual void enableFeatureLine(bool e) override {
-            enable_feature_line_ = e;
-        }
-
         static void shade(
             int32_t idx,
             aten::Path& paths,
@@ -82,7 +78,5 @@ namespace aten
         int32_t m_rrDepth{ 1 };
 
         std::vector<std::shared_ptr<texture>> m_noisetex;
-
-        bool enable_feature_line_{ false };
     };
 }

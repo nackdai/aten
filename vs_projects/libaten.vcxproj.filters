@@ -559,6 +559,12 @@
     <ClInclude Include="..\src\libaten\accelerator\threaded_bvh_traverser.h">
       <Filter>accelerator</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\npr\feature_line_config.h">
+      <Filter>renderer\npr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\scene_rendering_config.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

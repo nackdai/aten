@@ -4,11 +4,14 @@
 #include "math/math.h"
 #include "scene/hitable.h"
 #include "scene/scene.h"
-#include "scene/host_scene_context.h"
 #include "camera/camera.h"
 #include "misc/color.h"
 #include "misc/tuple.h"
 #include "sampler/sampler.h"
+
+namespace aten {
+    class context;
+}
 
 namespace AT_NAME {
 namespace npr {
@@ -633,6 +636,11 @@ namespace npr {
             const auto is_in_line_width = length_point_ray <= w_scaled;
             return is_in_line_width;
         }
+
+        static bool EditFeatureLineConfig(
+            aten::IMaterialParamEditor* editor,
+            aten::FeatureLineConfig& config
+        );
     };
 }
 }

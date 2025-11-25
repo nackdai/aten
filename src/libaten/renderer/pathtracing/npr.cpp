@@ -85,7 +85,7 @@ namespace aten
                     pixel_width,
                     idx, depth,
                     ctxt,
-                    ray, isect,
+                    ray,
                     path_host_.paths,
                     feature_line_sample_ray_infos_.data()
                 );

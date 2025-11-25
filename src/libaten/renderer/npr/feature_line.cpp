@@ -74,8 +74,8 @@ namespace npr {
             is_updated |= AT_EDIT_MATERIAL_PARAM(editor, config, enabled);
             is_updated |= AT_EDIT_MATERIAL_PARAM(editor, config, line_color);
             is_updated |= editor->edit("line_width", config.line_width, 1.0F, 10.0F);
-            is_updated |= editor->edit("albedo_threshold", config.albedo_threshold, 0.1F, 1.0F);
-            is_updated |= editor->edit("normal_threshold", config.normal_threshold, 0.1F, 1.0F);
+            is_updated |= editor->edit("albedo_threshold", config.albedo_threshold, 0.0F, 1.0F);
+            is_updated |= editor->edit("normal_threshold", config.normal_threshold, 0.0F, 1.0F);
         }
         return is_updated;
     }

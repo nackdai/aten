@@ -448,27 +448,34 @@ namespace npr {
             const aten::hitrecord &hrec_sample,
             const aten::vec4 &albedo_q,
             const aten::vec4 &albedo_s,
+            const aten::FeatureLineConfig& config,
+            const aten::FeatureLineMtrlConfig& mtrl_config,
             const float depth_q,
             const float depth_s,
-            const float threshold_albedo,
-            const float threshold_normal,
             const float scale_factor_threshold_depth)
         {
             // NOTE
             // Combine metrics by taking their max term (i.e. if any metric would return true the combined metric returns true).
 
             // Mesh id.
-            const auto is_mesh = EvaluateMeshIdMetric(hrec_query.meshid, hrec_sample.meshid);
+            const auto is_mesh = (mtrl_config.metric_flag & aten::FeatureLineMetricFlag::Mesh) > 0
+                ? EvaluateMeshIdMetric(hrec_query.meshid, hrec_sample.meshid)
+                : false;
 
             // Albedo.
-            const auto is_albedo = EvaluateAlbedoMetric(threshold_albedo, albedo_q, albedo_s);
+            const auto is_albedo = (mtrl_config.metric_flag & aten::FeatureLineMetricFlag::Albedo) > 0
+                ? EvaluateAlbedoMetric(config.albedo_threshold, albedo_q, albedo_s)
+                : false;
 
             // Normal.
-            const auto is_normal = EvaluateNormalMetric(threshold_normal, hrec_query.normal, hrec_sample.normal);
+            const auto is_normal = (mtrl_config.metric_flag & aten::FeatureLineMetricFlag::Normal) > 0
+                ? EvaluateNormalMetric(config.normal_threshold, hrec_query.normal, hrec_sample.normal)
+                : false;
 
             // Depth
-            const auto is_depth = EvaluateDepthMetric(
-                p, scale_factor_threshold_depth, hrec_query, hrec_sample, depth_q, depth_s);
+            const auto is_depth = (mtrl_config.metric_flag & aten::FeatureLineMetricFlag::Depth) > 0
+                ? EvaluateDepthMetric(p, scale_factor_threshold_depth, hrec_query, hrec_sample, depth_q, depth_s)
+                : false;
 
             return is_mesh || is_albedo || is_normal || is_depth;
         }

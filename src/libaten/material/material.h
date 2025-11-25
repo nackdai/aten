@@ -214,6 +214,18 @@ namespace aten
         STENCIL = 2,
     };
 
+    enum FeatureLineMetricFlag {
+        Mesh = 1 << 0,
+        Albedo = 1 << 1,
+        Normal = 1 << 2,
+        Depth = 1 << 3,
+    };
+
+    struct FeatureLineMtrlConfig {
+        bool enable{ true };
+        int32_t metric_flag{ FeatureLineMetricFlag::Mesh | FeatureLineMetricFlag::Albedo | FeatureLineMetricFlag::Normal | FeatureLineMetricFlag::Depth };
+    };
+
     struct MaterialParameter {
         aten::vec4 baseColor;   // サーフェイスカラー，通常テクスチャマップによって供給される.
         MaterialType type;
@@ -237,6 +249,8 @@ namespace aten
 
         MediumParameter medium;
         ToonParameter toon;
+
+        FeatureLineMtrlConfig feature_line;
 
         AT_HOST_DEVICE_API void Init()
         {
@@ -290,6 +304,8 @@ namespace aten
 
             medium = rhs.medium;
             toon = rhs.toon;
+
+            feature_line = rhs.feature_line;
 
             return *this;
         }

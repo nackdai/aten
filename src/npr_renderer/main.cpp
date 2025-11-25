@@ -67,16 +67,28 @@ public:
 
         auto* mtrl_eyeline = ctxt.GetMaterialByName("eyeline");
         mtrl_eyeline->stencil_type = aten::StencilType::ALWAYS;
+        mtrl_eyeline->feature_line.enable = false;
+
+        auto* mtrl_cheek = ctxt.GetMaterialByName("mat_cheek");
+        mtrl_cheek->feature_line.enable = false;
+
+        auto* mtrl_eyebase = ctxt.GetMaterialByName("eyebase");
+        mtrl_eyebase->feature_line.enable = false;
+
+        auto* mtrl_eye_left = ctxt.GetMaterialByName("eye_L1");
+        mtrl_eye_left->feature_line.enable = false;
+
+        auto* mtrl_eye_right = ctxt.GetMaterialByName("eye_R1");
+        mtrl_eye_right->feature_line.enable = false;
 
         aten::ImageLoader::load("FO_CLOTH1.tga", ctxt);
 
-#if 1
         auto* mtrl_face = ctxt.GetMaterialByName("face");
         AT_ASSERT(mtrl_face->type == aten::MaterialType::Toon);
         mtrl_face->toon.toon_type = aten::MaterialType::Diffuse;
         mtrl_face->toon.remap_texture = ctxt.GetTextureNum() - 1;
         mtrl_face->toon.target_light_idx = 0;
-#endif
+        mtrl_face->feature_line.metric_flag = aten::FeatureLineMetricFlag::Albedo | aten::FeatureLineMetricFlag::Normal | aten::FeatureLineMetricFlag::Depth;
 
         aten::ImageLoader::setBasePath("./");
 

@@ -44,11 +44,6 @@ namespace aten
             bg_ = bg;
         }
 
-        virtual void enableFeatureLine(bool e)
-        {
-            (void)e;
-        }
-
         inline uint32_t GetFrameCount() const noexcept
         {
             return frame_count_;

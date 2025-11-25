@@ -241,6 +241,7 @@
     <ClInclude Include="..\src\libaten\renderer\background.h" />
     <ClInclude Include="..\src\libaten\renderer\film.h" />
     <ClInclude Include="..\src\libaten\renderer\npr\feature_line.h" />
+    <ClInclude Include="..\src\libaten\renderer\npr\feature_line_config.h" />
     <ClInclude Include="..\src\libaten\renderer\npr\npr_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_impl.h" />
@@ -250,6 +251,7 @@
     <ClInclude Include="..\src\libaten\renderer\restir\restir.h" />
     <ClInclude Include="..\src\libaten\renderer\restir\restir_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\restir\restir_types.h" />
+    <ClInclude Include="..\src\libaten\renderer\scene_rendering_config.h" />
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf.h" />
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\svgf\svgf_types.h" />

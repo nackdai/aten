@@ -16,11 +16,11 @@
 namespace npr_kernel {
     __global__ void GenerateSampleRay(
         AT_NAME::npr::FeatureLine::SampleRayInfo<idaten::NPRPathTracing::SampleRayNum>* sample_ray_infos,
+        idaten::context ctxt,
         idaten::Path paths,
         const aten::ray* __restrict__ rays,
         const int32_t* __restrict__ hitindices,
         int32_t* hitnum,
-        float feature_line_width,
         float pixel_width)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -34,6 +34,8 @@ namespace npr_kernel {
         auto& sample_ray_info = sample_ray_infos[idx];
         const auto& ray = rays[idx];
 
+        const float feature_line_width{ ctxt.scene_rendering_config.feature_line.line_width };
+
         AT_NAME::npr::GenerateSampleRayAndDiscPerQueryRay<idaten::NPRPathTracing::SampleRayNum>(
             sample_ray_info.descs, sample_ray_info.disc,
             ray, paths.sampler[idx],
@@ -41,8 +43,6 @@ namespace npr_kernel {
     }
 
     __global__ void shadeSampleRay(
-        aten::vec3 line_color,  // TODO
-        float feature_line_width,
         float pixel_width,
         AT_NAME::npr::FeatureLine::SampleRayInfo<8>* sample_ray_infos,
         int32_t depth,
@@ -81,7 +81,7 @@ namespace npr_kernel {
         const auto& isect = isects[idx];
 
         AT_NAME::npr::ShadeSampleRay(
-            line_color, feature_line_width, pixel_width,
+            pixel_width,
             idx, depth,
             ctxt,
             camera, query_ray, isect,
@@ -91,8 +91,6 @@ namespace npr_kernel {
 
     __global__ void shadeMissSampleRay(
         int32_t width, int32_t height,
-        aten::vec3 line_color,  // TODO
-        float feature_line_width,
         float pixel_width,
         AT_NAME::npr::FeatureLine::SampleRayInfo<idaten::NPRPathTracing::SampleRayNum>* sample_ray_infos,
         int32_t depth,
@@ -133,7 +131,7 @@ namespace npr_kernel {
         const auto& isect = isects[idx];
 
         AT_NAME::npr::ShadeMissSampleRay(
-            line_color, feature_line_width, pixel_width,
+            pixel_width,
             idx, depth,
             ctxt,
             query_ray, isect,
@@ -150,7 +148,7 @@ namespace idaten {
         int32_t sample,
         int32_t bounce, int32_t rrBounce, int32_t max_depth)
     {
-        if (is_enable_feature_line_) {
+        if (ctxt_host_->ctxt.scene_rendering_config.feature_line.enabled) {
             dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
             dim3 threadPerBlock(64);
 
@@ -165,18 +163,16 @@ namespace idaten {
             if (bounce == 0) {
                 npr_kernel::GenerateSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
                     sample_ray_infos_.data(),
+                    ctxt_host_->ctxt,
                     path_host_->paths,
                     m_rays.data(),
                     m_hitidx.data(),
                     hitcount.data(),
-                    feature_line_width_,
                     pixel_width);
                 checkCudaKernel(GenerateSampleRay);
             }
 
             npr_kernel::shadeSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-                aten::vec3(0, 1, 0),
-                feature_line_width_,
                 pixel_width,
                 sample_ray_infos_.data(),
                 bounce,
@@ -206,7 +202,7 @@ namespace idaten {
         int32_t width, int32_t height,
         int32_t bounce)
     {
-        if (is_enable_feature_line_) {
+        if (ctxt_host_->ctxt.scene_rendering_config.feature_line.enabled) {
             dim3 block(BLOCK_SIZE, BLOCK_SIZE);
             dim3 grid(
                 (width + block.x - 1) / block.x,
@@ -223,8 +219,6 @@ namespace idaten {
             // Sample ray hit miss never happen at 1st bounce.
             npr_kernel::shadeMissSampleRay << <grid, block, 0, m_stream >> > (
                 width, height,
-                aten::vec3(0, 1, 0),
-                feature_line_width_,
                 pixel_width,
                 sample_ray_infos_.data(),
                 bounce,

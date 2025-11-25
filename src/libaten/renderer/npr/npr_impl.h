@@ -1,6 +1,7 @@
 #pragma once
 
 #include "renderer/npr/feature_line.h"
+#include "renderer/npr/feature_line_config.h"
 #include "renderer/pathtracing/pathtracing_impl.h"
 #include "geometry/EvaluateHitResult.h"
 #include "misc/tuple.h"
@@ -382,9 +383,7 @@ namespace npr {
 #if 1
     template <int32_t SampleRayNum>
     inline AT_DEVICE_API void ShadeSampleRay(
-        aten::vec3 line_color,  // TODO
-        float feature_line_width,
-        float pixel_width,
+        const float pixel_width,
         const int32_t idx,
         const int32_t depth,
         const AT_NAME::context& ctxt,
@@ -395,9 +394,10 @@ namespace npr {
         FeatureLine::SampleRayInfo<SampleRayNum>* sample_ray_infos
     )
     {
-        // TODO: These value should be configurable.
-        constexpr float albedo_threshold = 0.1f;
-        constexpr float normal_threshold = 0.1f;
+        const aten::vec3 line_color{ ctxt.scene_rendering_config.feature_line.line_color };
+        const float feature_line_width{ ctxt.scene_rendering_config.feature_line.line_width };
+        const float albedo_threshold{ ctxt.scene_rendering_config.feature_line.albedo_threshold };
+        const float normal_threshold{ ctxt.scene_rendering_config.feature_line.normal_threshold };
 
         const auto& cam_org = camera.origin;
 
@@ -498,9 +498,7 @@ namespace npr {
 
     template <int32_t SampleRayNum>
     inline AT_DEVICE_API void ShadeMissSampleRay(
-        aten::vec3 line_color,  // TODO
-        float feature_line_width,
-        float pixel_width,
+        const float pixel_width,
         const int32_t idx,
         const int32_t depth,
         const AT_NAME::context& ctxt,
@@ -510,6 +508,9 @@ namespace npr {
         FeatureLine::SampleRayInfo<SampleRayNum>* sample_ray_infos
     )
     {
+        const aten::vec3 line_color{ ctxt.scene_rendering_config.feature_line.line_color };
+        const float feature_line_width{ ctxt.scene_rendering_config.feature_line.line_width };
+
         auto& sample_ray_info = sample_ray_infos[idx];
         auto& sample_ray_descs = sample_ray_info.descs;
         auto& disc = sample_ray_info.disc;

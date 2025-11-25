@@ -11,26 +11,6 @@ namespace idaten
 
         static constexpr size_t SampleRayNum = 8;
 
-        bool isEnableFatureLine() const
-        {
-            return is_enable_feature_line_;
-        }
-
-        void enableFatureLine(bool b)
-        {
-            is_enable_feature_line_ = b;
-        }
-
-        float getFeatureLineWidth() const
-        {
-            return feature_line_width_;
-        }
-
-        void setFeatureLineWidth(float w)
-        {
-            feature_line_width_ = std::max(w, 1.0f);
-        }
-
     protected:
         void onShade(
             cudaSurfaceObject_t outputSurf,
@@ -44,7 +24,5 @@ namespace idaten
 
     protected:
         idaten::TypedCudaMemory<AT_NAME::npr::FeatureLine::SampleRayInfo<SampleRayNum>> sample_ray_infos_;
-        float feature_line_width_{ float(1) };
-        bool is_enable_feature_line_{ false };
     };
 }

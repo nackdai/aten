@@ -111,7 +111,7 @@ namespace idaten {
             }
             ctxt_host_->tex.resize(tex_num);
 
-            ctxt_host_->ctxt.enable_alpha_blending = scene_ctxt.enable_alpha_blending;
+            ctxt_host_->ctxt.scene_rendering_config = scene_ctxt.scene_rendering_config;
         }
 
         if (proxy_get_grid_from_host_scene_context) {
@@ -198,6 +198,11 @@ namespace idaten {
     void Renderer::updateCamera(const aten::CameraParameter& camera)
     {
         m_cam = camera;
+    }
+
+    void Renderer::UpdateSceneRenderingConfig(const aten::context& ctxt)
+    {
+        ctxt_host_->ctxt.scene_rendering_config = ctxt.scene_rendering_config;
     }
 
     uint32_t Renderer::getRegisteredTextureNum() const

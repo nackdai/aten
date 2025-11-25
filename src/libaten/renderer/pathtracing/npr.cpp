@@ -26,12 +26,7 @@ namespace aten
         const aten::CameraParameter& camera)
     {
         const auto pixel_width = Camera::ComputePixelWidthAtDistance(camera, 1);
-
-        // TODO: These value should be configurable.
-        constexpr float feature_line_width = 1;
-        constexpr float albedo_threshold = 0.1f;
-        constexpr float normal_threshold = 0.1f;
-        static const aten::vec3 LineColor(0, 1, 0);
+        const float feature_line_width{ ctxt.scene_rendering_config.feature_line.line_width };
 
         auto& sample_ray_info = feature_line_sample_ray_infos_[idx];
         auto* sampler = &path_host_.paths.sampler[idx];
@@ -60,7 +55,7 @@ namespace aten
 
             if (is_hit) {
                 AT_NAME::npr::ShadeSampleRay(
-                    LineColor, feature_line_width, pixel_width,
+                    pixel_width,
                     idx, depth,
                     ctxt, camera,
                     ray, isect,
@@ -87,7 +82,7 @@ namespace aten
             }
             else {
                 AT_NAME::npr::ShadeMissSampleRay(
-                    LineColor, feature_line_width, pixel_width,
+                    pixel_width,
                     idx, depth,
                     ctxt,
                     ray, isect,

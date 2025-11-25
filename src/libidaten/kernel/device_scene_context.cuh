@@ -8,6 +8,7 @@
 #include "light/light_parameter.h"
 #include "material/material.h"
 #include "math/mat4.h"
+#include "renderer/scene_rendering_config.h"
 #include "volume/volume_grid.h"
 
 namespace idaten {
@@ -49,7 +50,7 @@ namespace idaten {
 
         aten::aabb scene_bounding_box;
 
-        bool enable_alpha_blending{ false };
+        aten::SceneRenderingConfig scene_rendering_config;
 
         __device__ const float4 GetPosition(uint32_t idx) const noexcept
         {

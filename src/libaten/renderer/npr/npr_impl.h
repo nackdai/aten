@@ -139,10 +139,10 @@ namespace npr {
         const AT_NAME::npr::FeatureLine::Disc& disc,
         bool is_found_feature_line_point,
         float closest_feature_line_point_distance,
-        const float feature_line_width,
-        const float pixel_width,
-        const float albedo_threshold,
-        const float normal_threshold)
+        const aten::FeatureLineConfig& config,
+        const aten::FeatureLineMtrlConfig& mtrl_config,
+        const float pixel_width
+    )
     {
         // Query ray hit and then sample ray's hit.
 
@@ -162,7 +162,7 @@ namespace npr {
 
         // Check if the query ray is in feature line width.
         const auto is_line_width = AT_NAME::npr::FeatureLine::IsInLineWidth(
-            feature_line_width,
+            config.line_width,
             query_ray,
             hrec_sample.p,
             disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
@@ -171,7 +171,7 @@ namespace npr {
         if (is_line_width) {
             // Get merrics.
             aten::MaterialParameter mtrl_tmp;
-            AT_NAME::FillMaterial(mtrl_tmp, ctxt,hrec_query.mtrlid, hrec_query.isVoxel);
+            AT_NAME::FillMaterial(mtrl_tmp, ctxt, hrec_query.mtrlid, hrec_query.isVoxel);
             const auto query_albedo = AT_NAME::sampleTexture(ctxt, mtrl_tmp.albedoMap, hrec_query.u, hrec_query.v, mtrl_tmp.baseColor);
 
             AT_NAME::FillMaterial(mtrl_tmp, ctxt, hrec_sample.mtrlid, hrec_sample.isVoxel);
@@ -185,8 +185,8 @@ namespace npr {
                 query_ray.org,
                 hrec_query, hrec_sample,
                 query_albedo, sample_albedo,
+                config, ctxt.GetMaterial(hrec_query.mtrlid).feature_line,
                 query_depth, sample_depth,
-                albedo_threshold, normal_threshold,
                 2);
             if (is_feature_line) {
                 if (distance_sample_pos_on_query_ray < closest_feature_line_point_distance
@@ -394,10 +394,13 @@ namespace npr {
         FeatureLine::SampleRayInfo<SampleRayNum>* sample_ray_infos
     )
     {
+        const auto& query_ray_hit_mtrl = ctxt.GetMaterial(isect.mtrlid);
+        if (!query_ray_hit_mtrl.feature_line.enable) {
+            return;
+        }
+
         const aten::vec3 line_color{ ctxt.scene_rendering_config.feature_line.line_color };
         const float feature_line_width{ ctxt.scene_rendering_config.feature_line.line_width };
-        const float albedo_threshold{ ctxt.scene_rendering_config.feature_line.albedo_threshold };
-        const float normal_threshold{ ctxt.scene_rendering_config.feature_line.normal_threshold };
 
         const auto& cam_org = camera.origin;
 
@@ -455,17 +458,24 @@ namespace npr {
                 AT_MATH_EPSILON, AT_MATH_INF);
 
             if (is_hit) {
-                // Query ray hits and then sample ray hits.
-                aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = EvaluateQueryAndSampleRayHit(
-                    sample_ray_descs[i],
-                    ctxt, cam_org,
-                    query_ray, hrec_query, distance_query_ray_hit,
-                    isect_sample_ray,
-                    disc,
-                    is_found_feature_line_point,
-                    closest_feature_line_point_distance,
-                    feature_line_width, pixel_width,
-                    albedo_threshold, normal_threshold);
+                const auto& sample_ray_hit_mtrl = ctxt.GetMaterial(isect_sample_ray.mtrlid);
+                if (sample_ray_hit_mtrl.feature_line.enable) {
+                    // Query ray hits and then sample ray hits.
+                    aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = EvaluateQueryAndSampleRayHit(
+                        sample_ray_descs[i],
+                        ctxt, cam_org,
+                        query_ray, hrec_query, distance_query_ray_hit,
+                        isect_sample_ray,
+                        disc,
+                        is_found_feature_line_point,
+                        closest_feature_line_point_distance,
+                        ctxt.scene_rendering_config.feature_line,
+                        sample_ray_hit_mtrl.feature_line,
+                        pixel_width);
+                }
+                else {
+                    sample_ray_descs[i].is_terminated = true;
+                }
             }
             else {
                 // Query ray hits but sample ray doesn't hit anything.
@@ -475,7 +485,7 @@ namespace npr {
                     sample_ray, disc,
                     is_found_feature_line_point,
                     closest_feature_line_point_distance,
-                    feature_line_width, pixel_width);
+                    ctxt.scene_rendering_config.feature_line.line_width, pixel_width);
             }
 
             const auto mtrl = ctxt.GetMaterial(hrec_query.mtrlid);
@@ -503,7 +513,6 @@ namespace npr {
         const int32_t depth,
         const AT_NAME::context& ctxt,
         const aten::ray& query_ray,
-        const aten::Intersection& isect,
         AT_NAME::Path& paths,
         FeatureLine::SampleRayInfo<SampleRayNum>* sample_ray_infos
     )
@@ -552,14 +561,20 @@ namespace npr {
                 AT_MATH_EPSILON, AT_MATH_INF);
 
             if (is_hit) {
-                // Query ray doesn't hit, but sample ray hits.
-                aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = EvaluateQueryRayNotHitButSampleRayHit(
-                    ctxt, query_ray,
-                    isect_sample_ray,
-                    disc,
-                    is_found_feature_line_point,
-                    closest_feature_line_point_distance,
-                    feature_line_width, pixel_width);
+                const auto& sample_ray_hit_mtrl = ctxt.GetMaterial(isect_sample_ray.mtrlid);
+                if (sample_ray_hit_mtrl.feature_line.enable) {
+                    // Query ray doesn't hit, but sample ray hits.
+                    aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = EvaluateQueryRayNotHitButSampleRayHit(
+                        ctxt, query_ray,
+                        isect_sample_ray,
+                        disc,
+                        is_found_feature_line_point,
+                        closest_feature_line_point_distance,
+                        feature_line_width, pixel_width);
+                }
+                else {
+                    sample_ray_descs[i].is_terminated = true;
+                }
             }
             else {
                 // Sample ray doesn't hit anything. It means sample ray causes hit miss.

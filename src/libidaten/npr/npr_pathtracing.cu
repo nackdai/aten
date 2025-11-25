@@ -98,7 +98,6 @@ namespace npr_kernel {
         int32_t* hitnum,
         idaten::Path paths,
         const aten::CameraParameter camera,
-        const aten::Intersection* __restrict__ isects,
         const aten::ray* __restrict__ rays,
         idaten::context ctxt,
         const aten::ObjectParameter* __restrict__ shapes,
@@ -128,13 +127,12 @@ namespace npr_kernel {
 
         // Query ray doesn't hit anything, but evaluate a possibility that sample ray might hit something.
         const auto& query_ray = rays[idx];
-        const auto& isect = isects[idx];
 
         AT_NAME::npr::ShadeMissSampleRay(
             pixel_width,
             idx, depth,
             ctxt,
-            query_ray, isect,
+            query_ray,
             paths,
             sample_ray_infos
         );
@@ -226,7 +224,6 @@ namespace idaten {
                 hitcount.data(),
                 path_host_->paths,
                 m_cam,
-                m_isects.data(),
                 m_rays.data(),
                 ctxt_host_->ctxt,
                 ctxt_host_->shapeparam.data(),

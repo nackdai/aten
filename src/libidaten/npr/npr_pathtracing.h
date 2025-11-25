@@ -11,11 +11,6 @@ namespace idaten
 
         static constexpr size_t SampleRayNum = 8;
 
-        struct SampleRayInfo {
-            std::array<AT_NAME::npr::FeatureLine::SampleRayDesc, SampleRayNum> descs;
-            AT_NAME::npr::FeatureLine::Disc disc;
-        };
-
         bool isEnableFatureLine() const
         {
             return is_enable_feature_line_;
@@ -48,7 +43,7 @@ namespace idaten
             int32_t bounce) override;
 
     protected:
-        idaten::TypedCudaMemory<SampleRayInfo> sample_ray_infos_;
+        idaten::TypedCudaMemory<AT_NAME::npr::FeatureLine::SampleRayInfo<SampleRayNum>> sample_ray_infos_;
         float feature_line_width_{ float(1) };
         bool is_enable_feature_line_{ false };
     };

@@ -34,3 +34,6 @@
 [submodule "3rdparty/nvidia_container_image_cuda"]
 	path = 3rdparty/nvidia_container_image_cuda
 	url = https://gitlab.com/nvidia/container-images/cuda.git
+[submodule "3rdparty/imgui_gradient"]
+	path = 3rdparty/imgui_gradient
+	url = https://github.com/Coollab-Art/imgui_gradient.git

@@ -51,6 +51,12 @@ rem tinyobjloader ====================
 cmake %EXTRA_CMAKE_OPTION% -S tinyobjloader -B tinyobjloader\build -A %PLATFORM% || goto error
 cmake --build tinyobjloader\build --config=%CONFIG% -j 4 || goto error
 
+rem imgui_gradient ===================
+
+echo "==== Build imgui_gradient"
+cmake %EXTRA_CMAKE_OPTION% -S imgui_gradient -B imgui_gradient\build -A %PLATFORM% -DCMAKE_PROJECT_INCLUDE_BEFORE=..\extra_imgui_gradient.cmake || goto error
+cmake --build imgui_gradient\build --config=%CONFIG% -j 4 || goto error
+
 rem assimp ==========================
 
 cmake %EXTRA_CMAKE_OPTION% -S assimp -B assimp\build -A %PLATFORM% -DCMAKE_CXX_FLAGS="/wd4834 /wd4819 /utf-8 /EHsc" -DASSIMP_BUILD_TESTS=FALSE -DASSIMP_INSTALL=FALSE -DASSIMP_INSTALL_PDB=FALSE -DLIBRARY_SUFFIX= -DCMAKE_DEBUG_POSTFIX= -DASSIMP_BUILD_ASSIMP_TOOLS=FALSE || goto error

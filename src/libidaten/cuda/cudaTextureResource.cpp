@@ -281,14 +281,12 @@ namespace idaten
             size.depth = 0;
         }
 
-        cudaMipmappedArray_t mipmapArray;
-
         cudaChannelFormatDesc desc = cudaCreateChannelDesc<float4>();
-        checkCudaErrors(cudaMallocMipmappedArray(&mipmapArray, &desc, size, level));
+        checkCudaErrors(cudaMallocMipmappedArray(&mipmapped_array_, &desc, size, level));
 
         // upload level 0.
         cudaArray_t level0;
-        checkCudaErrors(cudaGetMipmappedArrayLevel(&level0, mipmapArray, 0));
+        checkCudaErrors(cudaGetMipmappedArrayLevel(&level0, mipmapped_array_, 0));
 
         void* data = const_cast<void*>((const void*)p);
 
@@ -301,17 +299,52 @@ namespace idaten
         checkCudaErrors(cudaMemcpy3DAsync(&copyParams));
 
         // compute rest of mipmaps based on level 0.
-        generateMipMaps(mipmapArray, width, height, level);
+        generateMipMaps(mipmapped_array_, width, height, level);
 
         // Make Resource description:
         memset(&m_resDesc, 0, sizeof(m_resDesc));
         m_resDesc.resType = cudaResourceTypeMipmappedArray;
-        m_resDesc.res.mipmap.mipmap = mipmapArray;
+        m_resDesc.res.mipmap.mipmap = mipmapped_array_;
 
         m_isMipmap = true;
         m_mipmapLevel = level;
 
         filter_mode_ = ConvertFilterMode(filter);
         address_mode_ = ConvertAddressMode(address);
+    }
+
+    void CudaTexture::CopyFromHost(
+        const aten::vec4* p,
+        int32_t width, int32_t height)
+    {
+        AT_ASSERT(m_array || mipmapped_array_);
+
+        const auto pitch = width * sizeof(float4);
+
+        if (m_array) {
+            checkCudaErrors(
+                cudaMemcpy2DToArrayAsync(m_array, 0, 0, p, pitch, width, height, cudaMemcpyHostToDevice));
+        }
+        else if (mipmapped_array_) {
+            cudaArray_t level0;
+            checkCudaErrors(cudaGetMipmappedArrayLevel(&level0, mipmapped_array_, 0));
+
+            void* data = const_cast<void*>((const void*)p);
+
+            cudaExtent size;
+            {
+                size.width = width;
+                size.height = height;
+                size.depth = 0;
+            }
+
+            cudaMemcpy3DParms copyParams = { 0 };
+            copyParams.srcPtr = make_cudaPitchedPtr(data, pitch, size.width, size.height);
+            copyParams.dstArray = level0;
+            copyParams.extent = size;
+            copyParams.extent.depth = 1;
+            copyParams.kind = cudaMemcpyHostToDevice;
+            checkCudaErrors(cudaMemcpy3DAsync(&copyParams));
+        }
     }
 }

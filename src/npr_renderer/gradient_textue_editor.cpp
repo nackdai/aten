@@ -28,3 +28,22 @@ bool GradientTextureEditor::Display()
 
     return result;
 }
+
+void GradientTextureEditor::Read(
+    aten::vec4* dst_1d,
+    size_t width, size_t height
+)
+{
+    AT_ASSERT(width > 1);
+    const float step_x = 1.0F / (width - 1);
+
+    for (size_t y = 0; y < height; y++) {
+        for (size_t x = 0; x < width; x++) {
+            const float f_x = step_x * x;
+            const auto color = gradient_widget_.gradient().at({ f_x, ImGG::WrapMode::Clamp });
+
+            const auto idx = y * width + x;
+            dst_1d[idx] = aten::vec4(color.x, color.y, color.z, color.w);
+        }
+    }
+}

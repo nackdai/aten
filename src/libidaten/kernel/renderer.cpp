@@ -200,6 +200,19 @@ namespace idaten {
         m_cam = camera;
     }
 
+    void Renderer::UpdateTexture(int32_t idx, const aten::context& ctxt)
+    {
+        AT_ASSERT(idx < ctxt_host_->texRsc.size());
+        if (idx < ctxt_host_->texRsc.size()) {
+            auto host_tex = ctxt.GetTexture(idx);
+            const auto pixels = host_tex->width() * host_tex->height();
+            ctxt_host_->texRsc[idx].CopyFromHost(
+                host_tex->colors().data(),
+                host_tex->width(), host_tex->height()
+            );
+        }
+    }
+
     void Renderer::UpdateSceneRenderingConfig(const aten::context& ctxt)
     {
         ctxt_host_->ctxt.scene_rendering_config = ctxt.scene_rendering_config;

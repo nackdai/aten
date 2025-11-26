@@ -79,6 +79,11 @@ namespace aten
             return m_colors;
         }
 
+        std::vector<vec4>& colors()
+        {
+            return m_colors;
+        }
+
         auto width() const
         {
             return width_;

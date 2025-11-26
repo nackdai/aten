@@ -101,7 +101,7 @@
       <AdditionalDependencies>libaten.lib;libatenscene.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -124,7 +124,7 @@
       <AdditionalDependencies>libaten.lib;libatenscene.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
@@ -147,7 +147,7 @@
       <AdditionalDependencies>libaten.lib;libatenscene.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

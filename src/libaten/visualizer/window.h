@@ -233,13 +233,7 @@ namespace aten {
 
             return CreateImpl(
                 width, height, title, is_offscreen,
-                handlers.OnRun,
-                handlers.OnClose,
-                handlers.OnMouseBtn,
-                handlers.OnMouseMove,
-                handlers.OnMouseWheel,
-                handlers.OnKey,
-                handlers.OnDropFile);
+                handlers);
         }
 
         void Run();
@@ -256,13 +250,7 @@ namespace aten {
         int32_t CreateImpl(
             int32_t width, int32_t height, std::string_view title,
             bool is_offscreen,
-            OnRunFunc onRun,
-            OnCloseFunc _onClose = nullptr,
-            OnMouseBtnFunc _onMouseBtn = nullptr,
-            OnMouseMoveFunc _onMouseMove = nullptr,
-            OnMouseWheelFunc _onMouseWheel = nullptr,
-            OnKeyFunc _onKey = nullptr,
-            OnDropFileFunc _onDrop = nullptr);
+            const MesageHandlers& msg_handlers);
 
         std::shared_ptr<_detail::WindowImpl> FindWindowByNativeHandle(GLFWwindow* w);
         std::shared_ptr<_detail::WindowImpl> FindWindowById(int32_t id);

@@ -443,6 +443,15 @@ public:
 
             ImGui::Begin("Gradient texture");
             gradient_tex_editor_.Display();
+            if (ImGui::Button("Update")) {
+                // TODO
+                auto* mtrl_face = ctxt_.GetMaterialByName("face");
+                auto tex = ctxt_.GetTexture(mtrl_face->toon.remap_texture);
+                gradient_tex_editor_.Read(
+                    tex->colors().data(),
+                    tex->width(), tex->height());
+                renderer_.UpdateTexture(mtrl_face->toon.remap_texture, ctxt_);
+            }
             ImGui::End();
 
             ImGui::Spacing();

@@ -32,36 +32,36 @@ namespace aten
 
             void OnClose()
             {
-                if (on_close_) {
-                    on_close_();
+                if (msg_handlers_.OnClose) {
+                    msg_handlers_.OnClose();
                 }
             }
 
             void OnMouseBtn(bool left, bool press, int32_t x, int32_t y)
             {
-                if (on_mouse_btn_) {
-                    on_mouse_btn_(left, press, x, y);
+                if (msg_handlers_.OnMouseBtn) {
+                    msg_handlers_.OnMouseBtn(left, press, x, y);
                 }
             }
 
             void OnMouseMove(int32_t x, int32_t y)
             {
-                if (on_mouse_move_) {
-                    on_mouse_move_(x, y);
+                if (msg_handlers_.OnMouseMove) {
+                    msg_handlers_.OnMouseMove(x, y);
                 }
             }
 
             void OnMouseWheel(int32_t delta)
             {
-                if (on_mouse_wheel_) {
-                    on_mouse_wheel_(delta);
+                if (msg_handlers_.OnMouseWheel) {
+                    msg_handlers_.OnMouseWheel(delta);
                 }
             }
 
             void OnKey(bool press, aten::Key key)
             {
-                if (on_key_) {
-                    on_key_(press, key);
+                if (msg_handlers_.OnKey) {
+                    msg_handlers_.OnKey(press, key);
                 }
             }
 
@@ -69,8 +69,8 @@ namespace aten
             {
                 // NOTE:
                 // Support only 1 file.
-                if (on_drop_file_) {
-                    on_drop_file_(paths[0]);
+                if (msg_handlers_.OnDropFile) {
+                    msg_handlers_.OnDropFile(paths[0]);
                 }
             }
 
@@ -107,12 +107,7 @@ namespace aten
                 // For example, if the instance is shared_ptr, these callbacks might keep the ownership of the instances.
                 // In that case, the instance might not be released as expected due to that these callbacks keep its ownership.
                 // So, in order to release the ownership, set nullptr to the callbacks explicitly.
-                on_run_ = nullptr;
-                on_close_ = nullptr;
-                on_mouse_btn_ = nullptr;
-                on_mouse_move_ = nullptr;
-                on_mouse_wheel_ = nullptr;
-                on_key_ = nullptr;
+                msg_handlers_ = window::MesageHandlers();
             }
 
             GLFWwindow* wnd_{ nullptr };
@@ -123,13 +118,7 @@ namespace aten
 
             ImGuiContext* imgui_ctxt_{ nullptr };
 
-            window::OnRunFunc on_run_{ nullptr };
-            window::OnCloseFunc on_close_{ nullptr };
-            window::OnMouseBtnFunc on_mouse_btn_{ nullptr };
-            window::OnMouseMoveFunc on_mouse_move_{ nullptr };
-            window::OnMouseWheelFunc on_mouse_wheel_{ nullptr };
-            window::OnKeyFunc on_key_{ nullptr };
-            window::OnDropFileFunc on_drop_file_{ nullptr };
+            window::MesageHandlers msg_handlers_;
         };
     }
 
@@ -341,13 +330,7 @@ namespace aten
     int32_t window::CreateImpl(
         int32_t width, int32_t height, std::string_view title,
         bool is_offscreen,
-        OnRunFunc onRun,
-        OnCloseFunc onClose/*= nullptr*/,
-        OnMouseBtnFunc onMouseBtn/*= nullptr*/,
-        OnMouseMoveFunc onMouseMove/*= nullptr*/,
-        OnMouseWheelFunc onMouseWheel/*= nullptr*/,
-        OnKeyFunc onKey/*= nullptr*/,
-        OnDropFileFunc onDrop/*= nullptr*/)
+        const MesageHandlers& msg_handlers)
     {
         auto result = ::glfwInit();
         if (!result) {
@@ -457,14 +440,7 @@ namespace aten
 
         auto wnd = std::make_shared<_detail::WindowImpl>(glfwWindow, static_cast<int32_t>(windows_.size()));
         {
-            wnd->on_run_ = onRun;
-            wnd->on_close_ = onClose;
-            wnd->on_mouse_btn_ = onMouseBtn;
-            wnd->on_mouse_move_ = onMouseMove;
-            wnd->on_mouse_wheel_ = onMouseWheel;
-            wnd->on_key_ = onKey;
-            wnd->on_drop_file_ = onDrop;
-
+            wnd->msg_handlers_ = msg_handlers;
             wnd->imgui_ctxt_ = ImGui::GetCurrentContext();
         }
 
@@ -494,7 +470,7 @@ namespace aten
                 ImGui_ImplGlfw_NewFrame();
                 ImGui::NewFrame();
 
-                running = wnd->on_run_();
+                running = wnd->msg_handlers_.OnRun();
 
                 wnd->DrawImGui();
 

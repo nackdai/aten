@@ -242,7 +242,13 @@ namespace idaten
         return m_tex;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
+    void CudaTexture::unbind()
+    {
+        if (m_tex > 0) {
+            checkCudaErrors(cudaDestroyTextureObject(m_tex));
+            m_tex = 0;
+        }
+    }
 
     static inline int32_t getMipMapLevels(int32_t width, int32_t height)
     {

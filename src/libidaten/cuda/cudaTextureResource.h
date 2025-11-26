@@ -20,7 +20,7 @@ namespace idaten
             size_t memberNumInItem,
             size_t numOfContaints);
 
-        virtual cudaTextureObject_t bind();
+        cudaTextureObject_t bind();
         void unbind();
 
         void update(
@@ -49,20 +49,10 @@ namespace idaten
         cudaTextureObject_t m_tex{ 0 };
     };
 
-    struct TextureResource {
-        const aten::vec4* ptr;
-        int32_t width;
-        int32_t height;
-
-        TextureResource(const aten::vec4* p, int32_t w, int32_t h)
-            : ptr(p), width(w), height(h)
-        {}
-    };
-
-    class CudaTexture : public CudaTextureResource {
+    class CudaTexture {
     public:
         CudaTexture() = default;
-        virtual ~CudaTexture() = default;
+        ~CudaTexture() = default;
 
     public:
         void init(
@@ -78,7 +68,8 @@ namespace idaten
             aten::TextureFilterMode filter = aten::TextureFilterMode::Linear,
             aten::TextureAddressMode address = aten::TextureAddressMode::Wrap);
 
-        virtual cudaTextureObject_t bind() override;
+        cudaTextureObject_t bind();
+        void unbind();
 
     private:
         static inline cudaTextureFilterMode ConvertFilterMode(aten::TextureFilterMode filter);
@@ -90,6 +81,9 @@ namespace idaten
 
         cudaArray_t m_array{ nullptr };
         cudaChannelFormatDesc m_channelFmtDesc;
+
+        cudaResourceDesc m_resDesc;
+        cudaTextureObject_t m_tex{ 0 };
 
         cudaTextureFilterMode filter_mode_{ cudaTextureFilterMode::cudaFilterModePoint };
         cudaTextureAddressMode address_mode_{ cudaTextureAddressMode::cudaAddressModeWrap };

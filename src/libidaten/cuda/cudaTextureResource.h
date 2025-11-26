@@ -71,6 +71,10 @@ namespace idaten
         cudaTextureObject_t bind();
         void unbind();
 
+        void CopyFromHost(
+            const aten::vec4* p,
+            int32_t width, int32_t height);
+
     private:
         static inline cudaTextureFilterMode ConvertFilterMode(aten::TextureFilterMode filter);
 
@@ -80,6 +84,7 @@ namespace idaten
         int32_t m_mipmapLevel{ 0 };
 
         cudaArray_t m_array{ nullptr };
+        cudaMipmappedArray_t mipmapped_array_{ nullptr };
         cudaChannelFormatDesc m_channelFmtDesc;
 
         cudaResourceDesc m_resDesc;

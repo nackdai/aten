@@ -8,11 +8,11 @@
 #include <algorithm>
 #include <iterator>
 
-#include <imgui.h>
-
 #include "aten.h"
 #include "atenscene.h"
 #include "idaten.h"
+
+#include "gradient_textue_editor.h"
 
 #include "../common/app_misc.h"
 #include "../common/scenedefs.h"
@@ -357,6 +357,19 @@ public:
         }
 
 #ifdef DEVICE_RENDERING
+        RenderGUI(frame, cudaelapsed, rasterizerTime, visualizerTime);
+#endif
+
+        return true;
+    }
+
+    void RenderGUI(
+        uint32_t frame,
+        float cudaelapsed,
+        double rasterizerTime,
+        double visualizerTime
+    )
+    {
         if (will_show_gui_)
         {
             bool need_renderer_reset = false;
@@ -428,6 +441,12 @@ public:
 
             ImGui::Spacing();
 
+            ImGui::Begin("Gradient texture");
+            gradient_tex_editor_.Display();
+            ImGui::End();
+
+            ImGui::Spacing();
+
             auto enable_progressive = renderer_.IsEnableProgressive();
             if (ImGui::Checkbox("Progressive", &enable_progressive))
             {
@@ -451,9 +470,6 @@ public:
                 renderer_.reset();
             }
         }
-#endif
-
-        return true;
     }
 
     void OnClose()
@@ -613,6 +629,8 @@ private:
     } scene_light_;
 
     MaterialParamEditor mtrl_param_editor_;
+
+    GradientTextureEditor gradient_tex_editor_;
 
     bool will_show_gui_
 #ifdef DEVICE_RENDERING

@@ -289,9 +289,11 @@
     <ClCompile Include="..\3rdparty\imgui\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="..\3rdparty\imgui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\3rdparty\imgui\imgui.cpp" />
+    <ClCompile Include="..\3rdparty\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\3rdparty\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\3rdparty\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\3rdparty\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\3rdparty\imgui\misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\accelerator.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh_node.cpp" />

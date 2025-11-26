@@ -834,6 +834,12 @@
     <ClCompile Include="..\src\libaten\display\gt_tonemapper.cpp">
       <Filter>display</Filter>
     </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\imgui_demo.cpp">
+      <Filter>ui\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\misc\cpp\imgui_stdlib.cpp">
+      <Filter>ui\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\gamma_fs.glsl">

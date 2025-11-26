@@ -113,7 +113,7 @@
       <AdditionalDependencies>libaten.lib;libatenscene.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)
 copy /B /Y "$(FBXSDK_LIB)\x64\$(Configuration)\*.dll" $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -137,7 +137,7 @@ copy /B /Y "$(FBXSDK_LIB)\x64\$(Configuration)\*.dll" $(OutputPath)</Command>
       <AdditionalDependencies>libaten.lib;libatenscene.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)
 copy /B /Y "$(FBXSDK_LIB)\x64\$(Configuration)\*.dll" $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -161,7 +161,7 @@ copy /B /Y "$(FBXSDK_LIB)\x64\$(Configuration)\*.dll" $(OutputPath)</Command>
       <AdditionalDependencies>libaten.lib;libatenscene.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)
 copy /B /Y "$(FBXSDK_LIB)\x64\$(Configuration)\*.dll" $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>

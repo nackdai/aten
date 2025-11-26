@@ -120,7 +120,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <CodeGeneration>compute_20,sm_20;compute_60,sm_60</CodeGeneration>
     </CudaCompile>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
     <CudaLink>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -156,7 +156,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <CodeGeneration>compute_20,sm_20;compute_60,sm_60</CodeGeneration>
     </CudaCompile>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
     <CudaLink>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

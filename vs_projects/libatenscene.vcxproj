@@ -89,7 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\assimp\include;$(ProjectDir)..\3rdparty\assimp\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\assimp\include;$(ProjectDir)..\3rdparty\$(Platform)\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
@@ -98,7 +98,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\tinyobjloader\build\$(Configuration);$(ProjectDir)..\3rdparty\assimp\build\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\$(Platform)\tinyobjloader\$(Configuration);$(ProjectDir)..\3rdparty\$(Platform)\assimp\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib;tinyobjloader.lib;assimp.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -109,7 +109,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\assimp\include;$(ProjectDir)..\3rdparty\assimp\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\assimp\include;$(ProjectDir)..\3rdparty\$(Platform)\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
@@ -121,7 +121,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\tinyobjloader\build\$(Configuration);$(ProjectDir)..\3rdparty\assimp\build\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\$(Platform)\tinyobjloader\$(Configuration);$(ProjectDir)..\3rdparty\$(Platform)\assimp\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib;tinyobjloader.lib;assimp.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -132,7 +132,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\assimp\include;$(ProjectDir)..\3rdparty\assimp\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\assimp\include;$(ProjectDir)..\3rdparty\$(Platform)\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
@@ -144,7 +144,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\tinyobjloader\build\$(Configuration);$(ProjectDir)..\3rdparty\assimp\build\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\$(Platform)\tinyobjloader\$(Configuration);$(ProjectDir)..\3rdparty\$(Platform)\assimp\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib;tinyobjloader.lib;assimp.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>

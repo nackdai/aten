@@ -38,6 +38,8 @@ namespace idaten
 
         void updateCamera(const aten::CameraParameter& camera);
 
+        void UpdateTexture(int32_t idx, const aten::context& ctxt);
+
         void UpdateSceneRenderingConfig(const aten::context& ctxt);
 
         void viewTextures(

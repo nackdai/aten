@@ -343,6 +343,11 @@ namespace aten
         void DeleteAllMaterialsAndClearList();
 
         /**
+         * @brief Replace the material instance by index.
+         */
+        void ReplaceMaterialInstance(const int32_t idx, std::shared_ptr<AT_NAME::material>& mtrl);
+
+        /**
          * @brief Copy the registered materials' paramters to the specified list.
          * @param[in] dst Destination to copy registered materials' paramters.
          */

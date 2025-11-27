@@ -356,9 +356,7 @@ public:
             AT_PRINTF("Take Screenshot[%s]\n", screen_shot_file_name.c_str());
         }
 
-#ifdef DEVICE_RENDERING
         RenderGUI(frame, cudaelapsed, rasterizerTime, visualizerTime);
-#endif
 
         return true;
     }
@@ -370,6 +368,7 @@ public:
         double visualizerTime
     )
     {
+#ifdef DEVICE_RENDERING
         if (will_show_gui_)
         {
             bool need_renderer_reset = false;
@@ -424,38 +423,6 @@ public:
 
             ImGui::Spacing();
 
-            const auto& mtrl_param = ctxt_.GetMaterialByName("face");
-            auto mtrl = ctxt_.GetMaterialInstance(mtrl_param->id);
-            if (mtrl->edit(&mtrl_param_editor_)) {
-                need_renderer_reset = true;
-                renderer_.updateMaterial(ctxt_.GetMetarialParemeters());
-            }
-
-            ImGui::Spacing();
-
-            if (aten::npr::FeatureLine::EditFeatureLineConfig(
-                &mtrl_param_editor_, ctxt_.scene_rendering_config.feature_line))
-            {
-                renderer_.UpdateSceneRenderingConfig(ctxt_);
-            }
-
-            ImGui::Spacing();
-
-            ImGui::Begin("Gradient texture");
-            gradient_tex_editor_.Display();
-            if (ImGui::Button("Update")) {
-                // TODO
-                auto* mtrl_face = ctxt_.GetMaterialByName("face");
-                auto tex = ctxt_.GetTexture(mtrl_face->toon.remap_texture);
-                gradient_tex_editor_.Read(
-                    tex->colors().data(),
-                    tex->width(), tex->height());
-                renderer_.UpdateTexture(mtrl_face->toon.remap_texture, ctxt_);
-            }
-            ImGui::End();
-
-            ImGui::Spacing();
-
             auto enable_progressive = renderer_.IsEnableProgressive();
             if (ImGui::Checkbox("Progressive", &enable_progressive))
             {
@@ -475,10 +442,98 @@ public:
             ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
             ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
 
+            ImGui::Begin("Material");
+
+            const auto* mtrl_param = ctxt_.GetMaterialByName("face");
+            auto mtrl = ctxt_.GetMaterialInstance(mtrl_param->id);
+
+            bool new_update_mtrl = false;
+
+            if (mtrl_param->type == aten::MaterialType::Toon
+                || mtrl_param->type == aten::MaterialType::StylizedBrdf
+            )
+            {
+                constexpr std::array mtrl_types = {
+                    "Toon",
+                    "StylizedBrdf",
+                };
+
+                const auto mtrl_idx = mtrl_param->id;
+
+                int32_t mtrl_type = mtrl_param->type == aten::MaterialType::Toon ? 0 : 1;
+                ImGui::Text("%s", mtrl_types[mtrl_type]);
+
+                if (ImGui::Combo("mode", &mtrl_type, mtrl_types.data(), static_cast<int32_t>(mtrl_types.size()))) {
+                    auto new_mtrl_type = mtrl_type == 0 ? aten::MaterialType::Toon : aten::MaterialType::StylizedBrdf;
+                    if (new_mtrl_type != mtrl_param->type) {
+                        auto albedo_map = ctxt_.GetTexture(mtrl_param->albedoMap);
+                        auto normal_map = ctxt_.GetTexture(mtrl_param->normalMap);
+                        aten::MaterialParameter new_mtrl_param = *mtrl_param;
+                        new_mtrl_param.type = new_mtrl_type;
+
+                        auto new_mtrl = aten::material::CreateMaterialWithMaterialParameter(
+                            new_mtrl_param,
+                            albedo_map ? albedo_map.get() : nullptr,
+                            normal_map ? normal_map.get() : nullptr,
+                            nullptr);
+                        new_mtrl->setName(mtrl->name());
+
+                        ctxt_.ReplaceMaterialInstance(mtrl_idx, new_mtrl);
+                        mtrl = new_mtrl;
+                        need_renderer_reset = true;
+                        new_update_mtrl = true;
+                    }
+                }
+
+                if (mtrl->edit(&mtrl_param_editor_)) {
+                    need_renderer_reset = true;
+                    new_update_mtrl = true;
+                }
+            }
+            else {
+                if (mtrl->edit(&mtrl_param_editor_)) {
+                    need_renderer_reset = true;
+                    new_update_mtrl = true;
+                }
+            }
+
+            if (new_update_mtrl) {
+                renderer_.updateMaterial(ctxt_.GetMetarialParemeters());
+            }
+
+            ImGui::End();
+
+            ImGui::Begin("Feature Line");
+            {
+                if (aten::npr::FeatureLine::EditFeatureLineConfig(
+                    &mtrl_param_editor_, ctxt_.scene_rendering_config.feature_line))
+                {
+                    renderer_.UpdateSceneRenderingConfig(ctxt_);
+                }
+            }
+            ImGui::End();
+
+
+            ImGui::Begin("Gradient texture");
+            {
+                gradient_tex_editor_.Display();
+                if (ImGui::Button("Update")) {
+                    // TODO
+                    auto* mtrl_face = ctxt_.GetMaterialByName("face");
+                    auto tex = ctxt_.GetTexture(mtrl_face->toon.remap_texture);
+                    gradient_tex_editor_.Read(
+                        tex->colors().data(),
+                        tex->width(), tex->height());
+                    renderer_.UpdateTexture(mtrl_face->toon.remap_texture, ctxt_);
+                }
+            }
+            ImGui::End();
+
             if (need_renderer_reset) {
                 renderer_.reset();
             }
         }
+#endif
     }
 
     void OnClose()

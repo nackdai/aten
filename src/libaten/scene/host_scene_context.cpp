@@ -147,6 +147,11 @@ namespace aten
         materials_.clear();
     }
 
+    void context::ReplaceMaterialInstance(const int32_t idx, std::shared_ptr<aten::material>& mtrl)
+    {
+        materials_[idx] = mtrl;
+    }
+
     void context::CopyMaterialParameters(std::vector<MaterialParameter>& dst) const
     {
         for (const auto& mtrl : materials_) {
@@ -334,8 +339,10 @@ namespace aten
 
     std::shared_ptr<texture> context::GetTexture(int32_t idx) const
     {
-        AT_ASSERT(0 <= idx && idx < GetTextureNum());
-        return textures_[idx];
+        if (0 <= idx && idx < GetTextureNum()) {
+            return textures_[idx];
+        }
+        return nullptr;
     }
 
     std::vector<std::shared_ptr<texture>> context::GetTextures()

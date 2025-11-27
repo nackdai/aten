@@ -105,9 +105,6 @@ namespace AT_NAME
         aten::vec3 brdf{ 0.0F };
 
         if (target_light) {
-            // NOTE:
-            // The target light has to be the singular light.
-            // In that case, sample is not used at all. So, we can pass it as nullptr.
             aten::LightSampleResult light_sample;
             AT_NAME::Light::sample(light_sample, *target_light, ctxt, hit_pos, normal, &sampler);
 
@@ -163,7 +160,6 @@ namespace AT_NAME
             }
 
             // Compute radiance.
-            // The target light is singular, and then MIS in ComputeRadianceNEE is always 1.0.
             auto res = ComputeRadianceNEE(
                 ctxt,
                 aten::vec3(1.0F),
@@ -366,20 +362,21 @@ namespace AT_NAME
                 base_mtrl.type = aten::MaterialType::ToonSpecular;
             }
 
-            pdf = material::samplePDF(ctxt, &base_mtrl, normal, wi, sampled_light->dir, u, v);
+            float nee_weight = 0.0F;
 
             // Compute radiance.
-            // The target light is singular, and then MIS in ComputeRadianceNEE is always 1.0.
             auto res = ComputeRadianceNEE(
                 ctxt,
                 aten::vec3(1.0F),
                 wi, normal,
                 base_mtrl, 0.0F, u, v,
                 light_selected_pdf,
-                *sampled_light);
+                *sampled_light,
+                &nee_weight);
 
             if (res) {
                 radiance = res.value();
+                pdf = 1.0F / nee_weight;
             }
         }
 
@@ -395,7 +392,7 @@ namespace AT_NAME
         const auto y = xyz.y;
 
         // To avoid too dark, compare with the minimum weight.
-        const auto weight = aten::clamp(y, W_MIN, 1.0F);
+        const auto weight = aten::max(y, W_MIN);
 
         const auto y_min = aten::max(0.0F, aten::min(param.toon.stylized_y_min, param.toon.stylized_y_max));
         const auto y_max = aten::max(param.toon.stylized_y_min, param.toon.stylized_y_max);

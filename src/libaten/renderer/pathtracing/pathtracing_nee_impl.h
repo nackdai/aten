@@ -29,8 +29,13 @@ namespace AT_NAME
         const float pre_sampled_random,
         float hit_u, float hit_v,
         const float light_select_prob,
-        const aten::LightSampleResult& light_sample)
+        const aten::LightSampleResult& light_sample,
+        float* weight_ptr = nullptr)
     {
+        if (weight_ptr) {
+            *weight_ptr = 0.0F;
+        }
+
         auto cosShadow = dot(surface_nml, light_sample.dir);
 
         float path_pdf{ AT_NAME::material::samplePDF(ctxt, &surface_mtrl, surface_nml, wi, light_sample.dir, hit_u, hit_v) };
@@ -78,6 +83,11 @@ namespace AT_NAME
             // 3point rendering equation.
             // Compute as area PDF.
             const auto contrib = (misW * bsdf * emit * G / light_sample.pdf) / light_select_prob;
+
+            if (weight_ptr) {
+                *weight_ptr = misW / light_sample.pdf / light_select_prob;
+            }
+
             return contrib;
         }
 

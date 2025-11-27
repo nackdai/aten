@@ -517,15 +517,18 @@ namespace AT_NAME
         {
             // Treat toon as a light.
             const auto toon_bsdf = Toon::bsdf(
-                ctxt, hit_target_mtrl, sampler,
+                ctxt, hit_target_mtrl,
+                path_throughput,
+                sampler,
                 hrec.p, hrec.normal, ray.dir,
                 hrec.u, hrec.v
             );
 
-            aten::vec3 contrib{
-                path_throughput.transmission * toon_bsdf + path_throughput.alpha_blend_radiance_on_the_way
-            };
-            aten::AddVec3(path_contrib.contrib, contrib);
+            // NOTE:
+            // The accumulated alpha blending color is applied in Toon::bsdf.
+            // So, no need to do it here.
+
+            aten::AddVec3(path_contrib.contrib, path_throughput.throughput * toon_bsdf);
 
             path_attrib.is_terminated = true;
             return true;
@@ -556,6 +559,10 @@ namespace AT_NAME
             return false;
         }
 
+        if (!path_attrib.is_accumulating_alpha_blending) {
+            return false;
+        }
+
         // If the material itself is originally translucent, we don't care alpha translucency.
         if (mtrl.attrib.is_translucent) {
             return false;
@@ -578,14 +585,11 @@ namespace AT_NAME
             // It means the ray go through to the opposite direction as if the hit object is ignored.
             ray = aten::ray(hit_pos, ray.dir, -hit_nml);
 
-            if (path_attrib.is_accumulating_alpha_blending)
-            {
-                const aten::vec3 alpha_belended_radiance{
-                    path_throughput.transmission * mtrl.baseColor * albedo * alpha
-                };
-                aten::AddVec3(path_throughput.alpha_blend_radiance_on_the_way, alpha_belended_radiance);
-                path_throughput.transmission *= (1.0F - alpha);
-            }
+            const aten::vec3 alpha_belended_radiance{
+                path_throughput.transmission * mtrl.baseColor * albedo * alpha
+            };
+            aten::AddVec3(path_throughput.alpha_blend_radiance_on_the_way, alpha_belended_radiance);
+            path_throughput.transmission *= (1.0F - alpha);
 
             path_attrib.is_singular = true;
             return true;

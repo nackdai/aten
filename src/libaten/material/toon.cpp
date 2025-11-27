@@ -83,6 +83,7 @@ namespace AT_NAME
     AT_DEVICE_API aten::vec3 Toon::bsdf(
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& param,
+        const AT_NAME::PathThroughput& throughput,
         aten::sampler& sampler,
         const aten::vec3& hit_pos,
         const aten::vec3& normal,
@@ -102,6 +103,7 @@ namespace AT_NAME
             : nullptr;
 #endif
 
+        aten::vec3 alpha_blend_clr{ 0.0F };
         aten::vec3 brdf{ 0.0F };
 
         if (target_light) {
@@ -119,12 +121,14 @@ namespace AT_NAME
             if (param.type == aten::MaterialType::Toon) {
                 brdf = Toon::ComputeBRDF(
                     ctxt, param,
+                    throughput,
                     is_hit_to_target_light ? &light_sample : nullptr,
                     sampler, hit_pos, normal, wi, u, v);
             }
             else if (param.type == aten::MaterialType::StylizedBrdf) {
                 brdf = StylizedBrdf::ComputeBRDF(
                     ctxt, param,
+                    throughput,
                     is_hit_to_target_light ? &light_sample : nullptr,
                     sampler, hit_pos, normal, wi, u, v);
             }
@@ -136,6 +140,7 @@ namespace AT_NAME
     AT_DEVICE_API aten::vec3 Toon::ComputeBRDF(
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& param,
+        const AT_NAME::PathThroughput& throughput,
         const aten::LightSampleResult* sampled_light,
         aten::sampler& sampler,
         const aten::vec3& hit_pos,
@@ -189,7 +194,9 @@ namespace AT_NAME
 
         const auto rim_light_term = ComputeRimLight(ctxt, param, hit_pos, normal, wi);
 
-        const auto albedo = AT_NAME::sampleTexture(ctxt, param.albedoMap, u, v, aten::vec4(1.0F));
+        auto albedo = AT_NAME::sampleTexture(ctxt, param.albedoMap, u, v, aten::vec4(1.0F));
+        albedo = throughput.transmission * albedo + throughput.alpha_blend_radiance_on_the_way;
+
         return (toon_term + rim_light_term) * albedo;
     }
 
@@ -338,6 +345,7 @@ namespace AT_NAME
     AT_DEVICE_API aten::vec3 StylizedBrdf::ComputeBRDF(
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& param,
+        const AT_NAME::PathThroughput& throughput,
         const aten::LightSampleResult* sampled_light,
         aten::sampler& sampler,
         const aten::vec3& hit_pos,
@@ -415,7 +423,8 @@ namespace AT_NAME
 
         const auto rim_light_term = ComputeRimLight(ctxt, param, hit_pos, normal, wi);
 
-        const auto albedo = AT_NAME::sampleTexture(ctxt, param.albedoMap, u, v, aten::vec4(1.0F));
+        auto albedo = AT_NAME::sampleTexture(ctxt, param.albedoMap, u, v, aten::vec4(1.0F));
+        albedo = throughput.transmission * albedo + throughput.alpha_blend_radiance_on_the_way;
 
         return (toon_term + rim_light_term) * albedo;
     }

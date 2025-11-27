@@ -14,6 +14,7 @@
 namespace AT_NAME
 {
     class context;
+    struct PathThroughput;
 
     class Toon : public material {
         friend class material;
@@ -36,6 +37,7 @@ namespace AT_NAME
         static AT_DEVICE_API aten::vec3 bsdf(
             const AT_NAME::context& ctxt,
             const aten::MaterialParameter& param,
+            const AT_NAME::PathThroughput& throughput,
             aten::sampler& sampler,
             const aten::vec3& hit_pos,
             const aten::vec3& normal,
@@ -49,6 +51,7 @@ namespace AT_NAME
         static AT_DEVICE_API aten::vec3 ComputeBRDF(
             const AT_NAME::context& ctxt,
             const aten::MaterialParameter& param,
+            const AT_NAME::PathThroughput& throughput,
             const aten::LightSampleResult* light_sample,
             aten::sampler& sampler,
             const aten::vec3& hit_pos,
@@ -84,6 +87,7 @@ namespace AT_NAME
         static AT_DEVICE_API aten::vec3 ComputeBRDF(
             const AT_NAME::context& ctxt,
             const aten::MaterialParameter& param,
+            const AT_NAME::PathThroughput& throughput,
             const aten::LightSampleResult* light_sample,
             aten::sampler& sampler,
             const aten::vec3& hit_pos,

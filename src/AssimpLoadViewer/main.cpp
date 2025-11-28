@@ -32,27 +32,10 @@ public:
         }
 #endif
 
-        obj_ = LoadObj("../../3rdparty/assimp/test/models/FBX/box.fbx", "");
-        if (!obj_) {
-            AT_ASSERT(false);
-            return false;
-        }
-
-        ctxt_.InitAllTextureAsGLTexture();
-
-        obj_->buildForRasterizeRendering(ctxt_);
-
         rasterizer_.init(
             WIDTH, HEIGHT,
             "../shader/drawobj_vs.glsl",
             "../shader/drawobj_fs.glsl");
-
-        auto texNum = ctxt_.GetTextureNum();
-
-        for (int32_t i = 0; i < texNum; i++) {
-            auto tex = ctxt_.GetTexture(i);
-            tex->initAsGLTexture();
-        }
 
         // TODO
         aten::vec3 pos(0.f, 10.0f, 30.0f);
@@ -87,11 +70,13 @@ public:
             1.0f,
             0);
 
-        rasterizer_.drawObject(
-            ctxt_,
-            *obj_,
-            &camera_,
-            is_wireframe_);
+        for (auto& obj : objs_) {
+            rasterizer_.drawObject(
+                ctxt_,
+                *obj,
+                &camera_,
+                is_wireframe_);
+        }
 
         if (will_take_screen_shot_)
         {
@@ -110,6 +95,30 @@ public:
         }
 
         return true;
+    }
+
+    void Load(std::string_view path)
+    {
+        ctxt_.CleanAll();
+
+        LoadObj(path, "");
+        if (objs_.empty()) {
+            AT_ASSERT(false);
+            return;
+        }
+
+        ctxt_.InitAllTextureAsGLTexture();
+
+        for (auto& obj : objs_) {
+            obj->buildForRasterizeRendering(ctxt_);
+        }
+
+        auto texNum = ctxt_.GetTextureNum();
+
+        for (int32_t i = 0; i < texNum; i++) {
+            auto tex = ctxt_.GetTexture(i);
+            tex->initAsGLTexture();
+        }
     }
 
     void OnClose()
@@ -222,7 +231,7 @@ public:
     }
 
 private:
-    std::shared_ptr<aten::PolygonObject> LoadObj(
+    bool LoadObj(
         std::string_view objpath,
         std::string_view mtrlpath)
     {
@@ -236,24 +245,17 @@ private:
             extname,
             filename);
 
-        if (mtrlpath.empty()) {
-            aten::MaterialParameter param;
-            param.type = aten::MaterialType::Diffuse;
-            param.baseColor = aten::vec3(1, 1, 1);;
-
-            auto mtrl = ctxt_.CreateMaterialWithMaterialParameter(
-                "dummy",
-                param,
-                nullptr, nullptr, nullptr);
+        if (pathname[pathname.size() - 1] != '/') {
+            pathname += '/';
         }
-        else {
+
+        if (!mtrlpath.empty()) {
             aten::MaterialLoader::load(mtrlpath, ctxt_);
         }
 
-        std::vector<std::shared_ptr<aten::PolygonObject>> objs;
         aten::AssimpImporter::load(
             objpath,
-            objs,
+            objs_,
             ctxt_,
             [&](std::string_view name,
                 aten::context& ctxt,
@@ -281,11 +283,7 @@ private:
                 return mtrl;
             });
 
-        // NOTE
-        // Number of obj is currently only one.
-        AT_ASSERT(objs.size() == 1);
-
-        return objs[0];
+        return true;
     }
 
     bool ParseArguments(int32_t argc, char* argv[])
@@ -322,7 +320,7 @@ private:
     aten::context ctxt_;
 
     aten::RasterizeRenderer rasterizer_;
-    std::shared_ptr<aten::PolygonObject> obj_;
+    std::vector<std::shared_ptr<aten::PolygonObject>> objs_;
 
     aten::PinholeCamera camera_;
     bool is_camera_dirty_{ false };
@@ -354,6 +352,7 @@ int32_t main(int32_t argc, char* argv[])
     handlers.OnMouseMove = [&app](int32_t x, int32_t y) { app->OnMouseMove(x, y);  };
     handlers.OnMouseWheel = [&app](int32_t delta) { app->OnMouseWheel(delta); };
     handlers.OnKey = [&app](bool press, aten::Key key) { app->OnKey(press, key); };
+    handlers.OnDropFile = [&app](std::string_view path) { app->Load(path); };
 
     auto id = wnd->Create(
         WIDTH, HEIGHT, TITLE,

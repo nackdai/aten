@@ -35,6 +35,6 @@ namespace aten
             context& ctxt,
             FuncCreateMaterial func_create_mtrl);
 
-        std::vector<std::string> mtrl_list_;
+        std::unordered_map<std::string, std::vector<int32_t>> mtrl_map_;
     };
 }

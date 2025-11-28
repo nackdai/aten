@@ -80,7 +80,8 @@ namespace npr_kernel {
         const auto& query_ray = rays[idx];
         const auto& isect = isects[idx];
 
-        AT_NAME::npr::ShadeSampleRay(
+        constexpr auto SampleRayNum = std::remove_pointer_t<decltype(sample_ray_infos)>::size;
+        AT_NAME::npr::ShadeSampleRay<SampleRayNum>(
             pixel_width,
             idx, depth,
             ctxt,
@@ -128,7 +129,8 @@ namespace npr_kernel {
         // Query ray doesn't hit anything, but evaluate a possibility that sample ray might hit something.
         const auto& query_ray = rays[idx];
 
-        AT_NAME::npr::ShadeMissSampleRay(
+        constexpr auto SampleRayNum = std::remove_pointer_t<decltype(sample_ray_infos)>::size;
+        AT_NAME::npr::ShadeMissSampleRay<SampleRayNum>(
             pixel_width,
             idx, depth,
             ctxt,

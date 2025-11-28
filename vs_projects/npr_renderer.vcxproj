@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="..\src\common\scenedefs.h" />
     <ClInclude Include="..\src\npr_renderer\gradient_textue_editor.h" />
+    <ClInclude Include="..\src\npr_renderer\unity_chan_scene.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{119B5EF2-25F8-4F38-AEE7-3DAED11247EC}</ProjectGuid>

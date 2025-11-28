@@ -30,8 +30,8 @@ unset(CMAKE_POLICY_VERSION_MINIMUM)
 
 add_subdirectory(googletest)
 
-set(ASSIMP_BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
-set(ASSIMP_USE_SYSTEM_ZLIB OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
@@ -46,11 +46,12 @@ set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_OBJ_IMPORTER ON)
 set(ASSIMP_BUILD_FBX_IMPORTER ON)
 set(ASSIMP_BUILD_GLTF_IMPORTER ON)
+set(ASSIMP_BUILD_MMD_IMPORTER ON)
 
 add_subdirectory(assimp)
 
 if(MSVC)
-  target_compile_options(assimp PRIVATE /wd4834 /wd4819 /utf-8 /EHsc)
+  target_compile_options(assimp PRIVATE /wd4834 /wd4819 /EHsc)
 else()
   # Ignore the case that all warnings are treated as the error in assimp.
   target_compile_options(assimp PRIVATE -Wno-error)

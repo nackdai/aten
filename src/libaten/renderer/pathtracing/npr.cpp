@@ -53,8 +53,10 @@ namespace aten
                 ray,
                 AT_MATH_EPSILON, AT_MATH_INF);
 
+            constexpr auto SampleRayNum = decltype(feature_line_sample_ray_infos_)::value_type::size;
+
             if (is_hit) {
-                AT_NAME::npr::ShadeSampleRay(
+                AT_NAME::npr::ShadeSampleRay<SampleRayNum>(
                     pixel_width,
                     idx, depth,
                     ctxt, camera,
@@ -81,7 +83,7 @@ namespace aten
                 willContinue = !path_host_.paths.attrib[idx].is_terminated;
             }
             else {
-                AT_NAME::npr::ShadeMissSampleRay(
+                AT_NAME::npr::ShadeMissSampleRay<SampleRayNum>(
                     pixel_width,
                     idx, depth,
                     ctxt,

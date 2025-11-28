@@ -12,10 +12,12 @@ add_library(
   ../../3rdparty/imgui/imconfig.h
   ../../3rdparty/imgui/imgui.cpp
   ../../3rdparty/imgui/imgui.h
+  ../../3rdparty/imgui/imgui_demo.cpp
   ../../3rdparty/imgui/imgui_draw.cpp
   ../../3rdparty/imgui/imgui_internal.h
   ../../3rdparty/imgui/imgui_tables.cpp
   ../../3rdparty/imgui/imgui_widgets.cpp
+  ../../3rdparty/imgui/misc/cpp/imgui_stdlib.cpp
   accelerator/GpuPayloadDefs.h
   accelerator/accelerator.cpp
   accelerator/accelerator.h
@@ -184,6 +186,7 @@ add_library(
   renderer/film.h
   renderer/npr/feature_line.cpp
   renderer/npr/feature_line.h
+  renderer/npr/feature_line_config.h
   renderer/npr/npr_impl.h
   renderer/pathtracing/npr.cpp
   renderer/pathtracing/pathtracing.cpp
@@ -196,6 +199,7 @@ add_library(
   renderer/restir/restir.h
   renderer/restir/restir_impl.h
   renderer/restir/restir_types.h
+  renderer/scene_rendering_config.h
   renderer/svgf/svgf.cpp
   renderer/svgf/svgf.h
   renderer/svgf/svgf_impl.h

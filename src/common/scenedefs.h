@@ -1,3 +1,5 @@
+#pragma once
+
 #include "aten.h"
 #include "atenscene.h"
 

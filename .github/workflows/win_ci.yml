@@ -97,7 +97,6 @@ jobs:
       - name: Build 3rdparty
         shell: cmd
         run: |
-          cd 3rdparty
           .\Build3rdParty.bat Release Enterprise || exit 1
 
       - name: Build

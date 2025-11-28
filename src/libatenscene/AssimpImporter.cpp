@@ -47,6 +47,9 @@ namespace aten
         assimp_mtrl->Get(AI_MATKEY_NAME, name);
 
         std::string mtrl_name(name.C_Str());
+        if (mtrl_name.empty()) {
+            mtrl_name = "no-name?";
+        }
         AT_PRINTF("%s\n", mtrl_name.c_str());
 
         auto stored_mtrl = ctxt.FindMaterialByName(mtrl_name);
@@ -116,7 +119,7 @@ namespace aten
         std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
         const aiNode* assimp_node,
         const aiScene* assimp_scene,
-        const std::vector<std::string>& mtrl_list)
+        const std::unordered_map<std::string, std::vector<int32_t>>& mtrl_map)
     {
         if (assimp_node->mNumMeshes > 0) {
             // Make transform matrix with traversing to the root parent.
@@ -135,12 +138,13 @@ namespace aten
             );
 
             auto obj = aten::TransformableFactory::createObject(ctxt);
-            auto shape = std::make_shared<aten::TriangleGroupMesh>();
 
             aten::vec3 obj_min(AT_MATH_INF);
             aten::vec3 obj_max(-AT_MATH_INF);
 
             for (uint32_t i = 0; i < assimp_node->mNumMeshes; i++) {
+                auto shape = std::make_shared<aten::TriangleGroupMesh>();
+
                 // Get mesh id which node has.
                 uint32_t mesh_id = assimp_node->mMeshes[i];
 
@@ -148,11 +152,9 @@ namespace aten
                 const auto assimp_mesh = assimp_scene->mMeshes[mesh_id];
 
                 // TODO
-                if (assimp_mesh->HasBones()) {
-                    AT_ASSERT(false);
-                    AT_PRINTF("Not allow bone model\n");
-                    return false;
-                }
+                // Support bones.
+                // if (assimp_mesh->HasBones()) {
+                // }
 
                 if (!assimp_mesh->HasPositions()) {
                     AT_ASSERT(false);
@@ -160,13 +162,9 @@ namespace aten
                     return false;
                 }
 
-                auto num_uv_channels = assimp_mesh->GetNumUVChannels();
-
-                if (num_uv_channels > 0 && num_uv_channels != 1) {
-                    AT_ASSERT(false);
-                    AT_PRINTF("Invalid UV in mesh verticesl\n");
-                    return false;
-                }
+                // TODO
+                // Support multiple textures in the mesh.
+                // auto num_uv_channels = assimp_mesh->GetNumUVChannels();
 
                 const auto vtx_idx_offset = ctxt.GetVertexNum();
 
@@ -214,8 +212,26 @@ namespace aten
                         std::max(aabb_max.z, vtx.pos.z));
                 }
 
-                AT_ASSERT(assimp_mesh->mMaterialIndex < mtrl_list.size());
-                const auto mtrl_name = mtrl_list[assimp_mesh->mMaterialIndex];
+                obj_min = vec3(
+                    std::min(obj_min.x, aabb_min.x),
+                    std::min(obj_min.y, aabb_min.y),
+                    std::min(obj_min.z, aabb_min.z));
+                obj_max = vec3(
+                    std::max(obj_max.x, aabb_max.x),
+                    std::max(obj_max.y, aabb_max.y),
+                    std::max(obj_max.z, aabb_max.z));
+
+                const auto mtrl_idx = assimp_mesh->mMaterialIndex;
+
+                const auto it = std::find_if(
+                    mtrl_map.begin(), mtrl_map.end(),
+                    [mtrl_idx](const auto& p) {
+                        const auto& ids = p.second;
+                        const auto it_id = std::find(ids.begin(), ids.end(), mtrl_idx);
+                        return it_id != ids.end();
+                    }
+                );
+                std::string mtrl_name = it != mtrl_map.end() ? it->first : "";
 
                 auto mtrl = ctxt.FindMaterialByName(mtrl_name);
                 if (!mtrl) {
@@ -230,9 +246,10 @@ namespace aten
                     const auto& assimp_face = assimp_mesh->mFaces[f_idx];
 
                     if (assimp_face.mNumIndices != 3) {
-                        AT_ASSERT(false);
-                        AT_PRINTF("Face has to be triangle\n");
-                        return false;
+                        // TODO
+                        // Not sure why the number of the indices in the face sometimes is not 3...
+                        AT_PRINTF("Weird...Face has to be triangle...\n");
+                        continue;
                     }
 
                     aten::TriangleParameter face_param;
@@ -260,6 +277,8 @@ namespace aten
                     shape->AddFace(f);
                 }
 
+                shape->m_aabb.init(aabb_min, aabb_max);
+
                 if (mtrl->param().type == aten::MaterialType::Emissive) {
                     // Export the object which has an emissive material as the emissive object.
                     auto emit_obj = aten::TransformableFactory::createObject(ctxt);
@@ -273,12 +292,12 @@ namespace aten
             }
 
             obj->setBoundingBox(aten::aabb(obj_min, obj_max));
-            objs.push_back(std::move(obj));
+            objs.push_back(obj);
         }
 
         for (uint32_t child_idx = 0; child_idx < assimp_node->mNumChildren; child_idx++) {
             const auto child = assimp_node->mChildren[child_idx];
-            if (!createObject(ctxt, objs, assimp_node, assimp_scene, mtrl_list)) {
+            if (!createObject(ctxt, objs, child, assimp_scene, mtrl_map)) {
                 return false;
             }
         }
@@ -292,9 +311,7 @@ namespace aten
         context& ctxt,
         FuncCreateMaterial func_create_mtrl)
     {
-        uint32_t assimp_flags = aiProcessPreset_TargetRealtime_MaxQuality |
-            aiProcess_OptimizeGraph |
-            aiProcess_FlipUVs;
+        uint32_t assimp_flags = aiProcess_OptimizeGraph | aiProcess_Triangulate;
 
         // Never use Assimp's tangent gen code
         assimp_flags &= ~(aiProcess_CalcTangentSpace);
@@ -319,13 +336,19 @@ namespace aten
         for (uint32_t i = 0; i < assimp_scene->mNumMaterials; i++) {
             const auto assimp_mtrl = assimp_scene->mMaterials[i];
             auto mtrl_name = CreateMaterial(ctxt, assimp_mtrl, func_create_mtrl);
-            if (!mtrl_name.empty()) {
-                mtrl_list_.push_back(std::move(mtrl_name));
+            const auto it = mtrl_map_.find(mtrl_name);
+            if (it == mtrl_map_.end()) {
+                std::vector<int32_t> ids(1);
+                ids[0] = i;
+                mtrl_map_.insert(std::make_pair(mtrl_name, std::move(ids)));
+            }
+            else {
+                mtrl_map_[mtrl_name].emplace_back(i);
             }
         }
 
         auto root_node = assimp_scene->mRootNode;
-        if (!createObject(ctxt, objs, root_node, assimp_scene, mtrl_list_)) {
+        if (!createObject(ctxt, objs, root_node, assimp_scene, mtrl_map_)) {
             return false;
         }
 

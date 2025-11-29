@@ -284,7 +284,7 @@ namespace aten
                     auto emit_obj = aten::TransformableFactory::createObject(ctxt);
                     emit_obj->appendShape(shape);
                     emit_obj->setBoundingBox(aten::aabb(aabb_min, aabb_max));
-                    objs.push_back(std::move(emit_obj));
+                    objs.push_back(emit_obj);
                 }
                 else {
                     obj->appendShape(shape);

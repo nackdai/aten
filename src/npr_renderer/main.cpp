@@ -237,9 +237,12 @@ public:
 
         if (have_built_scene_) {
 #ifdef DEVICE_RENDERING
-        if (is_view_texture_) {
+            if (mode_ == RenderingMode::Texture) {
             renderer_.viewTextures(view_texture_idx_, WIDTH, HEIGHT);
         }
+            else if (mode_ == RenderingMode::AOV) {
+                renderer_.ViewAOV(aov_, WIDTH, HEIGHT);
+            }
         else {
             renderer_.render(
                 WIDTH, HEIGHT,
@@ -316,6 +319,28 @@ public:
         {
             bool need_renderer_reset = false;
 
+            constexpr std::array RenderingModeStr = {
+                "PT", "Texture", "AOV"
+            };
+
+            ImGui::Combo(
+                "RenderingMode",
+                reinterpret_cast<int32_t*>(&mode_),
+                RenderingModeStr.data(), RenderingModeStr.size());
+            if (mode_ == RenderingMode::Texture) {
+                const auto tex_num = ctxt_.GetTextureNum();
+                ImGui::SliderInt("View texture", &view_texture_idx_, 0, tex_num - 1);
+            }
+            else if (mode_ == RenderingMode::AOV) {
+                constexpr std::array AovStr = {
+                    "Albedo", "Normal", "WireFrame", "BaryCentric"
+                };
+                ImGui::Combo(
+                    "AOV",
+                    reinterpret_cast<int32_t*>(&aov_),
+                    AovStr.data(), AovStr.size());
+            }
+
             ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", frame, 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Text("cuda : %.3f ms (avg : %.3f ms)", cudaelapsed, avg_cuda_time_);
             ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * max_samples_) / float(1000 * 1000) * (float(1000) / cudaelapsed));
@@ -370,15 +395,6 @@ public:
             if (ImGui::Checkbox("Progressive", &enable_progressive))
             {
                 renderer_.SetEnableProgressive(enable_progressive);
-            }
-
-            auto is_view_texture = is_view_texture_;
-            if (ImGui::Checkbox("View texture", &is_view_texture)) {
-                is_view_texture_ = is_view_texture;
-            }
-            if (is_view_texture_) {
-                const auto tex_num = ctxt_.GetTextureNum();
-                ImGui::SliderInt("View texture", &view_texture_idx_, 0, tex_num - 1);
             }
 
             auto cam = camera_.param();
@@ -692,8 +708,15 @@ private:
     int32_t prev_mouse_pos_x_{ 0 };
     int32_t prev_mouse_pos_y_{ 0 };
 
-    bool is_view_texture_{ false };
+    enum RenderingMode {
+        PT,
+        Texture,
+        AOV,
+    };
+
+    RenderingMode mode_{ RenderingMode::PT };
     int32_t view_texture_idx_{ 0 };
+    idaten::Renderer::AOV aov_{ static_cast<idaten::Renderer::AOV>(0) };
 };
 
 int32_t main()

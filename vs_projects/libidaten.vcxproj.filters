@@ -460,7 +460,7 @@
     <CudaCompile Include="..\src\libidaten\ao\ao.cu">
       <Filter>ao</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\tex_viewer.cu">
+    <CudaCompile Include="..\src\libidaten\kernel\debug_viewer.cu">
       <Filter>kernel\renderer</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\restir\restir_debug.cu">

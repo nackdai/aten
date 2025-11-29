@@ -19,6 +19,13 @@ namespace idaten
         virtual ~Renderer() = default;
 
     public:
+        enum class AOV {
+            Albedo,
+            Normal,
+            WireFrame,
+            BaryCentric,
+        };
+
         virtual void render(
             int32_t width, int32_t height,
             int32_t maxSamples,
@@ -44,6 +51,10 @@ namespace idaten
 
         void viewTextures(
             uint32_t idx,
+            int32_t screenWidth, int32_t screenHeight);
+
+        void ViewAOV(
+            AOV aov,
             int32_t screenWidth, int32_t screenHeight);
 
         uint32_t getRegisteredTextureNum() const;

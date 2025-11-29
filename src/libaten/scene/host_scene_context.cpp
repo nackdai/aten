@@ -244,6 +244,11 @@ namespace aten
         t->updateIndex(transformables_.size() - 1);
     }
 
+    std::vector<std::shared_ptr<aten::transformable>>& context::GetTransformableList()
+    {
+        return transformables_;
+    }
+
     std::shared_ptr<aten::transformable> context::GetTransformable(int32_t idx) const
     {
         AT_ASSERT(0 <= idx && idx < transformables_.size());

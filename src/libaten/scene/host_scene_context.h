@@ -427,6 +427,11 @@ namespace aten
         void AddTransformable(const std::shared_ptr<transformable>& t);
 
         /**
+         * @brief Get the stored transformable list.
+         */
+        std::vector<std::shared_ptr<aten::transformable>>& GetTransformableList();
+
+        /**
          * @brief Get the transformable instance by index.
          * @brief[in] idx Index to the transformable instance
          * @return If the transformable instance is found, returns it. Otherwise, returns nullptr.

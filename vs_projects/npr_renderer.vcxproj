@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="..\src\common\scenedefs.h" />
     <ClInclude Include="..\src\npr_renderer\gradient_textue_editor.h" />
+    <ClInclude Include="..\src\npr_renderer\model_loader.h" />
     <ClInclude Include="..\src\npr_renderer\unity_chan_scene.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -104,7 +105,8 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <CodeGeneration>compute_20,sm_20;compute_60,sm_60</CodeGeneration>
     </CudaCompile>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)
+copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\assimp\bin\$(Configuration)\assimp*.dll $(OutputPath)</Command>
     </PreBuildEvent>
     <CudaLink>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -140,7 +142,8 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <CodeGeneration>compute_20,sm_20;compute_60,sm_60</CodeGeneration>
     </CudaCompile>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)
+copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\assimp\bin\$(Configuration)\assimp*.dll $(OutputPath)</Command>
     </PreBuildEvent>
     <CudaLink>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -177,7 +180,8 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <CodeGeneration>compute_20,sm_20;compute_60,sm_60</CodeGeneration>
     </CudaCompile>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\Release\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\glew\bin\$(Configuration)\\glew32*.dll $(OutputPath)
+copy /B /Y $(ProjectDir)..\3rdparty\$(PlatformName)\assimp\bin\$(Configuration)\assimp*.dll $(OutputPath)</Command>
     </PreBuildEvent>
     <CudaLink>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

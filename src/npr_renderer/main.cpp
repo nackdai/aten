@@ -18,8 +18,10 @@
 #include "../common/scenedefs.h"
 
 #include "unity_chan_scene.h"
+#include "model_loader.h"
 
-#define NprScene    UnityChanScene
+//#define NprScene    UnityChanScene
+#define NprScene    DummyScene
 
 //#pragma optimize( "", off)
 
@@ -131,8 +133,7 @@ public:
         aten::accelerator::setUserDefsInternalAccelCreator([] {
             return std::make_shared<aten::GPUBvh>();
         });
-        deform_mdl_ = NprScene::makeScene(ctxt_, &scene_);
-        scene_.build(ctxt_);
+        std::ignore = NprScene::makeScene(ctxt_, &scene_);
 
         // IBL
         scene_light_.is_ibl = false;
@@ -153,7 +154,16 @@ public:
             ctxt_.AddLight(scene_light_.point_light);
         }
 
-        auto mdl = deform_mdl_->GetHasObjectAsRealType();
+        if constexpr (std::is_same_v<NprScene, UnityChanScene>) {
+            BuildScene();
+        }
+
+        return true;
+    }
+
+    void BuildScene()
+    {
+        scene_.build(ctxt_);
 
         {
             const auto& nodes = scene_.getAccel()->getNodes();
@@ -168,7 +178,7 @@ public:
                 WIDTH, HEIGHT,
                 camparam, ctxt_, nodes,
                 0, 0,
-                bg);
+                scene_light_.ibl->GetBackground());
 #else
             ctxt_.CopyBvhNodes(scene_.getAccel()->getNodes());
             renderer_.SetBG(bg);
@@ -194,7 +204,7 @@ public:
 #endif
         }
 
-        return true;
+        have_built_scene_ = true;
     }
 
     bool Run()
@@ -225,6 +235,7 @@ public:
         aten::timer timer;
         timer.begin();
 
+        if (have_built_scene_) {
 #ifdef DEVICE_RENDERING
         if (is_view_texture_) {
             renderer_.viewTextures(view_texture_idx_, WIDTH, HEIGHT);
@@ -247,6 +258,7 @@ public:
         }
         renderer_.render(ctxt_, dst, &scene_, &camera_);
 #endif
+        }
 
         auto cudaelapsed = timer.end();
 
@@ -467,6 +479,23 @@ public:
 #endif
     }
 
+    void Load(std::string_view path)
+    {
+        std::vector<std::shared_ptr<aten::PolygonObject>> objs;
+        ModelLoader::Load(objs, ctxt_, path);
+
+        for (auto& obj : objs) {
+            auto obj_instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(
+                ctxt_, obj, aten::mat4::Identity);
+            scene_.add(obj_instance);
+        }
+
+        BuildScene();
+
+        camera_.FitBoundingBox(scene_.GetBoundingBox());
+        is_camera_dirty_ = true;
+    }
+
     void OnClose()
     {
 
@@ -597,7 +626,7 @@ private:
     aten::AcceleratedScene<aten::GPUBvh> scene_;
     aten::context ctxt_;
 
-    std::shared_ptr<aten::instance<aten::deformable>> deform_mdl_;
+    bool have_built_scene_{ false };
 
 #ifdef DEVICE_RENDERING
     idaten::NPRPathTracing renderer_;
@@ -668,6 +697,7 @@ int32_t main()
     handlers.OnMouseMove = [&app](int32_t x, int32_t y) { app->OnMouseMove(x, y);  };
     handlers.OnMouseWheel = [&app](int32_t delta) { app->OnMouseWheel(delta); };
     handlers.OnKey = [&app](bool press, aten::Key key) { app->OnKey(press, key); };
+    handlers.OnDropFile = [&app](std::string_view path) { app->Load(path); };
 
     auto id = wnd->Create(
         WIDTH, HEIGHT, TITLE,

@@ -45,6 +45,11 @@ namespace AT_NAME {
             }
         }
 
+        const aten::BackgroundResource& GetBackground() const
+        {
+            return bg_;
+        }
+
         float samplePdf(const aten::ray& r, const aten::context& ctxt) const;
 
         static AT_HOST_DEVICE_API float samplePdf(const aten::vec3& clr, float avgIllum)

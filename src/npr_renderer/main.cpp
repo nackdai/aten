@@ -387,13 +387,22 @@ public:
 
             ImGui::Begin("Material");
 
-            const auto* mtrl_param = ctxt_.GetMaterialByName("face");
-            auto mtrl = ctxt_.GetMaterialInstance(mtrl_param->id);
+            const auto mtrl_num = ctxt_.GetMaterialNum();
+            if (mtrl_num > 0) {
+                edit_mtrl_idx_ = edit_mtrl_idx_ < 0 ? 0 : edit_mtrl_idx_;
+                ImGui::SliderInt("index", &edit_mtrl_idx_, 0, mtrl_num - 1);
+            }
+
+            if (edit_mtrl_idx_ >= 0) {
+                auto& mtrl_param = ctxt_.GetMaterialInstance(edit_mtrl_idx_)->param();
+                auto mtrl = ctxt_.GetMaterialInstance(mtrl_param.id);
+
+                ImGui::Text("%s", mtrl->name());
 
             bool new_update_mtrl = false;
 
-            if (mtrl_param->type == aten::MaterialType::Toon
-                || mtrl_param->type == aten::MaterialType::StylizedBrdf
+                if (mtrl_param.type == aten::MaterialType::Toon
+                    || mtrl_param.type == aten::MaterialType::StylizedBrdf
             )
             {
                 constexpr std::array mtrl_types = {
@@ -401,17 +410,17 @@ public:
                     "StylizedBrdf",
                 };
 
-                const auto mtrl_idx = mtrl_param->id;
+                    const auto mtrl_idx = mtrl_param.id;
 
-                int32_t mtrl_type = mtrl_param->type == aten::MaterialType::Toon ? 0 : 1;
+                    int32_t mtrl_type = mtrl_param.type == aten::MaterialType::Toon ? 0 : 1;
                 ImGui::Text("%s", mtrl_types[mtrl_type]);
 
                 if (ImGui::Combo("mode", &mtrl_type, mtrl_types.data(), static_cast<int32_t>(mtrl_types.size()))) {
                     auto new_mtrl_type = mtrl_type == 0 ? aten::MaterialType::Toon : aten::MaterialType::StylizedBrdf;
-                    if (new_mtrl_type != mtrl_param->type) {
-                        auto albedo_map = ctxt_.GetTexture(mtrl_param->albedoMap);
-                        auto normal_map = ctxt_.GetTexture(mtrl_param->normalMap);
-                        aten::MaterialParameter new_mtrl_param = *mtrl_param;
+                        if (new_mtrl_type != mtrl_param.type) {
+                            auto albedo_map = ctxt_.GetTexture(mtrl_param.albedoMap);
+                            auto normal_map = ctxt_.GetTexture(mtrl_param.normalMap);
+                            aten::MaterialParameter new_mtrl_param = mtrl_param;
                         new_mtrl_param.type = new_mtrl_type;
 
                         auto new_mtrl = aten::material::CreateMaterialWithMaterialParameter(
@@ -442,6 +451,7 @@ public:
 
             if (new_update_mtrl) {
                 renderer_.updateMaterial(ctxt_.GetMetarialParemeters());
+                }
             }
 
             ImGui::End();
@@ -457,20 +467,26 @@ public:
             ImGui::End();
 
 
+            if (edit_mtrl_idx_ >= 0) {
+                auto& mtrl_param = ctxt_.GetMaterialInstance(edit_mtrl_idx_)->param();
+                if (mtrl_param.type == aten::MaterialType::Toon
+                    || mtrl_param.type == aten::MaterialType::StylizedBrdf)
+                {
             ImGui::Begin("Gradient texture");
-            {
+
                 gradient_tex_editor_.Display();
                 if (ImGui::Button("Update")) {
-                    // TODO
-                    auto* mtrl_face = ctxt_.GetMaterialByName("face");
-                    auto tex = ctxt_.GetTexture(mtrl_face->toon.remap_texture);
+
+                        auto tex = ctxt_.GetTexture(mtrl_param.toon.remap_texture);
                     gradient_tex_editor_.Read(
                         tex->colors().data(),
                         tex->width(), tex->height());
-                    renderer_.UpdateTexture(mtrl_face->toon.remap_texture, ctxt_);
+                        renderer_.UpdateTexture(mtrl_param.toon.remap_texture, ctxt_);
+                    }
+
+                    ImGui::End();
                 }
             }
-            ImGui::End();
 
             if (need_renderer_reset) {
                 renderer_.reset();
@@ -653,6 +669,7 @@ private:
     } scene_light_;
 
     MaterialParamEditor mtrl_param_editor_;
+    int32_t edit_mtrl_idx_{ -1 };
 
     GradientTextureEditor gradient_tex_editor_;
 

@@ -138,31 +138,6 @@ namespace aten
         auto& shadow_ray = shadow_rays[idx];
         shadow_ray.isActive = false;
 
-        // Implicit conection to light.
-        auto is_hit_implicit_light = AT_NAME::HitTeminatedMaterial(
-            ctxt, paths.sampler[idx],
-            isect.objid,
-            isBackfacing,
-            bounce,
-            paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
-            ray, rec, mtrl);
-        if (is_hit_implicit_light) {
-            return;
-        }
-
-        if (!mtrl.attrib.is_translucent && isBackfacing) {
-            orienting_normal = -orienting_normal;
-        }
-
-        // Apply normal map.
-        auto pre_sampled_r = material::applyNormal(
-            ctxt,
-            &mtrl,
-            mtrl.normalMap,
-            orienting_normal, orienting_normal,
-            rec.u, rec.v,
-            ray.dir, sampler);
-
         // Check stencil.
         auto is_stencil = AT_NAME::CheckStencil(
             rays[idx], paths.attrib[idx],
@@ -188,6 +163,31 @@ namespace aten
         if (is_translucent_by_alpha) {
             return;
         }
+
+        // Implicit conection to light.
+        auto is_hit_implicit_light = AT_NAME::HitTeminatedMaterial(
+            ctxt, paths.sampler[idx],
+            isect.objid,
+            isBackfacing,
+            bounce,
+            paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
+            ray, rec, mtrl);
+        if (is_hit_implicit_light) {
+            return;
+        }
+
+        if (!mtrl.attrib.is_translucent && isBackfacing) {
+            orienting_normal = -orienting_normal;
+        }
+
+        // Apply normal map.
+        auto pre_sampled_r = material::applyNormal(
+            ctxt,
+            &mtrl,
+            mtrl.normalMap,
+            orienting_normal, orienting_normal,
+            rec.u, rec.v,
+            ray.dir, sampler);
 
         // Explicit conection to light.
         AT_NAME::FillShadowRay(

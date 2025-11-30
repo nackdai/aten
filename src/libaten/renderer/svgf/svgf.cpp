@@ -173,6 +173,20 @@ namespace aten
         auto& shadow_ray = shadow_rays[idx];
         shadow_ray.isActive = false;
 
+        // Check transparency or translucency.
+        auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
+            ctxt,
+            mtrl,
+            rec.u, rec.v, rec.p,
+            orienting_normal,
+            rays[idx],
+            paths.sampler[idx],
+            paths.attrib[idx],
+            paths.throughput[idx]);
+        if (is_translucent_by_alpha) {
+            return;
+        }
+
         // Implicit conection to light.
         auto is_hit_implicit_light = AT_NAME::HitImplicitLight(
             ctxt, isect.objid,
@@ -198,20 +212,6 @@ namespace aten
             orienting_normal, orienting_normal,
             rec.u, rec.v,
             ray.dir, sampler);
-
-        // Check transparency or translucency.
-        auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
-            ctxt,
-            mtrl,
-            rec.u, rec.v, rec.p,
-            orienting_normal,
-            rays[idx],
-            paths.sampler[idx],
-            paths.attrib[idx],
-            paths.throughput[idx]);
-        if (is_translucent_by_alpha) {
-            return;
-        }
 
         // Explicit conection to light.
         AT_NAME::FillShadowRay(

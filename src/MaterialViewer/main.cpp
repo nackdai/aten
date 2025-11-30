@@ -121,8 +121,8 @@ public:
         // IBL
         scene_light_.is_envmap = true;
         scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
-        auto bg = AT_NAME::Background::CreateBackgroundResource(scene_light_.envmap_texture, aten::vec4(0));
-        scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
+        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(scene_light_.envmap_texture, aten::vec4(0));
+        scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(ctxt_.scene_rendering_config.bg, ctxt_);
         scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
 
         // PointLight
@@ -143,16 +143,13 @@ public:
             WIDTH * HEIGHT,
             1024);
 
+        ctxt_.scene_rendering_config.bg.enable_env_map = scene_light_.is_envmap;
+
         renderer_.UpdateSceneData(
             visualizer_->GetGLTextureHandle(),
             WIDTH, HEIGHT,
             camparam, ctxt_, nodes,
-            0, 0, bg);
-
-        renderer_.SetEnableEnvmap(scene_light_.is_envmap);
-#else
-        host_renderer_.SetBG(bg);
-        host_renderer_.SetEnableEnvmap(scene_light_.is_envmap);
+            0, 0);
 #endif
         return true;
     }
@@ -228,7 +225,8 @@ public:
                 need_renderer_reset = true;
 
                 scene_light_.is_envmap = next_is_envmap;
-                renderer_.SetEnableEnvmap(scene_light_.is_envmap);
+                ctxt_.scene_rendering_config.bg.enable_env_map = scene_light_.is_envmap;
+                renderer_.UpdateSceneRenderingConfig(ctxt_);
                 renderer_.updateLight(ctxt_);
             }
 

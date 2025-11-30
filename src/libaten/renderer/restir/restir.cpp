@@ -85,28 +85,15 @@ namespace aten
             }
         }
         else {
-            auto ibl = scene->getIBL();
-            if (ibl) {
-                ShadeMissWithEnvmap(
-                    idx,
-                    x, y,
-                    width, height,
-                    bounce,
-                    bg_,
-                    ctxt, camera,
-                    path_host_.paths, rays_[idx],
-                    aov_.GetNormalDepthAsSpan(),
-                    aov_.GetAlbedoMeshIdAsSpan());
-            }
-            else {
-                ShadeMiss(
-                    idx,
-                    bounce,
-                    bg_.bg_color,
-                    path_host_.paths,
-                    aov_.GetNormalDepthAsSpan(),
-                    aov_.GetAlbedoMeshIdAsSpan());
-            }
+            ShadeMiss(
+                idx,
+                x, y,
+                width, height,
+                bounce,
+                ctxt, camera,
+                path_host_.paths, rays_[idx],
+                aov_.GetNormalDepthAsSpan(),
+                aov_.GetAlbedoMeshIdAsSpan());
         }
     }
 

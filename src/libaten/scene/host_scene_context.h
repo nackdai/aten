@@ -215,7 +215,8 @@ namespace aten
          */
         const aten::mat4& GetMatrix(uint32_t idx) const noexcept
         {
-            return *matrices_[idx];
+            auto& mtx = matrices_[idx];
+            return *mtx;
         }
 
         /**

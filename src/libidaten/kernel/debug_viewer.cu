@@ -46,7 +46,6 @@ namespace idaten::kernel::debug
         idaten::Renderer::AOV aov,
         int32_t width, int32_t height,
         aten::CameraParameter camera,
-        aten::BackgroundResource bg,
         idaten::context ctxt,
         const aten::ObjectParameter* __restrict__ shapes,
         const aten::MaterialParameter* __restrict__ mtrls,
@@ -118,7 +117,7 @@ namespace idaten::kernel::debug
             }
         }
         else {
-            auto emit = AT_NAME::Background::SampleFromRay(ray.dir, bg, ctxt);
+            auto emit = AT_NAME::Background::SampleFromRay(ray.dir, ctxt.scene_rendering_config.bg, ctxt);
             clr = make_float4(emit.x, emit.y, emit.z, 1.0F);
         }
 
@@ -192,7 +191,7 @@ namespace idaten
             outputSurf,
             aov,
             screenWidth, screenHeight,
-            m_cam, bg_,
+            m_cam,
             ctxt_host_->ctxt,
             ctxt_host_->shapeparam.data(),
             ctxt_host_->mtrlparam.data(),

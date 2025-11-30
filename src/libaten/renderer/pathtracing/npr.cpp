@@ -92,24 +92,13 @@ namespace aten
                     feature_line_sample_ray_infos_.data()
                 );
 
-                auto ibl = scene->getIBL();
-                if (ibl && enable_envmap_) {
-                    ShadeMissWithEnvmap(
-                        idx,
-                        ix, iy,
-                        width, height,
-                        depth,
-                        bg_,
-                        ctxt, camera,
-                        path_host_.paths, rays_[idx]);
-                }
-                else {
-                    ShadeMiss(
-                        idx,
-                        depth,
-                        bg_.bg_color,
-                        path_host_.paths);
-                }
+                ShadeMiss(
+                    idx,
+                    ix, iy,
+                    width, height,
+                    depth,
+                    ctxt, camera,
+                    path_host_.paths, rays_[idx]);
 
                 willContinue = false;
             }

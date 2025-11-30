@@ -5,18 +5,7 @@
 #include "math/vec3.h"
 #include "math/ray.h"
 #include "image/texture.h"
-#include "material/sample_texture.h"
-
-namespace aten
-{
-    struct BackgroundResource {
-        aten::vec3 bg_color{ 0.0F };
-
-        int32_t envmap_tex_idx{ -1 };
-        float avgIllum{ 1.0F };
-        float multiplyer{ 1.0F };
-    };
-}
+#include "renderer/scene_rendering_config.h"
 
 namespace AT_NAME
 {
@@ -47,7 +36,7 @@ namespace AT_NAME
             const aten::BackgroundResource& bg_resource,
             const AT_NAME::context& ctxt)
         {
-            if (bg_resource.envmap_tex_idx < 0) {
+            if (bg_resource.envmap_tex_idx < 0 || !bg_resource.enable_env_map) {
                 return bg_resource.bg_color;
             }
 

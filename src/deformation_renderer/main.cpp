@@ -260,13 +260,13 @@ public:
 
 #ifdef ENABLE_ENVMAP
         auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
-        auto bg = AT_NAME::Background::CreateBackgroundResource(envmap);
+        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(envmap);
 
-        auto ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
+        auto ibl = std::make_shared<aten::ImageBasedLight>(ctxt_.scene_rendering_config.bg, ctxt_);
 
         scene_.addImageBasedLight(ctxt_, ibl);
 #else
-        auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, aten::vec4(0));
+        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(nullptr, aten::vec4(0));
 #endif
 
         size_t advanceVtxNum = 0;
@@ -324,8 +324,7 @@ public:
                 visualizer_->GetGLTextureHandle(),
                 WIDTH, HEIGHT,
                 camparam, ctxt_, nodes,
-                advanceTriNum, advanceVtxNum,
-                bg);
+                advanceTriNum, advanceVtxNum);
 
 #ifdef ENABLE_SVGF
             auto aabb = scene_.getAccel()->getBoundingbox();

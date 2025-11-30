@@ -320,39 +320,12 @@ namespace kernel {
         }
     }
 
-    __global__ void shadeMiss(
-        int32_t bounce,
-        float4* aovNormalDepth,
-        float4* aovAlbedoMeshid,
-        idaten::Path paths,
-        const aten::BackgroundResource bg,
-        int32_t width, int32_t height)
-    {
-        auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-        auto iy = blockIdx.y * blockDim.y + threadIdx.y;
-
-        if (ix >= width || iy >= height) {
-            return;
-        }
-
-        const auto idx = getIdx(ix, iy, width);
-
-        AT_NAME::ShadeMiss(
-            idx,
-            bounce,
-            bg.bg_color,
-            paths,
-            aten::span(aovNormalDepth, width * height),
-            aten::span(aovAlbedoMeshid, width * height));
-    }
-
-    __global__ void shadeMissWithEnvmap(
+    __global__ void ShadeMiss(
         int32_t bounce,
         const aten::CameraParameter camera,
         float4* aovNormalDepth,
         float4* aovAlbedoMeshid,
         const idaten::context ctxt,
-        const aten::BackgroundResource bg,
         idaten::Path paths,
         const aten::ray* __restrict__ rays,
         int32_t width, int32_t height)
@@ -366,12 +339,11 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        AT_NAME::ShadeMissWithEnvmap(
+        AT_NAME::ShadeMiss(
             idx,
             ix, iy,
             width, height,
             bounce,
-            bg,
             ctxt, camera,
             paths, rays[idx],
             aten::span(aovNormalDepth, width * height),
@@ -498,27 +470,15 @@ namespace idaten
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
-        if (m_enableEnvmap && bg_.envmap_tex_idx >= 0) {
-            kernel::shadeMissWithEnvmap << <grid, block, 0, m_stream >> > (
-                bounce,
-                m_cam,
-                aovNormalDepth.data(),
-                aovTexclrMeshid.data(),
-                ctxt_host_->ctxt,
-                bg_,
-                path_host_->paths,
-                m_rays.data(),
-                width, height);
-        }
-        else {
-            kernel::shadeMiss << <grid, block, 0, m_stream >> > (
-                bounce,
-                aovNormalDepth.data(),
-                aovTexclrMeshid.data(),
-                path_host_->paths,
-                bg_,
-                width, height);
-        }
+        kernel::ShadeMiss << <grid, block, 0, m_stream >> > (
+            bounce,
+            m_cam,
+            aovNormalDepth.data(),
+            aovTexclrMeshid.data(),
+            ctxt_host_->ctxt,
+            path_host_->paths,
+            m_rays.data(),
+            width, height);
 
         checkCudaKernel(shadeMiss);
     }

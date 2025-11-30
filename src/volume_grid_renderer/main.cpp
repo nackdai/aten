@@ -122,12 +122,12 @@ public:
 
 #ifdef ENABLE_IBL
         envmap_ = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
-        auto bg = AT_NAME::Background::CreateBackgroundResource(envmap_);
+        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(envmap_);
 
-        auto ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
+        auto ibl = std::make_shared<aten::ImageBasedLight>(ctxt_.scene_rendering_config.bg, ctxt_);
         scene_.addImageBasedLight(ctxt_, ibl);
 #else
-        auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, BGColor);
+        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(nullptr, BGColor);
 #endif
 
 #ifdef DEVICE_RENDERING
@@ -146,7 +146,7 @@ public:
                 visualizer_->GetGLTextureHandle(),
                 WIDTH, HEIGHT,
                 camparam, ctxt_, nodes,
-                0, 0, bg,
+                0, 0,
                 [](const aten::context& ctxt) -> auto { return ctxt.GetGrid(); });
         }
 #else

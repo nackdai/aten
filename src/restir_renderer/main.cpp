@@ -90,13 +90,13 @@ public:
             camparam.znear = float(0.1);
             camparam.zfar = float(10000.0);
 
-            auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, aten::vec4(0));
+            ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(nullptr, aten::vec4(0));
 
             renderer_.UpdateSceneData(
                 visualizer_->GetGLTextureHandle(),
                 WIDTH, HEIGHT,
                 camparam, ctxt_, nodes,
-                0, 0, bg);
+                0, 0);
 
             renderer_.SetGBuffer(
                 fbo_.GetGLTextureHandle(0),

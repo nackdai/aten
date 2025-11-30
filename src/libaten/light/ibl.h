@@ -17,25 +17,23 @@ namespace aten {
 namespace AT_NAME {
     class ImageBasedLight : public Light {
     public:
-        ImageBasedLight()
-            : Light(aten::LightType::IBL, aten::LightAttributeIBL)
-        {}
         ImageBasedLight(const aten::BackgroundResource& bg, const aten::context& ctxt)
             : Light(aten::LightType::IBL, aten::LightAttributeIBL)
         {
             SetBackground(bg, ctxt);
         }
 
-        ImageBasedLight(aten::Values& val);
-
         virtual ~ImageBasedLight() = default;
+
+    private:
+        ImageBasedLight() = default;
 
     public:
         void SetBackground(
             const aten::BackgroundResource& bg,
             const aten::context& ctxt)
         {
-            if (bg_.envmap_tex_idx != bg.envmap_tex_idx) {
+            if (bg.envmap_tex_idx != bg.envmap_tex_idx) {
                 bg_ = bg;
                 m_param.envmapidx = bg.envmap_tex_idx;
 
@@ -43,11 +41,6 @@ namespace AT_NAME {
                 auto envmap = ctxt.GetTexture(bg.envmap_tex_idx);
                 preCompute(envmap);
             }
-        }
-
-        const aten::BackgroundResource& GetBackground() const
-        {
-            return bg_;
         }
 
         float samplePdf(const aten::ray& r, const aten::context& ctxt) const;
@@ -143,6 +136,23 @@ namespace AT_NAME {
 
     private:
         void preCompute(const std::shared_ptr<aten::texture>& envmap);
+
+        aten::vec3 SampleFromRayWithTexture(
+            const aten::ray& in_ray,
+            const std::shared_ptr<aten::texture>& envmap) const
+        {
+            // Translate cartesian coordinates to spherical system.
+            auto uv = Background::ConvertDirectionToUV(in_ray.dir);
+            return SampleFromUVWithTexture(uv.x, uv.y, envmap);
+        }
+
+        aten::vec3 SampleFromUVWithTexture(
+            const float u, const float v,
+            const std::shared_ptr<aten::texture>& envmap) const
+        {
+            auto result = envmap->at(u, v);
+            return result * bg_.multiplyer;
+        }
 
     private:
         aten::BackgroundResource bg_;

@@ -329,12 +329,17 @@ namespace aten
     std::shared_ptr<texture> context::CreateTexture(
         int32_t width, int32_t height,
         uint32_t channels,
-        std::string_view name)
+        std::string_view name,
+        const aten::vec4 default_value/*= aten::vec4(0.0F)*/)
     {
         auto tex = GetTextureByName(name);
         if (!tex) {
             tex = texture::create(width, height, channels, name);
             AT_ASSERT(tex);
+
+            if (length(default_value) > 0.0F) {
+                tex->Fill(default_value);
+            }
 
             AddTexture(tex);
         }

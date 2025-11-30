@@ -43,6 +43,8 @@ namespace aten
     public:
         void init(int32_t width, int32_t height, int32_t channels);
 
+        void Fill(const aten::vec4& value);
+
         vec4 at(float u, float v) const;
 
         vec4 AtWithBilinear(float u, float v) const;

@@ -126,15 +126,19 @@ namespace aten
 
     void texture::init(int32_t width, int32_t height, int32_t channels)
     {
-        if (m_colors.empty()) {
-            width_ = width;
-            height_ = height;
-            m_channels = channels;
+        width_ = width;
+        height_ = height;
+        m_channels = channels;
 
-            m_size = height * width;
+        m_size = height * width;
 
-            m_colors.resize(width * height);
-        }
+        m_colors.clear();
+        m_colors.resize(width * height);
+    }
+
+    void texture::Fill(const aten::vec4& value)
+    {
+        std::fill(m_colors.begin(), m_colors.end(), value);
     }
 
     bool texture::initAsGLTexture()

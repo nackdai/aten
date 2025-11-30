@@ -57,7 +57,7 @@ namespace AT_NAME {
                 float u = (float)(x + 0.5) / width;
                 float v = (float)(y + 0.5) / height;
 
-                auto clr = AT_NAME::Background::SampleFromUVWithTexture(u, v, bg_, envmap);
+                auto clr = SampleFromUVWithTexture(u, v, envmap);
                 const auto illum = AT_NAME::color::luminance(clr);
 
                 m_avgIllum += illum * scale;
@@ -123,7 +123,7 @@ namespace AT_NAME {
         AT_ASSERT(bg_.envmap_tex_idx >= 0);
         auto envmap = ctxt.GetTexture(bg_.envmap_tex_idx);
 
-        auto clr = AT_NAME::Background::SampleFromRayWithTexture(r, bg_, envmap);
+        auto clr = SampleFromRayWithTexture(r, envmap);
 
         auto pdf = samplePdf(clr, m_avgIllum);
 
@@ -233,7 +233,7 @@ namespace AT_NAME {
         // u, v -> direction.
         result.dir = AT_NAME::Background::ConvertUVToDirection(u, v);
 
-        result.light_color = AT_NAME::Background::SampleFromUVWithTexture(u, v, bg_, envmap);
+        result.light_color = SampleFromUVWithTexture(u, v, envmap);
         result.light_color *= m_param.scale;
 #elif 0
         auto uv = AT_NAME::envmap::ConvertDirectionToUV(nml);

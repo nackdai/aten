@@ -21,13 +21,6 @@ namespace AT_NAME {
         : Light(aten::LightType::Direction, LightAttributeDirectional, val)
     {}
 
-    ImageBasedLight::ImageBasedLight(aten::Values& val)
-        : Light(aten::LightType::IBL, LightAttributeIBL, val)
-    {
-        AT_ASSERT(false);
-        throw std::exception();
-    }
-
     PointLight::PointLight(aten::Values& val)
         : Light(aten::LightType::Point, LightAttributeSingluar, val)
     {

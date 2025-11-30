@@ -61,25 +61,6 @@ namespace AT_NAME
             return result * bg_resource.multiplyer;
         }
 
-        static aten::vec3 SampleFromRayWithTexture(
-            const aten::ray& in_ray,
-            const aten::BackgroundResource& bg_resource,
-            const std::shared_ptr<aten::texture>& envmap)
-        {
-            // Translate cartesian coordinates to spherical system.
-            auto uv = ConvertDirectionToUV(in_ray.dir);
-            return SampleFromUVWithTexture(uv.x, uv.y, bg_resource, envmap);
-        }
-
-        static aten::vec3 SampleFromUVWithTexture(
-            const float u, const float v,
-            const aten::BackgroundResource& bg_resource,
-            const std::shared_ptr<aten::texture>& envmap)
-        {
-            auto result = envmap->at(u, v);
-            return result * bg_resource.multiplyer;
-        }
-
         static AT_HOST_DEVICE_API aten::vec3 ConvertUVToDirection(const float u, const float v)
         {
             // u = phi / 2PI

@@ -104,6 +104,10 @@ namespace aten
             int32_t lod_depth = -1
         )
         {
+            t_min = ctxt.scene_rendering_config.bvh_hit_min > 0
+                ? ctxt.scene_rendering_config.bvh_hit_min
+                : t_min;
+
             isect.isVoxel = false;
 
             const bool enable_lod = (lod_depth >= 0);
@@ -189,9 +193,9 @@ namespace aten
                         // Even though hit to the traiangle, check if we can treat it as hit for Any/Closer mode.
                         // If Any, we always treat hit result as the result.
                         // If Closer, we treat hit result as the result only when it's closer than previous hit.
-                        bool is_intersect = (Type == aten::IntersectType::Any
+                        bool is_intersect = t_min < isect_tmp.t && (Type == aten::IntersectType::Any
                             ? is_hit
-                            : isect_tmp.t < isect.t);
+                            : is_hit && isect_tmp.t < isect.t);
 
                         if (is_intersect) {
                             isect = isect_tmp;
@@ -228,7 +232,7 @@ namespace aten
                                 t_min, t_max, t_result,
                                 nml);
 
-                            bool is_intersect = (Type == aten::IntersectType::Any
+                            bool is_intersect = t_min < t_result && (Type == aten::IntersectType::Any
                                 ? is_hit
                                 : is_hit && t_result < isect.t);
 

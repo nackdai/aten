@@ -15,5 +15,12 @@ namespace aten
          * @brief Configuration to render feature line.
          */
         FeatureLineConfig feature_line;
+
+        /**
+         * @brief Configuration for minimum value how close hit is acceptable.
+         *
+         * If the value is netative, the default value is used.
+         */
+        float bvh_hit_min{ -1.0F };
     };
 }

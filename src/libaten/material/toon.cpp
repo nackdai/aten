@@ -112,11 +112,15 @@ namespace AT_NAME
 
             aten::ray r(hit_pos, light_sample.dir, normal);
 
-            bool is_hit_to_target_light = AT_NAME::HitTestToTargetLight(
-                ctxt, r,
-                *target_light, light_sample.dist_to_light,
-                param
-            );
+            bool is_hit_to_target_light = true;
+
+            if (param.toon.will_receive_shadow) {
+                is_hit_to_target_light = AT_NAME::HitTestToTargetLight(
+                    ctxt, r,
+                    *target_light, light_sample.dist_to_light,
+                    param
+                );
+            }
 
             if (param.type == aten::MaterialType::Toon) {
                 brdf = Toon::ComputeBRDF(

@@ -141,7 +141,8 @@ namespace aten
 
         MaterialType toon_type{ MaterialType::Diffuse };
         bool enable_rim_light{ false };
-        int8_t padding[3];
+        bool will_receive_shadow{ true };
+        int8_t padding[2];
 
         float stylized_y_min{ 0.0F };
         float stylized_y_max{ 1.0F };

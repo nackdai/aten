@@ -33,11 +33,6 @@ namespace idaten {
             m_hitDistLimit = d;
         }
 
-        void SetEnableEnvmap(bool b)
-        {
-            m_enableEnvmap = b;
-        }
-
         aten::tuple<aten::ray, aten::vec3> getDebugInfo(uint32_t x, uint32_t y);
 
         cudaStream_t GetCudaStream() const
@@ -104,7 +99,5 @@ namespace idaten {
 
         idaten::TypedCudaMemory<uint32_t> m_sobolMatrices;
         idaten::TypedCudaMemory<uint32_t> m_random;
-
-        bool m_enableEnvmap{ true };
     };
 }

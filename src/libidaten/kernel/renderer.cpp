@@ -16,7 +16,6 @@ namespace idaten {
         const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
         uint32_t advance_prim_num,
         uint32_t advance_vtx_num,
-        const aten::BackgroundResource& bg_resource,
         std::function<const aten::Grid*(const aten::context&)> proxy_get_grid_from_host_scene_context/*= nullptr*/)
     {
         m_glimg.init(gltex, CudaGLRscRegisterType::ReadWrite);
@@ -122,8 +121,6 @@ namespace idaten {
                 ctxt_host_->grids.writeFromHostToDeviceByNum(grids, grids_num);
             }
         }
-
-        bg_ = bg_resource;
     }
 
     void Renderer::updateBVH(

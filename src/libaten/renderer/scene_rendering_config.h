@@ -5,6 +5,15 @@
 
 namespace aten
 {
+    struct BackgroundResource {
+        aten::vec3 bg_color{ 0.0F };
+
+        int32_t envmap_tex_idx{ -1 };
+        float avgIllum{ 1.0F };
+        float multiplyer{ 1.0F };
+        bool enable_env_map{ true };
+    };
+
     struct SceneRenderingConfig {
         /**
          * @brief Control if alpha blending is enabled.
@@ -22,5 +31,7 @@ namespace aten
          * If the value is netative, the default value is used.
          */
         float bvh_hit_min{ -1.0F };
+
+        BackgroundResource bg;
     };
 }

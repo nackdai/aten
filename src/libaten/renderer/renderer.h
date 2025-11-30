@@ -3,7 +3,6 @@
 #include "types.h"
 #include "math/vec3.h"
 #include "math/vec4.h"
-#include "renderer/background.h"
 #include "renderer/film.h"
 #include "scene/host_scene_context.h"
 #include "scene/scene.h"
@@ -39,11 +38,6 @@ namespace aten
             frame_count_++;
         }
 
-        void SetBG(const BackgroundResource& bg)
-        {
-            bg_ = bg;
-        }
-
         inline uint32_t GetFrameCount() const noexcept
         {
             return frame_count_;
@@ -52,11 +46,6 @@ namespace aten
         void reset() noexcept
         {
             frame_count_ = 1;
-        }
-
-        void SetEnableEnvmap(bool b)
-        {
-            enable_envmap_ = b;
         }
 
     protected:
@@ -79,8 +68,6 @@ namespace aten
         }
 
     protected:
-        BackgroundResource bg_;
         uint32_t frame_count_{ 0 };
-        bool enable_envmap_{ true };
     };
 }

@@ -108,45 +108,9 @@ namespace AT_NAME
     template <class AOV_BUFFER_TYPE = aten::vec4>
     inline AT_DEVICE_API void ShadeMiss(
         int32_t idx,
-        int32_t bounce,
-        const aten::vec3& bg,
-        AT_NAME::Path& paths,
-        aten::span<AOV_BUFFER_TYPE> aov_normal_depth = nullptr,
-        aten::span<AOV_BUFFER_TYPE> aov_albedo_meshid = nullptr)
-    {
-        bounce = paths.attrib[idx].does_use_throughput_depth
-            ? paths.throughput[idx].depth_count
-            : bounce;
-
-        if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].isHit) {
-            if (bounce == 0) {
-                if (!aov_normal_depth.empty() && !aov_albedo_meshid.empty())
-                {
-                    // Export bg color to albedo buffer.
-                    AT_NAME::FillBasicAOVsIfHitMiss(
-                        aov_normal_depth[idx],
-                        aov_albedo_meshid[idx], bg);
-                }
-            }
-
-            auto contrib = _detail_pathtracing_impl::ApplyAlphaBlend(bg, paths.throughput[idx]);
-            contrib *= paths.throughput[idx].throughput;
-
-            aten::AddVec3(paths.contrib[idx].contrib, contrib);
-
-            _detail_pathtracing_impl::ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
-
-            paths.attrib[idx].is_terminated = true;
-        }
-    }
-
-    template <class AOV_BUFFER_TYPE = aten::vec4>
-    inline AT_DEVICE_API void ShadeMissWithEnvmap(
-        int32_t idx,
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,
         int32_t bounce,
-        const aten::BackgroundResource bg,
         const AT_NAME::context& ctxt,
         const aten::CameraParameter& camera,
         AT_NAME::Path& paths,
@@ -177,7 +141,7 @@ namespace AT_NAME
                 dir = camsample.r.dir;
             }
 
-            auto emit = AT_NAME::Background::SampleFromRay(dir, bg, ctxt);
+            auto emit = AT_NAME::Background::SampleFromRay(dir, ctxt.scene_rendering_config.bg, ctxt);
 
             float misW = 1.0f;
             if (bounce == 0
@@ -192,7 +156,7 @@ namespace AT_NAME
                 }
             }
             else {
-                auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, bg.avgIllum);
+                auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, ctxt.scene_rendering_config.bg.avgIllum);
                 misW = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
             }
 

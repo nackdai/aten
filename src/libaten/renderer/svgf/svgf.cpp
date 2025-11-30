@@ -64,29 +64,16 @@ namespace aten
                 willContinue = !path_host_.paths.attrib[idx].is_terminated;
             }
             else {
-                auto ibl = scene->getIBL();
                 auto& aov = params_.GetCurrAovBuffer();
-                if (ibl) {
-                    ShadeMissWithEnvmap(
-                        idx,
-                        ix, iy,
-                        width, height,
-                        depth,
-                        bg_,
-                        ctxt, camera,
-                        path_host_.paths, rays_[idx],
-                        aov.GetNormalDepthAsSpan(),
-                        aov.GetAlbedoMeshIdAsSpan());
-                }
-                else {
-                    ShadeMiss(
-                        idx,
-                        depth,
-                        bg_.bg_color,
-                        path_host_.paths,
-                        aov.GetNormalDepthAsSpan(),
-                        aov.GetAlbedoMeshIdAsSpan());
-                }
+                ShadeMiss(
+                    idx,
+                    ix, iy,
+                    width, height,
+                    depth,
+                    ctxt, camera,
+                    path_host_.paths, rays_[idx],
+                    aov.GetNormalDepthAsSpan(),
+                    aov.GetAlbedoMeshIdAsSpan());
 
                 willContinue = false;
             }

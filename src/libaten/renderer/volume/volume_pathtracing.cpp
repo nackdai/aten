@@ -74,24 +74,13 @@ namespace aten
                     scene);
             }
             else {
-                auto ibl = scene->getIBL();
-                if (ibl && enable_envmap_) {
-                    ShadeMissWithEnvmap(
-                        idx,
-                        ix, iy,
-                        width, height,
-                        path_host_.throughput[idx].depth_count,
-                        bg_,
-                        ctxt, camera,
-                        path_host_.paths, rays_[idx]);
-                }
-                else {
-                    ShadeMiss(
-                        idx,
-                        path_host_.throughput[idx].depth_count,
-                        bg_.bg_color,
-                        path_host_.paths);
-                }
+                ShadeMiss(
+                    idx,
+                    ix, iy,
+                    width, height,
+                    path_host_.throughput[idx].depth_count,
+                    ctxt, camera,
+                    path_host_.paths, rays_[idx]);
 
                 path_host_.paths.attrib[idx].is_terminated = true;
             }

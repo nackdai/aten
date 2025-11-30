@@ -121,13 +121,13 @@ public:
 
 #ifdef ENABLE_ENVMAP
         auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
-        auto bg = AT_NAME::Background::CreateBackgroundResource(envmap);
-        auto ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
-        bg.avgIllum = ibl->getAvgIlluminace();
+        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(envmap);
+        auto ibl = std::make_shared<aten::ImageBasedLight>(ctxt_.scene_rendering_config.bg, ctxt_);
+        ctxt_.scene_rendering_config.bg.avgIllum = ibl->getAvgIlluminace();
 
         scene_.addImageBasedLight(ctxt_, ibl);
 #else
-        auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, 0.0F);
+        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(nullptr, 0.0F);
 #endif
 
         {
@@ -145,7 +145,7 @@ public:
                 visualizer_->GetGLTextureHandle(),
                 WIDTH, HEIGHT,
                 camparam, ctxt_, nodes,
-                0, 0, bg);
+                0, 0);
         }
 
         return true;

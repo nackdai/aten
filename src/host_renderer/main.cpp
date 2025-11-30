@@ -9,9 +9,9 @@ constexpr const char* TITLE = "app";
 
 const aten::vec4 BGColor(0.0F);
 
-//#define ENABLE_IBL
+#define ENABLE_IBL
 // #define ENABLE_EVERY_FRAME_SC
-#define ENABLE_FEATURE_LINE
+//#define ENABLE_FEATURE_LINE
 
 class HostRendererApp {
 public:
@@ -88,14 +88,13 @@ public:
 
 #ifdef ENABLE_IBL
         envmap_ = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
-        auto bg = AT_NAME::Background::CreateBackgroundResource(envmap_);
+        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(envmap_);
 
-        auto ibl = std::make_shared<aten::ImageBasedLight>(bg, ctxt_);
+        auto ibl = std::make_shared<aten::ImageBasedLight>(ctxt_.scene_rendering_config.bg, ctxt_);
         scene_.addImageBasedLight(ctxt_, ibl);
 #else
-        auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr, BGColor);
+        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(nullptr, BGColor);
 #endif
-        renderer_.SetBG(bg);
 
 #ifdef ENABLE_FEATURE_LINE
         ctxt_.scene_rendering_config.feature_line.enabled = true;

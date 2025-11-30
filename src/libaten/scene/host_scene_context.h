@@ -467,17 +467,19 @@ namespace aten
         int32_t FindPolygonalTransformableOrderFromPointer(const void* p) const;
 
         /**
-         * @brief Create a texture instance which is the empty and then add it to the scene context.
+         * @brief Create a texture instance and then add it to the scene context.
          * @param[in] width Width of the image data.
          * @param[in] height Height of the image data.
          * @param[in] channels Number of color channels.
          * @param[in] name Name of the texture instance.
+         * @param[in] default_value Default value filled to the texture.
          * @return Created texture instance.
          */
         std::shared_ptr<texture> CreateTexture(
             int32_t width, int32_t height,
             uint32_t channels,
-            std::string_view name);
+            std::string_view name,
+            const aten::vec4 default_value = aten::vec4(0.0F));
 
         /**
          * @brief Get the number of all registered texture instances.

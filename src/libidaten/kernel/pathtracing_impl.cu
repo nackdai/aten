@@ -109,26 +109,6 @@ namespace pt {
                 aovAlbedoMeshId[idx], albedo, isect);
         }
 
-        // Implicit conection to light.
-        auto is_hit_implicit_light = AT_NAME::HitTeminatedMaterial(
-            ctxt, paths.sampler[idx],
-            isect.objid,
-            isBackfacing,
-            bounce,
-            paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
-            ray,
-            rec,
-            shMtrls[threadIdx.x]);
-        if (is_hit_implicit_light) {
-            return;
-        }
-
-        if (!shMtrls[threadIdx.x].attrib.is_translucent && isBackfacing) {
-            orienting_normal = -orienting_normal;
-        }
-
-        shShadowRays[threadIdx.x].isActive = false;
-
         // Check stencil.
         auto is_stencil = AT_NAME::CheckStencil(
             rays[idx], paths.attrib[idx],
@@ -159,6 +139,26 @@ namespace pt {
             shadowRays[idx].isActive = false;
             return;
         }
+
+        // Implicit conection to light.
+        auto is_hit_implicit_light = AT_NAME::HitTeminatedMaterial(
+            ctxt, paths.sampler[idx],
+            isect.objid,
+            isBackfacing,
+            bounce,
+            paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
+            ray,
+            rec,
+            shMtrls[threadIdx.x]);
+        if (is_hit_implicit_light) {
+            return;
+        }
+
+        if (!shMtrls[threadIdx.x].attrib.is_translucent && isBackfacing) {
+            orienting_normal = -orienting_normal;
+        }
+
+        shShadowRays[threadIdx.x].isActive = false;
 
         // Explicit conection to light.
         AT_NAME::FillShadowRay(

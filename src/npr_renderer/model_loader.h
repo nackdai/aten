@@ -18,7 +18,7 @@ public:
         const auto mtrl_num = ctxt.GetMaterialNum();
         for (size_t i = 0; i < mtrl_num; i++) {
             std::string tex_name = "remap_" + i;
-            auto tex = ctxt.CreateTexture(256, 1, 3, tex_name);
+            auto tex = ctxt.CreateTexture(256, 1, 3, tex_name, aten::vec4(1.0F));
 
             auto mtrl = ctxt.GetMaterialInstance(i);
             mtrl->param().toon.remap_texture = tex->id();
@@ -99,8 +99,8 @@ public:
         aten::vec3& at,
         float& fov)
     {
-        pos = aten::vec3(0.f, 1.3f, 0.5f);
-        at = aten::vec3(0.f, 1.3f, 0.f);
+        pos = aten::vec3(-0.026f, 17.4402f, 2.7454f);
+        at = aten::vec3(-0.026f, 17.4402f, 1.7454f);
         fov = 45.0f;
     }
 };

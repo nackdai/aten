@@ -165,6 +165,8 @@ namespace aten
             return;
         }
 
+        albedo = paths.throughput[idx].transmission * albedo + paths.throughput[idx].alpha_blend_radiance_on_the_way;
+
         if (!mtrl.attrib.is_translucent && isBackfacing) {
             orienting_normal = -orienting_normal;
         }

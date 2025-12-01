@@ -245,16 +245,14 @@ namespace AT_NAME
         shadow_ray.distToLight = distToLight;
         shadow_ray.lightcontrib = aten::vec3(0);
 
-        auto radiance = ComputeRadianceNEEWithAlphaBlending(
-            idx,
-            external_albedo,
-            ctxt, paths,
+        auto radiance = ComputeRadianceNEE(
+            ctxt, paths.throughput[idx].throughput,
             ray.dir, hit_nml,
             mtrl, pre_sampled_r, hit_u, hit_v,
             lightSelectPdf, sampleres);
         if (radiance.has_value()) {
             const auto& r = radiance.value();
-            shadow_ray.lightcontrib = paths.throughput[idx].throughput * r;
+            shadow_ray.lightcontrib = paths.throughput[idx].throughput * r * external_albedo;
             isShadowRayActive = true;
         }
 
@@ -671,11 +669,7 @@ namespace AT_NAME
         auto c = dot(ray_along_normal, static_cast<aten::vec3>(next_dir));
 
         if (pdfb > 0 && c > 0) {
-            aten::vec3 contrib{
-                (paths.throughput[idx].transmission * albedo + paths.throughput[idx].alpha_blend_radiance_on_the_way) * bsdf * c / pdfb
-            };
-
-            paths.throughput[idx].throughput *= contrib;
+            paths.throughput[idx].throughput *= albedo * bsdf * c / pdfb;
             paths.throughput[idx].throughput /= russian_prob;
         }
         else {

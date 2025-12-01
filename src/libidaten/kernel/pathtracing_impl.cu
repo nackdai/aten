@@ -140,6 +140,8 @@ namespace pt {
             return;
         }
 
+        albedo = paths.throughput[idx].transmission * albedo + paths.throughput[idx].alpha_blend_radiance_on_the_way;
+
         // Implicit conection to light.
         auto is_hit_implicit_light = AT_NAME::HitTeminatedMaterial(
             ctxt, paths.sampler[idx],
@@ -149,12 +151,10 @@ namespace pt {
             paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
             ray,
             rec,
-            shMtrls[threadIdx.x]);
+            albedo, shMtrls[threadIdx.x]);
         if (is_hit_implicit_light) {
             return;
         }
-
-        albedo = paths.throughput[idx].transmission * albedo + paths.throughput[idx].alpha_blend_radiance_on_the_way;
 
         if (!shMtrls[threadIdx.x].attrib.is_translucent && isBackfacing) {
             orienting_normal = -orienting_normal;

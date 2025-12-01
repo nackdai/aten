@@ -309,7 +309,6 @@ protected:
 
 int32_t main()
 {
-    aten::timer::init();
     aten::OMPUtil::setThreadNum(AORendererApp::ThreadNum);
 
     aten::initSampler(WIDTH, HEIGHT);

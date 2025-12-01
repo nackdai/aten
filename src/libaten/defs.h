@@ -77,8 +77,6 @@ namespace aten {
         ::OutputDebugString(display_str.c_str());
         std::cout << display_str;
     }
-
-    using AT_TIME = int64_t;
 }
 
 #define AT_PRINTF        aten::OutputDebugString
@@ -94,10 +92,6 @@ namespace aten {
 #include <cstring>
 
 #include "types.h"
-
-namespace aten {
-    using AT_TIME = timeval;
-}
 
 #define AT_PRINTF        printf
 

@@ -112,12 +112,9 @@ namespace idaten
 
         bool is_restir = m_mode == Mode::ReSTIR;
 
-        auto time = AT_NAME::timer::getSystemTime();
+        auto seed = AT_NAME::timer::GetCurrMilliseconds();
 
         for (int32_t i = 0; i < maxSamples; i++) {
-            int32_t seed = time.milliSeconds;
-            //int32_t seed = 0;
-
             generatePath(
                 width, height,
                 m_mode == Mode::AOVar,

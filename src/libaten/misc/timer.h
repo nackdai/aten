@@ -1,34 +1,53 @@
 #pragma once
 
+#include <chrono>
+
 #include "defs.h"
 #include "types.h"
 
 namespace AT_NAME {
-    struct SystemTime {
-        uint16_t year{ 0 };
-        uint16_t month{ 0 };
-        uint16_t dayOfWeek{ 0 };
-        uint16_t day{ 0 };
-        uint16_t hour{ 0 };
-        uint16_t minute{ 0 };
-        uint16_t second{ 0 };
-        uint16_t milliSeconds{ 0 };
-    };
-
     class timer {
     public:
         timer() {}
         ~timer() {}
 
     public:
-        static void init();
+        /**
+         * @brief Begin to measure the elapsed time.
+         */
+        void begin()
+        {
+            start_ = std::chrono::system_clock::now();
+            is_measuring_ = true;
+        }
 
-        void begin();
-        float end();
+        /**
+         * @brief End to measure the elapsed time.
+         * @return Elapsed time as milliseconds.
+         */
+        int64_t end()
+        {
+            AT_ASSERT(is_measuring_);
+            auto end = std::chrono::system_clock::now();
+            is_measuring_ = false;
 
-        static SystemTime getSystemTime();
+            auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_);
+            return elapsed_ms.count();
+        }
+
+        /**
+         * @brief Get current milliseconds.
+         * @return Milliseconds of the current time.
+         */
+        static int64_t GetCurrMilliseconds()
+        {
+            auto now = std::chrono::system_clock::now();
+            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+            return static_cast<int64_t>(ms.count());
+        }
 
     private:
-        aten::AT_TIME m_begin;
+        bool is_measuring_{ false };
+        std::chrono::system_clock::time_point start_;
     };
 }

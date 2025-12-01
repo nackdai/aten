@@ -522,7 +522,6 @@ private:
 
 int32_t main()
 {
-    aten::timer::init();
     aten::OMPUtil::setThreadNum(DeviceRendererApp::ThreadNum);
 
     aten::initSampler(WIDTH, HEIGHT);

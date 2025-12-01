@@ -530,7 +530,6 @@ private:
 
 int32_t main()
 {
-    aten::timer::init();
     aten::OMPUtil::setThreadNum(SVGFRendererApp::ThreadNum);
 
     aten::initSampler(WIDTH, HEIGHT);

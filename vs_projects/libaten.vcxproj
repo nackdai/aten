@@ -348,17 +348,11 @@
     <ClCompile Include="..\src\libaten\misc\omputil.cpp" />
     <ClCompile Include="..\src\libaten\misc\thread.cpp" />
     <ClCompile Include="..\src\libaten\misc\timeline.cpp" />
-    <ClCompile Include="..\src\libaten\os\linux\misc\timer_linux.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\os\linux\system_linux.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\os\windows\misc\timer_windows.cpp" />
     <ClCompile Include="..\src\libaten\os\windows\system_windows.cpp" />
     <ClCompile Include="..\src\libaten\renderer\ao\aorenderer.cpp" />
     <ClCompile Include="..\src\libaten\renderer\film.cpp" />

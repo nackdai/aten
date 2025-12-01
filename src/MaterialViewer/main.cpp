@@ -685,7 +685,6 @@ private:
 
 int32_t main()
 {
-    aten::timer::init();
     aten::OMPUtil::setThreadNum(MaterialViewerApp::ThreadNum);
 
     aten::initSampler(WIDTH, HEIGHT);

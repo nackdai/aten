@@ -359,12 +359,6 @@
     <ClCompile Include="..\src\libidaten\svgf\svgf.cpp">
       <Filter>svgf</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\os\windows\misc\timer_windows.cpp">
-      <Filter>aten\misc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\os\linux\misc\timer_linux.cpp">
-      <Filter>aten\misc</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libidaten\kernel\pathtracing.cpp">
       <Filter>kernel\renderer</Filter>
     </ClCompile>

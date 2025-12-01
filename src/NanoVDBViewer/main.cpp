@@ -241,7 +241,6 @@ private:
 
 int32_t main()
 {
-    aten::timer::init();
     aten::OMPUtil::setThreadNum(NanoVDBViewerApp::ThreadNum);
 
     aten::initSampler(WIDTH, HEIGHT);

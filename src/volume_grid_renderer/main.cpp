@@ -321,7 +321,6 @@ int32_t main(int32_t argc, char* argv[])
 {
     aten::initSampler(WIDTH, HEIGHT);
 
-    aten::timer::init();
     aten::OMPUtil::setThreadNum(VolumeGridRendererApp::ThreadNum);
 
     auto app = std::make_shared<VolumeGridRendererApp>(WIDTH, HEIGHT);

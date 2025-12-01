@@ -467,7 +467,6 @@ private:
 
 int32_t main()
 {
-    aten::timer::init();
     aten::OMPUtil::setThreadNum(ReSTIRRendererApp::ThreadNum);
 
     aten::initSampler(WIDTH, HEIGHT);

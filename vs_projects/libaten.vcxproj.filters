@@ -723,12 +723,6 @@
     <ClCompile Include="..\src\libaten\material\FlakesNormal.cpp">
       <Filter>material</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\os\linux\misc\timer_linux.cpp">
-      <Filter>misc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\os\windows\misc\timer_windows.cpp">
-      <Filter>misc</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\camera\pinhole.cpp">
       <Filter>camera</Filter>
     </ClCompile>

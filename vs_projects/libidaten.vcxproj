@@ -143,12 +143,6 @@
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
-    <ClCompile Include="..\src\libaten\os\linux\misc\timer_linux.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\os\windows\misc\timer_windows.cpp" />
     <CudaCompile Include="..\src\libaten\volume\grid.cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>

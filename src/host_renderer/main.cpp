@@ -262,7 +262,6 @@ int32_t main(int32_t argc, char* argv[])
 {
     aten::initSampler(WIDTH, HEIGHT);
 
-    aten::timer::init();
     aten::OMPUtil::setThreadNum(HostRendererApp::ThreadNum);
 
     auto app = std::make_shared<HostRendererApp>();

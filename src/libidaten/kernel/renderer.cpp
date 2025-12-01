@@ -104,7 +104,7 @@ namespace idaten {
                 ctxt_host_->texRsc[i].initAsMipmap(
                     t->colors().data(),
                     t->width(), t->height(),
-                    100,
+                    1,
                     t->GetFilterMode(), t->GetAddressMode());
 #endif
             }

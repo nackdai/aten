@@ -64,11 +64,9 @@ namespace idaten {
 
         static const int32_t rrBounce = 3;
 
-        auto time = AT_NAME::timer::getSystemTime();
+        auto seed = AT_NAME::timer::GetCurrMilliseconds();
 
         for (int32_t i = 0; i < maxSamples; i++) {
-            int32_t seed = time.milliSeconds;
-
             generatePath(
                 width, height,
                 false,

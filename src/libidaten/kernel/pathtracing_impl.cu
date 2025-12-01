@@ -154,6 +154,8 @@ namespace pt {
             return;
         }
 
+        albedo = paths.throughput[idx].transmission * albedo + paths.throughput[idx].alpha_blend_radiance_on_the_way;
+
         if (!shMtrls[threadIdx.x].attrib.is_translucent && isBackfacing) {
             orienting_normal = -orienting_normal;
         }

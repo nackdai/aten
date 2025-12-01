@@ -104,7 +104,7 @@ namespace AT_NAME
 #endif
 
         aten::vec3 alpha_blend_clr{ 0.0F };
-        aten::vec3 brdf{ 0.0F };
+        aten::vec3 toon_term{ 0.0F };
 
         if (target_light) {
             aten::LightSampleResult light_sample;
@@ -123,14 +123,14 @@ namespace AT_NAME
             }
 
             if (param.type == aten::MaterialType::Toon) {
-                brdf = Toon::ComputeBRDF(
+                toon_term = Toon::ComputeBRDF(
                     ctxt, param,
                     throughput,
                     is_hit_to_target_light ? &light_sample : nullptr,
                     sampler, hit_pos, normal, wi, u, v);
             }
             else if (param.type == aten::MaterialType::StylizedBrdf) {
-                brdf = StylizedBrdf::ComputeBRDF(
+                toon_term = StylizedBrdf::ComputeBRDF(
                     ctxt, param,
                     throughput,
                     is_hit_to_target_light ? &light_sample : nullptr,
@@ -138,7 +138,9 @@ namespace AT_NAME
             }
         }
 
-        return brdf;
+        const auto rim_light_term = ComputeRimLight(ctxt, param, hit_pos, normal, wi);
+
+        return toon_term + rim_light_term;
     }
 
     AT_DEVICE_API aten::vec3 Toon::ComputeBRDF(
@@ -196,12 +198,7 @@ namespace AT_NAME
         const auto remap = AT_NAME::sampleTexture(ctxt, param.toon.remap_texture, lum_y, 0.5F, aten::vec4(1.0F));
         aten::vec3 toon_term = remap;
 
-        const auto rim_light_term = ComputeRimLight(ctxt, param, hit_pos, normal, wi);
-
-        auto albedo = AT_NAME::sampleTexture(ctxt, param.albedoMap, u, v, aten::vec4(1.0F));
-        albedo = throughput.transmission * albedo + throughput.alpha_blend_radiance_on_the_way;
-
-        return (toon_term + rim_light_term) * albedo;
+        return toon_term;
     }
 
     namespace _detail {
@@ -425,12 +422,7 @@ namespace AT_NAME
 
         aten::vec3 toon_term{ weight * remap * pdf };
 
-        const auto rim_light_term = ComputeRimLight(ctxt, param, hit_pos, normal, wi);
-
-        auto albedo = AT_NAME::sampleTexture(ctxt, param.albedoMap, u, v, aten::vec4(1.0F));
-        albedo = throughput.transmission * albedo + throughput.alpha_blend_radiance_on_the_way;
-
-        return (toon_term + rim_light_term) * albedo;
+        return toon_term;
     }
 
     bool StylizedBrdf::edit(aten::IMaterialParamEditor* editor)

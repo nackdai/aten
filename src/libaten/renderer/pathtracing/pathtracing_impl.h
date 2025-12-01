@@ -457,6 +457,7 @@ namespace AT_NAME
         AT_NAME::PathThroughput& path_throughput,
         const aten::ray& ray,
         const aten::hitrecord& hrec,
+        const aten::vec3& external_albedo,
         const aten::MaterialParameter& hit_target_mtrl)
     {
         const auto is_teminate_mtrl = material::IsTerminatedMaterial(hit_target_mtrl);
@@ -490,7 +491,7 @@ namespace AT_NAME
             // The accumulated alpha blending color is applied in Toon::bsdf.
             // So, no need to do it here.
 
-            aten::AddVec3(path_contrib.contrib, path_throughput.throughput * toon_bsdf);
+            aten::AddVec3(path_contrib.contrib, path_throughput.throughput * toon_bsdf * external_albedo);
 
             path_attrib.is_terminated = true;
             return true;

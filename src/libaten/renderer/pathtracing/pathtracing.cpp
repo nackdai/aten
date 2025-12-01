@@ -153,6 +153,8 @@ namespace aten
             return;
         }
 
+        albedo = paths.throughput[idx].transmission * albedo + paths.throughput[idx].alpha_blend_radiance_on_the_way;
+
         // Implicit conection to light.
         auto is_hit_implicit_light = AT_NAME::HitTeminatedMaterial(
             ctxt, paths.sampler[idx],
@@ -160,12 +162,11 @@ namespace aten
             isBackfacing,
             bounce,
             paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
-            ray, rec, mtrl);
+            ray, rec,
+            albedo, mtrl);
         if (is_hit_implicit_light) {
             return;
         }
-
-        albedo = paths.throughput[idx].transmission * albedo + paths.throughput[idx].alpha_blend_radiance_on_the_way;
 
         if (!mtrl.attrib.is_translucent && isBackfacing) {
             orienting_normal = -orienting_normal;

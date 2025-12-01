@@ -403,8 +403,6 @@ namespace aten
 
         Initialize(dst, *camera);
 
-        auto time = timer::getSystemTime();
-
         for (uint32_t i = 0; i < samples; i++) {
             int32_t bounce = 0;
 
@@ -414,8 +412,6 @@ namespace aten
 #endif
                 {
                     auto thread_idx = OMPUtil::getThreadIdx();
-
-                    auto t = timer::getSystemTime();
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for

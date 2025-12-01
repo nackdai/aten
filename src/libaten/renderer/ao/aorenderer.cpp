@@ -71,15 +71,11 @@ namespace aten
 
         path_host_.init(width, height);
 
-        auto time = timer::getSystemTime();
-
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp parallel
 #endif
         {
             auto idx = OMPUtil::getThreadIdx();
-
-            auto t = timer::getSystemTime();
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for

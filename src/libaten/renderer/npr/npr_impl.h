@@ -423,9 +423,9 @@ namespace npr {
 
         const auto distance_query_ray_hit = length(hrec_query.p - query_ray.org);
 
-        // disc.center��query_ray.org�Ɉ�v����.
-        // �������A�ŏ������́Aquery_ray.org�̓J�������_�ɂȂ��Ă��邪�A
-        // accumulated_distance�ŃJ������disc�̋��������łɊ܂܂�Ă���.
+        // disc.centerはquery_ray.orgに一致する.
+        // ただし、最初だけは、query_ray.orgはカメラ視点になっているが、
+        // accumulated_distanceでカメラとdiscの距離がすでに含まれている.
         hit_point_distance = length(hrec_query.p - disc.center);
 
         const auto prev_disc = disc;

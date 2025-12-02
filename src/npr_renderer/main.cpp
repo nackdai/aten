@@ -105,6 +105,7 @@ public:
     {
         ctxt_.scene_rendering_config.enable_alpha_blending = true;
         ctxt_.scene_rendering_config.feature_line.enabled = true;
+        ctxt_.scene_rendering_config.bvh_hit_min = 1e-4;
 
         visualizer_ = aten::visualizer::init(WIDTH, HEIGHT);
 

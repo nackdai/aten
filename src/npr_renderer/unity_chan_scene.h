@@ -11,6 +11,9 @@ public:
     static std::shared_ptr<aten::instance<aten::deformable>> makeScene(
         aten::context& ctxt, aten::scene* scene)
     {
+        // Use default min hit distance.
+        ctxt.scene_rendering_config.bvh_hit_min = -1.0F;
+
         // NOTE:
         // The part of the normals in unitychan model seems to be broken.
         // That's the part of the hair.

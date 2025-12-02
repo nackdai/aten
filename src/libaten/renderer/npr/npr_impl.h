@@ -38,11 +38,13 @@ namespace npr {
     {
         disc = AT_NAME::npr::FeatureLine::GenerateDisc(query_ray, feature_line_width, pixel_width);
 
+#pragma unroll
         for (size_t i = 0; i < SampleRayNum; i++) {
+            auto& desc = sample_ray_descs[i];
             const auto sample_ray = AT_NAME::npr::FeatureLine::GenerateSampleRay(
-                sample_ray_descs[i], sampler, query_ray, disc);
-            AT_NAME::npr::FeatureLine::StoreRayInSampleRayDesc(sample_ray_descs[i], sample_ray);
-            sample_ray_descs[i].is_terminated = false;
+                desc, sampler, query_ray, disc);
+            AT_NAME::npr::FeatureLine::StoreRayInSampleRayDesc(desc, sample_ray);
+            desc.is_terminated = false;
         }
 
         disc.accumulated_distance = 1;
@@ -341,7 +343,7 @@ namespace npr {
         const AT_NAME::context& ctxt,
         const aten::ray& query_ray,
         const aten::Intersection& isect_sample_ray,
-        AT_NAME::npr::FeatureLine::Disc& disc,
+        const AT_NAME::npr::FeatureLine::Disc& disc,
         bool is_found_feature_line_point,
         float closest_feature_line_point_distance,
         const float feature_line_width,
@@ -438,20 +440,22 @@ namespace npr {
             hit_point_distance,
             disc.accumulated_distance);
 
+        aten::Intersection isect_sample_ray;
+
+#pragma unroll
         for (size_t i = 0; i < SampleRayNum; i++) {
-            if (sample_ray_info.descs[i].is_terminated) {
+            auto& desc = sample_ray_descs[i];
+            if (desc.is_terminated) {
                 continue;
             }
 
             auto sample_ray = GetSampleRay(
                 depth,
-                sample_ray_descs[i],
+                desc,
                 prev_disc, disc);
-            if (sample_ray_descs[i].is_terminated) {
+            if (desc.is_terminated) {
                 continue;
             }
-
-            aten::Intersection isect_sample_ray;
 
             auto is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
                 isect_sample_ray, ctxt, sample_ray,
@@ -462,7 +466,7 @@ namespace npr {
                 if (sample_ray_hit_mtrl.feature_line.enable) {
                     // Query ray hits and then sample ray hits.
                     aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = EvaluateQueryAndSampleRayHit(
-                        sample_ray_descs[i],
+                        desc,
                         ctxt, cam_org,
                         query_ray, hrec_query, distance_query_ray_hit,
                         isect_sample_ray,
@@ -474,13 +478,13 @@ namespace npr {
                         pixel_width);
                 }
                 else {
-                    sample_ray_descs[i].is_terminated = true;
+                    desc.is_terminated = true;
                 }
             }
             else {
                 // Query ray hits but sample ray doesn't hit anything.
                 aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = EvaluateQueryRayHitButSampleRayNotHit(
-                    sample_ray_descs[i],
+                    desc,
                     query_ray, hrec_query, distance_query_ray_hit,
                     sample_ray, disc,
                     is_found_feature_line_point,
@@ -494,7 +498,7 @@ namespace npr {
                 // TODO
                 // Even if material is glossy, how glossy depends on parameter (e.g. roughness etc).
                 // So, I need to consider how to indetify if sample ray bounce is necessary based on material.
-                sample_ray_descs[i].is_terminated = true;
+                desc.is_terminated = true;
             }
         }
 
@@ -541,46 +545,43 @@ namespace npr {
         AT_NAME::npr::FeatureLine::Disc prev_disc;
         hit_point_distance = CreateNextDiscByDummyQueryRayHitPoint(depth, hit_point_distance, query_ray, prev_disc, disc);
 
+        aten::Intersection isect_sample_ray;
+
+#pragma unroll
         for (size_t i = 0; i < SampleRayNum; i++) {
-            if (sample_ray_descs[i].is_terminated) {
-                continue;
-            }
+            auto& desc = sample_ray_descs[i];
+            if (!desc.is_terminated) {
+                auto sample_ray = GetSampleRay(
+                    depth,
+                    desc,
+                    prev_disc, disc);
+                if (!desc.is_terminated) {
+                    auto is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                        isect_sample_ray, ctxt, sample_ray,
+                        AT_MATH_EPSILON, AT_MATH_INF);
 
-            auto sample_ray = GetSampleRay(
-                depth,
-                sample_ray_descs[i],
-                prev_disc, disc);
-            if (sample_ray_descs[i].is_terminated) {
-                continue;
-            }
-
-            aten::Intersection isect_sample_ray;
-
-            auto is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
-                isect_sample_ray, ctxt, sample_ray,
-                AT_MATH_EPSILON, AT_MATH_INF);
-
-            if (is_hit) {
-                const auto& sample_ray_hit_mtrl = ctxt.GetMaterial(isect_sample_ray.mtrlid);
-                if (sample_ray_hit_mtrl.feature_line.enable) {
-                    // Query ray doesn't hit, but sample ray hits.
-                    aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = EvaluateQueryRayNotHitButSampleRayHit(
-                        ctxt, query_ray,
-                        isect_sample_ray,
-                        disc,
-                        is_found_feature_line_point,
-                        closest_feature_line_point_distance,
-                        feature_line_width, pixel_width);
+                    if (is_hit) {
+                        const auto& sample_ray_hit_mtrl = ctxt.GetMaterial(isect_sample_ray.mtrlid);
+                        if (sample_ray_hit_mtrl.feature_line.enable) {
+                            // Query ray doesn't hit, but sample ray hits.
+                            aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = EvaluateQueryRayNotHitButSampleRayHit(
+                                ctxt, query_ray,
+                                isect_sample_ray,
+                                disc,
+                                is_found_feature_line_point,
+                                closest_feature_line_point_distance,
+                                feature_line_width, pixel_width);
+                        }
+                        else {
+                            desc.is_terminated = true;
+                        }
+                    }
+                    else {
+                        // Sample ray doesn't hit anything. It means sample ray causes hit miss.
+                        // So, traversing sample ray is terminated.
+                        desc.is_terminated = true;
+                    }
                 }
-                else {
-                    sample_ray_descs[i].is_terminated = true;
-                }
-            }
-            else {
-                // Sample ray doesn't hit anything. It means sample ray causes hit miss.
-                // So, traversing sample ray is terminated.
-                sample_ray_descs[i].is_terminated = true;
-                break;
             }
         }
 

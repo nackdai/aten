@@ -516,6 +516,30 @@ public:
         std::vector<std::shared_ptr<aten::PolygonObject>> objs;
         ModelLoader::Load(objs, ctxt_, path);
 
+        auto* mtrl = ctxt_.GetMaterialByName("eyebase");
+        if (mtrl) {
+            mtrl->toon.will_receive_shadow = false;
+        }
+
+        constexpr std::array NonFeatureLineMtrls = {
+            "eyebase",
+            "eyelashes",
+            "mouth_line",
+            "double_eyelid",
+            "eyebrow",
+            "eye", "eye_light", "eye_shadow",
+        };
+        for (const auto* name : NonFeatureLineMtrls) {
+            auto* target_mtrl = ctxt_.GetMaterialByName(name);
+            if (target_mtrl) {
+                target_mtrl->feature_line.enable = false;
+                target_mtrl->stencil_type = aten::StencilType::ALWAYS;
+            }
+        }
+
+        auto* mtrl_hair = ctxt_.GetMaterialByName("hair");
+        mtrl_hair->stencil_type = aten::StencilType::STENCIL;
+
         for (auto& obj : objs) {
             auto obj_instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(
                 ctxt_, obj, aten::mat4::Identity);

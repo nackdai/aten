@@ -162,6 +162,7 @@ cuda_add_library(
   kernel/StreamCompaction.cu
   kernel/StreamCompaction.h
   kernel/bluenoiseSampler.cuh
+  kernel/debug_viewer.cu
   kernel/device_scene_context.cpp
   kernel/device_scene_context.cuh
   kernel/intersect.cu
@@ -176,7 +177,6 @@ cuda_add_library(
   kernel/pt_standard_impl.h
   kernel/renderer.cpp
   kernel/renderer.h
-  kernel/tex_viewer.cu
   npr/npr_pathtracing.cu
   npr/npr_pathtracing.h
   restir/restir.cpp

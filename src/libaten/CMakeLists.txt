@@ -174,7 +174,6 @@ add_library(
   misc/tuple.h
   misc/type_traits.h
   misc/value.h
-  os/linux/misc/timer_linux.cpp
   os/linux/system_linux.cpp
   os/system.h
   renderer/ao/aorenderer.cpp

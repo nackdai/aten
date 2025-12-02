@@ -32,6 +32,8 @@ namespace aten
         auto* sampler = &path_host_.paths.sampler[idx];
         const auto& ray = rays_[idx];
 
+        constexpr auto SampleRayNum = std::remove_reference_t< decltype(sample_ray_info)>::size;
+
         AT_NAME::npr::GenerateSampleRayAndDiscPerQueryRay<SampleRayNum>(
             sample_ray_info.descs, sample_ray_info.disc,
             ray, *sampler,

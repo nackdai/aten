@@ -36,7 +36,8 @@ namespace npr_kernel {
 
         const float feature_line_width{ ctxt.scene_rendering_config.feature_line.line_width };
 
-        AT_NAME::npr::GenerateSampleRayAndDiscPerQueryRay<idaten::NPRPathTracing::SampleRayNum>(
+        constexpr auto SampleRayNum = std::remove_pointer_t<decltype(sample_ray_infos)>::size;
+        AT_NAME::npr::GenerateSampleRayAndDiscPerQueryRay<SampleRayNum>(
             sample_ray_info.descs, sample_ray_info.disc,
             ray, paths.sampler[idx],
             feature_line_width, pixel_width);
@@ -44,7 +45,7 @@ namespace npr_kernel {
 
     __global__ void shadeSampleRay(
         float pixel_width,
-        AT_NAME::npr::FeatureLine::SampleRayInfo<8>* sample_ray_infos,
+        AT_NAME::npr::FeatureLine::SampleRayInfo<idaten::NPRPathTracing::SampleRayNum>* sample_ray_infos,
         int32_t depth,
         const int32_t* __restrict__ hitindices,
         int32_t* hitnum,

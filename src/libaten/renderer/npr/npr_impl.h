@@ -583,6 +583,13 @@ namespace npr {
                     }
                 }
             }
+#ifdef __CUDACC__
+            const auto warp_all_done = __all_sync(__activemask(), desc.is_terminated);
+
+            if (warp_all_done) {
+                break;
+            }
+#endif
         }
 
         if (is_found_feature_line_point) {

@@ -62,7 +62,7 @@ RUN ln -s /usr/bin/clang-${clang_version} /usr/local/bin/clang \
     && ln -s /usr/bin/clang-tidy-${clang_version} /usr/local/bin/clang-tidy \
     && ln -s /usr/bin/lldb-${clang_version} /usr/local/bin/lldb
 
-ARG cmake_version=3.21.3
+ARG cmake_version=4.2.0
 RUN curl -fL https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-Linux-x86_64.sh > cmake.sh  \
     && mkdir -p /bin/cmake \
     && sh ./cmake.sh --skip-license --prefix=/bin/cmake \

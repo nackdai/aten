@@ -148,6 +148,8 @@ public:
             aten::vec3(1.0, 1.0, 1.0),
             4000.0f);
 
+        ctxt_.scene_rendering_config.bg.enable_env_map = scene_light_.is_ibl;
+
         if (scene_light_.is_ibl) {
             scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
         }

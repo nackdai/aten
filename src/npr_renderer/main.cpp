@@ -721,7 +721,6 @@ private:
 
 int32_t main()
 {
-    aten::timer::init();
     aten::OMPUtil::setThreadNum(DeformationRendererApp::ThreadNum);
 
     aten::initSampler(WIDTH, HEIGHT);

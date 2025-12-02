@@ -72,11 +72,11 @@ base_cudagl_image_prefix="${image_tag_prefix}/nvidia/cudagl"
 base_cudagl_image_tag="${base_cudagl_image_prefix}:${CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION}"
 
 if docker image inspect "${base_cudagl_image_tag}" >/dev/null 2>/dev/null; then
-   echo "${base_cudagl_image_tag} is already available"
+  echo "${base_cudagl_image_tag} is already available"
 else
-   # Try to pull the docker image. If it's not available, building it happens.
-   # So, even if it's failed, to continue to the following sequence, need to suppress to raise an error.
-   docker pull "${base_cudagl_image_tag}" >/dev/null 2>/dev/null || true
+  # Try to pull the docker image. If it's not available, building it happens.
+  # So, even if it's failed, to continue to the following sequence, need to suppress to raise an error.
+  docker pull "${base_cudagl_image_tag}" >/dev/null 2>/dev/null || true
 fi
 
 pushd "${CUDAGL_BUILD_DIR}"

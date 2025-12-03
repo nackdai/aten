@@ -42,3 +42,18 @@ The development environment is Docker-based. Minimum setup references:
 
 - [Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
 - [Installing the NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+
+`direnv` is required for installation. You can install it with:
+
+```sh
+sudo apt install direnv
+```
+
+After installing, add the following line to your `~/.bashrc`:
+
+```sh
+eval "$(direnv hook bash)"
+```
+
+`.envrc` is the configuration file for `direnv`. If you need to add new environment variables that
+should be applied within the directory, define them in `.envrc`.

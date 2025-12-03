@@ -45,8 +45,13 @@ jobs:
         if: ${{ inputs.any_modified == 'true' }}
         run: |
           docker pull ghcr.io/${{ github.repository }}/aten
+
           file_change_date=$(git log -1 --pretty="format:%ct" ./docker/)
+          echo "::notice::$(git log -1 --pretty="format:%ai" ./docker/)"
+
           image_build_date=$(docker inspect -f '{{ .Created }}' ghcr.io/${{ github.repository }}/aten | xargs -i date --utc --date="{}" +%s)
+          echo "::notice::$(docker inspect -f '{{ .Created }}' ghcr.io/${{ github.repository }}/aten)"
+
           echo "::notice::File [${file_change_date}] DockerImage [${image_build_date}]"
           if [[ "${file_change_date}" -gt "${image_build_date}" ]]; then
             echo "::notice::Docker image should be rebuilt."
@@ -55,6 +60,7 @@ jobs:
             echo "::notice::No need to rebuild the Docker image."
             echo "need_build_image=false" >> "$GITHUB_OUTPUT"
           fi
+
 
       - name: Build images
         id: build_image

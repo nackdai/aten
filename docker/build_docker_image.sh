@@ -3,8 +3,8 @@
 set -eu
 set -o pipefail
 
-CUDA_VERSION="12.5.1"
-UBUNTU_VERSION="22.04"
+CUDA_VERSION="${CUDA_VERSION:-12.5.1}"
+UBUNTU_VERSION="${UBUNTU_VERSION:-22.04}"
 
 TAG="latest"
 
@@ -29,7 +29,7 @@ docker_build_options=()
 
 CUDAGL_BUILD_DIR="3rdparty/nvidia_container_image_cuda"
 
-while getopts "b:p:c:u:t:-:f" opt; do
+while getopts "b:p:c:u:t:-:" opt; do
   case "${opt}" in
     -)
       case "${OPTARG}" in

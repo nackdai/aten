@@ -20,6 +20,7 @@ repos:
         args: [-i, "2", -ci]
       - id: shellcheck
         args: [-e, SC2230]
+        exclude: .envrc
 
   # NOTE:
   # To run markdownlint even in windows stably, use markdownlint-cli not markdownlint-cli2.

@@ -10,12 +10,21 @@
 // NOTE
 // https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch39.html
 // https://github.com/bcrusco/CUDA-Path-Tracer/blob/master/stream_compaction/efficient.cu
+// https://github.com/shineyruan/CUDA-Stream-Compaction
 
 // ブロック単位で計算した exclusiveScan の総和値を足したものを計算する.
+/**
+ * @brief Add the result of exclusiveScan of 2 blocks.
+ * @param[out] dst
+ * @param[in] num Number of blocks per grid used in exclusiveScan.
+ * @param[in] stride Number of threads per block used in exclusiveScan.
+ * @param[in] src0
+ * @param[in] src1
+ */
 __global__ void computeBlockCount(
     int32_t* dst,
-    int32_t num,    // block count per grid used in exclusiveScan.
-    int32_t stride,    // thread count per block used in exclusiveScan.
+    int32_t num,
+    int32_t stride,
     const int32_t* src0,
     const int32_t* src1)
 {
@@ -48,7 +57,15 @@ __global__ void incrementBlocks(
     data[index] += incr[blockIdx.x];
 }
 
-__global__ void exclusiveScan(int32_t* dst, int32_t num, int32_t stride, const int32_t* src)
+/**
+ * @brief Execute exclusive scan.
+ * @note https://github.com/shineyruan/CUDA-Stream-Compaction?tab=readme-ov-file#work-efficient-parallel-scan
+ * @param[out] dst Output
+ * @param[in] num Number of elements in boolean array.
+ * @param[in] stride Block size (= number of thread per block).
+ * @param[in] bools Boolean array.
+ */
+__global__ void exclusiveScan(int32_t* dst, int32_t num, int32_t stride, const int32_t* bools)
 {
     extern __shared__ int32_t temp[];
 
@@ -60,12 +77,28 @@ __global__ void exclusiveScan(int32_t* dst, int32_t num, int32_t stride, const i
         return;
     }
 
-    // Copy input data to shared memory
-    temp[2 * index] = src[2 * index + (blockIdx.x * blockDim.x * 2)];
-    temp[2 * index + 1] = src[2 * index + 1 + (blockIdx.x * blockDim.x * 2)];
+    // - Copy input data to shared memory
+    // All source data is stored in the one linear list.
+    // The sequence is done per block (number of thread per block is blockIdx.x * blockDim.x).
+    // So, we need to shift with the block size.
+    // On the other hand, the block size (number of threads per block) to compute grid size and
+    // the block size which is specified to this kernel are different.
+    // The block size which is specified to this kernel is 1/2 of the block size to compute grid size.
+    // Therefore, to compute the correct block size (i.e. number of threads per block), we need to multiply with 2.
+    temp[2 * index] = bools[2 * index + (blockIdx.x * blockDim.x * 2)];
+    temp[2 * index + 1] = bools[2 * index + 1 + (blockIdx.x * blockDim.x * 2)];
 
-    // Up sweep
+    // - Up sweep
+    // This for loop means : for d = 0 to log_2(N).
+    // N means the number of values which we need to care per block.
+    // It means the number of threads per block. So, stride is block size itself.
+    // Continuing to divide stride (i.e. the number of thread) by 2 means how many time we can divide stride by 2.
+    // It means to compute log_2(N).
     for (int32_t d = stride >> 1; d > 0; d >>= 1) {
+        // Sync threads in the block here.
+        // So, all threads(= index) executes the following logic per one of loop.
+        // e.g. d = 4: thread(i.e. index) = {0, 1, 2, ....}
+        //      d = 2: thread(i.e. index) = {0, 1, 2, ....}
         __syncthreads();
 
         if (index < d) {
@@ -101,13 +134,21 @@ __global__ void exclusiveScan(int32_t* dst, int32_t num, int32_t stride, const i
     dst[2 * index + 1 + (blockIdx.x * blockDim.x * 2)] = temp[2 * index + 1];
 }
 
+/**
+ * @brief Execute scatter
+ * @note https://github.com/shineyruan/CUDA-Stream-Compaction?tab=readme-ov-file#work-efficient-parallel-scan
+ * @param[out] dst Result array of stream compaction
+ * @param[out] count Number of extracted elements in the sream compaction array.
+ * @param[in] num Number of elements in array of destination positions.
+ * @param[in] bools Bloolean array.
+ * @param[in] dst_positions Array of destination positions. i.e. Result array of exclusive scan.
+ */
 __global__ void scatter(
     int32_t* dst,
     int32_t* count,
     int32_t num,
     const int32_t* bools,
-    const int32_t* indices,
-    const int32_t* src)
+    const int32_t* dst_positions)
 {
     int32_t idx = (blockIdx.x * blockDim.x) + threadIdx.x;
 
@@ -116,12 +157,14 @@ __global__ void scatter(
     }
 
     if (bools[idx] > 0) {
-        int32_t pos = indices[idx];
-        dst[pos] = src[idx];
+        // If an element is marked as "1" in the boolean array,
+        // store it into the corresponding indexed parallel scan position in the output array.
+        int32_t pos = dst_positions[idx];
+        dst[pos] = idx;
     }
 
     if (idx == 0) {
-        *count = bools[num - 1] + indices[num - 1];
+        *count = bools[num - 1] + dst_positions[num - 1];
     }
 }
 
@@ -146,13 +189,7 @@ namespace idaten
             m_tmp.resize(blockPerGrid);
             m_work.resize(blockPerGrid);
 
-            m_indices.resize(m_maxInputNum);
-
-            std::vector<int32_t> iota(m_maxInputNum);
-            std::iota(iota.begin(), iota.end(), 0);
-
-            m_iota.resize(iota.size());
-            m_iota.writeFromHostToDeviceByNum(&iota[0], iota.size());
+            exclusive_scan_array_.resize(m_maxInputNum);
 
             m_counts.resize(1);
         }
@@ -167,25 +204,30 @@ namespace idaten
         m_tmp.free();
         m_work.free();
 
-        m_indices.free();
-        m_iota.free();
+        exclusive_scan_array_.free();
         m_counts.free();
     }
 
     void StreamCompaction::scan(
         const int32_t blocksize,
-        idaten::TypedCudaMemory<int32_t>& src,
+        idaten::TypedCudaMemory<int32_t>& bools,
         idaten::TypedCudaMemory<int32_t>& dst)
     {
         AT_ASSERT(dst.num() <= m_maxInputNum);
 
+        // (a + b - 1) / b = (a - 1) / b + b / b = (a - 1) / b + 1
+        //  => (dst.num() + blocksize - 1) / blocksize = (dst.num() - 1) / blocksize + 1
         int32_t blockPerGrid = static_cast<int32_t>(dst.num() - 1) / blocksize + 1;
 
+        // NOTE:
+        // `blocksize * sizeof(int32_t)` means the bytes to allocate for the shared memory in exclusiveScan.
+        // Two values are summed into one value. It means the number of values is reduced by 2 (i.e. 1/2).
+        // So, we specify the block size as `blocksize / 2`.
         exclusiveScan << <blockPerGrid, blocksize / 2, blocksize * sizeof(int32_t), m_stream >> > (
             dst.data(),
             static_cast<int32_t>(dst.num()),
             blocksize,
-            src.data());
+            bools.data());
 
         checkCudaKernel(exclusiveScan);
 
@@ -194,6 +236,12 @@ namespace idaten
             return;
         }
 
+        // ExclusiveScan is done per block. It means the exclusive scan is computed per block.
+        // We need to unify the array of ExclusiveScan result and execute ExclusiveScan to the unified array.
+        // Continue to unify the array until the number of block per grid is 1.
+        // In that case, it means all arrays are unified and it's applied with ExclusiveScan entirely.
+
+        // Subdivide block.
         int32_t tmpBlockPerGrid = (blockPerGrid - 1) / blocksize + 1;
         int32_t tmpBlockSize = blockPerGrid;
 
@@ -201,7 +249,7 @@ namespace idaten
             m_increments.data(),
             static_cast<int32_t>(m_increments.num()),
             blocksize,
-            src.data(),
+            bools.data(),
             dst.data());
 
         checkCudaKernel(computeBlockCount);
@@ -297,7 +345,7 @@ namespace idaten
         idaten::TypedCudaMemory<int32_t>& bools,
         int32_t* result/*= nullptr*/)
     {
-        scan(m_blockSize, bools, m_indices);
+        scan(m_blockSize, bools, exclusive_scan_array_);
 
         const auto num = static_cast<int32_t>(dst.num());
         const auto blockPerGrid = (num - 1) / m_blockSize + 1;
@@ -307,8 +355,7 @@ namespace idaten
             m_counts.data(),
             static_cast<int32_t>(dst.num()),
             bools.data(),
-            m_indices.data(),
-            m_iota.data());
+            exclusive_scan_array_.data());
 
         if (result) {
             m_counts.readFromDeviceToHostByNum(result);

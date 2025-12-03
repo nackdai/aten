@@ -16,6 +16,11 @@ namespace idaten {
 
         void clear();
 
+        /**
+         * @brief Extract indices which specify true in bools.
+         * @param[out] dst Destination to store indices.
+         * @param[in] bools Array to store true or false (i.e. 1 or 0).
+         */
         void compact(
             idaten::TypedCudaMemory<int32_t>& dst,
             idaten::TypedCudaMemory<int32_t>& bools,
@@ -47,8 +52,7 @@ namespace idaten {
         idaten::TypedCudaMemory<int32_t> m_tmp;
         idaten::TypedCudaMemory<int32_t> m_work;
 
-        idaten::TypedCudaMemory<int32_t> m_indices;
-        idaten::TypedCudaMemory<int32_t> m_iota;
+        idaten::TypedCudaMemory<int32_t> exclusive_scan_array_;
         idaten::TypedCudaMemory<int32_t> m_counts;
 
         cudaStream_t m_stream{ (cudaStream_t)0 };

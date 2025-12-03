@@ -60,6 +60,7 @@ jobs:
         id: build_image
         if: ${{ (steps.check_image_time.outputs.need_build_image == 'true') || (github.event_name == 'workflow_dispatch') }}
         run: |
+          source .envrc
           ./docker/build_docker_image.sh -b ./docker/ -p "ghcr.io/${{ github.repository }}/"
           echo "need_to_push=true" >> "$GITHUB_OUTPUT"
 

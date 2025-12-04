@@ -30,6 +30,7 @@ jobs:
         uses: actions/checkout@v5.0.0
         with:
           submodules: true
+          fetch-depth: 0  # To check the latest commit in `docker` directory properly, fetch all commits is necessary.
 
       - name: Login to GitHub Container Registry
         id: login
@@ -60,7 +61,6 @@ jobs:
             echo "::notice::No need to rebuild the Docker image."
             echo "need_build_image=false" >> "$GITHUB_OUTPUT"
           fi
-
 
       - name: Build images
         id: build_image

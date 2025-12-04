@@ -1,4 +1,10 @@
-cmake_minimum_required(VERSION 3.21.0)
+cmake_minimum_required(VERSION 3.27)
+
+# TODO: FindCUDA is deprecated. Modification to fit into new cmake takes a long
+# time. To recover it temporarily, we need to specify the policy CMP0146.
+if(POLICY CMP0146)
+  cmake_policy(SET CMP0146 OLD)
+endif()
 
 project(aten)
 

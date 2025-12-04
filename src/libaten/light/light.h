@@ -19,7 +19,8 @@ namespace AT_NAME
         {}
         Light(aten::LightType type, const aten::LightAttribute& attrib, const aten::Values& val);
 
-        virtual ~Light() {}
+        Light() = delete;
+        virtual ~Light() = default;
 
     public:
         template <class CONTEXT>

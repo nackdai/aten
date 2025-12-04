@@ -23,17 +23,15 @@ namespace AT_NAME {
             SetBackground(bg, ctxt);
         }
 
+        ImageBasedLight() = delete;
         virtual ~ImageBasedLight() = default;
-
-    private:
-        ImageBasedLight() = default;
 
     public:
         void SetBackground(
             const aten::BackgroundResource& bg,
             const aten::context& ctxt)
         {
-            if (bg.envmap_tex_idx != bg.envmap_tex_idx) {
+            if (bg_.envmap_tex_idx != bg.envmap_tex_idx) {
                 bg_ = bg;
                 m_param.envmapidx = bg.envmap_tex_idx;
 

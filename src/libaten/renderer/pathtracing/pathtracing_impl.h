@@ -38,15 +38,15 @@ namespace AT_NAME
             const aten::vec3& c,
             const PathThroughput& throughput)
         {
-            return throughput.transmission * c + throughput.alpha_blend_radiance_on_the_way;
+            return throughput.alpha_blend.transmission * c + throughput.alpha_blend.throughput;
         }
 
         inline AT_DEVICE_API void ClearAlphaBlend(
         PathThroughput& throughput,
         PathAttribute& attrib)
         {
-            throughput.transmission = 1.0F;
-            throughput.alpha_blend_radiance_on_the_way = aten::vec3(0.0F);
+            throughput.alpha_blend.transmission = 1.0F;
+            throughput.alpha_blend.throughput = aten::vec3(0.0F);
             attrib.is_accumulating_alpha_blending = false;
         }
     }
@@ -95,8 +95,8 @@ namespace AT_NAME
 
         paths.throughput[idx].throughput = aten::vec3(1);
         paths.throughput[idx].pdfb = 1.0f;
-        paths.throughput[idx].depth_count = 0;
-        paths.throughput[idx].mediums.clear();
+        paths.throughput[idx].medium.depth_count = 0;
+        paths.throughput[idx].medium.stack.clear();
 
         _detail_pathtracing_impl::ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
@@ -119,7 +119,7 @@ namespace AT_NAME
         aten::span<AOV_BUFFER_TYPE> aov_albedo_meshid = nullptr)
     {
         bounce = paths.attrib[idx].does_use_throughput_depth
-            ? paths.throughput[idx].depth_count
+            ? paths.throughput[idx].medium.depth_count
             : bounce;
 
         if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].isHit) {
@@ -549,10 +549,10 @@ namespace AT_NAME
             ray = aten::ray(hit_pos, ray.dir, -hit_nml);
 
             const aten::vec3 alpha_belended_radiance{
-                path_throughput.transmission * mtrl.baseColor * albedo * alpha
+                path_throughput.alpha_blend.transmission * mtrl.baseColor * albedo * alpha
             };
-            aten::AddVec3(path_throughput.alpha_blend_radiance_on_the_way, alpha_belended_radiance);
-            path_throughput.transmission *= (1.0F - alpha);
+            aten::AddVec3(path_throughput.alpha_blend.throughput, alpha_belended_radiance);
+            path_throughput.alpha_blend.transmission *= (1.0F - alpha);
 
             path_attrib.is_singular = true;
             return true;

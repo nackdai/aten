@@ -22,15 +22,19 @@ namespace AT_NAME {
     static constexpr size_t MedisumStackSize = 8;
     using MediumStack = aten::stack<int32_t, MedisumStackSize>;
 
-    struct PathThroughput {
+    struct alignas(16) PathThroughput {
         aten::vec3 throughput{ 1.0F };
         float pdfb{ 1.0F };
-        int32_t depth_count{ 0 };
-        MediumStack mediums;
-        struct {
-            aten::vec3 alpha_blend_radiance_on_the_way{ 0.0F };
+
+        struct alignas(16) AlphaBlendThroughput {
+            aten::vec3 throughput{ 0.0F };
             float transmission{ 1.0F };
-        };
+        } alpha_blend;
+
+        struct alignas(16) MediumThroughput {
+            int32_t depth_count{ 0 };
+            MediumStack stack;
+        } medium;
     };
 
     struct alignas(16) PathContrib {

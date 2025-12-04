@@ -258,10 +258,10 @@ namespace pt {
 
         auto idx = getIdx(ix, iy, width);
 
-        float4 c = paths.contrib[idx].v;
-        int32_t sample = c.w;
+        const auto& c = paths.contrib[idx].contrib;
+        const auto sample = paths.contrib[idx].samples;
 
-        float4 contrib = c;
+        float4 contrib = make_float4(c.x, c.y, c.z, 0.0F);
 
         if (enableProgressive) {
             float4 data;
@@ -269,7 +269,7 @@ namespace pt {
 
             // First data.w value is 0.
             int32_t n = data.w;
-            contrib = n * data + make_float4(c.x, c.y, c.z, 0) / sample;
+            contrib = n * data + contrib / sample;
             contrib /= (n + 1);
             contrib.w = n + 1;
         }

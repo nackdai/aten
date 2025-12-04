@@ -33,37 +33,16 @@ namespace AT_NAME {
         };
     };
 
-    struct PathContrib {
-        union {
-            aten::v4 v;
-            struct {
-                aten::v3 contrib;
-                float samples;
-            };
-        };
+    struct alignas(16) PathContrib {
+        aten::v3 contrib;
+        float samples;
 #ifndef __AT_CUDA__
-        PathContrib() : contrib(0), samples(0.0f) {}
-
-        PathContrib(const PathContrib& rhs)
-        {
-            v = rhs.v;
-        }
-        PathContrib(PathContrib&& rhs) noexcept
-        {
-            v = rhs.v;
-        }
-        PathContrib& operator=(const PathContrib& rhs)
-        {
-            v = rhs.v;
-            return *this;
-        }
-        PathContrib& operator=(PathContrib&& rhs) noexcept
-        {
-            v = rhs.v;
-            return *this;
-        }
-        ~PathContrib() = default;
+        PathContrib() : contrib(0.0F), samples(0.0F) {}
 #endif
+        static AT_HOST_DEVICE_API const aten::v4* AsVec4Ptr(const PathContrib& contrib)
+        {
+            return reinterpret_cast<const aten::v4*>(&contrib);
+        }
     };
 
     struct PathAttribute {

@@ -29,8 +29,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5.0.0
         with:
-          submodules: true
+          submodules: false
           fetch-depth: 0  # To check the latest commit in `docker` directory properly, fetch all commits is necessary.
+
+      - name: Fetch only specific submodule
+        run: |
+          git submodule update --init --depth 1 3rdparty/nvidia_container_image_cuda
 
       - name: Login to GitHub Container Registry
         id: login

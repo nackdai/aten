@@ -254,23 +254,23 @@ namespace aten
 
                     aten::TriangleParameter face_param;
 
-                    face_param.idx[0] = static_cast<uint32_t>(assimp_mesh->mFaces[f_idx].mIndices[0]) + vtx_idx_offset;
-                    face_param.idx[1] = static_cast<uint32_t>(assimp_mesh->mFaces[f_idx].mIndices[1]) + vtx_idx_offset;
-                    face_param.idx[2] = static_cast<uint32_t>(assimp_mesh->mFaces[f_idx].mIndices[2]) + vtx_idx_offset;
+                    face_param.v0.idx[0] = static_cast<uint32_t>(assimp_mesh->mFaces[f_idx].mIndices[0]) + vtx_idx_offset;
+                    face_param.v0.idx[1] = static_cast<uint32_t>(assimp_mesh->mFaces[f_idx].mIndices[1]) + vtx_idx_offset;
+                    face_param.v0.idx[2] = static_cast<uint32_t>(assimp_mesh->mFaces[f_idx].mIndices[2]) + vtx_idx_offset;
 
-                    const auto& v0 = ctxt.GetVertex(face_param.idx[0]);
-                    const auto& v1 = ctxt.GetVertex(face_param.idx[1]);
-                    const auto& v2 = ctxt.GetVertex(face_param.idx[2]);
+                    const auto& v0 = ctxt.GetVertex(face_param.v0.idx[0]);
+                    const auto& v1 = ctxt.GetVertex(face_param.v0.idx[1]);
+                    const auto& v2 = ctxt.GetVertex(face_param.v0.idx[2]);
 
                     if (v0.uv.z == float(1)
                         || v1.uv.z == float(1)
                         || v2.uv.z == float(1))
                     {
-                        face_param.needNormal = 1;
+                        face_param.v1.needNormal = 1;
                     }
 
-                    face_param.mtrlid = shape->GetMaterial()->id();
-                    face_param.mesh_id = shape->get_mesh_id();
+                    face_param.v1.mtrlid = shape->GetMaterial()->id();
+                    face_param.v1.mesh_id = shape->get_mesh_id();
 
                     auto f = ctxt.CreateTriangle(face_param);
 

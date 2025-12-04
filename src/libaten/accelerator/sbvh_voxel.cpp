@@ -117,13 +117,13 @@ namespace aten
                 const auto tri = ctxt.GetTriangleInstance(tid);
                 const auto& triparam = tri->GetParam();
 
-                auto found = mtrlMap.find(triparam.mtrlid);
+                auto found = mtrlMap.find(triparam.v1.mtrlid);
 
                 if (found != mtrlMap.end()) {
-                    found->second += triparam.area;
+                    found->second += triparam.v1.area;
                 }
                 else {
-                    mtrlMap.insert(std::make_pair(triparam.mtrlid, triparam.area));
+                    mtrlMap.insert(std::make_pair(triparam.v1.mtrlid, triparam.v1.area));
                 }
             }
 

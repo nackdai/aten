@@ -201,9 +201,9 @@ namespace aten
                             isect = isect_tmp;
                             isect.objid = objid;
                             isect.triangle_id = static_cast<int32_t>(node.primid);
-                            isect.mtrlid = static_cast<int32_t>(prim.mtrlid);
+                            isect.mtrlid = static_cast<int32_t>(prim.v1.mtrlid);
 
-                            isect.meshid = static_cast<int32_t>(prim.mesh_id);
+                            isect.meshid = static_cast<int32_t>(prim.v1.mesh_id);
                             isect.meshid = (isect.meshid < 0 ? meshid : isect.meshid);
 
                             t_max = isect.t;

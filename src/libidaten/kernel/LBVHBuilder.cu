@@ -590,11 +590,11 @@ __global__ void computeBoudingBox(
     int32_t triId = sortedIndices[leafId];
 
     aten::TriangleParameter prim;
-    prim.v0 = ((aten::vec4*)tris)[triId * aten::TriangleParamter_float4_size + 0];
+    prim.v0 = aten::TriangleParameter::ExtractTriParam0(tris, triId);
 
-    float4 v0 = getFloat4(vtxPos, prim.idx[0] + vtxOffset);
-    float4 v1 = getFloat4(vtxPos, prim.idx[1] + vtxOffset);
-    float4 v2 = getFloat4(vtxPos, prim.idx[2] + vtxOffset);
+    float4 v0 = getFloat4(vtxPos, prim.v0.idx[0] + vtxOffset);
+    float4 v1 = getFloat4(vtxPos, prim.v0.idx[1] + vtxOffset);
+    float4 v2 = getFloat4(vtxPos, prim.v0.idx[2] + vtxOffset);
 
     float4 aabbMin, aabbMax;
     computeBoundingBox(v0, v1, v2, &aabbMin, &aabbMax);

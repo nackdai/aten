@@ -250,7 +250,7 @@ namespace aten {
                     ObjFace triangle;
 
                     for (int32_t i = 0; i < 3; i++) {
-                        const auto& v = ctxt.GetVertex(tri_param.idx[i]);
+                        const auto& v = ctxt.GetVertex(tri_param.v0.idx[i]);
 
                         triangle.vtx[i].pos = writeVertexPosition(fp, v) ? vtx_idx : -1;
                         triangle.vtx[i].nml = writeVertexNormal(fp, v) ? vtx_idx : -1;

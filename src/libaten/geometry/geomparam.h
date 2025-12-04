@@ -20,7 +20,7 @@ namespace aten
     /**
      * @brief Parameter for object.
      */
-    struct ObjectParameter {
+    struct alignas(16) ObjectParameter {
         ObjectType type{ ObjectType::GeometryTypeMax };
 
         /**
@@ -56,59 +56,44 @@ namespace aten
 
         int32_t light_id{ -1 };     ///< If there is an associated light, index to light.
 
-        struct {
+        struct alignas(16) {
             vec3 center{ float(0) };    ///< Center of sphere.
             float radius{ 0 };          ///< Radius of sphere.
             int32_t mtrl_id{ -1 };      ///< Index of material.
         } sphere;
     };
-    AT_STATICASSERT((sizeof(ObjectParameter) % 16) == 0);
+
+    struct alignas(16) TriParam0 {
+        int32_t idx[3]; ///< Vertex index.
+        float padding;
+    };
+
+    struct alignas(16) TriParam1 {
+        float area;     ///< Triangle area.
+        int32_t needNormal{ 0 };    ///< Flag to describe if normal needs to be computed on the fly.
+        int32_t mtrlid;             ///< Material id.
+        /**
+         * @brief Belonged mesh id. (Mesh = Triangle group to have same material).
+         * This is unique in the entire scene.
+         */
+        int32_t mesh_id;
+    };
 
     /**
      * @brief Parameter for per triangle.
      */
-    struct TriangleParameter {
-        union {
-            aten::vec4 v0;
-            struct {
-                int32_t idx[3]; ///< Vertex index.
-                float area;     ///< Triangle area.
-            };
-        };
+    struct alignas(16) TriangleParameter {
+        TriParam0 v0;
+        TriParam1 v1;
 
-        union {
-            aten::vec4 v1;
-            struct {
-                int32_t needNormal; ///< Flag to describe if normal needs to be computed on the fly.
-                int32_t mtrlid;     ///< Material id.
-                /**
-                 * @brief Belonged mesh id. (Mesh = Triangle group to have same material).
-                 * This is unique in the entire scene.
-                 */
-                int32_t mesh_id;
-                float padding;
-            };
-        };
-
-        AT_HOST_DEVICE_API TriangleParameter()
+        static constexpr auto TriangleParamter_float4_size = (sizeof(TriParam0) + sizeof(TriParam1)) / 16;
+        static AT_DEVICE_API TriParam0 ExtractTriParam0(const TriangleParameter* tris, size_t idx)
         {
-            needNormal = 0;
+            return (reinterpret_cast<aten::TriParam0*>(const_cast<aten::TriangleParameter*>(tris))[idx * TriangleParamter_float4_size + 0]);
         }
-
-        AT_HOST_DEVICE_API TriangleParameter(const TriangleParameter& rhs)
+        static AT_DEVICE_API TriParam1 ExtractTriParam1(const TriangleParameter* tris, size_t idx)
         {
-            v0 = rhs.v0;
-            v1 = rhs.v1;
-        }
-
-        AT_HOST_DEVICE_API TriangleParameter& operator=(const TriangleParameter& rhs)
-        {
-            v0 = rhs.v0;
-            v1 = rhs.v1;
-            return *this;
+            return (reinterpret_cast<aten::TriParam1*>(const_cast<aten::TriangleParameter*>(tris))[idx * TriangleParamter_float4_size + 1]);
         }
     };
-    AT_STATICASSERT((sizeof(TriangleParameter) % 16) == 0);
-
-    constexpr size_t TriangleParamter_float4_size = sizeof(TriangleParameter) / sizeof(aten::vec4);
 }

@@ -67,18 +67,18 @@ __global__ void setTriangleParam(
 
     auto* tri = &triangles[idx];
 
-    const auto& v0 = pos[tri->idx[0]];
-    const auto& v1 = pos[tri->idx[1]];
-    const auto& v2 = pos[tri->idx[2]];
+    const auto& v0 = pos[tri->v0.idx[0]];
+    const auto& v1 = pos[tri->v0.idx[1]];
+    const auto& v2 = pos[tri->v0.idx[2]];
 
     auto a = v1 - v0;
     auto b = v2 - v0;
 
-    tri->area = length(cross(a, b));
+    tri->v1.area = length(cross(a, b));
 
-    tri->idx[0] += indexOffset;
-    tri->idx[1] += indexOffset;
-    tri->idx[2] += indexOffset;
+    tri->v0.idx[0] += indexOffset;
+    tri->v0.idx[1] += indexOffset;
+    tri->v0.idx[2] += indexOffset;
 }
 
 // NOTE

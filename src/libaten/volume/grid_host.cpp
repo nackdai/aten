@@ -104,12 +104,12 @@ namespace aten {
         for (size_t i = 0; i < TriangleIndices.size(); i += 3)
         {
             aten::TriangleParameter tri;
-            tri.idx[0] = TriangleIndices[i] + triangle_index_offset;
-            tri.idx[1] = TriangleIndices[i + 1] + triangle_index_offset;
-            tri.idx[2] = TriangleIndices[i + 2] + triangle_index_offset;
-            tri.mtrlid = target_mtrl_id;
-            tri.mesh_id = mesh->get_mesh_id();
-            tri.needNormal = true;
+            tri.v0.idx[0] = TriangleIndices[i] + triangle_index_offset;
+            tri.v0.idx[1] = TriangleIndices[i + 1] + triangle_index_offset;
+            tri.v0.idx[2] = TriangleIndices[i + 2] + triangle_index_offset;
+            tri.v1.mtrlid = target_mtrl_id;
+            tri.v1.mesh_id = mesh->get_mesh_id();
+            tri.v1.needNormal = true;
 
             auto face = ctxt.CreateTriangle(tri);
 

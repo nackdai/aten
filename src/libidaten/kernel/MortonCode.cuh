@@ -157,11 +157,11 @@ __global__ void genMortonCode(
     }
 
     aten::TriangleParameter prim;
-    prim.v0 = ((aten::vec4*)tris)[idx * aten::TriangleParamter_float4_size + 0];
+    prim.v0 = aten::TriangleParameter::ExtractTriParam0(tris, idx);
 
-    float4 v0 = getFloat4(vtxPos, prim.idx[0] + vtxOffset);
-    float4 v1 = getFloat4(vtxPos, prim.idx[1] + vtxOffset);
-    float4 v2 = getFloat4(vtxPos, prim.idx[2] + vtxOffset);
+    float4 v0 = getFloat4(vtxPos, prim.v0.idx[0] + vtxOffset);
+    float4 v1 = getFloat4(vtxPos, prim.v0.idx[1] + vtxOffset);
+    float4 v2 = getFloat4(vtxPos, prim.v0.idx[2] + vtxOffset);
 
     aten::vec3 vmin = aten::vec3(
         min(min(v0.x, v1.x), v2.x),

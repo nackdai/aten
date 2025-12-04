@@ -283,17 +283,17 @@ namespace kernel {
 
         if (objid >= 0) {
             aten::TriangleParameter prim;
-            prim.v0 = ((aten::vec4*)ctxt.prims)[primid * aten::TriangleParamter_float4_size + 0];
-            prim.v1 = ((aten::vec4*)ctxt.prims)[primid * aten::TriangleParamter_float4_size + 1];
+            prim.v0 = aten::TriangleParameter::ExtractTriParam0(ctxt.prims, primid);
+            prim.v1 = aten::TriangleParameter::ExtractTriParam1(ctxt.prims, primid);
 
-            isects[idx].mtrlid = prim.mtrlid;
-            isects[idx].meshid = prim.mesh_id;
+            isects[idx].mtrlid = prim.v1.mtrlid;
+            isects[idx].meshid = prim.v1.mesh_id;
 
             const auto* obj = &ctxt.GetObject(static_cast<uint32_t>(objid));
 
-            float4 p0 = tex1Dfetch<float4>(ctxt.vtxPos, prim.idx[0]);
-            float4 p1 = tex1Dfetch<float4>(ctxt.vtxPos, prim.idx[1]);
-            float4 p2 = tex1Dfetch<float4>(ctxt.vtxPos, prim.idx[2]);
+            float4 p0 = tex1Dfetch<float4>(ctxt.vtxPos, prim.v0.idx[0]);
+            float4 p1 = tex1Dfetch<float4>(ctxt.vtxPos, prim.v0.idx[1]);
+            float4 p2 = tex1Dfetch<float4>(ctxt.vtxPos, prim.v0.idx[2]);
 
             float a = data.z;
             float b = data.w;

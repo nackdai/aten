@@ -1131,7 +1131,7 @@ namespace aten
 
                 if (isHit) {
                     const auto& primParam = prim->GetParam();
-                    isectTmp.meshid = primParam.mesh_id;
+                    isectTmp.meshid = primParam.v1.mesh_id;
                 }
 #else
                 int32_t start = (int32_t)node->refIdListStart;

@@ -151,15 +151,15 @@ namespace aten
 
                 vtx_info_list.push_back(idx_0);
                 auto it = vtx_info_list.back();
-                faceParam.idx[0] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curr_vtx_pos;
+                faceParam.v0.idx[0] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curr_vtx_pos;
 
                 vtx_info_list.push_back(idx_1);
                 it = vtx_info_list.back();
-                faceParam.idx[1] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curr_vtx_pos;
+                faceParam.v0.idx[1] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curr_vtx_pos;
 
                 vtx_info_list.push_back(idx_2);
                 it = vtx_info_list.back();
-                faceParam.idx[2] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curr_vtx_pos;
+                faceParam.v0.idx[2] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curr_vtx_pos;
 
                 triangle_parameters.push_back(faceParam);
             }
@@ -381,22 +381,22 @@ namespace aten
                 // Add a triangle to the shape(= triangle group which has the same material).
                 auto& triangle_param = triangle_parameters[i];
 
-                const auto& v0 = ctxt.GetVertex(triangle_param.idx[0]);
-                const auto& v1 = ctxt.GetVertex(triangle_param.idx[1]);
-                const auto& v2 = ctxt.GetVertex(triangle_param.idx[2]);
+                const auto& v0 = ctxt.GetVertex(triangle_param.v0.idx[0]);
+                const auto& v1 = ctxt.GetVertex(triangle_param.v0.idx[1]);
+                const auto& v2 = ctxt.GetVertex(triangle_param.v0.idx[2]);
 
                 if (v0.uv.z == float(1)
                     || v1.uv.z == float(1)
                     || v2.uv.z == float(1)
                     || need_compute_normal_on_the_fly)
                 {
-                    triangle_param.needNormal = 1;
+                    triangle_param.v1.needNormal = 1;
                 }
 
                 // Triangle should belong the triangle group which has the same material(=shape).
                 // So, apply the same material index.
-                triangle_param.mtrlid = aten_shape->GetMaterial()->id();
-                triangle_param.mesh_id = aten_shape->get_mesh_id();
+                triangle_param.v1.mtrlid = aten_shape->GetMaterial()->id();
+                triangle_param.v1.mesh_id = aten_shape->get_mesh_id();
 
                 auto f = ctxt.CreateTriangle(triangle_param);
 

@@ -22,7 +22,7 @@ namespace AT_NAME
             f->build(ctxt, mtrlid, geomid, scale);
 
             const auto &faceParam = f->GetParam();
-            area += faceParam.area;
+            area += faceParam.v1.area;
 
             const auto &faabb = f->getBoundingbox();
 
@@ -42,9 +42,9 @@ namespace AT_NAME
             {
                 const auto &faceParam = f->GetParam();
 
-                idx.push_back(faceParam.idx[0]);
-                idx.push_back(faceParam.idx[1]);
-                idx.push_back(faceParam.idx[2]);
+                idx.push_back(faceParam.v0.idx[0]);
+                idx.push_back(faceParam.v0.idx[1]);
+                idx.push_back(faceParam.v0.idx[2]);
             }
 
             index_buffer_.init((uint32_t)idx.size(), &idx[0]);
@@ -57,9 +57,9 @@ namespace AT_NAME
     {
         const auto &faceParam = f->GetParam();
 
-        int32_t idx0 = faceParam.idx[0];
-        int32_t idx1 = faceParam.idx[1];
-        int32_t idx2 = faceParam.idx[2];
+        int32_t idx0 = faceParam.v0.idx[0];
+        int32_t idx1 = faceParam.v0.idx[1];
+        int32_t idx2 = faceParam.v0.idx[2];
 
         triangles_.push_back(f);
 

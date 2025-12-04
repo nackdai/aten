@@ -18,7 +18,7 @@ namespace aten
 
         f->param_ = param_;
 
-        f->build(ctxt, param_.mtrlid, param_.mesh_id, scale);
+        f->build(ctxt, param_.v1.mtrlid, param_.v1.mesh_id, scale);
 
         return f;
     }
@@ -41,7 +41,7 @@ namespace aten
 
             isect.triangle_id = m_id;
 
-            isect.mtrlid = param_.mtrlid;
+            isect.mtrlid = param_.v1.mtrlid;
         }
 
         return isHit;
@@ -54,9 +54,9 @@ namespace aten
         const std::optional<aten::vec3>& scale)
     {
         if (scale.has_value()) {
-            auto v0 = ctxt.GetVertex(param_.idx[0]);
-            auto v1 = ctxt.GetVertex(param_.idx[1]);
-            auto v2 = ctxt.GetVertex(param_.idx[2]);
+            auto v0 = ctxt.GetVertex(param_.v0.idx[0]);
+            auto v1 = ctxt.GetVertex(param_.v0.idx[1]);
+            auto v2 = ctxt.GetVertex(param_.v0.idx[2]);
 
             const auto& real_scale = scale.value();
 
@@ -90,14 +90,14 @@ namespace aten
             }
 #endif
 
-            ctxt.ReplaceVertex(param_.idx[0], v0);
-            ctxt.ReplaceVertex(param_.idx[1], v1);
-            ctxt.ReplaceVertex(param_.idx[2], v2);
+            ctxt.ReplaceVertex(param_.v0.idx[0], v0);
+            ctxt.ReplaceVertex(param_.v0.idx[1], v1);
+            ctxt.ReplaceVertex(param_.v0.idx[2], v2);
         }
         else {
-            const auto& v0 = ctxt.GetVertex(param_.idx[0]);
-            const auto& v1 = ctxt.GetVertex(param_.idx[1]);
-            const auto& v2 = ctxt.GetVertex(param_.idx[2]);
+            const auto& v0 = ctxt.GetVertex(param_.v0.idx[0]);
+            const auto& v1 = ctxt.GetVertex(param_.v0.idx[1]);
+            const auto& v2 = ctxt.GetVertex(param_.v0.idx[2]);
             BuildTriangle(
                 ctxt,
                 v0, v1, v2,
@@ -128,22 +128,22 @@ namespace aten
         // 三角形の面積 = ２辺の外積の長さ / 2;
         auto e0 = v1.pos - v0.pos;
         auto e1 = v2.pos - v0.pos;
-        param_.area = float(0.5) * cross(e0, e1).length();
+        param_.v1.area = float(0.5) * cross(e0, e1).length();
 
-        param_.mtrlid = mtrlid;
-        param_.mesh_id = geomid;
+        param_.v1.mtrlid = mtrlid;
+        param_.v1.mesh_id = geomid;
     }
 
     int32_t triangle::GetMeshId() const
     {
-        return param_.mesh_id;
+        return param_.v1.mesh_id;
     }
 
     aabb triangle::ComputeAABB(const aten::context& ctxt) const
     {
-        const auto& v0 = ctxt.GetVertex(param_.idx[0]);
-        const auto& v1 = ctxt.GetVertex(param_.idx[1]);
-        const auto& v2 = ctxt.GetVertex(param_.idx[2]);
+        const auto& v0 = ctxt.GetVertex(param_.v0.idx[0]);
+        const auto& v1 = ctxt.GetVertex(param_.v0.idx[1]);
+        const auto& v2 = ctxt.GetVertex(param_.v0.idx[2]);
 
         auto vmin = aten::vmin(aten::vmin(v0.pos, v1.pos), v2.pos);
         auto vmax = aten::vmax(aten::vmax(v0.pos, v1.pos), v2.pos);

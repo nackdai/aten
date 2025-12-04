@@ -46,9 +46,9 @@ namespace AT_NAME
         {
             bool isHit = false;
 
-            const auto v0{ ctxt.GetPositionAsVec3(param.idx[0]) };
-            const auto v1{ ctxt.GetPositionAsVec3(param.idx[1]) };
-            const auto v2{ ctxt.GetPositionAsVec3(param.idx[2]) };
+            const auto v0{ ctxt.GetPositionAsVec3(param.v0.idx[0]) };
+            const auto v1{ ctxt.GetPositionAsVec3(param.v0.idx[1]) };
+            const auto v2{ ctxt.GetPositionAsVec3(param.v0.idx[2]) };
 
             const auto res = intersectTriangle(r, v0, v1, v2);
 
@@ -73,13 +73,13 @@ namespace AT_NAME
             aten::hitrecord* rec,
             const aten::Intersection* isect)
         {
-            const auto p0{ ctxt.GetPositionAsVec4(tri.idx[0]) };
-            const auto p1{ ctxt.GetPositionAsVec4(tri.idx[1]) };
-            const auto p2{ ctxt.GetPositionAsVec4(tri.idx[2]) };
+            const auto p0{ ctxt.GetPositionAsVec4(tri.v0.idx[0]) };
+            const auto p1{ ctxt.GetPositionAsVec4(tri.v0.idx[1]) };
+            const auto p2{ ctxt.GetPositionAsVec4(tri.v0.idx[2]) };
 
-            const auto n0{ ctxt.GetNormalAsVec4(tri.idx[0]) };
-            const auto n1{ ctxt.GetNormalAsVec4(tri.idx[1]) };
-            const auto n2{ ctxt.GetNormalAsVec4(tri.idx[2]) };
+            const auto n0{ ctxt.GetNormalAsVec4(tri.v0.idx[0]) };
+            const auto n1{ ctxt.GetNormalAsVec4(tri.v0.idx[1]) };
+            const auto n2{ ctxt.GetNormalAsVec4(tri.v0.idx[2]) };
 
             // Extract uv.
             const auto u0 = p0.w;
@@ -107,7 +107,7 @@ namespace AT_NAME
             rec->u = c * u0 + a * u1 + b * u2;
             rec->v = c * v0 + a * v1 + b * v2;
 
-            if (tri.needNormal > 0) {
+            if (tri.v1.needNormal > 0) {
                 auto e01 = p1 - p0;
                 auto e02 = p2 - p0;
 
@@ -116,7 +116,7 @@ namespace AT_NAME
                 rec->normal = normalize(cross(e01, e02));
             }
 
-            rec->area = tri.area;
+            rec->area = tri.v1.area;
         }
 
         template <class CONTEXT>
@@ -126,13 +126,13 @@ namespace AT_NAME
             aten::SamplePosNormalPdfResult* result,
             aten::sampler* sampler)
         {
-            const auto p0{ ctxt.GetPositionAsVec4(tri.idx[0]) };
-            const auto p1{ ctxt.GetPositionAsVec4(tri.idx[1]) };
-            const auto p2{ ctxt.GetPositionAsVec4(tri.idx[2]) };
+            const auto p0{ ctxt.GetPositionAsVec4(tri.v0.idx[0]) };
+            const auto p1{ ctxt.GetPositionAsVec4(tri.v0.idx[1]) };
+            const auto p2{ ctxt.GetPositionAsVec4(tri.v0.idx[2]) };
 
-            const auto n0{ ctxt.GetNormalAsVec4(tri.idx[0]) };
-            const auto n1{ ctxt.GetNormalAsVec4(tri.idx[1]) };
-            const auto n2{ ctxt.GetNormalAsVec4(tri.idx[2]) };
+            const auto n0{ ctxt.GetNormalAsVec4(tri.v0.idx[0]) };
+            const auto n1{ ctxt.GetNormalAsVec4(tri.v0.idx[1]) };
+            const auto n2{ ctxt.GetNormalAsVec4(tri.v0.idx[2]) };
 
             float r0 = sampler->nextSample();
             float r1 = sampler->nextSample();

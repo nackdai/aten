@@ -164,15 +164,15 @@ namespace aten
                 tris.push_back(aten::TriangleParameter());
                 auto& tri = tris.back();
 
-                tri.idx[0] = idx[n + 0];
-                tri.idx[1] = idx[n + 1];
-                tri.idx[2] = idx[n + 2];
+                tri.v0.idx[0] = idx[n + 0];
+                tri.v0.idx[1] = idx[n + 1];
+                tri.v0.idx[2] = idx[n + 2];
 
-                tri.mtrlid = mtrlId;
-                tri.mesh_id = geomId;
+                tri.v1.mtrlid = mtrlId;
+                tri.v1.mesh_id = geomId;
 
                 // TODO
-                tri.needNormal = 0;
+                tri.v1.needNormal = 0;
             }
         }
     }

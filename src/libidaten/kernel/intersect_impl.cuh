@@ -45,7 +45,7 @@ AT_INLINE_RELEASE __device__ int32_t hit4Triangles1Ray(
     for (int32_t i = 0; i < num; i++) {
         int32_t pidx = (int32_t)*((float*)&primIdx + i);
         const auto* prim = &ctxt->prims[pidx];
-        float4 p2{ ctxt->GetPosition(prim->idx[2]) };
+        float4 p2{ ctxt->GetPosition(prim->v0.idx[2]) };
 
         *(((float*)&v2x) + i) = p2.x;
         *(((float*)&v2y) + i) = p2.y;

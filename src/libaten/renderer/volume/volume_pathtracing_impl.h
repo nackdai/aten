@@ -26,7 +26,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         const aten::vec3& surface_normal,
         const aten::MaterialParameter& mtrl,
-        AT_NAME::MediumStack& mediums)
+        AT_NAME::MediumStack& medium_stack)
     {
         const auto wi = -ray.dir;
         const auto is_trasmitted = dot(wo, surface_normal) < 0 != dot(wi, surface_normal) < 0;
@@ -35,13 +35,13 @@ namespace AT_NAME
         if (is_trasmitted) {
             if (is_enter) {
                 if (mtrl.is_medium) {
-                    mediums.push(mtrl.id);
+                    medium_stack.push(mtrl.id);
                 }
             }
             else {
-                //std::ignore = throughput.mediums.safe_pop();
-                if (mediums.size() > 0) {
-                    mediums.pop();
+                //std::ignore = throughput.medium.stack.safe_pop();
+                if (medium_stack.size() > 0) {
+                    medium_stack.pop();
                 }
             }
         }
@@ -49,15 +49,15 @@ namespace AT_NAME
 
     inline AT_DEVICE_API const aten::MediumParameter& GetCurrentMedium(
         const AT_NAME::context& ctxt,
-        const AT_NAME::MediumStack& mediums)
+        const AT_NAME::MediumStack& medium_stack)
     {
-        auto idx = mediums.top();
+        auto idx = medium_stack.top();
         return ctxt.GetMaterial(idx).medium;
     }
 
-    inline AT_DEVICE_API bool HasMedium(const AT_NAME::MediumStack& mediums)
+    inline AT_DEVICE_API bool HasMedium(const AT_NAME::MediumStack& medium_stack)
     {
-        return !mediums.empty();
+        return !medium_stack.empty();
     }
 
     inline AT_DEVICE_API bool IsSubsurface(const aten::MaterialParameter& mtrl)
@@ -87,7 +87,7 @@ namespace AT_NAME
         bool is_scattered = false;
         aten::ray next_ray;
 
-        const auto& medium = AT_NAME::GetCurrentMedium(ctxt, throughput.mediums);
+        const auto& medium = AT_NAME::GetCurrentMedium(ctxt, throughput.medium.stack);
         auto* grid = GetGridFromContext(ctxt, medium);
 
         if (grid) {
@@ -232,7 +232,7 @@ namespace AT_NAME
         const aten::Intersection& isect)
     {
         if (shadow_ray.isActive) {
-            const auto bounce = paths.throughput[idx].depth_count;
+            const auto bounce = paths.throughput[idx].medium.depth_count;
 
             aten::ray next_ray(shadow_ray.rayorg, shadow_ray.raydir);
 
@@ -261,10 +261,10 @@ namespace AT_NAME
                     ctxt, paths.sampler[idx],
                     light_sample,
                     next_ray.org, nml,
-                    paths.throughput[idx].mediums);
+                    paths.throughput[idx].medium.stack);
 
                 if (is_visilbe_to_light) {
-                    const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].mediums);
+                    const auto& medium = AT_NAME::GetCurrentMedium(ctxt, paths.throughput[idx].medium.stack);
                     const auto phase_f = AT_NAME::HenyeyGreensteinPhaseFunction::Evaluate(
                         medium.phase_function_g,
                         -next_ray.dir, light_sample.dir);
@@ -284,11 +284,11 @@ namespace AT_NAME
 
         // Update depth count for the next bounce.
         if (paths.attrib[idx].will_update_depth) {
-            paths.throughput[idx].depth_count += 1;
+            paths.throughput[idx].medium.depth_count += 1;
         }
         paths.attrib[idx].will_update_depth = false;
 
-        if (paths.throughput[idx].depth_count > max_depth) {
+        if (paths.throughput[idx].medium.depth_count > max_depth) {
             paths.attrib[idx].is_terminated = true;
         }
     }

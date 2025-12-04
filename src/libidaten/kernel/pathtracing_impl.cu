@@ -140,7 +140,7 @@ namespace pt {
             return;
         }
 
-        albedo = paths.throughput[idx].transmission * albedo + paths.throughput[idx].alpha_blend_radiance_on_the_way;
+        albedo = paths.throughput[idx].alpha_blend.transmission * albedo + paths.throughput[idx].alpha_blend.throughput;
 
         // Implicit conection to light.
         auto is_hit_implicit_light = AT_NAME::HitTeminatedMaterial(

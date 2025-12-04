@@ -53,7 +53,7 @@ namespace vpt
             return;
         }
 
-        bounce = paths.throughput[idx].depth_count;
+        bounce = paths.throughput[idx].medium.depth_count;
 
         const auto russianProb = AT_NAME::ComputeRussianProbability(
             bounce, depth_for_rr,
@@ -112,7 +112,7 @@ namespace vpt
 
         bool is_scattered = false;
 
-        if (AT_NAME::HasMedium(paths.throughput[idx].mediums)) {
+        if (AT_NAME::HasMedium(paths.throughput[idx].medium.stack)) {
             aten::ray next_ray;
 
             aten::tie(is_scattered, next_ray) = AT_NAME::SampleMedium(
@@ -194,7 +194,7 @@ namespace vpt
                         ctxt, paths.sampler[idx],
                         light_sample,
                         rec.p, orienting_normal,
-                        paths.throughput[idx].mediums);
+                        paths.throughput[idx].medium.stack);
 
                     if (is_visilbe_to_light) {
                         auto radiance = AT_NAME::ComputeRadianceNEE(
@@ -238,7 +238,7 @@ namespace vpt
 
             AT_NAME::UpdateMedium(
                 curr_ray, rays[idx].dir, orienting_normal,
-                shMtrls[threadIdx.x], paths.throughput[idx].mediums);
+                shMtrls[threadIdx.x], paths.throughput[idx].medium.stack);
         }
 
         paths.attrib[idx].will_update_depth = is_scattered || is_reflected_or_refracted;

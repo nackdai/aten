@@ -78,7 +78,7 @@ namespace aten
                     idx,
                     ix, iy,
                     width, height,
-                    path_host_.throughput[idx].depth_count,
+                    path_host_.throughput[idx].medium.depth_count,
                     ctxt, camera,
                     path_host_.paths, rays_[idx]);
 
@@ -129,7 +129,7 @@ namespace aten
 
         bool is_scattered = false;
 
-        if (AT_NAME::HasMedium(paths.throughput[idx].mediums)) {
+        if (AT_NAME::HasMedium(paths.throughput[idx].medium.stack)) {
             aten::ray next_ray;
 
             aten::tie(is_scattered, next_ray) = AT_NAME::SampleMedium(
@@ -208,7 +208,7 @@ namespace aten
                 is_reflected_or_refracted = true;
             }
 
-            AT_NAME::UpdateMedium(curr_ray, rays[idx].dir, orienting_normal, mtrl, paths.throughput[idx].mediums);
+            AT_NAME::UpdateMedium(curr_ray, rays[idx].dir, orienting_normal, mtrl, paths.throughput[idx].medium.stack);
         }
 
         paths.attrib[idx].will_update_depth = is_scattered || is_reflected_or_refracted;
@@ -244,7 +244,7 @@ namespace aten
         scene* scene,
         int32_t rrDepth)
     {
-        const auto bounce = paths.throughput[idx].depth_count;
+        const auto bounce = paths.throughput[idx].medium.depth_count;
 
         const auto russianProb = AT_NAME::ComputeRussianProbability(
             bounce, rrDepth,
@@ -279,7 +279,7 @@ namespace aten
 
         bool is_scattered = false;
 
-        if (AT_NAME::HasMedium(paths.throughput[idx].mediums)) {
+        if (AT_NAME::HasMedium(paths.throughput[idx].medium.stack)) {
             aten::ray next_ray;
 
             aten::tie(is_scattered, next_ray) = AT_NAME::SampleMedium(
@@ -359,7 +359,7 @@ namespace aten
                         ctxt, *sampler,
                         light_sample,
                         rec.p, orienting_normal,
-                        paths.throughput[idx].mediums);
+                        paths.throughput[idx].medium.stack);
 
                     if (is_visilbe_to_light) {
                         auto radiance = AT_NAME::ComputeRadianceNEE(
@@ -398,7 +398,7 @@ namespace aten
                 is_reflected_or_refracted = true;
             }
 
-            AT_NAME::UpdateMedium(curr_ray, rays[idx].dir, orienting_normal, mtrl, paths.throughput[idx].mediums);
+            AT_NAME::UpdateMedium(curr_ray, rays[idx].dir, orienting_normal, mtrl, paths.throughput[idx].medium.stack);
         }
 
         paths.attrib[idx].will_update_depth = is_scattered || is_reflected_or_refracted;

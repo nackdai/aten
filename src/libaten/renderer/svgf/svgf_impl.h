@@ -116,7 +116,7 @@ namespace svgf {
         aten::span<aten::v4> aov_color_variance = nullptr,
         aten::span<aten::v4> aov_moment_temporalweight = nullptr)
     {
-        const auto& c = paths.contrib[idx].v;
+        const auto& c = *(AT_NAME::PathContrib::AsVec4Ptr(paths.contrib[idx]));
 
         aten::v4 contrib;
         aten::CopyVec(contrib, c);

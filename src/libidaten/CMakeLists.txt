@@ -111,7 +111,6 @@ cuda_add_library(
   ../libaten/misc/color.h
   ../libaten/misc/timer.h
   ../libaten/misc/tuple.h
-  ../libaten/os/linux/misc/timer_linux.cpp
   ../libaten/renderer/ao/aorenderer_impl.h
   ../libaten/renderer/aov.h
   ../libaten/renderer/npr/feature_line.h

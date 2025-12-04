@@ -48,73 +48,23 @@ namespace aten {
         vec4 pos;   ///< Light position.
         vec4 dir;   ///< Light direction.
 
-        union {
-            aten::vec4 v0;
+        LightType type;             ///< Light type.
+        vec3 light_color{ 0.0F };   ///< Light color as RGB.
 
-            struct {
-                LightType type;     ///< Light type.
-                vec3 light_color;   ///< Light color as RGB (0, 1).
-            };
-        };
+        float innerAngle{ AT_MATH_PI }; ///< Spot light inner angle.
+        float outerAngle{ AT_MATH_PI }; ///< Spot light outer angle.
+        LightAttribute attrib;          ///< Light attribute.
+        float scale{ 1.0F };            ///< Scele factor to be multiplied to intensity or luminance.
 
-        union {
-            aten::vec4 v1;
-
-            struct {
-                float innerAngle;       ///< Spot light inner angle.
-                float outerAngle;       ///< Spot light outer angle.
-                LightAttribute attrib;  ///< Light attribute.
-            };
-        };
-
-        union {
-            aten::vec4 v2;
-
-            struct {
-                float scale;                ///< Scele factor to be multiplied to intensity or luminance.
-                float intensity;
-                int32_t arealight_objid;    ///< Object index to be referred as area light.
-                int32_t envmapidx;          ///< Texture index as environment map.
-            };
-        };
-
-        AT_HOST_DEVICE_API LightParameter()
-            : v0(0), v1(0), v2(0)
-        {
-            innerAngle = AT_MATH_PI;
-            outerAngle = AT_MATH_PI;
-            arealight_objid = -1;
-            envmapidx = -1;
-            scale = 1.0f;
-        };
+        float intensity{ 1.0F };
+        int32_t arealight_objid{ -1 };  ///< Object index to be referred as area light.
+        int32_t envmapidx{ -1 };        ///< Texture index as environment map.
+        int32_t padding;
 
         AT_HOST_DEVICE_API LightParameter(LightType _type, const LightAttribute& _attrib)
-            : v0(0), v1(0), v2(0)
         {
             attrib = _attrib;
             type = _type;
-            innerAngle = AT_MATH_PI;
-            outerAngle = AT_MATH_PI;
-            arealight_objid = -1;
-            envmapidx = -1;
-            scale = 1.0f;
-        }
-
-        LightParameter(const LightParameter& rhs)
-        {
-            *this = rhs;
-        }
-
-        LightParameter& operator=(const LightParameter& rhs)
-        {
-            pos = rhs.pos;
-            dir = rhs.dir;
-
-            v0 = rhs.v0;
-            v1 = rhs.v1;
-            v2 = rhs.v2;
-
-            return *this;
         }
 
         AT_HOST_DEVICE_API bool IsValidLightObjectId() const

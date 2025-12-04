@@ -118,6 +118,7 @@ namespace npr {
      * @param[in] ctxt Scene context.
      * @param[in] cam_org Camera's origin position.
      * @param[in] query_ray Query ray.
+     * @param[in] sample_ray Sample ray.
      * @param[in] hrec_query Hit record by the query ray.
      * @param[in] distance_query_ray_hit Distance between query ray hit point and query ray's origin.
      * @param[in] isect_sample_ray Intersection data by the sample ray.
@@ -135,6 +136,7 @@ namespace npr {
         const AT_NAME::context& ctxt,
         const aten::vec3& cam_org,
         const aten::ray& query_ray,
+        const aten::ray& sample_ray,
         const aten::hitrecord& hrec_query,
         const float distance_query_ray_hit,
         const aten::Intersection& isect_sample_ray,
@@ -151,7 +153,7 @@ namespace npr {
         const auto& obj = ctxt.GetObject(isect_sample_ray.objid);
 
         aten::hitrecord hrec_sample;
-        AT_NAME::evaluate_hit_result(hrec_sample, obj, ctxt, query_ray, isect_sample_ray);
+        AT_NAME::evaluate_hit_result(hrec_sample, obj, ctxt, sample_ray, isect_sample_ray);
 
         // If sample ray hit with the different mesh from query ray one, this sample ray won't bounce in next loop.
         sample_ray_desc.is_terminated = hrec_sample.meshid != hrec_query.meshid;
@@ -468,7 +470,8 @@ namespace npr {
                     aten::tie(is_found_feature_line_point, closest_feature_line_point_distance) = EvaluateQueryAndSampleRayHit(
                         desc,
                         ctxt, cam_org,
-                        query_ray, hrec_query, distance_query_ray_hit,
+                        query_ray, sample_ray,
+                        hrec_query, distance_query_ray_hit,
                         isect_sample_ray,
                         disc,
                         is_found_feature_line_point,

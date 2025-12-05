@@ -43,7 +43,7 @@ namespace AT_NAME
             aten::hitrecord& rec,
             const aten::Intersection& isect)
         {
-            const auto& faceParam = ctxt.GetTriangle(isect.triangle_id);
+            const auto& faceParam = ctxt.GetTriangle(isect.hit.tri.id);
 
             AT_NAME::triangle::EvaluateHitResult(ctxt, faceParam, &rec, &isect);
 

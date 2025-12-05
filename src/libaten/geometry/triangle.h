@@ -56,8 +56,8 @@ namespace AT_NAME
                 if (res.t < isect->t) {
                     isect->t = res.t;
 
-                    isect->a = res.a;
-                    isect->b = res.b;
+                    isect->hit.tri.a = res.a;
+                    isect->hit.tri.b = res.b;
 
                     isHit = true;
                 }
@@ -94,8 +94,8 @@ namespace AT_NAME
             // NOTE
             // http://d.hatena.ne.jp/Zellij/20131207/p1
 
-            float a = isect->a;
-            float b = isect->b;
+            float a = isect->hit.tri.a;
+            float b = isect->hit.tri.b;
             float c = 1 - a - b;
 
             // 重心座標系(barycentric coordinates).

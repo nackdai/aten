@@ -1183,9 +1183,9 @@ namespace aten
 
                     isectTmp.t = t_result;
 
-                    isectTmp.nml_x = nml.x;
-                    isectTmp.nml_y = nml.y;
-                    isectTmp.nml_z = nml.z;
+                    isectTmp.hit.voxel.nml_x = nml.x;
+                    isectTmp.hit.voxel.nml_y = nml.y;
+                    isectTmp.hit.voxel.nml_z = nml.z;
 
                     isectTmp.mtrlid = (short)node->mtrlid;
 

@@ -202,9 +202,9 @@ namespace AT_NAME
         BUFFER_VALUE_TYPE& aovBuffer,
         const aten::Intersection& isect)
     {
-        aovBuffer.x = isect.a;
-        aovBuffer.y = isect.b;
-        aovBuffer.z = float(1) - isect.a - isect.b;
+        aovBuffer.x = isect.hit.tri.a;
+        aovBuffer.y = isect.hit.tri.b;
+        aovBuffer.z = float(1) - isect.hit.tri.a - isect.hit.tri.b;
     }
 
     template <class BUFFER_VALUE_TYPE>

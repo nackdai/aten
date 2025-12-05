@@ -19,7 +19,8 @@ namespace AT_NAME
             // For voxel.
 
             // Repair normal.
-            rec.normal = normalize(aten::vec3(isect.nml_x, isect.nml_y, isect.nml_z));
+            rec.normal = normalize(aten::vec3(
+                isect.hit.voxel.nml_x, isect.hit.voxel.nml_y, isect.hit.voxel.nml_z));
 
             // Compute hit point.
             rec.p = r.org + isect.t * r.dir;

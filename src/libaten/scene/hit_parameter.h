@@ -38,28 +38,28 @@ namespace aten {
          */
         int32_t meshid{ -1 };
 
-        union {
+        union HitData {
             // For triangle.
-            struct {
-                int32_t triangle_id;    ///< Hit triangle id.
-                float a, b;             ///< Barycentric on hit triangle.
-            };
+            struct Triangle {
+                int32_t id; ///< Hit triangle id.
+                float a, b; ///< Barycentric on hit triangle.
+            } tri;
             // Fox voxel.
-            struct {
+            struct Voxel {
                 float nml_x;
                 float nml_y;
                 float nml_z;
-            };
-        };
+            } voxel;
+        } hit;
 
         int32_t isVoxel{ 0 };
 
         AT_HOST_DEVICE_API Intersection()
         {
-            triangle_id = -1;
-            a = b = float(0);
+            hit.tri.id = -1;
+            hit.tri.a = hit.tri.b = 0.0F;
 
-            nml_x = nml_y = nml_z = float(0);
+            hit.voxel.nml_x = hit.voxel.nml_y = hit.voxel.nml_z = 0.0F;
         }
     };
 

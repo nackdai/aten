@@ -100,10 +100,10 @@ namespace AT_NAME {
                 if (result.triangle_id >= 0) {
                     isect.t = length(dir);
 
-                    isect.triangle_id = result.triangle_id;
+                    isect.hit.tri.id = result.triangle_id;
 
-                    isect.a = result.a;
-                    isect.b = result.b;
+                    isect.hit.tri.a = result.a;
+                    isect.hit.tri.b = result.b;
 
                     // We can treat as hit.
                     isHit = true;

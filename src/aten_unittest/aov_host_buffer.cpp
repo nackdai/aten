@@ -137,14 +137,14 @@ TEST(aov_test, FillBaryCentricAOVTest)
     aten::vec4 aovBuffer;
 
     aten::Intersection isect;
-    isect.a = float(0.1);
-    isect.b = float(0.2);
+    isect.hit.tri.a = float(0.1);
+    isect.hit.tri.b = float(0.2);
 
     FillBaryCentricAOV(aovBuffer, isect);
 
-    ASSERT_FLOAT_EQ(aovBuffer.x, isect.a);
-    ASSERT_FLOAT_EQ(aovBuffer.y, isect.b);
-    ASSERT_FLOAT_EQ(aovBuffer.z, float(1) - isect.a - isect.b);
+    ASSERT_FLOAT_EQ(aovBuffer.x, isect.hit.tri.a);
+    ASSERT_FLOAT_EQ(aovBuffer.y, isect.hit.tri.b);
+    ASSERT_FLOAT_EQ(aovBuffer.z, float(1) - isect.hit.tri.a - isect.hit.tri.b);
 }
 
 TEST(aov_test, FillBaryCentricAOVIfHitMissTest)

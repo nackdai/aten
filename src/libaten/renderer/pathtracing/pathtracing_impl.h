@@ -47,18 +47,18 @@ namespace AT_NAME
         {
             throughput.alpha_blend.transmission = 1.0F;
             throughput.alpha_blend.throughput = aten::vec3(0.0F);
-            attrib.is_accumulating_alpha_blending = false;
+            attrib.attr.is_accumulating_alpha_blending = false;
         }
     }
 
     inline AT_DEVICE_API void ClearPathAttribute(PathAttribute& attrib)
     {
-        attrib.isHit = false;
-        attrib.is_terminated = false;
-        attrib.is_singular = false;
-        attrib.will_update_depth = true;
-        attrib.does_use_throughput_depth = false;
-        attrib.is_accumulating_alpha_blending = true;
+        attrib.attr.isHit = false;
+        attrib.attr.is_terminated = false;
+        attrib.attr.is_singular = false;
+        attrib.attr.will_update_depth = true;
+        attrib.attr.does_use_throughput_depth = false;
+        attrib.attr.is_accumulating_alpha_blending = true;
         attrib.last_hit_mtrl_idx = -1;
     }
 
@@ -118,11 +118,11 @@ namespace AT_NAME
         aten::span<AOV_BUFFER_TYPE> aov_normal_depth = nullptr,
         aten::span<AOV_BUFFER_TYPE> aov_albedo_meshid = nullptr)
     {
-        bounce = paths.attrib[idx].does_use_throughput_depth
+        bounce = paths.attrib[idx].attr.does_use_throughput_depth
             ? paths.throughput[idx].medium.depth_count
             : bounce;
 
-        if (!paths.attrib[idx].is_terminated && !paths.attrib[idx].isHit) {
+        if (!paths.attrib[idx].attr.is_terminated && !paths.attrib[idx].attr.isHit) {
             aten::vec3 dir = ray.dir;
 
             if (bounce == 0) {
@@ -145,7 +145,7 @@ namespace AT_NAME
 
             float misW = 1.0f;
             if (bounce == 0
-                || (bounce == 1 && paths.attrib[idx].is_singular))
+                || (bounce == 1 && paths.attrib[idx].attr.is_singular))
             {
                 if (!aov_normal_depth.empty() && !aov_albedo_meshid.empty())
                 {
@@ -167,7 +167,7 @@ namespace AT_NAME
 
             _detail_pathtracing_impl::ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
-            paths.attrib[idx].is_terminated = true;
+            paths.attrib[idx].attr.is_terminated = true;
         }
     }
 
@@ -355,7 +355,7 @@ namespace AT_NAME
         const AT_NAME::ShadowRay& shadow_ray
     )
     {
-        if (paths.attrib[idx].is_terminated) {
+        if (paths.attrib[idx].attr.is_terminated) {
             return false;
         }
 
@@ -442,7 +442,7 @@ namespace AT_NAME
         aten::AddVec3(path_contrib.contrib, contrib);
 
         // When ray hit the light, tracing will finish.
-        path_attrib.is_terminated = true;
+        path_attrib.attr.is_terminated = true;
         return true;
     }
 
@@ -493,7 +493,7 @@ namespace AT_NAME
 
             aten::AddVec3(path_contrib.contrib, path_throughput.throughput * toon_bsdf * external_albedo);
 
-            path_attrib.is_terminated = true;
+            path_attrib.attr.is_terminated = true;
             return true;
         }
         default:
@@ -522,7 +522,7 @@ namespace AT_NAME
             return false;
         }
 
-        if (!path_attrib.is_accumulating_alpha_blending) {
+        if (!path_attrib.attr.is_accumulating_alpha_blending) {
             return false;
         }
 
@@ -554,12 +554,12 @@ namespace AT_NAME
             aten::AddVec3(path_throughput.alpha_blend.throughput, alpha_belended_radiance);
             path_throughput.alpha_blend.transmission *= (1.0F - alpha);
 
-            path_attrib.is_singular = true;
+            path_attrib.attr.is_singular = true;
             return true;
         }
         else {
             // If ray hits to non-alpha face, terminate to accumulate alpha transmission.
-            path_attrib.is_accumulating_alpha_blending = false;
+            path_attrib.attr.is_accumulating_alpha_blending = false;
         }
 
         return false;
@@ -639,7 +639,7 @@ namespace AT_NAME
             if (aten::squared_length(path_throughput.throughput) > 0) {
                 russian_prob = aten::max_from_vec3(path_throughput.throughput);
                 auto p = sampler.nextSample();
-                path_attrib.is_terminated = (p >= russian_prob);
+                path_attrib.attr.is_terminated = (p >= russian_prob);
             }
         }
 
@@ -674,17 +674,17 @@ namespace AT_NAME
             paths.throughput[idx].throughput /= russian_prob;
         }
         else {
-            paths.attrib[idx].is_terminated = true;
+            paths.attrib[idx].attr.is_terminated = true;
         }
 
         _detail_pathtracing_impl::ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
-        if (paths.attrib[idx].is_terminated) {
+        if (paths.attrib[idx].attr.is_terminated) {
             return;
         }
 
         paths.throughput[idx].pdfb = pdfb;
-        paths.attrib[idx].is_singular = mtrl.attrib.is_singular;
+        paths.attrib[idx].attr.is_singular = mtrl.attrib.is_singular;
         paths.attrib[idx].last_hit_mtrl_idx = mtrl.id;
 
         // Make next ray.

@@ -37,9 +37,9 @@ namespace aten
     {
         int32_t loop_count = 0;
 
-        while (!path_host_.paths.attrib[idx].is_terminated) {
+        while (!path_host_.paths.attrib[idx].attr.is_terminated) {
             if (loop_count >= aten::MedisumStackSize) {
-                path_host_.attrib[idx].is_terminated = true;
+                path_host_.attrib[idx].attr.is_terminated = true;
                 break;
             }
 
@@ -48,7 +48,7 @@ namespace aten
 
             const auto& ray = rays_[idx];
 
-            path_host_.paths.attrib[idx].isHit = false;
+            path_host_.paths.attrib[idx].attr.isHit = false;
 
             Intersection isect;
             bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
@@ -58,7 +58,7 @@ namespace aten
                 AT_MATH_EPSILON, AT_MATH_INF);
 
             if (is_hit) {
-                path_host_.paths.attrib[idx].isHit = true;
+                path_host_.paths.attrib[idx].attr.isHit = true;
 
                 Nee(
                     idx,
@@ -82,7 +82,7 @@ namespace aten
                     ctxt, camera,
                     path_host_.paths, rays_[idx]);
 
-                path_host_.paths.attrib[idx].is_terminated = true;
+                path_host_.paths.attrib[idx].attr.is_terminated = true;
             }
 
             loop_count++;
@@ -103,8 +103,8 @@ namespace aten
             bounce, rrDepth,
             paths.attrib[idx], paths.throughput[idx],
             paths.sampler[idx]);
-        if (paths.attrib[idx].is_terminated) {
-            paths.attrib[idx].will_update_depth = false;
+        if (paths.attrib[idx].attr.is_terminated) {
+            paths.attrib[idx].attr.will_update_depth = false;
             return;
         }
         paths.throughput[idx].throughput /= russianProb;
@@ -157,7 +157,7 @@ namespace aten
                 rec,
                 mtrl);
             if (is_hit_implicit_light) {
-                paths.attrib[idx].will_update_depth = false;
+                paths.attrib[idx].attr.will_update_depth = false;
                 return;
             }
 
@@ -211,7 +211,7 @@ namespace aten
             AT_NAME::UpdateMedium(curr_ray, rays[idx].dir, orienting_normal, mtrl, paths.throughput[idx].medium.stack);
         }
 
-        paths.attrib[idx].will_update_depth = is_scattered || is_reflected_or_refracted;
+        paths.attrib[idx].attr.will_update_depth = is_scattered || is_reflected_or_refracted;
 
         return;
     }
@@ -250,8 +250,8 @@ namespace aten
             bounce, rrDepth,
             paths.attrib[idx], paths.throughput[idx],
             paths.sampler[idx]);
-        if (paths.attrib[idx].is_terminated) {
-            paths.attrib[idx].will_update_depth = false;
+        if (paths.attrib[idx].attr.is_terminated) {
+            paths.attrib[idx].attr.will_update_depth = false;
             return;
         }
         paths.throughput[idx].throughput /= russianProb;
@@ -314,7 +314,7 @@ namespace aten
                 rec,
                 mtrl);
             if (is_hit_implicit_light) {
-                paths.attrib[idx].will_update_depth = false;
+                paths.attrib[idx].attr.will_update_depth = false;
                 return;
             }
 
@@ -401,7 +401,7 @@ namespace aten
             AT_NAME::UpdateMedium(curr_ray, rays[idx].dir, orienting_normal, mtrl, paths.throughput[idx].medium.stack);
         }
 
-        paths.attrib[idx].will_update_depth = is_scattered || is_reflected_or_refracted;
+        paths.attrib[idx].attr.will_update_depth = is_scattered || is_reflected_or_refracted;
 
         return;
     }
@@ -426,7 +426,7 @@ namespace aten
             // Sample IBL properly.
             if (depth == 0) {
                 float misW = 1.0F;
-                paths.attrib[idx].is_terminated = true;
+                paths.attrib[idx].attr.is_terminated = true;
             }
             else {
                 auto pdfLight = ibl->samplePdf(ray, ctxt);
@@ -501,7 +501,7 @@ namespace aten
                             rnd);
 
                         path_host_.paths.contrib[idx].contrib = aten::vec3(0);
-                        path_host_.paths.attrib[idx].does_use_throughput_depth = true;
+                        path_host_.paths.attrib[idx].attr.does_use_throughput_depth = true;
 
                         radiance(
                             idx,
@@ -519,7 +519,7 @@ namespace aten
                         col2 += c * c;
                         cnt++;
 
-                        if (path_host_.paths.attrib[idx].is_terminated) {
+                        if (path_host_.paths.attrib[idx].attr.is_terminated) {
                             break;
                         }
                     }

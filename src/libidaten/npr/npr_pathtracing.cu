@@ -68,7 +68,7 @@ namespace npr_kernel {
 
         idx = hitindices[idx];
 
-        if (paths.attrib[idx].is_terminated) {
+        if (paths.attrib[idx].attr.is_terminated) {
             return;
         }
 
@@ -117,7 +117,7 @@ namespace npr_kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        if (paths.attrib[idx].is_terminated || paths.attrib[idx].isHit) {
+        if (paths.attrib[idx].attr.is_terminated || paths.attrib[idx].attr.isHit) {
             return;
         }
 

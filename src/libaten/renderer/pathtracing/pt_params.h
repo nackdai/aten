@@ -50,7 +50,7 @@ namespace AT_NAME {
     };
 
     struct PathAttribute {
-        struct {
+        struct Attribs {
             uint32_t isHit : 1;
             uint32_t is_terminated : 1;
             uint32_t is_singular : 1;
@@ -61,7 +61,7 @@ namespace AT_NAME {
             // If we continues to accumulate, the reflected ray throughput accumulates the alpha blended color and it makes the pixel brighter.
             // Not to cause it, we need to termniate immediately.
             uint32_t is_accumulating_alpha_blending : 1;
-        };
+        } attr;
 
         int32_t last_hit_mtrl_idx{ -1 };
     };

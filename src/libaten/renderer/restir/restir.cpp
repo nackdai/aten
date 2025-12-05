@@ -40,7 +40,7 @@ namespace aten
 
         const auto& ray = rays_[idx];
 
-        path_host_.paths.attrib[idx].isHit = false;
+        path_host_.paths.attrib[idx].attr.isHit = false;
 
         Intersection isect;
         bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
@@ -50,7 +50,7 @@ namespace aten
             AT_MATH_EPSILON, AT_MATH_INF);
 
         if (is_hit) {
-            path_host_.paths.attrib[idx].isHit = true;
+            path_host_.paths.attrib[idx].attr.isHit = true;
 
             if (bounce == 0) {
                 aten::span reservoirs(reservoirs_.GetCurrParams());
@@ -420,7 +420,7 @@ namespace aten
                         for (int32_t x = 0; x < width; x++) {
                             int32_t idx = y * width + x;
 
-                            if (path_host_.paths.attrib[idx].is_terminated) {
+                            if (path_host_.paths.attrib[idx].attr.is_terminated) {
                                 continue;
                             }
 
@@ -446,7 +446,7 @@ namespace aten
                         for (int32_t x = 0; x < width; x++) {
                             int32_t idx = y * width + x;
 
-                            if (path_host_.paths.attrib[idx].is_terminated) {
+                            if (path_host_.paths.attrib[idx].attr.is_terminated) {
                                 continue;
                             }
 
@@ -492,7 +492,7 @@ namespace aten
                                 for (int32_t x = 0; x < width; x++) {
                                     int32_t idx = y * width + x;
 
-                                    if (path_host_.paths.attrib[idx].is_terminated) {
+                                    if (path_host_.paths.attrib[idx].attr.is_terminated) {
                                         continue;
                                     }
 
@@ -517,7 +517,7 @@ namespace aten
                             for (int32_t x = 0; x < width; x++) {
                                 int32_t idx = y * width + x;
 
-                                if (path_host_.paths.attrib[idx].is_terminated) {
+                                if (path_host_.paths.attrib[idx].attr.is_terminated) {
                                     continue;
                                 }
 
@@ -543,7 +543,7 @@ namespace aten
                         for (int32_t x = 0; x < width; x++) {
                             int32_t idx = y * width + x;
 
-                            if (path_host_.paths.attrib[idx].is_terminated) {
+                            if (path_host_.paths.attrib[idx].attr.is_terminated) {
                                 continue;
                             }
 

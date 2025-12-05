@@ -36,7 +36,7 @@ namespace aten
                 AT_MATH_EPSILON, AT_MATH_INF);
 
             if (is_hit) {
-                path_host_.paths.attrib[idx].isHit = true;
+                path_host_.paths.attrib[idx].attr.isHit = true;
 
                 AT_NAME::ao::ShandeAO(
                     idx,
@@ -124,7 +124,7 @@ namespace aten
                         col += c;
                         cnt++;
 
-                        if (path_host_.paths.attrib[idx].is_terminated) {
+                        if (path_host_.paths.attrib[idx].attr.is_terminated) {
                             break;
                         }
                     }

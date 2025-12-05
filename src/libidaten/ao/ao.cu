@@ -25,10 +25,14 @@ namespace ao_kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        AT_NAME::ao::ShadeMissAO(
+        const auto ao_color = AT_NAME::ao::ShadeByAOIfHitMiss(
             idx,
             is_first_bounce,
             paths);
+
+        if (ao_color >= 0) {
+            paths.contrib[idx].contrib = make_float3(ao_color);
+        }
     }
 
     __global__ void shadeAO(
@@ -39,7 +43,6 @@ namespace ao_kernel {
         int32_t* hitnum,
         const aten::Intersection* __restrict__ isects,
         aten::ray* rays,
-        int32_t bounce, int32_t rrBounce,
         idaten::context ctxt,
         const aten::ObjectParameter* __restrict__ shapes,
         const aten::MaterialParameter* __restrict__ mtrls,
@@ -56,6 +59,10 @@ namespace ao_kernel {
 
         idx = hitindices[idx];
 
+        const auto rnd = random[idx];
+        const auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+        paths.sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 5 * 300, scramble);
+
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
         ctxt.lights = lights;
@@ -63,16 +70,13 @@ namespace ao_kernel {
         ctxt.matrices = matrices;
 
         const auto& ray = rays[idx];
-
-        auto rnd = random[idx];
-
         const auto& isect = isects[idx];
 
-        AT_NAME::ao::ShandeAO(
-            idx,
-            frame, rnd,
+        const auto ao_color = AT_NAME::ao::ShandeByAO(
             ao_num_rays, ao_radius,
-            paths, ctxt, ray, isect);
+            paths.sampler[idx], ctxt, ray, isect);
+
+        paths.contrib[idx].contrib = make_float3(ao_color);
     }
 }
 
@@ -113,7 +117,6 @@ namespace idaten {
             m_hitidx.data(), hitcount.data(),
             m_isects.data(),
             m_rays.data(),
-            bounce, rrBounce,
             ctxt_host_->ctxt,
             ctxt_host_->shapeparam.data(),
             ctxt_host_->mtrlparam.data(),

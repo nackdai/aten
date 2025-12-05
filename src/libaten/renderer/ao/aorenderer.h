@@ -22,7 +22,7 @@ namespace aten
             Camera* camera) override;
 
     protected:
-        void radiance(
+        float radiance(
             int32_t idx,
             uint32_t rnd,
             const context& ctxt,

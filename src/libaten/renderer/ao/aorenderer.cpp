@@ -17,44 +17,42 @@
 
 namespace aten
 {
-    void AORenderer::radiance(
+    float AORenderer::radiance(
         int32_t idx,
         uint32_t rnd,
         const context& ctxt,
         const ray& inRay,
         scene* scene)
     {
+        const auto frame = GetFrameCount();
+        const auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+        path_host_.paths.sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 5 * 300, scramble);
+
         Intersection isect;
 
-        int32_t depth = 0;
+        bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+            isect,
+            ctxt,
+            inRay,
+            AT_MATH_EPSILON, AT_MATH_INF);
 
-        while (depth < max_depth_) {
-            bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
-                isect,
-                ctxt,
-                inRay,
-                AT_MATH_EPSILON, AT_MATH_INF);
+        float ao_color{ 0.0F };
 
-            if (is_hit) {
-                path_host_.paths.attrib[idx].attr.isHit = true;
+        if (is_hit) {
+            path_host_.paths.attrib[idx].attr.isHit = true;
 
-                AT_NAME::ao::ShandeAO(
-                    idx,
-                    GetFrameCount(), rnd,
-                    m_numAORays, m_AORadius,
-                    path_host_.paths, ctxt, inRay, isect);
-            }
-            else {
-                bool is_first_bounce = (depth == 0);
-                AT_NAME::ao::ShadeMissAO(
-                    idx,
-                    is_first_bounce,
-                    path_host_.paths);
-                return;
-            }
-
-            depth++;
+            ao_color = AT_NAME::ao::ShandeByAO(
+                m_numAORays, m_AORadius,
+                path_host_.paths.sampler[idx], ctxt, inRay, isect);
         }
+        else {
+            ao_color = AT_NAME::ao::ShadeByAOIfHitMiss(
+                idx,
+                true,
+                path_host_.paths);
+        }
+
+        return ao_color;
     }
 
     void AORenderer::OnRender(
@@ -108,9 +106,7 @@ namespace aten
                             camsample,
                             rnd);
 
-                        path_host_.paths.contrib[idx].contrib = aten::vec3(0);
-
-                        radiance(
+                        const auto ao_color = radiance(
                             idx, rnd,
                             ctxt, ray, scene);
 
@@ -119,6 +115,9 @@ namespace aten
                             continue;
                         }
 
+                        if (!path_host_.paths.attrib[idx].attr.is_terminated) {
+                            path_host_.paths.contrib[idx].contrib = aten::vec3(ao_color);
+                        }
                         auto c = path_host_.paths.contrib[idx].contrib;
 
                         col += c;

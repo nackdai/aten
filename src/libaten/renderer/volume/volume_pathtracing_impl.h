@@ -283,13 +283,13 @@ namespace AT_NAME
         }
 
         // Update depth count for the next bounce.
-        if (paths.attrib[idx].will_update_depth) {
+        if (paths.attrib[idx].attr.will_update_depth) {
             paths.throughput[idx].medium.depth_count += 1;
         }
-        paths.attrib[idx].will_update_depth = false;
+        paths.attrib[idx].attr.will_update_depth = false;
 
         if (paths.throughput[idx].medium.depth_count > max_depth) {
-            paths.attrib[idx].is_terminated = true;
+            paths.attrib[idx].attr.is_terminated = true;
         }
     }
 }

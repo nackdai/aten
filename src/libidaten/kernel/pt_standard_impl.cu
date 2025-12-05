@@ -171,11 +171,11 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        paths.attrib[idx].isHit = false;
+        paths.attrib[idx].attr.isHit = false;
 
         hitbools[idx] = 0;
 
-        if (paths.attrib[idx].is_terminated) {
+        if (paths.attrib[idx].attr.is_terminated) {
             return;
         }
 
@@ -190,7 +190,7 @@ namespace kernel {
         float t_max = AT_MATH_INF;
 
         if (bounce >= 1
-            && !paths.attrib[idx].is_singular)
+            && !paths.attrib[idx].attr.is_singular)
         {
             t_max = hitDistLimit;
         }
@@ -213,13 +213,13 @@ namespace kernel {
 #endif
 
         if (bounce >= 1
-            && !paths.attrib[idx].is_singular
+            && !paths.attrib[idx].attr.is_singular
             && isect.t > hitDistLimit)
         {
             isHit = false;
         }
 
-        paths.attrib[idx].isHit = isHit;
+        paths.attrib[idx].attr.isHit = isHit;
 
         hitbools[idx] = isHit ? 1 : 0;
 #endif
@@ -248,11 +248,11 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        paths.attrib[idx].isHit = false;
+        paths.attrib[idx].attr.isHit = false;
 
         hitbools[idx] = 0;
 
-        if (paths.attrib[idx].is_terminated) {
+        if (paths.attrib[idx].attr.is_terminated) {
             return;
         }
 
@@ -311,11 +311,11 @@ namespace kernel {
 
             isects[idx].t = (camPos - vp).length();
 
-            paths.attrib[idx].isHit = true;
+            paths.attrib[idx].attr.isHit = true;
             hitbools[idx] = 1;
         }
         else {
-            paths.attrib[idx].isHit = false;
+            paths.attrib[idx].attr.isHit = false;
             hitbools[idx] = 0;
         }
     }

@@ -237,7 +237,7 @@ __global__ void EvaluateVisibility(
         return;
     }
 
-    if (paths.attrib[idx].is_terminated) {
+    if (paths.attrib[idx].attr.is_terminated) {
         return;
     }
 
@@ -282,7 +282,7 @@ __global__ void ComputePixelColor(
 
     idx = hitindices[idx];
 
-    if (paths.attrib[idx].is_terminated) {
+    if (paths.attrib[idx].attr.is_terminated) {
         return;
     }
 

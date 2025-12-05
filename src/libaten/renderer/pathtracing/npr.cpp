@@ -47,7 +47,7 @@ namespace aten
 
             const auto& ray = rays_[idx];
 
-            path_host_.paths.attrib[idx].isHit = false;
+            path_host_.paths.attrib[idx].attr.isHit = false;
 
             bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
                 isect,
@@ -67,7 +67,7 @@ namespace aten
                     feature_line_sample_ray_infos_.data()
                 );
 
-                path_host_.paths.attrib[idx].isHit = true;
+                path_host_.paths.attrib[idx].attr.isHit = true;
 
                 shade(
                     idx,
@@ -82,7 +82,7 @@ namespace aten
                     path_host_.paths,
                     shadow_rays_[idx]);
 
-                willContinue = !path_host_.paths.attrib[idx].is_terminated;
+                willContinue = !path_host_.paths.attrib[idx].attr.is_terminated;
             }
             else {
                 AT_NAME::npr::ShadeMissSampleRay<SampleRayNum>(

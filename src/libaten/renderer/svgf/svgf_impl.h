@@ -31,7 +31,7 @@ namespace svgf {
         {
             if constexpr (NeedCheckSingularMtrlBounce) {
                 //return bounce == 1 && paths.attrib[idx].mtrlType == aten::MaterialType::Specular;
-                return bounce == 1 && paths.attrib[idx].is_singular;
+                return bounce == 1 && paths.attrib[idx].attr.is_singular;
             }
             return false;
         }

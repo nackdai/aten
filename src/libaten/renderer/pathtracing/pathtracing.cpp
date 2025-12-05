@@ -36,7 +36,7 @@ namespace aten
 
             const auto& ray = rays_[idx];
 
-            path_host_.paths.attrib[idx].isHit = false;
+            path_host_.paths.attrib[idx].attr.isHit = false;
 
             bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
                 isect,
@@ -50,7 +50,7 @@ namespace aten
                     AT_NAME::evaluate_hit_result(*first_hrec, obj, ctxt, ray, isect);
                 }
 
-                path_host_.paths.attrib[idx].isHit = true;
+                path_host_.paths.attrib[idx].attr.isHit = true;
 
                 shade(
                     idx,
@@ -65,7 +65,7 @@ namespace aten
                     path_host_.paths,
                     shadow_rays_[idx]);
 
-                willContinue = !path_host_.paths.attrib[idx].is_terminated;
+                willContinue = !path_host_.paths.attrib[idx].attr.is_terminated;
             }
             else {
                 ShadeMiss(
@@ -98,7 +98,7 @@ namespace aten
         int32_t rrDepth,
         int32_t bounce)
     {
-        if (paths.attrib[idx].is_terminated) {
+        if (paths.attrib[idx].attr.is_terminated) {
             return;
         }
 
@@ -240,7 +240,7 @@ namespace aten
             // Sample IBL properly.
             if (depth == 0) {
                 float misW = 1.0F;
-                paths.attrib[idx].is_terminated = true;
+                paths.attrib[idx].attr.is_terminated = true;
             }
             else {
                 auto pdfLight = ibl->samplePdf(ray, ctxt);
@@ -346,7 +346,7 @@ namespace aten
                         col2 += c * c;
                         cnt++;
 
-                        if (path_host_.paths.attrib[idx].is_terminated) {
+                        if (path_host_.paths.attrib[idx].attr.is_terminated) {
                             break;
                         }
                     }

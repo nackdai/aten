@@ -48,8 +48,8 @@ namespace vpt
 
         idx = hitindices[idx];
 
-        if (paths.attrib[idx].is_terminated) {
-            paths.attrib[idx].will_update_depth = false;
+        if (paths.attrib[idx].attr.is_terminated) {
+            paths.attrib[idx].attr.will_update_depth = false;
             return;
         }
 
@@ -59,8 +59,8 @@ namespace vpt
             bounce, depth_for_rr,
             paths.attrib[idx], paths.throughput[idx],
             paths.sampler[idx]);
-        if (paths.attrib[idx].is_terminated) {
-            paths.attrib[idx].will_update_depth = false;
+        if (paths.attrib[idx].attr.is_terminated) {
+            paths.attrib[idx].attr.will_update_depth = false;
             return;
         }
 
@@ -147,7 +147,7 @@ namespace vpt
                 rec,
                 shMtrls[threadIdx.x]);
             if (is_hit_implicit_light) {
-                paths.attrib[idx].will_update_depth = false;
+                paths.attrib[idx].attr.will_update_depth = false;
                 return;
             }
 
@@ -241,7 +241,7 @@ namespace vpt
                 shMtrls[threadIdx.x], paths.throughput[idx].medium.stack);
         }
 
-        paths.attrib[idx].will_update_depth = is_scattered || is_reflected_or_refracted;
+        paths.attrib[idx].attr.will_update_depth = is_scattered || is_reflected_or_refracted;
     }
 
     __global__ void TraverseShadowRay(
@@ -295,7 +295,7 @@ namespace vpt
             return;
         }
 
-        int32_t n = paths.attrib[idx].is_terminated ? 1 : 0;
+        int32_t n = paths.attrib[idx].attr.is_terminated ? 1 : 0;
         atomicAdd(terminated_path_count + 0, n);
 #else
         // NOTE:
@@ -357,7 +357,7 @@ namespace vpt
             return;
         }
 
-        paths.attrib[idx].does_use_throughput_depth = true;
+        paths.attrib[idx].attr.does_use_throughput_depth = true;
     }
 }
 

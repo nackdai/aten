@@ -108,12 +108,14 @@ namespace idaten::kernel::debug
                 clr = make_float4(normal.x, normal.y, normal.z, 1);
             }
             else if (aov == idaten::Renderer::AOV::WireFrame) {
-                bool isHitEdge = (isect.a < 1e-2) || (isect.b < 1e-2) || (1 - isect.a - isect.b < 1e-2);
+                bool isHitEdge = (isect.hit.tri.a < 1e-2)
+                    || (isect.hit.tri.b < 1e-2)
+                    || (1 - isect.hit.tri.a - isect.hit.tri.b < 1e-2);
                 clr = isHitEdge ? make_float4(0) : make_float4(1);
             }
             else if (aov == idaten::Renderer::AOV::BaryCentric) {
-                auto c = 1 - isect.a - isect.b;
-                clr = make_float4(isect.a, isect.b, c, 1);
+                auto c = 1 - isect.hit.tri.a - isect.hit.tri.b;
+                clr = make_float4(isect.hit.tri.a, isect.hit.tri.b, c, 1);
             }
         }
         else {

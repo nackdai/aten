@@ -275,11 +275,11 @@ namespace kernel {
         int32_t primid = __float_as_int(data.y);
 
         isects[idx].objid = objid;
-        isects[idx].triangle_id = primid;
+        isects[idx].hit.tri.id = primid;
 
         // bary centroid.
-        isects[idx].a = data.z;
-        isects[idx].b = data.w;
+        isects[idx].hit.tri.a = data.z;
+        isects[idx].hit.tri.b = data.w;
 
         if (objid >= 0) {
             aten::TriangleParameter prim;

@@ -39,7 +39,7 @@ namespace aten
             // Temporary, notify triangle id to the parent object.
             isect.objid = m_id;
 
-            isect.triangle_id = m_id;
+            isect.hit.tri.id = m_id;
 
             isect.mtrlid = param_.v1.mtrlid;
         }

@@ -81,12 +81,14 @@ __global__ void fillAOV(
         clr = aovTexclrMeshid[idx];
     }
     else if (mode == AT_NAME::SVGFAovMode::WireFrame) {
-        bool isHitEdge = (isect.a < 1e-2) || (isect.b < 1e-2) || (1 - isect.a - isect.b < 1e-2);
+        bool isHitEdge = (isect.hit.tri.a < 1e-2)
+            || (isect.hit.tri.b < 1e-2)
+            || (1 - isect.hit.tri.a - isect.hit.tri.b < 1e-2);
         clr = isHitEdge ? make_float4(0) : make_float4(1);
     }
     else if (mode == AT_NAME::SVGFAovMode::BaryCentric) {
-        auto c = 1 - isect.a - isect.b;
-        clr = make_float4(isect.a, isect.b, c, 1);
+        auto c = 1 - isect.hit.tri.a - isect.hit.tri.b;
+        clr = make_float4(isect.hit.tri.a, isect.hit.tri.b, c, 1);
     }
     else if (mode == AT_NAME::SVGFAovMode::Motion) {
         float4 data;
@@ -169,7 +171,7 @@ __global__ void pickPixel(
         dst->normal = aten::vec3(normalDepth.x, normalDepth.y, normalDepth.z);
         dst->depth = normalDepth.w;
         dst->meshid = (int32_t)texclrMeshid.w;
-        dst->triid = isect.triangle_id;
+        dst->triid = isect.hit.tri.id;
         dst->mtrlid = isect.mtrlid;
     }
     else {

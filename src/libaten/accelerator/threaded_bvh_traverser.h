@@ -202,7 +202,7 @@ namespace aten
                         if (is_intersect) {
                             isect = isect_tmp;
                             isect.objid = objid;
-                            isect.triangle_id = static_cast<int32_t>(node.primid);
+                            isect.hit.tri.id = static_cast<int32_t>(node.primid);
                             isect.mtrlid = static_cast<int32_t>(prim.v1.mtrlid);
 
                             isect.meshid = static_cast<int32_t>(prim.v1.mesh_id);
@@ -248,9 +248,9 @@ namespace aten
 
                                 isect_tmp.t = t_result;
 
-                                isect_tmp.nml_x = nml.x;
-                                isect_tmp.nml_y = nml.y;
-                                isect_tmp.nml_z = nml.z;
+                                isect_tmp.hit.voxel.nml_x = nml.x;
+                                isect_tmp.hit.voxel.nml_y = nml.y;
+                                isect_tmp.hit.voxel.nml_z = nml.z;
 
                                 isect_tmp.mtrlid = static_cast<int32_t>(sbvh_node.mtrlid);
 

@@ -98,7 +98,7 @@ namespace idaten
         PathTracing() = default;
         virtual ~PathTracing() = default;
 
-        virtual void render(
+        void render(
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce) override;

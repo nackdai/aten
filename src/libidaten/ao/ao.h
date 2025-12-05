@@ -7,13 +7,13 @@
 
 namespace idaten
 {
-    class AORenderer : public PathTracingImplBase {
+    class AORenderer : public PathTracing {
     public:
         AORenderer() = default;
-        virtual ~AORenderer() {}
+        ~AORenderer() = default;
 
     public:
-        virtual void render(
+        void render(
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce) override;

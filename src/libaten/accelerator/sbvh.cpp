@@ -1011,12 +1011,12 @@ namespace aten
 
             bool isHit = false;
 
-            if (node->isLeaf()) {
+            if (aten::ThreadedBvhNode::isLeaf(*node)) {
                 Intersection isectTmp;
 
                 auto s = ctxt.GetTransformable((int32_t)node->object_id);
 
-                if (node->exid >= 0) {
+                if (node->ex_bvh.exid >= 0) {
                     // Traverse external linear bvh list.
                     const auto& param = s->GetParam();
 
@@ -1038,9 +1038,11 @@ namespace aten
                     }
 
                     //int32_t exid = node->mainExid;
-                    int32_t exid = *(int32_t*)(&node->exid);
-                    bool hasLod = AT_BVHNODE_HAS_LOD(exid);
-                    exid = hasLod && enableLod ? AT_BVHNODE_LOD_EXID(exid) : AT_BVHNODE_MAIN_EXID(exid);
+                    int32_t exid = *(int32_t*)(&node->ex_bvh.exid);
+                    bool hasLod = (node->ex_bvh.hasLod > 0);
+                    exid = hasLod && enableLod
+                        ? node->ex_bvh.lodExid
+                        : node->ex_bvh.mainExid;
                     //exid = AT_BVHNODE_LOD_EXID(exid);
 
                     isHit = hit(

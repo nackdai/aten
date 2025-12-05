@@ -167,7 +167,7 @@ namespace aten
 
         for (const auto& n : nodes) {
             fprintf(fp, "%d %d %d %d %d %d (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)\n",
-                (int32_t)n.hit, (int32_t)n.miss, (int32_t)n.object_id, (int32_t)n.primid, (int32_t)n.exid, (int32_t)n.meshid,
+                (int32_t)n.hit, (int32_t)n.miss, (int32_t)n.object_id, (int32_t)n.primid, (int32_t)n.ex_bvh.exid, (int32_t)n.meshid,
                 n.boxmin.x, n.boxmin.y, n.boxmin.z,
                 n.boxmax.x, n.boxmax.y, n.boxmax.z);
         }
@@ -224,7 +224,7 @@ namespace aten
                 if (isPrimitiveLeaf) {
                     // Leaves of this tree are primitive.
                     real_node.primid = static_cast<float>(ctxt.FindTriangleIdxFromPointer(item));
-                    real_node.exid = -1.0f;
+                    real_node.ex_bvh.exid = -1.0f;
                 }
                 else {
                     // This node specifies to another bvh tree.
@@ -234,14 +234,11 @@ namespace aten
                     auto subexid = node->getSubExternalId();
 
                     if (exid >= 0) {
-                        real_node.noExternal = false;
-                        real_node.hasLod = (subexid >= 0);
-                        real_node.mainExid = exid;
-                        real_node.lodExid = (subexid >= 0 ? subexid : 0);
+                        real_node.ex_bvh.exid = aten::ThreadedBvhNode::ConstructExternalBvhIdxFlag(exid, subexid);
                     }
                     else {
                         // In this case, the item which node keeps is sphere/cube.
-                        real_node.exid = -1.0f;
+                        real_node.ex_bvh.exid = -1.0f;
                     }
                 }
             }
@@ -394,12 +391,12 @@ namespace aten
 
             bool isHit = false;
 
-            if (node->isLeaf()) {
+            if (aten::ThreadedBvhNode::isLeaf(*node)) {
                 Intersection isectTmp;
 
                 auto s = node->object_id >= 0 ? ctxt.GetTransformable((int32_t)node->object_id) : nullptr;
 
-                if (node->exid >= 0) {
+                if (node->ex_bvh.exid >= 0) {
                     // Traverse external linear bvh list.
                     const auto& param = s->GetParam();
 
@@ -417,8 +414,8 @@ namespace aten
                     }
 
                     //int32_t exid = node->mainExid;
-                    int32_t exid = *(int32_t*)(&node->exid);
-                    exid = AT_BVHNODE_MAIN_EXID(exid);
+                    int32_t exid = *(int32_t*)(&node->ex_bvh.exid);
+                    exid = node->ex_bvh.mainExid;
 
                     isHit = hit(
                         ctxt,
@@ -527,13 +524,10 @@ namespace aten
                 int32_t subexid = node->getSubExternalId();
 
                 if (exid < 0) {
-                    real_node.exid = -1.0f;
+                    real_node.ex_bvh.exid = -1.0f;
                 }
                 else {
-                    real_node.noExternal = false;
-                    real_node.hasLod = (subexid >= 0);
-                    real_node.mainExid = (exid >= 0 ? exid : 0);
-                    real_node.lodExid = (subexid >= 0 ? subexid : 0);
+                    real_node.ex_bvh.exid = aten::ThreadedBvhNode::ConstructExternalBvhIdxFlag(exid, subexid);
                 }
             }
 

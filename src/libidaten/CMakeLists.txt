@@ -1,32 +1,16 @@
-set(PROJECT_NAME idaten)
+project(idaten LANGUAGES CXX CUDA)
 
-project(${PROJECT_NAME})
+set(CMAKE_CUDA_ARCHITECTURES ${CUDA_TARGET_COMPUTE_CAPABILITY})
 
-find_package(CUDA REQUIRED)
-
-set(CUDA_SEPARABLE_COMPILATION ON)
-set(CUDA_PROPAGATE_HOST_FLAGS ON)
-set(CUDA_VERBOSE_BUILD ON)
+set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+set(CMAKE_CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+set(CMAKE_CUDA_PROPAGATE_HOST_FLAGS ON)
+set(CMAKE_CUDA_VERBOSE_BUILD ON)
 
 message("-- CUDA --")
-message("Version: " ${CUDA_VERSION})
-message("Library: " ${CUDA_CUDA_LIBRARY})
-message("Runtime: " ${CUDA_CUDART_LIBRARY})
-
-set(CUDA_NVCC_FLAGS
-    ${CUDA_NVCC_FLAGS}
-    -rdc=true
-    -use_fast_math
-    --expt-relaxed-constexpr
-    --extended-lambda
-    -std=c++17
-    -gencode
-    arch=compute_${CUDA_TARGET_COMPUTE_CAPABILITY},code=sm_${CUDA_TARGET_COMPUTE_CAPABILITY}
-    -Xcompiler=-std=c++17)
-
-message("nvcc_flags " ${CUDA_NVCC_FLAGS})
-
-add_definitions(-D__AT_CUDA__)
+message("Version    : " ${CUDA_VERSION})
+message("Include dir: " ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+message("----------")
 
 set_source_files_properties(
   ../libaten/camera/pinhole.cpp
@@ -46,12 +30,11 @@ set_source_files_properties(
   ../libaten/material/velvet.cpp
   ../libaten/volume/grid.cpp
   ../libaten/volume/medium.cpp
-  PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+  PROPERTIES LANGUAGE CUDA)
 
 # Add library to build.
-cuda_add_library(
-  ${PROJECT_NAME}
-  STATIC
+add_library(
+  ${PROJECT_NAME} STATIC
   ../libaten/camera/camera.h
   ../libaten/camera/pinhole.cpp
   ../libaten/camera/pinhole.h
@@ -198,13 +181,20 @@ cuda_add_library(
   volume/volume_rendering.cu
   volume/volume_rendering.h)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+
+target_compile_options(
+  ${PROJECT_NAME}
+  PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--use_fast_math>
+          $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
+          $<$<COMPILE_LANGUAGE:CUDA>:--extended-lambda>
+          $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-std=c++17>)
 
 target_include_directories(
   ${PROJECT_NAME}
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  PUBLIC ${nanovdb_INCLUDE_DIRECTORIES})
-
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${nanovdb_INCLUDE_DIRECTORIES}
+         ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+target_compile_definitions(${PROJECT_NAME} PRIVATE __AT_CUDA__)
 target_link_libraries(${PROJECT_NAME} aten glm)
 
 # Defines outputs , depending Debug or Release.

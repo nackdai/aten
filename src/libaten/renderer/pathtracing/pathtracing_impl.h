@@ -575,10 +575,6 @@ namespace AT_NAME
         const aten::MaterialParameter& mtrl
     )
     {
-        if (mtrl.stencil_type == aten::StencilType::STENCIL) {
-            int x = 0;
-        }
-
         if (bounce > 0
             || mtrl.stencil_type != aten::StencilType::STENCIL
         ) {

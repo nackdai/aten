@@ -21,30 +21,23 @@ namespace ao {
     /**
      * @brief Shade Ambient Occlusion.
      *
-     * @param[in] idx Inded to the shading pixel.
-     * @param[in] frame Frame count.
-     * @param[in] rnd Seed for random.
      * @param[in] ao_num_rays Number of ray to shade AO.
      * @param[in] ao_radius Radius of the sphere to shader AO.
-     * @param[in,out] paths Information of paths.
+     * @param[in,out] sampler Sampler.
      * @param[in] ctxt Scene context.
      * @param[in] ray Query ray.
      * @param[in] isect Scene intersection information.
      * @param[in,out] scene Scene instance. Only for running on host.
+     * @return Shaded color by ambient occlusion.
      */
-    inline AT_DEVICE_API void ShandeAO(
-        int32_t idx,
-        uint32_t frame, uint32_t rnd,
+    inline AT_DEVICE_API float ShandeByAO(
         int32_t ao_num_rays, float ao_radius,
-        AT_NAME::Path& paths,
+        aten::sampler& sampler,
         const context& ctxt,
         const aten::ray& ray,
         const aten::Intersection& isect
     )
     {
-        auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-        paths.sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 5 * 300, scramble);
-
         aten::hitrecord rec;
 
         const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
@@ -65,12 +58,12 @@ namespace ao {
             mtrl.normalMap,
             orienting_normal, orienting_normal,
             rec.u, rec.v,
-            ray.dir, &paths.sampler[idx]);
+            ray.dir, &sampler);
 
-        aten::vec3 ao_color{ 0.0f };
+        float ao_color{ 0.0F };
 
         for (int32_t i = 0; i < ao_num_rays; i++) {
-            auto nextDir = AT_NAME::Diffuse::sampleDirection(orienting_normal, &paths.sampler[idx]);
+            auto nextDir = AT_NAME::Diffuse::sampleDirection(orienting_normal, &sampler);
             auto pdfb = AT_NAME::Diffuse::pdf(orienting_normal, nextDir);
 
             float c = dot(orienting_normal, nextDir);
@@ -87,16 +80,16 @@ namespace ao {
 
             if (isHit) {
                 if (c > 0.0f) {
-                    ao_color += aten::vec3(ao_isect.t / ao_radius * c / pdfb);
+                    ao_color += ao_isect.t / ao_radius * c / pdfb;
                 }
             }
             else {
-                ao_color = aten::vec3(1.0f);
+                ao_color = 1.0f;
             }
         }
 
         ao_color /= ao_num_rays;
-        aten::CopyVec(paths.contrib[idx].contrib, ao_color);
+        return ao_color;
     }
 
     /**
@@ -105,17 +98,19 @@ namespace ao {
      * @param[in] idx Index to the shading pixel.
      * @param[in] is_first_bounce Specify if this function is called for the first bounce.
      * @param[in,out] paths Information of paths.
+     * @return Check if ray hits to something, and if ray hits to something, return 1.0F.
+     *         Otherwize, return netative value as invalid value;
      */
-    inline AT_DEVICE_API void ShadeMissAO(
+    inline AT_DEVICE_API float ShadeByAOIfHitMiss(
         int32_t idx,
         bool is_first_bounce,
         AT_NAME::Path& paths)
     {
         if (!paths.attrib[idx].attr.is_terminated && !paths.attrib[idx].attr.isHit) {
-            aten::CopyVec(paths.contrib[idx].contrib, aten::vec3(1));
-
             paths.attrib[idx].attr.is_terminated = true;
+            return 1.0F;
         }
+        return -1.0F;
     }
 }
 }

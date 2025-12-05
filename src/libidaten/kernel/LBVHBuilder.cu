@@ -376,7 +376,7 @@ __device__ __host__ inline void onApplyTraverseOrder(
     auto gpunode = &dst[idx];
 
     gpunode->object_id = -1;
-    gpunode->exid = -1;
+    gpunode->ex_bvh.exid = -1;
     gpunode->meshid = -1;
 
     if (node->isLeaf) {

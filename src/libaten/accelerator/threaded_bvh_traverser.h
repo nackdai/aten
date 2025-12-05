@@ -78,7 +78,7 @@ namespace aten
 
             node.object_id = attrib.x;
             node.primid = attrib.y;
-            node.exid = attrib.z;
+            node.ex_bvh.exid = attrib.z;
             node.meshid = attrib.w;
 #else
             node = *reinterpret_cast<const aten::ThreadedBvhNode*>(&(*nodes_list)[nodeid]);
@@ -139,11 +139,11 @@ namespace aten
                 aten::ThreadedBvhNode node;
                 GetAsThreadedBvhNode(node, nodeid, node_list);
 
-                if (node.isLeaf()) {
+                if (aten::ThreadedBvhNode::isLeaf(node)) {
                     // Leaf.
                     const auto& obj = ctxt.GetObject(static_cast<uint32_t>(node.object_id));
 
-                    if (node.exid >= 0) {
+                    if (node.ex_bvh.exid >= 0) {
                         // Hit the bottom later bbox.
                         // Start to traverse the bottom layer.
                         if (obj.mtx_id >= 0) {
@@ -158,9 +158,11 @@ namespace aten
                         }
 
                         // Get index of the bottom layer bvh node list
-                        int32_t exid = aten::floatAsInt(node.exid);
-                        bool has_lod = AT_BVHNODE_HAS_LOD(exid);
-                        exid = has_lod && enable_lod ? AT_BVHNODE_LOD_EXID(exid) : AT_BVHNODE_MAIN_EXID(exid);
+                        int32_t exid = aten::floatAsInt(node.ex_bvh.exid);
+                        bool has_lod = (node.ex_bvh.hasLod > 0);
+                        exid = has_lod && enable_lod
+                            ? node.ex_bvh.lodExid
+                            : node.ex_bvh.mainExid;
 
                         // Get the node list of the bottom layer bvh.
                         node_list = GetBvhNodes<BvhNodeType>(ctxt, exid);

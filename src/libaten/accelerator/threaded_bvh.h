@@ -17,32 +17,43 @@ namespace aten
         aten::vec3 boxmax;      ///< AABB max position.
         float miss{ -1 };       ///< Link index if ray miss.
 
-        float object_id{ -1 };    ///< Object index.
+        // TODO:
+        // ThreadedBvhNode is converted from/to ThreadedSbvhNode.
+        // It's too bad.
+        // To keep the current situation temporarily, the following variables must be kept.
+        // The order of the variabled must be kept as well.
+
+        float object_id{ -1 };  ///< Object index.
         float primid{ -1 };     ///< Triangle index.
 
-        ///< External bvh index.
-        union {
-            float exid{ -1 };
+        union ExternalBvhIdxFlag {
+            float exid{ -1 };   ///< External bvh index.
             struct {
                 uint32_t mainExid : 15;     ///< External bvh index.
                 uint32_t lodExid : 15;      ///< LOD bvh index.
                 uint32_t hasLod : 1;        ///< Flag if the node has LOD.
                 uint32_t noExternal : 1;    ///< Flag if the node does not have external bvh.
             };
-        };
+        } ex_bvh;
 
-        float meshid{ -1 };        ///< Mesh id.
+        float meshid{ -1 };     ///< Mesh id.
 
-        bool AT_DEVICE_API isLeaf() const
+        static AT_DEVICE_API bool isLeaf(const ThreadedBvhNode& node)
         {
-            return (object_id >= 0 || primid >= 0);
+            return (node.object_id >= 0 || node.primid >= 0);
         }
-    };
 
-#define AT_BVHNODE_HAS_EXTERNAL(n)    (((n) & (1 << 31)) == 0)
-#define AT_BVHNODE_HAS_LOD(n)    (((n) & (1 << 30)) > 0)
-#define AT_BVHNODE_MAIN_EXID(n)    ((n) & 0x7fff)
-#define AT_BVHNODE_LOD_EXID(n)    (((n) & (0x7fff << 15)) >> 15)
+        static float ConstructExternalBvhIdxFlag(const int32_t exid, const int32_t subexid)
+        {
+            ExternalBvhIdxFlag flag;
+            flag.noExternal = (exid < 0);
+            flag.hasLod = (subexid >= 0);
+            flag.mainExid = exid;
+            flag.lodExid = (subexid >= 0 ? subexid : 0);
+            return flag.exid;
+        }
+
+    };
 
     /**
      * @brief Threaded Boundinf Volume Hierarchies.

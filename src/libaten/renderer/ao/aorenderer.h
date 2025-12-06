@@ -15,13 +15,19 @@ namespace aten
         AORenderer() {}
         ~AORenderer() {}
 
-        virtual void OnRender(
+        void OnRender(
             const context& ctxt,
             Destination& dst,
             scene* scene,
             Camera* camera) override;
 
     protected:
+        void RenderAO(
+            const context& ctxt,
+            Destination& dst,
+            scene* scene,
+            Camera* camera);
+
         float radiance(
             int32_t idx,
             uint32_t rnd,
@@ -31,6 +37,7 @@ namespace aten
 
     private:
         PathHost path_host_;
+        std::vector<aten::Intersection> isects_;
 
         uint32_t m_numAORays{ 1 };
         float m_AORadius{ float(1) };

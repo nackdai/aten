@@ -112,5 +112,107 @@ namespace ao {
         }
         return -1.0F;
     }
+
+    template <class SRC, class DST, bool IsHorizontal, int32_t KernelSize = 3>
+    inline AT_DEVICE_API DST ApplyBilateralFilter(
+        const int32_t center_x, const int32_t center_y,
+        const int32_t width, const int32_t height,
+        const float coeff_pixel_dist,
+        const float coeff_depth,
+        const SRC* values,
+        const aten::Intersection* isects
+    )
+    {
+        const auto coeff_pixel_dist_2 = 2 * (coeff_pixel_dist * coeff_pixel_dist);
+        const auto coeff_depth_2 = 2 * (coeff_depth * coeff_depth);
+
+        const auto center_idx = center_y * width + center_x;
+        const auto center_depth = isects[center_idx].t;
+
+        DST numer = 0.0F;
+        DST denom = 0.0F;
+        int32_t count = 0;
+
+#pragma unroll
+        for (int32_t i = -KernelSize; i <= KernelSize; i++) {
+            auto x = center_x;
+            auto y = center_y;
+            if constexpr (IsHorizontal) {
+                x = aten::clamp(center_x + i, 0, width - 1);
+            }
+            else {
+                y = aten::clamp(center_y + i, 0, height - 1);
+            }
+            const auto idx = y * width + x;
+
+            const auto depth = isects[idx].t;
+            const auto diff = center_depth - depth;
+            const auto kernel = aten::exp(-(i * i) / coeff_pixel_dist_2 - (diff * diff) / center_depth);
+
+            DST value;
+            if constexpr (std::is_same_v<SRC, AT_NAME::PathContrib>) {
+                value = values[idx].contrib.x;
+            }
+            else {
+                value = values[idx];
+            }
+
+            numer += value * kernel;
+            denom += kernel;
+        }
+
+        const auto result = aten::clamp(denom > 0.0F ? numer / denom : 1.0F, 0.0F, 1.0F);
+        return result;
+    }
+
+    template <class SRC, class DST, int32_t KernelSizeH = 3, int32_t KernelSizeV = 3>
+    inline AT_DEVICE_API DST ApplyBilateralFilterOrthogonal(
+        const int32_t center_x, const int32_t center_y,
+        const int32_t width, const int32_t height,
+        const float coeff_pixel_dist,
+        const float coeff_depth,
+        const SRC* values,
+        const aten::Intersection* isects
+    )
+    {
+        const auto coeff_pixel_dist_2 = 2 * (coeff_pixel_dist * coeff_pixel_dist);
+        const auto coeff_depth_2 = 2 * (coeff_depth * coeff_depth);
+
+        const auto center_idx = center_y * width + center_x;
+        const auto center_depth = isects[center_idx].t;
+
+        DST numer = 0.0F;
+        DST denom = 0.0F;
+        int32_t count = 0;
+
+        constexpr auto inclination = static_cast<float>(KernelSizeH) / KernelSizeV;
+
+#pragma unroll
+        for (int32_t h = -KernelSizeH; h <= KernelSizeH; h++) {
+            const auto step_v = static_cast<int32_t>(inclination * h);
+            const auto x = aten::clamp(center_x + step_v, 0, width - 1);
+            const auto y = aten::clamp(center_y + h, 0, height - 1);
+            const auto i = aten::sqrt(step_v * step_v + h * h);
+            const auto idx = y * width + x;
+
+            const auto depth = isects[idx].t;
+            const auto diff = center_depth - depth;
+            const auto kernel = aten::exp(-(i * i) / coeff_pixel_dist_2 - (diff * diff) / center_depth);
+
+            DST value;
+            if constexpr (std::is_same_v<SRC, AT_NAME::PathContrib>) {
+                value = values[idx].contrib.x;
+            }
+            else {
+                value = values[idx];
+            }
+
+            numer += value * kernel;
+            denom += kernel;
+        }
+
+        const auto result = aten::clamp(denom > 0.0F ? numer / denom : 1.0F, 0.0F, 1.0F);
+        return result;
+    }
 }
 }

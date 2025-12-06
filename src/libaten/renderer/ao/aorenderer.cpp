@@ -28,7 +28,7 @@ namespace aten
         const auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
         path_host_.paths.sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 5 * 300, scramble);
 
-        Intersection isect;
+        Intersection& isect = isects_[idx];
 
         bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
             isect,
@@ -61,6 +61,15 @@ namespace aten
         scene* scene,
         Camera* camera)
     {
+        RenderAO(ctxt, dst, scene, camera);
+    }
+
+    void AORenderer::RenderAO(
+        const context& ctxt,
+        Destination& dst,
+        scene* scene,
+        Camera* camera)
+    {
         int32_t width = dst.width;
         int32_t height = dst.height;
         uint32_t samples = dst.sample;
@@ -68,6 +77,9 @@ namespace aten
         max_depth_ = dst.maxDepth;
 
         path_host_.init(width, height);
+        if (isects_.empty()) {
+            isects_.resize(width * height);
+        }
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp parallel
@@ -109,11 +121,6 @@ namespace aten
                         const auto ao_color = radiance(
                             idx, rnd,
                             ctxt, ray, scene);
-
-                        if (isInvalidColor(path_host_.paths.contrib[idx].contrib)) {
-                            AT_PRINTF("Invalid(%d/%d)\n", x, y);
-                            continue;
-                        }
 
                         if (!path_host_.paths.attrib[idx].attr.is_terminated) {
                             path_host_.paths.contrib[idx].contrib = aten::vec3(ao_color);

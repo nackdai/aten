@@ -61,7 +61,12 @@ namespace aten
         scene* scene,
         Camera* camera)
     {
+#if 1
         RenderAO(ctxt, dst, scene, camera);
+#else
+        // Experimental for AO with biralteral filtering.
+        RenderAOWithBilateralFilter(ctxt, dst, scene, camera);
+#endif
     }
 
     void AORenderer::RenderAO(
@@ -138,6 +143,136 @@ namespace aten
                     col /= (float)cnt;
                     dst.buffer->put(x, y, vec4(col, 1));
                 }
+            }
+        }
+    }
+
+    void AORenderer::RenderAOWithBilateralFilter(
+        const context& ctxt,
+        Destination& dst,
+        scene* scene,
+        Camera* camera)
+    {
+        int32_t width = dst.width;
+        int32_t height = dst.height;
+        uint32_t samples = dst.sample;
+
+        max_depth_ = dst.maxDepth;
+
+        path_host_.init(width, height);
+        if (isects_.empty()) {
+            isects_.resize(width * height);
+        }
+        if (bilateral_filter_.empty()) {
+            bilateral_filter_.resize(width * height);
+        }
+
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp parallel
+#endif
+        {
+            auto idx = OMPUtil::getThreadIdx();
+
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+#ifdef RELEASE_DEBUG
+                    if (x == BREAK_X && y == BREAK_Y) {
+                        DEBUG_BREAK();
+                    }
+#endif
+
+                    int32_t idx = y * width + x;
+
+                    const auto rnd = aten::getRandom(idx);
+                    const auto& camsample = camera->param();
+
+                    aten::ray ray;
+
+                    GeneratePath(
+                        ray,
+                        idx,
+                        x, y,
+                        0, GetFrameCount(),
+                        path_host_.paths,
+                        camsample,
+                        rnd);
+
+                    const auto ao_color = radiance(
+                        idx, rnd,
+                        ctxt, ray, scene);
+
+                    if (!path_host_.paths.attrib[idx].attr.is_terminated) {
+                        path_host_.paths.contrib[idx].contrib = aten::vec3(ao_color);
+                    }
+                    auto c = path_host_.paths.contrib[idx].contrib;
+                    if (path_host_.paths.attrib[idx].attr.is_terminated) {
+                        break;
+                    }
+                }
+            }
+
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
+#if 1
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+                    const auto idx = y * width + x;
+                    const auto filtered_color = AT_NAME::ao::ApplyBilateralFilter<aten::PathContrib, float, true>(
+                        x, y,
+                        width, height,
+                        2.0F, 2.0F,
+                        path_host_.paths.contrib, isects_.data()
+                    );
+                    bilateral_filter_[idx] = filtered_color;
+                }
+            }
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+                    const auto idx = y * width + x;
+                    const auto filtered_color = AT_NAME::ao::ApplyBilateralFilter<aten::PathContrib, float, false>(
+                        x, y,
+                        width, height,
+                        2.0F, 2.0F,
+                        path_host_.paths.contrib, isects_.data()
+                    );
+                    bilateral_filter_[idx] *= filtered_color;
+                    auto c = bilateral_filter_[idx];
+                    c = c < 1.0F ? c * 0.5F : c;
+                    dst.buffer->put(x, y, vec4(c, c, c, 1));
+                }
+#else
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+                    const auto idx = y * width + x;
+                    const auto filtered_color = AT_NAME::ao::ApplyBilateralFilterOrthogonal<aten::PathContrib, float, 3, 3>(
+                        x, y,
+                        width, height,
+                        2.0F, 2.0F,
+                        path_host_.paths.contrib, isects_.data()
+                    );
+                    bilateral_filter_[idx] = filtered_color;
+                }
+            }
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+                    const auto idx = y * width + x;
+                    const auto filtered_color = AT_NAME::ao::ApplyBilateralFilterOrthogonal<aten::PathContrib, float, 3, -3>(
+                        x, y,
+                        width, height,
+                        2.0F, 2.0F,
+                        path_host_.paths.contrib,
+                        isects_.data()
+                    );
+                    bilateral_filter_[idx] *= filtered_color;
+                    auto c = bilateral_filter_[idx];
+                    c = c < 1.0F ? c * 0.5F : c;
+                    dst.buffer->put(x, y, vec4(c, c, c, 1));
+                }
+#endif
             }
         }
     }

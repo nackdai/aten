@@ -150,7 +150,7 @@ namespace idaten
         virtual bool InitPath(
             int32_t width, int32_t height) override final
         {
-            if (StandardPT::InitPath(width, height)) {
+            if (Renderer::InitPath(width, height)) {
                 size_t size = width * height;
                 m_restir_infos.Init(size);
                 m_reservoirs.Init(size);

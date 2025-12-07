@@ -5,6 +5,7 @@
 namespace idaten {
     Renderer::Renderer()
     {
+        path_host_ = std::make_shared<AT_NAME::PathHost>();
         ctxt_host_ = std::make_shared<decltype(ctxt_host_)::element_type>();
     }
 

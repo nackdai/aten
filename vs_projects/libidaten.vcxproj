@@ -98,7 +98,6 @@
     <ClInclude Include="..\src\libidaten\kernel\pathtracing.h" />
     <ClInclude Include="..\src\libidaten\kernel\persistent_thread.h" />
     <ClInclude Include="..\src\libidaten\kernel\pt_common.h" />
-    <ClInclude Include="..\src\libidaten\kernel\pt_standard_impl.h" />
     <ClInclude Include="..\src\libidaten\kernel\RadixSort.h" />
     <ClInclude Include="..\src\libidaten\kernel\renderer.h" />
     <ClInclude Include="..\src\libidaten\kernel\Skinning.h" />

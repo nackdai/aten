@@ -80,9 +80,9 @@ namespace idaten
             m_aovMode = mode;
         }
 
-        virtual void reset() override final
+        void reset() override final
         {
-            StandardPT::reset();
+            Renderer::reset();
             params_.curr_aov_pos = 0;
         }
 
@@ -149,7 +149,7 @@ namespace idaten
         {
             auto& curaov = params_.GetCurrAovBuffer();
 
-            StandardPT::MissShadeWithFillingAov(
+            Renderer::MissShadeWithFillingAov(
                 width, height,
                 bounce,
                 curaov.get<AT_NAME::SVGFAovBufferType::NormalDepth>(),

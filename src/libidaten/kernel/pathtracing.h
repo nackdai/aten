@@ -4,13 +4,13 @@
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
 
-#include "kernel/pt_standard_impl.h"
+#include "kernel/renderer.h"
 #include "sampler/sampler.h"
 #include "renderer/aov.h"
 
 namespace idaten
 {
-    class PathTracingImplBase : public StandardPT {
+    class PathTracingImplBase : public Renderer {
     public:
         PathTracingImplBase() = default;
         virtual ~PathTracingImplBase() = default;
@@ -50,7 +50,7 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t bounce)
         {
-            StandardPT::MissShadeWithFillingAov(
+            Renderer::MissShadeWithFillingAov(
                 width, height,
                 bounce,
                 aov_.normal_depth(),

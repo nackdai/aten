@@ -8,7 +8,6 @@
 #include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
 #include "kernel/renderer.h"
-#include "kernel/pt_standard_impl.h"
 
 #include "accelerator/threaded_bvh_traverser.h"
 #include "renderer/aov.h"
@@ -354,10 +353,7 @@ namespace kernel {
 
 namespace idaten
 {
-    StandardPT::StandardPT() : path_host_(std::make_shared<PathHost>())
-    {}
-
-    bool StandardPT::InitPath(int32_t width, int32_t height)
+    bool Renderer::InitPath(int32_t width, int32_t height)
     {
         ctxt_host_->BindToDeviceContext();
 
@@ -366,12 +362,12 @@ namespace idaten
         return result;
     }
 
-    void StandardPT::clearPath()
+    void Renderer::clearPath()
     {
         path_host_->Clear(m_frame, cudaMemsetAsync, m_stream);
     }
 
-    void StandardPT::generatePath(
+    void Renderer::generatePath(
         int32_t width, int32_t height,
         bool needFillAOV,
         int32_t sample, int32_t maxBounce,
@@ -396,7 +392,7 @@ namespace idaten
         checkCudaKernel(genPath);
     }
 
-    void StandardPT::hitTest(
+    void Renderer::hitTest(
         int32_t width, int32_t height,
         int32_t bounce)
     {
@@ -428,7 +424,7 @@ namespace idaten
         checkCudaKernel(hitTest);
     }
 
-    void StandardPT::hitTestOnScreenSpace(
+    void Renderer::hitTestOnScreenSpace(
         int32_t width, int32_t height,
         idaten::CudaGLSurface& gbuffer)
     {
@@ -459,7 +455,7 @@ namespace idaten
         checkCudaKernel(hitTestPrimaryRayInScreenSpace);
     }
 
-    void StandardPT::MissShadeWithFillingAov(
+    void Renderer::MissShadeWithFillingAov(
         int32_t width, int32_t height,
         int32_t bounce,
         idaten::TypedCudaMemory<float4>& aovNormalDepth,

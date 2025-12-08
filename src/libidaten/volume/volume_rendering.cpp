@@ -15,6 +15,8 @@ namespace idaten
     {
         static const int32_t rrBounce = 3;
 
+        m_shadowRays.resize(width * height);
+
         // Set bounce count to 1 forcibly, AOV rendering mode.
         maxBounce = (m_mode == Mode::AOV ? 1 : maxBounce);
 

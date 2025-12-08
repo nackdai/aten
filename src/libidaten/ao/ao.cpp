@@ -8,40 +8,12 @@
 #include "aten4idaten.h"
 
 namespace idaten {
-#ifdef __AT_DEBUG__
-    static bool doneSetStackSize = false;
-#endif
-
-    void AORenderer::render(
+    void AORenderer::OnRender(
         int32_t width, int32_t height,
         int32_t maxSamples,
-        int32_t maxBounce)
+        int32_t maxBounce,
+        cudaSurfaceObject_t outputSurf)
     {
-#ifdef __AT_DEBUG__
-        if (!doneSetStackSize) {
-            size_t val = 0;
-            cudaThreadGetLimit(&val, cudaLimitStackSize);
-            cudaThreadSetLimit(cudaLimitStackSize, val * 4);
-            doneSetStackSize = true;
-        }
-#endif
-
-        int32_t bounce = 0;
-
-        m_compaction.init(width * height, 1024);
-
-        m_isects.resize(width * height);
-        m_rays.resize(width * height);
-
-        m_hitbools.resize(width * height);
-        m_hitidx.resize(width * height);
-
-        m_glimg.map();
-        auto outputSurf = m_glimg.bind();
-
-        InitPath(width, height);
-        clearPath();
-
         static const int32_t rrBounce = 3;
 
         auto seed = AT_NAME::timer::GetCurrMilliseconds();
@@ -53,26 +25,18 @@ namespace idaten {
                 i, maxBounce,
                 seed);
 
-            bounce = 0;
+            hitTest(width, height, 0);
 
-            while (bounce < maxBounce) {
-                hitTest(
-                    width, height,
-                    bounce);
+            missShade(width, height, 0);
 
-                missShade(width, height, bounce);
+            m_compaction.compact(
+                m_hitidx,
+                m_hitbools,
+                nullptr);
 
-                m_compaction.compact(
-                    m_hitidx,
-                    m_hitbools,
-                    nullptr);
-
-                ShadeAO(
-                    width, height,
-                    bounce, rrBounce);
-
-                bounce++;
-            }
+            ShadeAO(
+                width, height,
+                0, rrBounce);
         }
 
         onGather(outputSurf, width, height, maxSamples);

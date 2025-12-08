@@ -54,6 +54,9 @@ namespace idaten
 
         void updateCamera(const aten::CameraParameter& camera);
 
+        void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
+        void updateLight(const aten::context& scene_ctxt, bool is_npr_target_light);
+
         void UpdateTexture(int32_t idx, const aten::context& ctxt);
 
         void UpdateSceneRenderingConfig(const aten::context& ctxt);

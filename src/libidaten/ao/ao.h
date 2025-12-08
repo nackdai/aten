@@ -13,11 +13,6 @@ namespace idaten
         ~AORenderer() = default;
 
     public:
-        void render(
-            int32_t width, int32_t height,
-            int32_t maxSamples,
-            int32_t maxBounce) override;
-
         int32_t getNumRays() const
         {
             return m_ao_num_rays;
@@ -37,6 +32,12 @@ namespace idaten
         }
 
     protected:
+        void OnRender(
+            int32_t width, int32_t height,
+            int32_t maxSamples,
+            int32_t maxBounce,
+            cudaSurfaceObject_t outputSurf) override;
+
         void missShade(
             int32_t width, int32_t height,
             int32_t bounce) override;

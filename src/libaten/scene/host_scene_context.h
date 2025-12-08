@@ -189,8 +189,8 @@ namespace aten
 
         /**
          * @brief Get the light parameter by index.
-         * @param[in] idx Index to the triangle parameter.
-         * @return Triangle parameter.
+         * @param[in] idx Index to the light parameter.
+         * @return Light parameter.
          */
         const aten::LightParameter& GetLight(uint32_t idx) const noexcept;
 
@@ -199,6 +199,19 @@ namespace aten
          * @return List of the light parameter.
          */
         std::vector<aten::LightParameter> GetLightParameters() const;
+
+        /**
+         * @brief Get the light parameter for NPR by index.
+         * @param[in] idx Index to the light parameter for NPR.
+         * @return Light parameter for NPR.
+         */
+        const aten::LightParameter& GetNprTargetLight(size_t idx) const noexcept;
+
+        /**
+         * @brief Get the list of the light parameter for NPR.
+         * @return List of the light parameter for NPR.
+         */
+        std::vector<aten::LightParameter> GetNprTargetLightParameters() const;
 
         /**
          * @brief Clear all registered lights.
@@ -524,15 +537,17 @@ namespace aten
         /**
          * @brief Add a light intance to the scene.
          * @param[in] light Light instance to be added.
+         * @param[in] is_npr If true, the light is used for NPR rendering.
          */
-        void AddLight(const std::shared_ptr<AT_NAME::Light>& light);
+        void AddLight(const std::shared_ptr<AT_NAME::Light>& light, bool is_npr = false);
 
         /**
          * @brief Get the actual light instance by index.
          * @param[in] idx Index to the light instance.
+         * @param[in] is_npr If true, the light is used for NPR rendering.
          * @return If the light instance is found, returns it. Otherwise, returns nullptr.
          */
-        std::shared_ptr<AT_NAME::Light> GetLightInstance(uint32_t idx) const;
+        std::shared_ptr<AT_NAME::Light> GetLightInstance(uint32_t idx, bool is_npr = false) const;
 
         /**
          * @brief Get the number of all registered light instances.
@@ -619,6 +634,8 @@ namespace aten
         std::vector<std::shared_ptr<aten::texture>> textures_;
         std::vector<std::shared_ptr<aten::mat4>> matrices_;
         std::vector<std::shared_ptr<AT_NAME::Light>> lights_;
+
+        std::vector<std::shared_ptr<AT_NAME::Light>> npr_target_lights_;
 
         std::vector<std::vector<GPUBvhNode>> nodes_;
 

@@ -46,6 +46,12 @@ namespace idaten {
             ctxt_host_->lightparam.writeFromHostToDeviceByNum(lights.data(), lights.size());
         }
 
+        const auto npr_lights = scene_ctxt.GetNprTargetLightParameters();
+        if (!npr_lights.empty()) {
+            ctxt_host_->npr_target_light_params.resize(npr_lights.size());
+            ctxt_host_->npr_target_light_params.writeFromHostToDeviceByNum(npr_lights.data(), npr_lights.size());
+        }
+
         const auto prims = scene_ctxt.GetPrimitiveParameters();
         if (prims.empty()) {
             ctxt_host_->primparams.resize(advance_prim_num);

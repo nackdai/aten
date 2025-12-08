@@ -114,7 +114,7 @@ namespace idaten
             std::function<const aten::Grid* (const aten::context&)> proxy_get_grid_from_host_scene_context = nullptr) override;
 
         void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
-        void updateLight(const aten::context& scene_ctxt);
+        void updateLight(const aten::context& scene_ctxt, bool is_npr_target_light);
 
         void SetRenderingMode(Mode mode)
         {

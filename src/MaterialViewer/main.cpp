@@ -119,17 +119,19 @@ public:
         auto bg = AT_NAME::Background::CreateBackgroundResource(nullptr);
 #else
         // IBL
-        scene_light_.is_envmap = true;
-        scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
-        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(scene_light_.envmap_texture, aten::vec4(0));
-        scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(ctxt_.scene_rendering_config.bg, ctxt_);
-        scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
+        auto envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
+        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(envmap_texture, aten::vec4(0));
+        auto ibl = std::make_shared<aten::ImageBasedLight>(ctxt_.scene_rendering_config.bg, ctxt_);
+        scene_.addImageBasedLight(ctxt_, ibl);
 
         // PointLight
-        scene_light_.point_light = std::make_shared<aten::PointLight>(
+        auto point_light = std::make_shared<aten::PointLight>(
             aten::vec3(0.0, 0.0, 50.0),
             aten::vec3(1.0, 0.0, 0.0),
             4000.0f);
+        ctxt_.AddLight(point_light, true);
+
+        ctxt_.scene_rendering_config.bg.enable_env_map = true;
 #endif
 
 #ifdef GPU_RENDERING
@@ -142,8 +144,6 @@ public:
         renderer_.getCompaction().init(
             WIDTH * HEIGHT,
             1024);
-
-        ctxt_.scene_rendering_config.bg.enable_env_map = scene_light_.is_envmap;
 
         renderer_.UpdateSceneData(
             visualizer_->GetGLTextureHandle(),
@@ -209,38 +209,23 @@ public:
                 need_renderer_reset = true;
             }
 
-            constexpr std::array light_types = { "IBL", "PointLight" };
-            int32_t lighttype = scene_light_.is_envmap ? 0 : 1;
-            if (ImGui::Combo("light", &lighttype, light_types.data(), static_cast<int32_t>(light_types.size()))) {
-                ctxt_.ClearAllLights();
+            auto mtrl = ctxt_.GetMaterialInstance(0);
 
-                auto next_is_envmap = lighttype == 0;
-                if (next_is_envmap) {
-                    ctxt_.AddLight(scene_light_.ibl);
-                }
-                else {
-                    ctxt_.AddLight(scene_light_.point_light);
-                }
-
-                need_renderer_reset = true;
-
-                scene_light_.is_envmap = next_is_envmap;
-                ctxt_.scene_rendering_config.bg.enable_env_map = scene_light_.is_envmap;
-                renderer_.UpdateSceneRenderingConfig(ctxt_);
-                renderer_.updateLight(ctxt_);
-            }
-
-            if (!scene_light_.is_envmap) {
-                auto& point_light = ctxt_.GetLightInstance(0);
+            ImGui::Spacing();
+            if (mtrl->param().type == aten::MaterialType::Toon
+                || mtrl->param().type == aten::MaterialType::StylizedBrdf)
+            {
+                auto& point_light = ctxt_.GetLightInstance(0, true);
                 auto& light_param = point_light->param();
 
                 bool is_updated = false;
                 is_updated |= ImGui::ColorEdit3("LightColor", reinterpret_cast<float*>(&light_param.light_color));
                 is_updated |= ImGui::SliderFloat("LightIntensity", &light_param.intensity, 0.0F, 10000.0F);
                 if (is_updated) {
-                    renderer_.updateLight(ctxt_);
+                    renderer_.updateLight(ctxt_, true);
                 }
             }
+            ImGui::Spacing();
 
             if (ImGui::SliderInt("Samples", &max_samples_, 1, 100)
                 || ImGui::SliderInt("Bounce", &max_bounce_, 1, 10))
@@ -260,7 +245,6 @@ public:
                 progressive_accumulate_count_ += 1;
             }
 
-            auto mtrl = ctxt_.GetMaterialInstance(0);
             bool needUpdateMtrl = false;
 
             constexpr std::array mtrl_types = {
@@ -520,7 +504,7 @@ private:
         mtrl_param.standard.roughness = 0.011F;
 
 #if 1
-#if 0
+#if 1
         constexpr const char* asset_path = "../../asset/suzanne/suzanne.obj";
         constexpr const char* mtrl_in_asset = "Material.001";
 #elif 0
@@ -616,34 +600,6 @@ private:
 
         return mtrl;
     }
-
-    void MershallLightParameter(std::vector<aten::LightParameter>& lightparams)
-    {
-        if (scene_light_.is_envmap) {
-            auto result = std::remove_if(lightparams.begin(), lightparams.end(),
-                [](const auto& l) {
-                    return l.type != aten::LightType::IBL;
-                }
-            );
-            lightparams.erase(result, lightparams.end());
-        }
-        else {
-            auto result = std::remove_if(lightparams.begin(), lightparams.end(),
-                [](const auto& l) {
-                    return l.type == aten::LightType::IBL;
-                }
-            );
-            lightparams.erase(result, lightparams.end());
-        }
-    }
-
-    struct SceneLight {
-        bool is_envmap{ false };
-
-        std::shared_ptr<aten::texture> envmap_texture;
-        std::shared_ptr<aten::ImageBasedLight> ibl;
-        std::shared_ptr<aten::PointLight> point_light;
-    } scene_light_;
 
     aten::PinholeCamera camera_;
     bool is_camera_dirty_{ false };

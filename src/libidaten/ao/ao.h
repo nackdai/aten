@@ -18,16 +18,6 @@ namespace idaten
             int32_t maxSamples,
             int32_t maxBounce) override;
 
-        void UpdateSceneData(
-            GLuint gltex,
-            int32_t width, int32_t height,
-            const aten::CameraParameter& camera,
-            const aten::context& scene_ctxt,
-            const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
-            uint32_t advance_prim_num,
-            uint32_t advance_vtx_num,
-            std::function<const aten::Grid* (const aten::context&)> proxy_get_grid_from_host_scene_context = nullptr) override;
-
         int32_t getNumRays() const
         {
             return m_ao_num_rays;

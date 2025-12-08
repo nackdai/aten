@@ -36,7 +36,7 @@ namespace svgf_kernel {
         const aten::TriangleParameter* __restrict__ prims,
         const aten::mat4* __restrict__ matrices,
         uint32_t* random,
-        idaten::ShadowRay* shadowRays)
+        aten::ShadowRay* shadowRays)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -52,7 +52,7 @@ namespace svgf_kernel {
 
         idx = hitindices[idx];
 
-        __shared__ idaten::ShadowRay shShadowRays[64];
+        __shared__ aten::ShadowRay shShadowRays[64];
         __shared__ aten::MaterialParameter shMtrls[64];
 
         const auto ray = rays[idx];

@@ -223,7 +223,7 @@ namespace restir {
         const CONTEXT& ctxt,
         AT_NAME::Reservoir& reservoir,
         AT_NAME::ReSTIRInfo& restir_info,
-        aten::span<AT_NAME::ShadowRay>& shadowRays)
+        aten::span<aten::ShadowRay>& shadowRays)
     {
         bool isHit = false;
 

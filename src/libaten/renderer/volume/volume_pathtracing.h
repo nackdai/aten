@@ -40,7 +40,7 @@ namespace aten
             aten::Path& paths,
             const context& ctxt,
             ray* rays,
-            AT_NAME::ShadowRay* shadow_rays,
+            aten::ShadowRay* shadow_rays,
             const aten::Intersection& isect,
             scene* scene,
             int32_t rrDepth);
@@ -51,7 +51,7 @@ namespace aten
             aten::Path& paths,
             const aten::context& ctxt,
             const aten::Intersection& isect,
-            const AT_NAME::ShadowRay* shadow_rays,
+            const aten::ShadowRay* shadow_rays,
             aten::scene* scene);
 
         void radiance(
@@ -75,7 +75,7 @@ namespace aten
         PathHost path_host_;
         std::vector<aten::ray> rays_;
 
-        std::vector<AT_NAME::ShadowRay> shadow_rays_;
+        std::vector<aten::ShadowRay> shadow_rays_;
 
         int32_t m_maxDepth{ 1 };
 

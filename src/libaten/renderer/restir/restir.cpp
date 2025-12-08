@@ -244,7 +244,7 @@ namespace aten
         aten::scene* scene,
         std::vector<AT_NAME::Reservoir>& reservoirs,
         std::vector<AT_NAME::ReSTIRInfo>& restir_infos,
-        std::vector<AT_NAME::ShadowRay>& shadowRays)
+        std::vector<aten::ShadowRay>& shadowRays)
     {
         aten::span shadow_rays(shadowRays);
 

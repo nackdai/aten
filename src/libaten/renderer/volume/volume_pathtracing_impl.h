@@ -225,7 +225,7 @@ namespace AT_NAME
 
     inline AT_DEVICE_API void TraverseShadowRay(
         int32_t idx,
-        const AT_NAME::ShadowRay& shadow_ray,
+        const aten::ShadowRay& shadow_ray,
         const int32_t max_depth,
         AT_NAME::Path& paths,
         const AT_NAME::context& ctxt,

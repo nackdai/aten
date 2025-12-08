@@ -223,7 +223,7 @@ __global__ void EvaluateVisibility(
     int32_t* hitnum,
     idaten::Reservoir* reservoirs,
     idaten::ReSTIRInfo* restir_infos,
-    idaten::ShadowRay* shadowRays,
+    aten::ShadowRay* shadowRays,
     idaten::context ctxt,
     const aten::ObjectParameter* __restrict__ shapes,
     const aten::MaterialParameter* __restrict__ mtrls,
@@ -272,7 +272,7 @@ __global__ void ComputePixelColor(
     const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     const aten::MaterialParameter* __restrict__ mtrls,
     cudaTextureObject_t* textures,
-    const idaten::ShadowRay* __restrict__ shadowRays)
+    const aten::ShadowRay* __restrict__ shadowRays)
 {
     int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 

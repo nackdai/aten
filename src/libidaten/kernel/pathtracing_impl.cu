@@ -33,7 +33,7 @@ namespace pt {
         int32_t frame,
         int32_t bounce, int32_t rrBounce,
         uint32_t* random,
-        idaten::ShadowRay* shadowRays)
+        aten::ShadowRay* shadowRays)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -53,7 +53,7 @@ namespace pt {
         ctxt.prims = prims;
         ctxt.matrices = matrices;
 
-        __shared__ idaten::ShadowRay shShadowRays[64];
+        __shared__ aten::ShadowRay shShadowRays[64];
         __shared__ aten::MaterialParameter shMtrls[64];
 
         const auto& isect = isects[idx];
@@ -218,7 +218,7 @@ namespace pt {
         idaten::Path paths,
         int32_t* hitindices,
         int32_t* hitnum,
-        const idaten::ShadowRay* __restrict__ shadowRays)
+        const aten::ShadowRay* __restrict__ shadowRays)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 

@@ -204,7 +204,7 @@ namespace AT_NAME
 
     inline AT_DEVICE_API void FillShadowRay(
         const int32_t idx,
-        AT_NAME::ShadowRay& shadow_ray,
+        aten::ShadowRay& shadow_ray,
         const AT_NAME::context& ctxt,
         int32_t bounce,
         const AT_NAME::Path& paths,
@@ -352,7 +352,7 @@ namespace AT_NAME
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& surface_mtrl,
         AT_NAME::Path paths,
-        const AT_NAME::ShadowRay& shadow_ray
+        const aten::ShadowRay& shadow_ray
     )
     {
         if (paths.attrib[idx].attr.is_terminated) {
@@ -695,7 +695,7 @@ namespace AT_NAME
         aten::ray* rays,
         const aten::Intersection& isect,
         aten::MaterialParameter& mtrl,
-        AT_NAME::ShadowRay& shadow_ray,
+        aten::ShadowRay& shadow_ray,
         int32_t rrDepth,
         int32_t bounce)
     {

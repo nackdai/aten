@@ -140,19 +140,6 @@ namespace AT_NAME {
 #endif
     };
 
-    struct ShadowRay {
-        aten::vec3 rayorg;
-        float distToLight;
-
-        aten::vec3 raydir;
-        struct {
-            uint32_t isActive : 1;
-        };
-
-        aten::vec3 lightcontrib;
-        uint32_t targetLightId;
-    };
-
     /**
      * @brief Matrices for rendering.
      */
@@ -191,5 +178,20 @@ namespace AT_NAME {
             mtx_V2W = mtx_W2V;
             mtx_V2W.invert();
         }
+    };
+}
+
+namespace aten {
+    struct ShadowRay {
+        aten::vec3 rayorg;
+        float distToLight;
+
+        aten::vec3 raydir;
+        struct {
+            uint32_t isActive : 1;
+        };
+
+        aten::vec3 lightcontrib;
+        uint32_t targetLightId;
     };
 }

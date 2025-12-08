@@ -38,7 +38,7 @@ namespace vpt
         int32_t sample, int32_t frame,
         int32_t bounce, int32_t depth_for_rr, int32_t max_depth,
         uint32_t* random,
-        AT_NAME::ShadowRay* shadow_rays)
+        aten::ShadowRay* shadow_rays)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -256,7 +256,7 @@ namespace vpt
         const int32_t* __restrict__ hitindices,
         int32_t* hitnum,
         const aten::Intersection* __restrict__ isects,
-        const AT_NAME::ShadowRay* __restrict__ shadow_rays
+        const aten::ShadowRay* __restrict__ shadow_rays
     )
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;

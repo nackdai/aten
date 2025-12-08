@@ -160,7 +160,7 @@ namespace idaten
         idaten::TypedCudaMemory<int32_t> m_hitbools;
         idaten::TypedCudaMemory<int32_t> m_hitidx;
 
-        idaten::TypedCudaMemory<AT_NAME::ShadowRay> m_shadowRays;
+        idaten::TypedCudaMemory<aten::ShadowRay> m_shadowRays;
 
         // Distance limitation to kill path.
         float m_hitDistLimit{ AT_MATH_INF };

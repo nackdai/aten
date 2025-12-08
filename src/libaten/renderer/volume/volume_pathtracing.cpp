@@ -222,7 +222,7 @@ namespace aten
         aten::Path& paths,
         const aten::context& ctxt,
         const aten::Intersection& isect,
-        const AT_NAME::ShadowRay* shadow_rays,
+        const aten::ShadowRay* shadow_rays,
         aten::scene* scene)
     {
         const auto& shadow_ray = shadow_rays[idx];
@@ -239,7 +239,7 @@ namespace aten
         aten::Path& paths,
         const context& ctxt,
         aten::ray* rays,
-        AT_NAME::ShadowRay* shadow_rays,
+        aten::ShadowRay* shadow_rays,
         const aten::Intersection& isect,
         scene* scene,
         int32_t rrDepth)

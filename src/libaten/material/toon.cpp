@@ -186,10 +186,6 @@ namespace AT_NAME
 
         float lum_y = aten::clamp(color::luminance(radiance), 0.0F, 1.0F);
 
-        // TODO:
-        // If we simply multiply color and remap, it might make the result 0.
-        // e.g. remap (1, 0, 0) * color (0, 1, 0) = result (0, 0, 0)
-        // So, disable to multiply at this moment.
         //const auto hsv = color::RGBtoHSV(radiance);
         //const auto color = color::HSVtoRGB(aten::vec3(hsv.r, hsv.g, 1));
 

@@ -44,73 +44,6 @@ namespace idaten
         params_.motion_depth_buffer.init(gltexMotionDepthbuffer, idaten::CudaGLRscRegisterType::ReadOnly);
     }
 
-    static bool doneSetStackSize = false;
-
-    void SVGFPathTracing::render(
-        int32_t width, int32_t height,
-        int32_t maxSamples,
-        int32_t maxBounce)
-    {
-#ifdef __AT_DEBUG__
-        if (!doneSetStackSize) {
-            size_t val = 0;
-            cudaThreadGetLimit(&val, cudaLimitStackSize);
-            cudaThreadSetLimit(cudaLimitStackSize, val * 4);
-            doneSetStackSize = true;
-        }
-#endif
-
-        int32_t bounce = 0;
-
-        m_isects.resize(width * height);
-        m_rays.resize(width * height);
-
-        m_shadowRays.resize(width * height);
-
-        InitPath(width, height);
-
-        CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
-        auto outputSurf = m_glimg.bind();
-
-        m_hitbools.resize(width * height);
-        m_hitidx.resize(width * height);
-
-        m_compaction.init(
-            width * height,
-            1024);
-
-        params_.mtxs.Reset(m_cam);
-
-        clearPath();
-
-        OnRender(
-            width, height, maxSamples, maxBounce,
-            outputSurf);
-
-        onDenoise(
-            width, height,
-            outputSurf);
-
-        if (m_mode == Mode::SVGF)
-        {
-            onAtrousFilter(outputSurf, width, height);
-            onCopyFromTmpBufferToAov(width, height);
-        }
-
-        {
-            pick(
-                m_pickedInfo.ix, m_pickedInfo.iy,
-                width, height);
-
-            //checkCudaErrors(cudaDeviceSynchronize());
-
-            // Toggle aov buffer pos.
-            params_.UpdateCurrAovBufferPos();
-
-            m_frame++;
-        }
-    }
-
     void SVGFPathTracing::OnRender(
         int32_t width, int32_t height,
         int32_t maxSamples,
@@ -118,6 +51,9 @@ namespace idaten
         cudaSurfaceObject_t outputSurf)
     {
         static const int32_t rrBounce = 3;
+
+        m_shadowRays.resize(width * height);
+        params_.mtxs.Reset(m_cam);
 
         // Set bounce count to 1 forcibly, aov render mode.
         maxBounce = (m_mode == Mode::AOVar ? 1 : maxBounce);
@@ -165,6 +101,29 @@ namespace idaten
         }
         else {
             onGather(outputSurf, width, height, maxSamples);
+        }
+
+        onDenoise(
+            width, height,
+            outputSurf);
+
+        if (m_mode == Mode::SVGF)
+        {
+            onAtrousFilter(outputSurf, width, height);
+            onCopyFromTmpBufferToAov(width, height);
+        }
+
+        {
+            pick(
+                m_pickedInfo.ix, m_pickedInfo.iy,
+                width, height);
+
+            //checkCudaErrors(cudaDeviceSynchronize());
+
+            // Toggle aov buffer pos.
+            params_.UpdateCurrAovBufferPos();
+
+            m_frame++;
         }
     }
 

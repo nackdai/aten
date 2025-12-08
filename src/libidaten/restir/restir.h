@@ -62,12 +62,7 @@ namespace idaten
         {
             can_ssrt_hit_test_ = true;
         }
-        virtual ~ReSTIRPathTracing() = default;
-
-        virtual void render(
-            int32_t width, int32_t height,
-            int32_t maxSamples,
-            int32_t maxBounce) override;
+        ~ReSTIRPathTracing() = default;
 
         void UpdateSceneData(
             GLuint gltex,
@@ -147,7 +142,7 @@ namespace idaten
         }
 
     protected:
-        virtual bool InitPath(
+        bool InitPath(
             int32_t width, int32_t height) override final
         {
             if (Renderer::InitPath(width, height)) {
@@ -166,7 +161,7 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce,
-            cudaSurfaceObject_t outputSurf);
+            cudaSurfaceObject_t outputSurf) override;
 
         void OnShadeReSTIR(
             cudaSurfaceObject_t outputSurf,

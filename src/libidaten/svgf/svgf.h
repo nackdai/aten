@@ -39,11 +39,6 @@ namespace idaten
         virtual ~SVGFPathTracing() {}
 
     public:
-        virtual void render(
-            int32_t width, int32_t height,
-            int32_t maxSamples,
-            int32_t maxBounce) override;
-
         void UpdateSceneData(
             GLuint gltex,
             int32_t width, int32_t height,
@@ -137,7 +132,7 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce,
-            cudaSurfaceObject_t outputSurf);
+            cudaSurfaceObject_t outputSurf) override;
 
         void onDenoise(
             int32_t width, int32_t height,

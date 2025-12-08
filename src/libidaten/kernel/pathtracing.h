@@ -20,6 +20,11 @@ namespace idaten
         PathTracingImplBase& operator=(const PathTracingImplBase&) = delete;
         PathTracingImplBase& operator=(PathTracingImplBase&&) = delete;
 
+        void render(
+            int32_t width, int32_t height,
+            int32_t maxSamples,
+            int32_t maxBounce) override;
+
         bool IsEnableProgressive() const
         {
             return m_enableProgressive;
@@ -42,6 +47,12 @@ namespace idaten
         }
 
     protected:
+        virtual void OnRender(
+            int32_t width, int32_t height,
+            int32_t maxSamples,
+            int32_t maxBounce,
+            cudaSurfaceObject_t outputSurf) = 0;
+
         virtual void onHitTest(
             int32_t width, int32_t height,
             int32_t bounce);
@@ -98,11 +109,6 @@ namespace idaten
         PathTracing() = default;
         virtual ~PathTracing() = default;
 
-        void render(
-            int32_t width, int32_t height,
-            int32_t maxSamples,
-            int32_t maxBounce) override;
-
         void UpdateSceneData(
             GLuint gltex,
             int32_t width, int32_t height,
@@ -112,9 +118,6 @@ namespace idaten
             uint32_t advance_prim_num,
             uint32_t advance_vtx_num,
             std::function<const aten::Grid* (const aten::context&)> proxy_get_grid_from_host_scene_context = nullptr) override;
-
-        void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
-        void updateLight(const aten::context& scene_ctxt, bool is_npr_target_light);
 
         void SetRenderingMode(Mode mode)
         {
@@ -126,11 +129,11 @@ namespace idaten
         }
 
     protected:
-        virtual void OnRender(
+        void OnRender(
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce,
-            cudaSurfaceObject_t outputSurf);
+            cudaSurfaceObject_t outputSurf) override;
 
         bool IsFirstFrame() const
         {

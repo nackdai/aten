@@ -44,38 +44,9 @@ namespace idaten
             });
     }
 
-    void PathTracing::updateMaterial(const std::vector<aten::MaterialParameter>& mtrls)
-    {
-        AT_ASSERT(mtrls.size() <= ctxt_host_->mtrlparam.num());
-
-        if (mtrls.size() <= ctxt_host_->mtrlparam.num()) {
-            ctxt_host_->mtrlparam.writeFromHostToDeviceByNum(&mtrls[0], (uint32_t)mtrls.size());
-            reset();
-        }
-    }
-
-    void PathTracing::updateLight(const aten::context& scene_ctxt, bool is_npr_target_light)
-    {
-        const auto lights = is_npr_target_light
-            ? scene_ctxt.GetNprTargetLightParameters()
-            : scene_ctxt.GetLightParameters();
-
-        AT_ASSERT(lights.size() <= ctxt_host_->lightparam.num());
-
-        if (lights.size() <= ctxt_host_->lightparam.num()) {
-            if (is_npr_target_light) {
-                ctxt_host_->npr_target_light_params.writeFromHostToDeviceByNum(&lights[0], (uint32_t)lights.size());
-            }
-            else {
-                ctxt_host_->lightparam.writeFromHostToDeviceByNum(&lights[0], (uint32_t)lights.size());
-            }
-            reset();
-        }
-    }
-
     static bool doneSetStackSize = false;
 
-    void PathTracing::render(
+    void PathTracingImplBase::render(
         int32_t width, int32_t height,
         int32_t maxSamples,
         int32_t maxBounce)
@@ -93,8 +64,6 @@ namespace idaten
 
         m_isects.resize(width * height);
         m_rays.resize(width * height);
-
-        m_shadowRays.resize(width * height);
 
         InitPath(width, height);
 
@@ -124,6 +93,8 @@ namespace idaten
         cudaSurfaceObject_t outputSurf)
     {
         static const int32_t rrBounce = 3;
+
+        m_shadowRays.resize(width * height);
 
         // Set bounce count to 1 forcibly, AOV rendering mode.
         maxBounce = (m_mode == Mode::AOV ? 1 : maxBounce);

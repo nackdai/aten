@@ -93,7 +93,7 @@ namespace AT_NAME
     {
         // Pick target light.
         const auto* target_light = param.toon.target_light_idx >= 0
-            ? &ctxt.GetLight(param.toon.target_light_idx)
+            ? &ctxt.GetNprTargetLight(param.toon.target_light_idx)
             : nullptr;
 
 #if 0

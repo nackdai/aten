@@ -6,6 +6,8 @@ namespace idaten {
         if (!ctxt.shapes) {
             ctxt.lightnum = static_cast<int32_t>(lightparam.num());
 
+            ctxt.npr_target_lights = npr_target_light_params.data();
+
             std::vector<cudaTextureObject_t> tmp_node;
             for (auto& node : nodeparam) {
                 auto nodeTex = node.bind();

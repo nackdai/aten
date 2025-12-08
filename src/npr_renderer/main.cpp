@@ -20,8 +20,8 @@
 #include "unity_chan_scene.h"
 #include "model_loader.h"
 
-//#define NprScene    UnityChanScene
-#define NprScene    DummyScene
+#define NprScene    UnityChanScene
+//#define NprScene    DummyScene
 
 //#pragma optimize( "", off)
 
@@ -137,25 +137,19 @@ public:
         std::ignore = NprScene::makeScene(ctxt_, &scene_);
 
         // IBL
-        scene_light_.is_ibl = false;
-        scene_light_.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
-        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(scene_light_.envmap_texture, aten::vec4(0));
-        scene_light_.ibl = std::make_shared<aten::ImageBasedLight>(ctxt_.scene_rendering_config.bg, ctxt_);
+        auto envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", ctxt_);
+        ctxt_.scene_rendering_config.bg = AT_NAME::Background::CreateBackgroundResource(envmap_texture, aten::vec4(0));
+        auto ibl = std::make_shared<aten::ImageBasedLight>(ctxt_.scene_rendering_config.bg, ctxt_);
 
         // PointLight
-        scene_light_.point_light = std::make_shared<aten::PointLight>(
+        auto point_light = std::make_shared<aten::PointLight>(
             aten::vec3(0.0, 0.0, 50.0),
             aten::vec3(1.0, 1.0, 1.0),
             4000.0f);
 
-        ctxt_.scene_rendering_config.bg.enable_env_map = scene_light_.is_ibl;
-
-        if (scene_light_.is_ibl) {
-            scene_.addImageBasedLight(ctxt_, scene_light_.ibl);
-        }
-        else {
-            ctxt_.AddLight(scene_light_.point_light);
-        }
+        ctxt_.scene_rendering_config.bg.enable_env_map = true;
+        scene_.addImageBasedLight(ctxt_, ibl);
+        ctxt_.AddLight(point_light, true);
 
         if constexpr (std::is_same_v<NprScene, UnityChanScene>) {
             BuildScene();
@@ -356,37 +350,14 @@ public:
 
             ImGui::Spacing();
 
-            constexpr std::array light_types = { "IBL", "PointLight" };
-            int32_t lighttype = scene_light_.is_ibl ? 0 : 1;
-            if (ImGui::Combo("light", &lighttype, light_types.data(), static_cast<int32_t>(light_types.size()))) {
-                ctxt_.ClearAllLights();
+            auto& point_light = ctxt_.GetLightInstance(0, true);
+            auto& light_param = point_light->param();
 
-                auto next_is_envmap = lighttype == 0;
-                if (next_is_envmap) {
-                    ctxt_.AddLight(scene_light_.ibl);
-                }
-                else {
-                    ctxt_.AddLight(scene_light_.point_light);
-                }
-
-                need_renderer_reset = true;
-
-                scene_light_.is_ibl = next_is_envmap;
-                ctxt_.scene_rendering_config.bg.enable_env_map = scene_light_.is_ibl;
-                renderer_.UpdateSceneRenderingConfig(ctxt_);
-                renderer_.updateLight(ctxt_);
-            }
-
-            if (!scene_light_.is_ibl) {
-                auto& point_light = ctxt_.GetLightInstance(0);
-                auto& light_param = point_light->param();
-
-                bool is_updated = false;
-                is_updated |= ImGui::ColorEdit3("LightColor", reinterpret_cast<float*>(&light_param.light_color));
-                is_updated |= ImGui::SliderFloat("LightIntensity", &light_param.intensity, 0.0F, 10000.0F);
-                if (is_updated) {
-                    renderer_.updateLight(ctxt_);
-                }
+            bool is_updated = false;
+            is_updated |= ImGui::ColorEdit3("LightColor", reinterpret_cast<float*>(&light_param.light_color));
+            is_updated |= ImGui::SliderFloat("LightIntensity", &light_param.intensity, 0.0F, 10000.0F);
+            if (is_updated) {
+                renderer_.updateLight(ctxt_, true);
             }
 
             ImGui::Spacing();
@@ -699,14 +670,6 @@ private:
     aten::TAA taa_;
 
     aten::RasterizeRenderer rasterizer_aabb_;
-
-    struct SceneLight {
-        bool is_ibl{ false };
-
-        std::shared_ptr<aten::texture> envmap_texture;
-        std::shared_ptr<aten::ImageBasedLight> ibl;
-        std::shared_ptr<aten::PointLight> point_light;
-    } scene_light_;
 
     MaterialParamEditor mtrl_param_editor_;
     int32_t edit_mtrl_idx_{ -1 };

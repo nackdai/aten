@@ -67,6 +67,24 @@ namespace aten
         return lights;
     }
 
+    const aten::LightParameter& context::GetNprTargetLight(size_t idx) const noexcept
+    {
+        AT_ASSERT(idx < npr_target_lights_.size());
+        return npr_target_lights_[idx]->param();
+    }
+
+    std::vector<aten::LightParameter> context::GetNprTargetLightParameters() const
+    {
+        std::vector<aten::LightParameter> lights;
+        lights.reserve(npr_target_lights_.size());
+
+        for (const auto& light : npr_target_lights_) {
+            lights.emplace_back(light->param());
+        }
+
+        return lights;
+    }
+
     aten::tuple<std::vector<aten::vec4>, std::vector<aten::vec4>> context::GetExtractedPosAndNmlInVertices() const
     {
         std::vector<aten::vec4> positions;
@@ -377,26 +395,40 @@ namespace aten
         }
     }
 
-    void context::AddLight(const std::shared_ptr<Light>& light)
-    {
-        lights_.emplace_back(light);
-
-        // Assigne light id to object of light.
-        if (light->param().arealight_objid >= 0) {
-            const auto light_id = static_cast<int32_t>(lights_.size() - 1);
-            auto obj = transformables_.at(light->param().arealight_objid);
-            obj->GetParam().light_id = light_id;
-
-            if (obj->GetParam().type == aten::ObjectType::Instance) {
-                obj = transformables_.at(obj->GetParam().object_id);
+    namespace host_scene_ctxt{
+        void AssignLightIdToObjectOfLight(
+            aten::context& ctxt,
+            const std::shared_ptr<Light>& light)
+        {
+            // Assign light id to object of light.
+            if (light->param().arealight_objid >= 0) {
+                const auto light_id = static_cast<int32_t>(ctxt.GetLightNum() - 1);
+                auto obj = ctxt.GetTransformable(light->param().arealight_objid);
                 obj->GetParam().light_id = light_id;
+                if (obj->GetParam().type == aten::ObjectType::Instance) {
+                    obj = ctxt.GetTransformable(obj->GetParam().object_id);
+                    obj->GetParam().light_id = light_id;
+                }
             }
         }
     }
 
-    std::shared_ptr<Light> context::GetLightInstance(uint32_t idx) const
+    void context::AddLight(const std::shared_ptr<Light>& light, bool is_npr/*= false*/)
     {
-        return lights_[idx];
+        if (is_npr) {
+            npr_target_lights_.emplace_back(light);
+        }
+        else {
+            lights_.emplace_back(light);
+        }
+
+        // Assign light id to object of light.
+        host_scene_ctxt::AssignLightIdToObjectOfLight(*this, light);
+    }
+
+    std::shared_ptr<Light> context::GetLightInstance(uint32_t idx, bool is_npr/*= false*/) const
+    {
+        return is_npr ? npr_target_lights_[idx] : lights_[idx];
     }
 
     size_t context::GetLightNum() const

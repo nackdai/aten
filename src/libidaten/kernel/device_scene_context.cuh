@@ -34,6 +34,8 @@ namespace idaten {
         int32_t lightnum{ 0 };
         const aten::LightParameter* lights{ nullptr };
 
+        const aten::LightParameter* npr_target_lights{ nullptr };
+
         const aten::TriangleParameter* prims{ nullptr };
 
         const aten::mat4* matrices{ nullptr };
@@ -114,6 +116,11 @@ namespace idaten {
             return lights[idx];
         }
 
+        __device__ const aten::LightParameter& GetNprTargetLight(size_t idx) const noexcept
+        {
+            return npr_target_lights[idx];
+        }
+
         __device__ const aten::mat4& GetMatrix(uint32_t idx) const noexcept
         {
             return matrices[idx];
@@ -152,6 +159,8 @@ namespace idaten {
         idaten::TypedCudaMemory<aten::MaterialParameter> mtrlparam;
         idaten::TypedCudaMemory<aten::LightParameter> lightparam;
         idaten::TypedCudaMemory<aten::TriangleParameter> primparams;
+
+        idaten::TypedCudaMemory<aten::LightParameter> npr_target_light_params;
 
         idaten::TypedCudaMemory<aten::mat4> mtxparams;
 

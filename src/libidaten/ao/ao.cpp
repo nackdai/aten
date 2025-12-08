@@ -8,26 +8,6 @@
 #include "aten4idaten.h"
 
 namespace idaten {
-    void AORenderer::UpdateSceneData(
-        GLuint gltex,
-        int32_t width, int32_t height,
-        const aten::CameraParameter& camera,
-        const aten::context& scene_ctxt,
-        const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
-        uint32_t advance_prim_num,
-        uint32_t advance_vtx_num,
-        std::function<const aten::Grid* (const aten::context&)> proxy_get_grid_from_host_scene_context/*= nullptr*/)
-    {
-        Renderer::UpdateSceneData(
-            gltex,
-            width, height,
-            camera, scene_ctxt, nodes,
-            advance_prim_num, advance_vtx_num,
-            proxy_get_grid_from_host_scene_context);
-
-        initSamplerParameter(width, height);
-    }
-
 #ifdef __AT_DEBUG__
     static bool doneSetStackSize = false;
 #endif

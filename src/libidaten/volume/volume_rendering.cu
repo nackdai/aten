@@ -449,7 +449,7 @@ namespace idaten {
 
         int32_t count = 0;
         for (const auto& a : attribs) {
-            count += a.is_terminated ? 1 : 0;
+            count += a.attr.is_terminated ? 1 : 0;
         }
 
         AT_ASSERT(count == terminated_path_count);

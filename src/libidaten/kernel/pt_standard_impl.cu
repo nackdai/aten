@@ -43,7 +43,7 @@ namespace kernel {
 
         AT_NAME::GeneratePath(
             rays[idx],
-            idx, ix, iy,
+            idx, ix, iy, width, height,
             sample, frame,
             paths, camera, random[idx]);
     }

@@ -314,7 +314,7 @@ namespace aten
                         GeneratePath(
                             rays_[idx],
                             idx,
-                            x, y,
+                            x, y, width, height,
                             i, GetFrameCount(),
                             path_host_.paths,
                             camsample,

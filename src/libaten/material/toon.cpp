@@ -84,6 +84,7 @@ namespace AT_NAME
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& param,
         const AT_NAME::PathThroughput& throughput,
+        const AT_NAME::PathAttribute& path_attr,
         aten::sampler& sampler,
         const aten::vec3& hit_pos,
         const aten::vec3& normal,
@@ -125,14 +126,14 @@ namespace AT_NAME
             if (param.type == aten::MaterialType::Toon) {
                 toon_term = Toon::ComputeBRDF(
                     ctxt, param,
-                    throughput,
+                    throughput, path_attr,
                     is_hit_to_target_light ? &light_sample : nullptr,
                     sampler, hit_pos, normal, wi, u, v);
             }
             else if (param.type == aten::MaterialType::StylizedBrdf) {
                 toon_term = StylizedBrdf::ComputeBRDF(
                     ctxt, param,
-                    throughput,
+                    throughput, path_attr,
                     is_hit_to_target_light ? &light_sample : nullptr,
                     sampler, hit_pos, normal, wi, u, v);
             }
@@ -147,6 +148,7 @@ namespace AT_NAME
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& param,
         const AT_NAME::PathThroughput& throughput,
+        const AT_NAME::PathAttribute& path_attr,
         const aten::LightSampleResult* sampled_light,
         aten::sampler& sampler,
         const aten::vec3& hit_pos,
@@ -343,6 +345,7 @@ namespace AT_NAME
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& param,
         const AT_NAME::PathThroughput& throughput,
+        const AT_NAME::PathAttribute& path_attr,
         const aten::LightSampleResult* sampled_light,
         aten::sampler& sampler,
         const aten::vec3& hit_pos,

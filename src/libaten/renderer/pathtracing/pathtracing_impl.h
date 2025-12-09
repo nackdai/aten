@@ -484,7 +484,7 @@ namespace AT_NAME
             // Treat toon as a light.
             const auto toon_bsdf = Toon::bsdf(
                 ctxt, hit_target_mtrl,
-                path_throughput,
+                path_throughput, path_attrib,
                 sampler,
                 hrec.p, hrec.normal, ray.dir,
                 hrec.u, hrec.v

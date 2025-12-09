@@ -15,6 +15,7 @@ namespace AT_NAME
 {
     class context;
     struct PathThroughput;
+    struct PathAttribute;
 
     class Toon : public material {
         friend class material;
@@ -38,6 +39,7 @@ namespace AT_NAME
             const AT_NAME::context& ctxt,
             const aten::MaterialParameter& param,
             const AT_NAME::PathThroughput& throughput,
+            const AT_NAME::PathAttribute& path_attr,
             aten::sampler& sampler,
             const aten::vec3& hit_pos,
             const aten::vec3& normal,
@@ -52,6 +54,7 @@ namespace AT_NAME
             const AT_NAME::context& ctxt,
             const aten::MaterialParameter& param,
             const AT_NAME::PathThroughput& throughput,
+            const AT_NAME::PathAttribute& path_attr,
             const aten::LightSampleResult* light_sample,
             aten::sampler& sampler,
             const aten::vec3& hit_pos,
@@ -88,6 +91,7 @@ namespace AT_NAME
             const AT_NAME::context& ctxt,
             const aten::MaterialParameter& param,
             const AT_NAME::PathThroughput& throughput,
+            const AT_NAME::PathAttribute& path_attr,
             const aten::LightSampleResult* light_sample,
             aten::sampler& sampler,
             const aten::vec3& hit_pos,

@@ -85,6 +85,7 @@ namespace idaten {
                 {
                     memset(&texDesc, 0, sizeof(cudaTextureDesc));
 
+                    // To use UV coordinates in [0,1] range, set normalizedCoords to 1.
                     texDesc.normalizedCoords = 1;
                     texDesc.filterMode = cudaFilterModeLinear;
                     texDesc.addressMode[0] = cudaAddressModeWrap;

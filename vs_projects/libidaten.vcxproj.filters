@@ -274,6 +274,9 @@
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_nee_impl.h">
       <Filter>kernel\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\cuda\CudaSurfaceTexture.h">
+      <Filter>cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

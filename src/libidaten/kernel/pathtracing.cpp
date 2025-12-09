@@ -84,6 +84,8 @@ namespace idaten
             outputSurf);
 
         m_frame++;
+
+        m_glimg.unbind();
     }
 
     void PathTracing::OnRender(

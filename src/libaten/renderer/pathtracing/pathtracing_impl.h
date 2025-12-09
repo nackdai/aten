@@ -65,7 +65,8 @@ namespace AT_NAME
     inline AT_DEVICE_API void GeneratePath(
         aten::ray& generated_ray,
         int32_t idx,
-        int32_t ix, int32_t iy,
+        const int32_t ix, const int32_t iy,
+        const int32_t width, const int32_t height,
         int32_t sample, uint32_t frame,
         AT_NAME::Path& paths,
         const aten::CameraParameter& camera,
@@ -101,6 +102,8 @@ namespace AT_NAME
         _detail_pathtracing_impl::ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
         ClearPathAttribute(paths.attrib[idx]);
+        paths.attrib[idx].screen_space_u = static_cast<float>(ix) / (width - 1);
+        paths.attrib[idx].screen_space_v = static_cast<float>(iy) / (height - 1);
 
         paths.contrib[idx].samples += 1;
     }

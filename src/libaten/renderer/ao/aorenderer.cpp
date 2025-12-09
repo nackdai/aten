@@ -117,7 +117,7 @@ namespace aten
                         GeneratePath(
                             ray,
                             idx,
-                            x, y,
+                            x, y, width, height,
                             i, GetFrameCount(),
                             path_host_.paths,
                             camsample,
@@ -194,7 +194,7 @@ namespace aten
                     GeneratePath(
                         ray,
                         idx,
-                        x, y,
+                        x, y, width, height,
                         0, GetFrameCount(),
                         path_host_.paths,
                         camsample,

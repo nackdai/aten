@@ -32,7 +32,7 @@ namespace aten
         GeneratePath(
             rays_[idx],
             idx,
-            x, y,
+            x, y, width, height,
             sample_cnt, GetFrameCount(),
             path_host_.paths,
             camera,

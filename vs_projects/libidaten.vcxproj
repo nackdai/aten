@@ -83,6 +83,7 @@
     <ClInclude Include="..\src\libidaten\cuda\cudaGLresource.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudainit.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudamemory.h" />
+    <ClInclude Include="..\src\libidaten\cuda\CudaSurfaceTexture.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudaTextureResource.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudautil.h" />
     <ClInclude Include="..\src\libidaten\cuda\helper_math.h" />

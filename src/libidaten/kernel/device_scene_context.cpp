@@ -39,5 +39,8 @@ namespace idaten {
         for (auto& node : nodeparam) {
             std::ignore = node.bind();
         }
+
+        ctxt.screen_space_texture_write = screen_space_texture.GetSurfaceObject();
+        ctxt.screen_space_texture_read = screen_space_texture.GetTextureObject();
     }
 }

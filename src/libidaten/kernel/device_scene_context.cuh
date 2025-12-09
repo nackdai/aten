@@ -2,6 +2,7 @@
 
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
+#include "cuda/CudaSurfaceTexture.h"
 #include "cuda/cudaTextureResource.h"
 #include "geometry/geomparam.h"
 #include "geometry/vertex.h"
@@ -53,6 +54,9 @@ namespace idaten {
         aten::aabb scene_bounding_box;
 
         aten::SceneRenderingConfig scene_rendering_config;
+
+        cudaSurfaceObject_t screen_space_texture_write{ 0 };
+        cudaTextureObject_t screen_space_texture_read{ 0 };
 
         __device__ const float4 GetPosition(uint32_t idx) const noexcept
         {
@@ -174,6 +178,8 @@ namespace idaten {
 
         idaten::CudaTextureResource vtxparamsPos;
         idaten::CudaTextureResource vtxparamsNml;
+
+        idaten::CudaSurfaceTexture<float> screen_space_texture;
 
         void BindToDeviceContext();
     };

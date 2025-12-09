@@ -10,6 +10,7 @@
 #include "cuda/cudamemory.h"
 
 #include "accelerator/threaded_bvh_traverser.h"
+#include "renderer/ao/aorenderer_impl.h"
 #include "renderer/pathtracing/pt_params.h"
 #include "renderer/npr/npr_impl.h"
 
@@ -140,6 +141,78 @@ namespace npr_kernel {
             sample_ray_infos
         );
     }
+
+    __global__ void ShadeAO(
+        int32_t width, int32_t height,
+        int32_t ao_num_rays, float ao_radius,
+        float* dst,
+        idaten::Path paths,
+        int32_t* hitindices,
+        int32_t* hitnum,
+        const aten::Intersection* __restrict__ isects,
+        aten::ray* rays,
+        idaten::context ctxt,
+        const aten::ObjectParameter* __restrict__ shapes,
+        const aten::MaterialParameter* __restrict__ mtrls,
+        const aten::LightParameter* __restrict__ lights,
+        const aten::TriangleParameter* __restrict__ prims,
+        const aten::mat4* __restrict__ matrices)
+    {
+        const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+        const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+        if (ix >= width || iy >= height) {
+            return;
+        }
+
+        auto idx = getIdx(ix, iy, width);
+
+        if (idx >= *hitnum) {
+            return;
+        }
+
+        idx = hitindices[idx];
+
+        ctxt.shapes = shapes;
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.matrices = matrices;
+
+        const auto& ray = rays[idx];
+        const auto& isect = isects[idx];
+
+        const auto ao_color = AT_NAME::ao::ShandeByAO(
+            ao_num_rays, ao_radius,
+            paths.sampler[idx], ctxt, ray, isect);
+
+        dst[idx] = ao_color;
+    }
+
+    __global__ void ApplyBilateralFilter(
+        int32_t width, int32_t height,
+        cudaSurfaceObject_t dst,
+        const float* __restrict__ src,
+        const aten::Intersection* __restrict__ isects
+    )
+    {
+        const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+        const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+        if (ix >= width || iy >= height) {
+            return;
+        }
+
+        const auto idx = getIdx(ix, iy, width);
+
+        const auto filtered_color = AT_NAME::ao::ApplyBilateralFilter<float, float, true>(
+            ix, iy,
+            width, height,
+            2.0F, 2.0F,
+            src, isects
+        );
+        surf2Dwrite(filtered_color, dst, ix * sizeof(float), iy, cudaBoundaryModeTrap);
+    }
 }
 
 namespace idaten {
@@ -149,6 +222,43 @@ namespace idaten {
         int32_t sample,
         int32_t bounce, int32_t rrBounce, int32_t max_depth)
     {
+        if (need_generate_hatching_from_ao_ && bounce == 0) {
+            dim3 thread_per_block(BLOCK_SIZE, BLOCK_SIZE);
+            dim3 block_per_grid(
+                (width + thread_per_block.x - 1) / thread_per_block.x,
+                (height + thread_per_block.y - 1) / thread_per_block.y);
+
+            ao_result_buffer_.resize(width * height);
+            ctxt_host_->screen_space_texture.Init(width, height);
+            ctxt_host_->BindToDeviceContext();
+
+            npr_kernel::ShadeAO << <block_per_grid, thread_per_block, 0, m_stream >> > (
+                width, height,
+                getNumRays(), getRadius(),
+                ao_result_buffer_.data(),
+                path_host_->paths,
+                m_hitidx.data(),
+                m_compaction.getCount().data(),
+                m_isects.data(),
+                m_rays.data(),
+                ctxt_host_->ctxt,
+                ctxt_host_->shapeparam.data(),
+                ctxt_host_->mtrlparam.data(),
+                ctxt_host_->lightparam.data(),
+                ctxt_host_->primparams.data(),
+                ctxt_host_->mtxparams.data());
+
+            checkCudaKernel(ShadeAO);
+
+            npr_kernel::ApplyBilateralFilter << <block_per_grid, thread_per_block, 0, m_stream >> > (
+                width, height,
+                ctxt_host_->screen_space_texture.GetSurfaceObject(),
+                ao_result_buffer_.data(),
+                m_isects.data());
+
+            checkCudaKernel(ApplyBilateralFilter);
+        }
+
         if (ctxt_host_->ctxt.scene_rendering_config.feature_line.enabled) {
             dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
             dim3 threadPerBlock(64);

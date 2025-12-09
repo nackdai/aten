@@ -45,6 +45,7 @@ namespace ao {
 
         aten::vec3 orienting_normal = rec.normal;
 
+        // To get normal map.
         aten::MaterialParameter mtrl;
         AT_NAME::FillMaterial(
             mtrl,
@@ -96,14 +97,12 @@ namespace ao {
      * @breif Shade Ambient Occulusion, if hit test is missed.
      *
      * @param[in] idx Index to the shading pixel.
-     * @param[in] is_first_bounce Specify if this function is called for the first bounce.
      * @param[in,out] paths Information of paths.
      * @return Check if ray hits to something, and if ray hits to something, return 1.0F.
      *         Otherwize, return netative value as invalid value;
      */
     inline AT_DEVICE_API float ShadeByAOIfHitMiss(
         int32_t idx,
-        bool is_first_bounce,
         AT_NAME::Path& paths)
     {
         if (!paths.attrib[idx].attr.is_terminated && !paths.attrib[idx].attr.isHit) {

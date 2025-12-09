@@ -48,7 +48,6 @@ namespace aten
         else {
             ao_color = AT_NAME::ao::ShadeByAOIfHitMiss(
                 idx,
-                true,
                 path_host_.paths);
         }
 
@@ -108,36 +107,34 @@ namespace aten
 
                     int32_t idx = y * width + x;
 
-                    for (uint32_t i = 0; i < samples; i++) {
-                        const auto rnd = aten::getRandom(idx);
-                        const auto& camsample = camera->param();
+                    const auto rnd = aten::getRandom(idx);
+                    const auto& camsample = camera->param();
 
-                        aten::ray ray;
+                    aten::ray ray;
 
-                        GeneratePath(
-                            ray,
-                            idx,
-                            x, y, width, height,
-                            i, GetFrameCount(),
-                            path_host_.paths,
-                            camsample,
-                            rnd);
+                    GeneratePath(
+                        ray,
+                        idx,
+                        x, y, width, height,
+                        0, GetFrameCount(),
+                        path_host_.paths,
+                        camsample,
+                        rnd);
 
-                        const auto ao_color = radiance(
-                            idx, rnd,
-                            ctxt, ray, scene);
+                    const auto ao_color = radiance(
+                        idx, rnd,
+                        ctxt, ray, scene);
 
-                        if (!path_host_.paths.attrib[idx].attr.is_terminated) {
-                            path_host_.paths.contrib[idx].contrib = aten::vec3(ao_color);
-                        }
-                        auto c = path_host_.paths.contrib[idx].contrib;
+                    if (!path_host_.paths.attrib[idx].attr.is_terminated) {
+                        path_host_.paths.contrib[idx].contrib = aten::vec3(ao_color);
+                    }
+                    auto c = path_host_.paths.contrib[idx].contrib;
 
-                        col += c;
-                        cnt++;
+                    col += c;
+                    cnt++;
 
-                        if (path_host_.paths.attrib[idx].attr.is_terminated) {
-                            break;
-                        }
+                    if (path_host_.paths.attrib[idx].attr.is_terminated) {
+                        break;
                     }
 
                     col /= (float)cnt;

@@ -27,7 +27,7 @@ namespace idaten {
 
             hitTest(width, height, 0);
 
-            missShade(width, height, 0);
+            ShadeMissAO(width, height, 0);
 
             m_compaction.compact(
                 m_hitidx,

@@ -38,9 +38,9 @@ namespace idaten
             int32_t maxBounce,
             cudaSurfaceObject_t outputSurf) override;
 
-        void missShade(
+        void ShadeMissAO(
             int32_t width, int32_t height,
-            int32_t bounce) override;
+            int32_t bounce);
 
         void ShadeAO(
             int32_t width, int32_t height,

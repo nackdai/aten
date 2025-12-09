@@ -27,16 +27,14 @@ namespace idaten {
 
             hitTest(width, height, 0);
 
-            ShadeMissAO(width, height, 0);
+            ShadeMissAO(width, height);
 
             m_compaction.compact(
                 m_hitidx,
                 m_hitbools,
                 nullptr);
 
-            ShadeAO(
-                width, height,
-                0, rrBounce);
+            ShadeAO(width, height);
         }
 
         onGather(outputSurf, width, height, maxSamples);
@@ -44,8 +42,5 @@ namespace idaten {
         checkCudaErrors(cudaDeviceSynchronize());
 
         m_frame++;
-
-        m_glimg.unbind();
-        m_glimg.unmap();
     }
 }

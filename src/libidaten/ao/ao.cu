@@ -79,28 +79,21 @@ namespace ao_kernel {
 }
 
 namespace idaten {
-    void AORenderer::ShadeMissAO(
-        int32_t width, int32_t height,
-        int32_t bounce)
+    void AORenderer::ShadeMissAO(int32_t width, int32_t height)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
-        bool isFirstBounce = bounce == 0;
-
         ao_kernel::shadeMissAO << <grid, block >> > (
-            isFirstBounce,
             width, height,
             path_host_->paths);
 
-        checkCudaKernel(shadeMiss);
+        checkCudaKernel(shadeMissAO);
     }
 
-    void AORenderer::ShadeAO(
-        int32_t width, int32_t height,
-        int32_t bounce, int32_t rrBounce)
+    void AORenderer::ShadeAO(int32_t width, int32_t height)
     {
         dim3 blockPerGrid((width * height + 64 - 1) / 64);
         dim3 threadPerBlock(64);
@@ -123,6 +116,6 @@ namespace idaten {
             ctxt_host_->mtxparams.data(),
             m_random.data());
 
-        checkCudaKernel(shade);
+        checkCudaKernel(shadeAO);
     }
 }

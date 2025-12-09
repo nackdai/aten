@@ -12,7 +12,6 @@
 
 namespace ao_kernel {
     __global__ void shadeMissAO(
-        bool is_first_bounce,
         int32_t width, int32_t height,
         idaten::Path paths)
     {
@@ -27,7 +26,6 @@ namespace ao_kernel {
 
         const auto ao_color = AT_NAME::ao::ShadeByAOIfHitMiss(
             idx,
-            is_first_bounce,
             paths);
 
         if (ao_color >= 0) {

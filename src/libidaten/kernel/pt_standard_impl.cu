@@ -65,7 +65,6 @@ namespace kernel {
         aten::ray* rays,
         int32_t* hitbools,
         int32_t width, int32_t height,
-        cudaTextureObject_t* nodes,
         int32_t bounce,
         float hitDistLimit)
     {
@@ -417,7 +416,6 @@ namespace idaten
             m_rays.data(),
             m_hitbools.data(),
             width, height,
-            ctxt_host_->nodetex.data(),
             bounce,
             m_hitDistLimit);
 

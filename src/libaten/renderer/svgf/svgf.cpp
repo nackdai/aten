@@ -167,7 +167,6 @@ namespace aten
             rec.u, rec.v, rec.p,
             orienting_normal,
             rays[idx],
-            paths.sampler[idx],
             paths.attrib[idx],
             paths.throughput[idx]);
         if (is_translucent_by_alpha) {

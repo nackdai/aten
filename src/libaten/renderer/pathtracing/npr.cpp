@@ -74,6 +74,10 @@ namespace aten
                     path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
                     isect, scene, m_rrDepth, depth);
 
+                AT_NAME::AdvanceAlphaBlendPath(
+                    ctxt, rays_[idx],
+                    path_host_.paths.attrib[idx], path_host_.paths.throughput[idx]);
+
                 const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
 
                 std::ignore = AT_NAME::HitShadowRay(

@@ -57,6 +57,10 @@ namespace aten
                     path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
                     isect, scene, m_rrDepth, depth);
 
+                AT_NAME::AdvanceAlphaBlendPath(
+                    ctxt, rays_[idx],
+                    path_host_.paths.attrib[idx], path_host_.paths.throughput[idx]);
+
                 const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
 
                 std::ignore = AT_NAME::HitShadowRay(
@@ -146,7 +150,6 @@ namespace aten
             rec.u, rec.v, rec.p,
             orienting_normal,
             rays[idx],
-            paths.sampler[idx],
             paths.attrib[idx],
             paths.throughput[idx]);
         if (is_translucent_by_alpha) {

@@ -117,8 +117,6 @@ namespace idaten
                     width, height,
                     bounce);
 
-                missShade(width, height, bounce);
-
                 int32_t hitcount = 0;
                 m_compaction.compact(
                     m_hitidx,
@@ -131,6 +129,8 @@ namespace idaten
                     width, height,
                     i,
                     bounce, rrBounce, maxBounce);
+
+                missShade(width, height, bounce);
 
                 bounce++;
             }

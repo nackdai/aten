@@ -109,6 +109,7 @@ namespace pt {
                 aovAlbedoMeshId[idx], albedo, isect);
         }
 
+#if 0
         // Check stencil.
         auto is_stencil = AT_NAME::CheckStencil(
             rays[idx], paths.attrib[idx],
@@ -128,7 +129,6 @@ namespace pt {
             rec.u, rec.v, rec.p,
             orienting_normal,
             rays[idx],
-            paths.sampler[idx],
             paths.attrib[idx],
             paths.throughput[idx]);
         if (is_translucent_by_alpha) {
@@ -139,7 +139,7 @@ namespace pt {
             shadowRays[idx].isActive = false;
             return;
         }
-
+#endif
         albedo = paths.throughput[idx].alpha_blend.transmission * albedo + paths.throughput[idx].alpha_blend.throughput;
 
         // Implicit conection to light.
@@ -287,6 +287,110 @@ namespace pt {
         }
     }
 
+    __global__ void AdvanceNPRPath(
+        int32_t width, int32_t height,
+        idaten::context ctxt,
+        const aten::ObjectParameter* __restrict__ shapes,
+        const aten::MaterialParameter* __restrict__ mtrls,
+        const aten::LightParameter* __restrict__ lights,
+        const aten::TriangleParameter* __restrict__ prims,
+        const aten::mat4* __restrict__ matrices,
+        idaten::Path paths,
+        aten::Intersection* isects,
+        aten::ray* rays,
+        const int32_t* __restrict__ hitindices,
+        const int32_t* hitnum)
+    {
+        int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if (idx >= *hitnum) {
+            return;
+        }
+
+        idx = hitindices[idx];
+
+        ctxt.shapes = shapes;
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.matrices = matrices;
+
+        const auto& isect = isects[idx];
+
+        const auto ray = rays[idx];
+        const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
+
+        aten::hitrecord rec;
+        AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
+
+        bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
+
+        // 交差位置の法線.
+        // 物体からのレイの入出を考慮.
+        aten::vec3 orienting_normal = rec.normal;
+
+        __shared__ aten::MaterialParameter shMtrls[64];
+
+        AT_NAME::FillMaterial(
+            shMtrls[threadIdx.x],
+            ctxt,
+            rec.mtrlid,
+            rec.isVoxel);
+
+        auto albedo = AT_NAME::sampleTexture(ctxt, shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, shMtrls[threadIdx.x].baseColor, 0);
+
+        // Apply normal map.
+        int32_t normalMap = shMtrls[threadIdx.x].normalMap;
+        auto pre_sampled_r = AT_NAME::material::applyNormal(
+            ctxt,
+            &shMtrls[threadIdx.x],
+            normalMap,
+            orienting_normal, orienting_normal,
+            rec.u, rec.v,
+            ray.dir,
+            &paths.sampler[idx]);
+
+        bool need_advance_path_one_more = false;
+
+        // Check stencil.
+        auto is_stencil = AT_NAME::CheckStencil(
+            rays[idx], paths.attrib[idx],
+            0,
+            ctxt,
+            rec.p, orienting_normal,
+            shMtrls[threadIdx.x]
+        );
+        if (is_stencil) {
+            need_advance_path_one_more = true;
+        }
+        else if (ctxt.scene_rendering_config.enable_alpha_blending) {
+            // Check transparency or translucency.
+            auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
+                ctxt,
+                shMtrls[threadIdx.x],
+                rec.u, rec.v, rec.p,
+                orienting_normal,
+                rays[idx],
+                paths.attrib[idx],
+                paths.throughput[idx]);
+            if (is_translucent_by_alpha) {
+                rays[idx] = AT_NAME::AdvanceAlphaBlendPath(
+                    ctxt, rays[idx],
+                    paths.attrib[idx], paths.throughput[idx]);
+
+                need_advance_path_one_more = true;
+            }
+        }
+
+        if (need_advance_path_one_more) {
+            bool isHit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                isects[idx], ctxt, rays[idx],
+                AT_MATH_EPSILON, AT_MATH_INF);
+
+            paths.attrib[idx].attr.isHit = isHit;
+        }
+    }
+
     __global__ void DisplayAOV(
         cudaSurfaceObject_t dst,
         int32_t width, int32_t height,
@@ -347,6 +451,22 @@ namespace idaten
         dim3 threadPerBlock(64);
 
         auto& hitcount = m_compaction.getCount();
+
+        if (bounce == 0) {
+            pt::AdvanceNPRPath << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
+                width, height,
+                ctxt_host_->ctxt,
+                ctxt_host_->shapeparam.data(),
+                ctxt_host_->mtrlparam.data(),
+                ctxt_host_->lightparam.data(),
+                ctxt_host_->primparams.data(),
+                ctxt_host_->mtxparams.data(),
+                path_host_->paths,
+                m_isects.data(),
+                m_rays.data(),
+                m_hitidx.data(), hitcount.data());
+            checkCudaKernel(AdvanceNPRPath);
+        }
 
         pt::shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             aov_.normal_depth().data(),

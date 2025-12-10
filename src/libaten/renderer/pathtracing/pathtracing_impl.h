@@ -42,8 +42,8 @@ namespace AT_NAME
         }
 
         inline AT_DEVICE_API void ClearAlphaBlend(
-        PathThroughput& throughput,
-        PathAttribute& attrib)
+            PathThroughput& throughput,
+            PathAttribute& attrib)
         {
             throughput.alpha_blend.transmission = 1.0F;
             throughput.alpha_blend.throughput = aten::vec3(0.0F);
@@ -514,7 +514,6 @@ namespace AT_NAME
         const aten::vec3& hit_pos,
         const aten::vec3& hit_nml,
         aten::ray& ray,
-        aten::sampler& sampler,
         AT_NAME::PathAttribute& path_attrib,
         AT_NAME::PathThroughput& path_throughput)
     {
@@ -568,9 +567,60 @@ namespace AT_NAME
         return false;
     }
 
+    inline AT_DEVICE_API aten::ray AdvanceAlphaBlendPath(
+        const AT_NAME::context& ctxt,
+        const aten::ray& original_ray,
+        AT_NAME::PathAttribute& path_attrib,
+        AT_NAME::PathThroughput& path_throughput
+    )
+    {
+        if (!path_attrib.attr.is_accumulating_alpha_blending) {
+            return original_ray;
+        }
+
+        auto ray{ original_ray };
+
+        // TODO
+        constexpr size_t MAX_LOOKUPS = 10;
+
+        size_t loop_count = 0;
+
+        for (loop_count = 0; loop_count < MAX_LOOKUPS; loop_count++) {
+            aten::Intersection isect;
+            bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                isect, ctxt, ray,
+                AT_MATH_EPSILON, AT_MATH_INF
+            );
+
+            if (is_hit) {
+                const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
+
+                aten::hitrecord rec;
+                AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
+
+                const auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
+                    ctxt,
+                    ctxt.GetMaterial(rec.mtrlid),
+                    rec.u, rec.v, rec.p, rec.normal,
+                    ray,
+                    path_attrib, path_throughput);
+                if (!is_translucent_by_alpha) {
+                    return ray;
+                }
+            }
+            else {
+                path_attrib.attr.is_accumulating_alpha_blending = false;
+                return ray;
+            }
+        }
+
+        path_attrib.attr.is_accumulating_alpha_blending = false;
+        return original_ray;
+    }
+
     inline AT_DEVICE_API bool CheckStencil(
         aten::ray& curr_ray,
-        PathAttribute& path_attrib,
+        AT_NAME::PathAttribute& path_attrib,
         const int32_t bounce,
         const AT_NAME::context& ctxt,
         const aten::vec3& hit_pos,
@@ -757,7 +807,6 @@ namespace AT_NAME
                 rec.u, rec.v, rec.p,
                 orienting_normal,
                 rays[idx],
-                paths.sampler[idx],
                 paths.attrib[idx],
                 paths.throughput[idx]);
             if (is_translucent_by_alpha) {

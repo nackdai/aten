@@ -350,15 +350,15 @@ namespace AT_NAME
     }
 
     inline AT_DEVICE_API bool HitShadowRay(
-        int32_t idx,
         int32_t bounce,
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& surface_mtrl,
-        AT_NAME::Path paths,
+        const AT_NAME::PathAttribute& path_attrib,
+        AT_NAME::PathContrib& path_contrib,
         const aten::ShadowRay& shadow_ray
     )
     {
-        if (paths.attrib[idx].attr.is_terminated) {
+        if (path_attrib.attr.is_terminated) {
             return false;
         }
 
@@ -385,7 +385,7 @@ namespace AT_NAME
         );
 
         if (is_hit_to_light) {
-            aten::AddVec3(paths.contrib[idx].contrib, shadow_ray.lightcontrib);
+            aten::AddVec3(path_contrib.contrib, shadow_ray.lightcontrib);
         }
 
         return is_hit_to_light;

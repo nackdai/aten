@@ -238,9 +238,10 @@ namespace pt {
         const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
 
         AT_NAME::HitShadowRay(
-            idx, bounce,
+            bounce,
             ctxt, mtrl,
-            paths, shadowRays[idx]);
+            paths.attrib[idx], paths.contrib[idx],
+            shadowRays[idx]);
     }
 
     __global__ void gather(

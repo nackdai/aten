@@ -216,13 +216,14 @@ namespace npr_kernel {
 }
 
 namespace idaten {
-    void NPRPathTracing::onShade(
-        cudaSurfaceObject_t outputSurf,
+    void NPRPathTracing::PreShade(
         int32_t width, int32_t height,
-        int32_t sample,
-        int32_t bounce, int32_t rrBounce, int32_t max_depth)
+        int32_t bounce,
+        cudaSurfaceObject_t outputSurf)
     {
-        if (need_generate_hatching_from_ao_ && bounce == 0) {
+        PathTracing::PreShade(width, height, bounce, outputSurf);
+
+        if (bounce == 0 && hatching_shadow_ == HatchingShadow::AOBase) {
             dim3 thread_per_block(BLOCK_SIZE, BLOCK_SIZE);
             dim3 block_per_grid(
                 (width + thread_per_block.x - 1) / thread_per_block.x,
@@ -258,7 +259,14 @@ namespace idaten {
 
             checkCudaKernel(ApplyBilateralFilter);
         }
+    }
 
+    void NPRPathTracing::onShade(
+        cudaSurfaceObject_t outputSurf,
+        int32_t width, int32_t height,
+        int32_t sample,
+        int32_t bounce, int32_t rrBounce, int32_t max_depth)
+    {
         if (ctxt_host_->ctxt.scene_rendering_config.feature_line.enabled) {
             dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
             dim3 threadPerBlock(64);

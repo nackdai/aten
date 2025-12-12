@@ -27,14 +27,19 @@ namespace idaten {
 
             hitTest(width, height, 0);
 
-            ShadeMissAO(width, height);
-
             m_compaction.compact(
                 m_hitidx,
                 m_hitbools,
                 nullptr);
 
+            PreShade(
+                width, height,
+                0,
+                outputSurf);
+
             ShadeAO(width, height);
+
+            ShadeMissAO(width, height);
         }
 
         onGather(outputSurf, width, height, maxSamples);

@@ -122,6 +122,11 @@ namespace idaten
                     m_hitidx,
                     m_hitbools);
 
+                PreShade(
+                    width, height,
+                    bounce,
+                    outputSurf);
+
                 //AT_PRINTF("%d\n", hitcount);
 
                 onShade(

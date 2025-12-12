@@ -441,18 +441,17 @@ namespace idaten
         }
     }
 
-    void PathTracingImplBase::onShade(
-        cudaSurfaceObject_t outputSurf,
+    void PathTracingImplBase::PreShade(
         int32_t width, int32_t height,
-        int32_t sample,
-        int32_t bounce, int32_t rrBounce, int32_t max_depth)
+        int32_t bounce,
+        cudaSurfaceObject_t outputSurf)
     {
-        dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
-        dim3 threadPerBlock(64);
-
-        auto& hitcount = m_compaction.getCount();
-
         if (bounce == 0) {
+            dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
+            dim3 threadPerBlock(64);
+
+            auto& hitcount = m_compaction.getCount();
+
             pt::AdvanceNPRPath << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
                 width, height,
                 ctxt_host_->ctxt,
@@ -467,6 +466,18 @@ namespace idaten
                 m_hitidx.data(), hitcount.data());
             checkCudaKernel(AdvanceNPRPath);
         }
+    }
+
+    void PathTracingImplBase::onShade(
+        cudaSurfaceObject_t outputSurf,
+        int32_t width, int32_t height,
+        int32_t sample,
+        int32_t bounce, int32_t rrBounce, int32_t max_depth)
+    {
+        dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
+        dim3 threadPerBlock(64);
+
+        auto& hitcount = m_compaction.getCount();
 
         pt::shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             aov_.normal_depth().data(),

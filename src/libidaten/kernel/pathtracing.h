@@ -68,13 +68,18 @@ namespace idaten
                 aov_.albedo_meshid());
         }
 
+        virtual void PreShade(
+            int32_t width, int32_t height,
+            int32_t bounce,
+            cudaSurfaceObject_t outputSurf);
+
         virtual void onShade(
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height,
             int32_t sample,
             int32_t bounce, int32_t rrBounce, int32_t max_depth);
 
-        void onShadeByShadowRay(
+        virtual void onShadeByShadowRay(
             int32_t width, int32_t height,
             int32_t bounce);
 

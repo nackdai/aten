@@ -46,46 +46,69 @@ namespace ao {
         aten::vec3 orienting_normal = rec.normal;
 
         // To get normal map.
-        aten::MaterialParameter mtrl;
+        aten::MaterialParameter base_mtrl;
         AT_NAME::FillMaterial(
-            mtrl,
+            base_mtrl,
             ctxt,
             rec.mtrlid, rec.isVoxel);
 
         // Apply normal map.
         AT_NAME::material::applyNormal(
             ctxt,
-            &mtrl,
-            mtrl.normalMap,
+            &base_mtrl,
+            base_mtrl.normalMap,
             orienting_normal, orienting_normal,
             rec.u, rec.v,
             ray.dir, &sampler);
 
         float ao_color{ 0.0F };
 
+        constexpr size_t MAX_LOOP = 10;
+
         for (int32_t i = 0; i < ao_num_rays; i++) {
             auto nextDir = AT_NAME::Diffuse::sampleDirection(orienting_normal, &sampler);
-            auto pdfb = AT_NAME::Diffuse::pdf(orienting_normal, nextDir);
-
-            float c = dot(orienting_normal, nextDir);
-
             auto ao_ray = aten::ray(rec.p, nextDir, orienting_normal);
+            for (size_t n = 0; n < MAX_LOOP; n++) {
+                aten::Intersection ao_isect;
+                bool isHit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                    ao_isect,
+                    ctxt,
+                    ao_ray,
+                    AT_MATH_EPSILON, ao_radius);
 
-            aten::Intersection ao_isect;
+                if (isHit) {
+                    const auto* hitobj = &ctxt.GetObject(static_cast<uint32_t>(ao_isect.objid));
 
-            bool isHit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
-                ao_isect,
-                ctxt,
-                ao_ray,
-                AT_MATH_EPSILON, ao_radius);
+                    aten::hitrecord ao_rec;
+                    AT_NAME::evaluate_hit_result(ao_rec, *hitobj, ctxt, ao_ray, ao_isect);
 
-            if (isHit) {
-                if (c > 0.0f) {
-                    ao_color += ao_isect.t / ao_radius * c / pdfb;
+                    const auto& mtrl = ctxt.GetMaterial(ao_isect.mtrlid);
+
+                    auto ao_orienting_normal = ao_rec.normal;
+
+                    if (AT_NAME::material::isTranslucentByAlpha(ctxt, mtrl, ao_rec.u, ao_rec.v)) {
+                        const bool is_same_facing = dot(ao_rec.normal, ao_ray.dir) > 0.0F;
+                        if (!is_same_facing) {
+                            ao_orienting_normal = -ao_orienting_normal;
+                        }
+
+                        // To go path through the object, specfy the oppoiste normal.
+                        ao_ray = aten::ray(ao_rec.p, ao_ray.dir, ao_orienting_normal);
+                        continue;
+                    }
+                    else {
+                        const float c = dot(ao_orienting_normal, nextDir);
+                        if (c > 0.0f) {
+                            const auto pdfb = AT_NAME::Diffuse::pdf(orienting_normal, nextDir);
+                            ao_color += ao_isect.t / ao_radius * c / pdfb;
+                        }
+                        break;
+                    }
                 }
-            }
-            else {
-                ao_color = 1.0f;
+                else {
+                    ao_color = 1.0f;
+                    break;
+                }
             }
         }
 
@@ -152,6 +175,9 @@ namespace ao {
             if constexpr (std::is_same_v<SRC, AT_NAME::PathContrib>) {
                 value = values[idx].contrib.x;
             }
+            else if constexpr (std::is_same_v<SRC, aten::ShadowRay>) {
+                value = values[idx].isActive ? 1.0F : 0.0F;
+            }
             else {
                 value = values[idx];
             }
@@ -201,6 +227,9 @@ namespace ao {
             DST value;
             if constexpr (std::is_same_v<SRC, AT_NAME::PathContrib>) {
                 value = values[idx].contrib.x;
+            }
+            else if constexpr (std::is_same_v<SRC, aten::ShadowRay>) {
+                value = values[idx].isActive ? 1.0F : 0.0F;
             }
             else {
                 value = values[idx];

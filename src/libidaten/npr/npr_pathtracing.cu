@@ -189,10 +189,71 @@ namespace npr_kernel {
         dst[idx] = ao_color;
     }
 
+    __global__ void HitShadowRayWithKeepingIfHitToLight(
+        int32_t bounce,
+        idaten::context ctxt,
+        const aten::ObjectParameter* __restrict__ shapes,
+        const aten::MaterialParameter* __restrict__ mtrls,
+        const aten::LightParameter* __restrict__ lights,
+        const aten::TriangleParameter* __restrict__ prims,
+        const aten::mat4* __restrict__ matrices,
+        const aten::Intersection* __restrict__ isects,
+        idaten::Path paths,
+        int32_t* hitindices,
+        int32_t* hitnum,
+        aten::ShadowRay* shadowRays)
+    {
+        int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if (idx >= *hitnum) {
+            return;
+        }
+
+        idx = hitindices[idx];
+
+        ctxt.shapes = shapes;
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.matrices = matrices;
+
+        const auto& isect = isects[idx];
+        auto mtrl = ctxt.GetMaterial(isect.mtrlid);
+
+        const auto original_mtrl_type = mtrl.type;
+
+        const auto is_toon_material = (original_mtrl_type == aten::MaterialType::Toon
+            || original_mtrl_type == aten::MaterialType::StylizedBrdf);
+
+        if (is_toon_material) {
+            // Replace toon material to lambertian for shadow ray test.
+            mtrl.type = aten::MaterialType::Diffuse;
+        }
+
+        auto& shadow_ray = shadowRays[idx];
+
+        // Reset termination flag to trace shadow ray forcibly.
+        auto path_attrib = paths.attrib[idx];
+        path_attrib.attr.is_terminated = false;
+
+        // If material is toon material,
+        // the contribution from shadow ray should not be applied to the rendering result.
+        const auto is_hit_to_light = AT_NAME::HitShadowRay(
+            bounce,
+            ctxt, mtrl,
+            path_attrib,
+            is_toon_material ? AT_NAME::PathContrib() : paths.contrib[idx],
+            shadow_ray);
+
+        // For latter filtering, keep shadow ray if it hits to light.
+        shadow_ray.isActive = is_hit_to_light;
+    }
+
+    template <class SrcType>
     __global__ void ApplyBilateralFilter(
         int32_t width, int32_t height,
         cudaSurfaceObject_t dst,
-        const float* __restrict__ src,
+        const SrcType* __restrict__ src,
         const aten::Intersection* __restrict__ isects
     )
     {
@@ -205,7 +266,7 @@ namespace npr_kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        const auto filtered_color = AT_NAME::ao::ApplyBilateralFilter<float, float, true>(
+        const auto filtered_color = AT_NAME::ao::ApplyBilateralFilter<SrcType, float, true>(
             ix, iy,
             width, height,
             2.0F, 2.0F,
@@ -310,11 +371,59 @@ namespace idaten {
             checkCudaKernel(shadeSampleRay);
         }
 
+        ctxt_host_->ctxt.enable_shadowray_base_stylized_shadow = hatching_shadow_ == HatchingShadow::ShadowRayBase;
+
         PathTracing::onShade(
             outputSurf,
             width, height,
             sample,
             bounce, rrBounce, max_depth);
+    }
+
+    void NPRPathTracing::onShadeByShadowRay(
+        int32_t width, int32_t height,
+        int32_t bounce)
+    {
+        if (bounce == 0 && hatching_shadow_ == HatchingShadow::ShadowRayBase) {
+            dim3 block_per_grid(((width * height) + 64 - 1) / 64);
+            dim3 thread_per_block(64);
+
+            auto& hitcount = m_compaction.getCount();
+
+            npr_kernel::HitShadowRayWithKeepingIfHitToLight << <block_per_grid, thread_per_block, 0, m_stream >> > (
+                bounce,
+                ctxt_host_->ctxt,
+                ctxt_host_->shapeparam.data(),
+                ctxt_host_->mtrlparam.data(),
+                ctxt_host_->lightparam.data(),
+                ctxt_host_->primparams.data(),
+                ctxt_host_->mtxparams.data(),
+                m_isects.data(),
+                path_host_->paths,
+                m_hitidx.data(), hitcount.data(),
+                m_shadowRays.data());
+
+            checkCudaKernel(HitShadowRayWithKeepingIfHitToLight);
+
+            thread_per_block = dim3(BLOCK_SIZE, BLOCK_SIZE);
+            block_per_grid = dim3(
+                (width + thread_per_block.x - 1) / thread_per_block.x,
+                (height + thread_per_block.y - 1) / thread_per_block.y);
+
+            ctxt_host_->screen_space_texture.Init(width, height);
+            ctxt_host_->BindToDeviceContext();
+
+            npr_kernel::ApplyBilateralFilter << <block_per_grid, thread_per_block, 0, m_stream >> > (
+                width, height,
+                ctxt_host_->screen_space_texture.GetSurfaceObject(),
+                m_shadowRays.data(),
+                m_isects.data());
+
+            checkCudaKernel(ApplyBilateralFilter);
+        }
+        else {
+            PathTracing::onShadeByShadowRay(width, height, bounce);
+        }
     }
 
     void NPRPathTracing::missShade(

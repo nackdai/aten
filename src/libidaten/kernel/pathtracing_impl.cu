@@ -142,8 +142,11 @@ namespace pt {
 #endif
         albedo = paths.throughput[idx].alpha_blend.transmission * albedo + paths.throughput[idx].alpha_blend.throughput;
 
-        // Implicit conection to light.
-        auto is_hit_implicit_light = AT_NAME::HitTeminatedMaterial(
+        const bool is_toon_mtrl = shMtrls[threadIdx.x].type == aten::MaterialType::Toon
+            || shMtrls[threadIdx.x].type == aten::MaterialType::StylizedBrdf;
+
+        // Implicit conection to light or hit to terminated material.
+        auto is_hit_terminated_mtrl = AT_NAME::HitTeminatedMaterial(
             ctxt, paths.sampler[idx],
             isect.objid,
             isBackfacing,
@@ -152,8 +155,17 @@ namespace pt {
             ray,
             rec,
             albedo, shMtrls[threadIdx.x]);
-        if (is_hit_implicit_light) {
+        if (is_hit_terminated_mtrl) {
+            if (ctxt.enable_shadowray_base_stylized_shadow && is_toon_mtrl) {
+                // Even if hit to terminated material, continue shadow ray for stylized shadow.
+                shMtrls[threadIdx.x].type = shMtrls[threadIdx.x].toon.toon_type == aten::MaterialType::Diffuse
+                    ? aten::MaterialType::Diffuse
+                    : aten::MaterialType::Specular;
+                shMtrls[threadIdx.x].attrib.is_singular = shMtrls[threadIdx.x].toon.toon_type == aten::MaterialType::ToonSpecular;
+            }
+            else {
             return;
+            }
         }
 
         if (!shMtrls[threadIdx.x].attrib.is_translucent && isBackfacing) {
@@ -176,6 +188,10 @@ namespace pt {
             pre_sampled_r);
 
         shadowRays[idx] = shShadowRays[threadIdx.x];
+
+        if (is_hit_terminated_mtrl) {
+            return;
+        }
 
         const auto russianProb = AT_NAME::ComputeRussianProbability(
             bounce, rrBounce,

@@ -79,9 +79,11 @@ namespace aten
                 const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
 
                 std::ignore = AT_NAME::HitShadowRay(
-                    idx, bounce,
+                    bounce,
                     ctxt, mtrl,
-                    path_host_.paths, shadow_rays_[idx]);
+                    path_host_.paths.attrib[idx],
+                    path_host_.paths.contrib[idx],
+                    shadow_rays_[idx]);
             }
         }
         else {

@@ -243,9 +243,10 @@ namespace restir {
             const auto& mtrl = ctxt.GetMaterial(restir_info.mtrl_idx);
 
             isHit = AT_NAME::HitShadowRay(
-                idx, bounce,
+                bounce,
                 ctxt, mtrl,
-                paths, shadowRays[idx]);
+                paths.attrib[idx], paths.contrib[idx],
+                shadowRays[idx]);
         }
 
         if (!isHit) {

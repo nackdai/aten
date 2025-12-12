@@ -81,9 +81,10 @@ namespace aten
                 const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
 
                 std::ignore = AT_NAME::HitShadowRay(
-                    idx, depth,
+                    depth,
                     ctxt, mtrl,
-                    path_host_.paths,
+                    path_host_.paths.attrib[idx],
+                    path_host_.paths.contrib[idx],
                     shadow_rays_[idx]);
 
                 willContinue = !path_host_.paths.attrib[idx].attr.is_terminated;

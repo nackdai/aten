@@ -55,6 +55,11 @@ namespace idaten {
 
         aten::SceneRenderingConfig scene_rendering_config;
 
+        /**
+         * @brief Control if stylized shadow based on shadow ray is enabled.
+         */
+        bool enable_shadowray_base_stylized_shadow{ false };
+
         cudaSurfaceObject_t screen_space_texture{ 0 };
 
         __device__ const float4 GetPosition(uint32_t idx) const noexcept

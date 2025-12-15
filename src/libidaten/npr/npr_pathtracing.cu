@@ -285,11 +285,11 @@ namespace npr_kernel {
         else {
             constexpr auto IsHorizontal = Direction == HatchingShadowFilterDirection::Horzontal;
             filtered_color = AT_NAME::ao::ApplyBilateralFilter<SrcType, float, IsHorizontal, KernelSizeH>(
-            ix, iy,
-            width, height,
-            2.0F, 2.0F,
-            src, isects
-        );
+                ix, iy,
+                width, height,
+                2.0F, 2.0F,
+                src, isects
+            );
         }
 
         if constexpr (!IsFirstStep) {
@@ -317,8 +317,6 @@ namespace idaten {
                 (height + thread_per_block.y - 1) / thread_per_block.y);
 
             ao_result_buffer_.resize(width * height);
-            ctxt_host_->screen_space_texture.Init(width, height);
-            ctxt_host_->BindToDeviceContext();
 
             npr_kernel::ShadeAO << <block_per_grid, thread_per_block, 0, m_stream >> > (
                 width, height,
@@ -338,24 +336,7 @@ namespace idaten {
 
             checkCudaKernel(ShadeAO);
 
-            using SrcType = decltype(ao_result_buffer_)::value_type;
-            using HatchingShadowFilterDirection = npr_kernel::HatchingShadowFilterDirection;
-
-            npr_kernel::ApplyBilateralFilter<SrcType, true, HatchingShadowFilterDirection::Orthogonal, 3, 3> << <block_per_grid, thread_per_block, 0, m_stream >> > (
-                width, height,
-                ctxt_host_->screen_space_texture.GetSurfaceObject(),
-                ao_result_buffer_.data(),
-                m_isects.data());
-
-            checkCudaKernel(ApplyBilateralFilter);
-
-            npr_kernel::ApplyBilateralFilter<SrcType, false, HatchingShadowFilterDirection::Orthogonal, 3, -3> << <block_per_grid, thread_per_block, 0, m_stream >> > (
-                width, height,
-                ctxt_host_->screen_space_texture.GetSurfaceObject(),
-                ao_result_buffer_.data(),
-                m_isects.data());
-
-            checkCudaKernel(ApplyBilateralFilter);
+            ApplyBilateralFilter(width, height, ao_result_buffer_);
         }
     }
 
@@ -442,32 +423,7 @@ namespace idaten {
 
             checkCudaKernel(HitShadowRayWithKeepingIfHitToLight);
 
-            thread_per_block = dim3(BLOCK_SIZE, BLOCK_SIZE);
-            block_per_grid = dim3(
-                (width + thread_per_block.x - 1) / thread_per_block.x,
-                (height + thread_per_block.y - 1) / thread_per_block.y);
-
-            ctxt_host_->screen_space_texture.Init(width, height);
-            ctxt_host_->BindToDeviceContext();
-
-            using SrcType = decltype(m_shadowRays)::value_type;
-            using HatchingShadowFilterDirection = npr_kernel::HatchingShadowFilterDirection;
-
-            npr_kernel::ApplyBilateralFilter<SrcType, true, HatchingShadowFilterDirection::Orthogonal, 3, 3> << <block_per_grid, thread_per_block, 0, m_stream >> > (
-                width, height,
-                ctxt_host_->screen_space_texture.GetSurfaceObject(),
-                m_shadowRays.data(),
-                m_isects.data());
-
-            checkCudaKernel(ApplyBilateralFilter);
-
-            npr_kernel::ApplyBilateralFilter<SrcType, false, HatchingShadowFilterDirection::Orthogonal, 3, -3> << <block_per_grid, thread_per_block, 0, m_stream >> > (
-                width, height,
-                ctxt_host_->screen_space_texture.GetSurfaceObject(),
-                m_shadowRays.data(),
-                m_isects.data());
-
-            checkCudaKernel(ApplyBilateralFilter);
+            ApplyBilateralFilter(width, height, m_shadowRays);
         }
         else {
             PathTracing::onShadeByShadowRay(width, height, bounce);
@@ -513,5 +469,38 @@ namespace idaten {
         }
 
         PathTracing::missShade(width, height, bounce);
+    }
+
+    template <class T>
+    void NPRPathTracing::ApplyBilateralFilter(
+        int32_t width, int32_t height,
+        idaten::TypedCudaMemory<T>& src)
+    {
+        dim3 thread_per_block{ BLOCK_SIZE, BLOCK_SIZE };
+        dim3 block_per_grid{
+            (width + thread_per_block.x - 1) / thread_per_block.x,
+            (height + thread_per_block.y - 1) / thread_per_block.y };
+
+        ctxt_host_->screen_space_texture.Init(width, height);
+        ctxt_host_->BindToDeviceContext();
+
+        using SrcType = T;
+        using HatchingShadowFilterDirection = npr_kernel::HatchingShadowFilterDirection;
+
+        npr_kernel::ApplyBilateralFilter<SrcType, true, HatchingShadowFilterDirection::Orthogonal, 3, 3> << <block_per_grid, thread_per_block, 0, m_stream >> > (
+            width, height,
+            ctxt_host_->screen_space_texture.GetSurfaceObject(),
+            src.data(),
+            m_isects.data());
+
+        checkCudaKernel(ApplyBilateralFilter);
+
+        npr_kernel::ApplyBilateralFilter<SrcType, false, HatchingShadowFilterDirection::Orthogonal, 3, -3> << <block_per_grid, thread_per_block, 0, m_stream >> > (
+            width, height,
+            ctxt_host_->screen_space_texture.GetSurfaceObject(),
+            src.data(),
+            m_isects.data());
+
+        checkCudaKernel(ApplyBilateralFilter);
     }
 }

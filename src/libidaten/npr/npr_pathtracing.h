@@ -59,6 +59,11 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t bounce) override;
 
+        template <class T>
+        void ApplyBilateralFilter(
+            int32_t width, int32_t height,
+            idaten::TypedCudaMemory<T>& src);
+
     protected:
         idaten::TypedCudaMemory<AT_NAME::npr::FeatureLine::SampleRayInfo<SampleRayNum>> sample_ray_infos_;
 

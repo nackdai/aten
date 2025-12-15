@@ -102,8 +102,8 @@ namespace AT_NAME
         _detail_pathtracing_impl::ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 
         ClearPathAttribute(paths.attrib[idx]);
-        paths.attrib[idx].screen_space_u = static_cast<float>(ix) / (width - 1);
-        paths.attrib[idx].screen_space_v = static_cast<float>(iy) / (height - 1);
+        paths.attrib[idx].screen_space_x = ix;
+        paths.attrib[idx].screen_space_y = iy;
 
         paths.contrib[idx].samples += 1;
     }

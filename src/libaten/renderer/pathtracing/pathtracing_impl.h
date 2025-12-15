@@ -470,41 +470,41 @@ namespace AT_NAME
 
         const auto mtrl_type = hit_target_mtrl.type;
 
-        switch (mtrl_type) {
-        case aten::MaterialType::Emissive:
+        if (mtrl_type == aten::MaterialType::Emissive) {
             // Implicit conection to light.
             return HitImplicitLight(
                 ctxt,
                 hit_obj_id, is_back_facing, bounce,
                 path_contrib, path_attrib, path_throughput,
                 ray, hrec, hit_target_mtrl);
-        case aten::MaterialType::Toon:
-        case aten::MaterialType::StylizedBrdf:
+        }
+        else if (mtrl_type == aten::MaterialType::Toon
+                || mtrl_type == aten::MaterialType::StylizedBrdf)
         {
-            // Treat toon as a light.
-            const auto toon_bsdf = Toon::bsdf(
-                ctxt, hit_target_mtrl,
-                path_throughput, path_attrib,
-                sampler,
-                hrec.p, hrec.normal, ray.dir,
-                hrec.u, hrec.v
-            );
+            if (bounce == 0) {
+                // Treat toon as a light.
+                const auto toon_bsdf = Toon::bsdf(
+                    ctxt, hit_target_mtrl,
+                    path_throughput, path_attrib,
+                    sampler,
+                    hrec.p, hrec.normal, ray.dir,
+                    hrec.u, hrec.v
+                );
 
-            // NOTE:
-            // The accumulated alpha blending color is applied in Toon::bsdf.
-            // So, no need to do it here.
+                // NOTE:
+                // The accumulated alpha blending color is applied in Toon::bsdf.
+                // So, no need to do it here.
 
-            aten::AddVec3(path_contrib.contrib, path_throughput.throughput * toon_bsdf * external_albedo);
+                aten::AddVec3(path_contrib.contrib, path_throughput.throughput * toon_bsdf * external_albedo);
 
-            path_attrib.attr.is_terminated = true;
+                path_attrib.attr.is_terminated = true;
+            }
             return true;
         }
-        default:
+        else {
             AT_ASSERT(false);
             return false;
         }
-
-        return true;
     }
 
     inline AT_DEVICE_API bool CheckMaterialTranslucentByAlpha(

@@ -64,8 +64,8 @@ namespace AT_NAME {
         } attr;
 
         int32_t last_hit_mtrl_idx{ -1 };
-        float screen_space_u{ 0.0F };
-        float screen_space_v{ 0.0F };
+        int32_t screen_space_x{ 0 };
+        int32_t screen_space_y{ 0 };
     };
 
     struct Path {

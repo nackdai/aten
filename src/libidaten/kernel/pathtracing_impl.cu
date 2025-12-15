@@ -156,7 +156,8 @@ namespace pt {
             rec,
             albedo, shMtrls[threadIdx.x]);
         if (is_hit_terminated_mtrl) {
-            if (ctxt.enable_shadowray_base_stylized_shadow && is_toon_mtrl) {
+            //if (ctxt.enable_shadowray_base_stylized_shadow && is_toon_mtrl) {
+            if (is_toon_mtrl && (bounce > 0 || ctxt.enable_shadowray_base_stylized_shadow)) {
                 // Even if hit to terminated material, continue shadow ray for stylized shadow.
                 shMtrls[threadIdx.x].type = shMtrls[threadIdx.x].toon.toon_type == aten::MaterialType::Diffuse
                     ? aten::MaterialType::Diffuse
@@ -164,7 +165,7 @@ namespace pt {
                 shMtrls[threadIdx.x].attrib.is_singular = shMtrls[threadIdx.x].toon.toon_type == aten::MaterialType::ToonSpecular;
             }
             else {
-            return;
+                return;
             }
         }
 

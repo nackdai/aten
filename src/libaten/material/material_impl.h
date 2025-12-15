@@ -243,6 +243,8 @@ namespace AT_NAME
                 const auto& albedo = ctxt.GetMaterial(static_cast<uint32_t>(mtrl_id)).baseColor;
                 dst_mtrl = aten::MaterialParameter(aten::MaterialType::Diffuse, aten::MaterialAttributeDiffuse);
                 dst_mtrl.baseColor = albedo;
+                dst_mtrl.feature_line.enable = false;
+                dst_mtrl.stencil_type = aten::StencilType::NONE;
             }
             else {
                 dst_mtrl = ctxt.GetMaterial(static_cast<uint32_t>(mtrl_id));
@@ -252,6 +254,8 @@ namespace AT_NAME
             // TODO
             dst_mtrl = aten::MaterialParameter(aten::MaterialType::Diffuse, aten::MaterialAttributeDiffuse);
             dst_mtrl.baseColor = aten::vec3(1.0f);
+            dst_mtrl.feature_line.enable = false;
+            dst_mtrl.stencil_type = aten::StencilType::NONE;
         }
 
         return is_valid_mtrl;

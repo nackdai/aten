@@ -604,6 +604,12 @@ namespace aten
             return nodes_[idx];
         }
 
+        // TODO
+        float GetScreenSpaceTextureAt(int32_t x, int32_t y) const
+        {
+            return 1.0F;
+        }
+
     private:
         /**
          * @brief Add a texture instance.

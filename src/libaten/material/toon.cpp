@@ -51,6 +51,8 @@ namespace AT_NAME
         is_updated |= editor->edit("toon_type", toon_type_str.data(), toon_type_str.size(), toon_type);
         m_param.toon.toon_type = toon_types[toon_type];
 
+        is_updated |= editor->edit("enable_hatching_shadow", m_param.toon.enable_hatching_shadow);
+
         if (m_param.toon.toon_type != aten::MaterialType::Diffuse) {
             // Stylized highlight.
             if (editor->CollapsingHeader("Stylized Highlight")) {
@@ -67,9 +69,7 @@ namespace AT_NAME
 
         // Rim light.
         if (editor->CollapsingHeader("Rim Light")) {
-            bool enable_rim_light = m_param.toon.enable_rim_light;
-            is_updated |= editor->edit("enable_rim_light", enable_rim_light);
-            m_param.toon.enable_rim_light = enable_rim_light;
+            is_updated |= editor->edit("enable_rim_light", m_param.toon.enable_rim_light);
 
             is_updated |= AT_EDIT_MATERIAL_PARAM(editor, m_param.toon, rim_light_color);
             is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, rim_light_width, 0.0F, 1.0F);
@@ -106,6 +106,7 @@ namespace AT_NAME
 
         aten::vec3 alpha_blend_clr{ 0.0F };
         aten::vec3 toon_term{ 0.0F };
+        float remap_v{ 1.0F };
 
         if (target_light) {
             aten::LightSampleResult light_sample;
@@ -124,14 +125,14 @@ namespace AT_NAME
             }
 
             if (param.type == aten::MaterialType::Toon) {
-                toon_term = Toon::ComputeBRDF(
+                aten::tie(toon_term, remap_v) = Toon::ComputeBRDF(
                     ctxt, param,
                     throughput, path_attr,
                     is_hit_to_target_light ? &light_sample : nullptr,
                     sampler, hit_pos, normal, wi, u, v);
             }
             else if (param.type == aten::MaterialType::StylizedBrdf) {
-                toon_term = StylizedBrdf::ComputeBRDF(
+                aten::tie(toon_term, remap_v) = StylizedBrdf::ComputeBRDF(
                     ctxt, param,
                     throughput, path_attr,
                     is_hit_to_target_light ? &light_sample : nullptr,
@@ -139,12 +140,23 @@ namespace AT_NAME
             }
         }
 
+        if (param.toon.enable_hatching_shadow) {
+            auto hatching = ctxt.GetScreenSpaceTextureAt(path_attr.screen_space_x, path_attr.screen_space_y);
+            if (remap_v > 0.5F) {
+                hatching = 1.0F;
+            }
+            else {
+                hatching = aten::min(aten::max(hatching * (remap_v + 0.05F) * 10.0F, hatching), 1.0F);
+            }
+            toon_term *= hatching;
+        }
+
         const auto rim_light_term = ComputeRimLight(ctxt, param, hit_pos, normal, wi);
 
         return toon_term + rim_light_term;
     }
 
-    AT_DEVICE_API aten::vec3 Toon::ComputeBRDF(
+    AT_DEVICE_API aten::tuple<aten::vec3, float> Toon::ComputeBRDF(
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& param,
         const AT_NAME::PathThroughput& throughput,
@@ -196,7 +208,7 @@ namespace AT_NAME
         const auto remap = AT_NAME::sampleTexture(ctxt, param.toon.remap_texture, lum_y, 0.5F, aten::vec4(1.0F));
         aten::vec3 toon_term = remap;
 
-        return toon_term;
+        return aten::make_tuple(toon_term, lum_y);
     }
 
     namespace _detail {
@@ -341,7 +353,7 @@ namespace AT_NAME
 
 namespace AT_NAME
 {
-    AT_DEVICE_API aten::vec3 StylizedBrdf::ComputeBRDF(
+    AT_DEVICE_API aten::tuple<aten::vec3, float> StylizedBrdf::ComputeBRDF(
         const AT_NAME::context& ctxt,
         const aten::MaterialParameter& param,
         const AT_NAME::PathThroughput& throughput,
@@ -421,7 +433,7 @@ namespace AT_NAME
 
         aten::vec3 toon_term{ weight * remap * pdf };
 
-        return toon_term;
+        return aten::make_tuple(toon_term, remap_v);
     }
 
     bool StylizedBrdf::edit(aten::IMaterialParamEditor* editor)

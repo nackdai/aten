@@ -50,7 +50,7 @@ namespace AT_NAME
         bool edit(aten::IMaterialParamEditor* editor) override;
 
     protected:
-        static AT_DEVICE_API aten::vec3 ComputeBRDF(
+        static AT_DEVICE_API aten::tuple<aten::vec3, float> ComputeBRDF(
             const AT_NAME::context& ctxt,
             const aten::MaterialParameter& param,
             const AT_NAME::PathThroughput& throughput,
@@ -87,7 +87,7 @@ namespace AT_NAME
         bool edit(aten::IMaterialParamEditor* editor) override;
 
     protected:
-        static AT_DEVICE_API aten::vec3 ComputeBRDF(
+        static AT_DEVICE_API aten::tuple<aten::vec3, float> ComputeBRDF(
             const AT_NAME::context& ctxt,
             const aten::MaterialParameter& param,
             const AT_NAME::PathThroughput& throughput,

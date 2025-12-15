@@ -249,7 +249,13 @@ namespace npr_kernel {
         shadow_ray.isActive = is_hit_to_light;
     }
 
-    template <class SrcType>
+    enum HatchingShadowFilterDirection {
+        Orthogonal,
+        Horzontal,
+        Vertical,
+    };
+
+    template <class SrcType, bool IsFirstStep, HatchingShadowFilterDirection Direction, int32_t KernelSizeH, int32_t KernelSizeV = KernelSizeH>
     __global__ void ApplyBilateralFilter(
         int32_t width, int32_t height,
         cudaSurfaceObject_t dst,
@@ -266,12 +272,32 @@ namespace npr_kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        const auto filtered_color = AT_NAME::ao::ApplyBilateralFilter<SrcType, float, true>(
+        float filtered_color = 0.0F;
+
+        if constexpr (Direction == HatchingShadowFilterDirection::Orthogonal) {
+            filtered_color = AT_NAME::ao::ApplyBilateralFilterOrthogonal<SrcType, float, KernelSizeH, KernelSizeV>(
+                ix, iy,
+                width, height,
+                2.0F, 2.0F,
+                src, isects
+            );
+        }
+        else {
+            constexpr auto IsHorizontal = Direction == HatchingShadowFilterDirection::Horzontal;
+            filtered_color = AT_NAME::ao::ApplyBilateralFilter<SrcType, float, IsHorizontal, KernelSizeH>(
             ix, iy,
             width, height,
             2.0F, 2.0F,
             src, isects
         );
+        }
+
+        if constexpr (!IsFirstStep) {
+            float curr_value = 0.0F;
+            surf2Dread(&curr_value, dst, ix * sizeof(float), iy);
+            filtered_color *= curr_value;
+            filtered_color = filtered_color < 1.0F ? filtered_color * 0.5F : filtered_color;
+        }
         surf2Dwrite(filtered_color, dst, ix * sizeof(float), iy, cudaBoundaryModeTrap);
     }
 }
@@ -312,7 +338,18 @@ namespace idaten {
 
             checkCudaKernel(ShadeAO);
 
-            npr_kernel::ApplyBilateralFilter << <block_per_grid, thread_per_block, 0, m_stream >> > (
+            using SrcType = decltype(ao_result_buffer_)::value_type;
+            using HatchingShadowFilterDirection = npr_kernel::HatchingShadowFilterDirection;
+
+            npr_kernel::ApplyBilateralFilter<SrcType, true, HatchingShadowFilterDirection::Orthogonal, 3, 3> << <block_per_grid, thread_per_block, 0, m_stream >> > (
+                width, height,
+                ctxt_host_->screen_space_texture.GetSurfaceObject(),
+                ao_result_buffer_.data(),
+                m_isects.data());
+
+            checkCudaKernel(ApplyBilateralFilter);
+
+            npr_kernel::ApplyBilateralFilter<SrcType, false, HatchingShadowFilterDirection::Orthogonal, 3, -3> << <block_per_grid, thread_per_block, 0, m_stream >> > (
                 width, height,
                 ctxt_host_->screen_space_texture.GetSurfaceObject(),
                 ao_result_buffer_.data(),
@@ -413,7 +450,18 @@ namespace idaten {
             ctxt_host_->screen_space_texture.Init(width, height);
             ctxt_host_->BindToDeviceContext();
 
-            npr_kernel::ApplyBilateralFilter << <block_per_grid, thread_per_block, 0, m_stream >> > (
+            using SrcType = decltype(m_shadowRays)::value_type;
+            using HatchingShadowFilterDirection = npr_kernel::HatchingShadowFilterDirection;
+
+            npr_kernel::ApplyBilateralFilter<SrcType, true, HatchingShadowFilterDirection::Orthogonal, 3, 3> << <block_per_grid, thread_per_block, 0, m_stream >> > (
+                width, height,
+                ctxt_host_->screen_space_texture.GetSurfaceObject(),
+                m_shadowRays.data(),
+                m_isects.data());
+
+            checkCudaKernel(ApplyBilateralFilter);
+
+            npr_kernel::ApplyBilateralFilter<SrcType, false, HatchingShadowFilterDirection::Orthogonal, 3, -3> << <block_per_grid, thread_per_block, 0, m_stream >> > (
                 width, height,
                 ctxt_host_->screen_space_texture.GetSurfaceObject(),
                 m_shadowRays.data(),

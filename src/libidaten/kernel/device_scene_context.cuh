@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cuda/cudadefs.h"
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
 #include "cuda/CudaSurfaceTexture.h"
@@ -60,7 +61,8 @@ namespace idaten {
          */
         bool enable_shadowray_base_stylized_shadow{ false };
 
-        cudaSurfaceObject_t screen_space_texture{ 0 };
+        cudaTextureObject_t screen_space_texture{ 0 };
+        cudaSurfaceObject_t screen_space_surface{ 0 };
 
         __device__ const float4 GetPosition(uint32_t idx) const noexcept
         {
@@ -157,6 +159,17 @@ namespace idaten {
         __device__ const aten::aabb& GetSceneBoundingBox() const
         {
             return scene_bounding_box;
+        }
+
+        __device__ float GetScreenSpaceTextureAt(int32_t x, int32_t y) const
+        {
+            float value = 1.0F;
+#ifdef __CUDACC__
+            if (screen_space_surface > 0) {
+                surf2Dread(&value, screen_space_surface, x * sizeof(float), y);
+            }
+#endif
+            return value;
         }
     };
 

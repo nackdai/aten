@@ -41,5 +41,6 @@ namespace idaten {
         }
 
         ctxt.screen_space_texture = screen_space_texture.GetTextureObject();
+        ctxt.screen_space_surface = screen_space_texture.GetSurfaceObject();
     }
 }

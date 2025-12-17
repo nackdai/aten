@@ -47,7 +47,7 @@ namespace AT_NAME
             float u, float v
         );
 
-        bool edit(aten::IMaterialParamEditor* editor) override;
+        bool edit(aten::IParamEditor* editor) override;
 
     protected:
         static AT_DEVICE_API aten::tuple<aten::vec3, float> ComputeBRDF(
@@ -84,7 +84,7 @@ namespace AT_NAME
         ~StylizedBrdf() = default;
 
     public:
-        bool edit(aten::IMaterialParamEditor* editor) override;
+        bool edit(aten::IParamEditor* editor) override;
 
     protected:
         static AT_DEVICE_API aten::tuple<aten::vec3, float> ComputeBRDF(

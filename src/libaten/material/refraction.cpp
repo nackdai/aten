@@ -49,7 +49,7 @@ namespace AT_NAME
         SampleRefraction(*result, sampler, *param, normal, wi);
     }
 
-    bool refraction::edit(aten::IMaterialParamEditor* editor)
+    bool refraction::edit(aten::IParamEditor* editor)
     {
         auto b0 = editor->edit("ior", m_param.standard.ior, 0.01F, 10.0F);
         auto b1 = editor->edit("color", m_param.baseColor);

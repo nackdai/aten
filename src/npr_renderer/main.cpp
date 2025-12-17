@@ -39,7 +39,7 @@ constexpr int32_t HEIGHT = 512;
 
 constexpr const char* TITLE = "NPR renderer";
 
-class MaterialParamEditor : public aten::IMaterialParamEditor {
+class MaterialParamEditor : public aten::IParamEditor {
 public:
     MaterialParamEditor() = default;
     ~MaterialParamEditor() = default;

@@ -65,7 +65,7 @@ namespace npr {
     }
 
     bool FeatureLine::EditFeatureLineConfig(
-        aten::IMaterialParamEditor* editor,
+        aten::IParamEditor* editor,
         aten::FeatureLineConfig& config
     )
     {

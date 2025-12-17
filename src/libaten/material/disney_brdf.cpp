@@ -15,7 +15,7 @@ namespace AT_NAME
     // Physically-Based Shading at Disney
     // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 
-    bool DisneyBRDF::edit(aten::IMaterialParamEditor* editor)
+    bool DisneyBRDF::edit(aten::IParamEditor* editor)
     {
         bool is_update = false;
         is_update |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, subsurface, 0, 1);

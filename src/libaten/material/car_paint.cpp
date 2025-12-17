@@ -252,7 +252,7 @@ namespace AT_NAME
         }
     }
 
-    bool CarPaint::edit(aten::IMaterialParamEditor* editor)
+    bool CarPaint::edit(aten::IParamEditor* editor)
     {
         auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, clearcoat_ior, float(0.01), float(10));
         auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, clearcoat_roughness, float(0.01), float(1.0));

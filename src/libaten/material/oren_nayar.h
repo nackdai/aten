@@ -59,6 +59,6 @@ namespace AT_NAME
             aten::sampler* sampler,
             float u, float v);
 
-        virtual bool edit(aten::IMaterialParamEditor* editor) override final;
+        virtual bool edit(aten::IParamEditor* editor) override final;
     };
 }

@@ -21,7 +21,7 @@ constexpr int32_t WIDTH = 1280;
 constexpr int32_t HEIGHT = 720;
 constexpr const char* TITLE = "idaten";
 
-class MaterialParamEditor : public aten::IMaterialParamEditor {
+class MaterialParamEditor : public aten::IParamEditor {
 public:
     MaterialParamEditor() = default;
     ~MaterialParamEditor() = default;

@@ -99,3 +99,5 @@
 #include "renderer/volume/volume_pathtracing.h"
 
 #include "os/system.h"
+
+#include "ui/parameter_editor.h"

@@ -565,6 +565,9 @@
     <ClInclude Include="..\src\libaten\renderer\scene_rendering_config.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\ui\parameter_editor.h">
+      <Filter>ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

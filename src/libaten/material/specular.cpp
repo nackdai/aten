@@ -47,7 +47,7 @@ namespace AT_NAME
         result->bsdf = bsdf(param, normal, wi, result->dir, u, v);
     }
 
-    bool specular::edit(aten::IMaterialParamEditor* editor)
+    bool specular::edit(aten::IParamEditor* editor)
     {
         auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, float(0.01), float(10));
         auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);

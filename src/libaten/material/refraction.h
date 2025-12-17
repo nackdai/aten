@@ -58,7 +58,7 @@ namespace AT_NAME
             const aten::vec3& orgnormal,
             aten::sampler* sampler);
 
-        virtual bool edit(aten::IMaterialParamEditor* editor) override final;
+        virtual bool edit(aten::IParamEditor* editor) override final;
 
         /**
         * @brief Compute probability to sample specified output vector.

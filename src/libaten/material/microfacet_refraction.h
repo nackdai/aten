@@ -62,7 +62,7 @@ namespace AT_NAME
             aten::sampler* sampler,
             const float u, const float v);
 
-        virtual bool edit(aten::IMaterialParamEditor* editor) override final;
+        virtual bool edit(aten::IParamEditor* editor) override final;
 
         static AT_DEVICE_API void SampleMicrofacetRefraction(
             AT_NAME::MaterialSampling& result,

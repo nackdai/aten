@@ -86,7 +86,7 @@ namespace AT_NAME
         result->bsdf = ComputeBRDF(roughness.r, ior, normal, wi, result->dir);
     }
 
-    bool MicrofacetBeckman::edit(aten::IMaterialParamEditor* editor)
+    bool MicrofacetBeckman::edit(aten::IParamEditor* editor)
     {
         auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0.01F, 1.0F);
         auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, 0.01F, 10.0F);

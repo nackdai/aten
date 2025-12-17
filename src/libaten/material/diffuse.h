@@ -69,7 +69,7 @@ namespace AT_NAME
             result->bsdf = bsdf(param);
         }
 
-        virtual bool edit(aten::IMaterialParamEditor* editor) override final
+        virtual bool edit(aten::IParamEditor* editor) override final
         {
             AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
             AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);

@@ -220,7 +220,7 @@ namespace AT_NAME
         result->bsdf = ComputeBRDF(roughness.r, normal, wi, result->dir);
     }
 
-    bool MicrofacetVelvet::edit(aten::IMaterialParamEditor* editor)
+    bool MicrofacetVelvet::edit(aten::IParamEditor* editor)
     {
         auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param.standard, roughness);
         auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);

@@ -173,7 +173,7 @@ namespace AT_NAME
         }
     }
 
-    bool MicrofacetRefraction::edit(aten::IMaterialParamEditor* editor)
+    bool MicrofacetRefraction::edit(aten::IParamEditor* editor)
     {
         auto b0 = editor->edit("roughness", m_param.standard.roughness, 0.001F, 1.0F);
         auto b1 = editor->edit("ior", m_param.standard.ior, 0.01F, 10.0F);

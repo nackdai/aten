@@ -645,7 +645,7 @@ namespace npr {
         }
 
         static bool EditFeatureLineConfig(
-            aten::IMaterialParamEditor* editor,
+            aten::IParamEditor* editor,
             aten::FeatureLineConfig& config
         );
     };

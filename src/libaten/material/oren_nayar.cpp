@@ -146,7 +146,7 @@ namespace AT_NAME {
         result->bsdf = bsdf(ctxt, param, normal, wi, result->dir, u, v);
     }
 
-    bool OrenNayar::edit(aten::IMaterialParamEditor* editor)
+    bool OrenNayar::edit(aten::IParamEditor* editor)
     {
         auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param.standard, roughness);
         auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);

@@ -5,7 +5,7 @@
 
 namespace aten
 {
-    class MaterialParamExporter : public aten::IMaterialParamEditor {
+    class MaterialParamExporter : public aten::IParamEditor {
     public:
         MaterialParamExporter(
             tinyxml2::XMLDocument& xmlDoc,

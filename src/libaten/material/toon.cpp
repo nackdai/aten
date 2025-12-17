@@ -25,7 +25,7 @@
 
 namespace AT_NAME
 {
-    bool Toon::edit(aten::IMaterialParamEditor* editor)
+    bool Toon::edit(aten::IParamEditor* editor)
     {
         auto is_updated = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0.01F, 1.0F);
         is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, 0.01F, 10.0F);
@@ -436,7 +436,7 @@ namespace AT_NAME
         return aten::make_tuple(toon_term, remap_v);
     }
 
-    bool StylizedBrdf::edit(aten::IMaterialParamEditor* editor)
+    bool StylizedBrdf::edit(aten::IParamEditor* editor)
     {
         bool is_updated = Toon::edit(editor);
 

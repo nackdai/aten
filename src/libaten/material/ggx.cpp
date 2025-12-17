@@ -273,7 +273,7 @@ namespace AT_NAME
         return aten::vec3(bsdf);
     }
 
-    bool MicrofacetGGX::edit(aten::IMaterialParamEditor* editor)
+    bool MicrofacetGGX::edit(aten::IParamEditor* editor)
     {
         auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0.01F, 1.0F);
         auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, 0.01F, 10.0F);

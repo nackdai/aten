@@ -395,43 +395,44 @@ public:
 
                 ImGui::Text("%s", mtrl->name());
 
-            bool new_update_mtrl = false;
+                bool new_update_mtrl = false;
 
                 if (mtrl_param.type == aten::MaterialType::Toon
                     || mtrl_param.type == aten::MaterialType::StylizedBrdf)
-            {
-                constexpr std::array mtrl_types = {
-                    "Toon",
-                    "StylizedBrdf",
-                };
+                {
+                    constexpr std::array mtrl_types = {
+                        "Toon",
+                        "StylizedBrdf",
+                    };
 
                     const auto mtrl_idx = mtrl_param.id;
 
                     int32_t mtrl_type = mtrl_param.type == aten::MaterialType::Toon ? 0 : 1;
-                ImGui::Text("%s", mtrl_types[mtrl_type]);
+                    ImGui::Text("%s", mtrl_types[mtrl_type]);
 
-                if (ImGui::Combo("mode", &mtrl_type, mtrl_types.data(), static_cast<int32_t>(mtrl_types.size()))) {
-                    auto new_mtrl_type = mtrl_type == 0 ? aten::MaterialType::Toon : aten::MaterialType::StylizedBrdf;
+                    if (ImGui::Combo("mode", &mtrl_type, mtrl_types.data(), static_cast<int32_t>(mtrl_types.size())))
+                    {
+                        auto new_mtrl_type = mtrl_type == 0 ? aten::MaterialType::Toon : aten::MaterialType::StylizedBrdf;
                         if (new_mtrl_type != mtrl_param.type)
                         {
                             auto albedo_map = ctxt_.GetTexture(mtrl_param.albedoMap);
                             auto normal_map = ctxt_.GetTexture(mtrl_param.normalMap);
                             aten::MaterialParameter new_mtrl_param = mtrl_param;
-                        new_mtrl_param.type = new_mtrl_type;
+                            new_mtrl_param.type = new_mtrl_type;
 
-                        auto new_mtrl = aten::material::CreateMaterialWithMaterialParameter(
-                            new_mtrl_param,
-                            albedo_map ? albedo_map.get() : nullptr,
-                            normal_map ? normal_map.get() : nullptr,
-                            nullptr);
-                        new_mtrl->setName(mtrl->name());
+                            auto new_mtrl = aten::material::CreateMaterialWithMaterialParameter(
+                                new_mtrl_param,
+                                albedo_map ? albedo_map.get() : nullptr,
+                                normal_map ? normal_map.get() : nullptr,
+                                nullptr);
+                            new_mtrl->setName(mtrl->name());
 
-                        ctxt_.ReplaceMaterialInstance(mtrl_idx, new_mtrl);
-                        mtrl = new_mtrl;
-                        need_renderer_reset = true;
-                        new_update_mtrl = true;
+                            ctxt_.ReplaceMaterialInstance(mtrl_idx, new_mtrl);
+                            mtrl = new_mtrl;
+                            need_renderer_reset = true;
+                            new_update_mtrl = true;
+                        }
                     }
-                }
 
                 if (mtrl->edit(&mtrl_param_editor_)) {
                     need_renderer_reset = true;
@@ -445,8 +446,8 @@ public:
                 }
             }
 
-            if (new_update_mtrl) {
-                renderer_.updateMaterial(ctxt_.GetMetarialParemeters());
+                if (new_update_mtrl) {
+                    renderer_.updateMaterial(ctxt_.GetMetarialParemeters());
                 }
             }
 
@@ -468,14 +469,14 @@ public:
                 if (mtrl_param.type == aten::MaterialType::Toon
                     || mtrl_param.type == aten::MaterialType::StylizedBrdf)
                 {
-            ImGui::Begin("Gradient texture");
+                    ImGui::Begin("Gradient texture");
 
-                gradient_tex_editor_.Display();
-                if (ImGui::Button("Update")) {
+                    gradient_tex_editor_.Display();
+                    if (ImGui::Button("Update")) {
                         auto tex = ctxt_.GetTexture(mtrl_param.toon.remap_texture);
-                    gradient_tex_editor_.Read(
-                        tex->colors().data(),
-                        tex->width(), tex->height());
+                        gradient_tex_editor_.Read(
+                            tex->colors().data(),
+                            tex->width(), tex->height());
                         renderer_.UpdateTexture(mtrl_param.toon.remap_texture, ctxt_);
                     }
 

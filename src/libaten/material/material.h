@@ -124,30 +124,33 @@ namespace aten
     struct ToonParameter {
         int32_t target_light_idx{ -1 };
         int32_t remap_texture{ -1 };
-        float highligt_translation_dt{ 0.0F };
-        float highligt_translation_db{ 0.0F };
-
-        float highligt_scale_t{ 0.0F };
-        float highligt_scale_b{ 0.0F };
-        float highlight_split_t{ 0.0F };
-        float highlight_split_b{ 0.0F };
-
-        float highlight_square_sharp{ 0.0F };
-        float highlight_square_magnitude{ 0.0F };
-        float rim_light_width{ 0.0F };
-        float rim_light_softness{ 0.0F };
-
-        float rim_light_spread{ 0.0F };
-        vec3 rim_light_color{ 0.0F };
-
-        MaterialType toon_type{ MaterialType::Diffuse };
-        bool enable_rim_light{ false };
-        bool will_receive_shadow{ true };
-        bool enable_hatching_shadow{ false };
-        int8_t padding[1];
 
         float stylized_y_min{ 0.0F };
         float stylized_y_max{ 1.0F };
+
+        MaterialType toon_type{ MaterialType::Diffuse };
+        bool will_receive_shadow{ true };
+
+        struct Hightlight {
+            float translation_dt{ 0.0F };
+            float translation_db{ 0.0F };
+            float scale_t{ 0.0F };
+            float scale_b{ 0.0F };
+
+            float split_t{ 0.0F };
+            float split_b{ 0.0F };
+            float square_sharp{ 0.0F };
+            float square_magnitude{ 0.0F };
+        } highlight;
+
+        struct RimLight {
+            float width{ 0.0F };
+            float softness{ 0.0F };
+            bool enable{ false };
+
+            vec3 color{ 0.0F };
+            float spread{ 0.0F };
+        } rim_light;
     };
 
     struct CarPaintMaterialParameter {

@@ -25,6 +25,7 @@ namespace idaten
             OrthogonalCross,
         };
 
+        bool edit(aten::IParamEditor& editor) override;
 
     protected:
         void OnRender(

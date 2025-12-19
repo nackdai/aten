@@ -475,6 +475,10 @@ public:
                 }
             }
 
+            ImGui::Begin("NPR Render");
+            renderer_.edit(mtrl_param_editor_);
+            ImGui::End();
+
             if (need_renderer_reset) {
                 renderer_.reset();
             }

@@ -51,30 +51,28 @@ namespace AT_NAME
         is_updated |= editor->edit("toon_type", toon_type_str.data(), toon_type_str.size(), toon_type);
         m_param.toon.toon_type = toon_types[toon_type];
 
-        is_updated |= editor->edit("enable_hatching_shadow", m_param.toon.enable_hatching_shadow);
-
-        if (m_param.toon.toon_type != aten::MaterialType::Diffuse) {
+        if (m_param.toon.toon_type == aten::MaterialType::Specular) {
             // Stylized highlight.
             if (editor->CollapsingHeader("Stylized Highlight")) {
-                is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_translation_dt, -1.0F, 1.0F);
-                is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_translation_db, -1.0F, 1.0F);
-                is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_scale_t, 0.0F, 1.0F);
-                is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highligt_scale_b, 0.0F, 1.0F);
-                is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_split_t, 0.0F, 1.0F);
-                is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_split_b, 0.0F, 1.0F);
-                is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_square_sharp, 0.0F, 1.0F);
-                is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, highlight_square_magnitude, 0.0F, 1.0F);
+                is_updated |= editor->edit("enable_stylized_shadow", m_param.toon.stylized_shadow.enable);
+                is_updated |= editor->edit("translation_dt", m_param.toon.highlight.translation_dt, -1.0F, 1.0F);
+                is_updated |= editor->edit("translation_db", m_param.toon.highlight.translation_db, -1.0F, 1.0F);
+                is_updated |= editor->edit("scale_t", m_param.toon.highlight.scale_t, 0.0F, 1.0F);
+                is_updated |= editor->edit("scale_b", m_param.toon.highlight.scale_b, 0.0F, 1.0F);
+                is_updated |= editor->edit("split_t", m_param.toon.highlight.split_t, 0.0F, 1.0F);
+                is_updated |= editor->edit("split_b", m_param.toon.highlight.split_b, 0.0F, 1.0F);
+                is_updated |= editor->edit("square_sharp", m_param.toon.highlight.square_sharp, 0.0F, 1.0F);
+                is_updated |= editor->edit("square_magnitude", m_param.toon.highlight.square_magnitude, 0.0F, 1.0F);
             }
         }
 
         // Rim light.
         if (editor->CollapsingHeader("Rim Light")) {
-            is_updated |= editor->edit("enable_rim_light", m_param.toon.enable_rim_light);
-
-            is_updated |= AT_EDIT_MATERIAL_PARAM(editor, m_param.toon, rim_light_color);
-            is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, rim_light_width, 0.0F, 1.0F);
-            is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, rim_light_softness, 0.0F, 1.0F);
-            is_updated |= AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.toon, rim_light_spread, 0.0F, 1.0F);
+            is_updated |= editor->edit("enable_rim_light", m_param.toon.rim_light.enable);
+            is_updated |= editor->edit("color", m_param.toon.rim_light.color);
+            is_updated |= editor->edit("width", m_param.toon.rim_light.width, 0.0F, 1.0F);
+            is_updated |= editor->edit("softness", m_param.toon.rim_light.softness, 0.0F, 1.0F);
+            is_updated |= editor->edit("spread", m_param.toon.rim_light.spread, 0.0F, 1.0F);
         }
 
         return is_updated;
@@ -246,7 +244,7 @@ namespace AT_NAME
         const auto N = normal;
 
         // Rim light.
-        if (param.toon.enable_rim_light) {
+        if (param.toon.rim_light.enable) {
             const auto NdotV = dot(V, N);
 
             float rim = 0;
@@ -259,13 +257,13 @@ namespace AT_NAME
             // Therefore, width need to be invert as smoothstep edge0 argument.
             if (NdotV > 0) {
                 rim = _detail::bezier_smoothstep(
-                    1.0F - param.toon.rim_light_width,
+                    1.0F - param.toon.rim_light.width,
                     1.0F,
-                    (1 - param.toon.rim_light_softness) * 0.5F,
+                    (1 - param.toon.rim_light.softness) * 0.5F,
                     1 - NdotV,
-                    param.toon.rim_light_spread);
+                    param.toon.rim_light.spread);
 
-                post_processed_additional_color += rim * param.toon.rim_light_color;
+                post_processed_additional_color += rim * param.toon.rim_light.color;
             }
         }
 
@@ -326,23 +324,23 @@ namespace AT_NAME
         aten::tie(t, b) = aten::GetTangentCoordinate(N);
 
         // Translation.
-        H = H + param.toon.highligt_translation_dt * t + param.toon.highligt_translation_db * b;
+        H = H + param.toon.highlight.translation_dt * t + param.toon.highlight.translation_db * b;
         H = normalize(H);
 
         // Direction scale.
-        H = H - param.toon.highligt_scale_t * dot(H, t) * t;
+        H = H - param.toon.highlight.scale_t * dot(H, t) * t;
         H = normalize(H);
-        H = H - param.toon.highligt_scale_b * dot(H, b) * b;
+        H = H - param.toon.highlight.scale_b * dot(H, b) * b;
         H = normalize(H);
 
         // Split.
-        H = H - param.toon.highlight_split_t * aten::sign(dot(H, t)) * t - param.toon.highlight_split_b * aten::sign(dot(H, b)) * b;
+        H = H - param.toon.highlight.split_t * aten::sign(dot(H, t)) * t - param.toon.highlight.split_b * aten::sign(dot(H, b)) * b;
         H = normalize(H);
 
         // Square.
-        const auto sqrnorm_t = sin(aten::pow(aten::acos(dot(H, t)), param.toon.highlight_square_sharp));
-        const auto sqrnorm_b = sin(aten::pow(aten::acos(dot(H, b)), param.toon.highlight_square_sharp));
-        H = H - param.toon.highlight_square_magnitude * (sqrnorm_t * dot(H, t) * t + sqrnorm_b * dot(H, b) * b);
+        const auto sqrnorm_t = sin(aten::pow(aten::acos(dot(H, t)), param.toon.highlight.square_sharp));
+        const auto sqrnorm_b = sin(aten::pow(aten::acos(dot(H, b)), param.toon.highlight.square_sharp));
+        H = H - param.toon.highlight.square_magnitude * (sqrnorm_t * dot(H, t) * t + sqrnorm_b * dot(H, b) * b);
         H = normalize(H);
 
         return H;

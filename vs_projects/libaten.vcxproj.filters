@@ -568,6 +568,9 @@
     <ClInclude Include="..\src\libaten\ui\parameter_editor.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\npr\npr_pathtracer.h">
+      <Filter>renderer\npr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

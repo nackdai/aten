@@ -46,14 +46,6 @@ namespace aten
             const aten::CameraParameter& camera,
             aten::hitrecord* first_hrec = nullptr);
 
-        void radiance_with_feature_line(
-            int32_t idx,
-            int32_t ix, int32_t iy,
-            int32_t width, int32_t height,
-            const context& ctxt,
-            scene* scene,
-            const aten::CameraParameter& camera);
-
         static void shadeMiss(
             const aten::context& ctxt,
             int32_t idx,
@@ -68,9 +60,6 @@ namespace aten
         std::vector<aten::ray> rays_;
 
         std::vector<aten::ShadowRay> shadow_rays_;
-
-        static constexpr size_t SampleRayNum = 8;
-        std::vector<aten::npr::FeatureLine::SampleRayInfo<SampleRayNum>> feature_line_sample_ray_infos_;
 
         int32_t m_maxDepth{ 1 };
 

@@ -47,6 +47,8 @@ namespace aten
 
         aten::SceneRenderingConfig scene_rendering_config;
 
+        bool enable_shadowray_base_stylized_shadow{ true };
+
         /**
          * @brief Get the vertex position by index.
          * @note w specifies u of uv cooridnate of the vertex.

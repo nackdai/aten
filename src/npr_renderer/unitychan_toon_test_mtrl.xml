@@ -39,7 +39,7 @@
     </material>
     <material>
         <name>hair</name>
-        <type>diffuse</type>
+        <type>toon</type>
         <normalMap>hair_01_NRM.tga</normalMap>
         <albedoMap>hair_01.tga</albedoMap>
         <baseColor>1.0 1.0 1.0</baseColor>

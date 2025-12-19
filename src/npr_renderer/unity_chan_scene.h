@@ -38,9 +38,6 @@ public:
             aten::vec3(0), aten::vec3(0), aten::vec3(0.01F));
         scene->add(deformMdl);
 
-        auto* mtrl_hair = ctxt.GetMaterialByName("hair");
-        mtrl_hair->stencil_type = aten::StencilType::STENCIL;
-
         auto* mtrl_eyeline = ctxt.GetMaterialByName("eyeline");
         mtrl_eyeline->stencil_type = aten::StencilType::ALWAYS;
         mtrl_eyeline->feature_line.enable = false;
@@ -59,12 +56,22 @@ public:
 
         aten::ImageLoader::load("FO_CLOTH1.tga", ctxt);
 
+        auto gradient_tex = ctxt.GetTexture(ctxt.GetTextureNum() - 1);
+        gradient_tex->SetFilterMode(aten::TextureFilterMode::Linear);
+
         auto* mtrl_face = ctxt.GetMaterialByName("face");
         AT_ASSERT(mtrl_face->type == aten::MaterialType::Toon);
         mtrl_face->toon.toon_type = aten::MaterialType::Diffuse;
         mtrl_face->toon.remap_texture = ctxt.GetTextureNum() - 1;
         mtrl_face->toon.target_light_idx = 0;
         mtrl_face->feature_line.metric_flag = aten::FeatureLineMetricFlag::Albedo | aten::FeatureLineMetricFlag::Normal | aten::FeatureLineMetricFlag::Depth;
+
+        auto* mtrl_hair = ctxt.GetMaterialByName("hair");
+        mtrl_hair->stencil_type = aten::StencilType::STENCIL;
+        AT_ASSERT(mtrl_hair->type == aten::MaterialType::Toon);
+        mtrl_hair->toon.toon_type = aten::MaterialType::Diffuse;
+        mtrl_hair->toon.remap_texture = ctxt.GetTextureNum() - 1;
+        mtrl_hair->toon.target_light_idx = 0;
 
         aten::ImageLoader::setBasePath("./");
 

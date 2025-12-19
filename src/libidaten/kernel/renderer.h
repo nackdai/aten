@@ -94,6 +94,11 @@ namespace idaten
             return m_stream;
         }
 
+        virtual bool edit(aten::IParamEditor& editor)
+        {
+            return false;
+        }
+
     protected:
         virtual void UpdateSceneData(
             GLuint gltex,

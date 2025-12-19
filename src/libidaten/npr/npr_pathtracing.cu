@@ -1,3 +1,5 @@
+#include <imgui.h>
+
 #include "npr/npr_pathtracing.h"
 
 #include "kernel/device_scene_context.cuh"
@@ -232,9 +234,9 @@ namespace npr_kernel {
 
         auto& shadow_ray = shadowRays[idx];
 
-        // Reset termination flag to trace shadow ray forcibly.
-        auto path_attrib = paths.attrib[idx];
-        path_attrib.attr.is_terminated = false;
+            // Reset termination flag to trace shadow ray forcibly.
+            auto path_attrib = paths.attrib[idx];
+            path_attrib.attr.is_terminated = false;
 
         // If material is toon material,
         // the contribution from shadow ray should not be applied to the rendering result.
@@ -283,29 +285,29 @@ namespace npr_kernel {
             }
         }
         else {
-        if constexpr (Direction == HatchingShadowFilterDirection::Orthogonal) {
-            filtered_color = AT_NAME::ao::ApplyBilateralFilterOrthogonal<SrcType, float, KernelSizeH, KernelSizeV>(
-                ix, iy,
-                width, height,
-                2.0F, 2.0F,
-                src, isects
-            );
-        }
-        else {
+            if constexpr (Direction == HatchingShadowFilterDirection::Orthogonal) {
+                filtered_color = AT_NAME::ao::ApplyBilateralFilterOrthogonal<SrcType, float, KernelSizeH, KernelSizeV>(
+                    ix, iy,
+                    width, height,
+                    2.0F, 2.0F,
+                    src, isects
+                );
+            }
+            else {
                 constexpr auto IsHorizontal = Direction == HatchingShadowFilterDirection::Horizontal;
-            filtered_color = AT_NAME::ao::ApplyBilateralFilter<SrcType, float, IsHorizontal, KernelSizeH>(
-                ix, iy,
-                width, height,
-                2.0F, 2.0F,
-                src, isects
-            );
-        }
+                filtered_color = AT_NAME::ao::ApplyBilateralFilter<SrcType, float, IsHorizontal, KernelSizeH>(
+                    ix, iy,
+                    width, height,
+                    2.0F, 2.0F,
+                    src, isects
+                );
+            }
 
-        if constexpr (!IsFirstStep) {
-            float curr_value = 0.0F;
-            surf2Dread(&curr_value, dst, ix * sizeof(float), iy);
-            filtered_color *= curr_value;
-            filtered_color = filtered_color < 1.0F ? filtered_color * 0.5F : filtered_color;
+            if constexpr (!IsFirstStep) {
+                float curr_value = 0.0F;
+                surf2Dread(&curr_value, dst, ix * sizeof(float), iy);
+                filtered_color *= curr_value;
+                filtered_color = filtered_color < 1.0F ? filtered_color * 0.5F : filtered_color;
             }
         }
         surf2Dwrite(filtered_color, dst, ix * sizeof(float), iy, cudaBoundaryModeTrap);
@@ -510,12 +512,12 @@ namespace idaten {
             || hatching_shadow_direction_ == HatchingShadowDirection::OrthogonalCross)
         {
             npr_kernel::ApplyBilateralFilter<SrcType, true, HatchingShadowDirection::Orthogonal, KernelSize, KernelSize> << <block_per_grid, thread_per_block, 0, m_stream >> > (
-            width, height,
-            ctxt_host_->screen_space_texture.GetSurfaceObject(),
-            src.data(),
+                width, height,
+                ctxt_host_->screen_space_texture.GetSurfaceObject(),
+                src.data(),
                 m_isects.data());
 
-        checkCudaKernel(ApplyBilateralFilter);
+            checkCudaKernel(ApplyBilateralFilter);
 
             if (hatching_shadow_direction_ == HatchingShadowDirection::OrthogonalCross) {
                 npr_kernel::ApplyBilateralFilter<SrcType, false, HatchingShadowDirection::Orthogonal, KernelSize, -KernelSize> << <block_per_grid, thread_per_block, 0, m_stream >> > (
@@ -553,13 +555,28 @@ namespace idaten {
             else if (hatching_shadow_direction_ == HatchingShadowDirection::Cross)
             {
                 npr_kernel::ApplyBilateralFilter<SrcType, false, HatchingShadowDirection::Vertical, KernelSize> << <block_per_grid, thread_per_block, 0, m_stream >> > (
-            width, height,
-            ctxt_host_->screen_space_texture.GetSurfaceObject(),
-            src.data(),
+                    width, height,
+                    ctxt_host_->screen_space_texture.GetSurfaceObject(),
+                    src.data(),
                     m_isects.data());
 
-        checkCudaKernel(ApplyBilateralFilter);
+                checkCudaKernel(ApplyBilateralFilter);
             }
         }
+    }
+
+    bool NPRPathTracing::edit(aten::IParamEditor& editor)
+    {
+        constexpr std::array ShadowBase = {
+            "AO", "ShadowRay",
+        };
+        bool is_updated = ImGui::Combo("ShadowBase", reinterpret_cast<int*>(&hatching_shadow_), ShadowBase.data(), ShadowBase.size());
+
+        constexpr std::array Filter = {
+            "None", "Horizontal", "Vertical", "Orthogonal", "Cross", "OrthogonalCross",
+        };
+        is_updated |= ImGui::Combo("Filter", reinterpret_cast<int*>(&hatching_shadow_direction_), Filter.data(), Filter.size());
+
+        return is_updated;
     }
 }

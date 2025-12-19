@@ -75,6 +75,14 @@ namespace AT_NAME
             is_updated |= editor->edit("spread", m_param.toon.rim_light.spread, 0.0F, 1.0F);
         }
 
+        // Stylized shadow.
+        if (editor->CollapsingHeader("Stylized shadow")) {
+            is_updated |= editor->edit("enable_stylized_shadow", m_param.toon.stylized_shadow.enable);
+            is_updated |= editor->edit("threshold", m_param.toon.stylized_shadow.threshold, 0.0F, 1.0F);
+            is_updated |= editor->edit("offset", m_param.toon.stylized_shadow.offset, 0.0F, 1.0F);
+            is_updated |= editor->edit("scale", m_param.toon.stylized_shadow.scale, 0.0F, 20.0F);
+        }
+
         return is_updated;
     }
 
@@ -138,15 +146,17 @@ namespace AT_NAME
             }
         }
 
-        if (param.toon.enable_hatching_shadow) {
-            auto hatching = ctxt.GetScreenSpaceTextureAt(path_attr.screen_space_x, path_attr.screen_space_y);
-            if (remap_v > 0.5F) {
-                hatching = 1.0F;
+        if (param.toon.stylized_shadow.enable) {
+            auto shadow = ctxt.GetScreenSpaceTextureAt(path_attr.screen_space_x, path_attr.screen_space_y);
+            if (remap_v >= param.toon.stylized_shadow.threshold) {
+                shadow = 1.0F;
             }
             else {
-                hatching = aten::min(aten::max(hatching * (remap_v + 0.05F) * 10.0F, hatching), 1.0F);
+                const auto offset = param.toon.stylized_shadow.offset;
+                const auto scale = param.toon.stylized_shadow.scale;
+                shadow = aten::min(aten::max(shadow * (remap_v + offset) * scale, shadow), 1.0F);
             }
-            toon_term *= hatching;
+            toon_term *= shadow;
         }
 
         const auto rim_light_term = ComputeRimLight(ctxt, param, hit_pos, normal, wi);

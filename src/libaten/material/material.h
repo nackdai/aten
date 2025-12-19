@@ -151,6 +151,13 @@ namespace aten
             vec3 color{ 0.0F };
             float spread{ 0.0F };
         } rim_light;
+
+        struct StylizedShadow {
+            float threshold{ 0.5F };
+            float offset{ 0.05F };
+            float scale{ 10.0F };
+            bool enable{ false };
+        } stylized_shadow;
     };
 
     struct CarPaintMaterialParameter {

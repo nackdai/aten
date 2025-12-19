@@ -94,6 +94,7 @@
 #include "renderer/background.h"
 #include "renderer/pathtracing/pathtracing.h"
 #include "renderer/ao/aorenderer.h"
+#include "renderer/npr/npr_pathtracer.h"
 #include "renderer/restir/restir.h"
 #include "renderer/svgf/svgf.h"
 #include "renderer/volume/volume_pathtracing.h"

@@ -243,6 +243,7 @@
     <ClInclude Include="..\src\libaten\renderer\npr\feature_line.h" />
     <ClInclude Include="..\src\libaten\renderer\npr\feature_line_config.h" />
     <ClInclude Include="..\src\libaten\renderer\npr\npr_impl.h" />
+    <ClInclude Include="..\src\libaten\renderer\npr\npr_pathtracer.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_nee_impl.h" />

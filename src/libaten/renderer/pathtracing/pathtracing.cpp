@@ -279,12 +279,6 @@ namespace aten
             shadow_rays_.resize(width * height);
         }
 
-        if (ctxt.scene_rendering_config.feature_line.enabled) {
-            if (feature_line_sample_ray_infos_.size() == 0) {
-                feature_line_sample_ray_infos_.resize(width * height);
-            }
-        }
-
         path_host_.init(width, height);
         path_host_.Clear(GetFrameCount());
 
@@ -326,18 +320,10 @@ namespace aten
 
                         path_host_.paths.contrib[idx].contrib = aten::vec3(0);
 
-                        if (ctxt.scene_rendering_config.feature_line.enabled) {
-                            radiance_with_feature_line(
-                                idx,
-                                x, y, width, height,
-                                ctxt, scene, camsample);
-                        }
-                        else {
                             radiance(
                                 idx,
                                 x, y, width, height,
                                 ctxt, scene, camsample, &hrec);
-                        }
 
                         if (isInvalidColor(path_host_.paths.contrib[idx].contrib)) {
                             AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);

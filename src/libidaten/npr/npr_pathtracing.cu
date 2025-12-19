@@ -220,35 +220,43 @@ namespace npr_kernel {
         ctxt.matrices = matrices;
 
         const auto& isect = isects[idx];
-        auto mtrl = ctxt.GetMaterial(isect.mtrlid);
+        const auto& real_mtrl = ctxt.GetMaterial(isect.mtrlid);
 
-        const auto original_mtrl_type = mtrl.type;
+        const auto original_mtrl_type = real_mtrl.type;
 
         const auto is_toon_material = (original_mtrl_type == aten::MaterialType::Toon
             || original_mtrl_type == aten::MaterialType::StylizedBrdf);
 
         if (is_toon_material) {
             // Replace toon material to lambertian for shadow ray test.
+            auto mtrl = real_mtrl;
             mtrl.type = aten::MaterialType::Diffuse;
-        }
-
-        auto& shadow_ray = shadowRays[idx];
 
             // Reset termination flag to trace shadow ray forcibly.
             auto path_attrib = paths.attrib[idx];
             path_attrib.attr.is_terminated = false;
+
+            auto path_contrib = paths.contrib[idx];
+            auto& shadow_ray = shadowRays[idx];
 
         // If material is toon material,
         // the contribution from shadow ray should not be applied to the rendering result.
         const auto is_hit_to_light = AT_NAME::HitShadowRay(
             bounce,
             ctxt, mtrl,
-            path_attrib,
-            is_toon_material ? AT_NAME::PathContrib() : paths.contrib[idx],
+                path_attrib, path_contrib,
             shadow_ray);
 
         // For latter filtering, keep shadow ray if it hits to light.
         shadow_ray.isActive = is_hit_to_light;
+        }
+        else {
+            AT_NAME::HitShadowRay(
+                bounce,
+                ctxt, real_mtrl,
+                paths.attrib[idx], paths.contrib[idx],
+                shadowRays[idx]);
+        }
     }
 
     using HatchingShadowFilterDirection = idaten::NPRPathTracing::HatchingShadowDirection;

@@ -11,20 +11,20 @@ namespace idaten
 
         static constexpr size_t SampleRayNum = 8;
 
-        enum HatchingShadow {
-            None,
-            AOBase,
-            ShadowRayBase,
+        enum HatchingShadowBase {
+            AO,
+            ShadowRay,
         };
 
-        void SetHatchinShadow(HatchingShadow shadow)
-        {
-            hatching_shadow_ = shadow;
-        }
-        HatchingShadow GetHatchingShadow() const
-        {
-            return hatching_shadow_;
-        }
+        enum HatchingShadowDirection {
+            None,
+            Horizontal,
+            Vertical,
+            Orthogonal,
+            Cross,
+            OrthogonalCross,
+        };
+
 
     protected:
         void OnRender(
@@ -68,6 +68,7 @@ namespace idaten
         idaten::TypedCudaMemory<AT_NAME::npr::FeatureLine::SampleRayInfo<SampleRayNum>> sample_ray_infos_;
 
         idaten::TypedCudaMemory<float> ao_result_buffer_;
-        HatchingShadow hatching_shadow_{ HatchingShadow::AOBase };
+        HatchingShadowBase hatching_shadow_{ HatchingShadowBase::AO };
+        HatchingShadowDirection hatching_shadow_direction_{ HatchingShadowDirection::Cross };
     };
 }

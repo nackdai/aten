@@ -54,7 +54,6 @@ namespace AT_NAME
         if (m_param.toon.toon_type == aten::MaterialType::Specular) {
             // Stylized highlight.
             if (editor->CollapsingHeader("Stylized Highlight")) {
-                is_updated |= editor->edit("enable_stylized_shadow", m_param.toon.stylized_shadow.enable);
                 is_updated |= editor->edit("translation_dt", m_param.toon.highlight.translation_dt, -1.0F, 1.0F);
                 is_updated |= editor->edit("translation_db", m_param.toon.highlight.translation_db, -1.0F, 1.0F);
                 is_updated |= editor->edit("scale_t", m_param.toon.highlight.scale_t, 0.0F, 1.0F);

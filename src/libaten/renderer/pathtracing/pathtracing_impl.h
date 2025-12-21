@@ -650,6 +650,17 @@ namespace AT_NAME
             if (is_hit) {
                 const auto& hit_mtrl = ctxt.GetMaterial(isect.mtrlid);
                 if (hit_mtrl.stencil_type == aten::StencilType::ALWAYS) {
+                    const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
+
+                    aten::hitrecord rec;
+                    AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
+
+                    const auto is_back_facing = aten::dot(rec.normal, -ray.dir) < 0.0F;
+                    if (is_back_facing) {
+                        // Not apply stencil to back facing.
+                        return false;
+                    }
+
                     // TODO:
                     // Unfortunately, it's hard to replace the current original evaludate resulted before stencil check.
                     // So, just update ray expected to hit the none stencil object which is found here.

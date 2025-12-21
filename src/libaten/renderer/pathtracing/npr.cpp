@@ -3,6 +3,7 @@
 #include "accelerator/threaded_bvh_traverser.h"
 #include "material/material_impl.h"
 #include "misc/omputil.h"
+#include "renderer/ao/aorenderer_impl.h"
 #include "renderer/npr/npr_pathtracer.h"
 #include "renderer/npr/npr_impl.h"
 
@@ -29,7 +30,7 @@ namespace aten
 
         while (depth < m_maxDepth) {
             bool willContinue = true;
-            Intersection isect;
+            auto& isect = isects_[idx];
 
             const auto& ray = rays_[idx];
 
@@ -62,12 +63,20 @@ namespace aten
 
                 const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
 
-                std::ignore = AT_NAME::HitShadowRay(
-                    depth,
-                    ctxt, mtrl,
-                    path_host_.paths.attrib[idx],
-                    path_host_.paths.contrib[idx],
-                    shadow_rays_[idx]);
+                if (depth == 0) {
+                    HitShadowRayWithKeepingIfHitToLight(
+                        idx, depth,
+                        ctxt, path_host_.paths, isect,
+                        shadow_rays_);
+                }
+                else {
+                    std::ignore = AT_NAME::HitShadowRay(
+                        depth,
+                        ctxt, mtrl,
+                        path_host_.paths.attrib[idx],
+                        path_host_.paths.contrib[idx],
+                        shadow_rays_[idx]);
+                }
 
                 willContinue = !path_host_.paths.attrib[idx].attr.is_terminated;
             }
@@ -206,8 +215,8 @@ namespace aten
 
         bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
 
-        // ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½Ì–@ï¿½ï¿½.
-        // ï¿½ï¿½ï¿½Ì‚ï¿½ï¿½ï¿½Ìƒï¿½ï¿½Cï¿½Ì“ï¿½ï¿½oï¿½ï¿½ï¿½lï¿½ï¿½.
+        // Œð·ˆÊ’u‚Ì–@ü.
+        // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ðl—¶.
         aten::vec3 orienting_normal = rec.normal;
 
         aten::MaterialParameter mtrl;
@@ -271,6 +280,71 @@ namespace aten
         }
     }
 
+    void NprPathTracer::HitShadowRayWithKeepingIfHitToLight(
+        int32_t idx, int32_t bounce,
+        const aten::context& ctxt,
+        const aten::Path& paths,
+        const aten::Intersection& isect,
+        std::vector<aten::ShadowRay>& shadowRays)
+    {
+        auto mtrl = ctxt.GetMaterial(isect.mtrlid);
+
+        const auto original_mtrl_type = mtrl.type;
+
+        const auto is_toon_material = (original_mtrl_type == aten::MaterialType::Toon
+            || original_mtrl_type == aten::MaterialType::StylizedBrdf);
+
+        if (is_toon_material) {
+            // Replace toon material to lambertian for shadow ray test.
+            mtrl.type = aten::MaterialType::Diffuse;
+        }
+
+        auto& shadow_ray = shadowRays[idx];
+
+        // Reset termination flag to trace shadow ray forcibly.
+        auto path_attrib = paths.attrib[idx];
+        path_attrib.attr.is_terminated = false;
+
+        // If material is toon material,
+        // the contribution from shadow ray should not be applied to the rendering result.
+        const auto is_hit_to_light = AT_NAME::HitShadowRay(
+            bounce,
+            ctxt, mtrl,
+            path_attrib,
+            is_toon_material ? AT_NAME::PathContrib() : paths.contrib[idx],
+            shadow_ray);
+
+        // For latter filtering, keep shadow ray if it hits to light.
+        shadow_ray.isActive = is_hit_to_light;
+    }
+
+    template <class SrcType>
+    void NprPathTracer::ApplyBilateralFilter(
+        int32_t ix, int32_t iy,
+        int32_t width, int32_t height,
+        const std::vector<aten::Intersection>& isects,
+        const SrcType* src,
+        std::function<void(float)> dst)
+    {
+        float filtered_color = 1.0F;
+
+        constexpr int32_t KernelSizeH = 5;
+        constexpr bool IsHorizontal = true;
+
+        filtered_color = AT_NAME::ao::ApplyBilateralFilter<SrcType, float, IsHorizontal, KernelSizeH>(
+            ix, iy,
+            width, height,
+            2.0F, 2.0F,
+            src, isects.data()
+        );
+
+        if (filtered_color > 0 && filtered_color < 1) {
+            int xxx = 0;
+        }
+
+        dst(filtered_color);
+    }
+
     void NprPathTracer::OnRender(
         context& ctxt,
         Destination& dst,
@@ -300,6 +374,12 @@ namespace aten
                 feature_line_sample_ray_infos_.resize(width * height);
             }
         }
+        if (isects_.empty()) {
+            isects_.resize(width * height);
+        }
+        if (contributes_.empty()) {
+            contributes_.resize(width * height);
+        }
 
         path_host_.init(width, height);
         path_host_.Clear(GetFrameCount());
@@ -315,85 +395,140 @@ namespace aten
 #endif
             for (int32_t y = 0; y < height; y++) {
                 for (int32_t x = 0; x < width; x++) {
-                    vec3 col = vec3(0);
-                    vec3 col2 = vec3(0);
-                    uint32_t cnt = 0;
-
 #ifdef RELEASE_DEBUG
                     if (x == BREAK_X && y == BREAK_Y) {
                         DEBUG_BREAK();
                     }
 #endif
                     int32_t idx = y * width + x;
-                    aten::hitrecord hrec;
 
-                    for (uint32_t i = 0; i < samples; i++) {
-                        const auto rnd = aten::getRandom(idx);
-                        const auto& camsample = camera->param();
+                    const auto curr_sample = 0;
 
-                        GeneratePath(
-                            rays_[idx],
-                            idx,
-                            x, y, width, height,
-                            i, GetFrameCount(),
-                            path_host_.paths,
-                            camsample,
-                            rnd);
+                    std::ignore = RenderPerSample(
+                        x, y, width, height, curr_sample,
+                        scene, ctxt, camera);
 
-                        path_host_.paths.contrib[idx].contrib = aten::vec3(0);
+                    const auto& c = path_host_.paths.contrib[idx].contrib;
 
-                        if (ctxt.scene_rendering_config.feature_line.enabled) {
-                            radiance_with_feature_line(
-                                idx,
-                                x, y, width, height,
-                                ctxt, scene, camsample);
-                        }
-                        else {
-                            radiance(
-                                idx,
-                                x, y, width, height,
-                                ctxt, scene, camsample, &hrec);
-                        }
+                    if (!isInvalidColor(c)) {
+                        contributes_[idx] += aten::vec4(c, 1.0F);
 
-                        if (isInvalidColor(path_host_.paths.contrib[idx].contrib)) {
-                            AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);
-                            continue;
-                        }
-
-                        auto c = path_host_.paths.contrib[idx].contrib;
-
-                        col += c;
-                        col2 += c * c;
-                        cnt++;
-
-                        if (path_host_.paths.attrib[idx].attr.is_terminated) {
-                            break;
+                        if (samples == 1) {
+                            auto curr_contrib = contributes_[idx];
+                            curr_contrib /= curr_contrib.w;
+                            dst.buffer->put(x, y, vec4(curr_contrib.x, curr_contrib.y, curr_contrib.z, 1));
                         }
                     }
+                }
+            }
 
-                    col /= (float)cnt;
+            if (samples >= 1) {
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp single
+#endif
+                if (ctxt.screen_space_texture.empty()) {
+                    ctxt.screen_space_texture.init(width, height, 1);
+                }
 
-#if 0
-                    if (hrec.mtrlid >= 0) {
-                        const auto mtrl = ctxt.GetMaterial(hrec.mtrlid);
-                        if (mtrl && mtrl->isNPR()) {
-                            col = FeatureLine::RenderFeatureLine(
-                                col,
-                                x, y, width, height,
-                                hrec,
-                                ctxt, *scene, *camera);
-                        }
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
+                for (int32_t y = 0; y < height; y++) {
+                    for (int32_t x = 0; x < width; x++) {
+                        ApplyBilateralFilter(
+                            x, y, width, height, isects_, shadow_rays_.data(),
+                            [&ctxt, x, y](float fitered_color) {
+                                ctxt.screen_space_texture.PutByXYcoord(x, y, fitered_color);
+                            });
                     }
+                }
+
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
+                for (int32_t y = 0; y < height; y++) {
+                    for (int32_t x = 0; x < width; x++) {
+                        int32_t idx = y * width + x;
+
+                        for (int32_t i = 0; i < samples; i++) {
+#ifdef RELEASE_DEBUG
+                            if (x == BREAK_X && y == BREAK_Y) {
+                                DEBUG_BREAK();
+                            }
 #endif
 
-                    dst.buffer->put(x, y, vec4(col, 1));
+                            const auto is_continue = RenderPerSample(
+                                x, y, width, height, i,
+                                scene, ctxt, camera);
 
-                    if (dst.variance) {
-                        col2 /= (float)cnt;
-                        dst.variance->put(x, y, vec4(col2 - col * col, float(1)));
+                            const auto& c = path_host_.paths.contrib[idx].contrib;
+
+                            if (!isInvalidColor(c)) {
+                                contributes_[idx] += aten::vec4(c, 1.0F);
+                            }
+
+                            if (!is_continue) {
+                                break;
+                            }
+                        }
+
+                        auto curr_contrib = contributes_[idx];
+                        curr_contrib /= curr_contrib.w;
+                        dst.buffer->put(x, y, vec4(curr_contrib.x, curr_contrib.y, curr_contrib.z, 1));
                     }
                 }
             }
         }
+    }
+
+    bool NprPathTracer::RenderPerSample(
+        int32_t x, int32_t y,
+        int32_t width, int32_t height,
+        int32_t sample,
+        aten::scene* scene,
+        const aten::context& ctxt,
+        const aten::Camera* camera)
+    {
+        const auto idx = y * width + x;
+
+        const auto rnd = aten::getRandom(idx);
+        const auto& camsample = camera->param();
+
+        GeneratePath(
+            rays_[idx],
+            idx,
+            x, y, width, height,
+            sample, GetFrameCount(),
+            path_host_.paths,
+            camsample,
+            rnd);
+
+        path_host_.paths.contrib[idx].contrib = aten::vec3(0);
+
+        if (ctxt.scene_rendering_config.feature_line.enabled) {
+            radiance_with_feature_line(
+                idx,
+                x, y, width, height,
+                ctxt, scene, camsample);
+        }
+        else {
+            radiance(
+                idx,
+                x, y, width, height,
+                ctxt, scene, camsample);
+        }
+
+        if (isInvalidColor(path_host_.paths.contrib[idx].contrib)) {
+            AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, sample);
+            return true;
+        }
+
+        auto c = path_host_.paths.contrib[idx].contrib;
+
+        if (path_host_.paths.attrib[idx].attr.is_terminated) {
+            return false;
+        }
+
+        return true;
     }
 }

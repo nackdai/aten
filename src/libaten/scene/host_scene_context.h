@@ -49,6 +49,8 @@ namespace aten
 
         bool enable_shadowray_base_stylized_shadow{ true };
 
+        aten::texture screen_space_texture;
+
         /**
          * @brief Get the vertex position by index.
          * @note w specifies u of uv cooridnate of the vertex.
@@ -606,9 +608,11 @@ namespace aten
             return nodes_[idx];
         }
 
-        // TODO
         float GetScreenSpaceTextureAt(int32_t x, int32_t y) const
         {
+            if (!screen_space_texture.empty()) {
+                return screen_space_texture.AtByXY(x, y).x;
+            }
             return 1.0F;
         }
 

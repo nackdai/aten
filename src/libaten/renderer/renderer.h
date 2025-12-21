@@ -29,7 +29,7 @@ namespace aten
 
     public:
         void render(
-            const context& ctxt,
+            context& ctxt,
             Destination& dst,
             scene* scene,
             Camera* camera)
@@ -50,7 +50,7 @@ namespace aten
 
     protected:
         virtual void OnRender(
-            const context& ctxt,
+            context& ctxt,
             Destination& dst,
             scene* scene,
             Camera* camera) = 0;

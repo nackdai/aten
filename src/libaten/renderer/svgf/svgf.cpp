@@ -459,7 +459,7 @@ namespace aten
     }
 
     void SVGFRenderer::OnRender(
-        const context& ctxt,
+        context& ctxt,
         Destination& dst,
         scene* scene,
         Camera* camera)

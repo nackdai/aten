@@ -256,7 +256,7 @@ namespace aten
     }
 
     void PathTracing::OnRender(
-        const context& ctxt,
+        context& ctxt,
         Destination& dst,
         scene* scene,
         Camera* camera)

@@ -120,6 +120,7 @@ add_library(
   ao/ao.cu
   ao/ao.h
   aten4idaten.h
+  cuda/CudaSurfaceTexture.h
   cuda/cudaGLresource.cpp
   cuda/cudaGLresource.h
   cuda/cudaTextureResource.cpp
@@ -156,7 +157,6 @@ add_library(
   kernel/persistent_thread.h
   kernel/pt_common.h
   kernel/pt_standard_impl.cu
-  kernel/pt_standard_impl.h
   kernel/renderer.cpp
   kernel/renderer.h
   npr/npr_pathtracing.cu
@@ -193,9 +193,9 @@ target_compile_options(
 target_include_directories(
   ${PROJECT_NAME}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${nanovdb_INCLUDE_DIRECTORIES}
-         ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+         ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES} ${imgui_INCLUDE_DIRECTORIES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE __AT_CUDA__)
-target_link_libraries(${PROJECT_NAME} aten glm)
+target_link_libraries(${PROJECT_NAME} aten glm imgui)
 
 # Defines outputs , depending Debug or Release.
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

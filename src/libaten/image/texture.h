@@ -43,9 +43,16 @@ namespace aten
     public:
         void init(int32_t width, int32_t height, int32_t channels);
 
+        inline bool empty() const
+        {
+            return m_colors.empty();
+        }
+
         void Fill(const aten::vec4& value);
 
         vec4 at(float u, float v) const;
+
+        vec4 AtByXY(int32_t x, int32_t y) const;
 
         vec4 AtWithBilinear(float u, float v) const;
 
@@ -63,6 +70,24 @@ namespace aten
 
             uint32_t pos = y * width_ + x;
             m_colors[pos] = color;
+        }
+
+        template <class T>
+        auto PutByXYcoord(int32_t x, int32_t y, const T& color)
+            -> std::enable_if_t<std::is_floating_point_v<T> || std::is_same_v<T, aten::vec3> || std::is_same_v<T, aten::vec4>, void>
+        {
+            const auto idx = y * width_ + x;
+            if constexpr (std::is_floating_point_v<T>) {
+                m_colors[idx].x = m_colors[idx].y = m_colors[idx].z = color;
+            }
+            else if constexpr (std::is_same_v<T, aten::vec3>) {
+                m_colors[idx].x = color.x;
+                m_colors[idx].y = color.y;
+                m_colors[idx].z = color.z;
+            }
+            else if constexpr (std::is_same_v<T, aten::vec4>) {
+                m_colors[idx] = color;
+            }
         }
 
         float& operator()(int32_t x, int32_t y, int32_t c)
@@ -168,8 +193,6 @@ namespace aten
         {
             m_id = static_cast<decltype(m_id)>(id);
         }
-
-        inline vec4 AtByXY(int32_t x, int32_t y) const;
 
         static int32_t NormalizeToWrapRepeat(int32_t value, int32_t wrap_size)
         {

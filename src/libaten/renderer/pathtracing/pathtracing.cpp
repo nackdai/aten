@@ -57,10 +57,6 @@ namespace aten
                     path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
                     isect, scene, m_rrDepth, depth);
 
-                AT_NAME::AdvanceAlphaBlendPath(
-                    ctxt, rays_[idx],
-                    path_host_.paths.attrib[idx], path_host_.paths.throughput[idx]);
-
                 const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
 
                 std::ignore = AT_NAME::HitShadowRay(
@@ -132,6 +128,7 @@ namespace aten
         auto& shadow_ray = shadow_rays[idx];
         shadow_ray.isActive = false;
 
+#if 0
         // Check stencil.
         auto is_stencil = AT_NAME::CheckStencil(
             rays[idx], paths.attrib[idx],
@@ -156,8 +153,12 @@ namespace aten
         if (is_translucent_by_alpha) {
             return;
         }
+#endif
 
         albedo = paths.throughput[idx].alpha_blend.transmission * albedo + paths.throughput[idx].alpha_blend.throughput;
+
+        const bool is_toon_mtrl = mtrl.type == aten::MaterialType::Toon
+            || mtrl.type == aten::MaterialType::StylizedBrdf;
 
         // Implicit conection to light.
         auto is_hit_implicit_light = AT_NAME::HitTeminatedMaterial(
@@ -169,7 +170,17 @@ namespace aten
             ray, rec,
             albedo, mtrl);
         if (is_hit_implicit_light) {
-            return;
+            //if (ctxt.enable_shadowray_base_stylized_shadow && is_toon_mtrl) {
+            if (is_toon_mtrl && (bounce > 0 || ctxt.enable_shadowray_base_stylized_shadow)) {
+                // Even if hit to terminated material, continue shadow ray for stylized shadow.
+                mtrl.type = mtrl.toon.toon_type == aten::MaterialType::Diffuse
+                    ? aten::MaterialType::Diffuse
+                    : aten::MaterialType::Specular;
+                mtrl.attrib.is_singular = mtrl.toon.toon_type == aten::MaterialType::ToonSpecular;
+            }
+            else {
+                return;
+            }
         }
 
         if (!mtrl.attrib.is_translucent && isBackfacing) {
@@ -320,10 +331,10 @@ namespace aten
 
                         path_host_.paths.contrib[idx].contrib = aten::vec3(0);
 
-                            radiance(
-                                idx,
-                                x, y, width, height,
-                                ctxt, scene, camsample, &hrec);
+                        radiance(
+                            idx,
+                            x, y, width, height,
+                            ctxt, scene, camsample, &hrec);
 
                         if (isInvalidColor(path_host_.paths.contrib[idx].contrib)) {
                             AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);
@@ -342,19 +353,6 @@ namespace aten
                     }
 
                     col /= (float)cnt;
-
-#if 0
-                    if (hrec.mtrlid >= 0) {
-                        const auto mtrl = ctxt.GetMaterial(hrec.mtrlid);
-                        if (mtrl && mtrl->isNPR()) {
-                            col = FeatureLine::RenderFeatureLine(
-                                col,
-                                x, y, width, height,
-                                hrec,
-                                ctxt, *scene, *camera);
-                        }
-                    }
-#endif
 
                     dst.buffer->put(x, y, vec4(col, 1));
 

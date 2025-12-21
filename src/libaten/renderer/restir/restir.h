@@ -24,7 +24,7 @@ namespace aten
         ReSTIRRenderer& operator=(ReSTIRRenderer&&) = delete;
 
         void OnRender(
-            const context& ctxt,
+            context& ctxt,
             Destination& dst,
             scene* scene,
             Camera* camera) override;

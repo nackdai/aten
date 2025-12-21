@@ -438,7 +438,7 @@ namespace aten
     }
 
     void VolumePathTracing::OnRender(
-        const context& ctxt,
+        context& ctxt,
         Destination& dst,
         scene* scene,
         Camera* camera)

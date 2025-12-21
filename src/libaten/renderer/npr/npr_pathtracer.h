@@ -11,7 +11,7 @@ namespace aten
         ~NprPathTracer() = default;
 
         virtual void OnRender(
-            const context& ctxt,
+            context& ctxt,
             Destination& dst,
             scene* scene,
             Camera* camera) override;

@@ -1360,16 +1360,16 @@ void ToonSimpleSphereScene::makeScene(
         mtrl_param.standard.ior = 2.3F;
         mtrl_param.toon.target_light_idx = 0;
         mtrl_param.toon.remap_texture = 0;
-        mtrl_param.toon.highligt_translation_dt = 0.0F;
-        mtrl_param.toon.highligt_translation_db = 0.0F;
-        mtrl_param.toon.highligt_scale_t = 0.0F;
-        mtrl_param.toon.highlight_split_t = 0.0F;
-        mtrl_param.toon.highlight_split_b = 0.0F;
-        mtrl_param.toon.enable_rim_light = true;
-        mtrl_param.toon.rim_light_color = aten::vec3(1);
-        mtrl_param.toon.rim_light_width = 0.25F;
-        mtrl_param.toon.rim_light_softness = 0.5F;
-        mtrl_param.toon.rim_light_spread = 0.6F;
+        mtrl_param.toon.highlight.translation_dt = 0.0F;
+        mtrl_param.toon.highlight.translation_db = 0.0F;
+        mtrl_param.toon.highlight.scale_t = 0.0F;
+        mtrl_param.toon.highlight.split_t = 0.0F;
+        mtrl_param.toon.highlight.split_b = 0.0F;
+        mtrl_param.toon.rim_light.enable = true;
+        mtrl_param.toon.rim_light.color = aten::vec3(1);
+        mtrl_param.toon.rim_light.width = 0.25F;
+        mtrl_param.toon.rim_light.softness = 0.5F;
+        mtrl_param.toon.rim_light.spread = 0.6F;
         mtrl_param.toon.toon_type = aten::MaterialType::Specular;
 
         auto objs = aten::ObjLoader::Load(asset_path, ctxt,

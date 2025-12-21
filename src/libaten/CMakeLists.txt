@@ -186,8 +186,9 @@ add_library(
   renderer/npr/feature_line.cpp
   renderer/npr/feature_line.h
   renderer/npr/feature_line_config.h
+  renderer/npr/npr.cpp
   renderer/npr/npr_impl.h
-  renderer/pathtracing/npr.cpp
+  renderer/npr/npr_pathtracer.h
   renderer/pathtracing/pathtracing.cpp
   renderer/pathtracing/pathtracing.h
   renderer/pathtracing/pathtracing_impl.h
@@ -220,6 +221,7 @@ add_library(
   scene/scene.cpp
   scene/scene.h
   types.h
+  ui/parameter_editor.h
   visualizer/GLProfiler.cpp
   visualizer/GLProfiler.h
   visualizer/GeomDataBuffer.cpp

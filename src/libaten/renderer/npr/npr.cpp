@@ -215,8 +215,8 @@ namespace aten
 
         bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
 
-        // Œð·ˆÊ’u‚Ì–@ü.
-        // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ðl—¶.
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½Ì–@ï¿½ï¿½.
+        // ï¿½ï¿½ï¿½Ì‚ï¿½ï¿½ï¿½Ìƒï¿½ï¿½Cï¿½Ì“ï¿½ï¿½oï¿½ï¿½ï¿½lï¿½ï¿½.
         aten::vec3 orienting_normal = rec.normal;
 
         aten::MaterialParameter mtrl;
@@ -305,13 +305,15 @@ namespace aten
         auto path_attrib = paths.attrib[idx];
         path_attrib.attr.is_terminated = false;
 
+        AT_NAME::PathContrib path_contrib;
+
         // If material is toon material,
         // the contribution from shadow ray should not be applied to the rendering result.
         const auto is_hit_to_light = AT_NAME::HitShadowRay(
             bounce,
             ctxt, mtrl,
             path_attrib,
-            is_toon_material ? AT_NAME::PathContrib() : paths.contrib[idx],
+            is_toon_material ? path_contrib : paths.contrib[idx],
             shadow_ray);
 
         // For latter filtering, keep shadow ray if it hits to light.

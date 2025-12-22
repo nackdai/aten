@@ -89,12 +89,23 @@ void StylizedHighlight::PreRender(aten::shader& shader, const aten::PinholeCamer
 {
     auto h_translation_dt = shader.getHandle("translation_dt");
     CALL_GL_API(::glUniform1f(h_translation_dt, half_trans_t_));
+    auto h_translation_db = shader.getHandle("translation_db");
+    CALL_GL_API(::glUniform1f(h_translation_db, half_trans_b_));
 
     auto h_scale_t = shader.getHandle("scale_t");
-    CALL_GL_API(::glUniform1f(h_scale_t, half_scale_));
+    CALL_GL_API(::glUniform1f(h_scale_t, half_scale_t_));
+    auto h_scale_b = shader.getHandle("scale_b");
+    CALL_GL_API(::glUniform1f(h_scale_b, half_scale_b_));
 
     auto h_split_t = shader.getHandle("split_t");
     CALL_GL_API(::glUniform1f(h_split_t, half_split_t_));
+    auto h_split_b = shader.getHandle("split_b");
+    CALL_GL_API(::glUniform1f(h_split_b, half_split_b_));
+
+    auto h_square_sharp = shader.getHandle("square_sharp");
+    CALL_GL_API(::glUniform1f(h_square_sharp, half_square_sharp_));
+    auto h_square_magnitude = shader.getHandle("square_magnitude");
+    CALL_GL_API(::glUniform1f(h_square_magnitude, half_square_magnitude_));
 }
 
 void StylizedHighlight::UpdateHalfVectors()
@@ -118,7 +129,7 @@ void StylizedHighlight::UpdateHalfVectors()
         half = normalize(half);
 
         // Directional scale.
-        half = half - half_scale_ * dot(half, t) * t;
+        half = half - half_scale_t_ * dot(half, t) * t;
         half = normalize(half);
 
         // Split.
@@ -203,8 +214,13 @@ void StylizedHighlight::DrawDebugVisual(
 void StylizedHighlight::EditParameter()
 {
     ImGui::SliderFloat("trans t", &half_trans_t_, -1, 1);
-    ImGui::SliderFloat("scale t", &half_scale_, 0.0, 1);
+    ImGui::SliderFloat("trans b", &half_trans_b_, -1, 1);
+    ImGui::SliderFloat("scale t", &half_scale_t_, 0.0, 1);
+    ImGui::SliderFloat("scale b", &half_scale_b_, 0.0, 1);
     ImGui::SliderFloat("split t", &half_split_t_, 0.0, 1);
+    ImGui::SliderFloat("split b", &half_split_b_, 0.0, 1);
+    ImGui::SliderFloat("square sharp", &half_square_sharp_, 0.0, 1);
+    ImGui::SliderFloat("square magnitude", &half_square_magnitude_, 0.0, 1);
 
     UpdateHalfVectors();
 }

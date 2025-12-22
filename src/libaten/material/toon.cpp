@@ -337,9 +337,7 @@ namespace AT_NAME
         H = normalize(H);
 
         // Direction scale.
-        H = H - param.toon.highlight.scale_t * dot(H, t) * t;
-        H = normalize(H);
-        H = H - param.toon.highlight.scale_b * dot(H, b) * b;
+        H = H - param.toon.highlight.scale_t * dot(H, t) * t - param.toon.highlight.scale_b * dot(H, b) * b;
         H = normalize(H);
 
         // Split.

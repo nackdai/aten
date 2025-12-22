@@ -13,6 +13,7 @@
 #include "renderer/aov.h"
 #include "renderer/pathtracing/pathtracing_impl.h"
 #include "renderer/pathtracing/pt_params.h"
+#include "renderer/pathtracing/path_time_profiler.h"
 
 // TODO
 // persistend thread works with CUDA 10.1.
@@ -177,6 +178,8 @@ namespace kernel {
             return;
         }
 
+        AT_NAME::PathTimeProfiler profiler(paths.throughput[idx]);
+
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
         ctxt.lights = lights;
@@ -221,6 +224,8 @@ namespace kernel {
 
         hitbools[idx] = isHit ? 1 : 0;
 #endif
+
+        profiler.end();
     }
 
     __global__ void hitTestPrimaryRayInScreenSpace(
@@ -253,6 +258,8 @@ namespace kernel {
         if (paths.attrib[idx].attr.is_terminated) {
             return;
         }
+
+        AT_NAME::PathTimeProfiler profiler(paths.throughput[idx]);
 
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
@@ -316,6 +323,8 @@ namespace kernel {
             paths.attrib[idx].attr.isHit = false;
             hitbools[idx] = 0;
         }
+
+        profiler.end();
     }
 
     __global__ void ShadeMiss(
@@ -337,6 +346,8 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
+        AT_NAME::PathTimeProfiler profiler(paths.throughput[idx]);
+
         AT_NAME::ShadeMiss(
             idx,
             ix, iy,
@@ -346,6 +357,8 @@ namespace kernel {
             paths, rays[idx],
             aten::span(aovNormalDepth, width * height),
             aten::span(aovAlbedoMeshid, width * height));
+
+        profiler.end();
     }
 }
 }

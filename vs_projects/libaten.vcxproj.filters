@@ -571,6 +571,9 @@
     <ClInclude Include="..\src\libaten\renderer\npr\npr_pathtracer.h">
       <Filter>renderer\npr</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\pathtracing\path_time_profiler.h">
+      <Filter>renderer\pathtracing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

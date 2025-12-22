@@ -247,6 +247,7 @@
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_nee_impl.h" />
+    <ClInclude Include="..\src\libaten\renderer\pathtracing\path_time_profiler.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pt_params.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
     <ClInclude Include="..\src\libaten\renderer\restir\restir.h" />

@@ -9,8 +9,11 @@ uniform vec4 color;
 uniform float translation_dt;
 uniform float translation_db;
 uniform float scale_t;
+uniform float scale_b;
 uniform float split_t;
 uniform float split_b;
+uniform float square_sharp;
+uniform float square_magnitude;
 
 layout(location = 0) out vec4 outColor;
 
@@ -42,15 +45,21 @@ void main()
     t = cross(b, normal);
 
     // Translaction.
-    vec3 h = wh + translation_dt * t;
+    vec3 h = wh + translation_dt * t + translation_db * b;
     h = normalize(h);
 
     // Direction scale.
-    h = h - scale_t * dot(h, t) * t;
+    h = h - scale_t * dot(h, t) * t - scale_b * dot(h, b) * b;
     h = normalize(h);
 
     // Split.
-    h = h - split_t * sign(dot(h, t)) * t;
+    h = h - split_t * sign(dot(h, t)) * t - split_b * sign(dot(h, b)) * b;
+    h = normalize(h);
+
+    // Square.
+    float sqrnorm_t = sin(pow(acos(dot(h, t)), square_sharp));
+    float sqrnorm_b = sin(pow(acos(dot(h, b)), square_sharp));
+    h = h - square_magnitude * (sqrnorm_t * dot(h, t) * t + sqrnorm_b * dot(h, b) * b);
     h = normalize(h);
 
     float c = pow(clamp(dot(normal, h), 0, 1), 10);

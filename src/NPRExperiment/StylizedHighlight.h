@@ -37,6 +37,14 @@ private:
     aten::shader shader_;
 
     float half_trans_t_{ 0.0F };
-    float half_scale_{ 0.0F };
+    float half_trans_b_{ 0.0F };
+
+    float half_scale_t_{ 0.0F };
+    float half_scale_b_{ 0.0F };
+
     float half_split_t_{ 0.0F };
+    float half_split_b_{ 0.0F };
+
+    float half_square_sharp_{ 0.0F };
+    float half_square_magnitude_{ 0.0F };
 };

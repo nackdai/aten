@@ -98,6 +98,7 @@ namespace AT_NAME
         paths.throughput[idx].pdfb = 1.0f;
         paths.throughput[idx].medium.depth_count = 0;
         paths.throughput[idx].medium.stack.clear();
+        paths.throughput[idx].time = 0.0F;
 
         _detail_pathtracing_impl::ClearAlphaBlend(paths.throughput[idx], paths.attrib[idx]);
 

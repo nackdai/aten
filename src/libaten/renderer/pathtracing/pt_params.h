@@ -26,15 +26,17 @@ namespace AT_NAME {
         aten::vec3 throughput{ 1.0F };
         float pdfb{ 1.0F };
 
-        struct alignas(16) AlphaBlendThroughput {
+        struct AlphaBlendThroughput {
             aten::vec3 throughput{ 0.0F };
             float transmission{ 1.0F };
         } alpha_blend;
 
-        struct alignas(16) MediumThroughput {
+        struct MediumThroughput {
             int32_t depth_count{ 0 };
             MediumStack stack;
         } medium;
+
+        float time{ 0.0F };
     };
 
     struct alignas(16) PathContrib {

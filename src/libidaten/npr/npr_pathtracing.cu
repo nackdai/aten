@@ -14,6 +14,7 @@
 #include "accelerator/threaded_bvh_traverser.h"
 #include "renderer/ao/aorenderer_impl.h"
 #include "renderer/pathtracing/pt_params.h"
+#include "renderer/pathtracing/path_time_profiler.h"
 #include "renderer/npr/npr_impl.h"
 
 namespace npr_kernel {
@@ -34,6 +35,8 @@ namespace npr_kernel {
 
         idx = hitindices[idx];
 
+        AT_NAME::PathTimeProfiler profiler(paths.throughput[idx]);
+
         auto& sample_ray_info = sample_ray_infos[idx];
         const auto& ray = rays[idx];
 
@@ -44,6 +47,8 @@ namespace npr_kernel {
             sample_ray_info.descs, sample_ray_info.disc,
             ray, paths.sampler[idx],
             feature_line_width, pixel_width);
+
+        profiler.end();
     }
 
     __global__ void shadeSampleRay(
@@ -75,6 +80,8 @@ namespace npr_kernel {
             return;
         }
 
+        AT_NAME::PathTimeProfiler profiler(paths.throughput[idx]);
+
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
         ctxt.lights = lights;
@@ -92,6 +99,8 @@ namespace npr_kernel {
             camera, query_ray, isect,
             paths, sample_ray_infos
         );
+
+        profiler.end();
     }
 
     __global__ void shadeMissSampleRay(
@@ -124,6 +133,8 @@ namespace npr_kernel {
             return;
         }
 
+        AT_NAME::PathTimeProfiler profiler(paths.throughput[idx]);
+
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
         ctxt.lights = lights;
@@ -142,6 +153,8 @@ namespace npr_kernel {
             paths,
             sample_ray_infos
         );
+
+        profiler.end();
     }
 
     __global__ void ShadeAO(
@@ -175,6 +188,8 @@ namespace npr_kernel {
 
         idx = hitindices[idx];
 
+        AT_NAME::PathTimeProfiler profiler(paths.throughput[idx]);
+
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
         ctxt.lights = lights;
@@ -189,6 +204,8 @@ namespace npr_kernel {
             paths.sampler[idx], ctxt, ray, isect);
 
         dst[idx] = ao_color;
+
+        profiler.end();
     }
 
     __global__ void HitShadowRayWithKeepingIfHitToLight(
@@ -212,6 +229,8 @@ namespace npr_kernel {
         }
 
         idx = hitindices[idx];
+
+        AT_NAME::PathTimeProfiler profiler(paths.throughput[idx]);
 
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
@@ -239,16 +258,16 @@ namespace npr_kernel {
             auto path_contrib = paths.contrib[idx];
             auto& shadow_ray = shadowRays[idx];
 
-        // If material is toon material,
-        // the contribution from shadow ray should not be applied to the rendering result.
-        const auto is_hit_to_light = AT_NAME::HitShadowRay(
-            bounce,
-            ctxt, mtrl,
-                path_attrib, path_contrib,
-            shadow_ray);
+            // If material is toon material,
+            // the contribution from shadow ray should not be applied to the rendering result.
+            const auto is_hit_to_light = AT_NAME::HitShadowRay(
+                bounce,
+                ctxt, mtrl,
+                    path_attrib, path_contrib,
+                shadow_ray);
 
-        // For latter filtering, keep shadow ray if it hits to light.
-        shadow_ray.isActive = is_hit_to_light;
+            // For latter filtering, keep shadow ray if it hits to light.
+            shadow_ray.isActive = is_hit_to_light;
         }
         else {
             AT_NAME::HitShadowRay(
@@ -257,17 +276,19 @@ namespace npr_kernel {
                 paths.attrib[idx], paths.contrib[idx],
                 shadowRays[idx]);
         }
+
+        profiler.end();
     }
 
     using HatchingShadowFilterDirection = idaten::NPRPathTracing::HatchingShadowDirection;
 
-    template <class SrcType, bool IsFirstStep, HatchingShadowFilterDirection Direction, int32_t KernelSizeH, int32_t KernelSizeV = KernelSizeH>
+    template <class SrcType, bool IsFirstStep, HatchingShadowFilterDirection Direction, int32_t KernelSizeH, int32_t KernelSizeV = KernelSizeH, bool NO_FILTER = false>
     __global__ void ApplyBilateralFilter(
         int32_t width, int32_t height,
         cudaSurfaceObject_t dst,
         const SrcType* __restrict__ src,
-        const aten::Intersection* __restrict__ isects,
-        const bool is_no_filter = false
+        const idaten::Path paths,
+        const aten::Intersection* __restrict__ isects
     )
     {
         AT_STATICASSERT(Direction != HatchingShadowFilterDirection::Cross
@@ -282,9 +303,11 @@ namespace npr_kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
+        AT_NAME::PathTimeProfiler profiler(paths.throughput[idx]);
+
         float filtered_color = 0.0F;
 
-        if (is_no_filter) {
+        if constexpr (NO_FILTER) {
             if constexpr (std::is_same_v<SrcType, aten::ShadowRay>) {
                 filtered_color = src[idx].isActive > 0 ? 1.0F : 0.0F;
             }
@@ -319,6 +342,8 @@ namespace npr_kernel {
             }
         }
         surf2Dwrite(filtered_color, dst, ix * sizeof(float), iy, cudaBoundaryModeTrap);
+
+        profiler.end();
     }
 }
 
@@ -508,11 +533,12 @@ namespace idaten {
         constexpr int32_t KernelSize = 5;
 
         if (hatching_shadow_direction_ == HatchingShadowDirection::None) {
-            npr_kernel::ApplyBilateralFilter<SrcType, true, HatchingShadowDirection::Horizontal, KernelSize> << <block_per_grid, thread_per_block, 0, m_stream >> > (
+            npr_kernel::ApplyBilateralFilter<SrcType, true, HatchingShadowDirection::Horizontal, KernelSize, KernelSize, true> << <block_per_grid, thread_per_block, 0, m_stream >> > (
                 width, height,
                 ctxt_host_->screen_space_texture.GetSurfaceObject(),
                 src.data(),
-                m_isects.data(), true);
+                path_host_->paths,
+                m_isects.data());
 
             checkCudaKernel(ApplyBilateralFilter);
         }
@@ -523,6 +549,7 @@ namespace idaten {
                 width, height,
                 ctxt_host_->screen_space_texture.GetSurfaceObject(),
                 src.data(),
+                path_host_->paths,
                 m_isects.data());
 
             checkCudaKernel(ApplyBilateralFilter);
@@ -532,6 +559,7 @@ namespace idaten {
                     width, height,
                     ctxt_host_->screen_space_texture.GetSurfaceObject(),
                     src.data(),
+                    path_host_->paths,
                     m_isects.data());
 
                 checkCudaKernel(ApplyBilateralFilter);
@@ -545,6 +573,7 @@ namespace idaten {
                     width, height,
                     ctxt_host_->screen_space_texture.GetSurfaceObject(),
                     src.data(),
+                    path_host_->paths,
                     m_isects.data());
 
                 checkCudaKernel(ApplyBilateralFilter);
@@ -556,6 +585,7 @@ namespace idaten {
                     width, height,
                     ctxt_host_->screen_space_texture.GetSurfaceObject(),
                     src.data(),
+                    path_host_->paths,
                     m_isects.data());
 
                 checkCudaKernel(ApplyBilateralFilter);
@@ -566,6 +596,7 @@ namespace idaten {
                     width, height,
                     ctxt_host_->screen_space_texture.GetSurfaceObject(),
                     src.data(),
+                    path_host_->paths,
                     m_isects.data());
 
                 checkCudaKernel(ApplyBilateralFilter);
@@ -584,6 +615,8 @@ namespace idaten {
             "None", "Horizontal", "Vertical", "Orthogonal", "Cross", "OrthogonalCross",
         };
         is_updated |= ImGui::Combo("Filter", reinterpret_cast<int*>(&hatching_shadow_direction_), Filter.data(), Filter.size());
+
+        is_updated |= ImGui::Checkbox("Display profile heatmap", &ctxt_host_->ctxt.will_display_path_time_perf_profile_heatmap);
 
         return is_updated;
     }

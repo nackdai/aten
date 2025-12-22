@@ -61,6 +61,11 @@ namespace idaten {
          */
         bool enable_shadowray_base_stylized_shadow{ false };
 
+        /**
+         * @brief Control if path time profile heatmap is desplayed.
+         */
+        bool will_display_path_time_perf_profile_heatmap{ false };
+
         cudaTextureObject_t screen_space_texture{ 0 };
         cudaSurfaceObject_t screen_space_surface{ 0 };
 

@@ -12,6 +12,7 @@
 #include "cuda/cudamemory.h"
 
 #include "renderer/pathtracing/pathtracing_impl.h"
+#include "renderer/pathtracing/path_time_profiler.h"
 
 namespace pt {
     __global__ void shade(
@@ -46,6 +47,8 @@ namespace pt {
         if (paths.attrib[idx].attr.is_terminated) {
             return;
         }
+
+        AT_NAME::PathTimeProfiler profiler(paths.throughput[idx]);
 
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
@@ -165,7 +168,7 @@ namespace pt {
                 shMtrls[threadIdx.x].attrib.is_singular = shMtrls[threadIdx.x].toon.toon_type == aten::MaterialType::ToonSpecular;
             }
             else {
-                return;
+                goto EXIT;
             }
         }
 
@@ -191,7 +194,7 @@ namespace pt {
         shadowRays[idx] = shShadowRays[threadIdx.x];
 
         if (is_hit_terminated_mtrl) {
-            return;
+            goto EXIT;
         }
 
         const auto russianProb = AT_NAME::ComputeRussianProbability(
@@ -221,6 +224,9 @@ namespace pt {
             albedo,
             paths,
             rays);
+
+    EXIT:
+        profiler.end();
     }
 
     __global__ void hitShadowRay(
@@ -245,6 +251,8 @@ namespace pt {
 
         idx = hitindices[idx];
 
+        AT_NAME::PathTimeProfiler profiler(paths.throughput[idx]);
+
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
         ctxt.lights = lights;
@@ -259,10 +267,13 @@ namespace pt {
             ctxt, mtrl,
             paths.attrib[idx], paths.contrib[idx],
             shadowRays[idx]);
+
+        profiler.end();
     }
 
     __global__ void gather(
         cudaSurfaceObject_t dst,
+        const idaten::context ctxt,
         const idaten::Path paths,
         bool enableProgressive,
         int32_t width, int32_t height)
@@ -275,13 +286,17 @@ namespace pt {
         }
 
         auto idx = getIdx(ix, iy, width);
-
         const auto& c = paths.contrib[idx].contrib;
         const auto sample = paths.contrib[idx].samples;
 
         float4 contrib = make_float4(c.x, c.y, c.z, 0.0F);
 
-        if (enableProgressive) {
+        if (ctxt.will_display_path_time_perf_profile_heatmap) {
+            const auto time = paths.throughput[idx].time;
+            const auto heatmap = AT_NAME::ComputeTemperature(time);
+            contrib = make_float4(heatmap, 1.0F);
+        }
+        else if (enableProgressive) {
             float4 data;
             surf2Dread(&data, dst, ix * sizeof(float4), iy);
 
@@ -559,6 +574,7 @@ namespace idaten
 
         pt::gather << <grid, block, 0, m_stream >> > (
             outputSurf,
+            ctxt_host_->ctxt,
             path_host_->paths,
             m_enableProgressive,
             width, height);

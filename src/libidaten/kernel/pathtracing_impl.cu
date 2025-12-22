@@ -291,12 +291,7 @@ namespace pt {
 
         float4 contrib = make_float4(c.x, c.y, c.z, 0.0F);
 
-        if (ctxt.will_display_path_time_perf_profile_heatmap) {
-            const auto time = paths.throughput[idx].time;
-            const auto heatmap = AT_NAME::ComputeTemperature(time);
-            contrib = make_float4(heatmap, 1.0F);
-        }
-        else if (enableProgressive) {
+        if (enableProgressive) {
             float4 data;
             surf2Dread(&data, dst, ix * sizeof(float4), iy);
 
@@ -310,6 +305,64 @@ namespace pt {
             contrib /= sample;
             contrib.w = 1;
         }
+
+        if (dst) {
+            surf2Dwrite(
+                contrib,
+                dst,
+                ix * sizeof(float4), iy,
+                cudaBoundaryModeTrap);
+        }
+    }
+
+    __global__ void DisplayTimeProfileHeatmap(
+        cudaSurfaceObject_t dst,
+        const idaten::Path paths,
+        int32_t width, int32_t height)
+    {
+        auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+        auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+        extern __shared__ float s_time[];
+
+        int num_threads = blockDim.x * blockDim.y;
+        int block_id = blockIdx.x + blockIdx.y * gridDim.x;
+        int thread_id = threadIdx.x + threadIdx.y * blockDim.x;
+
+        auto idx = getIdx(ix, iy, width);
+        const auto elapsed = (ix >= width || iy >= height) ? 0.0F : paths.throughput[idx].time;
+
+        s_time[thread_id] = elapsed;
+        __syncthreads();
+
+#if 0
+        // Max.
+        for (int offset = num_threads / 2; offset > 0; offset >>= 1)
+        {
+            if (thread_id < offset) {
+                s_time[thread_id] = max(s_time[thread_id], s_time[thread_id + offset]);
+            }
+            __syncthreads();
+        }
+
+        float time = s_time[0];
+#else
+        // Avg.
+        for (int offset = num_threads / 2; offset > 0; offset >>= 1) {
+            if (thread_id < offset) {
+                s_time[thread_id] += s_time[thread_id + offset];
+            }
+            __syncthreads();
+        }
+
+        float time = s_time[0];
+        time /= num_threads;
+#endif
+
+        __syncthreads();
+
+        const auto heatmap = AT_NAME::ComputeTemperature(time);
+        auto contrib = make_float4(heatmap, 1.0F);
 
         if (dst) {
             surf2Dwrite(
@@ -567,17 +620,31 @@ namespace idaten
         int32_t width, int32_t height,
         int32_t maxSamples)
     {
-        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
-        dim3 grid(
-            (width + block.x - 1) / block.x,
-            (height + block.y - 1) / block.y);
+        if (ctxt_host_->ctxt.will_display_path_time_perf_profile_heatmap) {
+            dim3 block(8, 8);
+            dim3 grid(
+                (width + block.x - 1) / block.x,
+                (height + block.y - 1) / block.y);
 
-        pt::gather << <grid, block, 0, m_stream >> > (
-            outputSurf,
-            ctxt_host_->ctxt,
-            path_host_->paths,
-            m_enableProgressive,
-            width, height);
+            size_t shared_size = block.x * block.y * sizeof(float);
+            pt::DisplayTimeProfileHeatmap << <grid, block, shared_size >> > (
+                outputSurf,
+                path_host_->paths,
+                width, height);
+        }
+        else {
+            dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+            dim3 grid(
+                (width + block.x - 1) / block.x,
+                (height + block.y - 1) / block.y);
+
+            pt::gather << <grid, block, 0, m_stream >> > (
+                outputSurf,
+                ctxt_host_->ctxt,
+                path_host_->paths,
+                m_enableProgressive,
+                width, height);
+        }
 
         checkCudaKernel(gather);
     }

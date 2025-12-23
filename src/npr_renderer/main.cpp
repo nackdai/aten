@@ -671,7 +671,7 @@ private:
 #ifdef DEVICE_RENDERING
     idaten::NPRPathTracing renderer_;
 #else
-    aten::PathTracing renderer_;
+    aten::NprPathTracer renderer_;
     aten::FilmProgressive buffer_{ WIDTH, HEIGHT };
 #endif
 

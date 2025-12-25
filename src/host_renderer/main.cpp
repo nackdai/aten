@@ -10,7 +10,7 @@ constexpr const char* TITLE = "app";
 const aten::vec4 BGColor(0.0F);
 
 #define ENABLE_IBL
-// #define ENABLE_EVERY_FRAME_SC
+//#define ENABLE_EVERY_FRAME_SC
 //#define ENABLE_FEATURE_LINE
 
 class HostRendererApp {
@@ -41,6 +41,15 @@ public:
 
     bool Init()
     {
+        if constexpr (std::is_same_v<Scene, AlphaBlendedObjCornellBoxScene>) {
+            renderer_ = std::make_shared<aten::NprPathTracer>();
+        }
+        else {
+            renderer_ = std::make_shared<aten::PathTracing>();
+            //renderer_ = std::make_shared<aten::VolumePathTracing>();
+            //renderer_ = std::make_shared<aten::SVGFRenderer>();
+            //renderer_ = std::make_shared<aten::ReSTIRRenderer>();
+        }
         visualizer_ = aten::visualizer::init(WIDTH, HEIGHT);
 
         gamma_.init(
@@ -173,13 +182,13 @@ public:
 
         SetMotionDepthBuffer(renderer_);
 
-        const auto frame_cnt = renderer_.GetFrameCount();
+        const auto frame_cnt = renderer_->GetFrameCount();
 
         aten::timer timer;
         timer.begin();
 
         // Trace rays.
-        renderer_.render(ctxt_, dst, &scene_, &camera_);
+        renderer_->render(ctxt_, dst, &scene_, &camera_);
 
         const auto elapsed = timer.end();
         avg_elapsed_ = avg_elapsed_ * frame_cnt + elapsed;
@@ -210,7 +219,7 @@ public:
 
 #ifdef ENABLE_EVERY_FRAME_SC
         {
-            const auto frame = renderer_.GetFrameCount();
+            const auto frame = renderer_->GetFrameCount();
             const auto file_name = aten::StringFormat("sc_%d.png", frame);
             visualizer_->takeScreenshot(file_name);
         }
@@ -232,10 +241,7 @@ private:
 
     std::shared_ptr<aten::texture> envmap_;
 
-    aten::PathTracing renderer_;
-    //aten::VolumePathTracing renderer_;
-    //aten::SVGFRenderer renderer_;
-    //aten::ReSTIRRenderer renderer_;
+    std::shared_ptr<aten::Renderer> renderer_;
 
     std::shared_ptr<aten::visualizer> visualizer_;
 

@@ -510,10 +510,10 @@ namespace AT_NAME
 
     inline AT_DEVICE_API bool CheckMaterialTranslucentByAlpha(
         const AT_NAME::context& ctxt,
-        const aten::MaterialParameter& mtrl,
+        const aten::MaterialParameter& original_mtrl,
         float u, float v,
-        const aten::vec3& hit_pos,
-        const aten::vec3& hit_nml,
+        const aten::vec3& original_hit_pos,
+        const aten::vec3& original_hit_nml,
         aten::ray& ray,
         AT_NAME::PathAttribute& path_attrib,
         AT_NAME::PathThroughput& path_throughput)
@@ -529,6 +529,8 @@ namespace AT_NAME
             return false;
         }
 
+        auto mtrl = original_mtrl;
+
         // If the material itself is originally translucent, we don't care alpha translucency.
         if (mtrl.attrib.is_translucent) {
             return false;
@@ -538,26 +540,65 @@ namespace AT_NAME
         // material::getTranslucentAlpha returns the multiplied alpha.
         // Why we call sampleTexture to get alpha value instead of calling material::getTranslucentAlpha is retrieving albedo color and alpha in the same time.
         // Therefore, we need to compute the multiplied alpha value.
-        const auto albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, u, v, aten::vec4(1.0F));
-        const auto alpha = albedo.a * mtrl.baseColor.a;
+        auto albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, u, v, aten::vec4(1.0F));
+        auto alpha = albedo.a * mtrl.baseColor.a;
+
+        constexpr size_t MAX_LOOKUPS = 10;
 
         if (alpha < 1.0F)
         {
-            // Just through the object.
-            // NOTE:
-            // Ray go through to the opposite direction. So, we need to specify inverted normal.
-            // Even if accumulating alpha blending already has been stopped but the hit object has alpha translucent material,
-            // we skip the following shadeing sequence.
-            // It means the ray go through to the opposite direction as if the hit object is ignored.
-            ray = aten::ray(hit_pos, ray.dir, -hit_nml);
+            aten::vec3 hit_pos{ original_hit_pos };
+            aten::vec3 hit_nml{ original_hit_nml };
 
-            const aten::vec3 alpha_belended_radiance{
-                path_throughput.alpha_blend.transmission * mtrl.baseColor * albedo * alpha
-            };
-            aten::AddVec3(path_throughput.alpha_blend.throughput, alpha_belended_radiance);
-            path_throughput.alpha_blend.transmission *= (1.0F - alpha);
+            for (size_t i = 0; i < MAX_LOOKUPS; i++) {
+                // Just through the object.
+                // NOTE:
+                // Ray go through to the opposite direction. So, we need to specify inverted normal.
+                // Even if accumulating alpha blending already has been stopped but the hit object has alpha translucent material,
+                // we skip the following shadeing sequence.
+                // It means the ray go through to the opposite direction as if the hit object is ignored.
+                ray = aten::ray(hit_pos, ray.dir, -hit_nml);
 
-            path_attrib.attr.is_singular = true;
+                const aten::vec3 alpha_belended_radiance{
+                    path_throughput.alpha_blend.transmission * mtrl.baseColor * albedo * alpha
+                };
+                aten::AddVec3(path_throughput.alpha_blend.throughput, alpha_belended_radiance);
+                path_throughput.alpha_blend.transmission *= (1.0F - alpha);
+
+                path_attrib.attr.is_singular = true;
+
+                aten::Intersection isect;
+                bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
+                    isect, ctxt, ray,
+                    AT_MATH_EPSILON, AT_MATH_INF
+                );
+
+                if (!is_hit) {
+                    break;
+                }
+
+                const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
+
+                aten::hitrecord rec;
+                AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
+
+                mtrl = ctxt.GetMaterial(rec.mtrlid);
+
+                albedo = AT_NAME::sampleTexture(ctxt, mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0F));
+                alpha = albedo.a * mtrl.baseColor.a;
+
+                if (alpha >= 1.0F) {
+                    break;
+                }
+
+                hit_pos = rec.p;
+                hit_nml = rec.normal;
+
+                const bool is_back_facing = aten::dot(-ray.dir, hit_nml) < 0.0F;
+                if (is_back_facing) {
+                    hit_nml = -hit_nml;
+                }
+            }
             return true;
         }
         else {
@@ -566,57 +607,6 @@ namespace AT_NAME
         }
 
         return false;
-    }
-
-    inline AT_DEVICE_API aten::ray AdvanceAlphaBlendPath(
-        const AT_NAME::context& ctxt,
-        const aten::ray& original_ray,
-        AT_NAME::PathAttribute& path_attrib,
-        AT_NAME::PathThroughput& path_throughput
-    )
-    {
-        if (!path_attrib.attr.is_accumulating_alpha_blending) {
-            return original_ray;
-        }
-
-        auto ray{ original_ray };
-
-        // TODO
-        constexpr size_t MAX_LOOKUPS = 10;
-
-        size_t loop_count = 0;
-
-        for (loop_count = 0; loop_count < MAX_LOOKUPS; loop_count++) {
-            aten::Intersection isect;
-            bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
-                isect, ctxt, ray,
-                AT_MATH_EPSILON, AT_MATH_INF
-            );
-
-            if (is_hit) {
-                const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
-
-                aten::hitrecord rec;
-                AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
-
-                const auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
-                    ctxt,
-                    ctxt.GetMaterial(rec.mtrlid),
-                    rec.u, rec.v, rec.p, rec.normal,
-                    ray,
-                    path_attrib, path_throughput);
-                if (!is_translucent_by_alpha) {
-                    return ray;
-                }
-            }
-            else {
-                path_attrib.attr.is_accumulating_alpha_blending = false;
-                return ray;
-            }
-        }
-
-        path_attrib.attr.is_accumulating_alpha_blending = false;
-        return original_ray;
     }
 
     inline AT_DEVICE_API bool CheckStencil(

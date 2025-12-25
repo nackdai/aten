@@ -44,7 +44,12 @@ namespace pt {
 
         idx = hitindices[idx];
 
+        shadowRays[idx].isActive = false;
+
         if (paths.attrib[idx].attr.is_terminated) {
+            return;
+        }
+        if (!paths.attrib[idx].attr.isHit) {
             return;
         }
 
@@ -460,18 +465,19 @@ namespace pt {
                 paths.attrib[idx],
                 paths.throughput[idx]);
             if (is_translucent_by_alpha) {
-                rays[idx] = AT_NAME::AdvanceAlphaBlendPath(
-                    ctxt, rays[idx],
-                    paths.attrib[idx], paths.throughput[idx]);
-
                 need_advance_path_one_more = true;
             }
         }
 
         if (need_advance_path_one_more) {
+            aten::Intersection isect_tmp;
             bool isHit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
-                isects[idx], ctxt, rays[idx],
+                isect_tmp, ctxt, rays[idx],
                 AT_MATH_EPSILON, AT_MATH_INF);
+
+            if (isHit) {
+                isects[idx] = isect_tmp;
+            }
 
             paths.attrib[idx].attr.isHit = isHit;
         }

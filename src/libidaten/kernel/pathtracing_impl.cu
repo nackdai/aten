@@ -148,6 +148,11 @@ namespace pt {
             return;
         }
 #endif
+        // NOTE:
+        // Need to define before goto.
+        AT_NAME::MaterialSampling sampling;
+        bool russianProb{ false };
+
         albedo = paths.throughput[idx].alpha_blend.transmission * albedo + paths.throughput[idx].alpha_blend.throughput;
 
         const bool is_toon_mtrl = shMtrls[threadIdx.x].type == aten::MaterialType::Toon
@@ -202,13 +207,11 @@ namespace pt {
             goto EXIT;
         }
 
-        const auto russianProb = AT_NAME::ComputeRussianProbability(
+        russianProb = AT_NAME::ComputeRussianProbability(
             bounce, rrBounce,
             paths.attrib[idx],
             paths.throughput[idx],
             paths.sampler[idx]);
-
-        AT_NAME::MaterialSampling sampling;
 
         AT_NAME::material::sampleMaterial(
             &sampling,

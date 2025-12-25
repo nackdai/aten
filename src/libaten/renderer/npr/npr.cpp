@@ -52,30 +52,28 @@ namespace aten
 
                 AdvanceNPRPath(idx, ctxt, path_host_.paths, rays_, isect);
 
-                shade(
-                    idx,
-                    path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
-                    isect, scene, m_rrDepth, depth);
+                if (path_host_.paths.attrib[idx].attr.isHit) {
+                    shade(
+                        idx,
+                        path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
+                        isect, scene, m_rrDepth, depth);
 
-                AT_NAME::AdvanceAlphaBlendPath(
-                    ctxt, rays_[idx],
-                    path_host_.paths.attrib[idx], path_host_.paths.throughput[idx]);
+                    const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
 
-                const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
-
-                if (depth == 0) {
-                    HitShadowRayWithKeepingIfHitToLight(
-                        idx, depth,
-                        ctxt, path_host_.paths, isect,
-                        shadow_rays_);
-                }
-                else {
-                    std::ignore = AT_NAME::HitShadowRay(
-                        depth,
-                        ctxt, mtrl,
-                        path_host_.paths.attrib[idx],
-                        path_host_.paths.contrib[idx],
-                        shadow_rays_[idx]);
+                    if (depth == 0) {
+                        HitShadowRayWithKeepingIfHitToLight(
+                            idx, depth,
+                            ctxt, path_host_.paths, isect,
+                            shadow_rays_);
+                    }
+                    else {
+                        std::ignore = AT_NAME::HitShadowRay(
+                            depth,
+                            ctxt, mtrl,
+                            path_host_.paths.attrib[idx],
+                            path_host_.paths.contrib[idx],
+                            shadow_rays_[idx]);
+                    }
                 }
 
                 willContinue = !path_host_.paths.attrib[idx].attr.is_terminated;
@@ -154,19 +152,21 @@ namespace aten
 
                 AdvanceNPRPath(idx, ctxt, path_host_.paths, rays_, isect);
 
-                shade(
-                    idx,
-                    path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
-                    isect, scene, m_rrDepth, depth);
+                if (path_host_.paths.attrib[idx].attr.isHit) {
+                    shade(
+                        idx,
+                        path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
+                        isect, scene, m_rrDepth, depth);
 
-                const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
+                    const auto& mtrl = ctxt.GetMaterial(isect.mtrlid);
 
-                std::ignore = AT_NAME::HitShadowRay(
-                    depth,
-                    ctxt, mtrl,
-                    path_host_.paths.attrib[idx],
-                    path_host_.paths.contrib[idx],
-                    shadow_rays_[idx]);
+                    std::ignore = AT_NAME::HitShadowRay(
+                        depth,
+                        ctxt, mtrl,
+                        path_host_.paths.attrib[idx],
+                        path_host_.paths.contrib[idx],
+                        shadow_rays_[idx]);
+                }
 
                 willContinue = !path_host_.paths.attrib[idx].attr.is_terminated;
             }
@@ -215,8 +215,6 @@ namespace aten
 
         bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
 
-        // �����ʒu�̖@��.
-        // ���̂���̃��C�̓��o���l��.
         aten::vec3 orienting_normal = rec.normal;
 
         aten::MaterialParameter mtrl;
@@ -238,6 +236,10 @@ namespace aten
             rec.u, rec.v,
             ray.dir,
             &paths.sampler[idx]);
+
+        if (!mtrl.attrib.is_translucent && isBackfacing) {
+            orienting_normal = -orienting_normal;
+        }
 
         bool need_advance_path_one_more = false;
 
@@ -263,18 +265,17 @@ namespace aten
                 paths.attrib[idx],
                 paths.throughput[idx]);
             if (is_translucent_by_alpha) {
-                rays[idx] = AT_NAME::AdvanceAlphaBlendPath(
-                    ctxt, rays[idx],
-                    paths.attrib[idx], paths.throughput[idx]);
-
                 need_advance_path_one_more = true;
             }
         }
 
         if (need_advance_path_one_more) {
+            aten::Intersection isect_tmp;
             bool isHit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
-                isect, ctxt, rays[idx],
+                isect_tmp, ctxt, rays[idx],
                 AT_MATH_EPSILON, AT_MATH_INF);
+
+            isect = isect_tmp;
 
             paths.attrib[idx].attr.isHit = isHit;
         }

@@ -916,7 +916,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
         aten::vec3(1.0f));
     scene->add(light);
 
-    auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 100.0f);
+    auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor, 10.0f);
     ctxt.AddLight(areaLight);
 
     for (int32_t i = 1; i < objs.size(); i++) {

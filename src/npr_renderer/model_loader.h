@@ -17,10 +17,10 @@ public:
 
         const auto mtrl_num = ctxt.GetMaterialNum();
         for (size_t i = 0; i < mtrl_num; i++) {
-            std::string tex_name = "remap_" + i;
+            auto mtrl = ctxt.GetMaterialInstance(i);
+            std::string tex_name = "remap_" + mtrl->nameString();
             auto tex = ctxt.CreateTexture(256, 1, 3, tex_name, aten::vec4(1.0F));
 
-            auto mtrl = ctxt.GetMaterialInstance(i);
             mtrl->param().toon.remap_texture = tex->id();
             mtrl->param().toon.target_light_idx = 0;
         }

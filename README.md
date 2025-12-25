@@ -122,6 +122,18 @@ Heterogeneous medium
 
 ![Heterogeneous](docs/gallery/heterogeneous.png)
 
+Non Photorealistic Rendering (NPR)
+
+- Feature line
+- Alpha blending
+- Lite Stencil
+- Rim light
+- Cartoon shading
+
+![NPR](docs/gallery/npr.png)
+
+(c) miHoYo
+
 ## Development
 
 - [Docker](docker/README.md)

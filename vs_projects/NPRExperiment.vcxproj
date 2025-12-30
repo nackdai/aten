@@ -35,6 +35,7 @@
     <None Include="..\src\NPRExperiment\npr_shading.vert" />
     <None Include="..\src\NPRExperiment\rimlight.frag" />
     <None Include="..\src\NPRExperiment\rimlight.vert" />
+    <None Include="..\src\NPRExperiment\rimlight_v2.frag" />
     <None Include="..\src\NPRExperiment\toon_bsdf.frag" />
     <None Include="..\src\NPRExperiment\toon_bsdf.vert" />
     <None Include="..\src\NPRExperiment\toon_specular_bsdf.frag" />

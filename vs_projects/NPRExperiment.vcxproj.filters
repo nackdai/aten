@@ -42,6 +42,9 @@
     <None Include="..\src\NPRExperiment\toon_specular_bsdf.frag">
       <Filter>shader</Filter>
     </None>
+    <None Include="..\src\NPRExperiment\rimlight_v2.frag">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="shader">

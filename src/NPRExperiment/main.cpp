@@ -21,6 +21,7 @@ public:
     enum class NPRType : int32_t {
         StylizedHighlight,
         RimLight,
+        RimLight_v2,
         NPRShading,
         ToonBsdf,
         Max,
@@ -71,6 +72,15 @@ public:
             "rimlight.vert",
             "rimlight.frag");
         rim_light_.InitDebugVisual(
+            WIDTH, HEIGHT,
+            "../shader/drawobj_vs.glsl",
+            "../shader/drawobj_fs.glsl");
+
+        rim_light_v2_.Init(
+            WIDTH, HEIGHT,
+            "rimlight.vert",
+            "rimlight_v2.frag");
+        rim_light_v2_.InitDebugVisual(
             WIDTH, HEIGHT,
             "../shader/drawobj_vs.glsl",
             "../shader/drawobj_fs.glsl");
@@ -149,6 +159,7 @@ public:
         constexpr std::array<const char*, static_cast<size_t>(NPRType::Max)> npr_types = {
             "StylizedHightlight",
             "RimLight",
+            "RimLight_v2",
             "NPRShading",
             "ToonBsdf",
         };
@@ -370,12 +381,14 @@ private:
     NPRType type_{ static_cast<NPRType>(0) };
     StylizedHighlight stylized_hightlight_;
     RimLight rim_light_;
+    RimLight_v2 rim_light_v2_;
     NPRShading npr_shading_;
     ToonBsdf toon_bsdf_;
 
     std::array<NPRModule*, static_cast<size_t>(NPRType::Max)> npr_ = {
         &stylized_hightlight_,
         &rim_light_,
+        & rim_light_v2_,
         &npr_shading_,
         &toon_bsdf_,
     };

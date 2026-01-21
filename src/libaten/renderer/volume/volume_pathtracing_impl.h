@@ -136,7 +136,7 @@ namespace AT_NAME
         while (true) {
             aten::Intersection isect;
 
-            bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closer>(
+            bool is_hit = aten::BvhTraverser::Traverse<aten::IntersectType::Closest>(
                 isect,
                 ctxt,
                 ray,

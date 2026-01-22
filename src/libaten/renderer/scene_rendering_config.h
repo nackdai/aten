@@ -28,9 +28,14 @@ namespace aten
         /**
          * @brief Configuration for minimum value how close hit is acceptable.
          *
-         * If the value is netative, the default value is used.
+         * If the value is negative, the default value is used.
          */
         float bvh_hit_min{ -1.0F };
+
+        /**
+        * @brief Epsilon bias for traversing shadow ray in medium.
+        */
+        float epsilon_bias_for_traversing_shadow_ray_in_medium{ 1e-3F };
 
         BackgroundResource bg;
     };

@@ -131,7 +131,7 @@ namespace AT_NAME
 
         // Need to check if hitting to something closer than light.
         // So, set shorter distance to light.
-        auto t_max = distance_to_light - AT_MATH_EPSILON;
+        auto t_max = distance_to_light - ctxt.scene_rendering_config.epsilon_bias_for_traversing_shadow_ray_in_medium;
 
         while (true) {
             aten::Intersection isect;

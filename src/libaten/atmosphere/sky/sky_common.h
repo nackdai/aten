@@ -1,0 +1,118 @@
+#pragma once
+
+#include "atmosphere/sky/sky_params.h"
+#include "image/texture.h"
+#include "image/texture_3d.h"
+
+// NOTE
+// 計算単位
+// - meter
+
+namespace aten::sky {
+    aten::vec4 SampleTexture2D(
+        const aten::texture& tex,
+        const aten::vec2& uv)
+    {
+        return tex.at(uv.x, uv.y);
+    }
+
+    aten::vec4 SampleTexture3D(
+        const aten::texture3d<aten::vec4>& tex,
+        const aten::vec3& uvw)
+    {
+        return tex.at(uvw);
+    }
+
+    float safe_sqrt(const float x)
+    {
+        return x <= 0.0F ? 0.0F : aten::sqrt(x);
+    }
+
+    // 大気の上端境界までの距離を計算する.
+    float DistanceToTopAtmosphereBoundary(
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const float r,
+        const float mu)  // 太陽方向の余弦.
+    {
+        AT_ASSERT(r <= atmosphere.top_radius);
+        AT_ASSERT(mu >= -1.0 && mu <= 1.0);
+
+        // atmosphere.top_radius : R_t
+
+        // |x + ts|^2 = R_t^2 から、tを求めたときの判別式.
+        const float discriminant = r * r * (mu * mu - 1.0) +
+            atmosphere.top_radius * atmosphere.top_radius;
+
+        // SafeSqrtで、discriminantが負のときは0を返す.
+
+        // |x + ts|^2 = R_t^2 から、tを求めると、解は２つあるが、-r * mu - SafeSqrt(discriminant) < 0 となるので、
+        // -r * mu + SafeSqrt(discriminant) の方が、距離dとして正しい値になる.
+        return aten::max(-r * mu + safe_sqrt(discriminant), 0.0F);
+    }
+
+    // 地球との交点までの距離を計算する.
+    float DistanceToBottomAtmosphereBoundary(
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const float r,
+        const float mu)
+    {
+        AT_ASSERT(r >= atmosphere.bottom_radius);
+        AT_ASSERT(mu >= -1.0 && mu <= 1.0);
+
+        // |x + ts|^2 = R_g^2 から、tを求めたときの判別式.
+        const float discriminant = r * r * (mu * mu - 1.0) +
+            atmosphere.bottom_radius * atmosphere.bottom_radius;
+
+        // |x + ts|^2 = R_g^2 から、tを求めると、解は２つあり、μ < 0 （視線が地面方向のため）であるために二つとも 正の値になる.
+        // 視線レイが地面と二点で交差する場合に、地球の奥側は見えないので、手前だけ考えればよく、二つの解のうち小さい方を選べばいい.
+        // 二つの解は、-r * mu ± SafeSqrt(discriminant) なので、-r * mu - SafeSqrt(discriminant) の方が小さい方になる.
+        return aten::max(-r * mu - safe_sqrt(discriminant), 0.0F);
+    }
+
+    float DistanceToNearestAtmosphereBoundary(
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const float r,
+        const float mu,
+        const bool ray_r_mu_intersects_ground)
+    {
+        if (ray_r_mu_intersects_ground) {
+            return DistanceToBottomAtmosphereBoundary(atmosphere, r, mu);
+        }
+        else {
+            return DistanceToTopAtmosphereBoundary(atmosphere, r, mu);
+        }
+    }
+
+    // 論文の式(2)
+    float RayleighPhaseFunction(const float nu)
+    {
+        constexpr float k = 3.0F / (16.0F * AT_MATH_PI);
+        return k * (1.0F + nu * nu);
+    }
+
+    // 論文の式(4)
+    float MiePhaseFunction(const float g, const float nu) {
+        const float k = 3.0F / (8.0F * AT_MATH_PI) * (1.0F - g * g) / (2.0F + g * g);
+        return k * (1.0F + nu * nu) / aten::pow(1.0F + g * g - 2.0F * g * nu, 1.5F);
+    }
+
+    // 視線レイが地面と交差するかどうかを計算する.
+    bool RayIntersectsGround(
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const float r,
+        const float mu)
+    {
+        AT_ASSERT(r >= atmosphere.bottom_radius);
+        AT_ASSERT(mu >= -1.0 && mu <= 1.0);
+
+        // そもそも、視線が地面方向（下方向）を向いていない場合は、地面と交差しない.
+        // そのため、mu < 0.0 であることが必要条件になる.
+
+        // |x + ts|^2 = R_g^2 から、tを求めたときの判別式:
+        //   D = r * r * (mu * mu - 1.0) + atmosphere.bottom_radius * atmosphere.bottom_radius
+        // このDが正（>=0）のとき、視線レイは地面と交差することになる.
+
+        return mu < 0.0F
+            && r * r * (mu * mu - 1.0F) + atmosphere.bottom_radius * atmosphere.bottom_radius >= 0.0F;
+    }
+}

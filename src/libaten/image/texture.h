@@ -34,7 +34,7 @@ namespace aten
         texture() = default;
         texture(int32_t width, int32_t height, int32_t channels, std::string_view name);
 
-        ~texture();
+        virtual ~texture();
 
     private:
         static std::shared_ptr<texture> create(
@@ -43,7 +43,7 @@ namespace aten
     public:
         void init(int32_t width, int32_t height, int32_t channels);
 
-        inline bool empty() const
+        bool empty() const
         {
             return m_colors.empty();
         }
@@ -51,6 +51,10 @@ namespace aten
         void Fill(const aten::vec4& value);
 
         vec4 at(float u, float v) const;
+        virtual vec4 at(const vec3& coord) const
+        {
+            return at(coord.x, coord.y);
+        }
 
         vec4 AtByXY(int32_t x, int32_t y) const;
 

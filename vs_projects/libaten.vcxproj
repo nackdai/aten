@@ -145,6 +145,16 @@
     <ClInclude Include="..\src\libaten\accelerator\threaded_bvh.h" />
     <ClInclude Include="..\src\libaten\aten.h" />
     <ClInclude Include="..\src\libaten\aten_namespace.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_common.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_compute.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_constants.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_coord_convert.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_model.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_params.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_precompute_textures.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_render.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_types.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\unit_quantity.h" />
     <ClInclude Include="..\src\libaten\camera\camera.h" />
     <ClInclude Include="..\src\libaten\camera\CameraOperator.h" />
     <ClInclude Include="..\src\libaten\camera\equirect.h" />
@@ -183,6 +193,7 @@
     <ClInclude Include="..\src\libaten\display\gamma.h" />
     <ClInclude Include="..\src\libaten\image\hdr.h" />
     <ClInclude Include="..\src\libaten\image\image.h" />
+    <ClInclude Include="..\src\libaten\image\texture_3d.h" />
     <ClInclude Include="..\src\libaten\light\arealight.h" />
     <ClInclude Include="..\src\libaten\light\directionallight.h" />
     <ClInclude Include="..\src\libaten\light\ibl.h" />
@@ -305,6 +316,8 @@
     <ClCompile Include="..\src\libaten\accelerator\sbvh_voxel.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\stackless_bvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\threaded_bvh.cpp" />
+    <ClCompile Include="..\src\libaten\atmosphere\sky\sky_model.cpp" />
+    <ClCompile Include="..\src\libaten\atmosphere\sky\sky_render.cpp" />
     <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp" />
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />
     <ClCompile Include="..\src\libaten\camera\pinhole.cpp" />

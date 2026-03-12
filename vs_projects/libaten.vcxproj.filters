@@ -106,6 +106,12 @@
     <Filter Include="display">
       <UniqueIdentifier>{4ed65f2c-4571-44f4-bedb-b94973d7fdd6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="atmosphere">
+      <UniqueIdentifier>{6a962b0e-3a65-4cb6-96b8-5040a4c07f60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="atmosphere\sky">
+      <UniqueIdentifier>{ac901573-7571-4c68-a04f-6d2328c03c6e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -574,6 +580,39 @@
     <ClInclude Include="..\src\libaten\renderer\pathtracing\path_time_profiler.h">
       <Filter>renderer\pathtracing</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_constants.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_coord_convert.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_params.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_compute.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\image\texture_3d.h">
+      <Filter>image</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_common.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_model.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_precompute_textures.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\unit_quantity.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_render.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_types.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -842,6 +881,12 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\npr\npr.cpp">
       <Filter>renderer\npr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\atmosphere\sky\sky_model.cpp">
+      <Filter>atmosphere\sky</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\atmosphere\sky\sky_render.cpp">
+      <Filter>atmosphere\sky</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

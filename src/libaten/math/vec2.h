@@ -5,23 +5,20 @@
 
 namespace aten {
     struct vec2 {
-        float x;
-        float y;
+        float x{ 0.0F };
+        float y{ 0.0F };
 
-        AT_HOST_DEVICE_API vec2()
-        {
-            x = y = 0;
-        }
+        constexpr AT_HOST_DEVICE_API vec2() = default;
         AT_HOST_DEVICE_API vec2(const vec2& _v)
         {
             x = _v.x;
             y = _v.y;
         }
-        AT_HOST_DEVICE_API vec2(float f)
+        constexpr AT_HOST_DEVICE_API vec2(float f)
         {
             x = y = f;
         }
-        AT_HOST_DEVICE_API vec2(float _x, float _y)
+        constexpr AT_HOST_DEVICE_API vec2(float _x, float _y)
         {
             x = _x;
             y = _y;

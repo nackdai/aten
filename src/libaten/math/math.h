@@ -123,6 +123,11 @@ namespace aten {
         return std::ceil(f);
     }
 
+    inline AT_HOST_DEVICE_API float mod(float x, float y)
+    {
+        return x - y * aten::floor(x / y);
+    }
+
 #ifdef __CUDACC__
     template <class T>
     inline AT_HOST_DEVICE_API auto max(T a, T b) -> std::enable_if_t<std::is_fundamental_v<T>, T>
@@ -191,6 +196,12 @@ namespace aten {
     inline AT_HOST_DEVICE_API T lerp(T a, T b, float f)
     {
         return a * (1.0F - f) + b * f;
+    }
+
+    inline AT_HOST_DEVICE_API float smoothstep(const float edge0, const float edge1, const float x)
+    {
+        auto t = aten::clamp((x - edge0) / (edge1 - edge0), 0.0F, 1.0F);
+        return t * t * (3.0F - 2.0F * t);
     }
 
     inline AT_HOST_DEVICE_API bool isInvalid(float f)

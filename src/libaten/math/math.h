@@ -200,7 +200,9 @@ namespace aten {
 
     inline AT_HOST_DEVICE_API float smoothstep(const float edge0, const float edge1, const float x)
     {
-        auto t = aten::clamp((x - edge0) / (edge1 - edge0), 0.0F, 1.0F);
+        auto div = edge1 - edge0;
+        div = div == 0.0F ? 0.0000001F : div;
+        auto t = aten::clamp((x - edge0) / div, 0.0F, 1.0F);
         return t * t * (3.0F - 2.0F * t);
     }
 

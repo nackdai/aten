@@ -28,6 +28,11 @@ set(CMAKE_POLICY_VERSION_MINIMUM "3.5" CACHE STRING "workaround for old CMakeLis
 add_subdirectory(tinyobjloader)
 unset(CMAKE_POLICY_VERSION_MINIMUM)
 
+if(MSVC)
+  # Build Google Test with dynamic runtime library (/MD for Release, /MDd for Debug)
+  set(gtest_force_shared_crt ON CACHE BOOL "Use shared (DLL) run-time lib even when Google Test is built as static lib." FORCE)
+endif()
+
 add_subdirectory(googletest)
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)

@@ -34,6 +34,12 @@ namespace aten
         texture() = default;
         texture(int32_t width, int32_t height, int32_t channels, std::string_view name);
 
+        texture(int32_t width, int32_t height, const aten::vec4& default)
+        {
+            init(width, height, 4);
+            Fill(default);
+        }
+
         virtual ~texture();
 
     private:
@@ -45,18 +51,14 @@ namespace aten
 
         bool empty() const
         {
-            return m_colors.empty();
+            return value_.empty();
         }
 
         void Fill(const aten::vec4& value);
 
         vec4 at(float u, float v) const;
-        virtual vec4 at(const vec3& coord) const
-        {
-            return at(coord.x, coord.y);
-        }
 
-        vec4 AtByXY(int32_t x, int32_t y) const;
+        virtual vec4 AtByXY(int32_t x, int32_t y) const;
 
         vec4 AtWithBilinear(float u, float v) const;
 
@@ -73,7 +75,7 @@ namespace aten
             const auto y = NormalizeToWrapRepeat(iv, height_ - 1);
 
             uint32_t pos = y * width_ + x;
-            m_colors[pos] = color;
+            value_[pos] = color;
         }
 
         template <class T>
@@ -82,15 +84,15 @@ namespace aten
         {
             const auto idx = y * width_ + x;
             if constexpr (std::is_floating_point_v<T>) {
-                m_colors[idx].x = m_colors[idx].y = m_colors[idx].z = color;
+                value_[idx].x = value_[idx].y = value_[idx].z = color;
             }
             else if constexpr (std::is_same_v<T, aten::vec3>) {
-                m_colors[idx].x = color.x;
-                m_colors[idx].y = color.y;
-                m_colors[idx].z = color.z;
+                value_[idx].x = color.x;
+                value_[idx].y = color.y;
+                value_[idx].z = color.z;
             }
             else if constexpr (std::is_same_v<T, aten::vec4>) {
-                m_colors[idx] = color;
+                value_[idx] = color;
             }
         }
 
@@ -102,17 +104,17 @@ namespace aten
 
             auto pos = ((height_ - 1) - y) * width_ + x;
 
-            return m_colors[pos][c];
+            return value_[pos][c];
         }
 
         const std::vector<vec4>& colors() const
         {
-            return m_colors;
+            return value_;
         }
 
         std::vector<vec4>& colors()
         {
-            return m_colors;
+            return value_;
         }
 
         auto width() const
@@ -213,7 +215,7 @@ namespace aten
 
         void SetFilterAndAddressModeAsGLTexture();
 
-    private:
+    protected:
         int32_t m_id{ -1 };
 
         int32_t width_{ 0 };
@@ -222,7 +224,7 @@ namespace aten
 
         int32_t m_size{ 0 };
 
-        std::vector<vec4> m_colors;
+        std::vector<vec4> value_;
 
         uint32_t m_gltex{ 0 };
 

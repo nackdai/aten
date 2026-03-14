@@ -37,7 +37,7 @@ namespace aten
     {
         uint32_t pos = y * width_ + x;
 
-        const auto clr = m_colors[pos];
+        const auto clr = value_[pos];
 
         // TODO
         // Note use alpha channel...
@@ -74,54 +74,36 @@ namespace aten
         return AtByXY(x, y);
     }
 
-    vec4 texture::AtWithBilinear(float u, float v) const
+    vec4 texture::AtWithBilinear(float x, float y) const
     {
+        float u = x * width_ - 0.5F;
+        float v = y * height_ - 0.5F;
+        const auto i = static_cast<int32_t>(aten::floor(u));
+        const auto j = static_cast<int32_t>(aten::floor(v));
+        u -= i;
+        v -= j;
+
+        int i0 = aten::max(0, aten::min(width_ - 1, i));
+        int i1 = aten::max(0, aten::min(width_ - 1, i + 1));
+        int j0 = aten::max(0, aten::min(height_ - 1, j));
+        int j1 = aten::max(0, aten::min(height_ - 1, j + 1));
+
         // NOTE:
-        // https://learn.microsoft.com/en-us/windows/uwp/graphics-concepts/bilinear-texture-filtering
+        // The following code is the same as expanding the following pseudo code.
+        /*
+            // 1. Interpolate horizontally along the top row between (i0, j0) and (i1, j0)
+            auto top = lerp(AtByXYZ(i0, j0), AtByXYZ(i1, j0), u);
 
-        const float fx = u * (width_ - 1);
-        const float fy = v * (height_ - 1);
+            // 2. Interpolate horizontally along the bottom row between (i0, j1) and (i1, j1)
+            auto bottom = lerp(AtByXYZ(i0, j1), AtByXYZ(i1, j1), u);
 
-        // NOTE:
-        // 0.5 is center of texel.
-
-        float frac_x = fx - 0.5F - static_cast<int32_t>(fx);
-        float frac_y = fy - 0.5F - static_cast<int32_t>(fy);
-
-        const auto x = static_cast<int32_t>(fx);
-        const auto y = static_cast<int32_t>(fy);
-
-        auto nearest_x = x;
-        if (frac_x >= 0.5F) {
-            nearest_x = x + 1;
-        }
-        else {
-            nearest_x = x - 1;
-            frac_x = 1.0F - frac_x;
-        }
-
-        auto nearest_y = y;
-        if (frac_y >= 0.5F) {
-            nearest_y = y + 1;
-        }
-        else {
-            nearest_y = y - 1;
-            frac_y = 1.0F - frac_y;
-        }
-
-        nearest_x = aten::clamp(nearest_x, 0, width_ - 1);
-        nearest_y = aten::clamp(nearest_y, 0, height_ - 1);
-
-        const auto c00 = AtByXY(x, y);
-        const auto c10 = AtByXY(nearest_x, y);
-        const auto c01 = AtByXY(x, nearest_y);
-        const auto c11 = AtByXY(nearest_x, nearest_y);
-
-        const auto c0 = aten::lerp(c00, c10, frac_x);
-        const auto c1 = aten::lerp(c01, c11, frac_x);
-        const auto c = aten::lerp(c0, c1, frac_y);
-
-        return c;
+            // 3. Finally, interpolate vertically between the top and bottom results using v
+            return lerp(top, bottom, v);
+        */
+        return AtByXY(i0, j0) * ((1.0F - u) * (1.0F - v))
+            + AtByXY(i1, j0) * (u * (1.0F - v))
+            + AtByXY(i0, j1) * ((1.0F - u) * v)
+            + AtByXY(i1, j1) * (u * v);
     }
 
     void texture::init(int32_t width, int32_t height, int32_t channels)
@@ -132,13 +114,13 @@ namespace aten
 
         m_size = height * width;
 
-        m_colors.clear();
-        m_colors.resize(width * height);
+        value_.clear();
+        value_.resize(width * height);
     }
 
     void texture::Fill(const aten::vec4& value)
     {
-        std::fill(m_colors.begin(), m_colors.end(), value);
+        std::fill(value_.begin(), value_.end(), value);
     }
 
     bool texture::initAsGLTexture()
@@ -146,7 +128,7 @@ namespace aten
         if (m_gltex == 0) {
             AT_VRETURN(width_ > 0, false);
             AT_VRETURN(height_ > 0, false);
-            AT_VRETURN(m_colors.size() > 0, false);
+            AT_VRETURN(value_.size() > 0, false);
 
             CALL_GL_API(::glGenTextures(1, &m_gltex));
             AT_VRETURN(m_gltex > 0, false);
@@ -161,7 +143,7 @@ namespace aten
                 0,
                 GL_RGBA,
                 GL_FLOAT,
-                &m_colors[0]));
+                &value_[0]));
 
             CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
             CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
@@ -297,7 +279,7 @@ namespace aten
     {
         AT_VRETURN(width_ == rhs.width_, false);
         AT_VRETURN(height_ == rhs.height_, false);
-        AT_VRETURN(m_colors.size() == rhs.m_colors.size(), false);
+        AT_VRETURN(value_.size() == rhs.value_.size(), false);
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for
@@ -306,7 +288,7 @@ namespace aten
             for (int32_t x = 0; x < width_; x++) {
                 int32_t idx = y * width_ + x;
 
-                m_colors[idx] += rhs.m_colors[idx];
+                value_[idx] += rhs.value_[idx];
             }
         }
 
@@ -329,9 +311,9 @@ namespace aten
             for (int32_t x = 0; x < width_; x++) {
                 int32_t yy = height_ - 1 - y;
 
-                dst[yy * width_ + x].r() = (uint8_t)aten::clamp(m_colors[y * width_ + x].x * float(255), float(0), float(255));
-                dst[yy * width_ + x].g() = (uint8_t)aten::clamp(m_colors[y * width_ + x].y * float(255), float(0), float(255));
-                dst[yy * width_ + x].b() = (uint8_t)aten::clamp(m_colors[y * width_ + x].z * float(255), float(0), float(255));
+                dst[yy * width_ + x].r() = (uint8_t)aten::clamp(value_[y * width_ + x].x * float(255), float(0), float(255));
+                dst[yy * width_ + x].g() = (uint8_t)aten::clamp(value_[y * width_ + x].y * float(255), float(0), float(255));
+                dst[yy * width_ + x].b() = (uint8_t)aten::clamp(value_[y * width_ + x].z * float(255), float(0), float(255));
             }
         }
 

@@ -3,17 +3,21 @@
 #include <vector>
 
 #include "defs.h"
+#include "math/vec4.h"
 
 namespace aten {
-    template <class T>
     class texture3d {
     public:
-        using ValueType = T;
-
         texture3d() = default;
         texture3d(int32_t width, int32_t height, int32_t depth)
         {
             init(width, height, depth);
+        }
+
+        texture3d(int32_t width, int32_t height, int32_t depth, const aten::vec4& default)
+        {
+            init(width, height, depth);
+            Fill(default);
         }
 
         ~texture3d() = default;
@@ -24,22 +28,22 @@ namespace aten {
             height_ = height;
             depth_ = depth;
 
-            data_.clear();
-            data_.resize(width * height * depth);
+            value_.clear();
+            value_.resize(width * height * depth);
         }
 
         bool empty() const
         {
-            return data_.empty();
+            return value_.empty();
         }
 
-        void Fill(const ValueType& value)
+        void Fill(const aten::vec4& value)
         {
-            std::fill(data_.begin(), data_.end(), value);
+            std::fill(value_.begin(), value_.end(), value);
         }
 
         // Nearest neighbor sampling
-        ValueType at(float u, float v, float w) const
+        aten::vec4 at(float u, float v, float w) const
         {
             int32_t iu = static_cast<int32_t>(u * (width_ - 1));
             int32_t iv = static_cast<int32_t>(v * (height_ - 1));
@@ -52,94 +56,49 @@ namespace aten {
             return AtByXYZ(x, y, z);
         }
 
-        vec4 at(const vec3& coord) const override final
+        vec4 at(const vec3& coord) const
         {
             return at(coord.x, coord.y, coord.z);
         }
 
-        ValueType AtWithTrilinear(float u, float v, float w) const
+        aten::vec4 AtWithTrilinear(float x, float y, float z) const
         {
-            // Trilinear interpolation
-            // https://en.wikipedia.org/wiki/Trilinear_interpolation
+            float u = x * width_ - 0.5F;
+            float v = y * height_ - 0.5F;
+            float w = z * depth_ - 0.5F;
+            const int32_t i = static_cast<int32_t>(aten::floor(u));
+            const int32_t j = static_cast<int32_t>(aten::floor(v));
+            const int32_t k = static_cast<int32_t>(aten::floor(w));
+            u -= i;
+            v -= j;
+            w -= k;
 
-            const float fx = u * (width_ - 1);
-            const float fy = v * (height_ - 1);
-            const float fz = w * (depth_ - 1);
+            int i0 = aten::max(0, aten::min(width_ - 1, i));
+            int i1 = aten::max(0, aten::min(width_ - 1, i + 1));
+            int j0 = aten::max(0, aten::min(height_ - 1, j));
+            int j1 = aten::max(0, aten::min(height_ - 1, j + 1));
+            int k0 = aten::max(0, aten::min(depth_ - 1, k));
+            int k1 = aten::max(0, aten::min(depth_ - 1, k + 1));
 
-            float frac_x = fx - 0.5F - static_cast<int32_t>(fx);
-            float frac_y = fy - 0.5F - static_cast<int32_t>(fy);
-            float frac_z = fz - 0.5F - static_cast<int32_t>(fz);
-
-            const auto x = static_cast<int32_t>(fx);
-            const auto y = static_cast<int32_t>(fy);
-            const auto z = static_cast<int32_t>(fz);
-
-            auto nearest_x = x;
-            if (frac_x >= 0.5F) {
-                nearest_x = x + 1;
-            }
-            else {
-                nearest_x = x - 1;
-                frac_x = 1.0F - frac_x;
-            }
-
-            auto nearest_y = y;
-            if (frac_y >= 0.5F) {
-                nearest_y = y + 1;
-            }
-            else {
-                nearest_y = y - 1;
-                frac_y = 1.0F - frac_y;
-            }
-
-            auto nearest_z = z;
-            if (frac_z >= 0.5F) {
-                nearest_z = z + 1;
-            }
-            else {
-                nearest_z = z - 1;
-                frac_z = 1.0F - frac_z;
-            }
-
-            nearest_x = aten::clamp(nearest_x, 0, width_ - 1);
-            nearest_y = aten::clamp(nearest_y, 0, height_ - 1);
-            nearest_z = aten::clamp(nearest_z, 0, depth_ - 1);
-
-            // Get sample values of 8 corners
-            const auto c000 = AtByXYZ(x, y, z);
-            const auto c100 = AtByXYZ(nearest_x, y, z);
-            const auto c010 = AtByXYZ(x, nearest_y, z);
-            const auto c110 = AtByXYZ(nearest_x, nearest_y, z);
-            const auto c001 = AtByXYZ(x, y, nearest_z);
-            const auto c101 = AtByXYZ(nearest_x, y, nearest_z);
-            const auto c011 = AtByXYZ(x, nearest_y, nearest_z);
-            const auto c111 = AtByXYZ(nearest_x, nearest_y, nearest_z);
-
-            // XY plane interpolation (z=0 plane)
-            const auto c00 = aten::lerp(c000, c100, frac_x);
-            const auto c10 = aten::lerp(c010, c110, frac_x);
-            const auto c0 = aten::lerp(c00, c10, frac_y);
-
-            // XY plane interpolation (z=1 plane)
-            const auto c01 = aten::lerp(c001, c101, frac_x);
-            const auto c11 = aten::lerp(c011, c111, frac_x);
-            const auto c1 = aten::lerp(c01, c11, frac_y);
-
-            // Z direction interpolation
-            const auto c = aten::lerp(c0, c1, frac_z);
-
-            return c;
+            return AtByXYZ(i0, j0, k0) * ((1.0F - u) * (1.0F - v) * (1.0F - w)) +
+                AtByXYZ(i1, j0, k0) * (u * (1.0F - v) * (1.0F - w)) +
+                AtByXYZ(i0, j1, k0) * ((1.0F - u) * v * (1.0F - w)) +
+                AtByXYZ(i1, j1, k0) * (u * v * (1.0F - w)) +
+                AtByXYZ(i0, j0, k1) * ((1.0F - u) * (1.0F - v) * w) +
+                AtByXYZ(i1, j0, k1) * (u * (1.F - v) * w) +
+                AtByXYZ(i0, j1, k1) * ((1.0F - u) * v * w) +
+                AtByXYZ(i1, j1, k1) * (u * v * w);
         }
 
         // Direct indexing
-        ValueType AtByXYZ(int32_t x, int32_t y, int32_t z) const
+        virtual aten::vec4 AtByXYZ(int32_t x, int32_t y, int32_t z) const
         {
             uint32_t pos = (z * height_ + y) * width_ + x;
-            return data_[pos];
+            return value_[pos];
         }
 
-        void put(
-            const ValueType& color,
+        void SetByUVW(
+            const aten::vec4& value,
             float u, float v, float w)
         {
             int32_t iu = static_cast<int32_t>(u * (width_ - 1));
@@ -150,8 +109,15 @@ namespace aten {
             const auto y = NormalizeToWrapRepeat(iv, height_ - 1);
             const auto z = NormalizeToWrapRepeat(iw, depth_ - 1);
 
+            SetByXYZ(value, x, y, z);
+        }
+
+        void SetByXYZ(
+            const aten::vec4& value,
+            int32_t x, int32_t y, int32_t z)
+        {
             uint32_t pos = (z * height_ + y) * width_ + x;
-            data_[pos] = color;
+            value_[pos] = value;
         }
 
         auto width() const
@@ -169,9 +135,9 @@ namespace aten {
             return depth_;
         }
 
-        const std::vector<ValueType>& data() const
+        const std::vector<aten::vec4>& data() const
         {
-            return data_;
+            return value_;
         }
 
     private:
@@ -188,11 +154,11 @@ namespace aten {
             return value;
         }
 
-    private:
+    protected:
         int32_t width_{ 0 };
         int32_t height_{ 0 };
         int32_t depth_{ 0 };
 
-        std::vector<ValueType> data_;
+        std::vector<aten::vec4> value_;
     };
 }

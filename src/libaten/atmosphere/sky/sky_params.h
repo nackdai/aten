@@ -3,20 +3,29 @@
 #include "math/vec3.h"
 
 namespace aten::sky {
+    struct DensityProfileLayer {
+        float width{ 0.0F };
+        float exp_term{ 0.0F };
+        float inv_height_scale{ 0.0F };
+
+        // For Ozon density.
+        float linear_term{ 0.0F };
+        float constant_term{ 0.0F };
+    };
+
     struct DensityProfile {
-        float width;
-        float inv_height_scale;
-        float exp_term{ 1.0F };
+        DensityProfileLayer layers[2];
     };
 
     static inline AT_DEVICE_API float GetLayerDensity(
-        const DensityProfile& layer,
+        const DensityProfileLayer& layer,
         const float altitude)
     {
         // オゾン層、Rayleigh散乱層、Mie散乱層などの大気の層の密度分布を表すための構造体.
         // Rayleigh散乱層、Mie散乱層では、exp_termが1で、exp_scaleが exp(-h/H) の形での -1/H となる.
         // それ以外の、変数はオゾン層で利用される (demo.cc L242).
-        float density = layer.exp_term * exp(altitude * layer.inv_height_scale);
+        float density = layer.exp_term * exp(altitude * layer.inv_height_scale)
+            + layer.linear_term * altitude + layer.constant_term;
         return aten::clamp(density, 0.0F, 1.0F);
     }
 
@@ -26,9 +35,9 @@ namespace aten::sky {
     {
         // 散乱層が複数層になっているか
         // 基本的には、オゾン層のみが複数層になる.
-        return altitude < profile.width
-            ? GetLayerDensity(profile, altitude)
-            : 0.0F;
+        return altitude < profile.layers[0].width
+            ? GetLayerDensity(profile.layers[0], altitude)
+            : GetLayerDensity(profile.layers[1], altitude);
     }
 
     /*

@@ -22,19 +22,19 @@ namespace aten::sky {
         texture coordinates $u$ in $[0.5 / n, 1 - 0.5 / n]$ - and its inverse :
     */
 
-    float GetTextureCoordFromUnitRange(float x, float texture_size)
+    inline float GetTextureCoordFromUnitRange(float x, float texture_size)
     {
         return 0.5F / texture_size + x * (1.0F - 1.0F / texture_size);
     }
 
-    float GetUnitRangeFromTextureCoord(float u, float texture_size)
+    inline float GetUnitRangeFromTextureCoord(float u, float texture_size)
     {
         return (u - 0.5F / texture_size) / (1.0F - 1.0F / texture_size);
     }
 
     // For Transmittance ============================================
 
-    inline void GetRMuFromTransmittanceByTextureUv(
+    inline void GetRMuFromTransmittanceTextureUv(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::vec2& uv,
         float& r,
@@ -82,13 +82,13 @@ namespace aten::sky {
 
         // この関数では、視線レイが大気に交差するので、
         // GetRMuMuSNuFromScatteringTextureUvzw での mu の計算と同様に、余弦定理で計算.
-        mu = d == 0.0
+        mu = d == 0.0F
             ? 1.0F
-            : (H * H - rho * rho - d * d) / (2.0 * r * d);
+            : (H * H - rho * rho - d * d) / (2.0F * r * d);
         mu = aten::clamp(mu, -1.0F, 1.0F);
     }
 
-    vec2 GetTransmittanceTextureUvFromRMu(
+    inline vec2 GetTransmittanceTextureUvFromRMu(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu)
@@ -131,7 +131,7 @@ namespace aten::sky {
 
     // For Irradiance ============================================
 
-    void GetRMuSFromIrradianceTextureUv(
+    inline void GetRMuSFromIrradianceTextureUv(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::vec2& uv,
         float& r,
@@ -151,7 +151,7 @@ namespace aten::sky {
         mu_s = aten::clamp(2.0F * x_mu_s - 1.0F, -1.0F, 1.0F);
     }
 
-    aten::vec2 GetIrradianceTextureUvFromRMuS(
+    inline aten::vec2 GetIrradianceTextureUvFromRMuS(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu_s)
@@ -169,117 +169,115 @@ namespace aten::sky {
 
     // For scattering ==============================================
 
-    namespace _detail {
-        void GetRMuMuSNuFromScatteringTextureByTexCoord(
-            const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::vec4& uvwz,
-            float& r,
-            float& mu,
-            float& mu_s,
-            float& nu,
-            bool& ray_r_mu_intersects_ground)
-        {
-            AT_ASSERT(uvwz.x >= 0.0 && uvwz.x <= 1.0);
-            AT_ASSERT(uvwz.y >= 0.0 && uvwz.y <= 1.0);
-            AT_ASSERT(uvwz.z >= 0.0 && uvwz.z <= 1.0);
-            AT_ASSERT(uvwz.w >= 0.0 && uvwz.w <= 1.0);
+    inline void GetRMuMuSNuFromScatteringTextureUvwz(
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const aten::vec4& uvwz,
+        float& r,
+        float& mu,
+        float& mu_s,
+        float& nu,
+        bool& ray_r_mu_intersects_ground)
+    {
+        AT_ASSERT(uvwz.x >= 0.0 && uvwz.x <= 1.0);
+        AT_ASSERT(uvwz.y >= 0.0 && uvwz.y <= 1.0);
+        AT_ASSERT(uvwz.z >= 0.0 && uvwz.z <= 1.0);
+        AT_ASSERT(uvwz.w >= 0.0 && uvwz.w <= 1.0);
 
-            // Distance to top atmosphere boundary for a horizontal ray at ground level.
-            // 論文中の 4. Precomputations の H = (Rt^2 - Rg^2)^1/2 に相当する値.
-            // 地球のグラウンドレベルからの太陽が地平線にあるときの距離.
-            const float H = aten::sqrt(atmosphere.top_radius * atmosphere.top_radius -
-                atmosphere.bottom_radius * atmosphere.bottom_radius);
+        // Distance to top atmosphere boundary for a horizontal ray at ground level.
+        // 論文中の 4. Precomputations の H = (Rt^2 - Rg^2)^1/2 に相当する値.
+        // 地球のグラウンドレベルからの太陽が地平線にあるときの距離.
+        const float H = aten::sqrt(atmosphere.top_radius * atmosphere.top_radius -
+            atmosphere.bottom_radius * atmosphere.bottom_radius);
 
-            // 論文中の 4. Precomputations で、u_r = ρ/H.
-            // uvwz.w には r ではなく、u_r が格納されているため、H を掛けて距離 ρ を求める.
-            // Distance to the horizon.
-            const float rho =
-                H * GetUnitRangeFromTextureCoord(uvwz.w, SCATTERING_TEXTURE_R_SIZE);
+        // 論文中の 4. Precomputations で、u_r = ρ/H.
+        // uvwz.w には r ではなく、u_r が格納されているため、H を掛けて距離 ρ を求める.
+        // Distance to the horizon.
+        const float rho =
+            H * GetUnitRangeFromTextureCoord(uvwz.w, SCATTERING_TEXTURE_R_SIZE);
 
-            // r は、論文中の 4. Precomputations で、ρ = sqrt(r^2 - Rg^2) から計算.
-            r = sqrt(rho * rho + atmosphere.bottom_radius * atmosphere.bottom_radius);
+        // r は、論文中の 4. Precomputations で、ρ = sqrt(r^2 - Rg^2) から計算.
+        r = sqrt(rho * rho + atmosphere.bottom_radius * atmosphere.bottom_radius);
 
-            if (uvwz.z < 0.5) {
-                // 視線レイが地面と交差する場合.
-                // Distance to the ground for the ray (r,mu), and its minimum and maximum
-                // values over all mu - obtained for (r,-1) and (r,mu_horizon) - from which
-                // we can recover mu:
+        if (uvwz.z < 0.5) {
+            // 視線レイが地面と交差する場合.
+            // Distance to the ground for the ray (r,mu), and its minimum and maximum
+            // values over all mu - obtained for (r,-1) and (r,mu_horizon) - from which
+            // we can recover mu:
 
-                // 視点 x から真下を向いたとき.
-                const float d_min = r - atmosphere.bottom_radius;
+            // 視点 x から真下を向いたとき.
+            const float d_min = r - atmosphere.bottom_radius;
 
-                // 視点 x から地球に接する点までの距離は ρ で、それが地球に接するときの最大距離になる.
-                // それを超えると、視線レイが地面と交差しなくなり、大気の上端と交差するようになる.
-                const float d_max = rho;
+            // 視点 x から地球に接する点までの距離は ρ で、それが地球に接するときの最大距離になる.
+            // それを超えると、視線レイが地面と交差しなくなり、大気の上端と交差するようになる.
+            const float d_max = rho;
 
-                // uvwz.z に格納されているのは、u_μ. そして、地面と交差する場合の、
-                // 値の範囲は [0, 0.5] で、d_min に対応するのが 0.5 で、d_max に対応するのが 0.0 になるように、GetUnitRangeFromTextureCoord の引数を調整している.
-                // u_μ = 1/2 - d/2ρ で、u_μ = 1/2 のときは d = 0 （最小距離）で、u_μ = 0 のときは d = ρ (最大距離) になる.
-                const float d = d_min + (d_max - d_min) * GetUnitRangeFromTextureCoord(
-                    1.0 - 2.0 * uvwz.z, SCATTERING_TEXTURE_MU_SIZE / 2);
+            // uvwz.z に格納されているのは、u_μ. そして、地面と交差する場合の、
+            // 値の範囲は [0, 0.5] で、d_min に対応するのが 0.5 で、d_max に対応するのが 0.0 になるように、GetUnitRangeFromTextureCoord の引数を調整している.
+            // u_μ = 1/2 - d/2ρ で、u_μ = 1/2 のときは d = 0 （最小距離）で、u_μ = 0 のときは d = ρ (最大距離) になる.
+            const float d = d_min + (d_max - d_min) * GetUnitRangeFromTextureCoord(
+                1.0F - 2.0F * uvwz.z, SCATTERING_TEXTURE_MU_SIZE / 2);
 
-                // d_min = 0 のときだけ d == 0 になり、それは、視点 x が地面に接しているときで、そのときを mu = -1 に対応させる.
-                // 余弦定理から、計算.
-                // https://gemini.google.com/share/91af735989be
-                mu = d == 0.0F
-                    ? -1.0F
-                    : aten::clamp(-(rho * rho + d * d) / (2.0F * r * d), -1.0F, 1.0F);
-                ray_r_mu_intersects_ground = true;
-            }
-            else {
-                // 視線レイが大気の上端と交差する場合.
-                // Distance to the top atmosphere boundary for the ray (r,mu), and its
-                // minimum and maximum values over all mu - obtained for (r,1) and
-                // (r,mu_horizon) - from which we can recover mu:
-
-                // 視点 x から真下を向いたとき.
-                const float d_min = atmosphere.top_radius - r;
-
-                // 視点 x から地球に接する点までの距離は ρ で、その接点から大気の上端までの距離は H であるため、
-                // 視点 x から大気の上端までの最大距離は ρ + H になる.
-                const float d_max = rho + H;
-
-                // uvwz.z に格納されているのは、u_μ. そして、大気の上端と交差する場合の、
-                // 値の範囲は [0.5, 1.0] で、d_min に対応するのが 0.5 で、d_max に対応するのが 1.0 になるように、GetUnitRangeFromTextureCoord の引数を調整している.
-                const float d = d_min + (d_max - d_min) * GetUnitRangeFromTextureCoord(
-                    2.0 * uvwz.z - 1.0, SCATTERING_TEXTURE_MU_SIZE / 2);
-
-                // d_min = 0 のときだけ d == 0 になり、それは、視点 x が大気の上端に接しているときで、そのときを mu = 1 に対応させる.
-                // 余弦定理から、計算.
-                // https://gemini.google.com/share/91af735989be
-                mu = d == 0.0F
-                    ? 1.0F
-                    : aten::clamp((H * H - rho * rho - d * d) / (2.0F * r * d), -1.0F, 1.0F);
-                ray_r_mu_intersects_ground = false;
-            }
-
-            const float x_mu_s =
-                GetUnitRangeFromTextureCoord(uvwz.y, SCATTERING_TEXTURE_MU_S_SIZE);
-
-            // 大気層の距離の最小値.
-            const float d_min = atmosphere.top_radius - atmosphere.bottom_radius;
-
-            // 大気層の距離の最大値は、太陽が地平線にあるときの距離.
-            const float d_max = H;
-
-            const float D = DistanceToTopAtmosphereBoundary(
-                atmosphere, atmosphere.bottom_radius, atmosphere.mu_s_min);
-            const float A = (D - d_min) / (d_max - d_min);
-            const float a = (A - x_mu_s * A) / (1.0 + x_mu_s * A);
-            const float d = d_min + min(a, A) * (d_max - d_min);
-
+            // d_min = 0 のときだけ d == 0 になり、それは、視点 x が地面に接しているときで、そのときを mu = -1 に対応させる.
             // 余弦定理から、計算.
             // https://gemini.google.com/share/91af735989be
-            mu_s = d == 0.0F
-                ? 1.0F // ここまでの計算で、d = 0 になることはないはずだが、念のため、d = 0 のときは mu_s = 1 に対応させる.
-                : aten::clamp((H * H - d * d) / (2.0F * atmosphere.bottom_radius * d), -1.0F, 1.0F);
-
-            // [0,1] から [-1,1] への線形マッピング.
-            nu = aten::clamp(uvwz.x * 2.0F - 1.0F, -1.0F, 1.0F);
+            mu = d == 0.0F
+                ? -1.0F
+                : aten::clamp(-(rho * rho + d * d) / (2.0F * r * d), -1.0F, 1.0F);
+            ray_r_mu_intersects_ground = true;
         }
+        else {
+            // 視線レイが大気の上端と交差する場合.
+            // Distance to the top atmosphere boundary for the ray (r,mu), and its
+            // minimum and maximum values over all mu - obtained for (r,1) and
+            // (r,mu_horizon) - from which we can recover mu:
+
+            // 視点 x から真下を向いたとき.
+            const float d_min = atmosphere.top_radius - r;
+
+            // 視点 x から地球に接する点までの距離は ρ で、その接点から大気の上端までの距離は H であるため、
+            // 視点 x から大気の上端までの最大距離は ρ + H になる.
+            const float d_max = rho + H;
+
+            // uvwz.z に格納されているのは、u_μ. そして、大気の上端と交差する場合の、
+            // 値の範囲は [0.5, 1.0] で、d_min に対応するのが 0.5 で、d_max に対応するのが 1.0 になるように、GetUnitRangeFromTextureCoord の引数を調整している.
+            const float d = d_min + (d_max - d_min) * GetUnitRangeFromTextureCoord(
+                2.0F * uvwz.z - 1.0F, SCATTERING_TEXTURE_MU_SIZE / 2);
+
+            // d_min = 0 のときだけ d == 0 になり、それは、視点 x が大気の上端に接しているときで、そのときを mu = 1 に対応させる.
+            // 余弦定理から、計算.
+            // https://gemini.google.com/share/91af735989be
+            mu = d == 0.0F
+                ? 1.0F
+                : aten::clamp((H * H - rho * rho - d * d) / (2.0F * r * d), -1.0F, 1.0F);
+            ray_r_mu_intersects_ground = false;
+        }
+
+        const float x_mu_s =
+            GetUnitRangeFromTextureCoord(uvwz.y, SCATTERING_TEXTURE_MU_S_SIZE);
+
+        // 大気層の距離の最小値.
+        const float d_min = atmosphere.top_radius - atmosphere.bottom_radius;
+
+        // 大気層の距離の最大値は、太陽が地平線にあるときの距離.
+        const float d_max = H;
+
+        const float D = DistanceToTopAtmosphereBoundary(
+            atmosphere, atmosphere.bottom_radius, atmosphere.mu_s_min);
+        const float A = (D - d_min) / (d_max - d_min);
+        const float a = (A - x_mu_s * A) / (1.0F + x_mu_s * A);
+        const float d = d_min + min(a, A) * (d_max - d_min);
+
+        // 余弦定理から、計算.
+        // https://gemini.google.com/share/91af735989be
+        mu_s = d == 0.0F
+            ? 1.0F // ここまでの計算で、d = 0 になることはないはずだが、念のため、d = 0 のときは mu_s = 1 に対応させる.
+            : aten::clamp((H * H - d * d) / (2.0F * atmosphere.bottom_radius * d), -1.0F, 1.0F);
+
+        // [0,1] から [-1,1] への線形マッピング.
+        nu = aten::clamp(uvwz.x * 2.0F - 1.0F, -1.0F, 1.0F);
     }
 
-    void GetRMuMuSNuFromScatteringTextureFragCoord(
+    inline void GetRMuMuSNuFromScatteringTextureFragCoord(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::vec3& screen_coord,
         float& r,
@@ -304,9 +302,9 @@ namespace aten::sky {
         vec4 uvwz(screen_coord_nu, screen_coord_mu_s, screen_coord.y, screen_coord.z);
         uvwz /= SCATTERING_TEXTURE_SIZE;
 
-        _detail::GetRMuMuSNuFromScatteringTextureByTexCoord(
+        GetRMuMuSNuFromScatteringTextureUvwz(
             atmosphere,
-            screen_coord,
+            uvwz,
             r, mu, mu_s, nu, ray_r_mu_intersects_ground);
 
         // Clamp nu to its valid range of values, given mu and mu_s.
@@ -318,7 +316,7 @@ namespace aten::sky {
             mu * mu_s + sqrt((1.0F - mu * mu) * (1.0F - mu_s * mu_s)));
     }
 
-    vec4 GetScatteringTextureUvwzFromRMuMuSNu(
+    inline vec4 GetScatteringTextureUvwzFromRMuMuSNu(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu,
@@ -375,7 +373,7 @@ namespace aten::sky {
             const float d = -r_mu + safe_sqrt(discriminant + H * H);
             const float d_min = atmosphere.top_radius - r;
             const float d_max = rho + H;
-            u_mu = 0.5 + 0.5 * GetTextureCoordFromUnitRange(
+            u_mu = 0.5F + 0.5F * GetTextureCoordFromUnitRange(
                 (d - d_min) / (d_max - d_min), SCATTERING_TEXTURE_MU_SIZE / 2);
         }
 

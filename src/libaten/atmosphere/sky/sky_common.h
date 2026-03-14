@@ -1,6 +1,7 @@
 #pragma once
 
 #include "atmosphere/sky/sky_params.h"
+#include "math/vec2.h"
 #include "image/texture.h"
 #include "image/texture_3d.h"
 
@@ -9,27 +10,27 @@
 // - meter
 
 namespace aten::sky {
-    aten::vec4 SampleTexture2D(
+    inline aten::vec3 SampleTexture2D(
         const aten::texture& tex,
         const aten::vec2& uv)
     {
-        return tex.at(uv.x, uv.y);
+        return tex.AtWithBilinear(uv.x, uv.y);
     }
 
-    aten::vec4 SampleTexture3D(
-        const aten::texture3d<aten::vec4>& tex,
+    inline aten::vec3 SampleTexture3D(
+        const aten::texture3d& tex,
         const aten::vec3& uvw)
     {
-        return tex.at(uvw);
+        return tex.AtWithTrilinear(uvw.x, uvw.y, uvw.z);
     }
 
-    float safe_sqrt(const float x)
+    inline float safe_sqrt(const float x)
     {
         return x <= 0.0F ? 0.0F : aten::sqrt(x);
     }
 
     // 大気の上端境界までの距離を計算する.
-    float DistanceToTopAtmosphereBoundary(
+    inline float DistanceToTopAtmosphereBoundary(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu)  // 太陽方向の余弦.
@@ -40,7 +41,7 @@ namespace aten::sky {
         // atmosphere.top_radius : R_t
 
         // |x + ts|^2 = R_t^2 から、tを求めたときの判別式.
-        const float discriminant = r * r * (mu * mu - 1.0) +
+        const float discriminant = r * r * (mu * mu - 1.0F) +
             atmosphere.top_radius * atmosphere.top_radius;
 
         // SafeSqrtで、discriminantが負のときは0を返す.
@@ -51,7 +52,7 @@ namespace aten::sky {
     }
 
     // 地球との交点までの距離を計算する.
-    float DistanceToBottomAtmosphereBoundary(
+    inline float DistanceToBottomAtmosphereBoundary(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu)
@@ -60,7 +61,7 @@ namespace aten::sky {
         AT_ASSERT(mu >= -1.0 && mu <= 1.0);
 
         // |x + ts|^2 = R_g^2 から、tを求めたときの判別式.
-        const float discriminant = r * r * (mu * mu - 1.0) +
+        const float discriminant = r * r * (mu * mu - 1.0F) +
             atmosphere.bottom_radius * atmosphere.bottom_radius;
 
         // |x + ts|^2 = R_g^2 から、tを求めると、解は２つあり、μ < 0 （視線が地面方向のため）であるために二つとも 正の値になる.
@@ -69,7 +70,7 @@ namespace aten::sky {
         return aten::max(-r * mu - safe_sqrt(discriminant), 0.0F);
     }
 
-    float DistanceToNearestAtmosphereBoundary(
+    inline float DistanceToNearestAtmosphereBoundary(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu,
@@ -84,20 +85,20 @@ namespace aten::sky {
     }
 
     // 論文の式(2)
-    float RayleighPhaseFunction(const float nu)
+    inline float RayleighPhaseFunction(const float nu)
     {
         constexpr float k = 3.0F / (16.0F * AT_MATH_PI);
         return k * (1.0F + nu * nu);
     }
 
     // 論文の式(4)
-    float MiePhaseFunction(const float g, const float nu) {
+    inline float MiePhaseFunction(const float g, const float nu) {
         const float k = 3.0F / (8.0F * AT_MATH_PI) * (1.0F - g * g) / (2.0F + g * g);
         return k * (1.0F + nu * nu) / aten::pow(1.0F + g * g - 2.0F * g * nu, 1.5F);
     }
 
     // 視線レイが地面と交差するかどうかを計算する.
-    bool RayIntersectsGround(
+    inline bool RayIntersectsGround(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu)

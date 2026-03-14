@@ -15,11 +15,11 @@
 
 namespace aten::sky {
     // 大気境界とのOpticalDepthを計算する.
-    float ComputeOpticalLengthToTopAtmosphereBoundary(
+    inline float ComputeOpticalLengthToTopAtmosphereBoundary(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::sky::DensityProfile& profile,
-        float& r,
-        float& mu)
+        const float r,
+        const float mu)
     {
         AT_ASSERT(r >= atmosphere.bottom_radius && r <= atmosphere.top_radius);
         AT_ASSERT(mu >= -1.0 && mu <= 1.0);
@@ -44,7 +44,7 @@ namespace aten::sky {
             // => r^2 + 2rμ + t^2 = r_i^2 (|x|=r, x・s=μ, |s|=1)
             // tについて解くと、t = -rμ ± sqrt(r^2(μ^2-1)+r_i^2) となるが、t = d_i となるため、
             // r_i^2 = d_i^2 + 2rμd_i + r^2 となる.
-            const float r_i = aten::sqrt(d_i * d_i + 2.0 * r * mu * d_i + r * r);
+            const float r_i = aten::sqrt(d_i * d_i + 2.0F * r * mu * d_i + r * r);
 
             // atmosphere.bottom_radius : R_ground
 
@@ -59,17 +59,17 @@ namespace aten::sky {
             // となる. つまり、i=0とi=SAMPLE_COUNTのときは、y_iの重みが0.5で、それ以外のときは1.0と計算することもできる.
 
             // Sample weight (from the trapezoidal rule).
-            float weight_i = i == 0 || i == SAMPLE_COUNT ? 0.5 : 1.0;
+            float weight_i = i == 0 || i == SAMPLE_COUNT ? 0.5F : 1.0F;
             result += y_i * weight_i * dx;
         }
         return result;
     }
 
     namespace transmittance {
-        aten::vec3 ComputeTransmittanceToTopAtmosphereBoundary(
+        inline aten::vec3 ComputeTransmittanceToTopAtmosphereBoundary(
             const aten::sky::AtmosphereParameters& atmosphere,
-            float& r,
-            float& mu)
+            const float r,
+            const float mu)
         {
             AT_ASSERT(r >= atmosphere.bottom_radius && r <= atmosphere.top_radius);
             AT_ASSERT(mu >= -1.0 && mu <= 1.0);
@@ -82,7 +82,7 @@ namespace aten::sky {
                 + atmosphere.mie_extinction * ComputeOpticalLengthToTopAtmosphereBoundary(atmosphere, atmosphere.mie_density, r, mu)));
         }
 
-        vec3 GetTransmittanceToTopAtmosphereBoundary(
+        inline vec3 GetTransmittanceToTopAtmosphereBoundary(
             const aten::sky::AtmosphereParameters& atmosphere,
             const aten::texture& transmittance_texture,
             const float r,
@@ -100,7 +100,7 @@ namespace aten::sky {
 
         // 視点xから視線ベクトル上のある点まで間の transmittance.
         // 視線ベクトル方向でのtransmittance.
-        aten::vec3 GetTransmittance(
+        inline aten::vec3 GetTransmittance(
             const aten::sky::AtmosphereParameters& atmosphere,
             const aten::texture& transmittance_texture,
             const float r,
@@ -167,7 +167,7 @@ namespace aten::sky {
         }
 
         // ある点から太陽方向に向かって大気上端までの間の transmittance.
-        aten::vec3 GetTransmittanceToSun(
+        inline aten::vec3 GetTransmittanceToSun(
             const aten::sky::AtmosphereParameters& atmosphere,
             const aten::texture& transmittance_texture,
             const float r,
@@ -209,7 +209,7 @@ namespace aten::sky {
     }
 
     namespace irradiance {
-        aten::vec3 GetIrradiance(
+        inline aten::vec3 GetIrradiance(
             const aten::sky::AtmosphereParameters& atmosphere,
             const aten::texture& irradiance_texture,
             const float r,
@@ -221,7 +221,7 @@ namespace aten::sky {
     }
 
     // 太陽からの入射放射照度を事前計算する.
-    aten::vec3 ComputeDirectIrradiance(
+    inline aten::vec3 ComputeDirectIrradiance(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::texture& transmittance_texture,
         const float r,
@@ -257,10 +257,10 @@ namespace aten::sky {
          while maintaining physical plausibility for atmospheric scattering.
         */
         const float average_cosine_factor = mu_s < -alpha_s
-            ? 0.0   // 太陽全体が地平線の下にある場合
+            ? 0.0F   // 太陽全体が地平線の下にある場合
             : (mu_s > alpha_s
                 ? mu_s  // 太陽全体が地平線の上にある場合
-                : (mu_s + alpha_s) * (mu_s + alpha_s) / (4.0 * alpha_s));   // 太陽が地平線の近くにある場合に 0 から α_s までがなめらかに変化するように近似.
+                : (mu_s + alpha_s) * (mu_s + alpha_s) / (4.0F * alpha_s));   // 太陽が地平線の近くにある場合に 0 から α_s までがなめらかに変化するように近似.
 
         // https://gemini.google.com/share/e287cbd05533
 
@@ -293,7 +293,7 @@ namespace aten::sky {
     }
 
     namespace single_scattering {
-        void ComputeSingleScatteringIntegrand(
+        inline void ComputeSingleScatteringIntegrand(
             const aten::sky::AtmosphereParameters& atmosphere,
             const aten::texture& transmittance_texture,
             const float r,
@@ -344,7 +344,7 @@ namespace aten::sky {
                 atmosphere.mie_density, r_d - atmosphere.bottom_radius);
         }
 
-        void ComputeSingleScattering(
+        inline void ComputeSingleScattering(
             const aten::sky::AtmosphereParameters& atmosphere,
             const aten::texture& transmittance_texture,
             const float r,
@@ -371,8 +371,8 @@ namespace aten::sky {
                     ray_r_mu_intersects_ground) / static_cast<float>(SAMPLE_COUNT);
 
             // Integration loop.
-            aten::vec3 rayleigh_sum;
-            aten::vec3 mie_sum;
+            aten::vec3 rayleigh_sum{ 0.0F };
+            aten::vec3 mie_sum{ 0.0F };
 
             // NOTE:
             // 太陽光の１回目の single scattering なので、光は全方向から来ず、s 方向からしか光はこないので、全球積分はここでは必要ない.
@@ -392,7 +392,7 @@ namespace aten::sky {
                 // となる. つまり、i=0とi=SAMPLE_COUNTのときは、y_iの重みが0.5で、それ以外のときは1.0と計算することもできる.
 
                 // Sample weight (from the trapezoidal rule).
-                float weight_i = (i == 0 || i == SAMPLE_COUNT) ? 0.5 : 1.0;
+                float weight_i = (i == 0 || i == SAMPLE_COUNT) ? 0.5F : 1.0F;
 
                 // 台形公式による積分として、本来はここで dx を掛けるべきだが
                 // ループの外で1回だけ dx を掛けることで計算コストを減らしている.
@@ -407,9 +407,9 @@ namespace aten::sky {
     }
 
     namespace scattering {
-        aten::vec3 GetScattering(
+        inline aten::vec3 GetScattering(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::texture3d<aten::vec4>& scattering_texture,
+            const aten::texture3d& scattering_texture,
             const float r,
             const float mu,
             const float mu_s,
@@ -435,19 +435,16 @@ namespace aten::sky {
             vec3 uvw1{ (tex_x + 1.0 + uvwz.y) / static_cast<float>(SCATTERING_TEXTURE_NU_SIZE),
                 uvwz.z, uvwz.w };
 
-            // NOTE
-            // #define AbstractSpectrum vec3
-
-            return aten::vec3(
-                SampleTexture3D(scattering_texture, uvw0) * (1.0 - lerp) +
-                SampleTexture3D(scattering_texture, uvw1) * lerp);
+            const auto a{ SampleTexture3D(scattering_texture, uvw0) };
+            const auto b{ SampleTexture3D(scattering_texture, uvw1) };
+            return a * (1.0F - lerp) + b * lerp;
         }
 
-        aten::vec3 GetScattering(
+        inline aten::vec3 GetScattering(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::texture3d<aten::vec4>& single_rayleigh_scattering_texture,
-            const aten::texture3d<aten::vec4>& single_mie_scattering_texture,
-            const aten::texture3d<aten::vec4>& multiple_scattering_texture,
+            const aten::texture3d& single_rayleigh_scattering_texture,
+            const aten::texture3d& single_mie_scattering_texture,
+            const aten::texture3d& multiple_scattering_texture,
             const float r,
             const float mu,
             const float mu_s,
@@ -473,12 +470,12 @@ namespace aten::sky {
         }
     }
 
-    aten::vec3 ComputeScatteringDensity(
+    inline aten::vec3 ComputeScatteringDensity(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::texture& transmittance_texture,
-        const aten::texture3d<aten::vec4>& single_rayleigh_scattering_texture,
-        const aten::texture3d<aten::vec4>& single_mie_scattering_texture,
-        const aten::texture3d<aten::vec4>& multiple_scattering_texture,
+        const aten::texture3d& single_rayleigh_scattering_texture,
+        const aten::texture3d& single_mie_scattering_texture,
+        const aten::texture3d& multiple_scattering_texture,
         const aten::texture& irradiance_texture,
         const float r,
         const float mu,
@@ -517,11 +514,11 @@ namespace aten::sky {
         aten::vec3 omega_s{ sun_dir_x, sun_dir_y, mu_s };
 
         constexpr int32_t SAMPLE_COUNT = 16;
-        const const float dphi = AT_MATH_PI / static_cast<float>(SAMPLE_COUNT);
-        const const float dtheta = AT_MATH_PI / static_cast<float>(SAMPLE_COUNT);
+        const float dphi = AT_MATH_PI / static_cast<float>(SAMPLE_COUNT);
+        const float dtheta = AT_MATH_PI / static_cast<float>(SAMPLE_COUNT);
 
         // 0で初期化.
-        aten::vec3 rayleigh_mie;
+        aten::vec3 rayleigh_mie{ 0.0F };
 
         // Nested loops for the integral over all the incident directions omega_i.
         // 全球積分をしていく.
@@ -538,8 +535,8 @@ namespace aten::sky {
             // The distance and transmittance to the ground only depend on theta, so we
             // can compute them in the outer loop for efficiency.
             float distance_to_ground = 0.0;
-            aten::vec3 transmittance_to_ground;
-            aten::vec3 ground_albedo;
+            aten::vec3 transmittance_to_ground{ 0.0F };
+            aten::vec3 ground_albedo{ 0.0F };
 
             if (is_ray_r_theta_intersects_ground) {
                 // 地面からの反射を計算.
@@ -631,11 +628,11 @@ namespace aten::sky {
     }
 
     // 太陽光 **でない** 光からの放射照度を計算.
-    aten::vec3 ComputeIndirectIrradiance(
+    inline aten::vec3 ComputeIndirectIrradiance(
         const aten::sky::AtmosphereParameters& atmosphere,
-        const aten::texture3d<aten::vec4>& single_rayleigh_scattering_texture,
-        const aten::texture3d<aten::vec4>& single_mie_scattering_texture,
-        const aten::texture3d<aten::vec4>& multiple_scattering_texture,
+        const aten::texture3d& single_rayleigh_scattering_texture,
+        const aten::texture3d& single_mie_scattering_texture,
+        const aten::texture3d& multiple_scattering_texture,
         const float r,
         const float mu_s,
         const int32_t scattering_order)
@@ -653,11 +650,11 @@ namespace aten::sky {
         const float dtheta = AT_MATH_PI / static_cast<float>(SAMPLE_COUNT);
 
         // ゼロで初期化.
-        aten::vec3 result;
+        aten::vec3 result{ 0.0F };
 
         // ComputeScatteringDensity でやったように z 方向を基準にして、太陽方向へのベクトルを計算.
         // y = 0 にすることで、後の計算を簡易化.
-        aten::vec3 omega_s{ sqrt(1.0 - mu_s * mu_s), 0.0, mu_s };
+        aten::vec3 omega_s{ aten::sqrt(1.0F - mu_s * mu_s), 0.0F, mu_s };
 
         // 半球積分.
         for (int32_t j = 0; j < SAMPLE_COUNT / 2; ++j) {
@@ -697,10 +694,10 @@ namespace aten::sky {
         return result;
     }
 
-    aten::vec3 ComputeMultipleScattering(
+    inline aten::vec3 ComputeMultipleScattering(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::texture& transmittance_texture,
-        const aten::texture3d<aten::vec4>& scattering_density_texture,
+        const aten::texture3d& scattering_density_texture,
         const float r,
         const float mu,
         const float mu_s,
@@ -724,7 +721,7 @@ namespace aten::sky {
 
         // Integration loop.
         // ゼロで初期化.
-        aten::vec3 rayleigh_mie_sum;
+        aten::vec3 rayleigh_mie_sum{ 0.0F };
 
         for (int32_t i = 0; i <= SAMPLE_COUNT; ++i) {
             const float d_i = static_cast<float>(i) * dx;
@@ -738,7 +735,7 @@ namespace aten::sky {
             // r_i について、解くと
             //  r_i = sqrt(d_i^2 + 2d_i・rμ + r^2)
             const float r_i = aten::clamp(
-                aten::sqrt(d_i * d_i + 2.0 * r * mu * d_i + r * r),
+                aten::sqrt(d_i * d_i + 2.0F * r * mu * d_i + r * r),
                 atmosphere.bottom_radius,
                 atmosphere.top_radius);
 
@@ -773,7 +770,7 @@ namespace aten::sky {
             // となる. つまり、i=0とi=SAMPLE_COUNTのときは、y_iの重みが0.5で、それ以外のときは1.0と計算することもできる.
 
             // Sample weight (from the trapezoidal rule).
-            const float weight_i = (i == 0 || i == SAMPLE_COUNT) ? 0.5 : 1.0;
+            const float weight_i = (i == 0 || i == SAMPLE_COUNT) ? 0.5F : 1.0F;
             rayleigh_mie_sum += rayleigh_mie_i * weight_i;
         }
 

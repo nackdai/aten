@@ -97,9 +97,7 @@ namespace aten::sky {
         // The density profile of air molecules that absorb light (e.g. ozone), i.e.
         // a function from altitude to dimensionless values between 0 (null density)
         // and 1 (maximum density).
-
-        // TODO
-        //DensityProfile absorption_density;
+        DensityProfile absorption_density;
 
         // The extinction coefficient of molecules that absorb light (e.g. ozone) at
         // the altitude where their density is maximum, as a function of wavelength.
@@ -107,7 +105,7 @@ namespace aten::sky {
         // 'absorption_extinction' times 'absorption_density' at this altitude.
 
         // TODO
-        //aten::vec3 absorption_extinction;
+        aten::vec3 absorption_extinction;
 
         // The average albedo of the ground.
         aten::vec3 ground_albedo;

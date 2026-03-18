@@ -1,5 +1,3 @@
-#pragma once
-
 #include "sky_test_fixture.h"
 #include "sky_test_lazy_texture.h"
 

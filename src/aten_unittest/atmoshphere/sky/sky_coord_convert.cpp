@@ -1,5 +1,3 @@
-#pragma once
-
 #include "sky_test_fixture.h"
 
 TEST_F(SkyTest, GetTextureCoordFromUnitRange)
@@ -156,7 +154,7 @@ TEST_F(SkyTest, GetRMuMuSNuFromScatteringTextureUvwz)
     float mu_s;
     float nu;
     bool ray_r_mu_intersects_ground;
-    
+
     aten::sky::GetRMuMuSNuFromScatteringTextureUvwz(atmosphere_,
         aten::vec4(0.0F,
                    0.5F / aten::sky::SCATTERING_TEXTURE_MU_S_SIZE,

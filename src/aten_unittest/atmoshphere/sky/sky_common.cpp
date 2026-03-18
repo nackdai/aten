@@ -1,5 +1,3 @@
-#pragma once
-
 #include "sky_test_fixture.h"
 
 TEST_F(SkyTest, safe_sqrt)

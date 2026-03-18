@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math/vec3.h"
+#include "math/mat4.h"
 
 namespace aten::sky {
     struct DensityProfileLayer {
@@ -103,8 +104,6 @@ namespace aten::sky {
         // the altitude where their density is maximum, as a function of wavelength.
         // The extinction coefficient at altitude h is equal to
         // 'absorption_extinction' times 'absorption_density' at this altitude.
-
-        // TODO
         aten::vec3 absorption_extinction;
 
         // The average albedo of the ground.
@@ -128,5 +127,9 @@ namespace aten::sky {
         // 102度という数字には、天文学的・気象学的な明確な根拠があり、「航海薄明（Nautical Twilight）」と「天文薄明（Astronomical Twilight）」の境界付近を指している.
         // μ_s = cos(102度) ≈ -0.2 となる.
         float mu_s_min;
+    };
+
+    struct SceneParameters {
+        aten::mat4 luminance_from_radiance;
     };
 }

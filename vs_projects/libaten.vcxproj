@@ -150,7 +150,9 @@
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_constants.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_coord_convert.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_dome_render.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_model.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_params.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_precompute_textures.h" />
     <ClInclude Include="..\src\libaten\camera\camera.h" />
     <ClInclude Include="..\src\libaten\camera\CameraOperator.h" />
     <ClInclude Include="..\src\libaten\camera\equirect.h" />
@@ -312,6 +314,7 @@
     <ClCompile Include="..\src\libaten\accelerator\sbvh_voxel.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\stackless_bvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\threaded_bvh.cpp" />
+    <ClCompile Include="..\src\libaten\atmosphere\sky\sky_model.cpp" />
     <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp" />
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />
     <ClCompile Include="..\src\libaten\camera\pinhole.cpp" />

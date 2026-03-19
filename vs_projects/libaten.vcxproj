@@ -153,6 +153,7 @@
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_model.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_params.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_precompute_textures.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\unit_quantity.h" />
     <ClInclude Include="..\src\libaten\camera\camera.h" />
     <ClInclude Include="..\src\libaten\camera\CameraOperator.h" />
     <ClInclude Include="..\src\libaten\camera\equirect.h" />

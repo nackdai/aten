@@ -16,6 +16,9 @@
     <ClCompile Include="..\src\aten_unittest\atmoshphere\sky\sky_compute.cpp">
       <Filter>atmosphere\sky</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\aten_unittest\atmoshphere\sky\unit_quantity.cpp">
+      <Filter>atmosphere\sky</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="atmosphere">

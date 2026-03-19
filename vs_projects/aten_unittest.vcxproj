@@ -19,6 +19,7 @@
     <ClCompile Include="..\src\aten_unittest\atmoshphere\sky\sky_common.cpp" />
     <ClCompile Include="..\src\aten_unittest\atmoshphere\sky\sky_compute.cpp" />
     <ClCompile Include="..\src\aten_unittest\atmoshphere\sky\sky_coord_convert.cpp" />
+    <ClCompile Include="..\src\aten_unittest\atmoshphere\sky\unit_quantity.cpp" />
     <ClCompile Include="..\src\aten_unittest\feature_line.cpp" />
     <ClCompile Include="..\src\aten_unittest\misc_stack.cpp" />
     <ClCompile Include="..\src\aten_unittest\misc_type_traits.cpp" />

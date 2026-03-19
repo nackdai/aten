@@ -607,6 +607,9 @@
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_precompute_textures.h">
       <Filter>atmosphere\sky</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\unit_quantity.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

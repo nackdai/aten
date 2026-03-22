@@ -1,24 +1,35 @@
 #pragma once
 
+#include "atmosphere/sky/unit_quantity.h"
+
 #include "math/math.h"
 
 namespace aten::sky {
+    // As [mm].
+    constexpr int32_t LambdaMin = 360;
+    constexpr int32_t LambdaMax = 830;
+
+    constexpr float LambdaR = 680.0;
+    constexpr float LambdaG = 550.0;
+    constexpr float LambdaB = 440.0;
+
     // Wavelength independent solar irradiance "spectrum" (not physically
     // realistic, but was used in the original implementation).
+    // // Values in W.m^-2 per nanometer. -> W.m^-2.nm^-1
     constexpr float ConstantSolarIrradiance = 1.5F;
 
-    constexpr float BottomRadius = 6360000.0F; // Rg = 6360 km in meter.
-    constexpr float TopRadius = 6420000.0F;    // Rt = 6420 km in meter.
+    constexpr Length BottomRadius = 6360.0_km;  // Rg = 6360 km in meter.
+    constexpr Length TopRadius = 6420.0_km;     // Rt = 6420 km in meter.
 
     constexpr float Rayleigh = 1.24062e-6F;
-    constexpr float RayleighScaleHeight = 8000.0F; // HR = 8 km in meter.
+    constexpr Length RayleighScaleHeight = 8.0_km; // HR = 8 km in meter.
 
-    constexpr float MieScaleHeight = 1200.0F;  // HM = 1.2 km in meter.
+    constexpr Length MieScaleHeight = 1.2_km;  // HM = 1.2 km in meter.
 
     // https://gemini.google.com/share/269fb9c1472b
-    constexpr float MieAngstromAlpha = 0.0F;
-    constexpr float MieAngstromBeta = 5.328e-3F;
-    constexpr float MieSingleScatteringAlbedo = 0.9F;
+    constexpr float MieAngstromAlpha = 0.0F;            // No unit
+    constexpr float MieAngstromBeta = 5.328e-3F;        // No unit
+    constexpr float MieSingleScatteringAlbedo = 0.9F;   // No unit
     constexpr float MiePhaseFunctionG = 0.8F;
 
     constexpr float GroundAlbedo = 0.1F;

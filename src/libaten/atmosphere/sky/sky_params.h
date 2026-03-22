@@ -47,22 +47,22 @@ namespace aten::sky {
 
     struct AtmosphereParameters {
         // The solar irradiance at the top of the atmosphere.
-        aten::vec3 solar_irradiance;
+        aten::vec3 solar_irradiance{ 0.0F };
 
         // The sun's angular radius. Warning: the implementation uses approximations
         // that are valid only if this angle is smaller than 0.1 radians.
 
         // https://physmemo.shakunage.net/phys/diameter/example1.html
         // 太陽の視半径.
-        float sun_angular_radius;
+        float sun_angular_radius{ 0.0F };
 
         // The distance between the planet center and the bottom of the atmosphere.
         // 地球の半径.
-        float bottom_radius;
+        float bottom_radius{ 0.0F };
 
         // The distance between the planet center and the top of the atmosphere.
         // 大気境界までの半径.
-        float top_radius;
+        float top_radius{ 0.0F };
 
         // The density profile of air molecules, i.e. a function from altitude to
         // dimensionless values between 0 (null density) and 1 (maximum density).
@@ -72,7 +72,7 @@ namespace aten::sky {
         // density is maximum (usually the bottom of the atmosphere), as a function of
         // wavelength. The scattering coefficient at altitude h is equal to
         // 'rayleigh_scattering' times 'rayleigh_density' at this altitude.
-        aten::vec3 rayleigh_scattering;
+        aten::vec3 rayleigh_scattering{ 0.0F };
 
         // The density profile of aerosols, i.e. a function from altitude to
         // dimensionless values between 0 (null density) and 1 (maximum density).
@@ -82,17 +82,17 @@ namespace aten::sky {
         // is maximum (usually the bottom of the atmosphere), as a function of
         // wavelength. The scattering coefficient at altitude h is equal to
         // 'mie_scattering' times 'mie_density' at this altitude.
-        aten::vec3 mie_scattering;
+        aten::vec3 mie_scattering{ 0.0F };
 
         // The extinction coefficient of aerosols at the altitude where their density
         // is maximum (usually the bottom of the atmosphere), as a function of
         // wavelength. The extinction coefficient at altitude h is equal to
         // 'mie_extinction' times 'mie_density' at this altitude.
-        aten::vec3 mie_extinction;
+        aten::vec3 mie_extinction{ 0.0F };
 
         // The asymmetry parameter for the Cornette-Shanks phase function for the
         // aerosols.
-        float mie_phase_function_g;
+        float mie_phase_function_g{ 0.0F };
 
 
         // The density profile of air molecules that absorb light (e.g. ozone), i.e.
@@ -104,10 +104,10 @@ namespace aten::sky {
         // the altitude where their density is maximum, as a function of wavelength.
         // The extinction coefficient at altitude h is equal to
         // 'absorption_extinction' times 'absorption_density' at this altitude.
-        aten::vec3 absorption_extinction;
+        aten::vec3 absorption_extinction{ 0.0F };
 
         // The average albedo of the ground.
-        aten::vec3 ground_albedo;
+        aten::vec3 ground_albedo{ 0.0F };
 
         // The cosine of the maximum Sun zenith angle for which atmospheric scattering
         // must be precomputed (for maximum precision, use the smallest Sun zenith
@@ -126,7 +126,7 @@ namespace aten::sky {
         // 例では、地球の場合 102度 まで沈めば、それ以上計算しても結果はほぼ変わらない（真っ暗とみなせる）としている.
         // 102度という数字には、天文学的・気象学的な明確な根拠があり、「航海薄明（Nautical Twilight）」と「天文薄明（Astronomical Twilight）」の境界付近を指している.
         // μ_s = cos(102度) ≈ -0.2 となる.
-        float mu_s_min;
+        float mu_s_min{ 0.0F };
     };
 
     struct SceneParameters {

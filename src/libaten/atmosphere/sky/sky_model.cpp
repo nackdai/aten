@@ -3,7 +3,227 @@
 #include "atmosphere/sky/sky_compute.h"
 #include "atmosphere/sky/sky_coord_convert.h"
 
+#include "atmosphere/sky/unit_quantity.h"
+
 namespace aten::sky {
+    namespace {
+        float InterpolateFactor(
+            const std::vector<float>& interp_factors,
+            const std::vector<float>& base_values,
+            const float v)
+        {
+            AT_ASSERT(interp_factors.size() == base_values.size());
+
+            if (v < base_values[0]) {
+                return interp_factors[0];
+            }
+
+            for (size_t i = 0; i < base_values.size() - 1; ++i) {
+                if (v < base_values[i + 1]) {
+                    const auto u = (v - base_values[i]) / (base_values[i + 1] - base_values[i]);
+                    return interp_factors[i] * (1.0F - u) + interp_factors[i + 1] * u;
+                }
+            }
+
+            return interp_factors[interp_factors.size() - 1];
+        }
+
+        // 波長ごとのfactorsの値をRGB波長の値に応じた値になるように補間する.
+        aten::vec3 InterpolateFactorByRGBLambda(
+            const std::vector<float> factors,
+            const std::vector<float> wavelengths,
+            const aten::vec3& rgb_lambda)
+        {
+            const auto r = InterpolateFactor(factors, wavelengths, rgb_lambda.r);
+            const auto g = InterpolateFactor(factors, wavelengths, rgb_lambda.g);
+            const auto b = InterpolateFactor(factors, wavelengths, rgb_lambda.b);
+            return aten::vec3{ r, g, b };
+        }
+
+        void SetDensityProfileLayer(
+            aten::sky::DensityProfileLayer& dst,
+            const aten::sky::DensityProfileLayer& src)
+        {
+            // m -> km
+            dst.width = aten::Length::as(src.width, MeterUnit::km);
+
+            dst.exp_term = src.exp_term;
+
+            // m^-1 -> km^-1
+            dst.inv_height_scale = aten::InverseLength::as(src.inv_height_scale, MeterUnit::km);
+            dst.linear_term = aten::InverseLength::as(src.linear_term, MeterUnit::km);
+
+            dst.constant_term = src.constant_term;
+        }
+    }
+
+    void SkyModel::Init()
+    {
+        textures_.Init();
+
+        using Irrandiance = InverseLength;
+
+        std::vector<float> wavelengths;
+        std::vector<float> solar_irradiance;
+        std::vector<float> rayleigh_scattering;
+        std::vector<float> mie_scattering;
+        std::vector<float> mie_extinction;
+        std::vector<float> absorption_extinction;
+        std::vector<float> ground_albedo;
+
+        for (int32_t l = LambdaMin; l <= LambdaMax; l += 10)
+        {
+            // 波長の範囲が
+            //  LambdaMin = 360[mm]
+            //  LambdaMax = 830[mm]
+            // で定義されていて、これを mm (1e-3) -> micro meter (1e-6) に変換.
+            const auto lambda = static_cast<float>(l) * 1e-3F;
+
+            wavelengths.emplace_back(l);
+
+            solar_irradiance.emplace_back(ConstantSolarIrradiance);
+
+            // kRayleighは、式(1)での exp(-h/H) の前にある項の部分のλの依存性がない部分で定数.
+            // ここでは、式(1)のλの依存性の部分を計算して、rayleigh_scatteringに格納する.
+            /*
+                https://gemini.google.com/share/b1f3242d1df2
+              標準状態（STP: 0°C, 1013.25 hPa）における大気の値を採用:
+                空気の屈折率 (n): 約 1.000293
+                分子数密度 (N): ロシュミット数（Loschmidt constant）を用いる.
+	                N = 2.545 × 10^25 [molecules/m^3]
+                円周率 (\pi): 3.14159265
+
+
+              β_R(λ) = 8pi^3(n^2-1)^2 / 3Nλ^4 を、変数であるλ 以外の部分（係数 k）としてまとめる.
+              k  = 8pi^3(n^2-1)^2 / 3N
+
+              k_SI = 1.1156 × 10^-30
+
+              この k_SI は、波長 λ を メートル (m) 単位で入れた時の値.
+
+              コードでは λ に μm 単位の数値を入れます。1[μm] = 10^-6 [m] なので、
+              分母にある λ^4 は次のように置き換わります。
+                λ^4[m] = (λ × 10^-6 [μm])^4 = λ[m]^4 × 10^-24
+
+              これを元の式に代入すると、定数部分は 10^-24 で割られる（つまり 10^24 倍される）ことになる.
+                k_μm = k_SI × 10^24 = 1.1156 × 10^-30 × 10^24 = 1.1156 × 10^-6
+            */
+            rayleigh_scattering.emplace_back(Rayleigh * aten::pow(lambda, -4.0F));
+
+            /*
+                https://gemini.google.com/share/269fb9c1472b
+              オングストローム（Angstrom）の濁度公式（または混濁係数の式）は、
+              大気中のエアロゾルによる光の散乱・吸収による減衰を表すための経験式です。
+              この公式は、波長 λ におけるエアロゾルの光学的厚さ（オプティカル・デプス）
+              τ_α(λ) を次のように定義します。
+
+              τ_α(λ) = βλ^{-α}
+
+              各変数の意味
+
+              τ_α(λ) : 波長 λ におけるエアロゾルの光学的厚さ
+                - 光学的厚さは無次元
+
+              λ : 波長（通常はマイクロメートル 単位で表されます）。
+
+              β（オングストローム濁度係数）:
+                - 大気中のエーロゾルの総量を反映する係数です。
+                - 値が大きいほど、大気が濁っている（粒子数が多い）ことを示します。
+                - λ = 1[μm] の時の光学的厚さ
+
+              α（オングストローム指数）:
+                - 粒子のサイズ分布に関連する指数です。
+                - 一般的に、粒子が小さいほど α は大きくなり（例：煙やもやでは 1.3 - 2.0 程度）
+                  粒子が大きいほど α は小さくなります（例：砂塵や雲では 0 に近づく）
+            */
+            /*
+                https://gemini.google.com/share/b1f3242d1df2
+              単位（次元）で分解すると:
+                MieAngstromBeta: 5.328e-3（無次元）
+                MieScaleHeight: 1200.0[m] ：ミー散乱の分布高度（スケールハイト）
+                lambda: マイクロメートル単位の数値
+                pow(lambda, -0.0): lambda^0 = 1（無次元）
+
+              これらを組み合わせると：
+                単位 = 無次元 / m × 無次元 = m^-1
+            */
+            const auto mie = MieAngstromBeta / MieScaleHeight * aten::pow(lambda, -MieAngstromAlpha);
+
+            // https://gemini.google.com/share/269fb9c1472b
+            mie_scattering.emplace_back(mie * MieSingleScatteringAlbedo);
+            mie_extinction.emplace_back(mie);
+
+            // TODO
+            // Support Ozon.
+            absorption_extinction.emplace_back(0.0F);
+
+            // 理想的には波長ごとに地面での反射率は変わるべき?
+            ground_albedo.emplace_back(GroundAlbedo);
+        }
+
+        const DensityProfileLayer rayleigh_layer{
+            0.0F,
+            1.0F,
+            -1.0F / RayleighScaleHeight,
+            0.0F,
+            0.0F
+        };
+
+        const DensityProfileLayer mie_layer{
+            0.0F,
+            1.0F,
+            -1.0F / MieScaleHeight,
+            0.0F,
+            0.0F
+        };
+
+        const vec3 rgb_lambdas{
+            LambdaR,
+            LambdaG,
+            LambdaB,
+        };
+
+        atmosphere_.solar_irradiance = InterpolateFactorByRGBLambda(solar_irradiance, wavelengths, rgb_lambdas);
+
+        atmosphere_.sun_angular_radius = MaxSunZenithAngle;
+
+        // m -> km
+        atmosphere_.bottom_radius = aten::Length::as(BottomRadius, MeterUnit::km);
+        atmosphere_.top_radius = aten::Length::as(TopRadius, MeterUnit::km);
+
+        SetDensityProfileLayer(atmosphere_.rayleigh_density.layers[0], rayleigh_layer);
+
+        // m^-1 -> km^-1
+        atmosphere_.rayleigh_scattering = InterpolateFactorByRGBLambda(rayleigh_scattering, wavelengths, rgb_lambdas);
+        atmosphere_.rayleigh_scattering.x = aten::InverseLength::as(atmosphere_.rayleigh_scattering.x, MeterUnit::km);
+        atmosphere_.rayleigh_scattering.y = aten::InverseLength::as(atmosphere_.rayleigh_scattering.y, MeterUnit::km);
+        atmosphere_.rayleigh_scattering.z = aten::InverseLength::as(atmosphere_.rayleigh_scattering.z, MeterUnit::km);
+
+        SetDensityProfileLayer(atmosphere_.mie_density.layers[0], mie_layer);
+
+        atmosphere_.mie_scattering = InterpolateFactorByRGBLambda(mie_scattering, wavelengths, rgb_lambdas);
+
+        // m^-1 -> km^-1
+        atmosphere_.mie_scattering.x = aten::InverseLength::as(atmosphere_.mie_scattering.x, MeterUnit::km);
+        atmosphere_.mie_scattering.y = aten::InverseLength::as(atmosphere_.mie_scattering.y, MeterUnit::km);
+        atmosphere_.mie_scattering.z = aten::InverseLength::as(atmosphere_.mie_scattering.z, MeterUnit::km);
+
+        // m^-1 -> km^-1
+        atmosphere_.mie_extinction = InterpolateFactorByRGBLambda(mie_extinction, wavelengths, rgb_lambdas);
+        atmosphere_.mie_extinction.x = aten::InverseLength::as(atmosphere_.mie_extinction.x, MeterUnit::km);
+        atmosphere_.mie_extinction.y = aten::InverseLength::as(atmosphere_.mie_extinction.y, MeterUnit::km);
+        atmosphere_.mie_extinction.z = aten::InverseLength::as(atmosphere_.mie_extinction.z, MeterUnit::km);
+
+        atmosphere_.mie_phase_function_g = MiePhaseFunctionG;
+
+        // TODO
+        // Ozon
+
+        atmosphere_.ground_albedo = InterpolateFactorByRGBLambda(ground_albedo, wavelengths, rgb_lambdas);
+
+        atmosphere_.mu_s_min = aten::cos(MaxSunZenithAngle);
+    }
+
     namespace {
         // Transmittance を計算.
         void ComputeTransmittanceToTopAtmosphereBoundaryTexture(
@@ -244,11 +464,6 @@ namespace aten::sky {
         }
     }
 
-    void SkyModel::Init()
-    {
-        textures_.Init();
-    }
-
     void SkyModel::PreCompute()
     {
         {
@@ -330,5 +545,10 @@ namespace aten::sky {
                 }
             }
         }
+    }
+
+    void SkyModel::Render()
+    {
+
     }
 }

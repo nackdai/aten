@@ -51,12 +51,19 @@ namespace aten {
 
         constexpr explicit Quantity(float v) : value_{ v } {}
 
-        constexpr float as(MeterUnit unit) const {
+        constexpr float as(MeterUnit unit) const
+        {
             float unit_m = _detail::LengthInMeters[static_cast<size_t>(unit)];
             return value_ / _detail::constexpr_pow(unit_m, Power);
         }
 
         constexpr operator float() const { return value_; }
+
+        static constexpr float as(float v, MeterUnit unit)
+        {
+            float unit_m = _detail::LengthInMeters[static_cast<size_t>(unit)];
+            return v / _detail::constexpr_pow(unit_m, Power);
+        }
 
     private:
         float value_;

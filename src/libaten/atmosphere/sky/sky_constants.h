@@ -48,6 +48,11 @@ namespace aten::sky {
     // μ_s = cos(102度) ≈ -0.2 となる.
     constexpr float MaxSunZenithAngle = Deg2Rad(102.0F);
 
+    // https://physmemo.shakunage.net/phys/diameter/diameter.html
+    // 太陽の視直径の平均視直径 0.5331 度 を ラジアンに変換した値.
+    // 半径なので、1/2 する.
+    constexpr double SunAngularRadius = 0.00935 / 2.0;
+
     // 論文内の 6. Implementation, results and discussion より:
 
     // We store T(r,µ) and E(r,µ) in 64x256 and 16x64 textures.

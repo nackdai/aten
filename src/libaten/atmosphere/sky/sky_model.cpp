@@ -185,7 +185,7 @@ namespace aten::sky {
 
         atmosphere_.solar_irradiance = InterpolateFactorByRGBLambda(solar_irradiance, wavelengths, rgb_lambdas);
 
-        atmosphere_.sun_angular_radius = MaxSunZenithAngle;
+        atmosphere_.sun_angular_radius = SunAngularRadius;
 
         // m -> km
         atmosphere_.bottom_radius = aten::Length::as(BottomRadius, MeterUnit::km);

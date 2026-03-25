@@ -294,7 +294,7 @@ namespace aten::sky {
         //  single_mie_scattering: CM （ミー散乱）のみを格納するテクスチャ.
         void ComputeSingleScatteringTexture(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::sky::SceneParameters& scene,
+            const aten::mat4& luminance_from_radiance,
             const int32_t x, const int32_t y, const int32_t layer,
             aten::sky::PreComputeTextures& textures)
         {
@@ -327,8 +327,8 @@ namespace aten::sky {
             textures.delta_rayleigh_scattering_texture.SetByXYZ(rayleigh, x, y, layer);
             textures.delta_mie_scattering_texture.SetByXYZ(mie, x, y, layer);
 
-            rayleigh = scene.luminance_from_radiance * rayleigh;
-            mie = scene.luminance_from_radiance * mie;
+            rayleigh = luminance_from_radiance * rayleigh;
+            mie = luminance_from_radiance * mie;
 
             textures.scattering_texture.SetByXYZ(
                 aten::vec4(rayleigh.r, rayleigh.g, rayleigh.b, mie.r),
@@ -339,7 +339,7 @@ namespace aten::sky {
         // ΔJ を計算する.
         void ComputeScatteringDensityTexture(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::sky::SceneParameters& scene,
+            const aten::mat4& luminance_from_radiance,
             const int32_t x, const int32_t y, const int32_t layer,
             aten::sky::PreComputeTextures& textures,
             const int32_t scattering_order)
@@ -381,7 +381,7 @@ namespace aten::sky {
         // E = E + ΔE を計算するための、太陽光でない入射する放射照度 ΔE を計算する.
         void ComputeIndirectIrradianceTexture(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::sky::SceneParameters& scene,
+            const aten::mat4& luminance_from_radiance,
             const int32_t x, const int32_t y,
             aten::sky::PreComputeTextures& textures,
             const int32_t scattering_order)
@@ -408,7 +408,7 @@ namespace aten::sky {
             };
 
             const auto curr_irradiance{ textures.irradiance_texture.AtByXY(x, y) };
-            delta_irradiance = scene.luminance_from_radiance * delta_irradiance;
+            delta_irradiance = luminance_from_radiance * delta_irradiance;
 
             textures.irradiance_texture.PutByXYcoord(
                 x, y,
@@ -418,7 +418,7 @@ namespace aten::sky {
         // S = S + ΔS を計算するための ΔS を計算する.
         void ComputeMultipleScatteringTexture(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::sky::SceneParameters& scene,
+            const aten::mat4& luminance_from_radiance,
             const int32_t x, const int32_t y, const int32_t layer,
             aten::sky::PreComputeTextures& textures)
         {
@@ -495,7 +495,7 @@ namespace aten::sky {
                     for (int32_t z = 0; z < aten::sky::SCATTERING_TEXTURE_DEPTH; z++) {
                         ComputeSingleScatteringTexture(
                             atmosphere_,
-                            scene_,
+                            luminance_from_radiance_,
                             x, y, z,
                             textures_);
                     }
@@ -511,7 +511,7 @@ namespace aten::sky {
                         for (int32_t z = 0; z < aten::sky::SCATTERING_TEXTURE_DEPTH; z++) {
                             ComputeScatteringDensityTexture(
                                 atmosphere_,
-                                scene_,
+                                luminance_from_radiance_,
                                 x, y, z,
                                 textures_,
                                 scattering_order);
@@ -524,7 +524,7 @@ namespace aten::sky {
                     for (int32_t x = 0; x < aten::sky::TRANSMITTANCE_TEXTURE_WIDTH; x++) {
                         ComputeIndirectIrradianceTexture(
                             atmosphere_,
-                            scene_,
+                            luminance_from_radiance_,
                             x, y,
                             textures_,
                             scattering_order - 1);
@@ -537,7 +537,7 @@ namespace aten::sky {
                         for (int32_t z = 0; z < aten::sky::SCATTERING_TEXTURE_DEPTH; z++) {
                             ComputeMultipleScatteringTexture(
                                 atmosphere_,
-                                scene_,
+                                luminance_from_radiance_,
                                 x, y, z,
                                 textures_);
                         }

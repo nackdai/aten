@@ -128,8 +128,4 @@ namespace aten::sky {
         // μ_s = cos(102度) ≈ -0.2 となる.
         float mu_s_min{ 0.0F };
     };
-
-    struct SceneParameters {
-        aten::mat4 luminance_from_radiance;
-    };
 }

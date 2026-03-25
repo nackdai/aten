@@ -30,7 +30,7 @@ namespace AT_NAME::sky {
         static constexpr int32_t NUM_SCATTERING = 4;
 
         aten::sky::AtmosphereParameters atmosphere_;
-        aten::sky::SceneParameters scene_;
         aten::sky::PreComputeTextures textures_;
+        aten::mat4 luminance_from_radiance_;
     };
 }

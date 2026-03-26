@@ -116,4 +116,37 @@ namespace aten::sky {
         return mu < 0.0F
             && r * r * (mu * mu - 1.0F) + atmosphere.bottom_radius * atmosphere.bottom_radius >= 0.0F;
     }
+
+    float InterpolateFactor(
+        const std::vector<float>& interp_factors,
+        const std::vector<float>& base_values,
+        const float v)
+    {
+        AT_ASSERT(interp_factors.size() == base_values.size());
+
+        if (v < base_values[0]) {
+            return interp_factors[0];
+        }
+
+        for (size_t i = 0; i < base_values.size() - 1; ++i) {
+            if (v < base_values[i + 1]) {
+                const auto u = (v - base_values[i]) / (base_values[i + 1] - base_values[i]);
+                return interp_factors[i] * (1.0F - u) + interp_factors[i + 1] * u;
+            }
+        }
+
+        return interp_factors[interp_factors.size() - 1];
+    }
+
+    // 波長ごとのfactorsの値をRGB波長の値に応じた値になるように補間する.
+    aten::vec3 InterpolateFactorByRGBLambda(
+        const std::vector<float> factors,
+        const std::vector<float> wavelengths,
+        const aten::vec3& rgb_lambda)
+    {
+        const auto r = InterpolateFactor(factors, wavelengths, rgb_lambda.r);
+        const auto g = InterpolateFactor(factors, wavelengths, rgb_lambda.g);
+        const auto b = InterpolateFactor(factors, wavelengths, rgb_lambda.b);
+        return aten::vec3{ r, g, b };
+    }
 }

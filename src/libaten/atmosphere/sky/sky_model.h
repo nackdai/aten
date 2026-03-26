@@ -32,5 +32,8 @@ namespace AT_NAME::sky {
         aten::sky::AtmosphereParameters atmosphere_;
         aten::sky::PreComputeTextures textures_;
         aten::mat4 luminance_from_radiance_;
+
+        aten::vec3 sun_radiance_to_luminance_;
+        aten::vec3 sky_radiance_to_luminance_;
     };
 }

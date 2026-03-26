@@ -67,12 +67,12 @@ namespace aten::sky {
 #else
             const auto scattering_0{ aten::sky::SampleTexture3D(texture.scattering_texture, uvw0) };
             const auto scattering_1{ aten::sky::SampleTexture3D(texture.scattering_texture, uvw1) };
-            const auto scattering{ scattering_0  * (1.0 - lerp) + scattering_1 * lerp };
+            const auto scattering{ scattering_0  * (1.0F - lerp) + scattering_1 * lerp };
 
             const auto single_mie_scattering_0{ aten::sky::SampleTexture3D(texture.optional_single_mie_scattering_texture, uvw0) };
             const auto single_mie_scattering_1{ aten::sky::SampleTexture3D(texture.optional_single_mie_scattering_texture, uvw1) };
             const auto single_mie_scattering{
-                single_mie_scattering_0* (1.0 - lerp) + single_mie_scattering_1 * lerp
+                single_mie_scattering_0* (1.0F - lerp) + single_mie_scattering_1 * lerp
             };
 #endif
 
@@ -171,5 +171,76 @@ namespace aten::sky {
 
         return scattering * RayleighPhaseFunction(nu)
             + single_mie_scattering * MiePhaseFunction(atmosphere.mie_phase_function_g, nu);
+    }
+
+    namespace {
+        aten::tuple<float, float, float> CieColorMatchingFunctionTableValue(const int32_t wavelength)
+        {
+            if (wavelength <= aten::sky::LambdaMin || wavelength >= aten::sky::LambdaMax) {
+                return aten::make_tuple(0.0F, 0.0F, 0.0F);
+            }
+
+            // wavelength in function table is defined per 5.0 nm.
+            auto u = (wavelength - aten::sky::LambdaMin) / 5.0F;
+
+            const auto row = static_cast<int32_t>(aten::floor(u));
+            AT_ASSERT(row >= 0 && row + 1 < CIE_2_DEG_COLOR_MATCHING_FUNCTIONS.size());
+            AT_ASSERT(CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[4 * row].labmda <= wavelength
+                && CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[4 * (row + 1)].labmda >= wavelength);
+
+            const auto& element_0 = CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[4 * row];
+            const auto& element_1 = CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[4 * (row + 1)];
+
+            u -= row;
+
+            const auto x = aten::lerp(element_0.x, element_1.x, u);
+            const auto y = aten::lerp(element_0.y, element_1.y, u);
+            const auto z = aten::lerp(element_0.z, element_1.z, u);
+
+            return aten::make_tuple(x, y, z);
+        }
+    }
+
+    /*
+        We can then implement a utility function to compute the "spectral radiance to luminance" conversion constants
+        (see Section 14.3 in https://arxiv.org/pdf/1612.04336.pdf"A Qualitative and Quantitative Evaluation of 8 Clear Sky Models</a> for their definitions):
+    */
+    // The returned constants are in lumen.nm / watt.
+    aten::vec3 ComputeSpectralRadianceToLuminanceFactors(
+        const std::vector<float>& wavelengths,
+        const std::vector<float>& solar_irradiance,
+        const float lambda_power)
+    {
+        float k_r = 0.0F;
+        float k_g = 0.0F;
+        float k_b = 0.0F;
+
+        const float solar_r = InterpolateFactor(wavelengths, solar_irradiance, aten::sky::LambdaR);
+        const float solar_g = InterpolateFactor(wavelengths, solar_irradiance, aten::sky::LambdaG);
+        const float solar_b = InterpolateFactor(wavelengths, solar_irradiance, aten::sky::LambdaB);
+
+        constexpr int32_t dlambda = 1;
+
+        for (int32_t lambda = aten::sky::LambdaMin; lambda < aten::sky::LambdaMax; lambda += dlambda)
+        {
+            float x_bar, y_bar, z_bar;
+            aten::tie(x_bar, y_bar, z_bar) = CieColorMatchingFunctionTableValue(lambda);
+
+            const auto r_bar = XYZ_TO_SRGB[0] * x_bar + XYZ_TO_SRGB[1] * y_bar + XYZ_TO_SRGB[2] * z_bar;
+            const auto g_bar = XYZ_TO_SRGB[3] * x_bar + XYZ_TO_SRGB[4] * y_bar + XYZ_TO_SRGB[5] * z_bar;
+            const auto b_bar = XYZ_TO_SRGB[6] * x_bar + XYZ_TO_SRGB[7] * y_bar + XYZ_TO_SRGB[8] * z_bar;
+
+            const auto irradiance = InterpolateFactor(wavelengths, solar_irradiance, static_cast<float>(lambda));
+
+            k_r += r_bar * irradiance / solar_r * aten::pow(lambda / aten::sky::LambdaR, lambda_power);
+            k_g += g_bar * irradiance / solar_g * aten::pow(lambda / aten::sky::LambdaG, lambda_power);
+            k_b += b_bar * irradiance / solar_b * aten::pow(lambda / aten::sky::LambdaB, lambda_power);
+        }
+
+        k_r *= aten::sky::MAX_LUMINOUS_EFFICACY * dlambda;
+        k_g *= aten::sky::MAX_LUMINOUS_EFFICACY * dlambda;
+        k_b *= aten::sky::MAX_LUMINOUS_EFFICACY * dlambda;
+
+        return { k_r, k_g, k_b };
     }
 }

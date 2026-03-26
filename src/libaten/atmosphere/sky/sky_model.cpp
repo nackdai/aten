@@ -1,45 +1,14 @@
 #include "atmosphere/sky/sky_model.h"
 
+#include "atmosphere/sky/sky_common.h"
 #include "atmosphere/sky/sky_compute.h"
 #include "atmosphere/sky/sky_coord_convert.h"
+#include "atmosphere/sky/sky_render.h"
 
 #include "atmosphere/sky/unit_quantity.h"
 
 namespace aten::sky {
     namespace {
-        float InterpolateFactor(
-            const std::vector<float>& interp_factors,
-            const std::vector<float>& base_values,
-            const float v)
-        {
-            AT_ASSERT(interp_factors.size() == base_values.size());
-
-            if (v < base_values[0]) {
-                return interp_factors[0];
-            }
-
-            for (size_t i = 0; i < base_values.size() - 1; ++i) {
-                if (v < base_values[i + 1]) {
-                    const auto u = (v - base_values[i]) / (base_values[i + 1] - base_values[i]);
-                    return interp_factors[i] * (1.0F - u) + interp_factors[i + 1] * u;
-                }
-            }
-
-            return interp_factors[interp_factors.size() - 1];
-        }
-
-        // 波長ごとのfactorsの値をRGB波長の値に応じた値になるように補間する.
-        aten::vec3 InterpolateFactorByRGBLambda(
-            const std::vector<float> factors,
-            const std::vector<float> wavelengths,
-            const aten::vec3& rgb_lambda)
-        {
-            const auto r = InterpolateFactor(factors, wavelengths, rgb_lambda.r);
-            const auto g = InterpolateFactor(factors, wavelengths, rgb_lambda.g);
-            const auto b = InterpolateFactor(factors, wavelengths, rgb_lambda.b);
-            return aten::vec3{ r, g, b };
-        }
-
         void SetDensityProfileLayer(
             aten::sky::DensityProfileLayer& dst,
             const aten::sky::DensityProfileLayer& src)
@@ -222,6 +191,9 @@ namespace aten::sky {
         atmosphere_.ground_albedo = InterpolateFactorByRGBLambda(ground_albedo, wavelengths, rgb_lambdas);
 
         atmosphere_.mu_s_min = aten::cos(MaxSunZenithAngle);
+
+        sun_radiance_to_luminance_ = aten::sky::ComputeSpectralRadianceToLuminanceFactors(wavelengths, solar_irradiance, 0);
+        sky_radiance_to_luminance_ = aten::sky::ComputeSpectralRadianceToLuminanceFactors(wavelengths, solar_irradiance, -3);
     }
 
     namespace {

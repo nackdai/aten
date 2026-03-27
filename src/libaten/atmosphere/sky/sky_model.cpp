@@ -519,8 +519,41 @@ namespace aten::sky {
         }
     }
 
-    void SkyModel::Render()
+    // NOTE
+    // camera parameters has to be specified based on km unit.
+    void SkyModel::Render(
+        const int32_t width,
+        const int32_t height,
+        const aten::CameraParameter& camera)
     {
+        // TODO
+        const auto sun_zenith_angle_radians = 1.3F;
+        const auto sun_azimuth_angle_radians = 2.9F;
 
+        const aten::vec3 sun_direction{
+            aten::cos(sun_azimuth_angle_radians) * aten::sin(sun_zenith_angle_radians),
+            aten::sin(sun_azimuth_angle_radians) * aten::sin(sun_zenith_angle_radians),
+            aten::cos(sun_zenith_angle_radians)
+        };
+
+        const aten::vec3 earth_center{
+            0.0F,
+            -BottomRadius.as(MeterUnit::km),
+            0.0F,
+        };
+
+        const auto sun_size = aten::cos(SunAngularRadius);
+
+        for (int32_t y = 0; y < height; y++) {
+            for (int32_t x = 0; x < width; x++) {
+                RenderSky(
+                    x, y,
+                    camera,
+                    atmosphere_, textures_,
+                    sun_direction,
+                    earth_center,
+                    sun_size);
+            }
+        }
     }
 }

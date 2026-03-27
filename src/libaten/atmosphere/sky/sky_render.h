@@ -5,6 +5,8 @@
 #include "atmosphere/sky/sky_params.h"
 #include "atmosphere/sky/sky_precompute_textures.h"
 
+#include "camera/pinhole.h"
+
 #include "math/vec3.h"
 
 #include "misc/tuple.h"
@@ -96,7 +98,7 @@ namespace aten::sky {
         const aten::sky::PreComputeTextures& texture,
         const aten::vec3& camera,
         const aten::vec3& view_ray,
-        Length shadow_length,
+        const float shadow_length,
         const aten::vec3& sun_direction,
         aten::vec3& out_transmittance)   // 視線の先に太陽が見えているときに太陽光の減衰を計算する用.
     {
@@ -171,6 +173,53 @@ namespace aten::sky {
 
         return scattering * RayleighPhaseFunction(nu)
             + single_mie_scattering * MiePhaseFunction(atmosphere.mie_phase_function_g, nu);
+    }
+
+    aten::vec3 RenderSky(
+        int32_t x, int32_t y,
+        const aten::CameraParameter& camera,
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const aten::sky::PreComputeTextures& texture,
+        const aten::vec3& sun_direction,
+        const aten::vec3& earth_center,
+        const float sun_size)
+    {
+        const float s = x / static_cast<float>(camera.width);
+        const float t = y / static_cast<float>(camera.height);
+
+        AT_NAME::CameraSampleResult camsample;
+        AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
+
+        const auto camera_org{ camsample.r.org };
+        const auto view_direction{ camsample.r.dir };
+
+        // TODO
+        const float shadow_length = 0.0F;
+
+        aten::vec3 transmittance{ 0.0F };
+        aten::vec3 radiance{
+            GetSkyRadiance(
+                atmosphere, texture,
+                camera_org - earth_center,
+                view_direction,
+                shadow_length,
+                sun_direction,
+                transmittance)
+        };
+
+        // If the view ray intersects the Sun, add the Sun radiance.
+        // ここで、視線方向のベクトルを v、太陽の方向ベクトルを s とします（どちらも単位ベクトル）.
+        // この2つのベクトルのなす角を α とすると、視線が太陽の円盤内にある条件は α <= θ です.
+        // これを、内積 cosα を使って判定する場合、条件は cosα >= cosθ となります。
+        // sun_size.y = cos(SunAngularRadius) なので、dot することで cosine で比較する.
+        // cosθ は θ が 0 に近いほど大きくなる.
+        // つまり、view_direction と sun_direction が近いほど、値は大きくなる.
+        // なので、>（大なり）だと太陽の視半径内といえる.
+        if (dot(view_direction, sun_direction) > sun_size) {
+            radiance = radiance + transmittance * GetSolarRadiance(atmosphere);
+        }
+
+        return radiance;
     }
 
     namespace {

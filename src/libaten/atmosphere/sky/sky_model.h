@@ -3,6 +3,8 @@
 #include "atmosphere/sky/sky_params.h"
 #include "atmosphere/sky/sky_precompute_textures.h"
 
+#include "camera/camera.h"
+
 namespace AT_NAME::sky {
     class SkyModel {
     public:
@@ -23,7 +25,10 @@ namespace AT_NAME::sky {
 
         void PreCompute();
 
-        void Render();
+        void Render(
+            const int32_t width,
+            const int32_t height,
+            const aten::CameraParameter& camera);
 
     private:
         // TODO

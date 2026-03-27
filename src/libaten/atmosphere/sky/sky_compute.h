@@ -601,7 +601,7 @@ namespace aten::sky {
                         atmosphere,
                         irradiance_texture,
                         atmosphere.bottom_radius,
-                        dot(ground_normal, omega_s))
+                        aten::clamp(dot(ground_normal, omega_s), -1.0F, 1.0F))
                 };
                 incident_radiance += transmittance_to_ground *
                     ground_albedo * (1.0F / AT_MATH_PI) * ground_irradiance;

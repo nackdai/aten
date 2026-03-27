@@ -4,6 +4,7 @@
 #include "atmosphere/sky/sky_precompute_textures.h"
 
 #include "camera/camera.h"
+#include "renderer/film.h"
 
 namespace AT_NAME::sky {
     class SkyModel {
@@ -28,7 +29,8 @@ namespace AT_NAME::sky {
         void Render(
             const int32_t width,
             const int32_t height,
-            const aten::CameraParameter& camera);
+            const aten::CameraParameter& camera,
+            Film& dst);
 
     private:
         // TODO

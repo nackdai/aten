@@ -209,8 +209,8 @@ namespace aten::sky {
             };
 
             const aten::vec2 frag_coord{
-                static_cast<float>(x),
-                static_cast<float>(y),
+                static_cast<float>(x) + 0.5F,
+                static_cast<float>(y) + 0.5F,
             };
 
             float r;
@@ -241,8 +241,8 @@ namespace aten::sky {
             aten::sky::PreComputeTextures& textures)
         {
             const aten::vec2 frag_coord{
-                static_cast<float>(x),
-                static_cast<float>(y),
+                static_cast<float>(x) + 0.5F,
+                static_cast<float>(y) + 0.5F,
             };
 
             float r;
@@ -277,9 +277,9 @@ namespace aten::sky {
             bool ray_r_mu_intersects_ground;
 
             const aten::vec3 frag_coord{
-                static_cast<float>(x),
-                static_cast<float>(y),
-                static_cast<float>(layer),
+                static_cast<float>(x) + 0.5F,
+                static_cast<float>(y) + 0.5F,
+                static_cast<float>(layer) + 0.5F,
             };
 
             aten::sky::GetRMuMuSNuFromScatteringTextureFragCoord(
@@ -317,9 +317,9 @@ namespace aten::sky {
             const int32_t scattering_order)
         {
             const aten::vec3 frag_coord{
-                static_cast<float>(x),
-                static_cast<float>(y),
-                static_cast<float>(layer),
+                static_cast<float>(x) + 0.5F,
+                static_cast<float>(y) + 0.5F,
+                static_cast<float>(layer) + 0.5F,
             };
 
             float r;
@@ -359,8 +359,8 @@ namespace aten::sky {
             const int32_t scattering_order)
         {
             const aten::vec2 frag_coord{
-                static_cast<float>(x),
-                static_cast<float>(y),
+                static_cast<float>(x) + 0.5F,
+                static_cast<float>(y) + 0.5F,
             };
 
             float r;
@@ -395,9 +395,9 @@ namespace aten::sky {
             aten::sky::PreComputeTextures& textures)
         {
             const aten::vec3 frag_coord{
-                static_cast<float>(x),
-                static_cast<float>(y),
-                static_cast<float>(layer),
+                static_cast<float>(x) + 0.5F,
+                static_cast<float>(y) + 0.5F,
+                static_cast<float>(layer) + 0.5F,
             };
 
             float r;
@@ -460,8 +460,8 @@ namespace aten::sky {
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for
 #endif
-            for (int32_t y = 0; y < aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT; y++) {
-                for (int32_t x = 0; x < aten::sky::TRANSMITTANCE_TEXTURE_WIDTH; x++) {
+            for (int32_t y = 0; y < aten::sky::IRRADIANCE_TEXTURE_HEIGHT; y++) {
+                for (int32_t x = 0; x < aten::sky::IRRADIANCE_TEXTURE_WIDTH; x++) {
                     ComputeDirectIrradianceTexture(
                         atmosphere_,
                         x, y,
@@ -510,8 +510,8 @@ namespace aten::sky {
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for
 #endif
-                for (int32_t y = 0; y < aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT; y++) {
-                    for (int32_t x = 0; x < aten::sky::TRANSMITTANCE_TEXTURE_WIDTH; x++) {
+                for (int32_t y = 0; y < aten::sky::IRRADIANCE_TEXTURE_HEIGHT; y++) {
+                    for (int32_t x = 0; x < aten::sky::IRRADIANCE_TEXTURE_WIDTH; x++) {
                         ComputeIndirectIrradianceTexture(
                             atmosphere_,
                             luminance_from_radiance_,
@@ -545,7 +545,8 @@ namespace aten::sky {
     void SkyModel::Render(
         const int32_t width,
         const int32_t height,
-        const aten::CameraParameter& camera)
+        const aten::CameraParameter& camera,
+        Film& dst)
     {
         // TODO
         const auto sun_zenith_angle_radians = 1.3F;
@@ -574,13 +575,17 @@ namespace aten::sky {
 #endif
             for (int32_t y = 0; y < height; y++) {
                 for (int32_t x = 0; x < width; x++) {
-                    RenderSky(
-                        x, y,
-                        camera,
-                        atmosphere_, textures_,
-                        sun_direction,
-                        earth_center,
-                        sun_size);
+                    const auto sky_luminance{
+                        RenderSky(
+                            x, y,
+                            camera,
+                            atmosphere_, textures_,
+                            sun_radiance_to_luminance_, sky_radiance_to_luminance_,
+                            sun_direction,
+                            earth_center,
+                            sun_size)
+                    };
+                    dst.put(x, y, sky_luminance);
                 }
             }
         }

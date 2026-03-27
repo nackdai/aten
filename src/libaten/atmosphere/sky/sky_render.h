@@ -180,6 +180,8 @@ namespace aten::sky {
         const aten::CameraParameter& camera,
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::sky::PreComputeTextures& texture,
+        const aten::vec3& sun_radiance_to_luminance,
+        const aten::vec3& sky_radiance_to_luminance,
         const aten::vec3& sun_direction,
         const aten::vec3& earth_center,
         const float sun_size)
@@ -207,6 +209,8 @@ namespace aten::sky {
                 transmittance)
         };
 
+        radiance = sky_radiance_to_luminance * radiance;
+
         // If the view ray intersects the Sun, add the Sun radiance.
         // ここで、視線方向のベクトルを v、太陽の方向ベクトルを s とします（どちらも単位ベクトル）.
         // この2つのベクトルのなす角を α とすると、視線が太陽の円盤内にある条件は α <= θ です.
@@ -216,7 +220,10 @@ namespace aten::sky {
         // つまり、view_direction と sun_direction が近いほど、値は大きくなる.
         // なので、>（大なり）だと太陽の視半径内といえる.
         if (dot(view_direction, sun_direction) > sun_size) {
-            radiance = radiance + transmittance * GetSolarRadiance(atmosphere);
+            auto solar_radiance{ GetSolarRadiance(atmosphere) };
+            solar_radiance = sun_radiance_to_luminance * solar_radiance;
+
+            radiance = radiance + transmittance * solar_radiance;
         }
 
         return radiance;
@@ -234,11 +241,11 @@ namespace aten::sky {
 
             const auto row = static_cast<int32_t>(aten::floor(u));
             AT_ASSERT(row >= 0 && row + 1 < CIE_2_DEG_COLOR_MATCHING_FUNCTIONS.size());
-            AT_ASSERT(CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[4 * row].labmda <= wavelength
-                && CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[4 * (row + 1)].labmda >= wavelength);
+            AT_ASSERT(CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row].labmda <= wavelength
+                && CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row + 1].labmda >= wavelength);
 
-            const auto& element_0 = CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[4 * row];
-            const auto& element_1 = CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[4 * (row + 1)];
+            const auto& element_0 = CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row];
+            const auto& element_1 = CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row + 1];
 
             u -= row;
 

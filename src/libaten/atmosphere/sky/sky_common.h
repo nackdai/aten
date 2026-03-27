@@ -117,7 +117,7 @@ namespace aten::sky {
             && r * r * (mu * mu - 1.0F) + atmosphere.bottom_radius * atmosphere.bottom_radius >= 0.0F;
     }
 
-    float InterpolateFactor(
+    inline float InterpolateFactor(
         const std::vector<float>& interp_factors,
         const std::vector<float>& base_values,
         const float v)
@@ -139,7 +139,7 @@ namespace aten::sky {
     }
 
     // 波長ごとのfactorsの値をRGB波長の値に応じた値になるように補間する.
-    aten::vec3 InterpolateFactorByRGBLambda(
+    inline aten::vec3 InterpolateFactorByRGBLambda(
         const std::vector<float> factors,
         const std::vector<float> wavelengths,
         const aten::vec3& rgb_lambda)

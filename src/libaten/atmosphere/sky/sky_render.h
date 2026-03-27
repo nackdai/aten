@@ -23,14 +23,14 @@ namespace aten::sky {
     // r = 1 となる.
     // 今回の場合は、太陽を円盤として立体角は
     //  S = pi x radius ^ 2
-    aten::vec3 GetSolarRadiance(const aten::sky::AtmosphereParameters& atmosphere)
+    inline aten::vec3 GetSolarRadiance(const aten::sky::AtmosphereParameters& atmosphere)
     {
         const auto sun_solid_angle = AT_MATH_PI * atmosphere.sun_angular_radius * atmosphere.sun_angular_radius;
         return atmosphere.solar_irradiance / sun_solid_angle;
     }
 
     namespace {
-        aten::tuple<aten::vec3, aten::vec3> GetCombinedScattering(
+        inline aten::tuple<aten::vec3, aten::vec3> GetCombinedScattering(
             const aten::sky::AtmosphereParameters& atmosphere,
             const aten::sky::PreComputeTextures texture,
             const float r,
@@ -93,7 +93,7 @@ namespace aten::sky {
         function, where most of the computations are used to correctly handle the case
         of viewers outside the atmosphere, and the case of light shafts:
     */
-    aten::vec3 GetSkyRadiance(
+    inline aten::vec3 GetSkyRadiance(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::sky::PreComputeTextures& texture,
         const aten::vec3& camera,
@@ -175,7 +175,7 @@ namespace aten::sky {
             + single_mie_scattering * MiePhaseFunction(atmosphere.mie_phase_function_g, nu);
     }
 
-    aten::vec3 RenderSky(
+    inline aten::vec3 RenderSky(
         int32_t x, int32_t y,
         const aten::CameraParameter& camera,
         const aten::sky::AtmosphereParameters& atmosphere,
@@ -223,7 +223,7 @@ namespace aten::sky {
     }
 
     namespace {
-        aten::tuple<float, float, float> CieColorMatchingFunctionTableValue(const int32_t wavelength)
+        inline aten::tuple<float, float, float> CieColorMatchingFunctionTableValue(const int32_t wavelength)
         {
             if (wavelength <= aten::sky::LambdaMin || wavelength >= aten::sky::LambdaMax) {
                 return aten::make_tuple(0.0F, 0.0F, 0.0F);
@@ -255,7 +255,7 @@ namespace aten::sky {
         (see Section 14.3 in https://arxiv.org/pdf/1612.04336.pdf"A Qualitative and Quantitative Evaluation of 8 Clear Sky Models</a> for their definitions):
     */
     // The returned constants are in lumen.nm / watt.
-    aten::vec3 ComputeSpectralRadianceToLuminanceFactors(
+    inline aten::vec3 ComputeSpectralRadianceToLuminanceFactors(
         const std::vector<float>& wavelengths,
         const std::vector<float>& solar_irradiance,
         const float lambda_power)

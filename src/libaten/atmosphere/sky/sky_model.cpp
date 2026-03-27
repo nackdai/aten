@@ -438,8 +438,14 @@ namespace aten::sky {
 
     void SkyModel::PreCompute()
     {
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp parallel
+#endif
         {
             // Transmittance を計算.
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
             for (int32_t y = 0; y < aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT; y++) {
                 for (int32_t x = 0; x < aten::sky::TRANSMITTANCE_TEXTURE_WIDTH; x++) {
                     ComputeTransmittanceToTopAtmosphereBoundaryTexture(
@@ -451,6 +457,9 @@ namespace aten::sky {
 
             // 最初の ΔE を計算.
             // 太陽からの入射放射輝度から指定された点での放射照度を計算する.
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
             for (int32_t y = 0; y < aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT; y++) {
                 for (int32_t x = 0; x < aten::sky::TRANSMITTANCE_TEXTURE_WIDTH; x++) {
                     ComputeDirectIrradianceTexture(
@@ -462,6 +471,9 @@ namespace aten::sky {
 
             // 最初の ΔS を計算.
             // 太陽光（一方向）からの単一散乱.
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
             for (int32_t y = 0; y < aten::sky::SCATTERING_TEXTURE_HEIGHT; y++) {
                 for (int32_t x = 0; x < aten::sky::SCATTERING_TEXTURE_WIDTH; x++) {
                     for (int32_t z = 0; z < aten::sky::SCATTERING_TEXTURE_DEPTH; z++) {
@@ -478,6 +490,9 @@ namespace aten::sky {
             for (int32_t scattering_order = 2; scattering_order <= NUM_SCATTERING; scattering_order++)
             {
                 // ΔJ を計算.
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
                 for (int32_t y = 0; y < aten::sky::SCATTERING_TEXTURE_HEIGHT; y++) {
                     for (int32_t x = 0; x < aten::sky::SCATTERING_TEXTURE_WIDTH; x++) {
                         for (int32_t z = 0; z < aten::sky::SCATTERING_TEXTURE_DEPTH; z++) {
@@ -492,6 +507,9 @@ namespace aten::sky {
                 }
 
                 // ΔE を計算して、E = E + ΔE する.
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
                 for (int32_t y = 0; y < aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT; y++) {
                     for (int32_t x = 0; x < aten::sky::TRANSMITTANCE_TEXTURE_WIDTH; x++) {
                         ComputeIndirectIrradianceTexture(
@@ -504,6 +522,9 @@ namespace aten::sky {
                 }
 
                 // ΔS を計算して、S = S + ΔS する.
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
                 for (int32_t y = 0; y < aten::sky::SCATTERING_TEXTURE_HEIGHT; y++) {
                     for (int32_t x = 0; x < aten::sky::SCATTERING_TEXTURE_WIDTH; x++) {
                         for (int32_t z = 0; z < aten::sky::SCATTERING_TEXTURE_DEPTH; z++) {
@@ -544,15 +565,23 @@ namespace aten::sky {
 
         const auto sun_size = aten::cos(SunAngularRadius);
 
-        for (int32_t y = 0; y < height; y++) {
-            for (int32_t x = 0; x < width; x++) {
-                RenderSky(
-                    x, y,
-                    camera,
-                    atmosphere_, textures_,
-                    sun_direction,
-                    earth_center,
-                    sun_size);
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp parallel
+#endif
+        {
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+                    RenderSky(
+                        x, y,
+                        camera,
+                        atmosphere_, textures_,
+                        sun_direction,
+                        earth_center,
+                        sun_size);
+                }
             }
         }
     }

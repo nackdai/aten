@@ -580,9 +580,9 @@ TEST_F(SkyTest, ComputeAndGetIrradiance)
         aten::sky::SCATTERING_TEXTURE_WIDTH,
         aten::sky::SCATTERING_TEXTURE_HEIGHT,
         aten::sky::SCATTERING_TEXTURE_DEPTH);
-    for (unsigned int x = 0; x < fake_multiple_scattering.width(); ++x) {
-        for (unsigned int y = 0; y < fake_multiple_scattering.height(); ++y) {
-            for (unsigned int z = 0; z < fake_multiple_scattering.depth(); ++z)
+    for (int32_t x = 0; x < fake_multiple_scattering.width(); ++x) {
+        for (int32_t y = 0; y < fake_multiple_scattering.height(); ++y) {
+            for (int32_t z = 0; z < fake_multiple_scattering.depth(); ++z)
             {
                 const auto v = z + fake_multiple_scattering.depth() *
                     (y + fake_multiple_scattering.height() * x);

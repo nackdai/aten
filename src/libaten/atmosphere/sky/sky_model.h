@@ -42,5 +42,7 @@ namespace AT_NAME::sky {
 
         aten::vec3 sun_radiance_to_luminance_;
         aten::vec3 sky_radiance_to_luminance_;
+
+        aten::vec3 white_point_;
     };
 }

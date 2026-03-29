@@ -885,6 +885,9 @@
     <ClCompile Include="..\src\libaten\atmosphere\sky\sky_model.cpp">
       <Filter>atmosphere\sky</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\atmosphere\sky\sky_render.cpp">
+      <Filter>atmosphere\sky</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\gamma_fs.glsl">

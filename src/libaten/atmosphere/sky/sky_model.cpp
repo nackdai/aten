@@ -160,7 +160,10 @@ namespace aten::sky {
         atmosphere_.bottom_radius = aten::Length::as(BottomRadius, MeterUnit::km);
         atmosphere_.top_radius = aten::Length::as(TopRadius, MeterUnit::km);
 
-        SetDensityProfileLayer(atmosphere_.rayleigh_density.layers[0], rayleigh_layer);
+        // NOTE:
+        // altitude < layers[0].width ? layers[0] : layers[1] で分岐される.
+        // layers[0].width = 0.0F なので、常に layers[1] が利用される.
+        SetDensityProfileLayer(atmosphere_.rayleigh_density.layers[1], rayleigh_layer);
 
         // m^-1 -> km^-1
         atmosphere_.rayleigh_scattering = InterpolateFactorByRGBLambda(rayleigh_scattering, wavelengths, rgb_lambdas);
@@ -168,7 +171,10 @@ namespace aten::sky {
         atmosphere_.rayleigh_scattering.y = aten::InverseLength::as(atmosphere_.rayleigh_scattering.y, MeterUnit::km);
         atmosphere_.rayleigh_scattering.z = aten::InverseLength::as(atmosphere_.rayleigh_scattering.z, MeterUnit::km);
 
-        SetDensityProfileLayer(atmosphere_.mie_density.layers[0], mie_layer);
+        // NOTE:
+        // altitude < layers[0].width ? layers[0] : layers[1] で分岐される.
+        // layers[0].width = 0.0F なので、常に layers[1] が利用される.
+        SetDensityProfileLayer(atmosphere_.mie_density.layers[1], mie_layer);
 
         atmosphere_.mie_scattering = InterpolateFactorByRGBLambda(mie_scattering, wavelengths, rgb_lambdas);
 
@@ -194,6 +200,12 @@ namespace aten::sky {
 
         sun_radiance_to_luminance_ = aten::sky::ComputeSpectralRadianceToLuminanceFactors(wavelengths, solar_irradiance, 0);
         sky_radiance_to_luminance_ = aten::sky::ComputeSpectralRadianceToLuminanceFactors(wavelengths, solar_irradiance, -3);
+
+        // TODO
+        // For tone mapping.
+        white_point_ = ConvertSpectrumToLinearSrgb(wavelengths, solar_irradiance);
+        const auto white_point_avg = (white_point_.r + white_point_.g + white_point_.b) / 3.0F;
+        white_point_ /= white_point_avg;
     }
 
     namespace {
@@ -540,6 +552,8 @@ namespace aten::sky {
         }
     }
 
+//#pragma optimize("", off)
+
     // NOTE
     // camera parameters has to be specified based on km unit.
     void SkyModel::Render(
@@ -553,9 +567,9 @@ namespace aten::sky {
         const auto sun_azimuth_angle_radians = 2.9F;
 
         const aten::vec3 sun_direction{
-            aten::cos(sun_azimuth_angle_radians) * aten::sin(sun_zenith_angle_radians),
-            aten::sin(sun_azimuth_angle_radians) * aten::sin(sun_zenith_angle_radians),
-            aten::cos(sun_zenith_angle_radians)
+            aten::sin(sun_zenith_angle_radians) * aten::cos(sun_azimuth_angle_radians),
+            aten::cos(sun_zenith_angle_radians),
+            aten::sin(sun_zenith_angle_radians) * aten::sin(sun_azimuth_angle_radians)
         };
 
         const aten::vec3 earth_center{
@@ -571,11 +585,12 @@ namespace aten::sky {
 #endif
         {
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
-#pragma omp for
+//#pragma omp for
+#pragma omp for schedule(dynamic, 1)
 #endif
             for (int32_t y = 0; y < height; y++) {
                 for (int32_t x = 0; x < width; x++) {
-                    const auto sky_luminance{
+                    auto sky_luminance{
                         RenderSky(
                             x, y,
                             camera,
@@ -585,7 +600,22 @@ namespace aten::sky {
                             earth_center,
                             sun_size)
                     };
-                    dst.put(x, y, sky_luminance);
+
+                    // TODO
+                    // Tone mapping.
+                    // white point (RGB=1.0（白））に対する比率の負値のexponential -> 強い値ほど減衰（ゼロに近い）.
+                    // それを 1.0 から引くことで、結果強い値が大きくなる.
+                    // exposure は全体の明るさを調整するための係数.
+                    aten::vec3 color{
+                        aten::vec3(1.0F) - aten::exp(-sky_luminance / white_point_ * EXPOSURE)
+                    };
+
+                    if (x == 0) {
+                        AT_PRINTF("[%d, %d] : %f, %f, %f\n", x, y, color.r, color.g, color.b);
+                    }
+                    //AT_PRINTF("[%d, %d] : %f, %f, %f\n", x, y, color.r, color.g, color.b);
+
+                    dst.put(x, y, color);
                 }
             }
         }

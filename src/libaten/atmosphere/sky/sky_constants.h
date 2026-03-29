@@ -213,4 +213,5 @@ namespace aten::sky {
       +0.0557F, -0.2040F, +1.0570F
     };
 
+    constexpr float EXPOSURE = 10.0F * 1e-5F;
 }

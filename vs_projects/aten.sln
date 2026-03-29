@@ -173,6 +173,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "npr_renderer", "npr_rendere
 		{F1F65E75-E655-449E-8115-186423D33147} = {F1F65E75-E655-449E-8115-186423D33147}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "atmosphere_renderer", "atmosphere_renderer.vcxproj", "{FDC530B9-578C-4E6D-8D92-59A67C601D95}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0191D96F-E987-4FDD-9D7A-934931E22B43} = {0191D96F-E987-4FDD-9D7A-934931E22B43}
+		{393C16ED-D331-4C42-B02A-4ECC84979166} = {393C16ED-D331-4C42-B02A-4ECC84979166}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -354,6 +360,12 @@ Global
 		{119B5EF2-25F8-4F38-AEE7-3DAED11247EC}.Profile|x64.Build.0 = Profile|x64
 		{119B5EF2-25F8-4F38-AEE7-3DAED11247EC}.Release|x64.ActiveCfg = Release|x64
 		{119B5EF2-25F8-4F38-AEE7-3DAED11247EC}.Release|x64.Build.0 = Release|x64
+		{FDC530B9-578C-4E6D-8D92-59A67C601D95}.Debug|x64.ActiveCfg = Debug|x64
+		{FDC530B9-578C-4E6D-8D92-59A67C601D95}.Debug|x64.Build.0 = Debug|x64
+		{FDC530B9-578C-4E6D-8D92-59A67C601D95}.Profile|x64.ActiveCfg = Profile|x64
+		{FDC530B9-578C-4E6D-8D92-59A67C601D95}.Profile|x64.Build.0 = Profile|x64
+		{FDC530B9-578C-4E6D-8D92-59A67C601D95}.Release|x64.ActiveCfg = Release|x64
+		{FDC530B9-578C-4E6D-8D92-59A67C601D95}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

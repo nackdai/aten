@@ -17,11 +17,27 @@ namespace aten::sky {
         return tex.AtWithBilinear(uv.x, uv.y);
     }
 
+    inline void WriteTexture2D(
+        aten::texture& tex,
+        const aten::vec3& value,
+        int32_t x, int32_t y)
+    {
+        tex.PutByXYcoord(x, y, value);
+    }
+
     inline aten::vec3 SampleTexture3D(
         const aten::texture3d& tex,
         const aten::vec3& uvw)
     {
         return tex.AtWithTrilinear(uvw.x, uvw.y, uvw.z);
+    }
+
+    inline void WriteTexture3D(
+        aten::texture3d& tex,
+        const aten::vec3& value,
+        int32_t x, int32_t y, int32_t z)
+    {
+        tex.SetByXYZ(value, x, y, z);
     }
 
     inline float safe_sqrt(const float x)

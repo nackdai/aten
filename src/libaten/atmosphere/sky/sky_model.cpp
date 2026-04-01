@@ -238,7 +238,7 @@ namespace aten::sky {
                     r, mu)
             };
 
-            textures.transmittance_texture.PutByXYcoord(x, y, transmittance);
+            WriteTexture2D(textures.transmittance_texture, transmittance, x, y);
         }
 
         static const aten::vec2 IRRADIANCE_TEXTURE_SIZE{
@@ -267,8 +267,8 @@ namespace aten::sky {
                 ComputeDirectIrradiance(atmosphere, textures.transmittance_texture, r, mu_s)
             };
 
-            textures.delta_irradiance_texture.PutByXYcoord(x, y, irradiance);
-            textures.irradiance_texture.PutByXYcoord(x, y, aten::vec3(0.0F));
+            WriteTexture2D(textures.delta_irradiance_texture, irradiance, x, y);
+            WriteTexture2D(textures.irradiance_texture, aten::vec3(0.0F), x, y);
         }
 
         // 論文内の 4. Precomputations の Angular precision の部分で説明されている、太陽光からの単一散乱のテクスチャを計算するためのシェーダ.
@@ -308,16 +308,17 @@ namespace aten::sky {
                 r, mu, mu_s, nu, ray_r_mu_intersects_ground,
                 rayleigh, mie);
 
-            textures.delta_rayleigh_scattering_texture.SetByXYZ(rayleigh, x, y, layer);
-            textures.delta_mie_scattering_texture.SetByXYZ(mie, x, y, layer);
+            WriteTexture3D(textures.delta_rayleigh_scattering_texture, rayleigh, x, y, layer);
+            WriteTexture3D(textures.delta_mie_scattering_texture, mie, x, y, layer);
 
             rayleigh = luminance_from_radiance * rayleigh;
             mie = luminance_from_radiance * mie;
 
-            textures.scattering_texture.SetByXYZ(
+            WriteTexture3D(
+                textures.scattering_texture,
                 aten::vec4(rayleigh.r, rayleigh.g, rayleigh.b, mie.r),
                 x, y, layer);
-            textures.optional_single_mie_scattering_texture.SetByXYZ(mie, x, y, layer);
+            WriteTexture3D(textures.optional_single_mie_scattering_texture, mie, x, y, layer);
         }
 
         // ΔJ を計算する.
@@ -357,7 +358,8 @@ namespace aten::sky {
                     scattering_order)
             };
 
-            textures.delta_scattering_density_texture.SetByXYZ(
+            WriteTexture3D(
+                textures.delta_scattering_density_texture,
                 scattering_density,
                 x, y, layer);
         }
@@ -394,9 +396,10 @@ namespace aten::sky {
             const auto curr_irradiance{ textures.irradiance_texture.AtByXY(x, y) };
             delta_irradiance = luminance_from_radiance * delta_irradiance;
 
-            textures.irradiance_texture.PutByXYcoord(
-                x, y,
-                curr_irradiance + delta_irradiance);
+            WriteTexture2D(
+                textures.irradiance_texture,
+                curr_irradiance + delta_irradiance,
+                x, y);
         }
 
         // S = S + ΔS を計算するための ΔS を計算する.
@@ -434,7 +437,8 @@ namespace aten::sky {
 
             const auto curr_scattering{ textures.scattering_texture.AtByXYZ(x, y, layer) };
 
-            textures.delta_multiple_scattering_texture.SetByXYZ(
+            WriteTexture3D(
+                textures.delta_multiple_scattering_texture,
                 delta_multiple_scattering,
                 x, y, layer);
 
@@ -442,7 +446,8 @@ namespace aten::sky {
 
             // C∗ = S_R[L0] + S[L∗]/P_R として保存.
             // P_R は後で乗算して、P_R・S_R[L0]+S[L∗] として計算するため.
-            textures.scattering_texture.SetByXYZ(
+            WriteTexture3D(
+                textures.scattering_texture,
                 curr_scattering + delta_multiple_scattering / phase,
                 x, y, layer);
         }

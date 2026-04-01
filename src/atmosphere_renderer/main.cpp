@@ -114,17 +114,20 @@ public:
             visualizer_->clear();
         }
 
-        sky_model_.Render(
-            WIDTH, HEIGHT,
-            camera_.param(),
-            dst_);
+        if (!is_sky_rendered_) {
+            sky_model_.Render(
+                WIDTH, HEIGHT,
+                camera_.param(),
+                dst_);
 
-        aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
-        aten::RasterizeRenderer::clearBuffer(
-            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Stencil,
-            clear_color,
-            1.0f,
-            0);
+            aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
+            aten::RasterizeRenderer::clearBuffer(
+                aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Stencil,
+                clear_color,
+                1.0f,
+                0);
+            is_sky_rendered_ = true;
+        }
 
         visualizer_->renderPixelData(dst_.image().data(), camera_.NeedRevert());
 
@@ -255,6 +258,9 @@ private:
     bool is_mouse_r_btn_down_{ false };
     int32_t prev_mouse_pos_x_{ 0 };
     int32_t prev_mouse_pos_y_{ 0 };
+
+    // TODO
+    bool is_sky_rendered_{ false };
 };
 
 int32_t main()

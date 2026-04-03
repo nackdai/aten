@@ -1,14 +1,29 @@
 #pragma once
 
+#include <type_traits>
+
 #include "defs.h"
 #include "cuda/cudadefs.h"
 #include "cuda/cudautil.h"
 
+#include "image/texture.h"
+
 namespace idaten
 {
+    struct SurfaceTexture
+    {
+        cudaSurfaceObject_t surface{ 0 };
+        cudaTextureObject_t texture{ 0 };
+    };
+
     template <class T>
     class CudaSurfaceTexture {
     public:
+        static_assert(
+            std::is_same_v<T, float> || std::is_same_v<T, float2> || std::is_same_v<T, float4>
+            || std::is_same_v<T, int> || std::is_same_v<T, int2> || std::is_same_v < T, int4>,
+            "");
+        
         using ValueType = T;
 
         CudaSurfaceTexture() = default;
@@ -22,7 +37,9 @@ namespace idaten
         CudaSurfaceTexture& operator=(const CudaSurfaceTexture&) = delete;
         CudaSurfaceTexture& operator=(CudaSurfaceTexture&& other) = delete;
 
-        bool Init(int32_t width, int32_t height)
+        bool Init(
+            int32_t width, int32_t height,
+            aten::TextureFilterMode filter = aten::TextureFilterMode::Point)
         {
             if (surf_obj_ != 0) {
                 return false;
@@ -46,7 +63,7 @@ namespace idaten
                 return false;
             }
 
-            result = CreateTextureObject();
+            result = CreateTextureObject(filter);
             if (!result) {
                 AT_ASSERT(false);
                 Destroy();
@@ -82,7 +99,12 @@ namespace idaten
             return tex_obj_;
         }
 
-    private:
+        SurfaceTexture GetSurfaceTexture() const
+        {
+            return SurfaceTexture{ surf_obj_, tex_obj_ };
+        }
+
+    protected:
         bool CreateSurfaceObject()
         {
             cudaResourceDesc surf_rsc_desc;
@@ -96,7 +118,7 @@ namespace idaten
             return result;
         }
 
-        bool CreateTextureObject()
+        bool CreateTextureObject(aten::TextureFilterMode filter)
         {
             cudaResourceDesc tex_rsc_desc;
             memset(&tex_rsc_desc, 0, sizeof(tex_rsc_desc));
@@ -111,6 +133,10 @@ namespace idaten
             tex_desc.filterMode = cudaFilterModeLinear;
             tex_desc.addressMode[0] = cudaAddressModeClamp;
             tex_desc.addressMode[1] = cudaAddressModeClamp;
+            tex_desc.addressMode[2] = cudaAddressModeClamp;
+            tex_desc.filterMode = filter == aten::TextureFilterMode::Linear
+                ? cudaFilterModeLinear
+                : cudaFilterModePoint;
             tex_desc.readMode = cudaReadModeElementType;
 
             tex_obj_ = 0;
@@ -119,9 +145,66 @@ namespace idaten
             return result;
         }
 
-    private:
+    protected:
         cudaArray_t cuda_array_{ nullptr };
         cudaSurfaceObject_t surf_obj_{ 0 };
         cudaTextureObject_t tex_obj_{ 0 };
+    };
+
+    template <class T>
+    class CudaSurfaceTexture3D : public CudaSurfaceTexture<T> {
+    public:
+        static_assert(
+            std::is_same_v<T, float> || std::is_same_v<T, float2> || std::is_same_v<T, float4>
+            || std::is_same_v<T, int> || std::is_same_v<T, int2> || std::is_same_v < T, int4>,
+            "");
+
+        CudaSurfaceTexture3D() = default;
+        ~CudaSurfaceTexture3D()
+        {
+            Destroy();
+        }
+
+        CudaSurfaceTexture3D(const CudaSurfaceTexture3D&) = delete;
+        CudaSurfaceTexture3D(CudaSurfaceTexture3D&& other) = delete;
+        CudaSurfaceTexture3D& operator=(const CudaSurfaceTexture3D&) = delete;
+        CudaSurfaceTexture3D& operator=(CudaSurfaceTexture3D&& other) = delete;
+
+        bool Init(
+            int32_t width, int32_t height, int32_t depth,
+            aten::TextureFilterMode filter)
+        {
+            if (surf_obj_ != 0) {
+                return false;
+            }
+
+            cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<T>();
+            cudaExtent extent = make_cudaExtent(width, height, depth);
+            auto result = checkCudaErrors(cudaMalloc3DArray(
+                &cuda_array_,
+                &channelDesc,
+                extent,
+                cudaArraySurfaceLoadStore));
+            if (!result) {
+                AT_ASSERT(false);
+                return false;
+            }
+
+            result = CreateSurfaceObject();
+            if (!result) {
+                AT_ASSERT(false);
+                Destroy();
+                return false;
+            }
+
+            result = CreateTextureObject(filter);
+            if (!result) {
+                AT_ASSERT(false);
+                Destroy();
+                return false;
+            }
+
+            return true;
+        }
     };
 }

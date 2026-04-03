@@ -1,5 +1,4 @@
-#pragma once
-
+#if 0
 #include "atmosphere/sky/sky_common.h"
 #include "atmosphere/sky/sky_compute.h"
 #include "atmosphere/sky/sky_params.h"
@@ -331,3 +330,4 @@ namespace aten::sky {
     }
 
 }
+#endif

@@ -29,7 +29,11 @@ namespace aten::sky {
     void SkyModel::Init()
     {
         textures_.Init();
+        InitParameters();
+    }
 
+    void SkyModel::InitParameters()
+    {
         using Irrandiance = InverseLength;
 
         std::vector<float> wavelengths;

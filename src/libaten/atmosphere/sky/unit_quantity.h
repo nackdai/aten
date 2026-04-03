@@ -44,10 +44,10 @@ namespace aten {
         }
     }
 
-    template <int32_t Power>
+    template <int32_t TPower>
     class Quantity {
     public:
-        static constexpr auto Power = Power;
+        static constexpr auto Power = TPower;
 
         constexpr explicit Quantity(float v) : value_{ v } {}
 

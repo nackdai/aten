@@ -4,9 +4,11 @@
 #include "atmosphere/sky/sky_precompute_textures.h"
 
 #include "camera/camera.h"
+#include "image/texture.h"
+#include "image/texture_3d.h"
 #include "renderer/film.h"
 
-namespace AT_NAME::sky {
+namespace aten::sky {
     class SkyModel {
     public:
         SkyModel() = default;
@@ -32,17 +34,21 @@ namespace AT_NAME::sky {
             const aten::CameraParameter& camera,
             Film& dst);
 
-    private:
+    protected:
+        void InitParameters();
+
         // TODO
         static constexpr int32_t NUM_SCATTERING = 4;
 
         aten::sky::AtmosphereParameters atmosphere_;
-        aten::sky::PreComputeTextures textures_;
         aten::mat4 luminance_from_radiance_;
 
         aten::vec3 sun_radiance_to_luminance_;
         aten::vec3 sky_radiance_to_luminance_;
 
         aten::vec3 white_point_;
+
+    private:
+        aten::sky::PreComputeTextureManager<aten::texture, aten::texture3d> textures_;
     };
 }

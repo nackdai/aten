@@ -1,52 +1,82 @@
 #pragma once
 
 #include "atmosphere/sky/sky_params.h"
+#include "atmosphere/sky/sky_types.h"
+
 #include "math/vec2.h"
-#include "image/texture.h"
-#include "image/texture_3d.h"
 
 // NOTE
 // 計算単位
 // - meter
 
 namespace aten::sky {
-    inline aten::vec3 SampleTexture2D(
-        const aten::texture& tex,
+    inline AT_DEVICE_API aten::vec3 SampleTexture2D(
+        const texture2d& tex,
         const aten::vec2& uv)
     {
+#ifdef __CUDACC__
+        AT_ASSERT(tex.texture > 0);
+        auto tmp = tex2D<float4>(tex.texture, uv.x, uv.y);
+        return { tmp.x, tmp.y, tmp.z };
+#else
         return tex.AtWithBilinear(uv.x, uv.y);
+#endif
     }
 
-    inline void WriteTexture2D(
-        aten::texture& tex,
+    inline AT_DEVICE_API void WriteTexture2D(
+        texture2d& tex,
         const aten::vec3& value,
         int32_t x, int32_t y)
     {
+#ifdef __CUDACC__
+        AT_ASSERT(tex.surface > 0);
+        surf2Dwrite(
+            make_float4(value.x, value.y, value.z, 1.0F),
+            tex.surface,
+            x * sizeof(float4), y,
+            cudaBoundaryModeTrap);
+#else
         tex.PutByXYcoord(x, y, value);
+#endif
     }
 
-    inline aten::vec3 SampleTexture3D(
-        const aten::texture3d& tex,
+    inline AT_DEVICE_API aten::vec3 SampleTexture3D(
+        const texture3d& tex,
         const aten::vec3& uvw)
     {
+#ifdef __CUDACC__
+        AT_ASSERT(tex.texture > 0);
+        auto tmp = tex3D<float4>(tex.texture, uvw.x, uvw.y, uvw.z);
+        return { tmp.x, tmp.y, tmp.z };
+#else
         return tex.AtWithTrilinear(uvw.x, uvw.y, uvw.z);
+#endif
     }
 
-    inline void WriteTexture3D(
-        aten::texture3d& tex,
+    inline AT_DEVICE_API void WriteTexture3D(
+        texture3d& tex,
         const aten::vec3& value,
         int32_t x, int32_t y, int32_t z)
     {
+#ifdef __CUDACC__
+        AT_ASSERT(tex.surface > 0);
+        surf3Dwrite(
+            make_float4(value.x, value.y, value.z, 1.0F),
+            tex.surface,
+            x * sizeof(float4), y, z,
+            cudaBoundaryModeTrap);
+#else
         tex.SetByXYZ(value, x, y, z);
+#endif
     }
 
-    inline float safe_sqrt(const float x)
+    inline AT_DEVICE_API float safe_sqrt(const float x)
     {
         return x <= 0.0F ? 0.0F : aten::sqrt(x);
     }
 
     // 大気の上端境界までの距離を計算する.
-    inline float DistanceToTopAtmosphereBoundary(
+    inline AT_DEVICE_API float DistanceToTopAtmosphereBoundary(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu)  // 太陽方向の余弦.
@@ -68,7 +98,7 @@ namespace aten::sky {
     }
 
     // 地球との交点までの距離を計算する.
-    inline float DistanceToBottomAtmosphereBoundary(
+    inline AT_DEVICE_API float DistanceToBottomAtmosphereBoundary(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu)
@@ -86,7 +116,7 @@ namespace aten::sky {
         return aten::max(-r * mu - safe_sqrt(discriminant), 0.0F);
     }
 
-    inline float DistanceToNearestAtmosphereBoundary(
+    inline AT_DEVICE_API float DistanceToNearestAtmosphereBoundary(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu,
@@ -101,20 +131,20 @@ namespace aten::sky {
     }
 
     // 論文の式(2)
-    inline float RayleighPhaseFunction(const float nu)
+    inline AT_DEVICE_API float RayleighPhaseFunction(const float nu)
     {
         constexpr float k = 3.0F / (16.0F * AT_MATH_PI);
         return k * (1.0F + nu * nu);
     }
 
     // 論文の式(4)
-    inline float MiePhaseFunction(const float g, const float nu) {
+    inline AT_DEVICE_API float MiePhaseFunction(const float g, const float nu) {
         const float k = 3.0F / (8.0F * AT_MATH_PI) * (1.0F - g * g) / (2.0F + g * g);
         return k * (1.0F + nu * nu) / aten::pow(1.0F + g * g - 2.0F * g * nu, 1.5F);
     }
 
     // 視線レイが地面と交差するかどうかを計算する.
-    inline bool RayIntersectsGround(
+    inline AT_DEVICE_API bool RayIntersectsGround(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu)

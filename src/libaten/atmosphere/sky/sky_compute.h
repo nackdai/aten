@@ -15,7 +15,7 @@
 
 namespace aten::sky {
     // 大気境界とのOpticalDepthを計算する.
-    inline float ComputeOpticalLengthToTopAtmosphereBoundary(
+    inline AT_DEVICE_API float ComputeOpticalLengthToTopAtmosphereBoundary(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::sky::DensityProfile& profile,
         const float r,
@@ -66,7 +66,7 @@ namespace aten::sky {
     }
 
     namespace transmittance {
-        inline aten::vec3 ComputeTransmittanceToTopAtmosphereBoundary(
+        inline AT_DEVICE_API aten::vec3 ComputeTransmittanceToTopAtmosphereBoundary(
             const aten::sky::AtmosphereParameters& atmosphere,
             const float r,
             const float mu)
@@ -83,9 +83,9 @@ namespace aten::sky {
                 + atmosphere.absorption_extinction * ComputeOpticalLengthToTopAtmosphereBoundary(atmosphere, atmosphere.absorption_density, r, mu)));
         }
 
-        inline vec3 GetTransmittanceToTopAtmosphereBoundary(
+        inline AT_DEVICE_API vec3 GetTransmittanceToTopAtmosphereBoundary(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::texture& transmittance_texture,
+            const aten::sky::texture2d& transmittance_texture,
             const float r,
             const float mu)
         {
@@ -101,9 +101,9 @@ namespace aten::sky {
 
         // 視点xから視線ベクトル上のある点まで間の transmittance.
         // 視線ベクトル方向でのtransmittance.
-        inline aten::vec3 GetTransmittance(
+        inline AT_DEVICE_API aten::vec3 GetTransmittance(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::texture& transmittance_texture,
+            const aten::sky::texture2d& transmittance_texture,
             const float r,
             const float mu,
             const float d,
@@ -168,9 +168,9 @@ namespace aten::sky {
         }
 
         // ある点から太陽方向に向かって大気上端までの間の transmittance.
-        inline aten::vec3 GetTransmittanceToSun(
+        inline AT_DEVICE_API aten::vec3 GetTransmittanceToSun(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::texture& transmittance_texture,
+            const aten::sky::texture2d& transmittance_texture,
             const float r,
             const float mu_s)
         {
@@ -210,9 +210,9 @@ namespace aten::sky {
     }
 
     namespace irradiance {
-        inline aten::vec3 GetIrradiance(
+        inline AT_DEVICE_API aten::vec3 GetIrradiance(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::texture& irradiance_texture,
+            const aten::sky::texture2d& irradiance_texture,
             const float r,
             const float mu_s)
         {
@@ -222,9 +222,9 @@ namespace aten::sky {
     }
 
     // 太陽からの入射放射照度を事前計算する.
-    inline aten::vec3 ComputeDirectIrradiance(
+    inline AT_DEVICE_API aten::vec3 ComputeDirectIrradiance(
         const aten::sky::AtmosphereParameters& atmosphere,
-        const aten::texture& transmittance_texture,
+        const aten::sky::texture2d& transmittance_texture,
         const float r,
         const float mu_s)
     {
@@ -294,9 +294,9 @@ namespace aten::sky {
     }
 
     namespace single_scattering {
-        inline void ComputeSingleScatteringIntegrand(
+        inline AT_DEVICE_API void ComputeSingleScatteringIntegrand(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::texture& transmittance_texture,
+            const aten::sky::texture2d& transmittance_texture,
             const float r,
             const float mu,
             const float mu_s,
@@ -345,9 +345,9 @@ namespace aten::sky {
                 atmosphere.mie_density, r_d - atmosphere.bottom_radius);
         }
 
-        inline void ComputeSingleScattering(
+        inline AT_DEVICE_API void ComputeSingleScattering(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::texture& transmittance_texture,
+            const aten::sky::texture2d& transmittance_texture,
             const float r,
             const float mu,
             const float mu_s,
@@ -408,9 +408,9 @@ namespace aten::sky {
     }
 
     namespace scattering {
-        inline aten::vec3 GetScattering(
+        inline AT_DEVICE_API aten::vec3 GetScattering(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::texture3d& scattering_texture,
+            const aten::sky::texture3d& scattering_texture,
             const float r,
             const float mu,
             const float mu_s,
@@ -441,11 +441,11 @@ namespace aten::sky {
             return a * (1.0F - lerp) + b * lerp;
         }
 
-        inline aten::vec3 GetScattering(
+        inline AT_DEVICE_API aten::vec3 GetScattering(
             const aten::sky::AtmosphereParameters& atmosphere,
-            const aten::texture3d& single_rayleigh_scattering_texture,
-            const aten::texture3d& single_mie_scattering_texture,
-            const aten::texture3d& multiple_scattering_texture,
+            const aten::sky::texture3d& single_rayleigh_scattering_texture,
+            const aten::sky::texture3d& single_mie_scattering_texture,
+            const aten::sky::texture3d& multiple_scattering_texture,
             const float r,
             const float mu,
             const float mu_s,
@@ -471,13 +471,13 @@ namespace aten::sky {
         }
     }
 
-    inline aten::vec3 ComputeScatteringDensity(
+    inline AT_DEVICE_API aten::vec3 ComputeScatteringDensity(
         const aten::sky::AtmosphereParameters& atmosphere,
-        const aten::texture& transmittance_texture,
-        const aten::texture3d& single_rayleigh_scattering_texture,
-        const aten::texture3d& single_mie_scattering_texture,
-        const aten::texture3d& multiple_scattering_texture,
-        const aten::texture& irradiance_texture,
+        const aten::sky::texture2d& transmittance_texture,
+        const aten::sky::texture3d& single_rayleigh_scattering_texture,
+        const aten::sky::texture3d& single_mie_scattering_texture,
+        const aten::sky::texture3d& multiple_scattering_texture,
+        const aten::sky::texture2d& irradiance_texture,
         const float r,
         const float mu,
         const float mu_s,
@@ -629,11 +629,11 @@ namespace aten::sky {
     }
 
     // 太陽光 **でない** 光からの放射照度を計算.
-    inline aten::vec3 ComputeIndirectIrradiance(
+    inline AT_DEVICE_API aten::vec3 ComputeIndirectIrradiance(
         const aten::sky::AtmosphereParameters& atmosphere,
-        const aten::texture3d& single_rayleigh_scattering_texture,
-        const aten::texture3d& single_mie_scattering_texture,
-        const aten::texture3d& multiple_scattering_texture,
+        const aten::sky::texture3d& single_rayleigh_scattering_texture,
+        const aten::sky::texture3d& single_mie_scattering_texture,
+        const aten::sky::texture3d& multiple_scattering_texture,
         const float r,
         const float mu_s,
         const int32_t scattering_order)
@@ -695,10 +695,10 @@ namespace aten::sky {
         return result;
     }
 
-    inline aten::vec3 ComputeMultipleScattering(
+    inline AT_DEVICE_API aten::vec3 ComputeMultipleScattering(
         const aten::sky::AtmosphereParameters& atmosphere,
-        const aten::texture& transmittance_texture,
-        const aten::texture3d& scattering_density_texture,
+        const aten::sky::texture2d& transmittance_texture,
+        const aten::sky::texture3d& scattering_density_texture,
         const float r,
         const float mu,
         const float mu_s,

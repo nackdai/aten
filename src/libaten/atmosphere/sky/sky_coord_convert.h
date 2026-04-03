@@ -22,19 +22,19 @@ namespace aten::sky {
         texture coordinates $u$ in $[0.5 / n, 1 - 0.5 / n]$ - and its inverse :
     */
 
-    inline float GetTextureCoordFromUnitRange(float x, float texture_size)
+    inline AT_DEVICE_API float GetTextureCoordFromUnitRange(float x, float texture_size)
     {
         return 0.5F / texture_size + x * (1.0F - 1.0F / texture_size);
     }
 
-    inline float GetUnitRangeFromTextureCoord(float u, float texture_size)
+    inline AT_DEVICE_API float GetUnitRangeFromTextureCoord(float u, float texture_size)
     {
         return (u - 0.5F / texture_size) / (1.0F - 1.0F / texture_size);
     }
 
     // For Transmittance ============================================
 
-    inline void GetRMuFromTransmittanceTextureUv(
+    inline AT_DEVICE_API void GetRMuFromTransmittanceTextureUv(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::vec2& uv,
         float& r,
@@ -88,7 +88,7 @@ namespace aten::sky {
         mu = aten::clamp(mu, -1.0F, 1.0F);
     }
 
-    inline vec2 GetTransmittanceTextureUvFromRMu(
+    inline AT_DEVICE_API vec2 GetTransmittanceTextureUvFromRMu(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu)
@@ -131,7 +131,7 @@ namespace aten::sky {
 
     // For Irradiance ============================================
 
-    inline void GetRMuSFromIrradianceTextureUv(
+    inline AT_DEVICE_API void GetRMuSFromIrradianceTextureUv(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::vec2& uv,
         float& r,
@@ -151,7 +151,7 @@ namespace aten::sky {
         mu_s = aten::clamp(2.0F * x_mu_s - 1.0F, -1.0F, 1.0F);
     }
 
-    inline aten::vec2 GetIrradianceTextureUvFromRMuS(
+    inline AT_DEVICE_API aten::vec2 GetIrradianceTextureUvFromRMuS(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu_s)
@@ -169,7 +169,7 @@ namespace aten::sky {
 
     // For scattering ==============================================
 
-    inline void GetRMuMuSNuFromScatteringTextureUvwz(
+    inline AT_DEVICE_API void GetRMuMuSNuFromScatteringTextureUvwz(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::vec4& uvwz,
         float& r,
@@ -277,7 +277,7 @@ namespace aten::sky {
         nu = aten::clamp(uvwz.x * 2.0F - 1.0F, -1.0F, 1.0F);
     }
 
-    inline void GetRMuMuSNuFromScatteringTextureFragCoord(
+    inline AT_DEVICE_API void GetRMuMuSNuFromScatteringTextureFragCoord(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::vec3& screen_coord,
         float& r,
@@ -316,7 +316,7 @@ namespace aten::sky {
             mu * mu_s + sqrt((1.0F - mu * mu) * (1.0F - mu_s * mu_s)));
     }
 
-    inline vec4 GetScatteringTextureUvwzFromRMuMuSNu(
+    inline AT_DEVICE_API vec4 GetScatteringTextureUvwzFromRMuMuSNu(
         const aten::sky::AtmosphereParameters& atmosphere,
         const float r,
         const float mu,

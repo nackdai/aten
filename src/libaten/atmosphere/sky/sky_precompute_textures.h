@@ -3,23 +3,83 @@
 #include "atmosphere/sky/sky_constants.h"
 
 #include "image/texture.h"
-#include "image/texture_3d.h"
 
 namespace aten::sky {
-    struct PreComputeTextures {
+    template <class texture2d, class texture3d>
+    struct PreComputeTextureManager {
         // Permanent.
-        aten::texture transmittance_texture;
-        aten::texture irradiance_texture;
-        aten::texture3d scattering_texture;
-        aten::texture3d optional_single_mie_scattering_texture;
+        texture2d transmittance_texture;
+        texture2d irradiance_texture;
+        texture3d scattering_texture;
+        texture3d optional_single_mie_scattering_texture;
 
         // One shot.
-        aten::texture delta_irradiance_texture;
-        aten::texture3d delta_rayleigh_scattering_texture;
-        aten::texture3d delta_mie_scattering_texture;
-        aten::texture3d delta_scattering_density_texture;
-        aten::texture3d delta_multiple_scattering_texture;
+        texture2d delta_irradiance_texture;
+        texture3d delta_rayleigh_scattering_texture;
+        texture3d delta_mie_scattering_texture;
+        texture3d delta_scattering_density_texture;
+        texture3d delta_multiple_scattering_texture;
 
+#ifdef __CUDACC__
+        template <class T>
+        void Init(T& texture_host)
+        {
+            texture_host.transmittance_texture.Init(
+                aten::sky::TRANSMITTANCE_TEXTURE_WIDTH,
+                aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
+                aten::TextureFilterMode::Linear);
+            texture_host.irradiance_texture.Init(
+                aten::sky::IRRADIANCE_TEXTURE_WIDTH,
+                aten::sky::IRRADIANCE_TEXTURE_HEIGHT,
+                aten::TextureFilterMode::Linear);
+            texture_host.scattering_texture.Init(
+                aten::sky::SCATTERING_TEXTURE_WIDTH,
+                aten::sky::SCATTERING_TEXTURE_HEIGHT,
+                aten::sky::SCATTERING_TEXTURE_DEPTH,
+                aten::TextureFilterMode::Linear);
+            texture_host.optional_single_mie_scattering_texture.Init(
+                aten::sky::SCATTERING_TEXTURE_WIDTH,
+                aten::sky::SCATTERING_TEXTURE_HEIGHT,
+                aten::sky::SCATTERING_TEXTURE_DEPTH,
+                aten::TextureFilterMode::Linear);
+
+            texture_host.delta_irradiance_texture.Init(
+                aten::sky::IRRADIANCE_TEXTURE_WIDTH,
+                aten::sky::IRRADIANCE_TEXTURE_HEIGHT,
+                aten::TextureFilterMode::Linear);
+            texture_host.delta_rayleigh_scattering_texture.Init(
+                aten::sky::SCATTERING_TEXTURE_WIDTH,
+                aten::sky::SCATTERING_TEXTURE_HEIGHT,
+                aten::sky::SCATTERING_TEXTURE_DEPTH,
+                aten::TextureFilterMode::Linear);
+            texture_host.delta_mie_scattering_texture.Init(
+                aten::sky::SCATTERING_TEXTURE_WIDTH,
+                aten::sky::SCATTERING_TEXTURE_HEIGHT,
+                aten::sky::SCATTERING_TEXTURE_DEPTH,
+                aten::TextureFilterMode::Linear);
+            texture_host.delta_scattering_density_texture.Init(
+                aten::sky::SCATTERING_TEXTURE_WIDTH,
+                aten::sky::SCATTERING_TEXTURE_HEIGHT,
+                aten::sky::SCATTERING_TEXTURE_DEPTH,
+                aten::TextureFilterMode::Linear);
+            texture_host.delta_multiple_scattering_texture.Init(
+                aten::sky::SCATTERING_TEXTURE_WIDTH,
+                aten::sky::SCATTERING_TEXTURE_HEIGHT,
+                aten::sky::SCATTERING_TEXTURE_DEPTH,
+                aten::TextureFilterMode::Linear);
+
+            transmittance_texture = texture_host.transmittance_texture.GetSurfaceTexture();
+            irradiance_texture = texture_host.irradiance_texture.GetSurfaceTexture();
+            scattering_texture = texture_host.scattering_texture.GetSurfaceTexture();
+            optional_single_mie_scattering_texture = texture_host.optional_single_mie_scattering_texture.GetSurfaceTexture();
+
+            delta_irradiance_texture = texture_host.delta_irradiance_texture.GetSurfaceTexture();
+            delta_rayleigh_scattering_texture = texture_host.delta_rayleigh_scattering_texture.GetSurfaceTexture();
+            delta_mie_scattering_texture = texture_host.delta_mie_scattering_texture.GetSurfaceTexture();
+            delta_scattering_density_texture = texture_host.delta_scattering_density_texture.GetSurfaceTexture();
+            delta_multiple_scattering_texture = texture_host.delta_multiple_scattering_texture.GetSurfaceTexture();
+        }
+#else
         void Init()
         {
             transmittance_texture.init(
@@ -60,5 +120,6 @@ namespace aten::sky {
                 aten::sky::SCATTERING_TEXTURE_HEIGHT,
                 aten::sky::SCATTERING_TEXTURE_DEPTH);
         }
+#endif
     };
 }

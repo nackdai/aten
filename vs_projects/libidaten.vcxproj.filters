@@ -277,6 +277,9 @@
     <ClInclude Include="..\src\libidaten\cuda\CudaSurfaceTexture.h">
       <Filter>cuda</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\atmosphere\sky\sky_model_device.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -338,6 +341,12 @@
     </Filter>
     <Filter Include="aten\volume">
       <UniqueIdentifier>{19847303-0959-43d0-a7b7-bcf47a8fd898}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="atmosphere">
+      <UniqueIdentifier>{05acc1ef-a878-48e9-bdd4-061c6fe4cef6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="atmosphere\sky">
+      <UniqueIdentifier>{e032a9bb-7f98-4c78-b447-384270f42eb9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -495,6 +504,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\toon.cpp">
       <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\atmosphere\sky\sky_model.cu">
+      <Filter>atmosphere\sky</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

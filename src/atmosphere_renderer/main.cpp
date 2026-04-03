@@ -9,6 +9,9 @@
 #include "atenscene.h"
 
 #include "atmosphere/sky/sky_model.h"
+#include "atmosphere/sky/sky_model_device.h"
+
+#define DEVICE_RENDERING
 
 #ifdef DEVICE_RENDERING
 constexpr int32_t WIDTH = 1280;
@@ -51,9 +54,6 @@ public:
         visualizer_->addPostProc(&gamma_);
 
         InitCamera();
-
-        sky_model_.Init();
-        sky_model_.PreCompute();
 
         return true;
     }
@@ -114,7 +114,31 @@ public:
             visualizer_->clear();
         }
 
+#ifdef DEVICE_RENDERING
+        if (!is_sky_initialized_) {
+            sky_model_.Init();
+            sky_model_.PreCompute();
+            is_sky_initialized_ = true;
+        }
+
+        sky_model_.Render(
+            visualizer_->GetGLTextureHandle(),
+            WIDTH, HEIGHT,
+            camera_.param());
+
+        aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
+        aten::RasterizeRenderer::clearBuffer(
+            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Stencil,
+            clear_color,
+            1.0f,
+            0);
+
+        visualizer_->render(false);
+#else
         if (!is_sky_rendered_) {
+            sky_model_.Init();
+            sky_model_.PreCompute();
+
             sky_model_.Render(
                 WIDTH, HEIGHT,
                 camera_.param(),
@@ -130,6 +154,7 @@ public:
         }
 
         visualizer_->renderPixelData(dst_.image().data(), camera_.NeedRevert());
+#endif
 
         return true;
     }
@@ -236,7 +261,16 @@ private:
     {
     }
 
+#ifdef DEVICE_RENDERING
+    idaten::sky::SkyModel sky_model_;
+
+    bool is_sky_initialized_{ false };
+#else
     aten::sky::SkyModel sky_model_;
+
+    // TODO
+    bool is_sky_rendered_{ false };
+#endif
 
     aten::PinholeCamera camera_;
     bool is_camera_dirty_{ false };
@@ -258,9 +292,6 @@ private:
     bool is_mouse_r_btn_down_{ false };
     int32_t prev_mouse_pos_x_{ 0 };
     int32_t prev_mouse_pos_y_{ 0 };
-
-    // TODO
-    bool is_sky_rendered_{ false };
 };
 
 int32_t main()

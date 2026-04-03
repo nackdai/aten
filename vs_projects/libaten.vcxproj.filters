@@ -613,6 +613,9 @@
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_render.h">
       <Filter>atmosphere\sky</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_types.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

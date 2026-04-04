@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include <imgui.h>
+
 #include "aten.h"
 #include "atenscene.h"
 
@@ -124,6 +126,8 @@ public:
         sky_model_.Render(
             visualizer_->GetGLTextureHandle(),
             WIDTH, HEIGHT,
+            sun_zenith_angle_radians_,
+            sun_azimuth_angle_radians_,
             camera_.param());
 
         aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
@@ -155,6 +159,8 @@ public:
 
         visualizer_->renderPixelData(dst_.image().data(), camera_.NeedRevert());
 #endif
+
+        RenderGUI();
 
         return true;
     }
@@ -261,6 +267,14 @@ private:
     {
     }
 
+    void RenderGUI()
+    {
+#ifdef DEVICE_RENDERING
+        ImGui::SliderFloat("Sun Zenith Angle (radians)", &sun_zenith_angle_radians_, 0.0F, AT_MATH_PI);
+        ImGui::SliderFloat("Sun Azimuth Angle (radians)", &sun_azimuth_angle_radians_, -AT_MATH_PI, AT_MATH_PI);
+#endif
+    }
+
 #ifdef DEVICE_RENDERING
     idaten::sky::SkyModel sky_model_;
 
@@ -271,6 +285,9 @@ private:
     // TODO
     bool is_sky_rendered_{ false };
 #endif
+
+    float sun_zenith_angle_radians_{ 1.3F };
+    float sun_azimuth_angle_radians_{ 2.9F };
 
     aten::PinholeCamera camera_;
     bool is_camera_dirty_{ false };

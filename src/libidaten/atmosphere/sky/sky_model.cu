@@ -436,15 +436,13 @@ namespace idaten::sky {
         GLuint gltex,
         const int32_t width,
         const int32_t height,
+        const float sun_zenith_angle_radians,
+        const float sun_azimuth_angle_radians,
         const aten::CameraParameter& camera)
     {
         if (!m_glimg.IsValid()) {
             m_glimg.init(gltex, CudaGLRscRegisterType::ReadWrite);
         }
-
-        // TODO
-        const auto sun_zenith_angle_radians = 1.3F;
-        const auto sun_azimuth_angle_radians = 2.9F;
 
         const aten::vec3 sun_direction{
             aten::sin(sun_zenith_angle_radians) * aten::cos(sun_azimuth_angle_radians),

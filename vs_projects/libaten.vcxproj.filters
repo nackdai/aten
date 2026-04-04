@@ -598,9 +598,6 @@
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_common.h">
       <Filter>atmosphere\sky</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_dome_render.h">
-      <Filter>atmosphere\sky</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_model.h">
       <Filter>atmosphere\sky</Filter>
     </ClInclude>

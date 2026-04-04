@@ -149,7 +149,6 @@
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_compute.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_constants.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_coord_convert.h" />
-    <ClInclude Include="..\src\libaten\atmosphere\sky\sky_dome_render.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_model.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_params.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_precompute_textures.h" />

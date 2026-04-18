@@ -885,6 +885,8 @@ namespace idaten
         vboVtxPos.unmap();
     }
 
+    // For test.
+#if 0
     void LBVHBuilder::build()
     {
         static const uint32_t skeys[] = {
@@ -956,4 +958,5 @@ namespace idaten
         }
 #endif
     }
+#endif
 }

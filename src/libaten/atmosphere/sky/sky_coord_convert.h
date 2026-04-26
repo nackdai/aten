@@ -287,7 +287,7 @@ namespace aten::sky {
         bool& ray_r_mu_intersects_ground)
     {
         // https://gemini.google.com/share/3ec29779c23f
-        // nu 以外は 0.5 オフセットしているが、ν はオフセットしていないので、SCATTERING_TEXTURE_NU_SIZE から 1 を引く.
+        // nu 以外は 0.5 オフセットしているが、nu はオフセットしていないので、SCATTERING_TEXTURE_NU_SIZE から 1 を引く.
         const vec4 SCATTERING_TEXTURE_SIZE = vec4(
             SCATTERING_TEXTURE_NU_SIZE - 1,
             SCATTERING_TEXTURE_MU_S_SIZE,

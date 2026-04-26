@@ -70,6 +70,54 @@ namespace aten {
         static_assert(Power != 0, "Power cannot be zero");
     };
 
+    template <int32_t Power>
+    inline constexpr Quantity<Power> operator+(const Quantity<Power>& a, const Quantity<Power>& b)
+    {
+        return Quantity<Power>(static_cast<float>(a) + static_cast<float>(b));
+    }
+
+    template <int32_t Power>
+    inline constexpr Quantity<Power> operator+(const Quantity<Power>& a, float f)
+    {
+        return Quantity<Power>(static_cast<float>(a) + f);
+    }
+
+    template <int32_t Power>
+    inline constexpr Quantity<Power> operator-(const Quantity<Power>& a, const Quantity<Power>& b)
+    {
+        return Quantity<Power>(static_cast<float>(a) - static_cast<float>(b));
+    }
+
+    template <int32_t Power>
+    inline constexpr Quantity<Power> operator-(const Quantity<Power>& a, float f)
+    {
+        return Quantity<Power>(static_cast<float>(a) - f);
+    }
+
+    template <int32_t Power>
+    inline constexpr Quantity<Power> operator*(const Quantity<Power>& a, const Quantity<Power>& b)
+    {
+        return Quantity<Power>(static_cast<float>(a) * static_cast<float>(b));
+    }
+
+    template <int32_t Power>
+    inline constexpr Quantity<Power> operator*(const Quantity<Power>& a, float f)
+    {
+        return Quantity<Power>(static_cast<float>(a) * f);
+    }
+
+    template <int32_t Power>
+    inline constexpr Quantity<Power> operator/(const Quantity<Power>& a, const Quantity<Power>& b)
+    {
+        return Quantity<Power>(static_cast<float>(a) / static_cast<float>(b));
+    }
+
+    template <int32_t Power>
+    inline constexpr Quantity<Power> operator/(const Quantity<Power>& a, float f)
+    {
+        return Quantity<Power>(static_cast<float>(a) / f);
+    }
+
     using Length = aten::Quantity<1>;
     using InverseLength = aten::Quantity<-1>;
 }

@@ -112,6 +112,9 @@
     <Filter Include="atmosphere\sky">
       <UniqueIdentifier>{ac901573-7571-4c68-a04f-6d2328c03c6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="atmosphere\rainbow">
+      <UniqueIdentifier>{beec38aa-429a-499b-913a-c449f424dca1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -613,6 +616,15 @@
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_types.h">
       <Filter>atmosphere\sky</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_model.h">
+      <Filter>atmosphere\rainbow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_compute.h">
+      <Filter>atmosphere\rainbow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_constants.h">
+      <Filter>atmosphere\rainbow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -887,6 +899,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\atmosphere\sky\sky_render.cpp">
       <Filter>atmosphere\sky</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\atmosphere\rainbow\rainbow_model.cpp">
+      <Filter>atmosphere\rainbow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

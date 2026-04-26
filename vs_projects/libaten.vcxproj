@@ -145,6 +145,9 @@
     <ClInclude Include="..\src\libaten\accelerator\threaded_bvh.h" />
     <ClInclude Include="..\src\libaten\aten.h" />
     <ClInclude Include="..\src\libaten\aten_namespace.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_compute.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_constants.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_model.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_common.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_compute.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_constants.h" />
@@ -316,6 +319,7 @@
     <ClCompile Include="..\src\libaten\accelerator\sbvh_voxel.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\stackless_bvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\threaded_bvh.cpp" />
+    <ClCompile Include="..\src\libaten\atmosphere\rainbow\rainbow_model.cpp" />
     <ClCompile Include="..\src\libaten\atmosphere\sky\sky_model.cpp" />
     <ClCompile Include="..\src\libaten\atmosphere\sky\sky_render.cpp" />
     <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp" />

@@ -58,12 +58,18 @@ namespace aten {
                 t_result);
         }
 
+        AT_HOST_DEVICE_API aten::tuple<float, float> GetHitT(
+            const ray& r,
+            float t_min, float t_max) const
+        {
+            return GetHitT(r, m_min, m_max, t_min, t_max);
+        }
+
         template <class T>
-        static AT_HOST_DEVICE_API bool hit(
+        static AT_HOST_DEVICE_API aten::tuple<float, float> GetHitT(
             const ray& r,
             const T& _min, const T& _max,
-            float t_min, float t_max,
-            float* t_result = nullptr)
+            float t_min, float t_max)
         {
             aten::vec3 invdir(float(1) / (r.dir + aten::vec3(float(1e-6))));
 
@@ -77,6 +83,19 @@ namespace aten {
 
             const auto t1 = aten::min(aten::min_from_vec3(tmax), t_max);
             const auto t0 = aten::max(aten::max_from_vec3(tmin), t_min);
+
+            return aten::make_tuple(t0, t1);
+        }
+
+        template <class T>
+        static AT_HOST_DEVICE_API bool hit(
+            const ray& r,
+            const T& _min, const T& _max,
+            float t_min, float t_max,
+            float* t_result = nullptr)
+        {
+            float t0, t1;
+            aten::tie(t0, t1) = GetHitT(r, _min, _max, t_min, t_max);
 
             if (t_result) {
                 *t_result = t0;
@@ -136,7 +155,7 @@ namespace aten {
             return isHit;
         }
 
-        bool isIn(const vec3& p) const
+        AT_HOST_DEVICE_API bool isIn(const vec3& p) const
         {
             bool isInX = (m_min.x <= p.x && p.x <= m_max.x);
             bool isInY = (m_min.y <= p.y && p.y <= m_max.y);
@@ -163,12 +182,12 @@ namespace aten {
             return m_min;
         }
 
-        const vec3& maxPos() const
+        AT_HOST_DEVICE_API const vec3& maxPos() const
         {
             return m_max;
         }
 
-        vec3& maxPos()
+        AT_HOST_DEVICE_API vec3& maxPos()
         {
             return m_max;
         }
@@ -223,7 +242,7 @@ namespace aten {
             m_max.x = m_max.y = m_max.z = -AT_MATH_INF;
         }
 
-        bool isEmpty() const
+        AT_HOST_DEVICE_API bool isEmpty() const
         {
             return m_min.x == AT_MATH_INF;
         }

@@ -81,7 +81,8 @@ namespace aten::sky {
         const float d = d_min + x_mu * (d_max - d_min);
 
         // この関数では、視線レイが大気に交差するので、
-        // GetRMuMuSNuFromScatteringTextureUvzw での mu の計算と同様に、余弦定理で計算.
+        // GetRMuMuSNuFromScatteringTextureUvwz での mu の計算と同様に、余弦定理で計算.
+        // https://gemini.google.com/share/91af735989be
         mu = d == 0.0F
             ? 1.0F
             : (H * H - rho * rho - d * d) / (2.0F * r * d);

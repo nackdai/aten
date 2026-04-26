@@ -13,7 +13,13 @@
 #include "atmosphere/sky/sky_model.h"
 #include "atmosphere/sky/sky_model_device.h"
 
+#include "atmosphere/rainbow/rainbow_model.h"
+#include "atmosphere/rainbow/rainbow_model_device.h"
+
+#include "atmosphere/atmosphere.h"
+
 #define DEVICE_RENDERING
+//#define SKY_RENDERING
 
 #ifdef DEVICE_RENDERING
 constexpr int32_t WIDTH = 1280;
@@ -55,6 +61,11 @@ public:
 
         visualizer_->addPostProc(&gamma_);
 
+        rasterizer_aabb_.init(
+            WIDTH, HEIGHT,
+            "../shader/simple3d_vs.glsl",
+            "../shader/simple3d_fs.glsl");
+
         InitCamera();
 
         return true;
@@ -62,6 +73,7 @@ public:
 
     void InitCamera()
     {
+#ifdef SKY_RENDERING
         constexpr aten::Length view_distance_meters = 9000.0_m;
         constexpr float view_zenith_angle_radians = 1.47F;
         constexpr float view_azimuth_angle_radians = -0.1F;
@@ -71,25 +83,46 @@ public:
         const float cos_a = aten::cos(view_azimuth_angle_radians);
         const float sin_a = aten::sin(view_azimuth_angle_radians);
 
-        // Y-up‚É‚¨‚¯‚éŠeŠî’êƒxƒNƒgƒ‹
-        // ux (Right): …•½•ûŒü‚ÌƒxƒNƒgƒ‹
+        // Y-upã«ãŠã‘ã‚‹å„åŸºåº•ãƒ™ã‚¯ãƒˆãƒ«
+        // ux (Right): æ°´å¹³æ–¹å‘ã®ãƒ™ã‚¯ãƒˆãƒ«
         const std::array ux = { -sin_a, 0.0F, -cos_a };
-        // uy (Up): ‚’¼•ûŒü‚ÌƒxƒNƒgƒ‹ (Œ³‚Ìuz‚Ì—v‘f‚ðY-up—p‚É•À‚Ñ‘Ö‚¦)
+        // uy (Up): åž‚ç›´æ–¹å‘ã®ãƒ™ã‚¯ãƒˆãƒ« (å…ƒã®uzã®è¦ç´ ã‚’Y-upç”¨ã«ä¸¦ã³æ›¿ãˆ)
         const std::array uy = { -cos_z * cos_a, sin_z, -cos_z * sin_a };
-        // uz (Forward/View): Ž‹ü•ûŒü‚ÌƒxƒNƒgƒ‹
+        // uz (Forward/View): è¦–ç·šæ–¹å‘ã®ãƒ™ã‚¯ãƒˆãƒ«
         const std::array uz = { sin_z * cos_a, cos_z, sin_z * sin_a };
 
         const float l = view_distance_meters.as(aten::MeterUnit::km);
 
-        // ÅI“I‚ÈˆÊ’u
+        // æœ€çµ‚çš„ãªä½ç½®
         aten::vec3 pos{
             uz[0] * l, // X
-            uz[1] * l, // Y (‚±‚±‚ª‚‚³‚É‚È‚é)
+            uz[1] * l, // Y (ã“ã“ãŒé«˜ã•ã«ãªã‚‹)
             uz[2] * l, // Z
         };
         aten::vec3 at{
             pos + aten::vec3(1.0F)
         };
+#else
+        aten::vec3 pos{
+            0.0F,
+            aten::Length::as(2.0F, aten::MeterUnit::km),
+            0.0F,
+        };
+
+        constexpr auto view_angle = aten::Deg2Rad(25.0F);
+        aten::vec3 at{
+            pos.x,
+            pos.y + aten::sin(view_angle),
+            pos.z - aten::cos(view_angle),
+        };
+
+        /*aten::vec3 pos{
+            0.609041F, 0.314859F, -0.120800F
+        };
+        aten::vec3 at{
+            0.000000F, 0.424618F, -0.906308F
+        };*/
+#endif
         const float vfov = 30.0F;
 
         camera_.init(
@@ -111,6 +144,12 @@ public:
             camparam.znear = float(0.1);
             camparam.zfar = float(10000.0);
 
+#if 0
+            AT_PRINTF("Camera updated. pos: (%f, %f, %f), at: (%f, %f, %f)\n",
+                camparam.origin.x, camparam.origin.y, camparam.origin.z,
+                camparam.lookat.x, camparam.lookat.y, camparam.lookat.z);
+#endif
+
             is_camera_dirty_ = false;
 
             visualizer_->clear();
@@ -118,17 +157,42 @@ public:
 
 #ifdef DEVICE_RENDERING
         if (!is_sky_initialized_) {
+#if 1
+            atmosphere_.Init(camera_.param());
+            atmosphere_.PreCompute();
+#elif SKY_RENDERING
             sky_model_.Init();
             sky_model_.PreCompute();
+#else
+            rainbow_model_.Init(camera_.param());
+            rainbow_model_.PreCompute();
+#endif
             is_sky_initialized_ = true;
         }
 
+#if 1
+        atmosphere_.Render(
+            visualizer_->GetGLTextureHandle(),
+            WIDTH, HEIGHT,
+            atmosphere_type_,
+            sun_zenith_angle_radians_,
+            sun_azimuth_angle_radians_,
+            camera_.param());
+#elif SKY_RENDERING
         sky_model_.Render(
             visualizer_->GetGLTextureHandle(),
             WIDTH, HEIGHT,
             sun_zenith_angle_radians_,
             sun_azimuth_angle_radians_,
             camera_.param());
+#else
+        rainbow_model_.Render(
+            visualizer_->GetGLTextureHandle(),
+            WIDTH, HEIGHT,
+            // sun_zenith_angle_radians_,
+            // sun_azimuth_angle_radians_,
+            camera_.param());
+#endif
 
         aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
         aten::RasterizeRenderer::clearBuffer(
@@ -140,6 +204,7 @@ public:
         visualizer_->render(false);
 #else
         if (!is_sky_rendered_) {
+#ifdef SKY_RENDERING
             sky_model_.Init();
             sky_model_.PreCompute();
 
@@ -147,6 +212,15 @@ public:
                 WIDTH, HEIGHT,
                 camera_.param(),
                 dst_);
+#else
+            rainbow_model_.Init(camera_.param());
+            rainbow_model_.PreCompute();
+
+            rainbow_model_.Render(
+                WIDTH, HEIGHT,
+                camera_.param(),
+                dst_);
+#endif
 
             aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
             aten::RasterizeRenderer::clearBuffer(
@@ -159,6 +233,18 @@ public:
 
         visualizer_->renderPixelData(dst_.image().data(), camera_.NeedRevert());
 #endif
+
+        if (will_take_screen_shot_)
+        {
+            auto screen_shot_file_name = aten::StringFormat("sc_%d.png", screen_shot_count_);
+
+            visualizer_->takeScreenshot(screen_shot_file_name);
+
+            will_take_screen_shot_ = false;
+            screen_shot_count_++;
+
+            AT_PRINTF("Take Screenshot[%s]\n", screen_shot_file_name.c_str());
+        }
 
         RenderGUI();
 
@@ -267,27 +353,53 @@ private:
     {
     }
 
+    void AtmosphereTypeGUI()
+    {
+        for (const auto& type_pair : idaten::Atmosphere::TypeMap) {
+            bool is_selected = (atmosphere_type_ & type_pair.first) > 0;
+            if (ImGui::Checkbox(type_pair.second, &is_selected)) {
+                if (is_selected) {
+                    atmosphere_type_ |= type_pair.first;
+                }
+                else {
+                    atmosphere_type_ &= ~type_pair.first;
+                }
+            }
+        }
+    }
+
     void RenderGUI()
     {
 #ifdef DEVICE_RENDERING
         ImGui::SliderFloat("Sun Zenith Angle (radians)", &sun_zenith_angle_radians_, 0.0F, AT_MATH_PI);
         ImGui::SliderFloat("Sun Azimuth Angle (radians)", &sun_azimuth_angle_radians_, -AT_MATH_PI, AT_MATH_PI);
+
+        AtmosphereTypeGUI();
 #endif
     }
 
 #ifdef DEVICE_RENDERING
     idaten::sky::SkyModel sky_model_;
+    idaten::rainbow::RainbowModel rainbow_model_;
+
+    idaten::Atmosphere atmosphere_;
 
     bool is_sky_initialized_{ false };
 #else
     aten::sky::SkyModel sky_model_;
+    aten::rainbow::RainbowModel rainbow_model_;
 
     // TODO
     bool is_sky_rendered_{ false };
 #endif
 
+    int32_t atmosphere_type_{
+        static_cast<int32_t>(idaten::Atmosphere::Type::Sky)
+        | static_cast<int32_t>(idaten::Atmosphere::Type::Rainbow)
+    };
+
     float sun_zenith_angle_radians_{ 1.3F };
-    float sun_azimuth_angle_radians_{ 2.9F };
+    float sun_azimuth_angle_radians_{ AT_MATH_PI_HALF };
 
     aten::PinholeCamera camera_;
     bool is_camera_dirty_{ false };
@@ -295,6 +407,7 @@ private:
     aten::Film dst_{ WIDTH, HEIGHT };
 
     std::shared_ptr<aten::visualizer> visualizer_;
+    aten::RasterizeRenderer rasterizer_aabb_;
 
     aten::GammaCorrection gamma_;
 

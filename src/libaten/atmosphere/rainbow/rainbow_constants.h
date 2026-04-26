@@ -1,0 +1,38 @@
+#pragma once
+
+#include <array>
+
+#include "atmosphere/sky/sky_constants.h"
+#include "atmosphere/sky/unit_quantity.h"
+
+#include "math/math.h"
+
+namespace aten::rainbow {
+    // z
+    // Droplet "radius".
+    AT_DEVICE_API constexpr Length A_MIN = 0.3_mm;
+    AT_DEVICE_API constexpr Length A_MAX = 1.6_mm;
+    AT_DEVICE_API constexpr Length A_STEP = 0.01_mm;
+    AT_DEVICE_API constexpr auto A_WIDTH = static_cast<int32_t>((A_MAX - A_MIN) / A_STEP) + 1;
+
+    // y
+    AT_DEVICE_API constexpr Length WAVELENGTH_MIN = 360.0_nm;
+    AT_DEVICE_API constexpr Length WAVELENGTH_MAX = 830.0_nm;
+    AT_DEVICE_API constexpr Length WAVELENGTH_STEP = 10.0_nm;
+    AT_DEVICE_API constexpr auto WAVELENGTH_WIDTH = static_cast<int32_t>((WAVELENGTH_MAX - WAVELENGTH_MIN) / WAVELENGTH_STEP) + 1;
+
+    // x
+    AT_DEVICE_API constexpr auto THETA_MIN = Deg2Rad(36.0F);
+    AT_DEVICE_API constexpr auto THETA_MAX = Deg2Rad(60.0F);
+    AT_DEVICE_API constexpr auto THETA_STEP = Deg2Rad(0.1F);
+    AT_DEVICE_API constexpr auto THETA_WIDTH = static_cast<int32_t>((THETA_MAX - THETA_MIN) / THETA_STEP) + 1;
+
+    AT_DEVICE_API constexpr auto DROPLET_RADIUS_TEX_SIZE = 128;
+
+    AT_DEVICE_API constexpr Length DROPLET_SAMPLE_RADIUS_MIN = 0.3_mm;
+    AT_DEVICE_API constexpr Length DROPLET_SAMPLE_RADIUS_MAX = 0.7_mm;
+    AT_DEVICE_API constexpr Length DROPLET_SAMPLE_RADIUS_MEAN = 0.5_mm;
+    AT_DEVICE_API constexpr Length DROPLET_SAMPLE_RADIUS_SIGMA = (DROPLET_SAMPLE_RADIUS_MAX - DROPLET_SAMPLE_RADIUS_MEAN) / 1.96F;
+
+    AT_DEVICE_API constexpr auto EXTINCTION_EFFICIENT_IN_RAIN_VOLUME = 2.0F;
+}

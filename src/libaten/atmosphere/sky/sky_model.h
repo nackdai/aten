@@ -1,16 +1,25 @@
 #pragma once
 
 #include "atmosphere/sky/sky_params.h"
-#include "atmosphere/sky/sky_precompute_textures.h"
+#include "atmosphere/sky/sky_types.h"
 
 #include "camera/camera.h"
 #include "image/texture.h"
 #include "image/texture_3d.h"
 #include "renderer/film.h"
 
+namespace idaten {
+    class Atmosphere;
+}
+
 namespace aten::sky {
     class SkyModel {
+        friend class idaten::Atmosphere;
+
     public:
+        // TODO
+        static constexpr int32_t NUM_SCATTERING = 4;
+
         SkyModel() = default;
         ~SkyModel() = default;
 
@@ -35,10 +44,7 @@ namespace aten::sky {
             Film& dst);
 
     protected:
-        void InitParameters();
-
-        // TODO
-        static constexpr int32_t NUM_SCATTERING = 4;
+        static void InitParameters(SkyModel& sky_model);
 
         aten::sky::AtmosphereParameters atmosphere_;
         aten::mat4 luminance_from_radiance_;

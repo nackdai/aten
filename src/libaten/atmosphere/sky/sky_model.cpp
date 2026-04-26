@@ -29,10 +29,10 @@ namespace aten::sky {
     void SkyModel::Init()
     {
         textures_.Init();
-        InitParameters();
+        InitParameters(*this);
     }
 
-    void SkyModel::InitParameters()
+    void SkyModel::InitParameters(SkyModel& sky_model)
     {
         using Irrandiance = InverseLength;
 
@@ -156,60 +156,60 @@ namespace aten::sky {
             LambdaB,
         };
 
-        atmosphere_.solar_irradiance = InterpolateFactorByRGBLambda(solar_irradiance, wavelengths, rgb_lambdas);
+        sky_model.atmosphere_.solar_irradiance = InterpolateFactorByRGBLambda(solar_irradiance, wavelengths, rgb_lambdas);
 
-        atmosphere_.sun_angular_radius = SunAngularRadius;
+        sky_model.atmosphere_.sun_angular_radius = SunAngularRadius;
 
         // m -> km
-        atmosphere_.bottom_radius = aten::Length::as(BottomRadius, MeterUnit::km);
-        atmosphere_.top_radius = aten::Length::as(TopRadius, MeterUnit::km);
+        sky_model.atmosphere_.bottom_radius = aten::Length::as(BottomRadius, MeterUnit::km);
+        sky_model.atmosphere_.top_radius = aten::Length::as(TopRadius, MeterUnit::km);
 
         // NOTE:
         // altitude < layers[0].width ? layers[0] : layers[1] で分岐される.
         // layers[0].width = 0.0F なので、常に layers[1] が利用される.
-        SetDensityProfileLayer(atmosphere_.rayleigh_density.layers[1], rayleigh_layer);
+        SetDensityProfileLayer(sky_model.atmosphere_.rayleigh_density.layers[1], rayleigh_layer);
 
         // m^-1 -> km^-1
-        atmosphere_.rayleigh_scattering = InterpolateFactorByRGBLambda(rayleigh_scattering, wavelengths, rgb_lambdas);
-        atmosphere_.rayleigh_scattering.x = aten::InverseLength::as(atmosphere_.rayleigh_scattering.x, MeterUnit::km);
-        atmosphere_.rayleigh_scattering.y = aten::InverseLength::as(atmosphere_.rayleigh_scattering.y, MeterUnit::km);
-        atmosphere_.rayleigh_scattering.z = aten::InverseLength::as(atmosphere_.rayleigh_scattering.z, MeterUnit::km);
+        sky_model.atmosphere_.rayleigh_scattering = InterpolateFactorByRGBLambda(rayleigh_scattering, wavelengths, rgb_lambdas);
+        sky_model.atmosphere_.rayleigh_scattering.x = aten::InverseLength::as(sky_model.atmosphere_.rayleigh_scattering.x, MeterUnit::km);
+        sky_model.atmosphere_.rayleigh_scattering.y = aten::InverseLength::as(sky_model.atmosphere_.rayleigh_scattering.y, MeterUnit::km);
+        sky_model.atmosphere_.rayleigh_scattering.z = aten::InverseLength::as(sky_model.atmosphere_.rayleigh_scattering.z, MeterUnit::km);
 
         // NOTE:
         // altitude < layers[0].width ? layers[0] : layers[1] で分岐される.
         // layers[0].width = 0.0F なので、常に layers[1] が利用される.
-        SetDensityProfileLayer(atmosphere_.mie_density.layers[1], mie_layer);
+        SetDensityProfileLayer(sky_model.atmosphere_.mie_density.layers[1], mie_layer);
 
-        atmosphere_.mie_scattering = InterpolateFactorByRGBLambda(mie_scattering, wavelengths, rgb_lambdas);
-
-        // m^-1 -> km^-1
-        atmosphere_.mie_scattering.x = aten::InverseLength::as(atmosphere_.mie_scattering.x, MeterUnit::km);
-        atmosphere_.mie_scattering.y = aten::InverseLength::as(atmosphere_.mie_scattering.y, MeterUnit::km);
-        atmosphere_.mie_scattering.z = aten::InverseLength::as(atmosphere_.mie_scattering.z, MeterUnit::km);
+        sky_model.atmosphere_.mie_scattering = InterpolateFactorByRGBLambda(mie_scattering, wavelengths, rgb_lambdas);
 
         // m^-1 -> km^-1
-        atmosphere_.mie_extinction = InterpolateFactorByRGBLambda(mie_extinction, wavelengths, rgb_lambdas);
-        atmosphere_.mie_extinction.x = aten::InverseLength::as(atmosphere_.mie_extinction.x, MeterUnit::km);
-        atmosphere_.mie_extinction.y = aten::InverseLength::as(atmosphere_.mie_extinction.y, MeterUnit::km);
-        atmosphere_.mie_extinction.z = aten::InverseLength::as(atmosphere_.mie_extinction.z, MeterUnit::km);
+        sky_model.atmosphere_.mie_scattering.x = aten::InverseLength::as(sky_model.atmosphere_.mie_scattering.x, MeterUnit::km);
+        sky_model.atmosphere_.mie_scattering.y = aten::InverseLength::as(sky_model.atmosphere_.mie_scattering.y, MeterUnit::km);
+        sky_model.atmosphere_.mie_scattering.z = aten::InverseLength::as(sky_model.atmosphere_.mie_scattering.z, MeterUnit::km);
 
-        atmosphere_.mie_phase_function_g = MiePhaseFunctionG;
+        // m^-1 -> km^-1
+        sky_model.atmosphere_.mie_extinction = InterpolateFactorByRGBLambda(mie_extinction, wavelengths, rgb_lambdas);
+        sky_model.atmosphere_.mie_extinction.x = aten::InverseLength::as(sky_model.atmosphere_.mie_extinction.x, MeterUnit::km);
+        sky_model.atmosphere_.mie_extinction.y = aten::InverseLength::as(sky_model.atmosphere_.mie_extinction.y, MeterUnit::km);
+        sky_model.atmosphere_.mie_extinction.z = aten::InverseLength::as(sky_model.atmosphere_.mie_extinction.z, MeterUnit::km);
+
+        sky_model.atmosphere_.mie_phase_function_g = MiePhaseFunctionG;
 
         // TODO
         // Ozon
 
-        atmosphere_.ground_albedo = InterpolateFactorByRGBLambda(ground_albedo, wavelengths, rgb_lambdas);
+        sky_model.atmosphere_.ground_albedo = InterpolateFactorByRGBLambda(ground_albedo, wavelengths, rgb_lambdas);
 
-        atmosphere_.mu_s_min = aten::cos(MaxSunZenithAngle);
+        sky_model.atmosphere_.mu_s_min = aten::cos(MaxSunZenithAngle);
 
-        sun_radiance_to_luminance_ = aten::sky::ComputeSpectralRadianceToLuminanceFactors(wavelengths, solar_irradiance, 0);
-        sky_radiance_to_luminance_ = aten::sky::ComputeSpectralRadianceToLuminanceFactors(wavelengths, solar_irradiance, -3);
+        sky_model.sun_radiance_to_luminance_ = aten::sky::ComputeSpectralRadianceToLuminanceFactors(wavelengths, solar_irradiance, 0);
+        sky_model.sky_radiance_to_luminance_ = aten::sky::ComputeSpectralRadianceToLuminanceFactors(wavelengths, solar_irradiance, -3);
 
         // TODO
         // For tone mapping.
-        white_point_ = ConvertSpectrumToLinearSrgb(wavelengths, solar_irradiance);
-        const auto white_point_avg = (white_point_.r + white_point_.g + white_point_.b) / 3.0F;
-        white_point_ /= white_point_avg;
+        sky_model.white_point_ = ConvertSpectrumToLinearSrgb(wavelengths, solar_irradiance);
+        const auto white_point_avg = (sky_model.white_point_.r + sky_model.white_point_.g + sky_model.white_point_.b) / 3.0F;
+        sky_model.white_point_ /= white_point_avg;
     }
 
     namespace {

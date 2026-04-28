@@ -12,6 +12,37 @@
 #include "image/texture_3d.h"
 
 namespace aten::rainbow {
+    inline float ComputeInverseNormalDistributionCDF(
+        const float u,
+        const float mu,
+        const float sigma)
+    {
+        constexpr auto WinitzkiApproxFactor = 0.147F;
+
+        // TODO
+        const auto _u = aten::clamp(u, 0.00001F, 0.99999F);
+
+        // Compute inverse erf from Winitzki approximation.
+        const auto z = 2.0F * _u - 1.0F;
+
+        float inv_erf = 0.0F;
+
+        if (z != 0.0F) {
+            const auto a = WinitzkiApproxFactor;
+            const auto l = aten::log(1 - z * z);
+            const auto w = 2.0F / (AT_MATH_PI * a) + l / 2.0F;
+
+            const auto inner_sqrt = aten::sqrt(w * w - l / a);
+            const auto x = aten::sqrt(inner_sqrt - w);
+
+            inv_erf = z < 0.0F ? -x : x;
+        }
+
+        const auto result = mu + sigma * aten::sqrt(2) * inv_erf;
+
+        return result;
+    }
+
     // マーシャル・パルマー粒径分布を計算.
     // intensity_rainfall_rate[mm/h]
     // droplet_diameter[m]
@@ -93,7 +124,7 @@ namespace aten::rainbow {
     inline float ComputeM(
         const float k,
         const float wavelength, // [m]
-        const float a,  // droplet diamter. [m]
+        const float a,  // droplet radius. [m]
         const float theta,
         const float h,
         const float theta_max)
@@ -140,7 +171,7 @@ namespace aten::rainbow {
     inline void PreComputeAiryFunction(aten::texture3d& airy_func_tex)
     {
         for (int32_t z = 0; z < A_WIDTH; z++) {
-            // Droplet diameter. Unit is [m].
+            // Droplet radius. Unit is [m].
             const auto a = A_MIN + z * A_STEP;
 
             for (int32_t y = 0; y < WAVELENGTH_WIDTH; y++) {
@@ -168,7 +199,7 @@ namespace aten::rainbow {
     inline float ComputeAiryFunction(
         int32_t x, int32_t y, int32_t z)
     {
-        // Droplet diameter. Unit is [m].
+        // Droplet radius. Unit is [m].
         const auto a = A_MIN + z * A_STEP;
 
         // Unit is [m].
@@ -204,7 +235,7 @@ namespace aten::rainbow {
     inline float GetAiryFunctionValue(
         const aten::texture3d& airy_func_tex,
         const float wavelength, // [m]
-        const float a,  // droplet_diameter [m]
+        const float a,  // droplet radius [m]
         const float theta)
     {
         aten::vec3 uvw{
@@ -216,15 +247,47 @@ namespace aten::rainbow {
         return GetAiryFunctionValue(airy_func_tex, uvw);
     }
 
+    inline float GetDropletRadiusFromPreComputeTexture(
+        const aten::texture3d droplet_radius_tex,
+        const aten::vec3& point,
+        const aten::aabb& volume)
+    {
+        if (volume.isEmpty() || !volume.isIn(point)) {
+            AT_ASSERT(false);
+            return 0.0F;
+        }
+
+        // Normalize.
+        const auto& min_pos = volume.minPos();
+        const auto& max_pos = volume.maxPos();
+        const auto range{max_pos - min_pos};
+
+        auto uvw{
+            (point - min_pos) / range
+        };
+
+        AT_ASSERT(0.0F <= uvw.x && uvw.x <= 1.0F);
+        AT_ASSERT(0.0F <= uvw.y && uvw.y <= 1.0F);
+        AT_ASSERT(0.0F <= uvw.z && uvw.z <= 1.0F);
+
+        // TODO
+        uvw.x = aten::saturate(uvw.x);
+        uvw.y = aten::saturate(uvw.y);
+        uvw.z = aten::saturate(uvw.z);
+
+        const auto droplet_radius = droplet_radius_tex.AtWithTrilinear(uvw.x, uvw.y, uvw.z);
+        return droplet_radius.x;
+    }
+
     inline aten::vec3 AdvanceRainVolumeIntegral(
         const sky::AtmosphereParameters& atmosphere,
         const aten::sky::texture2d& transmittance_texture,
+        const aten::sky::texture3d& droplet_radius_tex,
         const aten::vec3& sun_direction,
         const aten::vec3& earth_center, // [km]
         const aten::vec3& camera_pos,   // [km]
         const aten::vec3& view_dir,
         const aten::aabb& rain_volume,  // [km x km x km]
-        const float droplet_diameter,   // [m]
         const float intensity_rainfall_rate,    // [mm/h]
         const aten::texture3d& airy_func_res_tex)
     {
@@ -266,8 +329,8 @@ namespace aten::rainbow {
 
         aten::vec3 uvw{
             aten::saturate(((theta - THETA_MIN) / THETA_STEP + 0.5F) / THETA_WIDTH),
-            0.0F,   // compute while the integral calculation.
-            aten::saturate(((droplet_diameter - A_MIN) / A_STEP + 0.5F) / A_WIDTH),
+            0.0F,   // compute from wavelength while the integral calculation.
+            0.0F,   // compute from droplet radius while the integral calculation.
         };
 
         const auto solar_radiance{ sky::GetSolarRadiance(atmosphere) };
@@ -289,6 +352,12 @@ namespace aten::rainbow {
                 break;
             }
 
+            const float droplet_radius = GetDropletRadiusFromPreComputeTexture(
+                droplet_radius_tex,
+                curr_point, rain_volume);
+
+            uvw.z = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
+
             auto z = curr_point - earth_center;
             const auto r = length(z);
 
@@ -308,12 +377,12 @@ namespace aten::rainbow {
                 rainbow_intensity[i] =  GetAiryFunctionValue(airy_func_res_tex, uvw);;
             }
 
-            rainbow_radiance += transmittance * solar_radiance * rainbow_intensity;
-        }
+            const auto droplet_diameter = 2.0F * droplet_radius;
+            const auto rain_density = ComputeMarshallPalmerDropletSizeDistribution(
+                droplet_diameter, intensity_rainfall_rate);
 
-        const auto rain_density = ComputeMarshallPalmerDropletSizeDistribution(
-            droplet_diameter, intensity_rainfall_rate);
-        rainbow_radiance *= rain_density;
+            rainbow_radiance += transmittance * solar_radiance * rainbow_intensity * rain_density;
+        }
 
         rainbow_radiance *= dt;
 

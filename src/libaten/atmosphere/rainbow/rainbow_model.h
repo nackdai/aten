@@ -25,6 +25,7 @@ namespace aten::rainbow {
 
     protected:
         aten::texture3d airy_func_tex_;
+        aten::texture3d droplet_radius_tex_;
         aten::texture transmittance_texture_;
     };
 }

@@ -11,6 +11,9 @@ namespace aten::rainbow {
         // Init 3d texture to store Airy function values.
         airy_func_tex_.init(THETA_WIDTH, WAVELENGTH_WIDTH, A_WIDTH);
 
+        // Init 3d texture to store droplet radius based on normal distribution.
+        droplet_radius_tex_.init(DROPLET_DIAMETER_TEX_SIZE, DROPLET_DIAMETER_TEX_SIZE, DROPLET_DIAMETER_TEX_SIZE);
+
         transmittance_texture_.init(
             aten::sky::TRANSMITTANCE_TEXTURE_WIDTH,
             aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
@@ -86,6 +89,43 @@ namespace aten::rainbow {
                     }
                 }
             }
+
+            // TODO
+            const auto rnd = aten::getRandom(0);
+            const auto frame = 0;
+            const auto scramble = rnd * 0x1fe3434f * (((frame + rnd) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+            aten::CMJ sampler;
+            sampler.init(
+                (frame + rnd) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
+                0,
+                scramble);
+
+            constexpr auto mu = 0.5_mm;
+
+            // NOTE:
+            // Sigma for 95% of normal distribution is precisely 1.96.
+            // We can often see 2.0. But, it's approximation. It's not correct mathematically.
+            // In this case, the target range is 0.3 - 0.7F.
+            constexpr auto sigma = 0.2_mm / 1.96F;
+
+            // Precompute droplet radius volume.
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
+            for (int32_t z = 0; z < DROPLET_DIAMETER_TEX_SIZE; z++) {
+                for (int32_t y = 0; y < DROPLET_DIAMETER_TEX_SIZE; y++) {
+                    for (int32_t x = 0; x < DROPLET_DIAMETER_TEX_SIZE; x++) {
+                        auto u = 0.0F;
+                        #pragma omp critical
+                        {
+                            u = sampler.nextSample();
+                        }
+
+                        const auto droplet_radius = ComputeInverseNormalDistributionCDF(u, mu, sigma);
+                        droplet_radius_tex_.SetByXYZ(droplet_radius, x, y, z);
+                    }
+                }
+            }
         }
     }
 
@@ -98,10 +138,10 @@ namespace aten::rainbow {
             const aten::CameraParameter& camera,
             const sky::AtmosphereParameters& atmosphere,
             const aten::sky::texture2d& transmittance_texture,
+            const aten::sky::texture3d& droplet_radius_tex,
             const aten::vec3& sun_direction,
             const aten::vec3& earth_center, // [km]
             const aten::aabb& rain_volume,  // [km x km x km]
-            const float droplet_diameter,   // [m]
             const float intensity_rainfall_rate,    // [mm/h]
             const aten::texture3d& airy_func_res_tex,
             const aten::vec3& sun_radiance_to_luminance
@@ -122,12 +162,12 @@ namespace aten::rainbow {
                 AdvanceRainVolumeIntegral(
                     atmosphere,
                     transmittance_texture,
+                    droplet_radius_tex,
                     sun_direction,
                     earth_center, // [km]
                     camera_pos,   // [km]
                     view_dir,
                     rain_volume,  // [km x km x km]
-                    droplet_diameter,   // [m]
                     intensity_rainfall_rate,    // [mm/h]
                     airy_func_res_tex)
             };
@@ -187,7 +227,6 @@ namespace aten::rainbow {
         };
 
         // TODO
-        constexpr Length droplet_diameter = 1.0_mm;
         constexpr float intensity_rainfall_rate = 1.0F; // [mm/h]
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
@@ -195,8 +234,8 @@ namespace aten::rainbow {
 #endif
         {
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
-//#pragma omp for
-#pragma omp for schedule(dynamic, 1)
+#pragma omp for
+//#pragma omp for schedule(dynamic, 1)
 #endif
             for (int32_t y = 0; y < height; y++) {
                 for (int32_t x = 0; x < width; x++) {
@@ -206,10 +245,10 @@ namespace aten::rainbow {
                             camera,
                             atmosphere_,
                             transmittance_texture_,
+                            droplet_radius_tex_,
                             sun_direction,
                             earth_center,
                             rain_volume,
-                            droplet_diameter,
                             intensity_rainfall_rate,
                             airy_func_tex_,
                             sun_radiance_to_luminance_)

@@ -25,4 +25,6 @@ namespace aten::rainbow {
     constexpr auto THETA_MAX = Deg2Rad(60.0F);
     constexpr auto THETA_STEP = Deg2Rad(0.1F);
     constexpr auto THETA_WIDTH = static_cast<int32_t>((THETA_MAX - THETA_MIN) / THETA_STEP) + 1;
+
+    constexpr auto DROPLET_DIAMETER_TEX_SIZE = 128;
 }

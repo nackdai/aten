@@ -136,7 +136,7 @@ namespace aten {
             return isHit;
         }
 
-        bool isIn(const vec3& p) const
+        AT_HOST_DEVICE_API bool isIn(const vec3& p) const
         {
             bool isInX = (m_min.x <= p.x && p.x <= m_max.x);
             bool isInY = (m_min.y <= p.y && p.y <= m_max.y);
@@ -163,12 +163,12 @@ namespace aten {
             return m_min;
         }
 
-        const vec3& maxPos() const
+        AT_HOST_DEVICE_API const vec3& maxPos() const
         {
             return m_max;
         }
 
-        vec3& maxPos()
+        AT_HOST_DEVICE_API vec3& maxPos()
         {
             return m_max;
         }
@@ -223,7 +223,7 @@ namespace aten {
             m_max.x = m_max.y = m_max.z = -AT_MATH_INF;
         }
 
-        bool isEmpty() const
+        AT_HOST_DEVICE_API bool isEmpty() const
         {
             return m_min.x == AT_MATH_INF;
         }

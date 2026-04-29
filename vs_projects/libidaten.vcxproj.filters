@@ -280,6 +280,9 @@
     <ClInclude Include="..\src\libidaten\atmosphere\sky\sky_model_device.h">
       <Filter>atmosphere\sky</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\atmosphere\rainbow\rainbow_model_device.h">
+      <Filter>atmosphere\rainbow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -347,6 +350,9 @@
     </Filter>
     <Filter Include="atmosphere\sky">
       <UniqueIdentifier>{e032a9bb-7f98-4c78-b447-384270f42eb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="atmosphere\rainbow">
+      <UniqueIdentifier>{42dba60a-25c8-4dd5-a965-6dfaa0c0ebfc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -507,6 +513,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\atmosphere\sky\sky_model.cu">
       <Filter>atmosphere\sky</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\atmosphere\rainbow\rainbow_model.cu">
+      <Filter>atmosphere\rainbow</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

@@ -6,13 +6,14 @@
 #include "atmosphere/sky/sky_compute.h"
 #include "atmosphere/sky/sky_constants.h"
 #include "atmosphere/sky/sky_render.h"
+#include "atmosphere/sky/sky_types.h"
 #include "atmosphere/sky/unit_quantity.h"
 
 #include "math/aabb.h"
 #include "image/texture_3d.h"
 
 namespace aten::rainbow {
-    inline float ComputeInverseNormalDistributionCDF(
+    inline AT_DEVICE_API float ComputeInverseNormalDistributionCDF(
         const float u,
         const float mu,
         const float sigma)
@@ -46,7 +47,7 @@ namespace aten::rainbow {
     // マーシャル・パルマー粒径分布を計算.
     // intensity_rainfall_rate[mm/h]
     // droplet_diameter[m]
-    inline float ComputeMarshallPalmerDropletSizeDistribution(
+    inline AT_DEVICE_API float ComputeMarshallPalmerDropletSizeDistribution(
         const float droplet_diameter,
         const float intensity_rainfall_rate)
     {
@@ -57,7 +58,7 @@ namespace aten::rainbow {
         // その場合は、D [cm] で計算する必要がある.
 
         // [cm^-4]
-        constexpr float N0 = 0.008F;
+        constexpr float N0 = 0.08F;
 
         // m -> cm.
         const auto D = droplet_diameter * 100.0F;
@@ -71,7 +72,7 @@ namespace aten::rainbow {
 
     // 水の屈折率(20°C)を計算.
     // wavelength[m] e.g. 660e-9[m]
-    inline float ComputeWaterRefractiveIndex(const float wavelength)
+    inline AT_DEVICE_API float ComputeWaterRefractiveIndex(const float wavelength)
     {
         // https://refractiveindex.info/?shelf=main&book=H2O&page=Daimon-20.0C
 
@@ -87,7 +88,7 @@ namespace aten::rainbow {
         return n;
     }
 
-    inline float ComputeH(const float n)
+    inline AT_DEVICE_API float ComputeH(const float n)
     {
         // n : 屈折率
         const auto n2 = aten::pow(n, 2);
@@ -95,7 +96,7 @@ namespace aten::rainbow {
         return h;
     }
 
-    inline float ComputeThetaMax(const float n)
+    inline AT_DEVICE_API float ComputeThetaMax(const float n)
     {
         // n : 屈折率
         const auto n2 = aten::pow(n, 2);
@@ -103,7 +104,7 @@ namespace aten::rainbow {
         return theta_max;
     }
 
-    inline float ComputeZ(
+    inline AT_DEVICE_API float ComputeZ(
         const float wavelength, // [m]
         const float a,  // [m]
         const float theta,
@@ -121,7 +122,7 @@ namespace aten::rainbow {
         return z;
     }
 
-    inline float ComputeM(
+    inline AT_DEVICE_API float ComputeM(
         const float k,
         const float wavelength, // [m]
         const float a,  // droplet radius. [m]
@@ -141,7 +142,7 @@ namespace aten::rainbow {
         return M;
     }
 
-    inline float ComputeAiryFunctionByIntegral(const float z)
+    inline AT_DEVICE_API float ComputeAiryFunctionByIntegral(const float z)
     {
         constexpr auto u_max = 10.0F;
         constexpr auto du = 0.005F;
@@ -168,7 +169,7 @@ namespace aten::rainbow {
         return f_z * du;
     }
 
-    inline void PreComputeAiryFunction(aten::texture3d& airy_func_tex)
+    inline AT_DEVICE_API void PreComputeAiryFunction(aten::sky::texture3d& airy_func_tex)
     {
         for (int32_t z = 0; z < A_WIDTH; z++) {
             // Droplet radius. Unit is [m].
@@ -190,13 +191,16 @@ namespace aten::rainbow {
                     const auto z = ComputeZ(wavelength, a, theta, h, theta_max);
                     const auto f_z = ComputeAiryFunctionByIntegral(z);
 
-                    airy_func_tex.SetByXYZ(vec4(M * M * f_z * f_z), x, y, z);
+                    sky::WriteTexture3D(
+                        airy_func_tex,
+                        aten::vec3(M * M * f_z * f_z),
+                        x, y, z);
                 }
             }
         }
     }
 
-    inline float ComputeAiryFunction(
+    inline AT_DEVICE_API float ComputeAiryFunction(
         int32_t x, int32_t y, int32_t z)
     {
         // Droplet radius. Unit is [m].
@@ -219,8 +223,8 @@ namespace aten::rainbow {
         return M * M * f_z * f_z;
     }
 
-    inline float GetAiryFunctionValue(
-        const aten::texture3d& airy_func_tex,
+    inline AT_DEVICE_API float GetAiryFunctionValue(
+        const aten::sky::texture3d& airy_func_tex,
         const aten::vec3& uvw)
     {
         AT_ASSERT(uvw.x >= 0.0F && uvw.x <= 1.0F);
@@ -229,11 +233,12 @@ namespace aten::rainbow {
 
         // NOTE:
         // the content value is the same in vec3.
-        return sky::SampleTexture3D(airy_func_tex, uvw).x;
+        const auto value = sky::SampleTexture3D(airy_func_tex, uvw);
+        return value.x;
     }
 
-    inline float GetAiryFunctionValue(
-        const aten::texture3d& airy_func_tex,
+    inline AT_DEVICE_API float GetAiryFunctionValue(
+        const aten::sky::texture3d& airy_func_tex,
         const float wavelength, // [m]
         const float a,  // droplet radius [m]
         const float theta)
@@ -247,8 +252,8 @@ namespace aten::rainbow {
         return GetAiryFunctionValue(airy_func_tex, uvw);
     }
 
-    inline float GetDropletRadiusFromPreComputeTexture(
-        const aten::texture3d droplet_radius_tex,
+    inline AT_DEVICE_API float GetDropletRadiusFromPreComputeTexture(
+        const aten::sky::texture3d& droplet_radius_tex,
         const aten::vec3& point,
         const aten::aabb& volume)
     {
@@ -275,11 +280,11 @@ namespace aten::rainbow {
         uvw.y = aten::saturate(uvw.y);
         uvw.z = aten::saturate(uvw.z);
 
-        const auto droplet_radius = droplet_radius_tex.AtWithTrilinear(uvw.x, uvw.y, uvw.z);
+        const auto droplet_radius = sky::SampleTexture3D(droplet_radius_tex, uvw);
         return droplet_radius.x;
     }
 
-    inline aten::vec3 AdvanceRainVolumeIntegral(
+    inline AT_DEVICE_API aten::vec3 AdvanceRainVolumeIntegral(
         const sky::AtmosphereParameters& atmosphere,
         const aten::sky::texture2d& transmittance_texture,
         const aten::sky::texture3d& droplet_radius_tex,
@@ -289,7 +294,7 @@ namespace aten::rainbow {
         const aten::vec3& view_dir,
         const aten::aabb& rain_volume,  // [km x km x km]
         const float intensity_rainfall_rate,    // [mm/h]
-        const aten::texture3d& airy_func_res_tex)
+        const aten::sky::texture3d& airy_func_res_tex)
     {
         // If the view direction is the same as sun direction, the rainbow doesn't appear.
         const bool is_same_direction = dot(sun_direction, view_dir) > 0.0F;

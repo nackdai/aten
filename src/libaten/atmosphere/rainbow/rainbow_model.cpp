@@ -12,7 +12,7 @@ namespace aten::rainbow {
         airy_func_tex_.init(THETA_WIDTH, WAVELENGTH_WIDTH, A_WIDTH);
 
         // Init 3d texture to store droplet radius based on normal distribution.
-        droplet_radius_tex_.init(DROPLET_DIAMETER_TEX_SIZE, DROPLET_DIAMETER_TEX_SIZE, DROPLET_DIAMETER_TEX_SIZE);
+        droplet_radius_tex_.init(DROPLET_RADIUS_TEX_SIZE, DROPLET_RADIUS_TEX_SIZE, DROPLET_RADIUS_TEX_SIZE);
 
         transmittance_texture_.init(
             aten::sky::TRANSMITTANCE_TEXTURE_WIDTH,
@@ -112,9 +112,9 @@ namespace aten::rainbow {
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for
 #endif
-            for (int32_t z = 0; z < DROPLET_DIAMETER_TEX_SIZE; z++) {
-                for (int32_t y = 0; y < DROPLET_DIAMETER_TEX_SIZE; y++) {
-                    for (int32_t x = 0; x < DROPLET_DIAMETER_TEX_SIZE; x++) {
+            for (int32_t z = 0; z < DROPLET_RADIUS_TEX_SIZE; z++) {
+                for (int32_t y = 0; y < DROPLET_RADIUS_TEX_SIZE; y++) {
+                    for (int32_t x = 0; x < DROPLET_RADIUS_TEX_SIZE; x++) {
                         auto u = 0.0F;
                         #pragma omp critical
                         {

@@ -134,6 +134,7 @@ namespace aten::rainbow {
 
     namespace {
         aten::vec3 RenderRainbow(
+            aten::CMJ& sampler,
             const int32_t x, const int32_t y,
             const aten::CameraParameter& camera,
             const sky::AtmosphereParameters& atmosphere,
@@ -144,7 +145,8 @@ namespace aten::rainbow {
             const aten::aabb& rain_volume,  // [km x km x km]
             const float intensity_rainfall_rate,    // [mm/h]
             const aten::texture3d& airy_func_res_tex,
-            const aten::vec3& sun_radiance_to_luminance
+            const aten::vec3& sun_radiance_to_luminance,
+            const aten::vec3& white_point
         )
         {
             const float s = x / static_cast<float>(camera.width);
@@ -158,8 +160,11 @@ namespace aten::rainbow {
             const auto camera_pos{ camsample.r.org };
             const auto view_dir{ camsample.r.dir };
 
+            //AT_PRINTF("np.array([%f, %f, %f]),\n", view_dir.x, view_dir.y, view_dir.z);
+
             aten::vec3 rainbow_radiance {
                 AdvanceRainVolumeIntegral(
+                    sampler,
                     atmosphere,
                     transmittance_texture,
                     droplet_radius_tex,
@@ -172,9 +177,23 @@ namespace aten::rainbow {
                     airy_func_res_tex)
             };
 
+            //AT_PRINTF("%d, ", y);
+            //AT_PRINTF("%f, %f, %f, ", rainbow_radiance.x, rainbow_radiance.y, rainbow_radiance.z);
+
             rainbow_radiance *= sun_radiance_to_luminance;
 
-            return rainbow_radiance;
+            //AT_PRINTF("%d, ", y);
+            //AT_PRINTF("%f, %f, %f, ", rainbow_radiance.x, rainbow_radiance.y, rainbow_radiance.z);
+
+            aten::vec3 color{
+                aten::vec3(1.0F) - aten::exp(-rainbow_radiance / white_point * aten::sky::EXPOSURE)
+            };
+
+            //AT_PRINTF("%d, ", y);
+            //AT_PRINTF("%f, %f, %f,", color.x, color.y, color.z);
+            //AT_PRINTF("\n");
+
+            return color;
         }
     }
 
@@ -238,9 +257,27 @@ namespace aten::rainbow {
 //#pragma omp for schedule(dynamic, 1)
 #endif
             for (int32_t y = 0; y < height; y++) {
-                for (int32_t x = 0; x < width; x++) {
+                //const auto x = 128;
+                for (int32_t x = 0; x < width; x++)
+                //for (int32_t x = 112; x < 144; x++)
+                {
+                    const auto id = y * width + x;
+                    const auto rnd = aten::getRandom(id);
+                    const auto frame = 0;
+                    const auto sample = 0;
+
+                    auto scramble = rnd * 0x1fe3434f
+                        * (((frame + sample) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+
+                    aten::CMJ sampler;
+                    sampler.init(
+                        (frame + sample) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
+                        0,
+                        scramble);
+
                     const auto color {
                         RenderRainbow(
+                            sampler,
                             x, y,
                             camera,
                             atmosphere_,
@@ -251,13 +288,17 @@ namespace aten::rainbow {
                             rain_volume,
                             intensity_rainfall_rate,
                             airy_func_tex_,
-                            sun_radiance_to_luminance_)
+                            sun_radiance_to_luminance_, white_point_)
                     };
 
-                    if (x == 0) {
-                        AT_PRINTF("[%d, %d] : %f, %f, %f\n", x, y, color.r, color.g, color.b);
+                    const auto l = length(color);
+
+                    //if (x == 0)
+                    if (y == 103)
+                    {
+                        //AT_PRINTF("[%d, %d] : %f, %f, %f\n", x, y, color.r, color.g, color.b);
                     }
-                    dst.put(x, y, color * 100.0F);
+                    dst.put(x, y, color);
                 }
             }
         }

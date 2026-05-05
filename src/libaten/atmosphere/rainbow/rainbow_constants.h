@@ -9,8 +9,9 @@
 
 namespace aten::rainbow {
     // z
-    AT_DEVICE_API constexpr Length A_MIN = 0.01_mm;
-    AT_DEVICE_API constexpr Length A_MAX = 0.5_mm;
+    // Droplet "radius".
+    AT_DEVICE_API constexpr Length A_MIN = 0.3_mm;
+    AT_DEVICE_API constexpr Length A_MAX = 0.7_mm;
     AT_DEVICE_API constexpr Length A_STEP = 0.02_mm;
     AT_DEVICE_API constexpr auto A_WIDTH = static_cast<int32_t>((A_MAX - A_MIN) / A_STEP) + 1;
 

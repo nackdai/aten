@@ -44,6 +44,23 @@ namespace aten::rainbow {
         return result;
     }
 
+    inline AT_DEVICE_API float ComputeMarshallPalmerDropletSizeDistributionLambda(const float intensity_rainfall_rate)
+    {
+        const auto lambda = 4.1F * aten::pow(intensity_rainfall_rate, -0.21F);
+        return lambda;
+    }
+
+    inline AT_DEVICE_API float ComputeMarshallPalmerDropletSizeDistributionFactor(
+        const float droplet_diameter,   // [m]
+        const float intensity_rainfall_rate)
+    {
+        // m -> mm.
+        const auto D = Length::as(droplet_diameter, MeterUnit::mm);
+        const auto lambda = ComputeMarshallPalmerDropletSizeDistributionLambda(intensity_rainfall_rate);
+        const auto e = aten::exp(-lambda * D);
+        return e;
+    }
+
     // マーシャル・パルマー粒径分布を計算.
     // intensity_rainfall_rate[mm/h]
     // droplet_diameter[m]
@@ -57,17 +74,35 @@ namespace aten::rainbow {
         // 論文だと、N0 = 0.008[cm^-4] で計算している.
         // その場合は、D [cm] で計算する必要がある.
 
-        // [cm^-4]
-        constexpr float N0 = 0.08F;
+        // [m^-3mm^-1]
+        constexpr float N0 = 8000.0F;
 
-        // m -> cm.
-        const auto D = droplet_diameter * 100.0F;
-
-        const auto lambda = 41.0F * aten::pow(intensity_rainfall_rate, -0.21F);
-
-        const auto ND = N0 * aten::exp(-lambda * D);
+        const auto e = ComputeMarshallPalmerDropletSizeDistributionFactor(
+            droplet_diameter,
+            intensity_rainfall_rate);
+        const auto ND = N0 * e;
 
         return ND;
+    }
+
+    inline AT_DEVICE_API float GetDropletDiamterFromMarshallPalmerDropletSizeDistribution(
+        const float u,
+        const float intensity_rainfall_rate)
+    {
+        const auto lambda = ComputeMarshallPalmerDropletSizeDistributionLambda(intensity_rainfall_rate);
+        const auto D = -1.0F / lambda * aten::log(1.0F - u);
+        return D;
+    }
+
+    inline AT_DEVICE_API float GetMarshallPalmerDropletSizeDistributionPDF(
+        const float droplet_diameter,
+        const float intensity_rainfall_rate)
+    {
+        const auto lambda = 4.1F * aten::pow(intensity_rainfall_rate, -0.21F);
+
+        const auto D = Length::as(droplet_diameter, MeterUnit::mm);
+        const auto e = aten::exp(-lambda * D);
+        return lambda * e;
     }
 
     // 水の屈折率(20°C)を計算.
@@ -285,6 +320,7 @@ namespace aten::rainbow {
     }
 
     inline AT_DEVICE_API aten::vec3 AdvanceRainVolumeIntegral(
+        aten::sampler& sampler,
         const sky::AtmosphereParameters& atmosphere,
         const aten::sky::texture2d& transmittance_texture,
         const aten::sky::texture3d& droplet_radius_tex,
@@ -351,15 +387,37 @@ namespace aten::rainbow {
 
         const aten::vec3& move_dir = view_dir;
 
-        for (;;) {
+        //for (;;) {
+        for (size_t i = 0; i < 10; i++) {
             curr_point += move_dir * dt;
             if (!rain_volume.isIn(curr_point)) {
                 break;
             }
 
+#if 0
             const float droplet_radius = GetDropletRadiusFromPreComputeTexture(
                 droplet_radius_tex,
                 curr_point, rain_volume);
+            const auto droplet_diameter = static_cast<float>(droplet_radius * 2.0F);
+            float pdf = 1.0F;   // TODO.
+#elif 0
+            const auto u = sampler.nextSample();
+            const auto droplet_radius = static_cast <float>(0.3_mm + (0.7_mm - 0.3_mm) * u);
+            const auto droplet_diameter = static_cast<float>(droplet_radius * 2.0F);
+            float pdf = static_cast<float>((0.7_mm - 0.3_mm).as(MeterUnit::mm));
+#else
+            const auto p_max = 1.0F - ComputeMarshallPalmerDropletSizeDistributionFactor(A_MAX * 2.0F, intensity_rainfall_rate);
+            const auto p_min = 1.0F - ComputeMarshallPalmerDropletSizeDistributionFactor(A_MIN * 2.0F, intensity_rainfall_rate);
+
+            auto u = sampler.nextSample();
+            u = p_min + u * (p_max - p_min);
+
+            auto droplet_diameter = GetDropletDiamterFromMarshallPalmerDropletSizeDistribution(u, intensity_rainfall_rate);
+            droplet_diameter = Length::from(droplet_diameter, MeterUnit::mm, MeterUnit::m);
+            const auto pdf = GetMarshallPalmerDropletSizeDistributionPDF(droplet_diameter, intensity_rainfall_rate);
+
+            const auto droplet_radius = 0.5F * droplet_diameter;
+#endif
 
             uvw.z = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
 
@@ -382,11 +440,13 @@ namespace aten::rainbow {
                 rainbow_intensity[i] =  GetAiryFunctionValue(airy_func_res_tex, uvw);;
             }
 
-            const auto droplet_diameter = 2.0F * droplet_radius;
-            const auto rain_density = ComputeMarshallPalmerDropletSizeDistribution(
+            auto rain_density = ComputeMarshallPalmerDropletSizeDistribution(
                 droplet_diameter, intensity_rainfall_rate);
 
-            rainbow_radiance += transmittance * solar_radiance * rainbow_intensity * rain_density;
+            const auto droplet_radius_as_mm = Length::as(droplet_radius, MeterUnit::mm);
+            rain_density *= AT_MATH_PI * droplet_radius_as_mm * droplet_radius_as_mm;
+
+            rainbow_radiance += transmittance * solar_radiance * rainbow_intensity * rain_density / pdf;
         }
 
         rainbow_radiance *= dt;

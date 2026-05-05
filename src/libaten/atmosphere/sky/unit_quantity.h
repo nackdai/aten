@@ -65,6 +65,12 @@ namespace aten {
             return v / _detail::constexpr_pow(unit_m, Power);
         }
 
+        static AT_DEVICE_API constexpr float from(float v, MeterUnit src, MeterUnit dst)
+        {
+            float unit_src = _detail::LengthInMeters[static_cast<size_t>(src)];
+            return as(v * unit_src, dst);
+        }
+
     private:
         float value_;
         static_assert(Power != 0, "Power cannot be zero");

@@ -319,6 +319,48 @@ namespace aten::rainbow {
         return droplet_radius.x;
     }
 
+    // TODO
+    inline AT_DEVICE_API float ComputeExtinctionInRainVolume(
+        const float intensity_rainfall_rate)    // [mm/h]
+    {
+        // NOTE:
+        // Compute as meter.
+
+        constexpr auto dD = Length::as(A_STEP, MeterUnit::mm);
+
+        float droplet_diameter_mm = Length::as(A_MIN, MeterUnit::mm);
+
+        float extinction = 0.0F;
+
+        for (int32_t a = 0; a < A_WIDTH; a++) {
+            const auto droplet_diameter_m = Length::from(droplet_diameter_mm, MeterUnit::mm, MeterUnit::m);
+#if 0
+            const auto droplet_distrib = ComputeMarshallPalmerDropletSizeDistribution(
+                droplet_diameter_m,
+                intensity_rainfall_rate);
+
+            const auto droplet_radius_mm = droplet_diameter_mm * 0.5F;
+            const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_mm * droplet_radius_mm;
+#else
+            // TODO
+            // The following code should be standardized.
+            constexpr auto N0 = 8000.0F * 10e3F;
+            const auto lambda = 4.1F * 10e3F * aten::pow(intensity_rainfall_rate, -0.21F);
+            const auto droplet_distrib = N0 * aten::exp(-lambda * droplet_diameter_m);
+            const auto droplet_radius_m = droplet_diameter_m * 0.5F;
+            const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_m * droplet_radius_m;
+#endif
+
+            extinction += EXTINCTION_EFFICIENT_IN_RAIN_VOLUME * droplet_cross_sectional_area * droplet_distrib;
+
+            droplet_diameter_mm += dD;
+        }
+
+        extinction *= dD;
+
+        return extinction;
+    }
+
     inline AT_DEVICE_API aten::vec3 AdvanceRainVolumeIntegral(
         aten::sampler& sampler,
         const sky::AtmosphereParameters& atmosphere,
@@ -330,6 +372,7 @@ namespace aten::rainbow {
         const aten::vec3& view_dir,
         const aten::aabb& rain_volume,  // [km x km x km]
         const float intensity_rainfall_rate,    // [mm/h]
+        const float extinction,
         const aten::sky::texture3d& airy_func_res_tex)
     {
         // If the view direction is the same as sun direction, the rainbow doesn't appear.
@@ -382,6 +425,8 @@ namespace aten::rainbow {
             sky::LambdaG * 1e-9F,
             sky::LambdaB * 1e-9F,
         };
+
+        float optical_length_in_rain_volume = 0.0F;
 
         aten::vec3 rainbow_radiance{ 0.0F };
 
@@ -449,8 +494,11 @@ namespace aten::rainbow {
 
             const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_as_mm * droplet_radius_as_mm;
             const auto rain_density = N0 / mp_lambda * droplet_cross_sectional_area * (p_max - p_min);
-            
-            rainbow_radiance += transmittance * solar_radiance * rainbow_intensity * rain_density;
+
+            optical_length_in_rain_volume += dt;
+            const auto transmittance_in_rain_volume = aten::exp(-extinction * optical_length_in_rain_volume);
+
+            rainbow_radiance += transmittance_in_rain_volume * transmittance * solar_radiance * rainbow_intensity * rain_density;
 #else
             auto rain_density = ComputeMarshallPalmerDropletSizeDistribution(
                 droplet_diameter, intensity_rainfall_rate);

@@ -28,4 +28,6 @@ namespace aten::rainbow {
     AT_DEVICE_API constexpr auto THETA_WIDTH = static_cast<int32_t>((THETA_MAX - THETA_MIN) / THETA_STEP) + 1;
 
     AT_DEVICE_API constexpr auto DROPLET_RADIUS_TEX_SIZE = 128;
+
+    AT_DEVICE_API constexpr auto EXTINCTION_EFFICIENT_IN_RAIN_VOLUME = 2.0F;
 }

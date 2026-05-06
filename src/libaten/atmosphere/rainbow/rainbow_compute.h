@@ -440,6 +440,18 @@ namespace aten::rainbow {
                 rainbow_intensity[i] =  GetAiryFunctionValue(airy_func_res_tex, uvw);;
             }
 
+#if 1
+            constexpr float N0 = 8000.0F;
+            const auto mp_lambda = ComputeMarshallPalmerDropletSizeDistributionLambda(intensity_rainfall_rate);
+
+            const auto droplet_diameter_as_mm = Length::as(droplet_diameter, MeterUnit::mm);
+            const auto droplet_radius_as_mm = droplet_diameter_as_mm * 0.5F;
+
+            const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_as_mm * droplet_radius_as_mm;
+            const auto rain_density = N0 / mp_lambda * droplet_cross_sectional_area * (p_max - p_min);
+            
+            rainbow_radiance += transmittance * solar_radiance * rainbow_intensity * rain_density;
+#else
             auto rain_density = ComputeMarshallPalmerDropletSizeDistribution(
                 droplet_diameter, intensity_rainfall_rate);
 
@@ -447,6 +459,7 @@ namespace aten::rainbow {
             rain_density *= AT_MATH_PI * droplet_radius_as_mm * droplet_radius_as_mm;
 
             rainbow_radiance += transmittance * solar_radiance * rainbow_intensity * rain_density / pdf;
+#endif
         }
 
         rainbow_radiance *= dt;

@@ -144,6 +144,7 @@ namespace aten::rainbow {
             const aten::vec3& earth_center, // [km]
             const aten::aabb& rain_volume,  // [km x km x km]
             const float intensity_rainfall_rate,    // [mm/h]
+            const float extinction,
             const aten::texture3d& airy_func_res_tex,
             const aten::vec3& sun_radiance_to_luminance,
             const aten::vec3& white_point
@@ -174,6 +175,7 @@ namespace aten::rainbow {
                     view_dir,
                     rain_volume,  // [km x km x km]
                     intensity_rainfall_rate,    // [mm/h]
+                    extinction,
                     airy_func_res_tex)
             };
 
@@ -248,6 +250,8 @@ namespace aten::rainbow {
         // TODO
         constexpr float intensity_rainfall_rate = 1.0F; // [mm/h]
 
+        const float extinction = ComputeExtinctionInRainVolume(intensity_rainfall_rate);
+
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp parallel
 #endif
@@ -287,6 +291,7 @@ namespace aten::rainbow {
                             earth_center,
                             rain_volume,
                             intensity_rainfall_rate,
+                            extinction,
                             airy_func_tex_,
                             sun_radiance_to_luminance_, white_point_)
                     };

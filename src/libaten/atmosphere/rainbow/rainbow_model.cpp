@@ -250,7 +250,7 @@ namespace aten::rainbow {
         // TODO
         constexpr float intensity_rainfall_rate = 1.0F; // [mm/h]
 
-        const float extinction = ComputeExtinctionInRainVolume(intensity_rainfall_rate);
+        const float extinction = ComputeExtinctionInRain(intensity_rainfall_rate);
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp parallel

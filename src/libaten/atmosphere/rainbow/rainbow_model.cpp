@@ -2,6 +2,7 @@
 
 #include "atmosphere/rainbow/rainbow_compute.h"
 #include "atmosphere/rainbow/rainbow_constants.h"
+#include "atmosphere/rainbow/rainbow_transmittance.h"
 
 #include "atmosphere/sky/sky_common.h"
 
@@ -55,6 +56,43 @@ namespace aten::rainbow {
             };
 
             aten::sky::WriteTexture2D(transmittance_texture, transmittance, x, y);
+        }
+
+        void ComputeTransmittanceInRainVolume(
+            int32_t x, int32_t y,
+            const aten::sky::AtmosphereParameters& atmosphere,
+            const aten::aabb& rain_volume,
+            const float extinction,
+            aten::texture& transmittance_texture)
+        {
+            static const aten::vec2 TRANSMITTANCE_TEXTURE_SIZE{
+                aten::sky::TRANSMITTANCE_TEXTURE_WIDTH,
+                aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
+            };
+
+            const aten::vec2 frag_coord{
+                static_cast<float>(x) + 0.5F,
+                static_cast<float>(y) + 0.5F,
+            };
+
+            float r;
+            float mu;
+
+            rainbow::GetRMuFromTransmittanceTextureUv(
+                atmosphere, rain_volume,
+                frag_coord / TRANSMITTANCE_TEXTURE_SIZE,
+                r, mu);
+
+            const auto optical_depth = rainbow::ComputeOpticalDepthBasedOnAabbCoveredHemiSphere(
+                atmosphere, rain_volume,
+                r, mu);
+
+            const auto transmittance = aten::exp(-extinction * optical_depth);
+
+            sky::WriteTexture2D(
+                transmittance_texture,
+                aten::vec3(transmittance),
+                x, y);
         }
     }
 

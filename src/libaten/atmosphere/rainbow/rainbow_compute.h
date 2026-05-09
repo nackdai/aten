@@ -12,7 +12,8 @@
 #include "math/aabb.h"
 #include "image/texture_3d.h"
 
-namespace aten::rainbow {
+namespace aten::rainbow
+{
     inline AT_DEVICE_API float ComputeInverseNormalDistributionCDF(
         const float u,
         const float mu,
@@ -185,7 +186,7 @@ namespace aten::rainbow {
         float f_z = 0.0F;
         const auto n_steps = static_cast<int32_t>(u_max / du);
 
-        for (int32_t i = 0; i < n_steps; i++) {
+        for (int32_t i = 0; i <= n_steps; i++) {
             auto u = i * du;
 
             // 式(2) : cos(pi / 2 * (u ^ 3 - z * u))
@@ -319,7 +320,7 @@ namespace aten::rainbow {
         return droplet_radius.x;
     }
 
-    inline AT_DEVICE_API aten::tuple<float, float> ComputeRMu(
+    inline AT_DEVICE_API aten::tuple<float, float> ComputeRMuS(
         const aten::vec3& curr_point,
         const aten::vec3& sun_direction,
         const aten::vec3& earth_center)
@@ -341,7 +342,7 @@ namespace aten::rainbow {
         const aten::vec3& earth_center)
     {
         float r, mu_s;
-        aten::tie(r, mu_s) = ComputeRMu(curr_point, sun_direction, earth_center);
+        aten::tie(r, mu_s) = ComputeRMuS(curr_point, sun_direction, earth_center);
 
         const auto transmittance = sky::transmittance::GetTransmittanceToSun(
             atmosphere,
@@ -377,7 +378,7 @@ namespace aten::rainbow {
         const float intensity_rainfall_rate)    // [mm/h]
     {
         // NOTE:
-        // Compute as meter.
+        // Compute as km.
 
         constexpr auto dD = Length::as(A_STEP, MeterUnit::mm);
 
@@ -386,7 +387,7 @@ namespace aten::rainbow {
         float extinction = 0.0F;
 
         for (int32_t a = 0; a < A_WIDTH; a++) {
-            const auto droplet_diameter_m = Length::from(droplet_diameter_mm, MeterUnit::mm, MeterUnit::m);
+            const auto droplet_diameter_m = Length::from(droplet_diameter_mm, MeterUnit::mm, MeterUnit::km);
 #if 0
             const auto droplet_distrib = ComputeMarshallPalmerDropletSizeDistribution(
                 droplet_diameter_m,
@@ -397,8 +398,8 @@ namespace aten::rainbow {
 #else
             // TODO
             // The following code should be standardized.
-            constexpr auto N0 = 8000.0F * 10e3F;    // [m^-3mm^-1] -> [m^-4]
-            const auto lambda = 4.1F * 10e3F * aten::pow(intensity_rainfall_rate, -0.21F);
+            constexpr auto N0 = 8000.0F * 10e3F * 10e8F;    // [m^-3mm^-1] -> [m^-4] -> [km^-4]
+            const auto lambda = 4.1F * 10e3F * 10e2F * aten::pow(intensity_rainfall_rate, -0.21F);
             const auto droplet_distrib = N0 * aten::exp(-lambda * droplet_diameter_m);
             const auto droplet_radius_m = droplet_diameter_m * 0.5F;
             const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_m * droplet_radius_m;
@@ -529,7 +530,7 @@ namespace aten::rainbow {
             uvw.z = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
 
             float r, mu_s;
-            aten::tie(r, mu_s) = ComputeRMu(curr_point, sun_direction, earth_center);
+            aten::tie(r, mu_s) = ComputeRMuS(curr_point, sun_direction, earth_center);
 
             const auto transmittance_to_sun = sky::transmittance::GetTransmittanceToSun(
                 atmosphere,
@@ -556,7 +557,10 @@ namespace aten::rainbow {
             // Sample weight (from the trapezoidal rule).
             float weight_i = i == 0 || i == SAMPLE_COUNT ? 0.5F : 1.0F;
 
-            const auto optical_length_in_rain_volume_i = aten::exp(-r / sky::MieScaleHeight);
+            constexpr float ScaleHeightAsKm = sky::MieScaleHeight.as(MeterUnit::km);
+
+            const auto altitude = r - atmosphere.bottom_radius;
+            const auto optical_length_in_rain_volume_i = aten::exp(-altitude / ScaleHeightAsKm);
             optical_length_in_rain_volume += optical_length_in_rain_volume_i * weight_i * dt;
 
 #if 1

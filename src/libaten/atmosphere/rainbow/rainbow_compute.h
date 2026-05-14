@@ -447,13 +447,20 @@ namespace aten::rainbow
             sky::LambdaB * 1e-9F,
         };
 
+        const auto p_max = 1.0F - ComputeMarshallPalmerDropletSizeDistributionFactor(A_MAX * 2.0F, intensity_rainfall_rate);
+        const auto p_min = 1.0F - ComputeMarshallPalmerDropletSizeDistributionFactor(A_MIN * 2.0F, intensity_rainfall_rate);
+
         aten::vec3 rainbow_radiance{ 0.0F };
         float optical_length_in_rain_volume = 0.0F;
+
+        aten::vec3 rainbow_radiance_tmp{ 0.0F };
 
         const aten::vec3& move_dir = view_dir;
 
         for (size_t i = 0; i <= SAMPLE_COUNT; i++) {
             AT_ASSERT(rain_volume.isIn(curr_point));
+
+            const auto d_i = i * dt;
 
 #if 0
             const float droplet_radius = GetDropletRadiusFromPreComputeTexture(
@@ -467,9 +474,6 @@ namespace aten::rainbow
             const auto droplet_diameter = static_cast<float>(droplet_radius * 2.0F);
             float pdf = static_cast<float>((0.7_mm - 0.3_mm).as(MeterUnit::mm));
 #else
-            const auto p_max = 1.0F - ComputeMarshallPalmerDropletSizeDistributionFactor(A_MAX * 2.0F, intensity_rainfall_rate);
-            const auto p_min = 1.0F - ComputeMarshallPalmerDropletSizeDistributionFactor(A_MIN * 2.0F, intensity_rainfall_rate);
-
             auto u = sampler.nextSample();
             u = p_min + u * (p_max - p_min);
 
@@ -486,16 +490,9 @@ namespace aten::rainbow
             aten::tie(t0, t1) = aten::aabb::GetHitT(rain_volume, aten::ray(curr_point, sun_direction), AT_MATH_EPSILON, AT_MATH_INF);
             const aten::vec3 boundary_point_to_sun_in_rain_volume{ curr_point + t1 * sun_direction };
 
-            const auto t = ComputeTransmittanceBetweenTwoPoints(
-                atmosphere, transmittance_texture,
-                curr_point, boundary_point_to_sun_in_rain_volume,
-                sun_direction, earth_center);
-
             const auto transmittance_to_sun_in_rain_volume = GetTransmittanceInRainVolumeBetweenTwoPoints(
                 atmosphere, rain_volume,
-                // TODO
-                // earth center でなく、1.0 で計算しているので、ダミーのセンターを指定.
-                aten::vec3(0.0F, -1.0F, 0.0F),
+                earth_center,
                 transmittance_in_rain_volume_texture,
                 curr_point, boundary_point_to_sun_in_rain_volume);
 
@@ -507,10 +504,6 @@ namespace aten::rainbow
                 transmittance_texture,
                 r, mu_s) * transmittance_to_sun_in_rain_volume;
 
-            // TODO
-            // Transmittance in rain to sun.
-            // 太陽方向は視線方向とは異なるので、別に optical length を計算する必要がある.
-
             aten::vec3 rainbow_intensity;
 
             for (size_t n = 0; n < visible_wavelength.size(); n++) {
@@ -518,20 +511,6 @@ namespace aten::rainbow
                 uvw.y = aten::saturate(((wavelength - WAVELENGTH_MIN) / WAVELENGTH_STEP + 0.5F) / WAVELENGTH_WIDTH);
                 rainbow_intensity[n] =  GetAiryFunctionValue(airy_func_res_tex, uvw);;
             }
-
-            // 台形公式による積分の場合、例えば、分割数3で単純に計算すると、
-            // (y0 + y1) * dx / 2 + (y1 + y2) * dx / 2 + (y2 + y3) * dx / 2
-            //   = (y0/2 + y1 + y2 + y3/2) * dx
-            // となる. つまり、i=0とi=SAMPLE_COUNTのときは、y_iの重みが0.5で、それ以外のときは1.0と計算することもできる.
-
-            // Sample weight (from the trapezoidal rule).
-            float weight_i = i == 0 || i == SAMPLE_COUNT ? 0.5F : 1.0F;
-
-            constexpr float ScaleHeightAsKm = sky::MieScaleHeight.as(MeterUnit::km);
-
-            const auto altitude = r - atmosphere.bottom_radius;
-            const auto optical_length_in_rain_volume_i = aten::exp(-altitude / ScaleHeightAsKm);
-            optical_length_in_rain_volume += optical_length_in_rain_volume_i * weight_i * dt;
 
 #if 1
             constexpr float N0 = 8000.0F;
@@ -543,18 +522,18 @@ namespace aten::rainbow
             const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_as_mm * droplet_radius_as_mm;
             const auto rain_density = N0 / mp_lambda * droplet_cross_sectional_area * (p_max - p_min);
 
-            //const auto transmittance_in_rain_volume = aten::exp(-extinction * optical_length_in_rain_volume);
+            const auto transmittance = GetSkyTransmittance(
+                atmosphere, earth_center,
+                transmittance_texture,
+                curr_point, move_dir, d_i);
 
-            const auto distance_to_bound_of_rain_volume = length(start_pos_in_rain_volume - curr_point);
-            const auto transmittance_in_rain_volume = distance_to_bound_of_rain_volume == 0.0F
-                ? aten::vec3(1.0F)
-                : GetTransmittanceInRainVolumeBetweenTwoPoints(
+            const auto transmittance_in_rain_volume = GetTransmittanceInRainVolume(
                     atmosphere, rain_volume, earth_center,
                     transmittance_in_rain_volume_texture,
-                    start_pos_in_rain_volume, curr_point);
+                    start_pos_in_rain_volume, move_dir, d_i);
 
             const auto rainbow_radiance_i{
-                transmittance_in_rain_volume * transmittance_to_sun * solar_radiance * rainbow_intensity * rain_density
+                transmittance * transmittance_in_rain_volume * transmittance_to_sun * solar_radiance * rainbow_intensity * rain_density
             };
 #else
             auto rain_density = ComputeMarshallPalmerDropletSizeDistribution(
@@ -568,6 +547,14 @@ namespace aten::rainbow
             };
 #endif
             curr_point += move_dir * dt;
+
+            // 台形公式による積分の場合、例えば、分割数3で単純に計算すると、
+            // (y0 + y1) * dx / 2 + (y1 + y2) * dx / 2 + (y2 + y3) * dx / 2
+            //   = (y0/2 + y1 + y2 + y3/2) * dx
+            // となる. つまり、i=0とi=SAMPLE_COUNTのときは、y_iの重みが0.5で、それ以外のときは1.0と計算することもできる.
+
+            // Sample weight (from the trapezoidal rule).
+            float weight_i = i == 0 || i == SAMPLE_COUNT ? 0.5F : 1.0F;
 
             rainbow_radiance += rainbow_radiance_i * weight_i * dt;
         }

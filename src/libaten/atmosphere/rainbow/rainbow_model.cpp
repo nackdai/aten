@@ -7,7 +7,7 @@
 #include "atmosphere/sky/sky_common.h"
 
 namespace aten::rainbow {
-    void RainbowModel::Init()
+    void RainbowModel::Init(const aten::CameraParameter& camera)
     {
         // Init 3d texture to store Airy function values.
         airy_func_tex_.init(THETA_WIDTH, WAVELENGTH_WIDTH, A_WIDTH);
@@ -19,6 +19,37 @@ namespace aten::rainbow {
             aten::sky::TRANSMITTANCE_TEXTURE_WIDTH,
             aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
             3);
+
+        transmittance_in_rain_volume_texture_.init(
+            aten::sky::TRANSMITTANCE_TEXTURE_WIDTH,
+            aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
+            3);
+
+        // Set rain volume box.
+        {
+            // TODO
+            constexpr Length RainVolumeWidth = 4.0_km;
+            constexpr Length RainVolumeHeight = 4.0_km;
+            constexpr Length RainVolumeDepth = 4.0_km;
+
+            // TODO
+            const auto& camera_pos = camera.origin;
+
+            aten::vec3 rain_volume_min{
+                camera_pos.x - RainVolumeWidth.as(MeterUnit::km) * 0.5f,
+                0.0F,
+                camera_pos.z - 1.0F - RainVolumeDepth.as(MeterUnit::km),
+            };
+            aten::vec3 rain_volume_max{
+                camera_pos.x + RainVolumeWidth.as(MeterUnit::km) * 0.5f,
+                rain_volume_min.y + RainVolumeHeight.as(MeterUnit::km),
+                camera_pos.z - 1.0F,
+            };
+
+            rain_volume_.init(
+                rain_volume_min,
+                rain_volume_max);
+        }
 
         SkyModel::InitParameters();
     }
@@ -83,7 +114,7 @@ namespace aten::rainbow {
                 frag_coord / TRANSMITTANCE_TEXTURE_SIZE,
                 r, mu);
 
-            const auto optical_depth = rainbow::ComputeOpticalDepthBasedOnAabbCoveredHemiSphere(
+            const auto optical_depth = rainbow::ComputeOpticalDepthBasedOnAabbCoveredSphere(
                 atmosphere, rain_volume,
                 r, mu);
 
@@ -125,6 +156,21 @@ namespace aten::rainbow {
                         const auto intensity = ComputeAiryFunction(x, y, z);
                         airy_func_tex_.SetByXYZ(vec4(intensity), x, y, z);
                     }
+                }
+            }
+
+            const float extinction = ComputeExtinctionInRain(intensity_rainfall_rate);
+
+            // Precompute transmittance in rain volume.
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
+            for (int32_t y = 0; y < aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT; y++) {
+                for (int32_t x = 0; x < aten::sky::TRANSMITTANCE_TEXTURE_WIDTH; x++) {
+                    ComputeTransmittanceInRainVolume(
+                        x, y,
+                        atmosphere_, rain_volume_, extinction,
+                        transmittance_in_rain_volume_texture_);
                 }
             }
 
@@ -177,6 +223,7 @@ namespace aten::rainbow {
             const aten::CameraParameter& camera,
             const sky::AtmosphereParameters& atmosphere,
             const aten::sky::texture2d& transmittance_texture,
+            const aten::sky::texture2d& transmittance_in_rain_volume_texture,
             const aten::sky::texture3d& droplet_radius_tex,
             const aten::vec3& sun_direction,
             const aten::vec3& earth_center, // [km]
@@ -206,6 +253,7 @@ namespace aten::rainbow {
                     sampler,
                     atmosphere,
                     transmittance_texture,
+                    transmittance_in_rain_volume_texture,
                     droplet_radius_tex,
                     sun_direction,
                     earth_center, // [km]
@@ -261,33 +309,6 @@ namespace aten::rainbow {
             0.0F,
         };
 
-        // TODO
-        constexpr Length RainVolumeWidth = 4.0_km;
-        constexpr Length RainVolumeHeight = 4.0_km;
-        constexpr Length RainVolumeDepth = 4.0_km;
-
-        // TODO
-        const auto& camera_pos = camera.origin;
-
-        aten::vec3 rain_volume_min{
-            camera_pos.x - RainVolumeWidth.as(MeterUnit::km) * 0.5f,
-            0.0F,
-            camera_pos.z - 1.0F - RainVolumeDepth.as(MeterUnit::km),
-        };
-        aten::vec3 rain_volume_max{
-            camera_pos.x + RainVolumeWidth.as(MeterUnit::km) * 0.5f,
-            rain_volume_min.y + RainVolumeHeight.as(MeterUnit::km),
-            camera_pos.z - 1.0F,
-        };
-
-        aten::aabb rain_volume{
-            rain_volume_min,
-            rain_volume_max,
-        };
-
-        // TODO
-        constexpr float intensity_rainfall_rate = 1.0F; // [mm/h]
-
         const float extinction = ComputeExtinctionInRain(intensity_rainfall_rate);
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
@@ -324,10 +345,11 @@ namespace aten::rainbow {
                             camera,
                             atmosphere_,
                             transmittance_texture_,
+                            transmittance_in_rain_volume_texture_,
                             droplet_radius_tex_,
                             sun_direction,
                             earth_center,
-                            rain_volume,
+                            rain_volume_,
                             intensity_rainfall_rate,
                             extinction,
                             airy_func_tex_,

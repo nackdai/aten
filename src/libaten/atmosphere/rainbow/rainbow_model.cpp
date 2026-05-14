@@ -119,6 +119,7 @@ namespace aten::rainbow {
                 r, mu);
 
             const auto transmittance = aten::exp(-extinction * optical_depth);
+            AT_ASSERT(transmittance <= 1.0F);
 
             sky::WriteTexture2D(
                 transmittance_texture,

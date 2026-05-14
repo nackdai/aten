@@ -1,6 +1,7 @@
 #pragma once
 
 #include "atmosphere/rainbow/rainbow_constants.h"
+#include "atmosphere/rainbow/rainbow_transmittance.h"
 
 #include "atmosphere/sky/sky_common.h"
 #include "atmosphere/sky/sky_compute.h"
@@ -373,59 +374,11 @@ namespace aten::rainbow
         return transmittance_between_points;
     }
 
-    // TODO
-    inline AT_DEVICE_API float ComputeExtinctionInRain(
-        const float intensity_rainfall_rate)    // [mm/h]
-    {
-        // NOTE:
-        // Compute as km.
-
-        constexpr auto dD = Length::as(A_STEP, MeterUnit::mm);
-
-        float droplet_diameter_mm = Length::as(A_MIN, MeterUnit::mm);
-
-        float extinction = 0.0F;
-
-        for (int32_t a = 0; a < A_WIDTH; a++) {
-            const auto droplet_diameter_m = Length::from(droplet_diameter_mm, MeterUnit::mm, MeterUnit::km);
-#if 0
-            const auto droplet_distrib = ComputeMarshallPalmerDropletSizeDistribution(
-                droplet_diameter_m,
-                intensity_rainfall_rate);
-
-            const auto droplet_radius_mm = droplet_diameter_mm * 0.5F;
-            const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_mm * droplet_radius_mm;
-#else
-            // TODO
-            // The following code should be standardized.
-            constexpr auto N0 = 8000.0F * 10e3F * 10e8F;    // [m^-3mm^-1] -> [m^-4] -> [km^-4]
-            const auto lambda = 4.1F * 10e3F * 10e2F * aten::pow(intensity_rainfall_rate, -0.21F);
-            const auto droplet_distrib = N0 * aten::exp(-lambda * droplet_diameter_m);
-            const auto droplet_radius_m = droplet_diameter_m * 0.5F;
-            const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_m * droplet_radius_m;
-#endif
-
-            const auto extinction_i = EXTINCTION_EFFICIENT_IN_RAIN_VOLUME * droplet_cross_sectional_area * droplet_distrib;
-
-            droplet_diameter_mm += dD;
-
-            // 台形公式による積分の場合、例えば、分割数3で単純に計算すると、
-            // (y0 + y1) * dx / 2 + (y1 + y2) * dx / 2 + (y2 + y3) * dx / 2
-            //   = (y0/2 + y1 + y2 + y3/2) * dx
-            // となる. つまり、i=0とi=SAMPLE_COUNTのときは、y_iの重みが0.5で、それ以外のときは1.0と計算することもできる.
-
-            // Sample weight (from the trapezoidal rule).
-            float weight_i = a == 0 || a == A_WIDTH - 1 ? 0.5F : 1.0F;
-            extinction += extinction_i * weight_i * dD;
-        }
-
-        return extinction;
-    }
-
     inline AT_DEVICE_API aten::vec3 AdvanceRainVolumeIntegral(
         aten::sampler& sampler,
         const sky::AtmosphereParameters& atmosphere,
         const aten::sky::texture2d& transmittance_texture,
+        const aten::sky::texture2d& transmittance_in_rain_volume_texture,
         const aten::sky::texture3d& droplet_radius_tex,
         const aten::vec3& sun_direction,
         const aten::vec3& earth_center, // [km]
@@ -442,14 +395,12 @@ namespace aten::rainbow
             return aten::vec3(0.0F);
         }
 
-        const auto sun_light_direction = -sun_direction;
-
         // TODO
         // そもそも、太陽が地球の下に隠れて見えないなどについては、
         // GetTransmittanceToSun など sky 側で対応済みなので、それを利用する.
         // ただ、その場合に太陽を点ではなく円盤としているので、太陽の扱いは円盤にすること.
 
-        const float theta = aten::acos(dot(sun_light_direction, view_dir));
+        const float theta = aten::acos(dot(sun_direction, -view_dir));
         if (theta < THETA_MIN || theta >= THETA_MAX) {
             // 主虹、副虹の範囲内に収まらないので、虹が見えない.
             return aten::vec3(0.0F);
@@ -471,6 +422,8 @@ namespace aten::rainbow
         else {
             return aten::vec3(0.0F);
         }
+
+        const auto start_pos_in_rain_volume { curr_point };
 
         constexpr auto SAMPLE_COUNT = 100;
 
@@ -529,13 +482,30 @@ namespace aten::rainbow
 
             uvw.z = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
 
+            // Current point is in rain volume box. In this case, t0 is always zero. So, we adopt t1.
+            aten::tie(t0, t1) = aten::aabb::GetHitT(rain_volume, aten::ray(curr_point, sun_direction), AT_MATH_EPSILON, AT_MATH_INF);
+            const aten::vec3 boundary_point_to_sun_in_rain_volume{ curr_point + t1 * sun_direction };
+
+            const auto t = ComputeTransmittanceBetweenTwoPoints(
+                atmosphere, transmittance_texture,
+                curr_point, boundary_point_to_sun_in_rain_volume,
+                sun_direction, earth_center);
+
+            const auto transmittance_to_sun_in_rain_volume = GetTransmittanceInRainVolumeBetweenTwoPoints(
+                atmosphere, rain_volume,
+                // TODO
+                // earth center でなく、1.0 で計算しているので、ダミーのセンターを指定.
+                aten::vec3(0.0F, -1.0F, 0.0F),
+                transmittance_in_rain_volume_texture,
+                curr_point, boundary_point_to_sun_in_rain_volume);
+
             float r, mu_s;
             aten::tie(r, mu_s) = ComputeRMuS(curr_point, sun_direction, earth_center);
 
             const auto transmittance_to_sun = sky::transmittance::GetTransmittanceToSun(
                 atmosphere,
                 transmittance_texture,
-                r, mu_s);
+                r, mu_s) * transmittance_to_sun_in_rain_volume;
 
             // TODO
             // Transmittance in rain to sun.
@@ -573,7 +543,15 @@ namespace aten::rainbow
             const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_as_mm * droplet_radius_as_mm;
             const auto rain_density = N0 / mp_lambda * droplet_cross_sectional_area * (p_max - p_min);
 
-            const auto transmittance_in_rain_volume = aten::exp(-extinction * optical_length_in_rain_volume);
+            //const auto transmittance_in_rain_volume = aten::exp(-extinction * optical_length_in_rain_volume);
+
+            const auto distance_to_bound_of_rain_volume = length(start_pos_in_rain_volume - curr_point);
+            const auto transmittance_in_rain_volume = distance_to_bound_of_rain_volume == 0.0F
+                ? aten::vec3(1.0F)
+                : GetTransmittanceInRainVolumeBetweenTwoPoints(
+                    atmosphere, rain_volume, earth_center,
+                    transmittance_in_rain_volume_texture,
+                    start_pos_in_rain_volume, curr_point);
 
             const auto rainbow_radiance_i{
                 transmittance_in_rain_volume * transmittance_to_sun * solar_radiance * rainbow_intensity * rain_density

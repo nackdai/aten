@@ -19,55 +19,27 @@ namespace aten::rainbow
         const float r,
         const float mu)
     {
-        constexpr int32_t SAMPLE_COUNT = 100;
-
         const auto profile = atmosphere.mie_density;
 
-        // Get diagonal length. It's the longest length and then it's enough for radius of aabb covered hemisphere
-        const auto R = box.getDiagonalLenght() + 1.0F;
+        const auto Rg = 0.1F;
+        const auto Rt = box.getDiagonalLenght() + Rg;
 
-        AT_ASSERT(
-            r >= atmosphere.bottom_radius
-            && (r - atmosphere.bottom_radius) <= (box.maxPos().y - box.minPos().y));
-        const auto r_o = r - box.minPos().y - atmosphere.bottom_radius + 1.0F;
+        // TODO:
+        // GetRMuFromTransmittanceTextureUv の内部で、atmosphere.bottom_radius を r に加算しているが
+        // float の精度の問題で、r から atmosphere.bottom_radius を減算しても、加算前の値が得られないことがある.
+        // そこで、ここでは、r_o が Rt を越えないように clamp する.
+        const auto r_o = aten::clamp(r - atmosphere.bottom_radius + Rg, Rg, Rt);
 
-        AT_ASSERT(mu >= -1.0 && mu <= 1.0);
+        auto dummy_atmosphere = atmosphere;
+        dummy_atmosphere.top_radius = Rt;
+        dummy_atmosphere.bottom_radius = Rg;
 
-        const auto dx = R / static_cast<float>(SAMPLE_COUNT);
-
-        float result = 0.0F;
-
-        for (int32_t i = 0; i <= SAMPLE_COUNT; i++)
-        {
-            const float d_i = i * dx;
-
-            // Distance between the current sample point and the planet center.
-            // d_i での高度を計算.
-            // |x + ts|^2 = r_i^2
-            // => |x|^2 + 2tx・s + t^2|s|^2 = r_i^2
-            // => r^2 + 2rμ + t^2 = r_i^2 (|x|=r, x・s=μ, |s|=1)
-            // tについて解くと、t = -rμ ± sqrt(r^2(μ^2-1)+r_i^2) となるが、t = d_i となるため、
-            // r_i^2 = d_i^2 + 2rμd_i + r^2 となる.
-            const float r_i = aten::sqrt(d_i * d_i + 2.0F * r_o * mu * d_i + r_o * r_o);
-
-            // atmosphere.bottom_radius : R_ground
-
-            // Number density at the current sample point (divided by the number density
-            // at the bottom of the atmosphere, yielding a dimensionless number).
-            // Rayleigh散乱層、Mie散乱層の場合だと、exp(-h/H) を計算する.
-            const float y_i = sky::GetProfileDensity(profile, r_i - 1.0F);
-
-            // 台形公式による積分の場合、例えば、分割数3で単純に計算すると、
-            // (y0 + y1) * dx / 2 + (y1 + y2) * dx / 2 + (y2 + y3) * dx / 2
-            //   = (y0/2 + y1 + y2 + y3/2) * dx
-            // となる. つまり、i=0とi=SAMPLE_COUNTのときは、y_iの重みが0.5で、それ以外のときは1.0と計算することもできる.
-
-            // Sample weight (from the trapezoidal rule).
-            float weight_i = i == 0 || i == SAMPLE_COUNT ? 0.5F : 1.0F;
-            result += y_i * weight_i * dx;
-        }
-
-        return result;
+        const auto optical_length =sky::ComputeOpticalLengthToTopAtmosphereBoundary(
+            dummy_atmosphere,
+            profile,
+            r_o,
+            mu);
+        return optical_length;
     }
 
     inline AT_DEVICE_API void GetRMuFromTransmittanceTextureUv(
@@ -77,79 +49,16 @@ namespace aten::rainbow
         float& r,
         float& mu)
     {
-        // NOTE:
-        // What we need to computed is just mu (dot). So, no need to care which length we use for the computation.
-        // To simplify the computation, we use the earth radius and the top atmosphere radius.
+        const auto Rg = 0.1F;
+        const auto Rt = box.getDiagonalLenght() + Rg;
 
-        AT_ASSERT(uv.x >= 0.0 && uv.x <= 1.0);
-        AT_ASSERT(uv.y >= 0.0 && uv.y <= 1.0);
+        auto dummy_atmosphere = atmosphere;
+        dummy_atmosphere.top_radius = Rt;
+        dummy_atmosphere.bottom_radius = Rg;
 
-        const float x_r = sky::GetUnitRangeFromTextureCoord(uv.y, sky::TRANSMITTANCE_TEXTURE_HEIGHT);
+        sky::GetRMuFromTransmittanceTextureUv(dummy_atmosphere, uv, r, mu);
 
-        const float height = box.maxPos().y - box.minPos().y;
-
-        r = height * x_r + 1.0F;
-
-        // Get diagonal length. It's the longest length and then it's enough for radius of aabb covered hemisphere
-        const auto R = box.getDiagonalLenght() + 1.0F;
-
-        float x_mu = sky::GetUnitRangeFromTextureCoord(uv.x, sky::TRANSMITTANCE_TEXTURE_WIDTH);
-
-        // [0, 1] -> [-1, 1]
-        x_mu = 2.0F * x_mu - 1.0F;
-
-        float d = 0.0F;
-
-        // x_mu = 1 で視線レイvが"上"方向を向く => mu = 1.
-        // x_mu = 0 で視線レイvが"水平"方向を向く => mu = 0.
-        // x_mu = -1 で視線レイvが"下"方向を向く => mu = -1.
-
-        if (x_mu >= 0.0F) {
-            // 視線レイが真上を向いているとき (x_mu = 1).
-            const float d_min = R - r;
-
-            // 視線レイが水平を向いているとき (x_mu = 0).
-            const float d_max = aten::sqrt(R * R - r * r);
-
-            d = d_min + x_mu * (d_max - d_min);
-        }
-        else {
-            // 視線レイが水平を向いているとき (x_mu = 0).
-            const float d_min = aten::sqrt(R * R - r * r);
-
-            // 視線レイが真下を向いているとき (x_mu = 1).
-            const float d_max = R + r;
-
-            d = d_min - x_mu * (d_max - d_min);
-        }
-
-        // 余弦定理から、計算.
-        // https://gemini.google.com/share/91af735989be
-        mu = d == 0.0F
-            ? 1.0F
-            : -(r * r + d * d - R * R) / (2.0F * r * d);
-
-        mu = aten::clamp(mu, -1.0F, 1.0F);
-
-        r = height * x_r + box.minPos().y + atmosphere.bottom_radius;
-    }
-
-    inline AT_DEVICE_API float DistanceToSphereBoundary(
-        const float radius,
-        const float r,
-        const float mu)  // 太陽方向の余弦.
-    {
-        AT_ASSERT(r <= radius);
-        AT_ASSERT(mu >= -1.0 && mu <= 1.0);
-
-        // |x + ts|^2 = R^2 から、tを求めたときの判別式.
-        const float discriminant = r * r * (mu * mu - 1.0F) + radius * radius;
-
-        // SafeSqrtで、discriminantが負のときは0を返す.
-
-        // |x + ts|^2 = R^2 から、tを求めると、解は２つあるが、-r * mu - SafeSqrt(discriminant) < 0 となるので、
-        // -r * mu + SafeSqrt(discriminant) の方が、距離dとして正しい値になる.
-        return aten::max(-r * mu + sky::safe_sqrt(discriminant), 0.0F);
+        r = r - Rg + atmosphere.bottom_radius;
     }
 
     inline AT_DEVICE_API vec2 GetTransmittanceTextureUvFromRMu(
@@ -158,108 +67,65 @@ namespace aten::rainbow
         const float r,
         const float mu)
     {
-        // Get diagonal length. It's the longest length and then it's enough for radius of aabb covered hemisphere
-        const auto R = box.getDiagonalLenght() + 1.0F;
+        const auto Rg = 0.1F;
+        const auto Rt = box.getDiagonalLenght() + Rg;
 
-        const auto height = box.maxPos().y - box.minPos().y;
+        auto dummy_atmosphere = atmosphere;
+        dummy_atmosphere.top_radius = Rt;
+        dummy_atmosphere.bottom_radius = Rg;
 
-        float r_o = r - box.minPos().y - atmosphere.bottom_radius;
+        const auto r_tmp = r - atmosphere.bottom_radius + Rg;
 
-        AT_ASSERT(r_o <= height);
-
-        const float x_r = r_o / height;
-        r_o += 1.0F;
-
-        // Take care from zenith to horizon.
-        AT_ASSERT(mu >= -1.0 && mu <= 1.0);
-
-        // Distance to the top atmosphere boundary for the ray (r,mu), and its minimum
-        // and maximum values over all mu - obtained for (r,1) and (r,mu_horizon).
-        // 大気上端までの距離を計算.
-        const float d = DistanceToSphereBoundary(R, r_o, mu);
-
-        float x_mu = 0.0F;
-
-        // x_mu = 1 で視線レイvが"上"方向を向く => mu = 1.
-        // x_mu = 0 で視線レイvが"水平"方向を向く => mu = 0.
-        // x_mu = -1 で視線レイvが"下"方向を向く => mu = -1.
-
-        if (mu >= 0.0F) {
-            // 視線レイが真上を向いているとき (x_mu = 1).
-            const float d_min = R - r_o;
-
-            // 視線レイが水平を向いているとき (x_mu = 0).
-            const float d_max = aten::sqrt(R * R - r_o * r_o);
-
-            x_mu = (d - d_min) / (d_max - d_min);
-        }
-        else {
-            // 視線レイが水平を向いているとき (x_mu = 0).
-            const float d_min = aten::sqrt(R * R - r_o * r_o);
-
-            // 視線レイが真下を向いているとき (x_mu = 1).
-            const float d_max = R + r_o;
-
-            x_mu = -(d - d_min) / (d_max - d_min);
-        }
-
-        // [-1, 1] -> [0, 1]
-        x_mu = 0.5F * x_mu + 0.5F;
-        x_mu = aten::saturate(x_mu);
-
-        // x_mu と x_r をテクスチャのUV座標に変換する.
-        return vec2(
-            sky::GetTextureCoordFromUnitRange(x_mu, sky::TRANSMITTANCE_TEXTURE_WIDTH),
-            sky::GetTextureCoordFromUnitRange(x_r, sky::TRANSMITTANCE_TEXTURE_HEIGHT));
-    }
-
-    inline AT_DEVICE_API aten::vec3 GetTransmittanceInRainVolumeByRMu(
-        const sky::AtmosphereParameters& atmosphere,
-        const aten::aabb& box,
-        const sky::texture2d& transmission_rain_tex,
-        const float r,
-        const float mu)
-    {
-        const auto height = box.maxPos().y - box.minPos().y;
-
-        const float r_o = r - box.minPos().y - 1.0F; //atmosphere.bottom_radius;
-
-        AT_ASSERT(r_o <= height);
-
-        const auto x_r = r_o / height;
-
-        AT_ASSERT(mu >= -1.0F && mu <= 1.0F);
-
-        // [-1, 1] -> [0, 1]
-        const auto x_mu = 0.5F * mu + 0.5F;
-
-        aten::vec2 uv{
-            sky::GetTextureCoordFromUnitRange(x_mu, sky::TRANSMITTANCE_TEXTURE_WIDTH),
-            sky::GetTextureCoordFromUnitRange(x_r, sky::TRANSMITTANCE_TEXTURE_HEIGHT),
-        };
-
-        const auto transmittance = sky::SampleTexture2D(transmission_rain_tex, uv);
-        return transmittance;
+        return sky::GetTransmittanceTextureUvFromRMu(dummy_atmosphere, r_tmp, mu);
     }
 
     inline AT_DEVICE_API aten::tuple<float, float> ComputeRMu(
-        const sky::AtmosphereParameters& atmosphere,
         const aten::vec3& earth_center,
         const aten::vec3& point,
         const aten::vec3& view_dir)
     {
-        // TODO
-        // ここは、earth center から考えるのではなく、ダミーで設定した 1.0 の半径の球の中心から考えるべきかもしれない.
         auto z = point - earth_center;
         const auto r = length(z);
 
-        // TODO
-        // static in CUDA
-        const aten::vec3 zenith{0.0F, 0.0F, 1.0F};
-
-        const auto mu = dot(zenith, view_dir);
+        z /= r;
+        const auto mu = dot(z, view_dir);
 
         return aten::make_tuple(r, mu);
+    }
+
+    inline AT_DEVICE_API aten::vec3 GetTransmittanceInRainVolume(
+        const sky::AtmosphereParameters& atmosphere,
+        const aten::aabb& box,
+        const aten::vec3& earth_center,
+        const sky::texture2d& transmission_rain_tex,
+        const aten::vec3& base_point,
+        const aten::vec3& view_dir,
+        const float d)
+    {
+        const auto Rg = 0.1F;
+        const auto Rt = box.getDiagonalLenght() + Rg;
+
+        auto dummy_atmosphere = atmosphere;
+        dummy_atmosphere.bottom_radius = Rg;
+        dummy_atmosphere.top_radius = Rt;
+
+        float r, mu;
+
+        aten::tie(r, mu) = ComputeRMu(earth_center, base_point, view_dir);
+
+        // TODO:
+        // GetRMuFromTransmittanceTextureUv の内部で、atmosphere.bottom_radius を r に加算しているが
+        // float の精度の問題で、r から atmosphere.bottom_radius を減算しても、加算前の値が得られないことがある.
+        // そこで、ここでは、r_o が Rt を越えないように clamp する.
+        const auto r_o = aten::clamp(r - atmosphere.bottom_radius + Rg, Rg, Rt);
+
+        const auto transmittance = sky::transmittance::GetTransmittance(
+            dummy_atmosphere,
+            transmission_rain_tex,
+            r_o, mu, d,
+            false);
+
+        return aten::vmin(transmittance, 1.0F);
     }
 
     inline AT_DEVICE_API aten::vec3 GetTransmittanceInRainVolumeBetweenTwoPoints(
@@ -270,24 +136,54 @@ namespace aten::rainbow
         const aten::vec3& point_1,
         const aten::vec3& point_2)
     {
-        const aten::vec3 view_dir{ normalize(point_2 - point_1) };
+        const auto dir{
+            normalize(point_2 - point_1)
+        };
 
-        float r_1, mu_1;
-        aten::tie(r_1, mu_1) = ComputeRMu(atmosphere, earth_center, point_1, view_dir);
-        const auto transmittance_1 = GetTransmittanceInRainVolumeByRMu(atmosphere, box, transmission_rain_tex, r_1, mu_1);
+        const auto d = length(point_2 - point_1);
 
-        float r_2, mu_2;
-        aten::tie(r_2, mu_2) = ComputeRMu(atmosphere, earth_center, point_2, view_dir);
-        const auto transmittance_2 = GetTransmittanceInRainVolumeByRMu(atmosphere, box, transmission_rain_tex, r_2, mu_2);
+        const auto transmittance = GetTransmittanceInRainVolume(
+            atmosphere,
+            box,
+            earth_center,
+            transmission_rain_tex,
+            point_1, dir, d);
 
-        // transmittance は視点をx、大気上端の交点を i とすると、 exp(-∫_x^i).
-        // また、途中の点を y とすると、 exp(-∫_x^i) = exp{-(∫_x^y + ∫_y^i}) = exp(-∫_x^y) * exp(-∫_y^i) となる.
-        // つまり、exp(-∫_x^y) = exp(-∫_x^i) / exp(-∫_y^i) となるので、
-        // transmittance(x,y) = transmittance(x,i) / transmittance(y,i) となる.
-        // x ----- y ----- i
+        return aten::vmin(transmittance, 1.0F);
+    }
 
-        const auto transmittance = transmittance_1 / transmittance_2;
-        return transmittance;
+    inline AT_DEVICE_API aten::vec3 GetSkyTransmittance(
+        const sky::AtmosphereParameters& atmosphere,
+        const aten::vec3& earth_center,
+        const sky::texture2d& transmission_tex,
+        const aten::vec3& base_point,
+        const aten::vec3& view_dir,
+        const float d)
+    {
+        float r, mu;
+        aten::tie(r, mu) = ComputeRMu(earth_center, base_point, view_dir);
+
+        const bool is_intersects_ground = RayIntersectsGround(atmosphere, r, mu);
+
+        if (is_intersects_ground) {
+            const auto transmittance{
+                sky::transmittance::GetTransmittance(
+                    atmosphere,
+                    transmission_tex,
+                    r, mu, d,
+                    is_intersects_ground)
+            };
+            return transmittance;
+        }
+        else {
+            const auto transmittance{
+                sky::transmittance::GetTransmittanceToTopAtmosphereBoundary(
+                    atmosphere,
+                    transmission_tex,
+                    r, mu)
+            };
+            return transmittance;
+        }
     }
 
     // TODO

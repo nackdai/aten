@@ -58,12 +58,19 @@ namespace aten {
                 t_result);
         }
 
+        static AT_HOST_DEVICE_API aten::tuple<float, float> GetHitT(
+            const aabb& box,
+            const ray& r,
+            float t_min, float t_max)
+        {
+            return GetHitT(r, box.m_min, box.m_max, t_min, t_max);
+        }
+
         template <class T>
-        static AT_HOST_DEVICE_API bool hit(
+        static AT_HOST_DEVICE_API aten::tuple<float, float> GetHitT(
             const ray& r,
             const T& _min, const T& _max,
-            float t_min, float t_max,
-            float* t_result = nullptr)
+            float t_min, float t_max)
         {
             aten::vec3 invdir(float(1) / (r.dir + aten::vec3(float(1e-6))));
 
@@ -77,6 +84,19 @@ namespace aten {
 
             const auto t1 = aten::min(aten::min_from_vec3(tmax), t_max);
             const auto t0 = aten::max(aten::max_from_vec3(tmin), t_min);
+
+            return aten::make_tuple(t0, t1);
+        }
+
+        template <class T>
+        static AT_HOST_DEVICE_API bool hit(
+            const ray& r,
+            const T& _min, const T& _max,
+            float t_min, float t_max,
+            float* t_result = nullptr)
+        {
+            float t0, t1;
+            aten::tie(t0, t1) = GetHitT(r, _min, _max, t_min, t_max);
 
             if (t_result) {
                 *t_result = t0;

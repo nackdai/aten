@@ -206,8 +206,8 @@ namespace aten::rainbow {
                             u = sampler.nextSample();
                         }
 
-                        const auto droplet_radius = ComputeInverseNormalDistributionCDF(u, mu, sigma);
-                        droplet_radius_tex_.SetByXYZ(droplet_radius, x, y, z);
+                        //const auto droplet_radius = ComputeInverseNormalDistributionCDF(u, mu, sigma);
+                        //droplet_radius_tex_.SetByXYZ(droplet_radius, x, y, z);
                     }
                 }
             }
@@ -230,7 +230,6 @@ namespace aten::rainbow {
             const aten::vec3& earth_center, // [km]
             const aten::aabb& rain_volume,  // [km x km x km]
             const float intensity_rainfall_rate,    // [mm/h]
-            const float extinction,
             const aten::texture3d& airy_func_res_tex,
             const aten::vec3& sun_radiance_to_luminance,
             const aten::vec3& white_point
@@ -262,7 +261,6 @@ namespace aten::rainbow {
                     view_dir,
                     rain_volume,  // [km x km x km]
                     intensity_rainfall_rate,    // [mm/h]
-                    extinction,
                     airy_func_res_tex)
             };
 
@@ -310,8 +308,6 @@ namespace aten::rainbow {
             0.0F,
         };
 
-        const float extinction = ComputeExtinctionInRain(intensity_rainfall_rate);
-
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp parallel
 #endif
@@ -321,9 +317,7 @@ namespace aten::rainbow {
 //#pragma omp for schedule(dynamic, 1)
 #endif
             for (int32_t y = 0; y < height; y++) {
-                //const auto x = 128;
                 for (int32_t x = 0; x < width; x++)
-                //for (int32_t x = 112; x < 144; x++)
                 {
                     const auto id = y * width + x;
                     const auto rnd = aten::getRandom(id);
@@ -352,7 +346,6 @@ namespace aten::rainbow {
                             earth_center,
                             rain_volume_,
                             intensity_rainfall_rate,
-                            extinction,
                             airy_func_tex_,
                             sun_radiance_to_luminance_, white_point_)
                     };

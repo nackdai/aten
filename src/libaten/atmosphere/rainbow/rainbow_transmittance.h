@@ -187,7 +187,7 @@ namespace aten::rainbow
     }
 
     // TODO
-    inline AT_DEVICE_API float ComputeExtinctionInRain(
+    inline float ComputeExtinctionInRain(
         const float intensity_rainfall_rate)    // [mm/h]
     {
         // NOTE:
@@ -201,14 +201,7 @@ namespace aten::rainbow
 
         for (int32_t a = 0; a < A_WIDTH; a++) {
             const auto droplet_diameter_m = Length::from(droplet_diameter_mm, MeterUnit::mm, MeterUnit::km);
-#if 0
-            const auto droplet_distrib = ComputeMarshallPalmerDropletSizeDistribution(
-                droplet_diameter_m,
-                intensity_rainfall_rate);
 
-            const auto droplet_radius_mm = droplet_diameter_mm * 0.5F;
-            const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_mm * droplet_radius_mm;
-#else
             // TODO
             // The following code should be standardized.
             constexpr auto N0 = 8000.0F * 10e3F * 10e8F;    // [m^-3mm^-1] -> [m^-4] -> [km^-4]
@@ -216,7 +209,6 @@ namespace aten::rainbow
             const auto droplet_distrib = N0 * aten::exp(-lambda * droplet_diameter_m);
             const auto droplet_radius_m = droplet_diameter_m * 0.5F;
             const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_m * droplet_radius_m;
-#endif
 
             const auto extinction_i = EXTINCTION_EFFICIENT_IN_RAIN_VOLUME * droplet_cross_sectional_area * droplet_distrib;
 
@@ -233,5 +225,37 @@ namespace aten::rainbow
         }
 
         return extinction;
+    }
+
+    inline AT_DEVICE_API aten::tuple<float, float> ComputeRMuS(
+        const aten::vec3& curr_point,
+        const aten::vec3& sun_direction,
+        const aten::vec3& earth_center)
+    {
+        auto z = curr_point - earth_center;
+        const auto r = length(z);
+
+        z /= r;
+        const auto mu_s = dot(z, sun_direction);
+
+        return aten::make_tuple(r, mu_s);
+    }
+
+    inline AT_DEVICE_API aten::vec3 GetTransmittanceToSun(
+        const sky::AtmosphereParameters& atmosphere,
+        const sky::texture2d& transmittance_texture,
+        const aten::vec3& curr_point,
+        const aten::vec3& sun_direction,
+        const aten::vec3& earth_center)
+    {
+        float r, mu_s;
+        aten::tie(r, mu_s) = ComputeRMuS(curr_point, sun_direction, earth_center);
+
+        const auto transmittance = sky::transmittance::GetTransmittanceToSun(
+            atmosphere,
+            transmittance_texture,
+            r, mu_s);
+
+        return transmittance;
     }
 }

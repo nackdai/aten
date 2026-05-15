@@ -14,7 +14,7 @@ namespace idaten::rainbow {
         RainbowModel() = default;
         ~RainbowModel() = default;
 
-        void Init();
+        void Init(const aten::CameraParameter& camera);
 
         void PreCompute();
 
@@ -30,13 +30,22 @@ namespace idaten::rainbow {
         CudaSurfaceTexture<float4> transmittance_texture_host_;
         CudaSurfaceTexture3D<float4> airy_func_texture_host_;
         CudaSurfaceTexture3D<float4> droplet_radius_texture_host_;
+        CudaSurfaceTexture<float4> transmittance_in_rain_volume_texture_host_;
 
         idaten::SurfaceTexture transmittance_texture_;
         idaten::SurfaceTexture airy_func_texture_;
         idaten::SurfaceTexture droplet_radius_texture_;
+        idaten::SurfaceTexture transmittance_in_rain_volume_texture_;
 
         TypedCudaMemory<uint32_t> random_values_;
 
+        aten::aabb rain_volume_;
+
         idaten::CudaGLSurface m_glimg;
+
+        TypedCudaMemory<aten::vec3> render_result_;
+
+        // TODO
+        static constexpr float intensity_rainfall_rate = 1.0F; // [mm/h]
     };
 }

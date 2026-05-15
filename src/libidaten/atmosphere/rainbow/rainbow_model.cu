@@ -10,7 +10,7 @@
 #include "sampler/cmj.h"
 
 namespace idaten::rainbow {
-    void RainbowModel::Init()
+    void RainbowModel::Init(const aten::CameraParameter& camera)
     {
         // Init 3d texture to store Airy function values.
         airy_func_texture_host_.Init(
@@ -33,6 +33,38 @@ namespace idaten::rainbow {
             aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
             aten::TextureFilterMode::Linear);
         transmittance_texture_ = transmittance_texture_host_.GetSurfaceTexture();
+
+        transmittance_in_rain_volume_texture_host_.Init(
+            aten::sky::TRANSMITTANCE_TEXTURE_WIDTH,
+            aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
+            aten::TextureFilterMode::Linear);
+        transmittance_in_rain_volume_texture_ = transmittance_in_rain_volume_texture_host_.GetSurfaceTexture();
+
+        // Set rain volume box.
+        {
+            // TODO
+            constexpr aten::Length RainVolumeWidth = 4.0_km;
+            constexpr aten::Length RainVolumeHeight = 4.0_km;
+            constexpr aten::Length RainVolumeDepth = 4.0_km;
+
+            // TODO
+            const auto& camera_pos = camera.origin;
+
+            aten::vec3 rain_volume_min{
+                camera_pos.x - RainVolumeWidth.as(aten::MeterUnit::km) * 0.5f,
+                0.0F,
+                camera_pos.z - 1.0F - RainVolumeDepth.as(aten::MeterUnit::km),
+            };
+            aten::vec3 rain_volume_max{
+                camera_pos.x + RainVolumeWidth.as(aten::MeterUnit::km) * 0.5f,
+                rain_volume_min.y + RainVolumeHeight.as(aten::MeterUnit::km),
+                camera_pos.z - 1.0F,
+            };
+
+            rain_volume_.init(
+                rain_volume_min,
+                rain_volume_max);
+        }
 
         // TODO.
         // Create random values to pick the value from normal distribution.
@@ -87,6 +119,49 @@ namespace idaten::rainbow {
             aten::sky::WriteTexture2D(transmittance_texture, transmittance, x, y);
         }
 
+        __global__ void ComputeTransmittanceInRainVolumeTexture(
+            const aten::sky::AtmosphereParameters atmosphere,
+            idaten::SurfaceTexture transmittance_in_rain_volume_texture,
+            aten::aabb rain_volume,
+            float extinction)
+        {
+            const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
+            const int32_t y = blockIdx.y * blockDim.y + threadIdx.y;
+            if (x >= aten::sky::TRANSMITTANCE_TEXTURE_WIDTH || y >= aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT) {
+                return;
+            }
+
+            const aten::vec2 TRANSMITTANCE_TEXTURE_SIZE{
+                aten::sky::TRANSMITTANCE_TEXTURE_WIDTH,
+                aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
+            };
+
+            const aten::vec2 frag_coord{
+                static_cast<float>(x) + 0.5F,
+                static_cast<float>(y) + 0.5F,
+            };
+
+            float r;
+            float mu;
+
+            aten::rainbow::GetRMuFromTransmittanceTextureUv(
+                atmosphere, rain_volume,
+                frag_coord / TRANSMITTANCE_TEXTURE_SIZE,
+                r, mu);
+
+            const auto optical_depth = aten::rainbow::ComputeOpticalDepthBasedOnAabbCoveredSphere(
+                atmosphere, rain_volume,
+                r, mu);
+
+            const auto transmittance = aten::exp(-extinction * optical_depth);
+            AT_ASSERT(transmittance <= 1.0F);
+
+            aten::sky::WriteTexture2D(
+                transmittance_in_rain_volume_texture,
+                aten::vec3(transmittance),
+                x, y);
+        }
+
         __global__ void ComputeAiryFunctionKernel(idaten::SurfaceTexture airy_function_texture)
         {
             const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -133,14 +208,14 @@ namespace idaten::rainbow {
                 scramble);
 
             const auto u = sampler.nextSample();
-            const auto droplet_radius = aten::rainbow::ComputeInverseNormalDistributionCDF(u, mu, sigma);
-            aten::sky::WriteTexture3D(droplet_radius_texture, aten::vec3(droplet_radius), x, y, z);
+            //const auto droplet_radius = aten::rainbow::ComputeInverseNormalDistributionCDF(u, mu, sigma);
+            //aten::sky::WriteTexture3D(droplet_radius_texture, aten::vec3(droplet_radius), x, y, z);
         }
     }
 
     void RainbowModel::PreCompute()
     {
-        dim3 thread_per_block(16, 16, 16);
+        dim3 thread_per_block(16, 16);
 
         // Transmittance を計算.
         dim3 transmittance_block_per_grid(
@@ -151,6 +226,18 @@ namespace idaten::rainbow {
             atmosphere_,
             transmittance_texture_);
         checkCudaKernel(ComputeTransmittanceToTopAtmosphereBoundaryTexture);
+
+        const auto extinction = aten::rainbow::ComputeExtinctionInRain(intensity_rainfall_rate);
+
+        ComputeTransmittanceInRainVolumeTexture << <transmittance_block_per_grid, thread_per_block >> > (
+            atmosphere_,
+            transmittance_in_rain_volume_texture_,
+            rain_volume_,
+            extinction);
+        checkCudaKernel(ComputeTransmittanceInRainVolumeTexture);
+
+        // For 3 dimension cuda kernel.
+        thread_per_block = dim3(8, 8, 8);
 
         // Compute Airy function.
         dim3 airy_func_block_per_grid(
@@ -184,18 +271,22 @@ namespace idaten::rainbow {
 
     namespace {
         __global__ void RenderRainbow(
+            aten::vec3* render_result,
             cudaSurfaceObject_t dst,
+            uint32_t* random_values,
             const int32_t width, const int32_t height,
             const aten::CameraParameter camera,
             const aten::sky::AtmosphereParameters atmosphere,
             const idaten::SurfaceTexture transmittance_texture,
+            const idaten::SurfaceTexture transmittance_in_rain_volume_texture,
             const idaten::SurfaceTexture droplet_radius_tex,
             const aten::vec3 sun_direction,
             const aten::vec3 earth_center, // [km]
             const aten::aabb rain_volume,  // [km x km x km]
             const float intensity_rainfall_rate,    // [mm/h]
             const idaten::SurfaceTexture airy_func_res_tex,
-            const aten::vec3 sun_radiance_to_luminance)
+            const aten::vec3 sun_radiance_to_luminance,
+            const aten::vec3 white_point)
         {
             const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
             const int32_t y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -203,6 +294,17 @@ namespace idaten::rainbow {
             if (x >= width || y >= height) {
                 return;
             }
+
+            const auto id = y * width + x;
+
+            const auto rnd = random_values[id];
+            const auto frame = 0;
+            const auto scramble = rnd * 0x1fe3434f * (((frame + rnd) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+            aten::CMJ sampler;
+            sampler.init(
+                (frame + rnd) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
+                0,
+                scramble);
 
             const float s = x / static_cast<float>(camera.width);
             const float t = y / static_cast<float>(camera.height);
@@ -212,13 +314,18 @@ namespace idaten::rainbow {
             AT_NAME::CameraSampleResult camsample;
             AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
 
+            // TODO
+            const auto extinction = 0.0F;
+
             const auto camera_pos{ camsample.r.org };
             const auto view_dir{ camsample.r.dir };
 
             aten::vec3 rainbow_radiance {
                 aten::rainbow::AdvanceRainVolumeIntegral(
+                    sampler,
                     atmosphere,
                     transmittance_texture,
+                    transmittance_in_rain_volume_texture,
                     droplet_radius_tex,
                     sun_direction,
                     earth_center, // [km]
@@ -231,8 +338,19 @@ namespace idaten::rainbow {
 
             rainbow_radiance *= sun_radiance_to_luminance;
 
+            // TODO
+            // Tone mapping.
+            // white point (RGB=1.0（白））に対する比率の負値のexponential -> 強い値ほど減衰（ゼロに近い）.
+            // それを 1.0 から引くことで、結果強い値が大きくなる.
+            // exposure は全体の明るさを調整するための係数.
+            aten::vec3 color{
+                aten::vec3(1.0F) - aten::exp(-rainbow_radiance / white_point * aten::sky::EXPOSURE)
+            };
+
+            render_result[id] = color;
+
             surf2Dwrite(
-                make_float4(rainbow_radiance.x, rainbow_radiance.y, rainbow_radiance.z, 1.0F),
+                make_float4(color.x, color.y, color.z, 1.0F),
                 dst,
                 x * sizeof(float4), y,
                 cudaBoundaryModeTrap);
@@ -251,11 +369,6 @@ namespace idaten::rainbow {
             m_glimg.init(gltex, CudaGLRscRegisterType::ReadWrite);
         }
 
-        // const aten::vec3 sun_direction{
-        //     aten::sin(sun_zenith_angle_radians) * aten::cos(sun_azimuth_angle_radians),
-        //     aten::cos(sun_zenith_angle_radians),
-        //     aten::sin(sun_zenith_angle_radians) * aten::sin(sun_azimuth_angle_radians)
-        // };
         constexpr auto sun_angle = aten::Deg2Rad(20.0F);
 
         // TODO
@@ -272,35 +385,6 @@ namespace idaten::rainbow {
             0.0F,
         };
 
-        const auto sun_size = aten::cos(aten::sky::SunAngularRadius);
-
-        // TODO
-        constexpr aten::Length RainVolumeWidth = 4.0_km;
-        constexpr aten::Length RainVolumeHeight = 4.0_km;
-        constexpr aten::Length RainVolumeDepth = 4.0_km;
-
-        // TODO
-        const auto& camera_pos = camera.origin;
-
-        aten::vec3 rain_volume_min{
-            camera_pos.x - RainVolumeWidth.as(aten::MeterUnit::km) * 0.5f,
-            0.0F,
-            camera_pos.z - 1.0F - RainVolumeDepth.as(aten::MeterUnit::km),
-        };
-        aten::vec3 rain_volume_max{
-            camera_pos.x + RainVolumeWidth.as(aten::MeterUnit::km) * 0.5f,
-            rain_volume_min.y + RainVolumeHeight.as(aten::MeterUnit::km),
-            camera_pos.z - 1.0F,
-        };
-
-        aten::aabb rain_volume{
-            rain_volume_min,
-            rain_volume_max,
-        };
-
-        // TODO
-        constexpr float intensity_rainfall_rate = 1.0F; // [mm/h]
-
         dim3 thread_per_block(16, 16);
         dim3 block_per_grid(
             (width + thread_per_block.x - 1) / thread_per_block.x,
@@ -309,20 +393,29 @@ namespace idaten::rainbow {
         CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
         auto output_surface = m_glimg.bind();
 
+        render_result_.resize(width * height);
+
         RenderRainbow << <block_per_grid, thread_per_block >> > (
+            render_result_.data(),
             output_surface,
+            random_values_.data(),
             width, height,
             camera,
             atmosphere_,
             transmittance_texture_,
+            transmittance_in_rain_volume_texture_,
             droplet_radius_texture_,
             sun_direction,
             earth_center,
-            rain_volume,
+            rain_volume_,
             intensity_rainfall_rate,
             airy_func_texture_,
-            sun_radiance_to_luminance_);
+            sun_radiance_to_luminance_,
+            white_point_);
         checkCudaKernel(RenderRainbow);
+
+        //std::vector<aten::vec3> render_result_host(width * height);
+        //render_result_.readFromDeviceToHostByNum(render_result_host.data(), width * height);
 
         m_glimg.unbind();
     }

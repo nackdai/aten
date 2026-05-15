@@ -344,8 +344,8 @@ namespace aten::rainbow
 
         const auto box_distance_along_with_view_dir = t1 - t0;
 
-        // Not to out of the rain volume at the last step, multiply by 0.999999F.
-        const auto dt = box_distance_along_with_view_dir / SAMPLE_COUNT * 0.999999F;
+        // Not to out of the rain volume at the last step, multiply by 0.99.
+        const auto dt = box_distance_along_with_view_dir / SAMPLE_COUNT * 0.99F;
 
         aten::vec3 uvw{
             aten::saturate(((theta - THETA_MIN) / THETA_STEP + 0.5F) / THETA_WIDTH),

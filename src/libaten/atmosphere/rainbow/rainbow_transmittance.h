@@ -163,7 +163,10 @@ namespace aten::rainbow
         float r, mu;
         aten::tie(r, mu) = ComputeRMu(earth_center, base_point, view_dir);
 
-        const bool is_intersects_ground = RayIntersectsGround(atmosphere, r, mu);
+        // TODO
+        // How should we deal with the case where the ray intersects the ground?
+        // const bool is_intersects_ground = RayIntersectsGround(atmosphere, r, mu);
+        const bool is_intersects_ground = false;
 
         if (is_intersects_ground) {
             const auto transmittance{

@@ -283,6 +283,9 @@
     <ClInclude Include="..\src\libidaten\atmosphere\rainbow\rainbow_model_device.h">
       <Filter>atmosphere\rainbow</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\atmosphere\atmosphere.h">
+      <Filter>atmosphere</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -516,6 +519,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\atmosphere\rainbow\rainbow_model.cu">
       <Filter>atmosphere\rainbow</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\atmosphere\atmosphere.cu">
+      <Filter>atmosphere</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

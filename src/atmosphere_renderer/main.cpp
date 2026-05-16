@@ -16,6 +16,8 @@
 #include "atmosphere/rainbow/rainbow_model.h"
 #include "atmosphere/rainbow/rainbow_model_device.h"
 
+#include "atmosphere/atmosphere.h"
+
 #define DEVICE_RENDERING
 //#define SKY_RENDERING
 
@@ -155,7 +157,10 @@ public:
 
 #ifdef DEVICE_RENDERING
         if (!is_sky_initialized_) {
-#ifdef SKY_RENDERING
+#if 1
+            atmosphere_.Init(camera_.param());
+            atmosphere_.PreCompute();
+#elif SKY_RENDERING
             sky_model_.Init();
             sky_model_.PreCompute();
 #else
@@ -165,7 +170,14 @@ public:
             is_sky_initialized_ = true;
         }
 
-#ifdef SKY_RENDERING
+#if 1
+        atmosphere_.Render(
+            visualizer_->GetGLTextureHandle(),
+            WIDTH, HEIGHT,
+            sun_zenith_angle_radians_,
+            sun_azimuth_angle_radians_,
+            camera_.param());
+#elif SKY_RENDERING
         sky_model_.Render(
             visualizer_->GetGLTextureHandle(),
             WIDTH, HEIGHT,
@@ -189,10 +201,6 @@ public:
             0);
 
         visualizer_->render(false);
-
-        rasterizer_aabb_.drawAABB(
-            &camera_,
-            rainbow_model_.GetRainVolume());
 #else
         if (!is_sky_rendered_) {
 #ifdef SKY_RENDERING
@@ -355,6 +363,8 @@ private:
 #ifdef DEVICE_RENDERING
     idaten::sky::SkyModel sky_model_;
     idaten::rainbow::RainbowModel rainbow_model_;
+
+    idaten::Atmosphere atmosphere_;
 
     bool is_sky_initialized_{ false };
 #else

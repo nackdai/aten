@@ -1,6 +1,7 @@
 #pragma once
 
 #include "atmosphere/sky/sky_model.h"
+#include "atmosphere/rainbow/rainbow_precompute_textures.h"
 
 #include "camera/camera.h"
 #include "math/aabb.h"
@@ -8,8 +9,14 @@
 #include "image/texture_3d.h"
 #include "renderer/film.h"
 
+namespace idaten {
+    class Atmosphere;
+}
+
 namespace aten::rainbow {
     class RainbowModel : public sky::SkyModel {
+        friend class idaten::Atmosphere;
+
     public:
         RainbowModel() = default;
         ~RainbowModel() = default;
@@ -25,10 +32,7 @@ namespace aten::rainbow {
             Film& dst);
 
     protected:
-        aten::texture3d airy_func_tex_;
-        aten::texture3d droplet_radius_tex_;
-        aten::texture transmittance_texture_;
-        aten::texture transmittance_in_rain_volume_texture_;
+        aten::rainbow::PreComputeTextureManager<aten::texture, aten::texture3d> textures_;
 
         aten::aabb rain_volume_;
 

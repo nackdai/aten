@@ -58,12 +58,11 @@ namespace aten {
                 t_result);
         }
 
-        static AT_HOST_DEVICE_API aten::tuple<float, float> GetHitT(
-            const aabb& box,
+        AT_HOST_DEVICE_API aten::tuple<float, float> GetHitT(
             const ray& r,
-            float t_min, float t_max)
+            float t_min, float t_max) const
         {
-            return GetHitT(r, box.m_min, box.m_max, t_min, t_max);
+            return GetHitT(r, m_min, m_max, t_min, t_max);
         }
 
         template <class T>

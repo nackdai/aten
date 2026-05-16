@@ -9,21 +9,7 @@
 namespace aten::rainbow {
     void RainbowModel::Init(const aten::CameraParameter& camera)
     {
-        // Init 3d texture to store Airy function values.
-        airy_func_tex_.init(THETA_WIDTH, WAVELENGTH_WIDTH, A_WIDTH);
-
-        // Init 3d texture to store droplet radius based on normal distribution.
-        droplet_radius_tex_.init(DROPLET_RADIUS_TEX_SIZE, DROPLET_RADIUS_TEX_SIZE, DROPLET_RADIUS_TEX_SIZE);
-
-        transmittance_texture_.init(
-            aten::sky::TRANSMITTANCE_TEXTURE_WIDTH,
-            aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
-            3);
-
-        transmittance_in_rain_volume_texture_.init(
-            aten::sky::TRANSMITTANCE_TEXTURE_WIDTH,
-            aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
-            3);
+        textures_.Init();
 
         // Set rain volume box.
         {
@@ -51,7 +37,7 @@ namespace aten::rainbow {
                 rain_volume_max);
         }
 
-        SkyModel::InitParameters();
+        SkyModel::InitParameters(*this);
     }
 
     // TODO
@@ -143,7 +129,7 @@ namespace aten::rainbow {
                     ComputeTransmittanceToTopAtmosphereBoundaryTexture(
                         atmosphere_,
                         x, y,
-                        transmittance_texture_);
+                        textures_.transmittance_texture);
                 }
             }
 
@@ -155,7 +141,7 @@ namespace aten::rainbow {
                 for (int32_t y = 0; y < WAVELENGTH_WIDTH; y++) {
                     for (int32_t x = 0; x < THETA_WIDTH; x++) {
                         const auto intensity = ComputeAiryFunction(x, y, z);
-                        airy_func_tex_.SetByXYZ(vec4(intensity), x, y, z);
+                        textures_.airy_func_tex.SetByXYZ(vec4(intensity), x, y, z);
                     }
                 }
             }
@@ -171,7 +157,7 @@ namespace aten::rainbow {
                     ComputeTransmittanceInRainVolume(
                         x, y,
                         atmosphere_, rain_volume_, extinction,
-                        transmittance_in_rain_volume_texture_);
+                        textures_.transmittance_in_rain_volume_texture);
                 }
             }
 
@@ -339,14 +325,14 @@ namespace aten::rainbow {
                             x, y,
                             camera,
                             atmosphere_,
-                            transmittance_texture_,
-                            transmittance_in_rain_volume_texture_,
-                            droplet_radius_tex_,
+                            textures_.transmittance_texture,
+                            textures_.transmittance_in_rain_volume_texture,
+                            textures_.droplet_radius_tex,
                             sun_direction,
                             earth_center,
                             rain_volume_,
                             intensity_rainfall_rate,
-                            airy_func_tex_,
+                            textures_.airy_func_tex,
                             sun_radiance_to_luminance_, white_point_)
                     };
 

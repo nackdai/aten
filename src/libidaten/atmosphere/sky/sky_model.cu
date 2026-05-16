@@ -8,6 +8,8 @@
 #include "atmosphere/sky/sky_render.h"
 #include "atmosphere/sky/unit_quantity.h"
 
+#include "atmosphere/atmosphere.h"
+
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
@@ -17,7 +19,7 @@ namespace idaten::sky {
     void SkyModel::Init()
     {
         textures_.Init(pre_compute_textures_host_);
-        InitParameters();
+        InitParameters(*this);
     }
 
     namespace {
@@ -311,7 +313,11 @@ namespace idaten::sky {
         }
     }
 
-    void SkyModel::PreCompute()
+    template <int32_t NUM_SCATTERING>
+    static void PreComputeSkyValues(
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const aten::sky::PreComputeTextureManager<idaten::SurfaceTexture, idaten::SurfaceTexture>& textures,
+        const aten::mat4& luminance_from_radiance)
     {
         dim3 thread_per_block(16, 16);
         dim3 transmittance_block_per_grid(
@@ -326,25 +332,25 @@ namespace idaten::sky {
 
         // Transmittance を計算.
         ComputeTransmittanceToTopAtmosphereBoundaryTexture << <transmittance_block_per_grid, thread_per_block >> > (
-            atmosphere_,
-            textures_);
+            atmosphere,
+            textures);
         checkCudaKernel(ComputeTransmittanceToTopAtmosphereBoundaryTexture);
 
         // 最初の ΔE を計算.
         // 太陽からの入射放射輝度から指定された点での放射照度を計算する.
         ComputeDirectIrradianceTexture << <irradiance_block_per_grid, thread_per_block >> > (
-            atmosphere_,
-            textures_);
+            atmosphere,
+            textures);
         checkCudaKernel(ComputeDirectIrradianceTexture);
 
         // 最初の ΔS を計算.
         // 太陽光（一方向）からの単一散乱.
         for (int32_t z = 0; z < aten::sky::SCATTERING_TEXTURE_DEPTH; z++) {
             ComputeSingleScatteringTexture << <scattering_block_per_grid, thread_per_block >> > (
-                atmosphere_,
-                luminance_from_radiance_,
+                atmosphere,
+                luminance_from_radiance,
                 z,
-                textures_);
+                textures);
             checkCudaKernel(ComputeSingleScatteringTexture);
         }
 
@@ -354,32 +360,40 @@ namespace idaten::sky {
             // ΔJ を計算.
             for (int32_t z = 0; z < aten::sky::SCATTERING_TEXTURE_DEPTH; z++) {
                 ComputeScatteringDensityTexture << <scattering_block_per_grid, thread_per_block >> > (
-                    atmosphere_,
-                    luminance_from_radiance_,
+                    atmosphere,
+                    luminance_from_radiance,
                     z,
-                    textures_,
+                    textures,
                     scattering_order);
                 checkCudaKernel(ComputeScatteringDensityTexture);
             }
 
             // ΔE を計算して、E = E + ΔE する.
             ComputeIndirectIrradianceTexture << <irradiance_block_per_grid, thread_per_block >> > (
-                atmosphere_,
-                luminance_from_radiance_,
-                textures_,
+                atmosphere,
+                luminance_from_radiance,
+                textures,
                 scattering_order - 1);
             checkCudaKernel(ComputeIndirectIrradianceTexture);
 
             // ΔS を計算して、S = S + ΔS する.
             for (int32_t z = 0; z < aten::sky::SCATTERING_TEXTURE_DEPTH; z++) {
                 ComputeMultipleScatteringTexture << <scattering_block_per_grid, thread_per_block >> > (
-                    atmosphere_,
-                    luminance_from_radiance_,
+                    atmosphere,
+                    luminance_from_radiance,
                     z,
-                    textures_);
+                    textures);
                 checkCudaKernel(ComputeMultipleScatteringTexture);
             }
         }
+    }
+
+    void SkyModel::PreCompute()
+    {
+        PreComputeSkyValues<NUM_SCATTERING>(
+            atmosphere_,
+            textures_,
+            luminance_from_radiance_);
     }
 
     namespace {
@@ -479,5 +493,15 @@ namespace idaten::sky {
         checkCudaKernel(RenderSkyKernel);
 
         m_glimg.unbind();
+    }
+}
+
+namespace idaten{
+    void Atmosphere::PreComputeSky()
+    {
+        idaten::sky::PreComputeSkyValues<aten::sky::SkyModel::NUM_SCATTERING>(
+            sky_model_.atmosphere_,
+            sky_textures_,
+            sky_model_.luminance_from_radiance_);
     }
 }

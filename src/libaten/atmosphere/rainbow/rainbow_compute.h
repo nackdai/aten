@@ -324,7 +324,7 @@ namespace aten::rainbow
         aten::vec3 curr_point;
 
         float t0, t1;
-        aten::tie(t0, t1) = aten::aabb::GetHitT(rain_volume, aten::ray(camera_pos, view_dir), AT_MATH_EPSILON, AT_MATH_INF);
+        aten::tie(t0, t1) = rain_volume.GetHitT(aten::ray(camera_pos, view_dir), AT_MATH_EPSILON, AT_MATH_INF);
 
         const auto is_hit = t0 <= t1;
 
@@ -392,7 +392,7 @@ namespace aten::rainbow
             uvw.z = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
 
             // Current point is in rain volume box. In this case, t0 is always zero. So, we adopt t1.
-            aten::tie(t0, t1) = aten::aabb::GetHitT(rain_volume, aten::ray(curr_point, sun_direction), AT_MATH_EPSILON, AT_MATH_INF);
+            aten::tie(t0, t1) = rain_volume.GetHitT(aten::ray(curr_point, sun_direction), AT_MATH_EPSILON, AT_MATH_INF);
             const aten::vec3 boundary_point_to_sun_in_rain_volume{ curr_point + t1 * sun_direction };
 
             // Transmittance from the current point to sun only within the rain volume.

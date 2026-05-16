@@ -7,38 +7,29 @@
 #include "atmosphere/rainbow/rainbow_compute.h"
 #include "atmosphere/sky/sky_compute.h"
 
+#include "atmosphere/atmosphere.h"
+
 #include "sampler/cmj.h"
 
 namespace idaten::rainbow {
+    static void InitRandom(TypedCudaMemory<uint32_t>& random_values)
+    {
+        // TODO.
+        // Create random values to pick the value from normal distribution.
+        const auto random_store_size = aten::rainbow::DROPLET_RADIUS_TEX_SIZE
+            * aten::rainbow::DROPLET_RADIUS_TEX_SIZE
+            * aten::rainbow::DROPLET_RADIUS_TEX_SIZE;
+        const auto seed = 0;
+        std::vector<uint32_t> random(random_store_size);
+        std::mt19937 rand_src(seed);
+        std::generate(random.begin(), random.end(), rand_src);
+        random_values.resize(random_store_size);
+        random_values.writeFromHostToDeviceByNum(random.data(), random_store_size);
+    }
+
     void RainbowModel::Init(const aten::CameraParameter& camera)
     {
-        // Init 3d texture to store Airy function values.
-        airy_func_texture_host_.Init(
-            aten::rainbow::THETA_WIDTH,
-            aten::rainbow::WAVELENGTH_WIDTH,
-            aten::rainbow::A_WIDTH,
-            aten::TextureFilterMode::Linear);
-        airy_func_texture_ = airy_func_texture_host_.GetSurfaceTexture();
-
-        // Init 3d texture to store droplet radius based on normal distribution.
-        droplet_radius_texture_host_.Init(
-            aten::rainbow::DROPLET_RADIUS_TEX_SIZE,
-            aten::rainbow::DROPLET_RADIUS_TEX_SIZE,
-            aten::rainbow::DROPLET_RADIUS_TEX_SIZE,
-            aten::TextureFilterMode::Linear);
-        droplet_radius_texture_ = droplet_radius_texture_host_.GetSurfaceTexture();
-
-        transmittance_texture_host_.Init(
-            aten::sky::TRANSMITTANCE_TEXTURE_WIDTH,
-            aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
-            aten::TextureFilterMode::Linear);
-        transmittance_texture_ = transmittance_texture_host_.GetSurfaceTexture();
-
-        transmittance_in_rain_volume_texture_host_.Init(
-            aten::sky::TRANSMITTANCE_TEXTURE_WIDTH,
-            aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
-            aten::TextureFilterMode::Linear);
-        transmittance_in_rain_volume_texture_ = transmittance_in_rain_volume_texture_host_.GetSurfaceTexture();
+        textures_.Init(pre_compute_textures_host_);
 
         // Set rain volume box.
         {
@@ -78,7 +69,7 @@ namespace idaten::rainbow {
         random_values_.resize(random_store_size);
         random_values_.writeFromHostToDeviceByNum(random.data(), random_store_size);
 
-        SkyModel::InitParameters();
+        SkyModel::InitParameters(*this);
     }
 
     namespace {
@@ -213,7 +204,12 @@ namespace idaten::rainbow {
         }
     }
 
-    void RainbowModel::PreCompute()
+    static void PreComputeRainbowValues(
+        const bool need_to_compute_atmosphere_transmittance,
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const aten::aabb& rain_volume,
+        aten::rainbow::PreComputeTextureManager<idaten::SurfaceTexture, idaten::SurfaceTexture>& rainbow_textures,
+        const float intensity_rainfall_rate)
     {
         dim3 thread_per_block(16, 16);
 
@@ -222,17 +218,19 @@ namespace idaten::rainbow {
             (aten::sky::TRANSMITTANCE_TEXTURE_WIDTH + thread_per_block.x - 1) / thread_per_block.x,
             (aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT + thread_per_block.y - 1) / thread_per_block.y);
 
-        ComputeTransmittanceToTopAtmosphereBoundaryTexture << <transmittance_block_per_grid, thread_per_block >> > (
-            atmosphere_,
-            transmittance_texture_);
-        checkCudaKernel(ComputeTransmittanceToTopAtmosphereBoundaryTexture);
+        if (need_to_compute_atmosphere_transmittance) {
+            ComputeTransmittanceToTopAtmosphereBoundaryTexture << <transmittance_block_per_grid, thread_per_block >> > (
+                atmosphere,
+                rainbow_textures.transmittance_texture);
+            checkCudaKernel(ComputeTransmittanceToTopAtmosphereBoundaryTexture);
+        }
 
         const auto extinction = aten::rainbow::ComputeExtinctionInRain(intensity_rainfall_rate);
 
         ComputeTransmittanceInRainVolumeTexture << <transmittance_block_per_grid, thread_per_block >> > (
-            atmosphere_,
-            transmittance_in_rain_volume_texture_,
-            rain_volume_,
+            atmosphere,
+            rainbow_textures.transmittance_in_rain_volume_texture,
+            rain_volume,
             extinction);
         checkCudaKernel(ComputeTransmittanceInRainVolumeTexture);
 
@@ -245,9 +243,11 @@ namespace idaten::rainbow {
             (aten::rainbow::WAVELENGTH_WIDTH + thread_per_block.y - 1) / thread_per_block.y,
             (aten::rainbow::A_WIDTH + thread_per_block.z - 1) / thread_per_block.z);
 
-        ComputeAiryFunctionKernel << <airy_func_block_per_grid, thread_per_block >> > (airy_func_texture_);
+        ComputeAiryFunctionKernel << <airy_func_block_per_grid, thread_per_block >> > (
+            rainbow_textures.airy_func_tex);
         checkCudaKernel(ComputeAiryFunctionKernel);
 
+#if 0
         // Fill droplet radius.
         dim3 droplet_radius_block_per_grid(
             (aten::rainbow::DROPLET_RADIUS_TEX_SIZE + thread_per_block.x - 1) / thread_per_block.x,
@@ -263,15 +263,25 @@ namespace idaten::rainbow {
         constexpr auto sigma = 0.2_mm / 1.96F;
 
         FillDropletRadiusInRainVolume << <airy_func_block_per_grid, thread_per_block >> > (
-            droplet_radius_texture_,
+            rainbow_textures.droplet_radius_texture,
             random_values_.data(),
             mu, sigma);
         checkCudaKernel(FillDropletRadiusInRainVolume);
+#endif
+    }
+
+    void RainbowModel::PreCompute()
+    {
+        PreComputeRainbowValues(
+            true,
+            atmosphere_,
+            rain_volume_,
+            textures_,
+            intensity_rainfall_rate);
     }
 
     namespace {
         __global__ void RenderRainbow(
-            aten::vec3* render_result,
             cudaSurfaceObject_t dst,
             uint32_t* random_values,
             const int32_t width, const int32_t height,
@@ -314,9 +324,6 @@ namespace idaten::rainbow {
             AT_NAME::CameraSampleResult camsample;
             AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
 
-            // TODO
-            const auto extinction = 0.0F;
-
             const auto camera_pos{ camsample.r.org };
             const auto view_dir{ camsample.r.dir };
 
@@ -346,8 +353,6 @@ namespace idaten::rainbow {
             aten::vec3 color{
                 aten::vec3(1.0F) - aten::exp(-rainbow_radiance / white_point * aten::sky::EXPOSURE)
             };
-
-            render_result[id] = color;
 
             surf2Dwrite(
                 make_float4(color.x, color.y, color.z, 1.0F),
@@ -393,30 +398,41 @@ namespace idaten::rainbow {
         CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
         auto output_surface = m_glimg.bind();
 
-        render_result_.resize(width * height);
-
         RenderRainbow << <block_per_grid, thread_per_block >> > (
-            render_result_.data(),
             output_surface,
             random_values_.data(),
             width, height,
             camera,
             atmosphere_,
-            transmittance_texture_,
-            transmittance_in_rain_volume_texture_,
-            droplet_radius_texture_,
+            textures_.transmittance_texture,
+            textures_.transmittance_in_rain_volume_texture,
+            textures_.droplet_radius_tex,
             sun_direction,
             earth_center,
             rain_volume_,
             intensity_rainfall_rate,
-            airy_func_texture_,
+            textures_.airy_func_tex,
             sun_radiance_to_luminance_,
             white_point_);
         checkCudaKernel(RenderRainbow);
 
-        //std::vector<aten::vec3> render_result_host(width * height);
-        //render_result_.readFromDeviceToHostByNum(render_result_host.data(), width * height);
-
         m_glimg.unbind();
+    }
+}
+
+namespace idaten {
+    void Atmosphere::InitRainbow()
+    {
+        idaten::rainbow::InitRandom(random_values_);
+    }
+
+    void Atmosphere::PreComputeRainbow()
+    {
+        idaten::rainbow::PreComputeRainbowValues(
+            false,
+            sky_model_.atmosphere_,
+            rainbow_model_.rain_volume_,
+            rainbow_textures_,
+            aten::rainbow::RainbowModel::intensity_rainfall_rate);
     }
 }

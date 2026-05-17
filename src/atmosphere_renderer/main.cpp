@@ -103,7 +103,7 @@ public:
             pos + aten::vec3(1.0F)
         };
 #else
-        /*aten::vec3 pos{
+        aten::vec3 pos{
             0.0F,
             aten::Length::as(2.0F, aten::MeterUnit::km),
             0.0F,
@@ -114,14 +114,14 @@ public:
             pos.x,
             pos.y + aten::sin(view_angle),
             pos.z - aten::cos(view_angle),
-        };*/
+        };
 
-        aten::vec3 pos{
+        /*aten::vec3 pos{
             0.609041F, 0.314859F, -0.120800F
         };
         aten::vec3 at{
             0.000000F, 0.424618F, -0.906308F
-        };
+        };*/
 #endif
         const float vfov = 30.0F;
 
@@ -174,6 +174,7 @@ public:
         atmosphere_.Render(
             visualizer_->GetGLTextureHandle(),
             WIDTH, HEIGHT,
+            atmosphere_type_,
             sun_zenith_angle_radians_,
             sun_azimuth_angle_radians_,
             camera_.param());
@@ -352,11 +353,28 @@ private:
     {
     }
 
+    void AtmosphereTypeGUI()
+    {
+        for (const auto& type_pair : idaten::Atmosphere::TypeMap) {
+            bool is_selected = (atmosphere_type_ & type_pair.first) > 0;
+            if (ImGui::Checkbox(type_pair.second, &is_selected)) {
+                if (is_selected) {
+                    atmosphere_type_ |= type_pair.first;
+                }
+                else {
+                    atmosphere_type_ &= ~type_pair.first;
+                }
+            }
+        }
+    }
+
     void RenderGUI()
     {
 #ifdef DEVICE_RENDERING
         ImGui::SliderFloat("Sun Zenith Angle (radians)", &sun_zenith_angle_radians_, 0.0F, AT_MATH_PI);
         ImGui::SliderFloat("Sun Azimuth Angle (radians)", &sun_azimuth_angle_radians_, -AT_MATH_PI, AT_MATH_PI);
+
+        AtmosphereTypeGUI();
 #endif
     }
 
@@ -374,6 +392,11 @@ private:
     // TODO
     bool is_sky_rendered_{ false };
 #endif
+
+    int32_t atmosphere_type_{
+        static_cast<int32_t>(idaten::Atmosphere::Type::Sky)
+        | static_cast<int32_t>(idaten::Atmosphere::Type::Rainbow)
+    };
 
     float sun_zenith_angle_radians_{ 1.3F };
     float sun_azimuth_angle_radians_{ 2.9F };

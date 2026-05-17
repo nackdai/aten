@@ -50,16 +50,24 @@ namespace idaten {
         PreComputeRainbow();
     }
 
+    __device__ inline bool WillRenderAtmosphere(
+        const int32_t type,
+        const Atmosphere::Type render_type)
+    {
+        return (type & static_cast<int32_t>(render_type)) > 0;
+    }
+
     __global__ void RenderAtmosphere(
         cudaSurfaceObject_t dst,
         int32_t width, int32_t height,
+        const int32_t type,
         const aten::CameraParameter camera,
         const aten::sky::AtmosphereParameters atmosphere,
         const aten::sky::PreComputeTextures sky_textures,
         const aten::rainbow::PreComputeTextureManager<idaten::SurfaceTexture, idaten::SurfaceTexture> rainbow_textures,
         const aten::aabb rain_volume,
         const float intensity_rainfall_rate,    // [mm/h]
-        uint32_t* random_values,
+        const uint32_t* random_values,
         const aten::vec3 sun_radiance_to_luminance,
         const aten::vec3 sky_radiance_to_luminance,
         const aten::vec3 sun_direction,
@@ -74,28 +82,6 @@ namespace idaten {
             return;
         }
 
-        auto sky_luminance{
-            aten::sky::RenderSky(
-                x, y,
-                camera,
-                atmosphere, sky_textures,
-                sun_radiance_to_luminance, sky_radiance_to_luminance,
-                sun_direction,
-                earth_center,
-                sun_size)
-        };
-
-        const auto id = y * width + x;
-
-        const auto rnd = random_values[id];
-        const auto frame = 0;
-        const auto scramble = rnd * 0x1fe3434f * (((frame + rnd) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-        aten::CMJ sampler;
-        sampler.init(
-            (frame + rnd) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
-            0,
-            scramble);
-
         const float s = x / static_cast<float>(camera.width);
         const float t = y / static_cast<float>(camera.height);
 
@@ -107,47 +93,75 @@ namespace idaten {
         const auto camera_pos{ camsample.r.org };
         const auto view_dir{ camsample.r.dir };
 
-        aten::vec3 rainbow_radiance{
-            aten::rainbow::AdvanceRainVolumeIntegral(
-                sampler,
-                atmosphere,
-                rainbow_textures.transmittance_texture,
-                rainbow_textures.transmittance_in_rain_volume_texture,
-                rainbow_textures.droplet_radius_tex,
-                sun_direction,
-                earth_center, // [km]
-                camera_pos,   // [km]
-                view_dir,
-                rain_volume,  // [km x km x km]
-                intensity_rainfall_rate,    // [mm/h]
-                rainbow_textures.airy_func_tex)
-        };
+        const auto will_render_sky = WillRenderAtmosphere(type, Atmosphere::Type::Sky);
+        const auto will_render_rainbow = WillRenderAtmosphere(type, Atmosphere::Type::Rainbow);
 
-        rainbow_radiance *= sun_radiance_to_luminance;
+        aten::vec3 atmosphere_color{ 0.0F };
 
-        auto atmosphere_color{
-            rainbow_radiance
-        };
+        if (will_render_rainbow) {
+            const auto id = y * width + x;
 
-        float t0, t1;
-        aten::tie(t0, t1) = rain_volume.GetHitT(aten::ray(camera_pos, view_dir), AT_MATH_EPSILON, AT_MATH_INF);
+            const auto rnd = random_values[id];
+            const auto frame = 0;
+            const auto scramble = rnd * 0x1fe3434f * (((frame + rnd) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+            aten::CMJ sampler;
+            sampler.init(
+                (frame + rnd) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
+                0,
+                scramble);
 
-        const auto is_hit = t0 <= t1;
-
-        if (is_hit) {
-            const auto near_boundary_point = camera_pos + view_dir * t0;
-            const auto d = t1 - t0;
-
-            const auto transmittance_through_rain_volume{
-                aten::rainbow::GetTransmittanceInRainVolume(
-                    atmosphere, rain_volume, earth_center,
+            aten::vec3 rainbow_radiance{
+                aten::rainbow::AdvanceRainVolumeIntegral(
+                    sampler,
+                    atmosphere,
+                    rainbow_textures.transmittance_texture,
                     rainbow_textures.transmittance_in_rain_volume_texture,
-                    near_boundary_point, view_dir, d)
+                    rainbow_textures.droplet_radius_tex,
+                    sun_direction,
+                    earth_center, // [km]
+                    camera_pos,   // [km]
+                    view_dir,
+                    rain_volume,  // [km x km x km]
+                    intensity_rainfall_rate,    // [mm/h]
+                    rainbow_textures.airy_func_tex)
             };
 
-            atmosphere_color += transmittance_through_rain_volume * sky_luminance;
+            atmosphere_color += rainbow_radiance * sun_radiance_to_luminance;
         }
-        else {
+
+        if (will_render_sky) {
+            auto sky_luminance{
+                aten::sky::RenderSky(
+                    x, y,
+                    camera,
+                    atmosphere, sky_textures,
+                    sun_radiance_to_luminance, sky_radiance_to_luminance,
+                    sun_direction,
+                    earth_center,
+                    sun_size)
+            };
+
+            if (will_render_rainbow) {
+                float t0, t1;
+                aten::tie(t0, t1) = rain_volume.GetHitT(aten::ray(camera_pos, view_dir), AT_MATH_EPSILON, AT_MATH_INF);
+
+                const auto is_hit = t0 <= t1;
+
+                if (is_hit) {
+                    const auto near_boundary_point = camera_pos + view_dir * t0;
+                    const auto d = t1 - t0;
+
+                    const auto transmittance_through_rain_volume{
+                        aten::rainbow::GetTransmittanceInRainVolume(
+                            atmosphere, rain_volume, earth_center,
+                            rainbow_textures.transmittance_in_rain_volume_texture,
+                            near_boundary_point, view_dir, d)
+                    };
+
+                    sky_luminance *= transmittance_through_rain_volume;
+                }
+            }
+
             atmosphere_color += sky_luminance;
         }
 
@@ -171,6 +185,7 @@ namespace idaten {
         GLuint gltex,
         const int32_t width,
         const int32_t height,
+        const int32_t type,
         const float sun_zenith_angle_radians,
         const float sun_azimuth_angle_radians,
         const aten::CameraParameter& camera)
@@ -217,6 +232,7 @@ namespace idaten {
         RenderAtmosphere << <block_per_grid, thread_per_block >> > (
             output_surface,
             width, height,
+            type,
             camera,
             sky_model_.atmosphere_,
             sky_textures_,
@@ -235,4 +251,9 @@ namespace idaten {
 
         m_glimg.unbind();
     }
+
+    const std::map<int32_t, const char*> Atmosphere::TypeMap{
+        { static_cast<int32_t>(Type::Sky), "Sky" },
+        { static_cast<int32_t>(Type::Rainbow), "Rainbow" },
+    };
 }

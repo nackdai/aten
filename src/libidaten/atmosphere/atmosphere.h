@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include "atmosphere/sky/sky_model.h"
 #include "atmosphere/sky/sky_precompute_textures.h"
 #include "atmosphere/rainbow/rainbow_model.h"
@@ -14,6 +16,13 @@
 namespace idaten {
     class Atmosphere {
     public:
+        enum class Type {
+            Sky = 1 << 0,
+            Rainbow = 1 << 1,
+        };
+
+        static const std::map<int32_t, const char*> TypeMap;
+
         Atmosphere() = default;
         ~Atmosphere() = default;
 
@@ -25,6 +34,7 @@ namespace idaten {
             GLuint gltex,
             const int32_t width,
             const int32_t height,
+            const int32_t type,
             const float sun_zenith_angle_radians,
             const float sun_azimuth_angle_radians,
             const aten::CameraParameter& camera);

@@ -196,14 +196,15 @@ namespace aten::rainbow
         // NOTE:
         // Compute as km.
 
-        constexpr auto dD = Length::as(A_STEP, MeterUnit::mm);
+        constexpr auto dr = Length::as(A_STEP, MeterUnit::mm);
+        const auto dD = 2.0F * dr;
 
-        float droplet_diameter_mm = Length::as(A_MIN, MeterUnit::mm);
+        float droplet_radius_mm = Length::as(A_MIN, MeterUnit::mm);
 
         float extinction = 0.0F;
 
         for (int32_t a = 0; a < A_WIDTH; a++) {
-            const auto droplet_diameter_m = Length::from(droplet_diameter_mm, MeterUnit::mm, MeterUnit::km);
+            const auto droplet_diameter_m = Length::from(droplet_radius_mm * 2, MeterUnit::mm, MeterUnit::km);
 
             // TODO
             // The following code should be standardized.
@@ -215,7 +216,7 @@ namespace aten::rainbow
 
             const auto extinction_i = EXTINCTION_EFFICIENT_IN_RAIN_VOLUME * droplet_cross_sectional_area * droplet_distrib;
 
-            droplet_diameter_mm += dD;
+            droplet_radius_mm += dr;
 
             // 台形公式による積分の場合、例えば、分割数3で単純に計算すると、
             // (y0 + y1) * dx / 2 + (y1 + y2) * dx / 2 + (y2 + y3) * dx / 2

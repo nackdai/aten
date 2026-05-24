@@ -290,6 +290,53 @@ namespace aten::rainbow
         return droplet_radius.x;
     }
 
+    inline AT_DEVICE_API aten::tuple<float, float, float> CieColorMatchingFunctionTableValue(
+        const int32_t wavelength_nm)
+    {
+        if (wavelength_nm <= sky::LambdaMin || wavelength_nm >= sky::LambdaMax) {
+            return aten::make_tuple(0.0F, 0.0F, 0.0F);
+        }
+
+        auto u = (wavelength_nm - sky::LambdaMin) / 5.0F;
+        const auto row = static_cast<int32_t>(aten::floor(u));
+
+#if __CUDACC__
+        // TODO
+        // まずは、ホスト側での動作を試す.
+        sky::CIE_2_DEG_COLOR_MATCHING_FUNCTIONS_ELEMENT e0;
+        sky::CIE_2_DEG_COLOR_MATCHING_FUNCTIONS_ELEMENT e1;
+#else
+        const auto& e0 = sky::CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row];
+        const auto& e1 = sky::CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row + 1];
+#endif
+
+        u -= row;
+
+        return aten::make_tuple(
+            aten::lerp(e0.x, e1.x, u),
+            aten::lerp(e0.y, e1.y, u),
+            aten::lerp(e0.z, e1.z, u));
+    }
+
+    inline AT_DEVICE_API aten::vec3 SpectrumSampleToLinearSrgb(
+        const int32_t wavelength_nm,
+        const float spectral_value,
+        const float dlambda_nm)
+    {
+        float x_bar, y_bar, z_bar;
+        aten::tie(x_bar, y_bar, z_bar) = CieColorMatchingFunctionTableValue(wavelength_nm);
+
+        const float x = spectral_value * x_bar;
+        const float y = spectral_value * y_bar;
+        const float z = spectral_value * z_bar;
+
+        return sky::MAX_LUMINOUS_EFFICACY * dlambda_nm * aten::vec3{
+            sky::XYZ_TO_SRGB[0] * x + sky::XYZ_TO_SRGB[1] * y + sky::XYZ_TO_SRGB[2] * z,
+            sky::XYZ_TO_SRGB[3] * x + sky::XYZ_TO_SRGB[4] * y + sky::XYZ_TO_SRGB[5] * z,
+            sky::XYZ_TO_SRGB[6] * x + sky::XYZ_TO_SRGB[7] * y + sky::XYZ_TO_SRGB[8] * z,
+        };
+    }
+
     inline AT_DEVICE_API aten::vec3 AdvanceRainVolumeIntegral(
         aten::sampler& sampler,
         const sky::AtmosphereParameters& atmosphere,
@@ -304,6 +351,8 @@ namespace aten::rainbow
         const float intensity_rainfall_rate,    // [mm/h]
         const aten::sky::texture3d& airy_func_res_tex)
     {
+        (void)sampler;
+
         // If the view direction is the same as sun direction, the rainbow doesn't appear.
         const bool is_same_direction = dot(sun_direction, view_dir) > 0.0F;
         if (is_same_direction) {
@@ -355,16 +404,6 @@ namespace aten::rainbow
 
         const auto solar_radiance{ sky::GetSolarRadiance(atmosphere) };
 
-        // [nm] -> [m].
-        constexpr std::array visible_wavelength = {
-            sky::LambdaR * 1e-9F,
-            sky::LambdaG * 1e-9F,
-            sky::LambdaB * 1e-9F,
-        };
-
-        const auto p_max = 1.0F - ComputeMarshallPalmerDropletSizeDistributionFactor(A_MAX * 2.0F, intensity_rainfall_rate);
-        const auto p_min = 1.0F - ComputeMarshallPalmerDropletSizeDistributionFactor(A_MIN * 2.0F, intensity_rainfall_rate);
-
         aten::vec3 rainbow_radiance{ 0.0F };
         float optical_length_in_rain_volume = 0.0F;
 
@@ -376,20 +415,6 @@ namespace aten::rainbow
             AT_ASSERT(rain_volume.isIn(curr_point));
 
             const auto d_i = i * dt;
-
-            auto u = sampler.nextSample();
-
-            // Convert to sample the restricted droplet diameter.
-            u = p_min + u * (p_max - p_min);
-
-            // Sample the droplet diameter.
-            auto droplet_diameter = GetDropletDiameterFromMarshallPalmerDropletSizeDistribution(u, intensity_rainfall_rate);
-            droplet_diameter = Length::from(droplet_diameter, MeterUnit::mm, MeterUnit::m);
-            const auto pdf = GetMarshallPalmerDropletSizeDistributionPDF(droplet_diameter, intensity_rainfall_rate);
-
-            const auto droplet_radius = 0.5F * droplet_diameter;
-
-            uvw.z = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
 
             // Current point is in rain volume box. In this case, t0 is always zero. So, we adopt t1.
             aten::tie(t0, t1) = rain_volume.GetHitT(aten::ray(curr_point, sun_direction), AT_MATH_EPSILON, AT_MATH_INF);
@@ -412,22 +437,61 @@ namespace aten::rainbow
                 transmittance_texture,
                 r, mu_s) * transmittance_to_sun_in_rain_volume;
 
-            aten::vec3 rainbow_intensity;
+            aten::vec3 rainbow_intensity{ 0.0F };
 
-            for (size_t n = 0; n < visible_wavelength.size(); n++) {
-                const auto wavelength = visible_wavelength[n];
-                uvw.y = aten::saturate(((wavelength - WAVELENGTH_MIN) / WAVELENGTH_STEP + 0.5F) / WAVELENGTH_WIDTH);
-                rainbow_intensity[n] =  GetAiryFunctionValue(airy_func_res_tex, uvw);;
+            constexpr int32_t DROPLET_SAMPLE_COUNT = 32;
+            const float diameter_min = A_MIN * 2.0F;
+            const float diameter_max = A_MAX * 2.0F;
+            const float dD = (diameter_max - diameter_min) / DROPLET_SAMPLE_COUNT;
+            const float dD_mm = Length::as(dD, MeterUnit::mm);
+
+            float mp_distribution_norm = 0.0F;
+            for (int32_t j = 0; j < DROPLET_SAMPLE_COUNT; j++) {
+                const float droplet_diameter = diameter_min + (j + 0.5F) * dD;
+                const float density = ComputeMarshallPalmerDropletSizeDistribution(
+                    droplet_diameter,
+                    intensity_rainfall_rate);
+
+                mp_distribution_norm += density * dD_mm;
             }
 
-            constexpr float N0 = 8000.0F;
-            const auto mp_lambda = ComputeMarshallPalmerDropletSizeDistributionLambda(intensity_rainfall_rate);
+            if (mp_distribution_norm <= 0.0F) {
+                return aten::vec3(0.0F);
+            }
 
-            const auto droplet_diameter_as_mm = Length::as(droplet_diameter, MeterUnit::mm);
-            const auto droplet_radius_as_mm = droplet_diameter_as_mm * 0.5F;
+            for (int32_t j = 0; j < DROPLET_SAMPLE_COUNT; j++) {
+                const float droplet_diameter = diameter_min + (j + 0.5F) * dD;
+                const float droplet_radius = 0.5F * droplet_diameter;
 
-            const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_as_mm * droplet_radius_as_mm;
-            const auto rain_density = N0 / mp_lambda * droplet_cross_sectional_area * (p_max - p_min);
+                uvw.z = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
+
+                const float density = ComputeMarshallPalmerDropletSizeDistribution(
+                    droplet_diameter,
+                    intensity_rainfall_rate);
+                const float droplet_weight = density * dD_mm / mp_distribution_norm;
+
+                constexpr int32_t LAMBDA_STEP_NM = 10;
+                constexpr float dlambda_nm = static_cast<float>(LAMBDA_STEP_NM);
+
+                for (int32_t lambda_nm = sky::LambdaMin; lambda_nm <= sky::LambdaMax; lambda_nm += LAMBDA_STEP_NM) {
+                    const float wavelength = Length::from(
+                        static_cast<float>(lambda_nm),
+                        MeterUnit::nm,
+                        MeterUnit::m);
+
+                    uvw.y = aten::saturate(
+                        ((wavelength - WAVELENGTH_MIN) / WAVELENGTH_STEP + 0.5F) / WAVELENGTH_WIDTH);
+
+                    const float airy = GetAiryFunctionValue(airy_func_res_tex, uvw);
+
+                    const float spectral_value = airy * droplet_weight;
+
+                    rainbow_intensity += SpectrumSampleToLinearSrgb(
+                        lambda_nm,
+                        spectral_value,
+                        dlambda_nm);
+                }
+            }
 
             const auto transmittance = GetSkyTransmittance(
                 atmosphere, earth_center,
@@ -440,7 +504,11 @@ namespace aten::rainbow
                     start_pos_in_rain_volume, move_dir, d_i);
 
             const auto rainbow_radiance_i{
-                transmittance * transmittance_in_rain_volume * transmittance_to_sun * solar_radiance * rainbow_intensity * rain_density
+                transmittance
+                * transmittance_in_rain_volume
+                * transmittance_to_sun
+                * rainbow_intensity
+                * solar_radiance
             };
 
             curr_point += move_dir * dt;

@@ -37,6 +37,6 @@ namespace aten::rainbow {
         aten::aabb rain_volume_;
 
         // TODO
-        static constexpr float intensity_rainfall_rate = 1.0F; // [mm/h]
+        static constexpr float intensity_rainfall_rate = 3.0F; // [mm/h]
     };
 }

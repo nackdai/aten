@@ -337,193 +337,31 @@ namespace aten::rainbow
         };
     }
 
-    inline AT_DEVICE_API aten::vec3 AdvanceRainVolumeIntegral(
-        aten::sampler& sampler,
-        const sky::AtmosphereParameters& atmosphere,
-        const aten::sky::texture2d& transmittance_texture,
-        const aten::sky::texture2d& transmittance_in_rain_volume_texture,
-        const aten::sky::texture3d& droplet_radius_tex,
-        const aten::vec3& sun_direction,
-        const aten::vec3& earth_center, // [km]
-        const aten::vec3& camera_pos,   // [km]
-        const aten::vec3& view_dir,
-        const aten::aabb& rain_volume,  // [km x km x km]
-        const float intensity_rainfall_rate,    // [mm/h]
-        const aten::sky::texture3d& airy_func_res_tex)
+    inline AT_DEVICE_API aten::vec3 ComputeSpectralRgbPhaseValue(
+        const int32_t theta_idx,
+        const int32_t radius_idx)
     {
-        (void)sampler;
+        aten::vec3 rgb{ 0.0F };
 
-        // If the view direction is the same as sun direction, the rainbow doesn't appear.
-        const bool is_same_direction = dot(sun_direction, view_dir) > 0.0F;
-        if (is_same_direction) {
-            return aten::vec3(0.0F);
+        constexpr int32_t LAMBDA_STEP_NM = 10;
+        constexpr float dlambda_nm = static_cast<float>(LAMBDA_STEP_NM);
+
+        for (int32_t lambda_nm = sky::LambdaMin; lambda_nm <= sky::LambdaMax; lambda_nm += LAMBDA_STEP_NM) {
+            const auto lambda = Length::from(static_cast<float>(lambda_nm), MeterUnit::nm, MeterUnit::m);
+            const int32_t wavelength_idx = aten::clamp(
+                static_cast<int32_t>((lambda - WAVELENGTH_MIN) / WAVELENGTH_STEP + 0.5F),
+                0,
+                WAVELENGTH_WIDTH - 1
+            );
+
+            const float airy = ComputeAiryFunction(theta_idx, wavelength_idx, radius_idx);
+
+            rgb += SpectrumSampleToLinearSrgb(
+                lambda_nm,
+                airy,
+                dlambda_nm);
         }
 
-        // TODO
-        // そもそも、太陽が地球の下に隠れて見えないなどについては、
-        // GetTransmittanceToSun など sky 側で対応済みなので、それを利用する.
-        // ただ、その場合に太陽を点ではなく円盤としているので、太陽の扱いは円盤にすること.
-
-        const float theta = aten::acos(dot(sun_direction, -view_dir));
-        if (theta < THETA_MIN || theta >= THETA_MAX) {
-            // 主虹、副虹の範囲内に収まらないので、虹が見えない.
-            return aten::vec3(0.0F);
-        }
-
-        aten::vec3 curr_point;
-
-        float t0, t1;
-        aten::tie(t0, t1) = rain_volume.GetHitT(aten::ray(camera_pos, view_dir), AT_MATH_EPSILON, AT_MATH_INF);
-
-        const auto is_hit = t0 <= t1;
-
-        if (rain_volume.isIn(camera_pos)) {
-            curr_point = camera_pos;
-        }
-        else if (is_hit) {
-            curr_point = camera_pos + t0 * view_dir;
-        }
-        else {
-            return aten::vec3(0.0F);
-        }
-
-        const auto start_pos_in_rain_volume { curr_point };
-
-        constexpr auto SAMPLE_COUNT = 100;
-
-        const auto box_distance_along_with_view_dir = t1 - t0;
-
-        // Not to out of the rain volume at the last step, multiply by 0.99.
-        const auto dt = box_distance_along_with_view_dir / SAMPLE_COUNT * 0.99F;
-
-        aten::vec3 uvw{
-            aten::saturate(((theta - THETA_MIN) / THETA_STEP + 0.5F) / THETA_WIDTH),
-            0.0F,   // compute from wavelength while the integral calculation.
-            0.0F,   // compute from droplet radius while the integral calculation.
-        };
-
-        const auto solar_radiance{ sky::GetSolarRadiance(atmosphere) };
-
-        aten::vec3 rainbow_radiance{ 0.0F };
-        float optical_length_in_rain_volume = 0.0F;
-
-        aten::vec3 rainbow_radiance_tmp{ 0.0F };
-
-        const aten::vec3& move_dir = view_dir;
-
-        for (size_t i = 0; i <= SAMPLE_COUNT; i++) {
-            AT_ASSERT(rain_volume.isIn(curr_point));
-
-            const auto d_i = i * dt;
-
-            // Current point is in rain volume box. In this case, t0 is always zero. So, we adopt t1.
-            aten::tie(t0, t1) = rain_volume.GetHitT(aten::ray(curr_point, sun_direction), AT_MATH_EPSILON, AT_MATH_INF);
-            const aten::vec3 boundary_point_to_sun_in_rain_volume{ curr_point + t1 * sun_direction };
-
-            // Transmittance from the current point to sun only within the rain volume.
-            const auto transmittance_to_sun_in_rain_volume = GetTransmittanceInRainVolumeBetweenTwoPoints(
-                atmosphere, rain_volume,
-                earth_center,
-                transmittance_in_rain_volume_texture,
-                curr_point, boundary_point_to_sun_in_rain_volume);
-
-            float r, mu_s;
-            aten::tie(r, mu_s) = ComputeRMuS(curr_point, sun_direction, earth_center);
-
-            // Get transmittance to sun in the atmosphere boundary.
-            // Multiply the transmittance in the rain volume.
-            const auto transmittance_to_sun = sky::transmittance::GetTransmittanceToSun(
-                atmosphere,
-                transmittance_texture,
-                r, mu_s) * transmittance_to_sun_in_rain_volume;
-
-            aten::vec3 rainbow_intensity{ 0.0F };
-
-            constexpr int32_t DROPLET_SAMPLE_COUNT = 32;
-            const float diameter_min = A_MIN * 2.0F;
-            const float diameter_max = A_MAX * 2.0F;
-            const float dD = (diameter_max - diameter_min) / DROPLET_SAMPLE_COUNT;
-            const float dD_mm = Length::as(dD, MeterUnit::mm);
-
-            float mp_distribution_norm = 0.0F;
-            for (int32_t j = 0; j < DROPLET_SAMPLE_COUNT; j++) {
-                const float droplet_diameter = diameter_min + (j + 0.5F) * dD;
-                const float density = ComputeMarshallPalmerDropletSizeDistribution(
-                    droplet_diameter,
-                    intensity_rainfall_rate);
-
-                mp_distribution_norm += density * dD_mm;
-            }
-
-            if (mp_distribution_norm <= 0.0F) {
-                return aten::vec3(0.0F);
-            }
-
-            for (int32_t j = 0; j < DROPLET_SAMPLE_COUNT; j++) {
-                const float droplet_diameter = diameter_min + (j + 0.5F) * dD;
-                const float droplet_radius = 0.5F * droplet_diameter;
-
-                uvw.z = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
-
-                const float density = ComputeMarshallPalmerDropletSizeDistribution(
-                    droplet_diameter,
-                    intensity_rainfall_rate);
-                const float droplet_weight = density * dD_mm / mp_distribution_norm;
-
-                constexpr int32_t LAMBDA_STEP_NM = 10;
-                constexpr float dlambda_nm = static_cast<float>(LAMBDA_STEP_NM);
-
-                for (int32_t lambda_nm = sky::LambdaMin; lambda_nm <= sky::LambdaMax; lambda_nm += LAMBDA_STEP_NM) {
-                    const float wavelength = Length::from(
-                        static_cast<float>(lambda_nm),
-                        MeterUnit::nm,
-                        MeterUnit::m);
-
-                    uvw.y = aten::saturate(
-                        ((wavelength - WAVELENGTH_MIN) / WAVELENGTH_STEP + 0.5F) / WAVELENGTH_WIDTH);
-
-                    const float airy = GetAiryFunctionValue(airy_func_res_tex, uvw);
-
-                    const float spectral_value = airy * droplet_weight;
-
-                    rainbow_intensity += SpectrumSampleToLinearSrgb(
-                        lambda_nm,
-                        spectral_value,
-                        dlambda_nm);
-                }
-            }
-
-            const auto transmittance = GetSkyTransmittance(
-                atmosphere, earth_center,
-                transmittance_texture,
-                curr_point, move_dir, d_i);
-
-            const auto transmittance_in_rain_volume = GetTransmittanceInRainVolume(
-                    atmosphere, rain_volume, earth_center,
-                    transmittance_in_rain_volume_texture,
-                    start_pos_in_rain_volume, move_dir, d_i);
-
-            const auto rainbow_radiance_i{
-                transmittance
-                * transmittance_in_rain_volume
-                * transmittance_to_sun
-                * rainbow_intensity
-                * solar_radiance
-            };
-
-            curr_point += move_dir * dt;
-
-            // 台形公式による積分の場合、例えば、分割数3で単純に計算すると、
-            // (y0 + y1) * dx / 2 + (y1 + y2) * dx / 2 + (y2 + y3) * dx / 2
-            //   = (y0/2 + y1 + y2 + y3/2) * dx
-            // となる. つまり、i=0とi=SAMPLE_COUNTのときは、y_iの重みが0.5で、それ以外のときは1.0と計算することもできる.
-
-            // Sample weight (from the trapezoidal rule).
-            float weight_i = i == 0 || i == SAMPLE_COUNT ? 0.5F : 1.0F;
-
-            rainbow_radiance += rainbow_radiance_i * weight_i * dt;
-        }
-
-        return rainbow_radiance;
+        return rgb;
     }
 }

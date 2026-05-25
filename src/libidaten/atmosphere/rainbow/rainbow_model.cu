@@ -5,6 +5,7 @@
 
 #include "atmosphere/rainbow/rainbow_constants.h"
 #include "atmosphere/rainbow/rainbow_compute.h"
+#include "atmosphere/rainbow/rainbow_render.h"
 #include "atmosphere/sky/sky_compute.h"
 
 #include "atmosphere/atmosphere.h"
@@ -153,7 +154,7 @@ namespace idaten::rainbow {
                 x, y);
         }
 
-        __global__ void ComputeAiryFunctionKernel(idaten::SurfaceTexture airy_function_texture)
+        __global__ void ComputeAiryFunctionKernel(idaten::SurfaceTexture spectrum_srgb_tex)
         {
             const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
             const int32_t y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -165,8 +166,9 @@ namespace idaten::rainbow {
                 return;
             }
 
+            // TODO
             const auto intensity = aten::rainbow::ComputeAiryFunction(x, y, z);
-            aten::sky::WriteTexture3D(airy_function_texture, aten::vec3(intensity), x, y, z);
+            aten::sky::WriteTexture2D(spectrum_srgb_tex, aten::vec3(intensity), x, y);
         }
 
         __global__ void FillDropletRadiusInRainVolume(
@@ -244,7 +246,7 @@ namespace idaten::rainbow {
             (aten::rainbow::A_WIDTH + thread_per_block.z - 1) / thread_per_block.z);
 
         ComputeAiryFunctionKernel << <airy_func_block_per_grid, thread_per_block >> > (
-            rainbow_textures.airy_func_tex);
+            rainbow_textures.spectrum_srgb_tex);
         checkCudaKernel(ComputeAiryFunctionKernel);
 
 #if 0
@@ -294,7 +296,7 @@ namespace idaten::rainbow {
             const aten::vec3 earth_center, // [km]
             const aten::aabb rain_volume,  // [km x km x km]
             const float intensity_rainfall_rate,    // [mm/h]
-            const idaten::SurfaceTexture airy_func_res_tex,
+            const idaten::SurfaceTexture spectrum_srgb_tex,
             const aten::vec3 sun_radiance_to_luminance,
             const aten::vec3 white_point)
         {
@@ -340,10 +342,13 @@ namespace idaten::rainbow {
                     view_dir,
                     rain_volume,  // [km x km x km]
                     intensity_rainfall_rate,    // [mm/h]
-                    airy_func_res_tex)
+                    spectrum_srgb_tex)
             };
 
-            rainbow_radiance *= sun_radiance_to_luminance;
+            // The rainbow phase texture is already converted from spectrum to linear sRGB.
+            // Do not apply the RGB wavelength-to-luminance factors again.
+            //rainbow_radiance *= sun_radiance_to_luminance;
+            rainbow_radiance = aten::vmax(rainbow_radiance, 0.0F);
 
             // TODO
             // Tone mapping.
@@ -351,7 +356,8 @@ namespace idaten::rainbow {
             // それを 1.0 から引くことで、結果強い値が大きくなる.
             // exposure は全体の明るさを調整するための係数.
             aten::vec3 color{
-                aten::vec3(1.0F) - aten::exp(-rainbow_radiance / white_point * aten::sky::EXPOSURE)
+                aten::vec3(1.0F) - aten::exp(
+                    -rainbow_radiance / white_point * aten::sky::EXPOSURE * aten::rainbow::RAINBOW_EXPOSURE_SCALE)
             };
 
             surf2Dwrite(
@@ -411,7 +417,7 @@ namespace idaten::rainbow {
             earth_center,
             rain_volume_,
             intensity_rainfall_rate,
-            textures_.airy_func_tex,
+            textures_.spectrum_srgb_tex,
             sun_radiance_to_luminance_,
             white_point_);
         checkCudaKernel(RenderRainbow);

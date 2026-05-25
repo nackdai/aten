@@ -257,6 +257,14 @@ namespace aten {
             aten::max(a.z, b.z));
     }
 
+    inline AT_HOST_DEVICE_API vec3 vmax(const vec3& a, float b)
+    {
+        return vec3(
+            aten::max(a.x, b),
+            aten::max(a.y, b),
+            aten::max(a.z, b));
+    }
+
     inline AT_HOST_DEVICE_API vec3 pow(const vec3& v, float a)
     {
         vec3 ret(

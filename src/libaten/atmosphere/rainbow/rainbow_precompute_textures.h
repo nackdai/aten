@@ -8,7 +8,7 @@ namespace aten::rainbow {
     template <class texture2d, class texture3d>
     struct PreComputeTextureManager {
         texture2d transmittance_texture;
-        texture3d airy_func_tex;
+        texture2d spectrum_srgb_tex;
         texture3d droplet_radius_tex;
         texture2d transmittance_in_rain_volume_texture;
 
@@ -26,9 +26,9 @@ namespace aten::rainbow {
                 aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
                 aten::TextureFilterMode::Linear);
 
-            texture_host.airy_func_tex.Init(
-                THETA_WIDTH, WAVELENGTH_WIDTH, A_WIDTH,
-                aten::TextureFilterMode::Linear);
+            /*texture_host.spectrum_srgb_tex.Init(
+                THETA_WIDTH, A_WIDTH,
+                aten::TextureFilterMode::Linear);*/
 
             texture_host.droplet_radius_tex.Init(
                 DROPLET_RADIUS_TEX_SIZE, DROPLET_RADIUS_TEX_SIZE, DROPLET_RADIUS_TEX_SIZE,
@@ -36,7 +36,7 @@ namespace aten::rainbow {
 
             transmittance_texture = texture_host.transmittance_texture.GetSurfaceTexture();
             transmittance_in_rain_volume_texture = texture_host.transmittance_in_rain_volume_texture.GetSurfaceTexture();
-            airy_func_tex = texture_host.airy_func_tex.GetSurfaceTexture();
+            //spectrum_srgb_tex = texture_host.spectrum_srgb_tex.GetSurfaceTexture();
             droplet_radius_tex = texture_host.droplet_radius_tex.GetSurfaceTexture();
         }
 #else
@@ -52,8 +52,7 @@ namespace aten::rainbow {
                 aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
                 3);
 
-            // Init 3d texture to store Airy function values.
-            airy_func_tex.init(THETA_WIDTH, WAVELENGTH_WIDTH, A_WIDTH);
+            spectrum_srgb_tex.init(THETA_WIDTH, A_WIDTH, 3);
 
             // Init 3d texture to store droplet radius based on normal distribution.
             droplet_radius_tex.init(DROPLET_RADIUS_TEX_SIZE, DROPLET_RADIUS_TEX_SIZE, DROPLET_RADIUS_TEX_SIZE);

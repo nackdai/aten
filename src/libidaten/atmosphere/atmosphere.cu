@@ -1,6 +1,7 @@
 #include "atmosphere/atmosphere.h"
 
 #include "atmosphere/rainbow/rainbow_compute.h"
+#include "atmosphere/rainbow/rainbow_render.h"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -123,7 +124,7 @@ namespace idaten {
                     view_dir,
                     rain_volume,  // [km x km x km]
                     intensity_rainfall_rate,    // [mm/h]
-                    rainbow_textures.airy_func_tex)
+                    rainbow_textures.spectrum_srgb_tex)
             };
 
             atmosphere_color += rainbow_radiance * sun_radiance_to_luminance;

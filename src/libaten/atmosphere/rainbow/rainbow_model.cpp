@@ -3,6 +3,7 @@
 #include "atmosphere/rainbow/rainbow_compute.h"
 #include "atmosphere/rainbow/rainbow_constants.h"
 #include "atmosphere/rainbow/rainbow_transmittance.h"
+#include "atmosphere/rainbow/rainbow_render.h"
 
 #include "atmosphere/sky/sky_common.h"
 
@@ -133,16 +134,14 @@ namespace aten::rainbow {
                 }
             }
 
-            // Precompute Airy function table.
+            // Precompute spectrum in SRGB table.
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for
 #endif
-            for (int32_t z = 0; z < A_WIDTH; z++) {
-                for (int32_t y = 0; y < WAVELENGTH_WIDTH; y++) {
-                    for (int32_t x = 0; x < THETA_WIDTH; x++) {
-                        const auto intensity = ComputeAiryFunction(x, y, z);
-                        textures_.airy_func_tex.SetByXYZ(vec4(intensity), x, y, z);
-                    }
+            for (int32_t y = 0; y < A_WIDTH; y++) {
+                for (int32_t x = 0; x < THETA_WIDTH; x++) {
+                    const auto rgb = ComputeSpectralRgbPhaseValue(x, y);
+                    sky::WriteTexture2D(textures_.spectrum_srgb_tex, rgb, x, y);
                 }
             }
 
@@ -216,7 +215,7 @@ namespace aten::rainbow {
             const aten::vec3& earth_center, // [km]
             const aten::aabb& rain_volume,  // [km x km x km]
             const float intensity_rainfall_rate,    // [mm/h]
-            const aten::texture3d& airy_func_res_tex,
+            const aten::sky::texture2d& spectrum_srgb_tex,
             const aten::vec3& sun_radiance_to_luminance,
             const aten::vec3& white_point
         )
@@ -247,19 +246,30 @@ namespace aten::rainbow {
                     view_dir,
                     rain_volume,  // [km x km x km]
                     intensity_rainfall_rate,    // [mm/h]
-                    airy_func_res_tex)
+                    spectrum_srgb_tex)
             };
 
             //AT_PRINTF("%d, ", y);
             //AT_PRINTF("%f, %f, %f, ", rainbow_radiance.x, rainbow_radiance.y, rainbow_radiance.z);
 
-            rainbow_radiance *= sun_radiance_to_luminance;
+            // The rainbow phase texture is already converted from spectrum to linear sRGB.
+            // Do not apply the RGB wavelength-to-luminance factors again.
+            //rainbow_radiance *= sun_radiance_to_luminance;
 
-            //AT_PRINTF("%d, ", y);
-            //AT_PRINTF("%f, %f, %f, ", rainbow_radiance.x, rainbow_radiance.y, rainbow_radiance.z);
+            const float theta = aten::acos(dot(sun_direction, -view_dir));
+
+            // AT_PRINTF("%d, %f, %f, %f, %f,\n",
+            //     y,
+            //     aten::Rad2Deg(theta),
+            //     rainbow_radiance.x,
+            //     rainbow_radiance.y,
+            //     rainbow_radiance.z);
+
+            rainbow_radiance = aten::vmax(rainbow_radiance, 0.0F);
 
             aten::vec3 color{
-                aten::vec3(1.0F) - aten::exp(-rainbow_radiance / white_point * aten::sky::EXPOSURE)
+                aten::vec3(1.0F) - aten::exp(
+                    -rainbow_radiance / white_point * aten::sky::EXPOSURE)
             };
 
             //AT_PRINTF("%d, ", y);
@@ -304,6 +314,7 @@ namespace aten::rainbow {
 #endif
             for (int32_t y = 0; y < height; y++) {
                 for (int32_t x = 0; x < width; x++)
+                //int32_t x = 128;
                 {
                     const auto id = y * width + x;
                     const auto rnd = aten::getRandom(id);
@@ -332,7 +343,7 @@ namespace aten::rainbow {
                             earth_center,
                             rain_volume_,
                             intensity_rainfall_rate,
-                            textures_.airy_func_tex,
+                            textures_.spectrum_srgb_tex,
                             sun_radiance_to_luminance_, white_point_)
                     };
 

@@ -106,7 +106,12 @@ namespace aten::rainbow
 
             aten::vec3 rainbow_intensity{ 0.0F };
 
-            const float droplet_radius = SampleUniformDropletRadius(sampler.nextSample());
+            const float u_droplet_radius = sampler.nextSample();
+#if defined(AT_RAINBOW_USE_UNIFORM_DROPLET_RADIUS)
+            const float droplet_radius = SampleUniformDropletRadius(u_droplet_radius);
+#else
+            const float droplet_radius = SampleNormalDropletRadius(u_droplet_radius);
+#endif
             uv.y = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
 
             rainbow_intensity += sky::SampleTexture2D(spectrum_srgb_tex, uv);

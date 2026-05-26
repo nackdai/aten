@@ -84,6 +84,38 @@ namespace aten::rainbow
             + (DROPLET_SAMPLE_RADIUS_MAX - DROPLET_SAMPLE_RADIUS_MIN) * aten::saturate(u);
     }
 
+    inline AT_DEVICE_API float ComputeInverseErfWinitzki(const float z)
+    {
+        constexpr float a = 0.147F;
+        const float x = aten::clamp(z, -0.999999F, 0.999999F);
+        if (aten::abs(x) <= AT_MATH_EPSILON) {
+            return 0.0F;
+        }
+
+        const float l = aten::log(1.0F - x * x);
+        const float w = 2.0F / (AT_MATH_PI * a) + l * 0.5F;
+        const float inner_sqrt = aten::sqrt(aten::max(0.0F, w * w - l / a));
+        return aten::sign(x) * aten::sqrt(aten::max(0.0F, inner_sqrt - w));
+    }
+
+    inline AT_DEVICE_API float ComputeInverseNormalDistributionCDF(
+        const float u,
+        const float mu,
+        const float sigma)
+    {
+        constexpr float SQRT_2 = 1.41421356237309504880F;
+        const float clamped_u = aten::clamp(u, 1e-6F, 1.0F - 1e-6F);
+        return mu + sigma * SQRT_2 * ComputeInverseErfWinitzki(2.0F * clamped_u - 1.0F);
+    }
+
+    inline AT_DEVICE_API float SampleNormalDropletRadius(const float u)
+    {
+        return ComputeInverseNormalDistributionCDF(
+            u,
+            DROPLET_SAMPLE_RADIUS_MEAN,
+            DROPLET_SAMPLE_RADIUS_SIGMA);
+    }
+
     inline AT_DEVICE_API float ComputeWaterRefractiveIndex(const float wavelength)
     {
         // https://refractiveindex.info/?shelf=main&book=H2O&page=Daimon-20.0C

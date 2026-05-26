@@ -24,10 +24,13 @@ namespace aten::rainbow {
     // x
     AT_DEVICE_API constexpr auto THETA_MIN = Deg2Rad(36.0F);
     AT_DEVICE_API constexpr auto THETA_MAX = Deg2Rad(60.0F);
-    AT_DEVICE_API constexpr auto THETA_STEP = Deg2Rad(0.01F);
+    AT_DEVICE_API constexpr auto THETA_STEP = Deg2Rad(0.1F);
     AT_DEVICE_API constexpr auto THETA_WIDTH = static_cast<int32_t>((THETA_MAX - THETA_MIN) / THETA_STEP) + 1;
 
     AT_DEVICE_API constexpr auto DROPLET_RADIUS_TEX_SIZE = 128;
+
+    AT_DEVICE_API constexpr Length DROPLET_SAMPLE_RADIUS_MIN = 0.3_mm;
+    AT_DEVICE_API constexpr Length DROPLET_SAMPLE_RADIUS_MAX = 0.7_mm;
 
     AT_DEVICE_API constexpr auto EXTINCTION_EFFICIENT_IN_RAIN_VOLUME = 2.0F;
 

@@ -17,7 +17,7 @@ namespace aten::rainbow
 {
     inline AT_DEVICE_API float ComputeMarshallPalmerDropletSizeDistributionLambda(const float intensity_rainfall_rate)
     {
-        const auto lambda = 4.1F * aten::pow(intensity_rainfall_rate, -0.21F);
+        const auto lambda = 41.0F * aten::pow(intensity_rainfall_rate, -0.21F);
         return lambda;
     }
 
@@ -26,7 +26,7 @@ namespace aten::rainbow
         const float intensity_rainfall_rate)
     {
         // m -> mm.
-        const auto D = Length::as(droplet_diameter, MeterUnit::mm);
+        const auto D = Length::as(droplet_diameter, MeterUnit::cm);
         const auto lambda = ComputeMarshallPalmerDropletSizeDistributionLambda(intensity_rainfall_rate);
         const auto e = aten::exp(-lambda * D);
         return e;
@@ -46,7 +46,7 @@ namespace aten::rainbow
         // その場合は、D [cm] で計算する必要がある.
 
         // [m^-3mm^-1]
-        constexpr float N0 = 8000.0F;
+        constexpr float N0 = 0.08F;
 
         const auto e = ComputeMarshallPalmerDropletSizeDistributionFactor(
             droplet_diameter,
@@ -69,7 +69,7 @@ namespace aten::rainbow
         const float droplet_diameter,
         const float intensity_rainfall_rate)
     {
-        const auto lambda = 4.1F * aten::pow(intensity_rainfall_rate, -0.21F);
+        const auto lambda = 41.0F * aten::pow(intensity_rainfall_rate, -0.21F);
 
         const auto D = Length::as(droplet_diameter, MeterUnit::mm);
         const auto e = aten::exp(-lambda * D);
@@ -78,6 +78,12 @@ namespace aten::rainbow
 
     // 水の屈折率(20°C)を計算.
     // wavelength[m] e.g. 660e-9[m]
+    inline AT_DEVICE_API float SampleUniformDropletRadius(const float u)
+    {
+        return DROPLET_SAMPLE_RADIUS_MIN
+            + (DROPLET_SAMPLE_RADIUS_MAX - DROPLET_SAMPLE_RADIUS_MIN) * aten::saturate(u);
+    }
+
     inline AT_DEVICE_API float ComputeWaterRefractiveIndex(const float wavelength)
     {
         // https://refractiveindex.info/?shelf=main&book=H2O&page=Daimon-20.0C

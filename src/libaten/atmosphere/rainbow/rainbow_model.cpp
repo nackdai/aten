@@ -254,9 +254,9 @@ namespace aten::rainbow {
 
             // The rainbow phase texture is already converted from spectrum to linear sRGB.
             // Do not apply the RGB wavelength-to-luminance factors again.
-            //rainbow_radiance *= sun_radiance_to_luminance;
+            rainbow_radiance *= sun_radiance_to_luminance;
 
-            const float theta = aten::acos(dot(sun_direction, -view_dir));
+            //const float theta = aten::acos(dot(sun_direction, -view_dir));
 
             // AT_PRINTF("%d, %f, %f, %f, %f,\n",
             //     y,

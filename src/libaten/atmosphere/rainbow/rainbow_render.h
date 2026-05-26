@@ -18,7 +18,8 @@ namespace aten::rainbow
         const float intensity_rainfall_rate,    // [mm/h]
         const aten::sky::texture2d& spectrum_srgb_tex)
     {
-        (void)sampler;
+        (void)droplet_radius_tex;
+        (void)intensity_rainfall_rate;
 
         // If the view direction is the same as sun direction, the rainbow doesn't appear.
         const bool is_same_direction = dot(sun_direction, view_dir) > 0.0F;
@@ -105,45 +106,16 @@ namespace aten::rainbow
 
             aten::vec3 rainbow_intensity{ 0.0F };
 
-            constexpr Length SAMPLE_RADIUS_MIN = A_MIN;
-            constexpr Length SAMPLE_RADIUS_MAX = A_MAX;
+            const float droplet_radius = SampleUniformDropletRadius(sampler.nextSample());
+            uv.y = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
 
-            constexpr int32_t DROPLET_SAMPLE_COUNT = 64;
-            const float diameter_min = SAMPLE_RADIUS_MIN * 2.0F;
-            const float diameter_max = SAMPLE_RADIUS_MAX * 2.0F;
-            const float dD = (diameter_max - diameter_min) / DROPLET_SAMPLE_COUNT;
-            const float dD_mm = Length::as(dD, MeterUnit::mm);
+            rainbow_intensity += sky::SampleTexture2D(spectrum_srgb_tex, uv);
 
-            float mp_distribution_norm = 0.0F;
-            for (int32_t j = 0; j < DROPLET_SAMPLE_COUNT; j++) {
-                const float droplet_diameter = diameter_min + (j + 0.5F) * dD;
-                const float density = ComputeMarshallPalmerDropletSizeDistribution(
-                    droplet_diameter,
-                    intensity_rainfall_rate);
 
-                mp_distribution_norm += density * dD_mm;
-            }
-
-            if (mp_distribution_norm <= 0.0F) {
-                return aten::vec3(0.0F);
-            }
-
-            for (int32_t j = 0; j < DROPLET_SAMPLE_COUNT; j++) {
-                const float droplet_diameter = diameter_min + (j + 0.5F) * dD;
-                const float droplet_radius = 0.5F * droplet_diameter;
-
-                uv.y = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
-
-                const float density = ComputeMarshallPalmerDropletSizeDistribution(
-                    droplet_diameter,
-                    intensity_rainfall_rate);
-                const float droplet_weight = density * dD_mm / mp_distribution_norm;
-
-                constexpr int32_t LAMBDA_STEP_NM = 10;
-                constexpr float dlambda_nm = static_cast<float>(LAMBDA_STEP_NM);
-
-                rainbow_intensity += sky::SampleTexture2D(spectrum_srgb_tex, uv) * droplet_weight;
-            }
+            const float droplet_diameter = droplet_radius * 2.0F;
+            const float rain_density = ComputeMarshallPalmerDropletSizeDistribution(
+                droplet_diameter,
+                intensity_rainfall_rate);
 
             const auto transmittance = GetSkyTransmittance(
                 atmosphere, earth_center,
@@ -160,6 +132,7 @@ namespace aten::rainbow
                 * transmittance_in_rain_volume
                 * transmittance_to_sun
                 * rainbow_intensity
+                * rain_density
                 * solar_radiance
             };
 

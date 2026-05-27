@@ -106,21 +106,31 @@ namespace aten::rainbow
 
             aten::vec3 rainbow_intensity{ 0.0F };
 
+            float droplet_diameter_pdf = 1.0F;
+
             const float u_droplet_radius = sampler.nextSample();
-#if defined(AT_RAINBOW_USE_UNIFORM_DROPLET_RADIUS)
+#if 0
             const float droplet_radius = SampleUniformDropletRadius(u_droplet_radius);
-#else
+#elif 0
             const float droplet_radius = SampleNormalDropletRadius(u_droplet_radius);
+#else
+            const float droplet_radius = SampleMarshallPalmerDropletRadius(u_droplet_radius, intensity_rainfall_rate);
+            droplet_diameter_pdf = GetMarshallPalmerDropletDiameterPDFTruncated(
+                droplet_radius * 2.0F,
+                intensity_rainfall_rate);
 #endif
             uv.y = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
 
             rainbow_intensity += sky::SampleTexture2D(spectrum_srgb_tex, uv);
 
-
             const float droplet_diameter = droplet_radius * 2.0F;
             const float rain_density = ComputeMarshallPalmerDropletSizeDistribution(
                 droplet_diameter,
                 intensity_rainfall_rate);
+
+            const float weight = droplet_diameter_pdf > 0.0F
+                ? rain_density / droplet_diameter_pdf
+                : 0.0F;
 
             const auto transmittance = GetSkyTransmittance(
                 atmosphere, earth_center,
@@ -137,7 +147,7 @@ namespace aten::rainbow
                 * transmittance_in_rain_volume
                 * transmittance_to_sun
                 * rainbow_intensity
-                * rain_density
+                * weight
                 * solar_radiance
             };
 

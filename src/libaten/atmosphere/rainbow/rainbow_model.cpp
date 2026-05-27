@@ -252,18 +252,16 @@ namespace aten::rainbow {
             //AT_PRINTF("%d, ", y);
             //AT_PRINTF("%f, %f, %f, ", rainbow_radiance.x, rainbow_radiance.y, rainbow_radiance.z);
 
-            // The rainbow phase texture is already converted from spectrum to linear sRGB.
-            // Do not apply the RGB wavelength-to-luminance factors again.
+            const float theta = aten::acos(dot(sun_direction, -view_dir));
+
+            AT_PRINTF("%d, %f, %f, %f, %f,\n",
+                y,
+                aten::Rad2Deg(theta),
+                rainbow_radiance.x,
+                rainbow_radiance.y,
+                rainbow_radiance.z);
+
             rainbow_radiance *= sun_radiance_to_luminance;
-
-            //const float theta = aten::acos(dot(sun_direction, -view_dir));
-
-            // AT_PRINTF("%d, %f, %f, %f, %f,\n",
-            //     y,
-            //     aten::Rad2Deg(theta),
-            //     rainbow_radiance.x,
-            //     rainbow_radiance.y,
-            //     rainbow_radiance.z);
 
             rainbow_radiance = aten::vmax(rainbow_radiance, 0.0F);
 
@@ -313,8 +311,8 @@ namespace aten::rainbow {
 //#pragma omp for schedule(dynamic, 1)
 #endif
             for (int32_t y = 0; y < height; y++) {
-                for (int32_t x = 0; x < width; x++)
-                //int32_t x = 128;
+                //for (int32_t x = 0; x < width; x++)
+                int32_t x = 128;
                 {
                     const auto id = y * width + x;
                     const auto rnd = aten::getRandom(id);

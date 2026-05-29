@@ -61,7 +61,7 @@ namespace idaten {
 
             // Rainbow.
             CudaSurfaceTexture<float4> transmittance_in_rain_volume_texture;
-            CudaSurfaceTexture3D<float4> airy_func_tex;
+            CudaSurfaceTexture<float4> spectrum_srgb_tex;
             CudaSurfaceTexture3D<float4> droplet_radius_tex;
         } pre_compute_textures_host_;
 

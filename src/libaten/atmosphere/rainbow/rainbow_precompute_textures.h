@@ -26,9 +26,9 @@ namespace aten::rainbow {
                 aten::sky::TRANSMITTANCE_TEXTURE_HEIGHT,
                 aten::TextureFilterMode::Linear);
 
-            /*texture_host.spectrum_srgb_tex.Init(
+            texture_host.spectrum_srgb_tex.Init(
                 THETA_WIDTH, A_WIDTH,
-                aten::TextureFilterMode::Linear);*/
+                aten::TextureFilterMode::Linear);
 
             texture_host.droplet_radius_tex.Init(
                 DROPLET_RADIUS_TEX_SIZE, DROPLET_RADIUS_TEX_SIZE, DROPLET_RADIUS_TEX_SIZE,
@@ -36,7 +36,7 @@ namespace aten::rainbow {
 
             transmittance_texture = texture_host.transmittance_texture.GetSurfaceTexture();
             transmittance_in_rain_volume_texture = texture_host.transmittance_in_rain_volume_texture.GetSurfaceTexture();
-            //spectrum_srgb_tex = texture_host.spectrum_srgb_tex.GetSurfaceTexture();
+            spectrum_srgb_tex = texture_host.spectrum_srgb_tex.GetSurfaceTexture();
             droplet_radius_tex = texture_host.droplet_radius_tex.GetSurfaceTexture();
         }
 #else

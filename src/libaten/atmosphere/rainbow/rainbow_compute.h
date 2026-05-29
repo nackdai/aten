@@ -374,15 +374,8 @@ namespace aten::rainbow
         auto u = (wavelength_nm - sky::LambdaMin) / 5.0F;
         const auto row = static_cast<int32_t>(aten::floor(u));
 
-#if __CUDACC__
-        // TODO
-        // まずは、ホスト側での動作を試す.
-        sky::CIE_2_DEG_COLOR_MATCHING_FUNCTIONS_ELEMENT e0;
-        sky::CIE_2_DEG_COLOR_MATCHING_FUNCTIONS_ELEMENT e1;
-#else
         const auto& e0 = sky::CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row];
         const auto& e1 = sky::CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row + 1];
-#endif
 
         u -= row;
 

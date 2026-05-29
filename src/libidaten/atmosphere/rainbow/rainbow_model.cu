@@ -154,21 +154,18 @@ namespace idaten::rainbow {
                 x, y);
         }
 
-        __global__ void ComputeAiryFunctionKernel(idaten::SurfaceTexture spectrum_srgb_tex)
+        __global__ void ComputeSpectralRgbPhaseValue(idaten::SurfaceTexture spectrum_srgb_tex)
         {
             const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
             const int32_t y = blockIdx.y * blockDim.y + threadIdx.y;
-            const int32_t z = blockIdx.z * blockDim.z + threadIdx.z;
             if (x >= aten::rainbow::THETA_WIDTH
-                || y >= aten::rainbow::WAVELENGTH_WIDTH
-                || z >= aten::rainbow::A_WIDTH)
+                || y >= aten::rainbow::A_WIDTH)
             {
                 return;
             }
 
-            // TODO
-            const auto intensity = aten::rainbow::ComputeAiryFunction(x, y, z);
-            aten::sky::WriteTexture2D(spectrum_srgb_tex, aten::vec3(intensity), x, y);
+            const auto intensity = aten::rainbow::ComputeSpectralRgbPhaseValue(x, y);
+            aten::sky::WriteTexture2D(spectrum_srgb_tex, intensity, x, y);
         }
 
         __global__ void FillDropletRadiusInRainVolume(
@@ -237,17 +234,16 @@ namespace idaten::rainbow {
         checkCudaKernel(ComputeTransmittanceInRainVolumeTexture);
 
         // For 3 dimension cuda kernel.
-        thread_per_block = dim3(8, 8, 8);
+        thread_per_block = dim3(16, 16);
 
         // Compute Airy function.
-        dim3 airy_func_block_per_grid(
+        dim3 spectral_rgb_block_per_grid(
             (aten::rainbow::THETA_WIDTH + thread_per_block.x - 1) / thread_per_block.x,
-            (aten::rainbow::WAVELENGTH_WIDTH + thread_per_block.y - 1) / thread_per_block.y,
             (aten::rainbow::A_WIDTH + thread_per_block.z - 1) / thread_per_block.z);
 
-        ComputeAiryFunctionKernel << <airy_func_block_per_grid, thread_per_block >> > (
+        ComputeSpectralRgbPhaseValue << <spectral_rgb_block_per_grid, thread_per_block >> > (
             rainbow_textures.spectrum_srgb_tex);
-        checkCudaKernel(ComputeAiryFunctionKernel);
+        checkCudaKernel(ComputeSpectralRgbPhaseValue);
 
 #if 0
         // Fill droplet radius.

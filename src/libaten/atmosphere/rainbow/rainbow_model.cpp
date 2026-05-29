@@ -231,8 +231,6 @@ namespace aten::rainbow {
             const auto camera_pos{ camsample.r.org };
             const auto view_dir{ camsample.r.dir };
 
-            //AT_PRINTF("np.array([%f, %f, %f]),\n", view_dir.x, view_dir.y, view_dir.z);
-
             aten::vec3 rainbow_radiance {
                 AdvanceRainVolumeIntegral(
                     sampler,
@@ -249,30 +247,14 @@ namespace aten::rainbow {
                     spectrum_srgb_tex)
             };
 
-            //AT_PRINTF("%d, ", y);
-            //AT_PRINTF("%f, %f, %f, ", rainbow_radiance.x, rainbow_radiance.y, rainbow_radiance.z);
-
-            const float theta = aten::acos(dot(sun_direction, -view_dir));
-
-            AT_PRINTF("%d, %f, %f, %f, %f,\n",
-                y,
-                aten::Rad2Deg(theta),
-                rainbow_radiance.x,
-                rainbow_radiance.y,
-                rainbow_radiance.z);
+            rainbow_radiance = aten::vmax(rainbow_radiance, 0.0F);
 
             rainbow_radiance *= sun_radiance_to_luminance;
-
-            rainbow_radiance = aten::vmax(rainbow_radiance, 0.0F);
 
             aten::vec3 color{
                 aten::vec3(1.0F) - aten::exp(
                     -rainbow_radiance / white_point * aten::sky::EXPOSURE)
             };
-
-            //AT_PRINTF("%d, ", y);
-            //AT_PRINTF("%f, %f, %f,", color.x, color.y, color.z);
-            //AT_PRINTF("\n");
 
             return color;
         }
@@ -311,8 +293,7 @@ namespace aten::rainbow {
 //#pragma omp for schedule(dynamic, 1)
 #endif
             for (int32_t y = 0; y < height; y++) {
-                //for (int32_t x = 0; x < width; x++)
-                int32_t x = 128;
+                for (int32_t x = 0; x < width; x++)
                 {
                     const auto id = y * width + x;
                     const auto rnd = aten::getRandom(id);
@@ -345,13 +326,6 @@ namespace aten::rainbow {
                             sun_radiance_to_luminance_, white_point_)
                     };
 
-                    const auto l = length(color);
-
-                    //if (x == 0)
-                    if (y == 103)
-                    {
-                        //AT_PRINTF("[%d, %d] : %f, %f, %f\n", x, y, color.r, color.g, color.b);
-                    }
                     dst.put(x, y, color);
                 }
             }

@@ -127,6 +127,7 @@ namespace idaten {
                     rainbow_textures.spectrum_srgb_tex)
             };
 
+            rainbow_radiance = aten::vmax(rainbow_radiance, 0.0F);
             atmosphere_color += rainbow_radiance * sun_radiance_to_luminance;
         }
 
@@ -142,6 +143,12 @@ namespace idaten {
                     sun_size)
             };
 
+            // TODO:
+            // The rain volume is a virtual medium used only to simulate the rainbow.
+            // It does not currently represent visible rain or a full rain simulation.
+            // Decide whether the same medium should also attenuate the background sky.
+            // If both looks are useful, expose this as a rendering option.
+#if 0
             if (will_render_rainbow) {
                 float t0, t1;
                 aten::tie(t0, t1) = rain_volume.GetHitT(aten::ray(camera_pos, view_dir), AT_MATH_EPSILON, AT_MATH_INF);
@@ -162,15 +169,16 @@ namespace idaten {
                     sky_luminance *= transmittance_through_rain_volume;
                 }
             }
+#endif
 
             atmosphere_color += sky_luminance;
         }
 
         // TODO
         // Tone mapping.
-        // white point (RGB=1.0i”’jj‚É‘Î‚·‚é”ä—¦‚Ì•‰’l‚Ìexponential -> ‹­‚¢’l‚Ù‚ÇŒ¸Šiƒ[ƒ‚É‹ß‚¢j.
-        // ‚»‚ê‚ğ 1.0 ‚©‚çˆø‚­‚±‚Æ‚ÅAŒ‹‰Ê‹­‚¢’l‚ª‘å‚«‚­‚È‚é.
-        // exposure ‚Í‘S‘Ì‚Ì–¾‚é‚³‚ğ’²®‚·‚é‚½‚ß‚ÌŒW”.
+        // white point (RGB=1.0ï¼ˆç™½ï¼‰ï¼‰ã«å¯¾ã™ã‚‹æ¯”ç‡ã®è² å€¤ã®exponential -> å¼·ã„å€¤ã»ã©æ¸›è¡°ï¼ˆã‚¼ãƒ­ã«è¿‘ã„ï¼‰.
+        // ãã‚Œã‚’ 1.0 ã‹ã‚‰å¼•ãã“ã¨ã§ã€çµæœå¼·ã„å€¤ãŒå¤§ãããªã‚‹.
+        // exposure ã¯å…¨ä½“ã®æ˜ã‚‹ã•ã‚’èª¿æ•´ã™ã‚‹ãŸã‚ã®ä¿‚æ•°.
         aten::vec3 color{
             aten::vec3(1.0F) - aten::exp(-atmosphere_color / white_point * aten::sky::EXPOSURE)
         };
@@ -201,23 +209,22 @@ namespace idaten {
             (height + thread_per_block.y - 1) / thread_per_block.y
         };
 
-#if 0
-        const aten::vec3 sun_direction{
+#if 1
+        aten::vec3 sun_direction{
             aten::sin(sun_zenith_angle_radians) * aten::cos(sun_azimuth_angle_radians),
             aten::cos(sun_zenith_angle_radians),
             aten::sin(sun_zenith_angle_radians) * aten::sin(sun_azimuth_angle_radians)
         };
 #else
+        // For debug.
         constexpr auto sun_angle = aten::Deg2Rad(20.0F);
-
-        // TODO
         aten::vec3 sun_direction{
             0.0F,
             aten::sin(sun_angle),
             aten::cos(sun_angle),
         };
-        sun_direction = normalize(sun_direction);
 #endif
+        sun_direction = normalize(sun_direction);
 
         const aten::vec3 earth_center{
             0.0F,

@@ -204,15 +204,15 @@ namespace aten::rainbow
         float extinction = 0.0F;
 
         for (int32_t a = 0; a < A_WIDTH; a++) {
-            const auto droplet_diameter_m = Length::from(droplet_radius_mm * 2, MeterUnit::mm, MeterUnit::km);
+            const auto droplet_diameter_km = Length::from(droplet_radius_mm * 2, MeterUnit::mm, MeterUnit::km);
 
             // TODO
             // The following code should be standardized.
             constexpr auto N0 = 8000.0F * 10e3F * 10e8F;    // [m^-3mm^-1] -> [m^-4] -> [km^-4]
             const auto lambda = 4.1F * 10e3F * 10e2F * aten::pow(intensity_rainfall_rate, -0.21F);
-            const auto droplet_distrib = N0 * aten::exp(-lambda * droplet_diameter_m);
-            const auto droplet_radius_m = droplet_diameter_m * 0.5F;
-            const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_m * droplet_radius_m;
+            const auto droplet_distrib = N0 * aten::exp(-lambda * droplet_diameter_km);
+            const auto droplet_radius_km = droplet_diameter_km * 0.5F;
+            const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_km * droplet_radius_km;
 
             const auto extinction_i = EXTINCTION_EFFICIENT_IN_RAIN_VOLUME * droplet_cross_sectional_area * droplet_distrib;
 

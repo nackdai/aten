@@ -234,34 +234,6 @@ namespace aten::sky {
         return radiance;
     }
 
-    namespace {
-        inline aten::tuple<float, float, float> CieColorMatchingFunctionTableValue(const int32_t wavelength)
-        {
-            if (wavelength <= aten::sky::LambdaMin || wavelength >= aten::sky::LambdaMax) {
-                return aten::make_tuple(0.0F, 0.0F, 0.0F);
-            }
-
-            // wavelength in function table is defined per 5.0 nm.
-            auto u = (wavelength - aten::sky::LambdaMin) / 5.0F;
-
-            const auto row = static_cast<int32_t>(aten::floor(u));
-            AT_ASSERT(row >= 0 && row + 1 < CIE_2_DEG_COLOR_MATCHING_FUNCTIONS.size());
-            AT_ASSERT(CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row].labmda <= wavelength
-                && CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row + 1].labmda >= wavelength);
-
-            const auto& element_0 = CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row];
-            const auto& element_1 = CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row + 1];
-
-            u -= row;
-
-            const auto x = aten::lerp(element_0.x, element_1.x, u);
-            const auto y = aten::lerp(element_0.y, element_1.y, u);
-            const auto z = aten::lerp(element_0.z, element_1.z, u);
-
-            return aten::make_tuple(x, y, z);
-        }
-    }
-
     /*
         We can then implement a utility function to compute the "spectral radiance to luminance" conversion constants
         (see Section 14.3 in https://arxiv.org/pdf/1612.04336.pdf"A Qualitative and Quantitative Evaluation of 8 Clear Sky Models</a> for their definitions):

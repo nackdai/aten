@@ -364,34 +364,13 @@ namespace aten::rainbow
         return droplet_radius.x;
     }
 
-    inline AT_DEVICE_API aten::tuple<float, float, float> CieColorMatchingFunctionTableValue(
-        const int32_t wavelength_nm)
-    {
-        if (wavelength_nm <= sky::LambdaMin || wavelength_nm >= sky::LambdaMax) {
-            return aten::make_tuple(0.0F, 0.0F, 0.0F);
-        }
-
-        auto u = (wavelength_nm - sky::LambdaMin) / 5.0F;
-        const auto row = static_cast<int32_t>(aten::floor(u));
-
-        const auto& e0 = sky::CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row];
-        const auto& e1 = sky::CIE_2_DEG_COLOR_MATCHING_FUNCTIONS[row + 1];
-
-        u -= row;
-
-        return aten::make_tuple(
-            aten::lerp(e0.x, e1.x, u),
-            aten::lerp(e0.y, e1.y, u),
-            aten::lerp(e0.z, e1.z, u));
-    }
-
     inline AT_DEVICE_API aten::vec3 SpectrumSampleToLinearSrgb(
         const int32_t wavelength_nm,
         const float spectral_value,
         const float dlambda_nm)
     {
         float x_bar, y_bar, z_bar;
-        aten::tie(x_bar, y_bar, z_bar) = CieColorMatchingFunctionTableValue(wavelength_nm);
+        aten::tie(x_bar, y_bar, z_bar) = sky::CieColorMatchingFunctionTableValue(wavelength_nm);
 
         const float x = spectral_value * x_bar;
         const float y = spectral_value * y_bar;

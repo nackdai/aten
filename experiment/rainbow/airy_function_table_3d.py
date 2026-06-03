@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import math
 
-from calc_water_refraction import calc_water_refraction, DAIMON_MASAMURA_WATER_REFRACTIVE_INDEX_TABLE
+from calc_water_refraction import calc_water_refraction
 from airy_function import compute_h, compute_theta_max, compute_z, compute_M, airy_rainbow_integral
 
 A_MIN = 0.02e-3
@@ -30,7 +30,7 @@ def _table_airy_rainbow_integral(a) -> list[list[float]]:
         theta = THETA_MIN
         while theta <= THETA_MAX:
             # --- 計算処理 ---
-            n = calc_water_refraction(wavelength, DAIMON_MASAMURA_WATER_REFRACTIVE_INDEX_TABLE)
+            n = calc_water_refraction(wavelength)
             h = compute_h(n)
             theta_max = compute_theta_max(n)
             z = compute_z(wavelength * 1e-9, a, theta, h, theta_max)
@@ -146,7 +146,7 @@ for theta_deg in theta_values:
     f_z = pick_airy_rainbow_integral(airy_rainbow_integral_table, a, wavelength, theta)
     f_squared_values.append(f_z**2)
 
-    n = calc_water_refraction(wavelength, DAIMON_MASAMURA_WATER_REFRACTIVE_INDEX_TABLE)
+    n = calc_water_refraction(wavelength)
     h = compute_h(n)
     theta_max = compute_theta_max(n)
     z = compute_z(wavelength * 1e-9, a, theta, h, theta_max)

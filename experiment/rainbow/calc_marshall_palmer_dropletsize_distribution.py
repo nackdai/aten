@@ -20,7 +20,7 @@ def calc_marshall_palmer_dropletsize_distribution_as_cm(droplet_diameter_cm: flo
         float: The droplet size distribution for a given diameter D.
     """
     # Parameters for the Marshall-Palmer distribution
-    N0 = 0.008  # cm^-4
+    N0 = 0.08  # cm^-4
     Lambda = 41 * (rainfall_rate_mm_hr ** -0.21)  # cm^-1
 
     # Calculate the droplet size distribution
@@ -47,7 +47,7 @@ def calc_marshall_palmer_dropletsize_distribution_as_mm(droplet_diameter_mm: flo
         float: The droplet size distribution for a given diameter D.
     """
     # Parameters for the Marshall-Palmer distribution
-    N0 = 8000  # m^-1 mm^-1
+    N0 = 8000  # m^-3 mm^-1
     Lambda = 4.1 * (rainfall_rate_mm_hr ** -0.21)  # mm^-1
 
     # Calculate the droplet size distribution
@@ -55,34 +55,39 @@ def calc_marshall_palmer_dropletsize_distribution_as_mm(droplet_diameter_mm: flo
 
     return N_D
 
-results: list[float] = []
+def main():
+    results: list[float] = []
 
-# Rainfall rates in mm/hr
-R = [1, 5, 25]
+    # Rainfall rates in mm/hr
+    R = [1, 5, 25]
 
-# 0 cm to 0.5 cm in 0.01 cm increments
-D_cm = [x * 0.01 for x in range(0, 51)]
+    # 0 cm to 0.5 cm in 0.01 cm increments
+    D_cm = [x * 0.01 for x in range(0, 51)]
 
-# 0 mm to 5 mm in 0.1 mm increments
-D_mm = [x * 0.1 for x in range(0, 51)]
+    # 0 mm to 5 mm in 0.1 mm increments
+    D_mm = [x * 0.1 for x in range(0, 51)]
 
-for rainfall_rate in R:
-    results.append(
-        [calc_marshall_palmer_dropletsize_distribution_as_mm(d, rainfall_rate) for d in D_mm]
-    )
+    for rainfall_rate in R:
+        results.append(
+            [calc_marshall_palmer_dropletsize_distribution_as_mm(d, rainfall_rate) for d in D_mm]
+        )
 
-plt.figure(figsize=(10, 6), dpi=100)
-plt.plot(D_mm, results[0], color='#ff0000', lw=1.5, label='R = 1 mm/hr')
-plt.plot(D_mm, results[1], color='#00ff00', lw=1.5, label='R = 5 mm/hr')
-plt.plot(D_mm, results[2], color='#0000ff', lw=1.5, label='R = 25 mm/hr')
-plt.xlabel('Droplet Diameter (mm)')
-plt.ylabel('Droplet Size Distribution')
-plt.title('Marshall-Palmer Droplet Size Distribution')
-plt.yscale('log', base=10)
+    plt.figure(figsize=(10, 6), dpi=100)
+    plt.plot(D_mm, results[0], color='#ff0000', lw=1.5, label='R = 1 mm/hr')
+    plt.plot(D_mm, results[1], color='#00ff00', lw=1.5, label='R = 5 mm/hr')
+    plt.plot(D_mm, results[2], color='#0000ff', lw=1.5, label='R = 25 mm/hr')
+    plt.xlabel('Droplet Diameter (mm)')
+    plt.ylabel('Droplet Size Distribution')
+    plt.title('Marshall-Palmer Droplet Size Distribution')
+    plt.yscale('log', base=10)
 
-# For mm, [10e-2, 10e3]
-# For cm, [10e-6, 10e-1] 
-plt.ylim(10e-2, 10e3)
+    # For mm, [10e-2, 10e3]
+    # For cm, [10e-6, 10e-1] 
+    plt.ylim(10e-2, 10e3)
 
-plt.legend()
-plt.show()
+    plt.legend()
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()

@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\aten_unittest\aov_host_buffer.cpp" />
+    <ClCompile Include="..\src\aten_unittest\atmoshphere\rainbow\rainbow_transmittance.cpp" />
     <ClCompile Include="..\src\aten_unittest\atmoshphere\sky\sky_common.cpp" />
     <ClCompile Include="..\src\aten_unittest\atmoshphere\sky\sky_compute.cpp" />
     <ClCompile Include="..\src\aten_unittest\atmoshphere\sky\sky_coord_convert.cpp" />
@@ -27,6 +28,7 @@
     <ClCompile Include="..\src\aten_unittest\pinhole_camera.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\aten_unittest\atmoshphere\rainbow\rainbow_test_fixture.h" />
     <ClInclude Include="..\src\aten_unittest\atmoshphere\sky\sky_test_fixture.h" />
     <ClInclude Include="..\src\aten_unittest\atmoshphere\sky\sky_test_lazy_texture.h" />
   </ItemGroup>

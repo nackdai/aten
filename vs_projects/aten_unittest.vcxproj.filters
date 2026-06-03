@@ -19,6 +19,9 @@
     <ClCompile Include="..\src\aten_unittest\atmoshphere\sky\unit_quantity.cpp">
       <Filter>atmosphere\sky</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\aten_unittest\atmoshphere\rainbow\rainbow_transmittance.cpp">
+      <Filter>atmosphere\rainbow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="atmosphere">
@@ -27,6 +30,9 @@
     <Filter Include="atmosphere\sky">
       <UniqueIdentifier>{973ae865-aa35-4829-bbf9-b06415501333}</UniqueIdentifier>
     </Filter>
+    <Filter Include="atmosphere\rainbow">
+      <UniqueIdentifier>{14b27a07-829c-4078-acc9-3729e8508d8b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\aten_unittest\atmoshphere\sky\sky_test_fixture.h">
@@ -34,6 +40,9 @@
     </ClInclude>
     <ClInclude Include="..\src\aten_unittest\atmoshphere\sky\sky_test_lazy_texture.h">
       <Filter>atmosphere\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\aten_unittest\atmoshphere\rainbow\rainbow_test_fixture.h">
+      <Filter>atmosphere\rainbow</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

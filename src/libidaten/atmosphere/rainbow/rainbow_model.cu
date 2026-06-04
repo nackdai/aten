@@ -5,6 +5,7 @@
 
 #include "atmosphere/rainbow/rainbow_constants.h"
 #include "atmosphere/rainbow/rainbow_compute.h"
+#include "atmosphere/rainbow/rainbow_render.h"
 #include "atmosphere/sky/sky_compute.h"
 
 #include "atmosphere/atmosphere.h"

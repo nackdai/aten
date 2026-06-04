@@ -2,6 +2,7 @@
 
 #include "atmosphere/rainbow/rainbow_compute.h"
 #include "atmosphere/rainbow/rainbow_constants.h"
+#include "atmosphere/rainbow/rainbow_render.h"
 #include "atmosphere/rainbow/rainbow_transmittance.h"
 
 #include "atmosphere/sky/sky_common.h"

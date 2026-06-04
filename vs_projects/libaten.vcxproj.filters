@@ -631,6 +631,9 @@
     <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_precompute_textures.h">
       <Filter>atmosphere\rainbow</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_render.h">
+      <Filter>atmosphere\rainbow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

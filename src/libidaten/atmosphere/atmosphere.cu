@@ -1,6 +1,7 @@
 #include "atmosphere/atmosphere.h"
 
 #include "atmosphere/rainbow/rainbow_compute.h"
+#include "atmosphere/rainbow/rainbow_render.h"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"

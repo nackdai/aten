@@ -16,6 +16,81 @@
 
 namespace aten::rainbow
 {
+    inline AT_DEVICE_API float SampleUniformDropletRadius(const float u)
+    {
+        return DROPLET_SAMPLE_RADIUS_MIN
+            + (DROPLET_SAMPLE_RADIUS_MAX - DROPLET_SAMPLE_RADIUS_MIN) * aten::saturate(u);
+    }
+
+    inline AT_DEVICE_API float ComputeInverseErfWinitzki(const float z)
+    {
+        constexpr float a = 0.147F;
+        const float x = aten::clamp(z, -0.999999F, 0.999999F);
+        if (aten::abs(x) <= AT_MATH_EPSILON) {
+            return 0.0F;
+        }
+
+        const float l = aten::log(1.0F - x * x);
+        const float w = 2.0F / (AT_MATH_PI * a) + l * 0.5F;
+        const float inner_sqrt = aten::sqrt(aten::max(0.0F, w * w - l / a));
+        return aten::sign(x) * aten::sqrt(aten::max(0.0F, inner_sqrt - w));
+    }
+
+    inline AT_DEVICE_API float ComputeInverseNormalDistributionCDF(
+        const float u,
+        const float mu,
+        const float sigma)
+    {
+        constexpr float SQRT_2 = 1.41421356237309504880F;
+        const float clamped_u = aten::clamp(u, 1e-6F, 1.0F - 1e-6F);
+        return mu + sigma * SQRT_2 * ComputeInverseErfWinitzki(2.0F * clamped_u - 1.0F);
+    }
+
+    inline AT_DEVICE_API float SampleNormalDropletRadius(const float u)
+    {
+        return ComputeInverseNormalDistributionCDF(
+            u,
+            DROPLET_SAMPLE_RADIUS_MEAN,
+            DROPLET_SAMPLE_RADIUS_SIGMA);
+    }
+
+    inline AT_DEVICE_API float SampleMarshallPalmerDropletRadius(
+        const float u,
+        const float intensity_rainfall_rate)
+    {
+        const float lambda = ComputeMarshallPalmerDropletSizeDistributionLambda(intensity_rainfall_rate);
+
+        const float d_min_mm = Length::as(DROPLET_SAMPLE_RADIUS_MIN * 2.0F, MeterUnit::mm);
+        const float d_max_mm = Length::as(DROPLET_SAMPLE_RADIUS_MAX * 2.0F, MeterUnit::mm);
+
+        const float c0 = aten::exp(-lambda * d_min_mm);
+        const float c1 = aten::exp(-lambda * d_max_mm);
+
+        const float d_mm = -aten::log(c0 - aten::saturate(u) * (c0 - c1)) / lambda;
+
+        return Length::from(d_mm * 0.5F, MeterUnit::mm, MeterUnit::m);
+    }
+
+    inline AT_DEVICE_API float GetMarshallPalmerDropletDiameterPDFTruncated(
+        const float droplet_diameter, // [m]
+        const float intensity_rainfall_rate)
+    {
+        const float lambda = ComputeMarshallPalmerDropletSizeDistributionLambda(intensity_rainfall_rate);
+
+        const float D_mm = Length::as(droplet_diameter, MeterUnit::mm);
+
+        const float D_min_mm = Length::as(DROPLET_SAMPLE_RADIUS_MIN * 2.0F, MeterUnit::mm);
+        const float D_max_mm = Length::as(DROPLET_SAMPLE_RADIUS_MAX * 2.0F, MeterUnit::mm);
+
+        if (D_mm < D_min_mm || D_mm > D_max_mm) {
+            return 0.0F;
+        }
+
+        const float norm = aten::exp(-lambda * D_min_mm) - aten::exp(-lambda * D_max_mm);
+
+        return lambda * aten::exp(-lambda * D_mm) / norm;
+    }
+
     inline AT_DEVICE_API aten::vec3 AdvanceRainVolumeIntegral(
         aten::sampler& sampler,
         const sky::AtmosphereParameters& atmosphere,
@@ -103,17 +178,22 @@ namespace aten::rainbow
 
             const auto d_i = i * dt;
 
+            float droplet_size_pdf = 1.0F;
+
             auto u = sampler.nextSample();
 
-            // Convert to sample the restricted droplet diameter.
-            u = p_min + u * (p_max - p_min);
+#if 0
+            const auto droplet_radius = SampleUniformDropletRadius(u);
+#elif 0
+            const auto droplet_radius = SampleNormalDropletRadius(u);
+#else
+            const auto droplet_radius = SampleMarshallPalmerDropletRadius(u, intensity_rainfall_rate);
+            droplet_size_pdf = GetMarshallPalmerDropletDiameterPDFTruncated(
+                droplet_radius * 2.0F,
+                intensity_rainfall_rate);
+#endif
 
-            // Sample the droplet diameter.
-            auto droplet_diameter = GetDropletDiameterFromMarshallPalmerDropletSizeDistribution(u, intensity_rainfall_rate);
-            droplet_diameter = Length::from(droplet_diameter, MeterUnit::mm, MeterUnit::m);
-            const auto pdf = GetMarshallPalmerDropletSizeDistributionPDF(droplet_diameter, intensity_rainfall_rate);
-
-            const auto droplet_radius = 0.5F * droplet_diameter;
+            const auto droplet_diameter = 2.0F * droplet_radius;
 
             uvw.z = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
 
@@ -146,14 +226,10 @@ namespace aten::rainbow
                 rainbow_intensity[n] =  GetAiryFunctionValue(airy_func_res_tex, uvw);;
             }
 
-            constexpr float N0 = 8000.0F;
-            const auto mp_lambda = ComputeMarshallPalmerDropletSizeDistributionLambda(intensity_rainfall_rate);
-
-            const auto droplet_diameter_as_mm = Length::as(droplet_diameter, MeterUnit::mm);
-            const auto droplet_radius_as_mm = droplet_diameter_as_mm * 0.5F;
-
-            const auto droplet_cross_sectional_area = AT_MATH_PI * droplet_radius_as_mm * droplet_radius_as_mm;
-            const auto rain_density = N0 / mp_lambda * droplet_cross_sectional_area * (p_max - p_min);
+            const auto rain_density = ComputeMarshallPalmerDropletSizeDistribution(droplet_diameter, intensity_rainfall_rate);
+            const auto rain_weight = droplet_size_pdf > 0.0F
+                ? rain_density / droplet_size_pdf
+                : 0.0F;
 
             const auto transmittance = GetSkyTransmittance(
                 atmosphere, earth_center,
@@ -166,7 +242,12 @@ namespace aten::rainbow
                     start_pos_in_rain_volume, move_dir, d_i);
 
             const auto rainbow_radiance_i{
-                transmittance * transmittance_in_rain_volume * transmittance_to_sun * solar_radiance * rainbow_intensity * rain_density
+                transmittance
+                * transmittance_in_rain_volume
+                * transmittance_to_sun
+                * solar_radiance
+                * rainbow_intensity
+                * rain_weight
             };
 
             curr_point += move_dir * dt;

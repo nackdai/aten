@@ -147,6 +147,7 @@
     <ClInclude Include="..\src\libaten\aten_namespace.h" />
     <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_compute.h" />
     <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_constants.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_defs.h" />
     <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_model.h" />
     <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_precompute_textures.h" />
     <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_render.h" />

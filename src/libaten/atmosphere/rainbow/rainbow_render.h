@@ -178,6 +178,11 @@ namespace aten::rainbow
 
             const auto d_i = i * dt;
 
+#if 1
+            // Sample from pre computed textures.
+            float droplet_radius, rain_weight;
+            aten::tie(droplet_radius, rain_weight) = GetDropletRadiusAndRainDensityWeightFromPreComputeTexture(droplet_radius_tex, curr_point, rain_volume);
+#else
             float droplet_size_pdf = 1.0F;
 
             auto u = sampler.nextSample();
@@ -193,7 +198,13 @@ namespace aten::rainbow
                 intensity_rainfall_rate);
 #endif
 
-            const auto droplet_diameter = 2.0F * droplet_radius;
+            const auto rain_density = ComputeMarshallPalmerDropletSizeDistribution(
+                2.0F * droplet_radius,  // diameter
+                intensity_rainfall_rate);
+            const auto rain_weight = droplet_size_pdf > 0.0F
+                ? rain_density / droplet_size_pdf
+                : 0.0F;
+#endif
 
             uvw.z = aten::saturate(((droplet_radius - A_MIN) / A_STEP + 0.5F) / A_WIDTH);
 
@@ -225,11 +236,6 @@ namespace aten::rainbow
                 uvw.y = aten::saturate(((wavelength - WAVELENGTH_MIN) / WAVELENGTH_STEP + 0.5F) / WAVELENGTH_WIDTH);
                 rainbow_intensity[n] =  GetAiryFunctionValue(airy_func_res_tex, uvw);;
             }
-
-            const auto rain_density = ComputeMarshallPalmerDropletSizeDistribution(droplet_diameter, intensity_rainfall_rate);
-            const auto rain_weight = droplet_size_pdf > 0.0F
-                ? rain_density / droplet_size_pdf
-                : 0.0F;
 
             const auto transmittance = GetSkyTransmittance(
                 atmosphere, earth_center,

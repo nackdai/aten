@@ -113,6 +113,23 @@ namespace aten::rainbow {
                 aten::vec3(transmittance),
                 x, y);
         }
+
+        inline void ComputeDropletRadiusValues(
+            int32_t x, int32_t y, int32_t z,
+            const float u,
+            const float intensity_rainfall_rate,
+            texture3d& droplet_radius_text)
+        {
+            const auto droplet_radius = SampleMarshallPalmerDropletRadius(u, intensity_rainfall_rate);
+            const auto droplet_size_pdf = GetMarshallPalmerDropletDiameterPDFTruncated(
+                droplet_radius * 2.0F,
+                intensity_rainfall_rate);
+            const auto rain_density = ComputeMarshallPalmerDropletSizeDistribution(droplet_radius * 2.0F, intensity_rainfall_rate);
+            const auto rain_weight = droplet_size_pdf > 0.0F
+                ? rain_density / droplet_size_pdf
+                : 0.0F;
+            droplet_radius_text.SetByXYZ(vec4(droplet_radius, rain_density, rain_weight, 0.0F), x, y, z);
+        }
     }
 
     void RainbowModel::PreCompute()
@@ -172,14 +189,6 @@ namespace aten::rainbow {
                 0,
                 scramble);
 
-            constexpr auto mu = 0.5_mm;
-
-            // NOTE:
-            // Sigma for 95% of normal distribution is precisely 1.96.
-            // We can often see 2.0. But, it's approximation. It's not correct mathematically.
-            // In this case, the target range is 0.3 - 0.7F.
-            constexpr auto sigma = 0.2_mm / 1.96F;
-
             // Precompute droplet radius volume.
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for
@@ -192,9 +201,11 @@ namespace aten::rainbow {
                         {
                             u = sampler.nextSample();
                         }
-
-                        //const auto droplet_radius = ComputeInverseNormalDistributionCDF(u, mu, sigma);
-                        //droplet_radius_tex_.SetByXYZ(droplet_radius, x, y, z);
+                        ComputeDropletRadiusValues(
+                            x, y, z,
+                            u,
+                            intensity_rainfall_rate, 
+                            textures_.droplet_radius_tex);
                     }
                 }
             }
@@ -232,8 +243,6 @@ namespace aten::rainbow {
 
             const auto camera_pos{ camsample.r.org };
             const auto view_dir{ camsample.r.dir };
-
-            //AT_PRINTF("np.array([%f, %f, %f]),\n", view_dir.x, view_dir.y, view_dir.z);
 
             aten::vec3 rainbow_radiance {
                 AdvanceRainVolumeIntegral(
@@ -337,13 +346,6 @@ namespace aten::rainbow {
                             sun_radiance_to_luminance_, white_point_)
                     };
 
-                    const auto l = length(color);
-
-                    //if (x == 0)
-                    if (y == 103)
-                    {
-                        //AT_PRINTF("[%d, %d] : %f, %f, %f\n", x, y, color.r, color.g, color.b);
-                    }
                     dst.put(x, y, color);
                 }
             }

@@ -258,14 +258,14 @@ namespace aten::rainbow
         return GetAiryFunctionValue(airy_func_tex, uvw);
     }
 
-    inline AT_DEVICE_API float GetDropletRadiusFromPreComputeTexture(
+    inline AT_DEVICE_API aten::tuple<float, float> GetDropletRadiusAndRainDensityWeightFromPreComputeTexture(
         const aten::sky::texture3d& droplet_radius_tex,
         const aten::vec3& point,
         const aten::aabb& volume)
     {
         if (volume.isEmpty() || !volume.isIn(point)) {
             AT_ASSERT(false);
-            return 0.0F;
+            return aten::make_tuple(0.0F, 0.0F);
         }
 
         // Normalize.
@@ -281,12 +281,11 @@ namespace aten::rainbow
         AT_ASSERT(0.0F <= uvw.y && uvw.y <= 1.0F);
         AT_ASSERT(0.0F <= uvw.z && uvw.z <= 1.0F);
 
-        // TODO
         uvw.x = aten::saturate(uvw.x);
         uvw.y = aten::saturate(uvw.y);
         uvw.z = aten::saturate(uvw.z);
 
-        const auto droplet_radius = sky::SampleTexture3D(droplet_radius_tex, uvw);
-        return droplet_radius.x;
+        const auto result = sky::SampleTexture3D(droplet_radius_tex, uvw);
+        return aten::make_tuple(result.x, result.z);  // radius, rain density weight
     }
 }

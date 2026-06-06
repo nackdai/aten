@@ -173,8 +173,7 @@ namespace idaten::rainbow {
         __global__ void FillDropletRadiusInRainVolume(
             idaten::SurfaceTexture droplet_radius_texture,
             uint32_t* random_values,
-            const float mu,
-            const float sigma)
+            const float intensity_rainfall_rate)
         {
             const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
             const int32_t y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -200,8 +199,18 @@ namespace idaten::rainbow {
                 scramble);
 
             const auto u = sampler.nextSample();
-            //const auto droplet_radius = aten::rainbow::ComputeInverseNormalDistributionCDF(u, mu, sigma);
-            //aten::sky::WriteTexture3D(droplet_radius_texture, aten::vec3(droplet_radius), x, y, z);
+            const auto droplet_radius = aten::rainbow::SampleMarshallPalmerDropletRadius(u, intensity_rainfall_rate);
+            const auto droplet_size_pdf = aten::rainbow::GetMarshallPalmerDropletDiameterPDFTruncated(
+                droplet_radius * 2.0F,
+                intensity_rainfall_rate);
+            const auto rain_density = aten::rainbow::ComputeMarshallPalmerDropletSizeDistribution(droplet_radius * 2.0F, intensity_rainfall_rate);
+            const auto rain_weight = droplet_size_pdf > 0.0F
+                ? rain_density / droplet_size_pdf
+                : 0.0F;
+            aten::sky::WriteTexture3D(
+                droplet_radius_texture,
+                aten::vec3(droplet_radius, rain_density, rain_weight),
+                x, y, z);
         }
     }
 
@@ -210,6 +219,7 @@ namespace idaten::rainbow {
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::aabb& rain_volume,
         aten::rainbow::PreComputeTextureManager<idaten::SurfaceTexture, idaten::SurfaceTexture>& rainbow_textures,
+        TypedCudaMemory<uint32_t>& random_values,
         const float intensity_rainfall_rate)
     {
         dim3 thread_per_block(16, 16);
@@ -248,27 +258,17 @@ namespace idaten::rainbow {
             rainbow_textures.airy_func_tex);
         checkCudaKernel(ComputeAiryFunctionKernel);
 
-#if 0
         // Fill droplet radius.
         dim3 droplet_radius_block_per_grid(
             (aten::rainbow::DROPLET_RADIUS_TEX_SIZE + thread_per_block.x - 1) / thread_per_block.x,
             (aten::rainbow::DROPLET_RADIUS_TEX_SIZE + thread_per_block.y - 1) / thread_per_block.y,
             (aten::rainbow::DROPLET_RADIUS_TEX_SIZE + thread_per_block.z - 1) / thread_per_block.z);
 
-        constexpr auto mu = 0.5_mm;
-
-        // NOTE:
-        // Sigma for 95% of normal distribution is precisely 1.96.
-        // We can often see 2.0. But, it's approximation. It's not correct mathematically.
-        // In this case, the target range is 0.3 - 0.7F.
-        constexpr auto sigma = 0.2_mm / 1.96F;
-
         FillDropletRadiusInRainVolume << <airy_func_block_per_grid, thread_per_block >> > (
-            rainbow_textures.droplet_radius_texture,
-            random_values_.data(),
-            mu, sigma);
+            rainbow_textures.droplet_radius_tex,
+            random_values.data(),
+            intensity_rainfall_rate);
         checkCudaKernel(FillDropletRadiusInRainVolume);
-#endif
     }
 
     void RainbowModel::PreCompute()
@@ -278,6 +278,7 @@ namespace idaten::rainbow {
             atmosphere_,
             rain_volume_,
             textures_,
+            random_values_,
             intensity_rainfall_rate);
     }
 
@@ -434,6 +435,7 @@ namespace idaten {
             sky_model_.atmosphere_,
             rainbow_model_.rain_volume_,
             rainbow_textures_,
+            random_values_,
             aten::rainbow::RainbowModel::intensity_rainfall_rate);
     }
 }

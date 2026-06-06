@@ -127,7 +127,11 @@ namespace idaten {
                     rainbow_textures.airy_func_tex)
             };
 
+#ifdef ENABLE_FULL_SPECTRAL_RAINBOW
+            atmosphere_color += rainbow_radiance;
+#else
             atmosphere_color += rainbow_radiance * sun_radiance_to_luminance;
+#endif
         }
 
         if (will_render_sky) {
@@ -166,11 +170,6 @@ namespace idaten {
             atmosphere_color += sky_luminance;
         }
 
-        // TODO
-        // Tone mapping.
-        // white point (RGB=1.0（白））に対する比率の負値のexponential -> 強い値ほど減衰（ゼロに近い）.
-        // それを 1.0 から引くことで、結果強い値が大きくなる.
-        // exposure は全体の明るさを調整するための係数.
         aten::vec3 color{
             aten::vec3(1.0F) - aten::exp(-atmosphere_color / white_point * aten::sky::EXPOSURE)
         };

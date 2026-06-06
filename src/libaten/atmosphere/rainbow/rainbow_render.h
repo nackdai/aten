@@ -1,5 +1,6 @@
 #pragma once
 
+#include "atmosphere/rainbow/rainbow_defs.h"
 #include "atmosphere/rainbow/rainbow_compute.h"
 #include "atmosphere/rainbow/rainbow_constants.h"
 #include "atmosphere/rainbow/rainbow_transmittance.h"
@@ -178,7 +179,7 @@ namespace aten::rainbow
 
             const auto d_i = i * dt;
 
-#if 1
+#ifdef ENABLE_PRECOMPUTE_DROPLET_RADIUS
             // Sample from pre computed textures.
             float droplet_radius, rain_weight;
             aten::tie(droplet_radius, rain_weight) = GetDropletRadiusAndRainDensityWeightFromPreComputeTexture(droplet_radius_tex, curr_point, rain_volume);
@@ -231,11 +232,16 @@ namespace aten::rainbow
 
             aten::vec3 rainbow_intensity;
 
+#ifdef ENABLE_FULL_SPECTRAL_RAINBOW
+            uvw.y = 0.5F / WAVELENGTH_WIDTH;
+            rainbow_intensity = sky::SampleTexture3D(airy_func_res_tex, uvw);
+#else
             for (size_t n = 0; n < visible_wavelength.size(); n++) {
                 const auto wavelength = visible_wavelength[n];
                 uvw.y = aten::saturate(((wavelength - WAVELENGTH_MIN) / WAVELENGTH_STEP + 0.5F) / WAVELENGTH_WIDTH);
                 rainbow_intensity[n] =  GetAiryFunctionValue(airy_func_res_tex, uvw);;
             }
+#endif
 
             const auto transmittance = GetSkyTransmittance(
                 atmosphere, earth_center,

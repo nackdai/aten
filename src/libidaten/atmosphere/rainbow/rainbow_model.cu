@@ -3,6 +3,7 @@
 #include <random>
 #include <algorithm>
 
+#include "atmosphere/rainbow/rainbow_defs.h"
 #include "atmosphere/rainbow/rainbow_constants.h"
 #include "atmosphere/rainbow/rainbow_compute.h"
 #include "atmosphere/rainbow/rainbow_render.h"
@@ -170,6 +171,20 @@ namespace idaten::rainbow {
             aten::sky::WriteTexture3D(airy_function_texture, aten::vec3(intensity), x, y, z);
         }
 
+        __global__ void ComputeSpectralRgbPhaseValueKernel(idaten::SurfaceTexture rgb_phase_value_tex)
+        {
+            const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
+            const int32_t y = blockIdx.y * blockDim.y + threadIdx.y;
+            if (x >= aten::rainbow::THETA_WIDTH
+                || y >= aten::rainbow::A_WIDTH)
+            {
+                return;
+            }
+
+            const auto rgb = aten::rainbow::ComputeSpectralRgbPhaseValue(x, y);
+            aten::sky::WriteTexture3D(rgb_phase_value_tex, rgb, x, 0, y);
+        }
+
         __global__ void FillDropletRadiusInRainVolume(
             idaten::SurfaceTexture droplet_radius_texture,
             uint32_t* random_values,
@@ -199,6 +214,7 @@ namespace idaten::rainbow {
                 scramble);
 
             const auto u = sampler.nextSample();
+
             const auto droplet_radius = aten::rainbow::SampleMarshallPalmerDropletRadius(u, intensity_rainfall_rate);
             const auto droplet_size_pdf = aten::rainbow::GetMarshallPalmerDropletDiameterPDFTruncated(
                 droplet_radius * 2.0F,
@@ -207,6 +223,7 @@ namespace idaten::rainbow {
             const auto rain_weight = droplet_size_pdf > 0.0F
                 ? rain_density / droplet_size_pdf
                 : 0.0F;
+
             aten::sky::WriteTexture3D(
                 droplet_radius_texture,
                 aten::vec3(droplet_radius, rain_density, rain_weight),
@@ -245,6 +262,16 @@ namespace idaten::rainbow {
             extinction);
         checkCudaKernel(ComputeTransmittanceInRainVolumeTexture);
 
+#ifdef ENABLE_FULL_SPECTRAL_RAINBOW
+        // Compute Airy function.
+        dim3 spectral_block_per_grid(
+            (aten::rainbow::THETA_WIDTH + thread_per_block.x - 1) / thread_per_block.x,
+            (aten::rainbow::A_WIDTH + thread_per_block.y - 1) / thread_per_block.y);
+
+        ComputeSpectralRgbPhaseValueKernel << <spectral_block_per_grid, thread_per_block >> > (
+            rainbow_textures.airy_func_tex);
+        checkCudaKernel(ComputeSpectralRgbPhaseValueKernel);
+#else
         // For 3 dimension cuda kernel.
         thread_per_block = dim3(8, 8, 8);
 
@@ -257,6 +284,11 @@ namespace idaten::rainbow {
         ComputeAiryFunctionKernel << <airy_func_block_per_grid, thread_per_block >> > (
             rainbow_textures.airy_func_tex);
         checkCudaKernel(ComputeAiryFunctionKernel);
+#endif
+
+#ifdef ENABLE_PRECOMPUTE_DROPLET_RADIUS
+        // For 3 dimension cuda kernel.
+        thread_per_block = dim3(8, 8, 8);
 
         // Fill droplet radius.
         dim3 droplet_radius_block_per_grid(
@@ -264,11 +296,12 @@ namespace idaten::rainbow {
             (aten::rainbow::DROPLET_RADIUS_TEX_SIZE + thread_per_block.y - 1) / thread_per_block.y,
             (aten::rainbow::DROPLET_RADIUS_TEX_SIZE + thread_per_block.z - 1) / thread_per_block.z);
 
-        FillDropletRadiusInRainVolume << <airy_func_block_per_grid, thread_per_block >> > (
+        FillDropletRadiusInRainVolume << <droplet_radius_block_per_grid, thread_per_block >> > (
             rainbow_textures.droplet_radius_tex,
             random_values.data(),
             intensity_rainfall_rate);
         checkCudaKernel(FillDropletRadiusInRainVolume);
+#endif
     }
 
     void RainbowModel::PreCompute()
@@ -345,7 +378,13 @@ namespace idaten::rainbow {
                     airy_func_res_tex)
             };
 
+            rainbow_radiance = aten::vmax(rainbow_radiance, aten::vec3(0.0F));
+
+#ifdef ENABLE_FULL_SPECTRAL_RAINBOW
+            // Nothing to do.
+#else
             rainbow_radiance *= sun_radiance_to_luminance;
+#endif
 
             // TODO
             // Tone mapping.

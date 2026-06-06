@@ -1,5 +1,6 @@
 #include "atmosphere/rainbow/rainbow_model.h"
 
+#include "atmosphere/rainbow/rainbow_defs.h"
 #include "atmosphere/rainbow/rainbow_compute.h"
 #include "atmosphere/rainbow/rainbow_constants.h"
 #include "atmosphere/rainbow/rainbow_render.h"
@@ -151,6 +152,17 @@ namespace aten::rainbow {
                 }
             }
 
+#ifdef ENABLE_FULL_SPECTRAL_RAINBOW
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for
+#endif
+            for (int32_t z = 0; z < A_WIDTH; z++) {
+                for (int32_t x = 0; x < THETA_WIDTH; x++) {
+                    const auto rgb = ComputeSpectralRgbPhaseValue(x, z);
+                    textures_.airy_func_tex.SetByXYZ(vec4(rgb), x, 0, z);
+                }
+            }
+#else
             // Precompute Airy function table.
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for
@@ -163,6 +175,7 @@ namespace aten::rainbow {
                     }
                 }
             }
+#endif
 
             const float extinction = ComputeExtinctionInRain(intensity_rainfall_rate);
 
@@ -189,6 +202,7 @@ namespace aten::rainbow {
                 0,
                 scramble);
 
+#ifdef ENABLE_PRECOMPUTE_DROPLET_RADIUS
             // Precompute droplet radius volume.
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for
@@ -204,11 +218,12 @@ namespace aten::rainbow {
                         ComputeDropletRadiusValues(
                             x, y, z,
                             u,
-                            intensity_rainfall_rate, 
+                            intensity_rainfall_rate,
                             textures_.droplet_radius_tex);
                     }
                 }
             }
+#endif
         }
     }
 
@@ -260,10 +275,16 @@ namespace aten::rainbow {
                     airy_func_res_tex)
             };
 
+            rainbow_radiance = aten::vmax(rainbow_radiance, aten::vec3(0.0F));
+
             //AT_PRINTF("%d, ", y);
             //AT_PRINTF("%f, %f, %f, ", rainbow_radiance.x, rainbow_radiance.y, rainbow_radiance.z);
 
+#ifdef ENABLE_FULL_SPECTRAL_RAINBOW
+            // Nothing to do.
+#else
             rainbow_radiance *= sun_radiance_to_luminance;
+#endif
 
             //AT_PRINTF("%d, ", y);
             //AT_PRINTF("%f, %f, %f, ", rainbow_radiance.x, rainbow_radiance.y, rainbow_radiance.z);

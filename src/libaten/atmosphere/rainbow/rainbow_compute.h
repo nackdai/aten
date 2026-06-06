@@ -288,4 +288,51 @@ namespace aten::rainbow
         const auto result = sky::SampleTexture3D(droplet_radius_tex, uvw);
         return aten::make_tuple(result.x, result.z);  // radius, rain density weight
     }
+
+    inline AT_DEVICE_API aten::vec3 SpectrumSampleToLinearSrgb(
+        const int32_t wavelength_nm,
+        const float spectral_value,
+        const float dlambda_nm)
+    {
+        float x_bar, y_bar, z_bar;
+        aten::tie(x_bar, y_bar, z_bar) = sky::CieColorMatchingFunctionTableValue(wavelength_nm);
+
+        const float x = spectral_value * x_bar;
+        const float y = spectral_value * y_bar;
+        const float z = spectral_value * z_bar;
+
+        return sky::MAX_LUMINOUS_EFFICACY * dlambda_nm * aten::vec3{
+            sky::XYZ_TO_SRGB[0] * x + sky::XYZ_TO_SRGB[1] * y + sky::XYZ_TO_SRGB[2] * z,
+            sky::XYZ_TO_SRGB[3] * x + sky::XYZ_TO_SRGB[4] * y + sky::XYZ_TO_SRGB[5] * z,
+            sky::XYZ_TO_SRGB[6] * x + sky::XYZ_TO_SRGB[7] * y + sky::XYZ_TO_SRGB[8] * z,
+        };
+    }
+
+    inline AT_DEVICE_API aten::vec3 ComputeSpectralRgbPhaseValue(
+        const int32_t theta_idx,
+        const int32_t radius_idx)
+    {
+        aten::vec3 rgb{ 0.0F };
+
+        constexpr int32_t LAMBDA_STEP_NM = 10;
+        constexpr float dlambda_nm = static_cast<float>(LAMBDA_STEP_NM);
+
+        for (int32_t lambda_nm = sky::LambdaMin; lambda_nm <= sky::LambdaMax; lambda_nm += LAMBDA_STEP_NM) {
+            const auto lambda = Length::from(static_cast<float>(lambda_nm), MeterUnit::nm, MeterUnit::m);
+            const int32_t wavelength_idx = aten::clamp(
+                static_cast<int32_t>((lambda - WAVELENGTH_MIN) / WAVELENGTH_STEP + 0.5F),
+                0,
+                WAVELENGTH_WIDTH - 1
+            );
+
+            const float airy = ComputeAiryFunction(theta_idx, wavelength_idx, radius_idx);
+
+            rgb += SpectrumSampleToLinearSrgb(
+                lambda_nm,
+                airy,
+                dlambda_nm);
+        }
+
+        return rgb;
+    }
 }

@@ -27,8 +27,8 @@ namespace idaten::rainbow {
             GLuint gltex,
             const int32_t width,
             const int32_t height,
-            // const float sun_zenith_angle_radians,
-            // const float sun_azimuth_angle_radians,
+            const float sun_zenith_angle_radians,
+            const float sun_azimuth_angle_radians,
             const aten::CameraParameter& camera);
 
         const aten::aabb& GetRainVolume() const

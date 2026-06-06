@@ -407,8 +407,8 @@ namespace idaten::rainbow {
         GLuint gltex,
         const int32_t width,
         const int32_t height,
-        // const float sun_zenith_angle_radians,
-        // const float sun_azimuth_angle_radians,
+        const float sun_zenith_angle_radians,
+        const float sun_azimuth_angle_radians,
         const aten::CameraParameter& camera)
     {
         if (!m_glimg.IsValid()) {
@@ -417,12 +417,20 @@ namespace idaten::rainbow {
 
         constexpr auto sun_angle = aten::Deg2Rad(20.0F);
 
-        // TODO
+#if 1
+        aten::vec3 sun_direction{
+            aten::sin(sun_zenith_angle_radians) * aten::cos(sun_azimuth_angle_radians),
+            aten::cos(sun_zenith_angle_radians),
+            aten::sin(sun_zenith_angle_radians) * aten::sin(sun_azimuth_angle_radians)
+        };
+#else
+        // For debug.
         aten::vec3 sun_direction{
             0.0F,
             aten::sin(sun_angle),
             aten::cos(sun_angle),
         };
+#endif
         sun_direction = normalize(sun_direction);
 
         const aten::vec3 earth_center{

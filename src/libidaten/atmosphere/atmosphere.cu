@@ -200,7 +200,7 @@ namespace idaten {
             (height + thread_per_block.y - 1) / thread_per_block.y
         };
 
-#if 0
+#if 1
         const aten::vec3 sun_direction{
             aten::sin(sun_zenith_angle_radians) * aten::cos(sun_azimuth_angle_radians),
             aten::cos(sun_zenith_angle_radians),

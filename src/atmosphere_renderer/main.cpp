@@ -399,7 +399,7 @@ private:
     };
 
     float sun_zenith_angle_radians_{ 1.3F };
-    float sun_azimuth_angle_radians_{ 2.9F };
+    float sun_azimuth_angle_radians_{ AT_MATH_PI_HALF };
 
     aten::PinholeCamera camera_;
     bool is_camera_dirty_{ false };

@@ -147,3 +147,11 @@ Non Photorealistic Rendering (NPR)
 We can open this project in a VSCode devcontainer.
 If we encounter a devcontainer build failure, it might be due to the docker-compose version.
 In that case, please update docker-compose.
+
+## Third-party code
+
+The sky atmosphere implementation under `src/libaten/atmosphere/sky` is based
+on Eric Bruneton's
+[Precomputed Atmospheric Scattering](https://github.com/ebruneton/precomputed_atmospheric_scattering)
+project. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for license
+details.

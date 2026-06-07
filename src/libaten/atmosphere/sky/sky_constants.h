@@ -7,7 +7,7 @@
 #include "math/math.h"
 
 namespace aten::sky {
-    // As [mm].
+    // As [nm].
     constexpr int32_t LambdaMin = 360;
     constexpr int32_t LambdaMax = 830;
 

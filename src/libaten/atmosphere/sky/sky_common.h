@@ -5,10 +5,6 @@
 
 #include "math/vec2.h"
 
-// NOTE
-// 計算単位
-// - meter
-
 namespace aten::sky {
     inline AT_DEVICE_API aten::vec3 SampleTexture2D(
         const texture2d& tex,

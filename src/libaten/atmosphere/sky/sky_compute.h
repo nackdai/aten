@@ -9,10 +9,6 @@
 #include "image/texture.h"
 #include "image/texture_3d.h"
 
-// NOTE
-// 計算単位
-// - meter
-
 namespace aten::sky {
     // 大気境界とのOpticalDepthを計算する.
     inline AT_DEVICE_API float ComputeOpticalLengthToTopAtmosphereBoundary(
@@ -190,7 +186,7 @@ namespace aten::sky {
 
             // 太陽上端 : cos(θh-αs)、太陽下端 : cos(θh+αs)
             // cos(θh±αs) = cosθh・cosαs ∓ sinθh・sinαs
-            // αs は非常に小さい（αs<<1）ので、cosαs = 0、sinαs = αs に近似できる.
+            // αs は非常に小さい（αs<<1）ので、cosαs = 1, sinαs = αs に近似できる.
             // よって、cos(θh±αs) = cosθh ∓ αs・sinθh
             // cosθh - αs・sinθh <= μs <= cosθh + αs・sinθh
             //  => -αs・sinθh <= μs - cosθh <= αs・sinθh
@@ -234,28 +230,50 @@ namespace aten::sky {
         const float alpha_s = atmosphere.sun_angular_radius;
 
         /**
-         [Explanation of the Average Cosine Factor Approximation]
-         * 1. Small-Angle Approximation (Why mu_s can be compared with alpha_s):
-         - mu_s = cos(zenith_angle). Near the horizon, mu_s = sin(elevation_angle).
-         - Since the sun's angular radius (alpha_s) is very small (~0.0046 rad),
-         we use the approximation: sin(x) $2248 x (in radians).
-         - Therefore, mu_s effectively represents the sun's elevation in radians,
-         allowing a direct comparison with alpha_s without expensive trig functions.
+            [Average Cosine Factor Approximation]
 
-         2. Parabolic Smoothing (The formula: (mu + alpha)^2 / 4alpha):
-         - This is a C1-continuous approximation of the visible fraction of the sun disc.
-         - It smoothly interpolates between:
-         a) mu_s < -alpha_s : 0.0 (Sun is completely below the horizon)
-         b) mu_s >  alpha_s : mu_s (Sun is completely above the horizon)
-         - The quadratic form f(mu) = (mu + alpha)^2 / (4 * alpha) ensures:
-         - f(-alpha) = 0
-         - f(alpha)  = alpha (matches mu_s at the boundary)
-         - Derivatives (f') match at both boundaries (0 and 1), preventing visual
-         artifacts like Mach bands during sunset/sunrise.
+            Direct irradiance from the finite solar disc contains an integral of the
+            cosine term over the visible part of the disc. When the Sun is well above
+            the horizon this reduces to mu_s, and when it is fully below the horizon it
+            becomes 0.
 
-         3. Efficiency:
-         - Avoids expensive geometric area calculations (involving acos/sqrt)
-         while maintaining physical plausibility for atmospheric scattering.
+            Around the horizon, Bruneton's implementation uses a cheap C1-continuous
+            quadratic approximation instead of evaluating the exact clipped-disc
+            integral with acos/sqrt terms:
+
+            0                                  if mu_s < -alpha_s
+            (mu_s + alpha_s)^2 / (4 alpha_s)   if -alpha_s <= mu_s <= alpha_s
+            mu_s                               if mu_s >  alpha_s
+
+            Here alpha_s is the Sun angular radius. Near the horizon,
+            mu_s = cos(zenith_angle) = sin(elevation_angle), and because alpha_s is
+            small, mu_s can be compared directly with alpha_s in radians.
+
+            This is not the visible fraction of the solar disc. It approximates the
+            average projected cosine contribution of the visible solar disc, so its
+            value matches 0 below the horizon and mu_s above the horizon, with matching
+            first derivatives at both transition points.
+
+            [平均 cosine factor の近似]
+
+            有限サイズの太陽円盤からの direct irradiance では、見えている太陽円盤上で
+            cosine 項を積分する必要がある。太陽が地平線より十分上にある場合、この寄与は
+            mu_s になり、完全に地平線の下にある場合は 0 になる.
+
+            地平線付近では、正確な円盤のクリップ積分を acos/sqrt で評価する代わりに、
+            Bruneton の実装では以下の C1 連続な二次近似を使う.
+
+            0                                  if mu_s < -alpha_s
+            (mu_s + alpha_s)^2 / (4 alpha_s)   if -alpha_s <= mu_s <= alpha_s
+            mu_s                               if mu_s >  alpha_s
+
+            alpha_s は太陽の視半径。地平線付近では
+            mu_s = cos(天頂角) = sin(高度角) であり、alpha_s は十分小さいため、
+            mu_s をラジアン単位の高度角とみなして alpha_s と直接比較できる.
+
+            この値は太陽円盤の可視面積率そのものではない。見えている太陽円盤が direct
+            irradiance に与える、投影 cosine 項の平均的な寄与を近似している.
+            そのため、地平線より下では 0、地平線より十分上では mu_s に滑らかにつながる.
         */
         const float average_cosine_factor = mu_s < -alpha_s
             ? 0.0F   // 太陽全体が地平線の下にある場合

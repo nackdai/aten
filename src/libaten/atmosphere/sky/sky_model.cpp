@@ -47,9 +47,9 @@ namespace aten::sky {
         for (int32_t l = LambdaMin; l <= LambdaMax; l += 10)
         {
             // 波長の範囲が
-            //  LambdaMin = 360[mm]
-            //  LambdaMax = 830[mm]
-            // で定義されていて、これを mm (1e-3) -> micro meter (1e-6) に変換.
+            //  LambdaMin = 360[nm]
+            //  LambdaMax = 830[nm]
+            // で定義されていて、これを nm (1e-9) -> micro meter (1e-6) に変換.
             const auto lambda = static_cast<float>(l) * 1e-3F;
 
             wavelengths.emplace_back(l);

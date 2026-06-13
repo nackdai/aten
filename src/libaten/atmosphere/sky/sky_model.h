@@ -52,6 +52,9 @@ namespace aten::sky {
         aten::vec3 sun_radiance_to_luminance_;
         aten::vec3 sky_radiance_to_luminance_;
 
+        aten::vec3 precompute_reference_irradiance_{ 1.0F };
+        aten::vec3 sun_light_irradiance_{ 1.0F };
+
         aten::vec3 white_point_;
 
     private:

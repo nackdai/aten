@@ -32,6 +32,14 @@ namespace aten::sky {
         return atmosphere.solar_irradiance / sun_solid_angle;
     }
 
+    inline AT_DEVICE_API aten::vec3 GetSolarRadiance(
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const aten::vec3& solar_irradiance)
+    {
+        const auto sun_solid_angle = AT_MATH_PI * atmosphere.sun_angular_radius * atmosphere.sun_angular_radius;
+        return solar_irradiance / sun_solid_angle;
+    }
+
     namespace {
         inline AT_DEVICE_API aten::tuple<aten::vec3, aten::vec3> GetCombinedScattering(
             const aten::sky::AtmosphereParameters& atmosphere,
@@ -185,6 +193,8 @@ namespace aten::sky {
         const aten::sky::PreComputeTextures& texture,
         const aten::vec3& sun_radiance_to_luminance,
         const aten::vec3& sky_radiance_to_luminance,
+        const aten::vec3& sky_irradiance_ratio,
+        const aten::vec3& sun_irradiance,
         const aten::vec3& sun_direction,
         const aten::vec3& earth_center,
         const float sun_size)
@@ -214,7 +224,7 @@ namespace aten::sky {
                 transmittance)
         };
 
-        radiance = sky_radiance_to_luminance * radiance;
+        radiance = sky_radiance_to_luminance * (radiance * sky_irradiance_ratio);
 
         // If the view ray intersects the Sun, add the Sun radiance.
         // ここで、視線方向のベクトルを v、太陽の方向ベクトルを s とします（どちらも単位ベクトル）.
@@ -225,7 +235,7 @@ namespace aten::sky {
         // つまり、view_direction と sun_direction が近いほど、値は大きくなる.
         // なので、>（大なり）だと太陽の視半径内といえる.
         if (dot(view_direction, sun_direction) > sun_size) {
-            auto solar_radiance{ GetSolarRadiance(atmosphere) };
+            auto solar_radiance{ GetSolarRadiance(atmosphere, sun_irradiance) };
             solar_radiance = sun_radiance_to_luminance * solar_radiance;
 
             radiance = radiance + transmittance * solar_radiance;

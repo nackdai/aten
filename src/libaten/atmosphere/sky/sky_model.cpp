@@ -156,7 +156,9 @@ namespace aten::sky {
             LambdaB,
         };
 
-        sky_model.atmosphere_.solar_irradiance = InterpolateFactorByRGBLambda(solar_irradiance, wavelengths, rgb_lambdas);
+        sky_model.sun_light_irradiance_ = InterpolateFactorByRGBLambda(solar_irradiance, wavelengths, rgb_lambdas);
+        sky_model.precompute_reference_irradiance_ = aten::vec3(1.0F);
+        sky_model.atmosphere_.solar_irradiance = sky_model.precompute_reference_irradiance_;
 
         sky_model.atmosphere_.sun_angular_radius = SunAngularRadius;
 
@@ -588,6 +590,11 @@ namespace aten::sky {
         };
 
         const auto sun_size = aten::cos(SunAngularRadius);
+        const aten::vec3 sky_irradiance_ratio{
+            sun_light_irradiance_.r / precompute_reference_irradiance_.r,
+            sun_light_irradiance_.g / precompute_reference_irradiance_.g,
+            sun_light_irradiance_.b / precompute_reference_irradiance_.b,
+        };
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp parallel
@@ -605,6 +612,8 @@ namespace aten::sky {
                             camera,
                             atmosphere_, textures_,
                             sun_radiance_to_luminance_, sky_radiance_to_luminance_,
+                            sky_irradiance_ratio,
+                            sun_light_irradiance_,
                             sun_direction,
                             earth_center,
                             sun_size)

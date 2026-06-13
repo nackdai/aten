@@ -308,7 +308,7 @@ namespace aten::sky {
             transmittance_texture,
             r, mu_s);
 
-        return atmosphere.solar_irradiance * transmittance * average_cosine_factor;
+        return transmittance * average_cosine_factor;
     }
 
     namespace single_scattering {
@@ -419,9 +419,8 @@ namespace aten::sky {
                 mie_sum += mie_i * weight_i;
             }
 
-            rayleigh = rayleigh_sum * dx * atmosphere.solar_irradiance *
-                atmosphere.rayleigh_scattering;
-            mie = mie_sum * dx * atmosphere.solar_irradiance * atmosphere.mie_scattering;
+            rayleigh = rayleigh_sum * dx * atmosphere.rayleigh_scattering;
+            mie = mie_sum * dx * atmosphere.mie_scattering;
         }
     }
 

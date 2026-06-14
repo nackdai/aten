@@ -32,12 +32,26 @@ namespace aten::sky {
         return atmosphere.solar_irradiance / sun_solid_angle;
     }
 
+    inline AT_DEVICE_API aten::vec3 GetLightDiskRadiance(
+        const float angular_radius,
+        const aten::vec3& light_irradiance)
+    {
+        const auto solid_angle = AT_MATH_PI * angular_radius * angular_radius;
+        return light_irradiance / solid_angle;
+    }
+
+    inline AT_DEVICE_API aten::vec3 GetLightDiskRadiance(
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const aten::vec3& light_irradiance)
+    {
+        return GetLightDiskRadiance(atmosphere.sun_angular_radius, light_irradiance);
+    }
+
     inline AT_DEVICE_API aten::vec3 GetSolarRadiance(
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::vec3& solar_irradiance)
     {
-        const auto sun_solid_angle = AT_MATH_PI * atmosphere.sun_angular_radius * atmosphere.sun_angular_radius;
-        return solar_irradiance / sun_solid_angle;
+        return GetLightDiskRadiance(atmosphere, solar_irradiance);
     }
 
     namespace {
@@ -110,7 +124,7 @@ namespace aten::sky {
         const aten::vec3& camera,
         const aten::vec3& view_ray,
         const float shadow_length,
-        const aten::vec3& sun_direction,
+        const aten::vec3& light_direction,
         aten::vec3& out_transmittance)   // 視線の先に太陽が見えているときに太陽光の減衰を計算する用.
     {
         // Compute the distance to the top atmosphere boundary along the view ray,
@@ -157,8 +171,8 @@ namespace aten::sky {
 
         // Compute the r, mu, mu_s and nu parameters needed for the texture lookups.
         const float mu = rmu / r;
-        const float mu_s = dot(camera_pos, sun_direction) / r;
-        const float nu = dot(view_ray, sun_direction);
+        const float mu_s = dot(camera_pos, light_direction) / r;
+        const float nu = dot(view_ray, light_direction);
         const bool ray_r_mu_intersects_ground = RayIntersectsGround(atmosphere, r, mu);
 
         // 大気の境界までの transmittace を使うことになる.
@@ -186,18 +200,19 @@ namespace aten::sky {
             + single_mie_scattering * MiePhaseFunction(atmosphere.mie_phase_function_g, nu);
     }
 
-    inline AT_DEVICE_API aten::vec3 RenderSky(
+    inline AT_DEVICE_API aten::vec3 RenderSkyByDirectionalLight(
         int32_t x, int32_t y,
         const aten::CameraParameter& camera,
         const aten::sky::AtmosphereParameters& atmosphere,
         const aten::sky::PreComputeTextures& texture,
-        const aten::vec3& sun_radiance_to_luminance,
+        const aten::vec3& light_radiance_to_luminance,
         const aten::vec3& sky_radiance_to_luminance,
-        const aten::vec3& sky_irradiance_ratio,
-        const aten::vec3& sun_irradiance,
-        const aten::vec3& sun_direction,
+        const aten::vec3& light_irradiance_ratio,
+        const aten::vec3& light_irradiance,
+        const aten::vec3& light_direction,
         const aten::vec3& earth_center,
-        const float sun_size)
+        const float light_angular_radius,
+        const bool render_light_disk)
     {
         const float s = x / static_cast<float>(camera.width);
         const float t = y / static_cast<float>(camera.height);
@@ -220,28 +235,56 @@ namespace aten::sky {
                 camera_org - earth_center,
                 view_direction,
                 shadow_length,
-                sun_direction,
+                light_direction,
                 transmittance)
         };
 
-        radiance = sky_radiance_to_luminance * (radiance * sky_irradiance_ratio);
+        radiance = sky_radiance_to_luminance * (radiance * light_irradiance_ratio);
 
         // If the view ray intersects the Sun, add the Sun radiance.
         // ここで、視線方向のベクトルを v、太陽の方向ベクトルを s とします（どちらも単位ベクトル）.
         // この2つのベクトルのなす角を α とすると、視線が太陽の円盤内にある条件は α <= θ です.
         // これを、内積 cosα を使って判定する場合、条件は cosα >= cosθ となります。
-        // sun_size.y = cos(SunAngularRadius) なので、dot することで cosine で比較する.
+        // light_angular_radius の cos と dot することで cosine で比較する.
         // cosθ は θ が 0 に近いほど大きくなる.
         // つまり、view_direction と sun_direction が近いほど、値は大きくなる.
         // なので、>（大なり）だと太陽の視半径内といえる.
-        if (dot(view_direction, sun_direction) > sun_size) {
-            auto solar_radiance{ GetSolarRadiance(atmosphere, sun_irradiance) };
-            solar_radiance = sun_radiance_to_luminance * solar_radiance;
+        if (render_light_disk && dot(view_direction, light_direction) > aten::cos(light_angular_radius)) {
+            auto light_radiance{ GetLightDiskRadiance(light_angular_radius, light_irradiance) };
+            light_radiance = light_radiance_to_luminance * light_radiance;
 
-            radiance = radiance + transmittance * solar_radiance;
+            radiance = radiance + transmittance * light_radiance;
         }
 
         return radiance;
+    }
+
+    inline AT_DEVICE_API aten::vec3 RenderSky(
+        int32_t x, int32_t y,
+        const aten::CameraParameter& camera,
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const aten::sky::PreComputeTextures& texture,
+        const aten::vec3& sun_radiance_to_luminance,
+        const aten::vec3& sky_radiance_to_luminance,
+        const aten::vec3& sky_irradiance_ratio,
+        const aten::vec3& sun_irradiance,
+        const aten::vec3& sun_direction,
+        const aten::vec3& earth_center,
+        const float sun_angular_radius)
+    {
+        return RenderSkyByDirectionalLight(
+            x, y,
+            camera,
+            atmosphere,
+            texture,
+            sun_radiance_to_luminance,
+            sky_radiance_to_luminance,
+            sky_irradiance_ratio,
+            sun_irradiance,
+            sun_direction,
+            earth_center,
+            sun_angular_radius,
+            true);
     }
 
     /*

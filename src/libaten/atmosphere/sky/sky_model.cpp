@@ -589,7 +589,7 @@ namespace aten::sky {
             0.0F,
         };
 
-        const auto sun_size = aten::cos(SunAngularRadius);
+        const auto sun_angular_radius = SunAngularRadius;
         const aten::vec3 sky_irradiance_ratio{
             sun_light_irradiance_.r / precompute_reference_irradiance_.r,
             sun_light_irradiance_.g / precompute_reference_irradiance_.g,
@@ -616,7 +616,7 @@ namespace aten::sky {
                             sun_light_irradiance_,
                             sun_direction,
                             earth_center,
-                            sun_size)
+                            sun_angular_radius)
                     };
 
                     // TODO

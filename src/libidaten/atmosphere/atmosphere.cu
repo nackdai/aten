@@ -75,7 +75,7 @@ namespace idaten {
         const aten::vec3 sun_irradiance,
         const aten::vec3 sun_direction,
         const aten::vec3 earth_center,
-        const float sun_size,
+        const float sun_angular_radius,
         const aten::vec3 white_point)
     {
         const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -147,7 +147,7 @@ namespace idaten {
                     sun_irradiance,
                     sun_direction,
                     earth_center,
-                    sun_size)
+                    sun_angular_radius)
             };
 
             if (will_render_rainbow) {
@@ -228,7 +228,7 @@ namespace idaten {
             0.0F,
         };
 
-        const auto sun_size = aten::cos(aten::sky::SunAngularRadius);
+        const auto sun_angular_radius = aten::sky::SunAngularRadius;
 
         CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
         auto output_surface = m_glimg.bind();
@@ -250,7 +250,7 @@ namespace idaten {
             sky_model_.sun_light_irradiance_,
             sun_direction,
             earth_center,
-            sun_size,
+            sun_angular_radius,
             sky_model_.white_point_
         );
         checkCudaKernel(RenderAtmosphere);

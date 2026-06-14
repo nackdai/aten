@@ -409,7 +409,7 @@ namespace idaten::sky {
             const aten::vec3 sun_irradiance,
             const aten::vec3 sun_direction,
             const aten::vec3 earth_center,
-            const float sun_size,
+            const float sun_angular_radius,
             const aten::vec3 white_point)
         {
             const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -428,7 +428,7 @@ namespace idaten::sky {
                     sun_irradiance,
                     sun_direction,
                     earth_center,
-                    sun_size)
+                    sun_angular_radius)
             };
 
             // TODO
@@ -474,7 +474,7 @@ namespace idaten::sky {
             0.0F,
         };
 
-        const auto sun_size = aten::cos(aten::sky::SunAngularRadius);
+        const auto sun_angular_radius = aten::sky::SunAngularRadius;
 
         dim3 thread_per_block(16, 16);
         dim3 block_per_grid(
@@ -494,7 +494,7 @@ namespace idaten::sky {
             sun_light_irradiance_,
             sun_direction,
             earth_center,
-            sun_size,
+            sun_angular_radius,
             white_point_);
         checkCudaKernel(RenderSkyKernel);
 

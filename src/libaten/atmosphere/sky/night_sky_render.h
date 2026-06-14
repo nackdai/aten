@@ -141,6 +141,81 @@ namespace aten::sky {
         return direct_radiance + earthshine_radiance;
     }
 
+    inline AT_DEVICE_API aten::vec3 RenderNightSkyBackground(
+        int32_t x, int32_t y,
+        const aten::CameraParameter& camera,
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const aten::sky::PreComputeTextures& texture,
+        const aten::vec3& sky_radiance_to_luminance,
+        const aten::vec3& reference_irradiance,
+        const aten::vec3& sun_irradiance,
+        const aten::vec3& sun_direction,
+        const aten::vec3& moon_direction,
+        const aten::vec3& earth_center,
+        const float moon_distance,
+        aten::vec3& out_transmittance)
+    {
+        const float s = x / static_cast<float>(camera.width);
+        const float t = y / static_cast<float>(camera.height);
+
+        AT_NAME::CameraSampleResult camsample;
+        AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
+
+        const auto camera_org{ camsample.r.org };
+        const auto view_direction{ camsample.r.dir };
+
+        constexpr float shadow_length = 0.0F;
+
+        aten::vec3 radiance{
+            GetSkyRadiance(
+                atmosphere, texture,
+                camera_org - earth_center,
+                view_direction,
+                shadow_length,
+                moon_direction,
+                out_transmittance)
+        };
+
+        const auto moon_irradiance = ComputeMoonIrradiance(
+            sun_irradiance,
+            sun_direction,
+            moon_direction,
+            moon_distance);
+        const auto moon_irradiance_ratio = moon_irradiance / reference_irradiance;
+
+        radiance = sky_radiance_to_luminance * (radiance * moon_irradiance_ratio);
+
+        return radiance;
+    }
+
+    inline AT_DEVICE_API aten::vec3 RenderMoonDisk(
+        int32_t x, int32_t y,
+        const aten::CameraParameter& camera,
+        const aten::vec3& light_radiance_to_luminance,
+        const aten::vec3& sun_irradiance,
+        const aten::vec3& sun_direction,
+        const aten::vec3& moon_direction,
+        const float moon_distance,
+        const aten::vec3& transmittance)
+    {
+        const float s = x / static_cast<float>(camera.width);
+        const float t = y / static_cast<float>(camera.height);
+
+        AT_NAME::CameraSampleResult camsample;
+        AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
+
+        const auto view_direction{ camsample.r.dir };
+
+        const auto moon_radiance = GetMoonDiskRadiance(
+            view_direction,
+            sun_irradiance,
+            sun_direction,
+            moon_direction,
+            moon_distance);
+
+        return transmittance * (light_radiance_to_luminance * moon_radiance);
+    }
+
     inline AT_DEVICE_API aten::vec3 RenderNightSky(
         int32_t x, int32_t y,
         const aten::CameraParameter& camera,
@@ -155,45 +230,32 @@ namespace aten::sky {
         const aten::vec3& earth_center,
         const float moon_distance)
     {
-        const float s = x / static_cast<float>(camera.width);
-        const float t = y / static_cast<float>(camera.height);
-
-        AT_NAME::CameraSampleResult camsample;
-        AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
-
-        const auto camera_org{ camsample.r.org };
-        const auto view_direction{ camsample.r.dir };
-
-        constexpr float shadow_length = 0.0F;
-
+        // Keep the original one-call API as a wrapper. Star rendering can use the
+        // split API to compose: background -> stars -> moon disk.
         aten::vec3 transmittance{ 0.0F };
-        aten::vec3 radiance{
-            GetSkyRadiance(
-                atmosphere, texture,
-                camera_org - earth_center,
-                view_direction,
-                shadow_length,
-                moon_direction,
-                transmittance)
-        };
-
-        const auto moon_irradiance = ComputeMoonIrradiance(
+        auto radiance = RenderNightSkyBackground(
+            x, y,
+            camera,
+            atmosphere,
+            texture,
+            sky_radiance_to_luminance,
+            reference_irradiance,
             sun_irradiance,
             sun_direction,
             moon_direction,
-            moon_distance);
-        const auto moon_irradiance_ratio = moon_irradiance / reference_irradiance;
+            earth_center,
+            moon_distance,
+            transmittance);
 
-        radiance = sky_radiance_to_luminance * (radiance * moon_irradiance_ratio);
-
-        const auto moon_radiance = GetMoonDiskRadiance(
-            view_direction,
+        radiance = radiance + RenderMoonDisk(
+            x, y,
+            camera,
+            light_radiance_to_luminance,
             sun_irradiance,
             sun_direction,
             moon_direction,
-            moon_distance);
-
-        radiance = radiance + transmittance * (light_radiance_to_luminance * moon_radiance);
+            moon_distance,
+            transmittance);
 
         return radiance;
     }

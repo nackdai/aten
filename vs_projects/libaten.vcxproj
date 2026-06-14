@@ -152,6 +152,7 @@
     <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_precompute_textures.h" />
     <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_render.h" />
     <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_transmittance.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\night_sky_render.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_common.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_compute.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_constants.h" />

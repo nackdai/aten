@@ -224,5 +224,5 @@ namespace aten::sky {
 
     // Moonlight scattering is roughly 1e-6 of sunlight. Keep the global sky
     // exposure unchanged and boost only the standalone night-sky preview.
-    constexpr float NightSkyExposureScale = 1.0e1F;
+    constexpr float NightSkyExposureScale = 1.0e5F;
 }

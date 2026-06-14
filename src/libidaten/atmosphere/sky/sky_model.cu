@@ -4,6 +4,7 @@
 #include "atmosphere/sky/sky_coord_convert.h"
 #include "atmosphere/sky/sky_compute.h"
 #include "atmosphere/sky/sky_constants.h"
+#include "atmosphere/sky/night_sky_render.h"
 #include "atmosphere/sky/sky_precompute_textures.h"
 #include "atmosphere/sky/sky_render.h"
 #include "atmosphere/sky/unit_quantity.h"

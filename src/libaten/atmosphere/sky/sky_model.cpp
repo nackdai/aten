@@ -3,6 +3,7 @@
 #include "atmosphere/sky/sky_common.h"
 #include "atmosphere/sky/sky_compute.h"
 #include "atmosphere/sky/sky_coord_convert.h"
+#include "atmosphere/sky/night_sky_render.h"
 #include "atmosphere/sky/sky_render.h"
 
 #include "atmosphere/sky/unit_quantity.h"

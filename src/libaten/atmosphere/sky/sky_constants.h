@@ -58,6 +58,7 @@ namespace aten::sky {
     constexpr Length MoonRadius = 1737.4_km;
     constexpr Length MeanMoonDistance = 384400.0_km;
     constexpr float MoonMeanAlbedo = 0.072F;
+    constexpr float MoonHapkeDensity = 0.6F;
     constexpr float SolarIrradianceAtMoon = 1905.0F;
     constexpr float FullEarthshineIrradianceAtMoon = 0.19F;
 
@@ -223,5 +224,5 @@ namespace aten::sky {
 
     // Moonlight scattering is roughly 1e-6 of sunlight. Keep the global sky
     // exposure unchanged and boost only the standalone night-sky preview.
-    constexpr float NightSkyExposureScale = 1.0e5F;
+    constexpr float NightSkyExposureScale = 1.0e1F;
 }

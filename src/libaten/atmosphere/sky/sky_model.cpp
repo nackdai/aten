@@ -638,4 +638,62 @@ namespace aten::sky {
             }
         }
     }
+
+    // NOTE
+    // camera parameters has to be specified based on km unit.
+    void SkyModel::RenderNightSky(
+        const int32_t width,
+        const int32_t height,
+        const aten::CameraParameter& camera,
+        Film& dst)
+    {
+        // TODO: expose moon direction as a render parameter.
+        const auto moon_zenith_angle_radians = 1.3F;
+        const auto moon_azimuth_angle_radians = 2.9F;
+
+        const aten::vec3 moon_direction{
+            aten::sin(moon_zenith_angle_radians) * aten::cos(moon_azimuth_angle_radians),
+            aten::cos(moon_zenith_angle_radians),
+            aten::sin(moon_zenith_angle_radians) * aten::sin(moon_azimuth_angle_radians)
+        };
+        const auto sun_direction = -moon_direction;
+
+        const aten::vec3 earth_center{
+            0.0F,
+            -BottomRadius.as(MeterUnit::km),
+            0.0F,
+        };
+
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp parallel
+#endif
+        {
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for schedule(dynamic, 1)
+#endif
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+                    auto sky_luminance{
+                        aten::sky::RenderNightSky(
+                            x, y,
+                            camera,
+                            atmosphere_, textures_,
+                            sun_radiance_to_luminance_, sky_radiance_to_luminance_,
+                            precompute_reference_irradiance_,
+                            sun_light_irradiance_,
+                            sun_direction,
+                            moon_direction,
+                            earth_center,
+                            MeanMoonDistance.as(MeterUnit::km))
+                    };
+
+                    aten::vec3 color{
+                        aten::vec3(1.0F) - aten::exp(-sky_luminance / white_point_ * EXPOSURE * NightSkyExposureScale)
+                    };
+
+                    dst.put(x, y, color);
+                }
+            }
+        }
+    }
 }

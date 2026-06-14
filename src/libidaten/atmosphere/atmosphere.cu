@@ -261,5 +261,6 @@ namespace idaten {
     const std::map<int32_t, const char*> Atmosphere::TypeMap{
         { static_cast<int32_t>(Type::Sky), "Sky" },
         { static_cast<int32_t>(Type::Rainbow), "Rainbow" },
+        { static_cast<int32_t>(Type::NightSky), "NightSky" },
     };
 }

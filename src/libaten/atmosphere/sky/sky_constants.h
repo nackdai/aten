@@ -55,6 +55,12 @@ namespace aten::sky {
     // 半径なので、1/2 する.
     constexpr float SunAngularRadius = 0.00935F / 2.0F;
 
+    constexpr Length MoonRadius = 1737.4_km;
+    constexpr Length MeanMoonDistance = 384400.0_km;
+    constexpr float MoonMeanAlbedo = 0.072F;
+    constexpr float SolarIrradianceAtMoon = 1905.0F;
+    constexpr float FullEarthshineIrradianceAtMoon = 0.19F;
+
     // 論文内の 6. Implementation, results and discussion より:
 
     // We store T(r,µ) and E(r,µ) in 64x256 and 16x64 textures.
@@ -214,4 +220,8 @@ namespace aten::sky {
     };
 
     constexpr float EXPOSURE = 10.0F * 1e-5F;
+
+    // Moonlight scattering is roughly 1e-6 of sunlight. Keep the global sky
+    // exposure unchanged and boost only the standalone night-sky preview.
+    constexpr float NightSkyExposureScale = 1.0e5F;
 }

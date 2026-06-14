@@ -156,7 +156,15 @@ public:
         }
 
 #ifdef DEVICE_RENDERING
-        if (!is_sky_initialized_) {
+        const auto night_sky_type = static_cast<int32_t>(idaten::Atmosphere::Type::NightSky);
+        const bool is_night_sky_only = atmosphere_type_ == night_sky_type;
+
+        if (is_night_sky_only && !is_night_sky_initialized_) {
+            sky_model_.Init();
+            sky_model_.PreCompute();
+            is_night_sky_initialized_ = true;
+        }
+        else if (!is_night_sky_only && !is_atmosphere_initialized_) {
 #if 1
             atmosphere_.Init(camera_.param());
             atmosphere_.PreCompute();
@@ -167,17 +175,27 @@ public:
             rainbow_model_.Init(camera_.param());
             rainbow_model_.PreCompute();
 #endif
-            is_sky_initialized_ = true;
+            is_atmosphere_initialized_ = true;
         }
 
 #if 1
-        atmosphere_.Render(
-            visualizer_->GetGLTextureHandle(),
-            WIDTH, HEIGHT,
-            atmosphere_type_,
-            sun_zenith_angle_radians_,
-            sun_azimuth_angle_radians_,
-            camera_.param());
+        if (is_night_sky_only) {
+            sky_model_.RenderNightSky(
+                visualizer_->GetGLTextureHandle(),
+                WIDTH, HEIGHT,
+                sun_zenith_angle_radians_,
+                sun_azimuth_angle_radians_,
+                camera_.param());
+        }
+        else {
+            atmosphere_.Render(
+                visualizer_->GetGLTextureHandle(),
+                WIDTH, HEIGHT,
+                atmosphere_type_,
+                sun_zenith_angle_radians_,
+                sun_azimuth_angle_radians_,
+                camera_.param());
+        }
 #elif SKY_RENDERING
         sky_model_.Render(
             visualizer_->GetGLTextureHandle(),
@@ -355,11 +373,31 @@ private:
 
     void AtmosphereTypeGUI()
     {
+        if (ImGui::Button("Day Sky")) {
+            atmosphere_type_ =
+                static_cast<int32_t>(idaten::Atmosphere::Type::Sky)
+                | static_cast<int32_t>(idaten::Atmosphere::Type::Rainbow);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Night Sky")) {
+            atmosphere_type_ = static_cast<int32_t>(idaten::Atmosphere::Type::NightSky);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Clear")) {
+            atmosphere_type_ = 0;
+        }
+
         for (const auto& type_pair : idaten::Atmosphere::TypeMap) {
             bool is_selected = (atmosphere_type_ & type_pair.first) > 0;
             if (ImGui::Checkbox(type_pair.second, &is_selected)) {
                 if (is_selected) {
-                    atmosphere_type_ |= type_pair.first;
+                    if (type_pair.first == static_cast<int32_t>(idaten::Atmosphere::Type::NightSky)) {
+                        atmosphere_type_ = type_pair.first;
+                    }
+                    else {
+                        atmosphere_type_ &= ~static_cast<int32_t>(idaten::Atmosphere::Type::NightSky);
+                        atmosphere_type_ |= type_pair.first;
+                    }
                 }
                 else {
                     atmosphere_type_ &= ~type_pair.first;
@@ -384,7 +422,8 @@ private:
 
     idaten::Atmosphere atmosphere_;
 
-    bool is_sky_initialized_{ false };
+    bool is_atmosphere_initialized_{ false };
+    bool is_night_sky_initialized_{ false };
 #else
     aten::sky::SkyModel sky_model_;
     aten::rainbow::RainbowModel rainbow_model_;
@@ -394,8 +433,9 @@ private:
 #endif
 
     int32_t atmosphere_type_{
-        static_cast<int32_t>(idaten::Atmosphere::Type::Sky)
-        | static_cast<int32_t>(idaten::Atmosphere::Type::Rainbow)
+        // static_cast<int32_t>(idaten::Atmosphere::Type::Sky)
+        // | static_cast<int32_t>(idaten::Atmosphere::Type::Rainbow)
+        static_cast<int32_t>(idaten::Atmosphere::Type::NightSky)
     };
 
     float sun_zenith_angle_radians_{ 1.3F };

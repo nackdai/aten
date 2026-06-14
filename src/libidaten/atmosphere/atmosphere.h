@@ -19,6 +19,7 @@ namespace idaten {
         enum class Type {
             Sky = 1 << 0,
             Rainbow = 1 << 1,
+            NightSky = 1 << 2,
         };
 
         static const std::map<int32_t, const char*> TypeMap;

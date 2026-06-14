@@ -27,6 +27,14 @@ namespace idaten::sky {
             const float sun_azimuth_angle_radians,
             const aten::CameraParameter& camera);
 
+        void RenderNightSky(
+            GLuint gltex,
+            const int32_t width,
+            const int32_t height,
+            const float moon_zenith_angle_radians,
+            const float moon_azimuth_angle_radians,
+            const aten::CameraParameter& camera);
+
     private:
         struct PreComputeTexturesHost {
             // Permanent.

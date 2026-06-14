@@ -43,6 +43,12 @@ namespace aten::sky {
             const aten::CameraParameter& camera,
             Film& dst);
 
+        void RenderNightSky(
+            const int32_t width,
+            const int32_t height,
+            const aten::CameraParameter& camera,
+            Film& dst);
+
     protected:
         static void InitParameters(SkyModel& sky_model);
 

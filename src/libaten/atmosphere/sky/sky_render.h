@@ -54,6 +54,51 @@ namespace aten::sky {
         return GetLightDiskRadiance(atmosphere, solar_irradiance);
     }
 
+    // Phase term used in the paper's moon irradiance equation:
+    //   Em(phi, d) = 2 C rm^2 / (3 d^2) * { Eem + Esm * phase(phi) }
+    inline AT_HOST_DEVICE_API float ComputeMoonPhaseIrradianceFactor(const float phase_angle)
+    {
+        constexpr float eps = 1.0e-4F;
+        const auto phi = aten::clamp(phase_angle, eps, AT_MATH_PI - eps);
+        return 1.0F - aten::sin(phi * 0.5F) * aten::tan(phi * 0.5F) * aten::log(1.0F / aten::tan(phi * 0.25F));
+    }
+
+    // Paper Eq. (1): Earthshine irradiance at the Moon, Eem.
+    inline AT_HOST_DEVICE_API float ComputeEarthshineIrradianceAtMoon(const float phase_angle)
+    {
+        constexpr float eps = 1.0e-4F;
+        const auto earth_phase = aten::clamp(AT_MATH_PI - phase_angle, eps, AT_MATH_PI - eps);
+        const auto phase_factor =
+            1.0F - aten::sin(earth_phase * 0.5F) * aten::tan(earth_phase * 0.5F) * aten::log(1.0F / aten::tan(earth_phase * 0.25F));
+        return FullEarthshineIrradianceAtMoon * 0.5F * phase_factor;
+    }
+
+    // Paper Eq. (2): Moon irradiance at the observer, Em(phi, d).
+    inline AT_HOST_DEVICE_API float ComputeMoonIrradiance(
+        const float phase_angle,
+        const float moon_distance)
+    {
+        const auto moon_phase_factor = ComputeMoonPhaseIrradianceFactor(phase_angle);
+        const auto earthshine_irradiance = ComputeEarthshineIrradianceAtMoon(phase_angle);
+        const auto moon_radius = MoonRadius.as(MeterUnit::km);
+
+        return 2.0F * MoonMeanAlbedo * moon_radius * moon_radius / (3.0F * moon_distance * moon_distance)
+            * (earthshine_irradiance + SolarIrradianceAtMoon * moon_phase_factor);
+    }
+
+    inline AT_HOST_DEVICE_API aten::vec3 ComputeMoonIrradiance(
+        const aten::vec3& sun_irradiance,
+        const aten::vec3& sun_direction,
+        const aten::vec3& moon_direction,
+        const float moon_distance)
+    {
+        const auto cos_phase_angle = aten::clamp(dot(-moon_direction, sun_direction), -1.0F, 1.0F);
+        const auto phase_angle = aten::acos(cos_phase_angle);
+        const auto em = ComputeMoonIrradiance(phase_angle, moon_distance);
+
+        return sun_irradiance * (em / SolarIrradianceAtMoon);
+    }
+
     namespace {
         inline AT_DEVICE_API aten::tuple<aten::vec3, aten::vec3> GetCombinedScattering(
             const aten::sky::AtmosphereParameters& atmosphere,
@@ -257,6 +302,42 @@ namespace aten::sky {
         }
 
         return radiance;
+    }
+
+    inline AT_DEVICE_API aten::vec3 RenderNightSky(
+        int32_t x, int32_t y,
+        const aten::CameraParameter& camera,
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const aten::sky::PreComputeTextures& texture,
+        const aten::vec3& light_radiance_to_luminance,
+        const aten::vec3& sky_radiance_to_luminance,
+        const aten::vec3& reference_irradiance,
+        const aten::vec3& sun_irradiance,
+        const aten::vec3& sun_direction,
+        const aten::vec3& moon_direction,
+        const aten::vec3& earth_center,
+        const float moon_distance)
+    {
+        const auto moon_irradiance = ComputeMoonIrradiance(
+            sun_irradiance,
+            sun_direction,
+            moon_direction,
+            moon_distance);
+        const auto moon_irradiance_ratio = moon_irradiance / reference_irradiance;
+
+        return RenderSkyByDirectionalLight(
+            x, y,
+            camera,
+            atmosphere,
+            texture,
+            light_radiance_to_luminance,
+            sky_radiance_to_luminance,
+            moon_irradiance_ratio,
+            moon_irradiance,
+            moon_direction,
+            earth_center,
+            SunAngularRadius,
+            false);
     }
 
     inline AT_DEVICE_API aten::vec3 RenderSky(

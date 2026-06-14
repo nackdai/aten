@@ -403,13 +403,14 @@ namespace idaten::sky {
             const aten::CameraParameter camera,
             const aten::sky::AtmosphereParameters atmosphere,
             const aten::sky::PreComputeTextures textures,
-            const aten::vec3 sun_radiance_to_luminance,
+            const aten::vec3 light_radiance_to_luminance,
             const aten::vec3 sky_radiance_to_luminance,
-            const aten::vec3 sky_irradiance_ratio,
-            const aten::vec3 sun_irradiance,
-            const aten::vec3 sun_direction,
+            const aten::vec3 light_irradiance_ratio,
+            const aten::vec3 light_irradiance,
+            const aten::vec3 light_direction,
             const aten::vec3 earth_center,
-            const float sun_angular_radius,
+            const float light_angular_radius,
+            const bool render_light_disk,
             const aten::vec3 white_point)
         {
             const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -419,16 +420,17 @@ namespace idaten::sky {
             }
 
             auto sky_luminance{
-                aten::sky::RenderSky(
+                aten::sky::RenderSkyByDirectionalLight(
                     x, y,
                     camera,
                     atmosphere, textures,
-                    sun_radiance_to_luminance, sky_radiance_to_luminance,
-                    sky_irradiance_ratio,
-                    sun_irradiance,
-                    sun_direction,
+                    light_radiance_to_luminance, sky_radiance_to_luminance,
+                    light_irradiance_ratio,
+                    light_irradiance,
+                    light_direction,
                     earth_center,
-                    sun_angular_radius)
+                    light_angular_radius,
+                    render_light_disk)
             };
 
             // TODO
@@ -438,6 +440,53 @@ namespace idaten::sky {
             // exposure は全体の明るさを調整するための係数.
             aten::vec3 color{
                 aten::vec3(1.0F) - aten::exp(-sky_luminance / white_point * aten::sky::EXPOSURE)
+            };
+
+            surf2Dwrite(
+                make_float4(color.x, color.y, color.z, 1.0F),
+                dst,
+                x * sizeof(float4), y,
+                cudaBoundaryModeTrap);
+        }
+
+        __global__ void RenderNightSkyKernel(
+            cudaSurfaceObject_t dst,
+            int32_t width, int32_t height,
+            const aten::CameraParameter camera,
+            const aten::sky::AtmosphereParameters atmosphere,
+            const aten::sky::PreComputeTextures textures,
+            const aten::vec3 sun_radiance_to_luminance,
+            const aten::vec3 sky_radiance_to_luminance,
+            const aten::vec3 reference_irradiance,
+            const aten::vec3 sun_irradiance,
+            const aten::vec3 sun_direction,
+            const aten::vec3 moon_direction,
+            const aten::vec3 earth_center,
+            const float moon_distance,
+            const aten::vec3 white_point)
+        {
+            const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
+            const int32_t y = blockIdx.y * blockDim.y + threadIdx.y;
+            if (x >= width || y >= height) {
+                return;
+            }
+
+            const auto sky_luminance{
+                aten::sky::RenderNightSky(
+                    x, y,
+                    camera,
+                    atmosphere, textures,
+                    sun_radiance_to_luminance, sky_radiance_to_luminance,
+                    reference_irradiance,
+                    sun_irradiance,
+                    sun_direction,
+                    moon_direction,
+                    earth_center,
+                    moon_distance)
+            };
+
+            const aten::vec3 color{
+                aten::vec3(1.0F) - aten::exp(-sky_luminance / white_point * aten::sky::EXPOSURE * aten::sky::NightSkyExposureScale)
             };
 
             surf2Dwrite(
@@ -495,8 +544,60 @@ namespace idaten::sky {
             sun_direction,
             earth_center,
             sun_angular_radius,
+            true,
             white_point_);
         checkCudaKernel(RenderSkyKernel);
+
+        m_glimg.unbind();
+    }
+
+    void SkyModel::RenderNightSky(
+        GLuint gltex,
+        const int32_t width,
+        const int32_t height,
+        const float moon_zenith_angle_radians,
+        const float moon_azimuth_angle_radians,
+        const aten::CameraParameter& camera)
+    {
+        if (!m_glimg.IsValid()) {
+            m_glimg.init(gltex, CudaGLRscRegisterType::ReadWrite);
+        }
+
+        const aten::vec3 moon_direction{
+            aten::sin(moon_zenith_angle_radians) * aten::cos(moon_azimuth_angle_radians),
+            aten::cos(moon_zenith_angle_radians),
+            aten::sin(moon_zenith_angle_radians) * aten::sin(moon_azimuth_angle_radians)
+        };
+        const auto sun_direction = -moon_direction;
+
+        const aten::vec3 earth_center{
+            0.0F,
+            -aten::sky::BottomRadius.as(aten::MeterUnit::km),
+            0.0F,
+        };
+
+        dim3 thread_per_block(16, 16);
+        dim3 block_per_grid(
+            (width + thread_per_block.x - 1) / thread_per_block.x,
+            (height + thread_per_block.y - 1) / thread_per_block.y);
+
+        CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
+        auto output_surface = m_glimg.bind();
+
+        RenderNightSkyKernel << <block_per_grid, thread_per_block >> > (
+            output_surface,
+            width, height,
+            camera,
+            atmosphere_, textures_,
+            sun_radiance_to_luminance_, sky_radiance_to_luminance_,
+            precompute_reference_irradiance_,
+            sun_light_irradiance_,
+            sun_direction,
+            moon_direction,
+            earth_center,
+            aten::sky::MeanMoonDistance.as(aten::MeterUnit::km),
+            white_point_);
+        checkCudaKernel(RenderNightSkyKernel);
 
         m_glimg.unbind();
     }

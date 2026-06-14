@@ -163,6 +163,8 @@
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_render.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\sky_types.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\star_catalog.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\star_render.h" />
+    <ClInclude Include="..\src\libaten\atmosphere\sky\star_types.h" />
     <ClInclude Include="..\src\libaten\atmosphere\sky\unit_quantity.h" />
     <ClInclude Include="..\src\libaten\camera\camera.h" />
     <ClInclude Include="..\src\libaten\camera\CameraOperator.h" />

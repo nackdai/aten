@@ -94,7 +94,8 @@ namespace aten::sky {
         float Planck(const float wavelength_nm, const float temperature)
         {
             // Spectral radiance of a blackbody. The absolute scale is normalized
-            // away in ComputeBlackbodyColor; here we only need the spectral shape.
+            // away in ComputeBlackbodyLuminanceNormalizedColor; here we only need
+            // the spectral shape.
             //
             // This is not a night-sky paper equation. After the paper estimates
             // Teff from B-V, we use Planck's law to turn that temperature into a
@@ -113,7 +114,7 @@ namespace aten::sky {
             return static_cast<float>(numerator / denominator);
         }
 
-        aten::vec3 ComputeBlackbodyColor(const float temperature)
+        aten::vec3 ComputeBlackbodyLuminanceNormalizedColor(const float temperature)
         {
             std::vector<float> wavelengths;
             std::vector<float> spectrum;
@@ -130,22 +131,36 @@ namespace aten::sky {
             }
 
             if (max_value > 0.0F) {
-                // Normalize before conversion so star brightness stays controlled
-                // by Vmag-derived irradiance, not by blackbody absolute radiance.
+                // Normalize the spectral shape before RGB conversion. This does
+                // not define star brightness; it only keeps the Planck values in
+                // a stable numeric range. Brightness is set by Vmag-derived
+                // irradiance below.
                 for (auto& value : spectrum) {
                     value /= max_value;
                 }
             }
 
             auto color = ConvertSpectrumToLinearSrgb(wavelengths, spectrum);
-            const auto max_component = aten::max(color.x, aten::max(color.y, color.z));
-            if (max_component > 0.0F) {
-                color = color / max_component;
-            }
 
             color.x = aten::max(color.x, 0.0F);
             color.y = aten::max(color.y, 0.0F);
             color.z = aten::max(color.z, 0.0F);
+
+            // Vmag gives a scalar brightness. B-V/Teff gives the spectral shape.
+            // To multiply them, turn the blackbody RGB into a chromatic weight
+            // whose linear-sRGB luminance is 1. This is a practical proxy for
+            // V-band normalization until an explicit Johnson V response curve is
+            // introduced. After this normalization,
+            // star.rgb_irradiance_weight * star.irradiance preserves the
+            // Vmag-derived brightness while distributing it across RGB according
+            // to the estimated stellar color.
+            const auto luminance =
+                0.2126F * color.x
+                + 0.7152F * color.y
+                + 0.0722F * color.z;
+            if (luminance > 0.0F) {
+                color = color / luminance;
+            }
 
             return color;
         }
@@ -337,7 +352,7 @@ namespace aten::sky {
             star.bv_color = bv_color;
             star.proper_motion_ra = proper_motion_ra;
             star.proper_motion_dec = proper_motion_dec;
-            star.color = ComputeBlackbodyColor(ComputeEffectiveTemperatureFromBv(bv_color));
+            star.rgb_irradiance_weight = ComputeBlackbodyLuminanceNormalizedColor(ComputeEffectiveTemperatureFromBv(bv_color));
 
             return true;
         }
@@ -387,7 +402,7 @@ namespace aten::sky {
             // arcsec/year representation used by the ASCII loader.
             star.proper_motion_ra = proper_motion_ra * ArcsecPerRadian;
             star.proper_motion_dec = proper_motion_dec * ArcsecPerRadian;
-            star.color = ComputeBlackbodyColor(ComputeEffectiveTemperatureFromBv(bv_color));
+            star.rgb_irradiance_weight = ComputeBlackbodyLuminanceNormalizedColor(ComputeEffectiveTemperatureFromBv(bv_color));
 
             return star.hr > 0;
         }

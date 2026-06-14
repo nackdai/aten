@@ -1,3 +1,5 @@
+#include "atmosphere/sky/star_render.h"
+
 #if 0
 #include "atmosphere/sky/sky_common.h"
 #include "atmosphere/sky/sky_compute.h"

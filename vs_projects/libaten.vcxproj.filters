@@ -619,6 +619,12 @@
     <ClInclude Include="..\src\libaten\atmosphere\sky\star_catalog.h">
       <Filter>atmosphere\sky</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\star_render.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\atmosphere\sky\star_types.h">
+      <Filter>atmosphere\sky</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\libaten\atmosphere\rainbow\rainbow_model.h">
       <Filter>atmosphere\rainbow</Filter>
     </ClInclude>

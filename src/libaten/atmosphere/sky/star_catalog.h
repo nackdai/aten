@@ -14,16 +14,16 @@ namespace aten::sky {
         // horizon frame; that should be done later from observation time/location.
         aten::vec3 direction_j2000{ 0.0F, 1.0F, 0.0F };
 
+        // Irradiance derived from visual_magnitude using the night-sky paper's
+        // star magnitude equation.
+        float irradiance{ 0.0F };
+
         // Linear RGB chromaticity-like color normalized to max component 1.
         // Brightness is carried separately by irradiance.
         aten::vec3 color{ 1.0F };
 
         // V-band apparent magnitude. Smaller values are brighter.
         float visual_magnitude{ 0.0F };
-
-        // Irradiance derived from visual_magnitude using the night-sky paper's
-        // star magnitude equation.
-        float irradiance{ 0.0F };
 
         // B-V color index. ASCII BSC provides this directly; binary BSC5 does not,
         // so the binary loader estimates it from the spectral-type shorthand.

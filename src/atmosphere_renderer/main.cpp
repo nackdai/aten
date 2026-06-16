@@ -32,6 +32,7 @@ constexpr int32_t HEIGHT = 256;
 #define TAKE_SC_EVERY_FRAME (false)
 
 constexpr const char* TITLE = "Atmosphere renderer";
+constexpr const char* BrightStarCatalogPath = "../../asset/atmosphere/yale_bright_star_catalog.txt";
 
 class AtmosphereRendererApp {
 public:
@@ -162,6 +163,9 @@ public:
         if (is_night_sky_only && !is_night_sky_initialized_) {
             sky_model_.Init();
             sky_model_.PreCompute();
+            if (!sky_model_.SetStars(BrightStarCatalogPath)) {
+                AT_PRINTF("Failed to load Bright Star Catalog [%s]\n", BrightStarCatalogPath);
+            }
             is_night_sky_initialized_ = true;
         }
         else if (!is_night_sky_only && !is_atmosphere_initialized_) {

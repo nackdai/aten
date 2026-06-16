@@ -222,6 +222,29 @@ namespace aten::sky {
     }
 
     /**
+     * @brief Approximate the solid angle covered by a circular star render splat.
+     *
+     * Catalog magnitude gives irradiance at the observer, i.e. flux per receiver
+     * area integrated over the apparent source. To add it to the sky HDR buffer
+     * together with atmospheric radiance/luminance, we distribute that irradiance
+     * over the finite apparent disk used for rendering:
+     *
+     *   radiance ~= irradiance / solid_angle.
+     *
+     * The footprint is an artistic/debug render disk rather than a physical
+     * stellar disk, but this conversion keeps the result tied to the selected
+     * angular footprint instead of requiring a large arbitrary brightness scale.
+     *
+     * @param angular_radius Apparent angular radius in radians.
+     * @return Solid angle in steradians.
+     */
+    inline AT_HOST_DEVICE_API float ComputeStarSplatSolidAngle(const float angular_radius)
+    {
+        const auto radius = aten::max(angular_radius, 1.0e-6F);
+        return 2.0F * AT_MATH_PI * (1.0F - aten::cos(radius));
+    }
+
+    /**
      * @brief Project an infinite-distance star direction to pixel coordinates.
      *
      * Uses the same pinhole camera convention as PinholeCamera::RevertRayToPixelPos.
@@ -327,7 +350,9 @@ namespace aten::sky {
 
         splat.radius = ComputeStarAngularRadiusInPixels(camera, params.angular_radius);
         splat.fade_width = ComputeStarAngularRadiusInPixels(camera, params.angular_fade_width);
-        const auto star_radiance = ComputeStarRadiance(star, params.radiance_scale);
+        const auto star_radiance =
+            ComputeStarRadiance(star, params.radiance_scale)
+            / ComputeStarSplatSolidAngle(params.angular_radius);
         splat.radiance = transmittance * star_radiance;
         splat.hr = star.hr;
 

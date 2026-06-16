@@ -777,6 +777,7 @@ namespace idaten::sky {
 
         stars_.writeFromHostToDeviceByNum(stars.data(), stars.size());
         checkCudaErrors(cudaDeviceSynchronize());
+        AT_PRINTF("Loaded Bright Star Catalog [%s]: %zu stars\n", catalog_path.c_str(), stars.size());
         return true;
     }
 

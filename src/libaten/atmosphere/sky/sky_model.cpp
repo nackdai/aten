@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "atmosphere/sky/sky_model.h"
 
 #include "atmosphere/sky/sky_common.h"
@@ -5,6 +7,7 @@
 #include "atmosphere/sky/sky_coord_convert.h"
 #include "atmosphere/sky/night_sky_render.h"
 #include "atmosphere/sky/sky_render.h"
+#include "atmosphere/sky/star_render.h"
 
 #include "atmosphere/sky/unit_quantity.h"
 
@@ -25,6 +28,7 @@ namespace aten::sky {
 
             dst.constant_term = src.constant_term;
         }
+
     }
 
     void SkyModel::Init()
@@ -640,9 +644,105 @@ namespace aten::sky {
         }
     }
 
+    namespace {
+        void AddHdrAtomic(std::vector<aten::vec3>& hdr, const size_t idx, const aten::vec3& value)
+        {
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+            // OpenMP atomic applies only to the immediately following update
+            // statement, not to a braced block. Use one atomic per RGB channel
+            // instead of a single critical section to keep contention smaller.
+#pragma omp atomic
+            hdr[idx].x += value.x;
+#pragma omp atomic
+            hdr[idx].y += value.y;
+#pragma omp atomic
+            hdr[idx].z += value.z;
+#else
+            hdr[idx] += value;
+#endif
+        }
+
+        void RenderStarsToHdr(
+            const std::vector<aten::sky::Star>& stars,
+            const int32_t width,
+            const int32_t height,
+            const aten::CameraParameter& camera,
+            const aten::sky::AtmosphereParameters& atmosphere,
+            const aten::sky::PreComputeTextures& textures,
+            const aten::vec3& earth_center,
+            const bool cull_moon_disk,
+            const aten::vec3& moon_direction,
+            const float moon_distance,
+            std::vector<aten::vec3>& hdr)
+        {
+            if (stars.empty()) {
+                return;
+            }
+
+            const auto camera_from_earth_center = camera.origin - earth_center;
+            aten::sky::StarRenderParameters params;
+
+            // This initial integration treats J2000 catalog directions as world
+            // directions. A later observation model should transform J2000 into
+            // local horizon/camera space from time, latitude, and longitude.
+            const auto star_count = static_cast<int32_t>(stars.size());
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp parallel for schedule(dynamic, 16)
+#endif
+            for (int32_t star_idx = 0; star_idx < star_count; ++star_idx) {
+                const auto& star = stars[star_idx];
+                const auto star_direction = normalize(star.direction_j2000);
+                const auto transmittance = ComputeStarTransmittance(
+                    atmosphere,
+                    textures,
+                    camera_from_earth_center,
+                    star_direction);
+
+                aten::sky::StarScreenSplat splat;
+                if (!aten::sky::BuildStarScreenSplat(
+                    star,
+                    star_direction,
+                    transmittance,
+                    camera,
+                    params,
+                    splat)) {
+                    continue;
+                }
+
+                aten::sky::StarScreenSplatBounds bounds;
+                if (!aten::sky::ComputeStarScreenSplatBounds(splat, width, height, bounds)) {
+                    continue;
+                }
+
+                for (int32_t y = bounds.min_y; y <= bounds.max_y; ++y) {
+                    for (int32_t x = bounds.min_x; x <= bounds.max_x; ++x) {
+                        if (cull_moon_disk && PixelIntersectsMoonDisk(x, y, camera, moon_direction, moon_distance)) {
+                            continue;
+                        }
+
+                        const auto star_luminance = aten::sky::EvaluateStarSplatRadianceAtPixel(splat, x, y);
+
+                        AddHdrAtomic(hdr, static_cast<size_t>(y) * width + x, star_luminance);
+                    }
+                }
+            }
+        }
+    }
+
     // NOTE
     // camera parameters has to be specified based on km unit.
     void SkyModel::RenderNightSky(
+        const int32_t width,
+        const int32_t height,
+        const aten::CameraParameter& camera,
+        Film& dst)
+    {
+        static const std::vector<aten::sky::Star> empty_stars;
+        RenderNightSky(empty_stars, width, height, camera, dst);
+    }
+
+    void SkyModel::RenderNightSky(
+        const std::vector<aten::sky::Star>& stars,
         const int32_t width,
         const int32_t height,
         const aten::CameraParameter& camera,
@@ -665,6 +765,11 @@ namespace aten::sky {
             0.0F,
         };
 
+        const auto pixel_count = static_cast<size_t>(width) * height;
+        if (hdr_buffer_.size() != pixel_count) {
+            hdr_buffer_.resize(pixel_count);
+        }
+
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp parallel
 #endif
@@ -674,22 +779,129 @@ namespace aten::sky {
 #endif
             for (int32_t y = 0; y < height; y++) {
                 for (int32_t x = 0; x < width; x++) {
-                    auto sky_luminance{
-                        aten::sky::RenderNightSky(
+                    const auto idx = static_cast<size_t>(y) * width + x;
+                    aten::vec3 view_transmittance;
+                    hdr_buffer_[idx] = aten::sky::RenderNightSkyBackground(
                             x, y,
                             camera,
                             atmosphere_, textures_,
-                            sun_radiance_to_luminance_, sky_radiance_to_luminance_,
+                            sky_radiance_to_luminance_,
                             precompute_reference_irradiance_,
                             sun_light_irradiance_,
                             sun_direction,
                             moon_direction,
                             earth_center,
-                            MeanMoonDistance.as(MeterUnit::km))
+                            MeanMoonDistance.as(MeterUnit::km),
+                            view_transmittance);
+                }
+            }
+        }
+
+        // Stars are physically behind the Moon, so they are inserted after the
+        // moonlit sky background and before the Moon disk is composited.
+        RenderStarsToHdr(
+            stars,
+            width,
+            height,
+            camera,
+            atmosphere_,
+            textures_,
+            earth_center,
+            true,
+            moon_direction,
+            MeanMoonDistance.as(MeterUnit::km),
+            hdr_buffer_);
+
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp parallel
+#endif
+        {
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for schedule(dynamic, 1)
+#endif
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+                    const auto idx = static_cast<size_t>(y) * width + x;
+                    const auto s = static_cast<float>(x) / static_cast<float>(camera.width);
+                    const auto t = static_cast<float>(y) / static_cast<float>(camera.height);
+
+                    AT_NAME::CameraSampleResult camsample;
+                    AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
+                    const auto view_transmittance = aten::sky::ComputeDirectionalTransmittanceToTopAtmosphere(
+                        atmosphere_,
+                        textures_,
+                        camsample.r.org - earth_center,
+                        camsample.r.dir);
+
+                    // RenderStarsToHdr skips pixels covered by the Moon disk,
+                    // so adding the Moon here does not draw stars in front of
+                    // the Moon. Keep the moonlit sky background already stored
+                    // in hdr_buffer_, then add the transmitted Moon disk radiance.
+                    hdr_buffer_[idx] += aten::sky::RenderMoonDisk(
+                        x, y,
+                        camera,
+                        sun_radiance_to_luminance_,
+                        sun_light_irradiance_,
+                        sun_direction,
+                        moon_direction,
+                        MeanMoonDistance.as(MeterUnit::km),
+                        view_transmittance);
+
+                    const aten::vec3 color{
+                        aten::vec3(1.0F) - aten::exp(-hdr_buffer_[idx] / white_point_ * EXPOSURE * NightSkyExposureScale)
                     };
 
-                    aten::vec3 color{
-                        aten::vec3(1.0F) - aten::exp(-sky_luminance / white_point_ * EXPOSURE * NightSkyExposureScale)
+                    dst.put(x, y, color);
+                }
+            }
+        }
+    }
+
+    void SkyModel::RenderStars(
+        const std::vector<aten::sky::Star>& stars,
+        const int32_t width,
+        const int32_t height,
+        const aten::CameraParameter& camera,
+        Film& dst)
+    {
+        const aten::vec3 earth_center{
+            0.0F,
+            -BottomRadius.as(MeterUnit::km),
+            0.0F,
+        };
+
+        const auto pixel_count = static_cast<size_t>(width) * height;
+        if (hdr_buffer_.size() != pixel_count) {
+            hdr_buffer_.resize(pixel_count);
+        }
+        std::fill(hdr_buffer_.begin(), hdr_buffer_.end(), aten::vec3(0.0F));
+
+        const aten::vec3 unused_moon_direction{ 0.0F, 1.0F, 0.0F };
+        RenderStarsToHdr(
+            stars,
+            width,
+            height,
+            camera,
+            atmosphere_,
+            textures_,
+            earth_center,
+            false,
+            unused_moon_direction,
+            MeanMoonDistance.as(MeterUnit::km),
+            hdr_buffer_);
+
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp parallel
+#endif
+        {
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
+#pragma omp for schedule(dynamic, 1)
+#endif
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+                    const auto idx = static_cast<size_t>(y) * width + x;
+                    const aten::vec3 color{
+                        aten::vec3(1.0F) - aten::exp(-hdr_buffer_[idx] / white_point_ * EXPOSURE * NightSkyExposureScale)
                     };
 
                     dst.put(x, y, color);

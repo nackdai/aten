@@ -1,6 +1,9 @@
 #pragma once
 
+#include <vector>
+
 #include "atmosphere/sky/sky_params.h"
+#include "atmosphere/sky/star_types.h"
 #include "atmosphere/sky/sky_types.h"
 
 #include "camera/camera.h"
@@ -49,6 +52,20 @@ namespace aten::sky {
             const aten::CameraParameter& camera,
             Film& dst);
 
+        void RenderNightSky(
+            const std::vector<aten::sky::Star>& stars,
+            const int32_t width,
+            const int32_t height,
+            const aten::CameraParameter& camera,
+            Film& dst);
+
+        void RenderStars(
+            const std::vector<aten::sky::Star>& stars,
+            const int32_t width,
+            const int32_t height,
+            const aten::CameraParameter& camera,
+            Film& dst);
+
     protected:
         static void InitParameters(SkyModel& sky_model);
 
@@ -65,5 +82,6 @@ namespace aten::sky {
 
     private:
         aten::sky::PreComputeTextureManager<aten::texture, aten::texture3d> textures_;
+        std::vector<aten::vec3> hdr_buffer_;
     };
 }

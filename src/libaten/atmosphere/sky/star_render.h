@@ -1,5 +1,7 @@
 #pragma once
 
+#include "atmosphere/sky/sky_compute.h"
+#include "atmosphere/sky/sky_types.h"
 #include "atmosphere/sky/star_types.h"
 
 #include "camera/camera.h"
@@ -62,6 +64,20 @@ namespace aten::sky {
     };
 
     /**
+     * @brief Integer pixel bounds covered by one star splat.
+     *
+     * The bounds are inclusive and already clamped to the render target. CPU
+     * star splatting and a later CUDA implementation can use this to visit only
+     * the pixels touched by a star.
+     */
+    struct StarScreenSplatBounds {
+        int32_t min_x{ 0 };
+        int32_t max_x{ -1 };
+        int32_t min_y{ 0 };
+        int32_t max_y{ -1 };
+    };
+
+    /**
      * @brief Return whether a local-frame star direction is above the horizon.
      *
      * @param star_direction Star direction in the local horizon frame where +Y is zenith.
@@ -71,6 +87,74 @@ namespace aten::sky {
     {
         // Local sky convention used in the night-sky notes: +Y is local zenith.
         return star_direction.y > 0.0F;
+    }
+
+    /**
+     * @brief Compute transmittance from the camera to the top atmosphere boundary.
+     *
+     * The caller provides a normalized direction from the observer toward an
+     * effectively infinitely distant source, such as a star. This is kept as a
+     * shared helper because CPU star splatting and a later CUDA star kernel need
+     * the same atmosphere lookup.
+     *
+     * @param atmosphere Atmosphere parameters in the precomputed sky model.
+     * @param textures Precomputed atmosphere textures.
+     * @param camera_from_earth_center Camera position relative to the earth center.
+     * @param direction Normalized ray direction from the camera.
+     * @return RGB transmittance along the ray, or zero if the ray intersects ground.
+     */
+    inline AT_DEVICE_API aten::vec3 ComputeDirectionalTransmittanceToTopAtmosphere(
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const aten::sky::PreComputeTextures& textures,
+        const aten::vec3& camera_from_earth_center,
+        const aten::vec3& direction)
+    {
+        const auto r = length(camera_from_earth_center);
+        if (r <= 0.0F) {
+            return aten::vec3(0.0F);
+        }
+
+        const auto mu = dot(camera_from_earth_center, direction) / r;
+        if (r > atmosphere.top_radius) {
+            // TODO: support observers outside the atmosphere. The current
+            // atmosphere renderer normally places the camera near the ground.
+            return aten::vec3(1.0F);
+        }
+
+        if (aten::sky::RayIntersectsGround(atmosphere, r, mu)) {
+            return aten::vec3(0.0F);
+        }
+
+        return aten::sky::transmittance::GetTransmittanceToTopAtmosphereBoundary(
+            atmosphere,
+            textures.transmittance_texture,
+            r,
+            mu);
+    }
+
+    /**
+     * @brief Compute atmospheric transmittance for a star direction.
+     *
+     * This wrapper names the source being evaluated; internally it is the same
+     * top-atmosphere transmittance lookup used for any distant directional source.
+     *
+     * @param atmosphere Atmosphere parameters in the precomputed sky model.
+     * @param textures Precomputed atmosphere textures.
+     * @param camera_from_earth_center Camera position relative to the earth center.
+     * @param star_direction Normalized star direction from the camera.
+     * @return RGB transmittance from the star to the observer.
+     */
+    inline AT_DEVICE_API aten::vec3 ComputeStarTransmittance(
+        const aten::sky::AtmosphereParameters& atmosphere,
+        const aten::sky::PreComputeTextures& textures,
+        const aten::vec3& camera_from_earth_center,
+        const aten::vec3& star_direction)
+    {
+        return ComputeDirectionalTransmittanceToTopAtmosphere(
+            atmosphere,
+            textures,
+            camera_from_earth_center,
+            star_direction);
     }
 
     /**
@@ -251,6 +335,30 @@ namespace aten::sky {
     }
 
     /**
+     * @brief Compute the inclusive pixel rectangle covered by a star splat.
+     *
+     * @param splat Star splat produced by BuildStarScreenSplat.
+     * @param width Render target width.
+     * @param height Render target height.
+     * @param bounds Output inclusive pixel bounds.
+     * @return true if the splat overlaps at least one pixel in the render target.
+     */
+    inline AT_HOST_DEVICE_API bool ComputeStarScreenSplatBounds(
+        const StarScreenSplat& splat,
+        const int32_t width,
+        const int32_t height,
+        StarScreenSplatBounds& bounds)
+    {
+        const auto outer_radius = splat.radius + aten::max(splat.fade_width, 0.0F);
+        bounds.min_x = aten::max(0, static_cast<int32_t>(aten::floor(splat.center.x - outer_radius)));
+        bounds.max_x = aten::min(width - 1, static_cast<int32_t>(aten::ceil(splat.center.x + outer_radius)));
+        bounds.min_y = aten::max(0, static_cast<int32_t>(aten::floor(splat.center.y - outer_radius)));
+        bounds.max_y = aten::min(height - 1, static_cast<int32_t>(aten::ceil(splat.center.y + outer_radius)));
+
+        return bounds.min_x <= bounds.max_x && bounds.min_y <= bounds.max_y;
+    }
+
+    /**
      * @brief Compute the weight of a screen-space splat at a pixel position.
      *
      * @param splat Star splat produced by BuildStarScreenSplat.
@@ -293,5 +401,28 @@ namespace aten::sky {
         const float pixel_y)
     {
         return splat.radiance * ComputeStarSplatWeight(splat, pixel_x, pixel_y);
+    }
+
+    /**
+     * @brief Evaluate the observed radiance contributed by one splat at one pixel.
+     *
+     * This helper applies the common pixel-center convention used by CPU and
+     * future CUDA splat loops: integer pixel coordinates are evaluated at
+     * (x + 0.5, y + 0.5).
+     *
+     * @param splat Star splat produced by BuildStarScreenSplat.
+     * @param x Integer pixel x coordinate.
+     * @param y Integer pixel y coordinate.
+     * @return RGB radiance contribution for the pixel.
+     */
+    inline AT_HOST_DEVICE_API aten::vec3 EvaluateStarSplatRadianceAtPixel(
+        const StarScreenSplat& splat,
+        const int32_t x,
+        const int32_t y)
+    {
+        return EvaluateStarSplatRadiance(
+            splat,
+            static_cast<float>(x) + 0.5F,
+            static_cast<float>(y) + 0.5F);
     }
 }

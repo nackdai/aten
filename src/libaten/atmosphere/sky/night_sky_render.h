@@ -53,6 +53,41 @@ namespace aten::sky {
         return aten::asin(aten::clamp(MoonRadius.as(MeterUnit::km) / moon_distance, -1.0F, 1.0F));
     }
 
+    inline AT_DEVICE_API bool ViewRayIntersectsMoonDisk(
+        const aten::vec3& view_direction,
+        const aten::vec3& moon_direction,
+        const float moon_distance)
+    {
+        // TODO: This is a generic ray-sphere intersection test with the camera
+        // at the ray origin. Consider extracting it as a shared helper, e.g.
+        // RayIntersectsSphereFromOrigin(ray_direction, sphere_center, radius),
+        // and keep this function as the Moon-specific wrapper.
+        const auto moon_radius = MoonRadius.as(MeterUnit::km);
+        const auto view_center_cos = dot(view_direction, moon_direction);
+        const auto projected_distance = view_center_cos * moon_distance;
+        const auto discriminant =
+            projected_distance * projected_distance
+            - (moon_distance * moon_distance - moon_radius * moon_radius);
+
+        return projected_distance > 0.0F && discriminant > 0.0F;
+    }
+
+    inline AT_DEVICE_API bool PixelIntersectsMoonDisk(
+        const int32_t x,
+        const int32_t y,
+        const aten::CameraParameter& camera,
+        const aten::vec3& moon_direction,
+        const float moon_distance)
+    {
+        const float s = x / static_cast<float>(camera.width);
+        const float t = y / static_cast<float>(camera.height);
+
+        AT_NAME::CameraSampleResult camsample;
+        AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
+
+        return ViewRayIntersectsMoonDisk(camsample.r.dir, moon_direction, moon_distance);
+    }
+
     inline AT_HOST_DEVICE_API float ComputeMoonBackscatter(
         const float phase_angle,
         const float density)

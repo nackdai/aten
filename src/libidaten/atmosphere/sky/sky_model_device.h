@@ -3,11 +3,15 @@
 #include "atmosphere/sky/sky_model.h"
 #include "atmosphere/sky/sky_params.h"
 #include "atmosphere/sky/sky_precompute_textures.h"
+#include "atmosphere/sky/star_types.h"
 
 #include "camera/camera.h"
 
 #include "cuda/cudaGLresource.h"
 #include "cuda/CudaSurfaceTexture.h"
+#include "cuda/cudamemory.h"
+
+#include <string>
 
 namespace idaten::sky {
     class SkyModel : public aten::sky::SkyModel {
@@ -35,6 +39,17 @@ namespace idaten::sky {
             const float moon_azimuth_angle_radians,
             const aten::CameraParameter& camera);
 
+        bool SetStars(const std::string& catalog_path);
+
+        void RenderNightSky(
+            GLuint gltex,
+            const int32_t width,
+            const int32_t height,
+            const float moon_zenith_angle_radians,
+            const float moon_azimuth_angle_radians,
+            const aten::CameraParameter& camera,
+            const std::string& catalog_path);
+
     private:
         struct PreComputeTexturesHost {
             // Permanent.
@@ -54,5 +69,7 @@ namespace idaten::sky {
         aten::sky::PreComputeTextureManager<idaten::SurfaceTexture, idaten::SurfaceTexture> textures_;
 
         idaten::CudaGLSurface m_glimg;
+        idaten::TypedCudaMemory<aten::sky::Star> stars_;
+        idaten::TypedCudaMemory<float4> hdr_buffer_;
     };
 }

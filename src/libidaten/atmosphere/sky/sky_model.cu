@@ -7,6 +7,8 @@
 #include "atmosphere/sky/night_sky_render.h"
 #include "atmosphere/sky/sky_precompute_textures.h"
 #include "atmosphere/sky/sky_render.h"
+#include "atmosphere/sky/star_catalog.h"
+#include "atmosphere/sky/star_render.h"
 #include "atmosphere/sky/unit_quantity.h"
 
 #include "atmosphere/atmosphere.h"
@@ -450,15 +452,116 @@ namespace idaten::sky {
                 cudaBoundaryModeTrap);
         }
 
-        __global__ void RenderNightSkyKernel(
+        __global__ void RenderNightSkyBackgroundKernel(
+            float4* hdr,
+            int32_t width, int32_t height,
+            const aten::CameraParameter camera,
+            const aten::sky::AtmosphereParameters atmosphere,
+            const aten::sky::PreComputeTextures textures,
+            const aten::vec3 sky_radiance_to_luminance,
+            const aten::vec3 reference_irradiance,
+            const aten::vec3 sun_irradiance,
+            const aten::vec3 sun_direction,
+            const aten::vec3 moon_direction,
+            const aten::vec3 earth_center,
+            const float moon_distance)
+        {
+            const int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
+            const int32_t y = blockIdx.y * blockDim.y + threadIdx.y;
+            if (x >= width || y >= height) {
+                return;
+            }
+
+            const auto idx = static_cast<size_t>(y) * width + x;
+            aten::vec3 transmittance;
+            const auto sky_luminance = aten::sky::RenderNightSkyBackground(
+                    x, y,
+                    camera,
+                    atmosphere, textures,
+                    sky_radiance_to_luminance,
+                    reference_irradiance,
+                    sun_irradiance,
+                    sun_direction,
+                    moon_direction,
+                    earth_center,
+                    moon_distance,
+                    transmittance);
+
+            hdr[idx] = make_float4(sky_luminance.x, sky_luminance.y, sky_luminance.z, 0.0F);
+        }
+
+        __global__ void RenderStarsToHdrKernel(
+            const aten::sky::Star* stars,
+            const int32_t star_count,
+            const int32_t width,
+            const int32_t height,
+            const aten::CameraParameter camera,
+            const aten::sky::AtmosphereParameters atmosphere,
+            const aten::sky::PreComputeTextures textures,
+            const aten::vec3 earth_center,
+            const aten::vec3 moon_direction,
+            const float moon_distance,
+            float4* hdr)
+        {
+            const int32_t star_idx = blockIdx.x * blockDim.x + threadIdx.x;
+            if (star_idx >= star_count) {
+                return;
+            }
+
+            const auto camera_from_earth_center = camera.origin - earth_center;
+            aten::sky::StarRenderParameters params;
+
+            // This initial integration matches the CPU path and treats J2000
+            // catalog directions as world directions until the observation-time
+            // transform is added.
+            const auto& star = stars[star_idx];
+            const auto star_direction = normalize(star.direction_j2000);
+            const auto transmittance = aten::sky::ComputeStarTransmittance(
+                atmosphere,
+                textures,
+                camera_from_earth_center,
+                star_direction);
+
+            aten::sky::StarScreenSplat splat;
+            if (!aten::sky::BuildStarScreenSplat(
+                star,
+                star_direction,
+                transmittance,
+                camera,
+                params,
+                splat))
+            {
+                return;
+            }
+
+            aten::sky::StarScreenSplatBounds bounds;
+            if (!aten::sky::ComputeStarScreenSplatBounds(splat, width, height, bounds)) {
+                return;
+            }
+
+            for (int32_t y = bounds.min_y; y <= bounds.max_y; ++y) {
+                for (int32_t x = bounds.min_x; x <= bounds.max_x; ++x) {
+                    if (aten::sky::PixelIntersectsMoonDisk(x, y, camera, moon_direction, moon_distance)) {
+                        continue;
+                    }
+
+                    const auto star_luminance = aten::sky::EvaluateStarSplatRadianceAtPixel(splat, x, y);
+                    const auto idx = static_cast<size_t>(y) * width + x;
+                    atomicAdd(&hdr[idx].x, star_luminance.x);
+                    atomicAdd(&hdr[idx].y, star_luminance.y);
+                    atomicAdd(&hdr[idx].z, star_luminance.z);
+                }
+            }
+        }
+
+        __global__ void CompositeNightSkyKernel(
             cudaSurfaceObject_t dst,
+            const float4* hdr,
             int32_t width, int32_t height,
             const aten::CameraParameter camera,
             const aten::sky::AtmosphereParameters atmosphere,
             const aten::sky::PreComputeTextures textures,
             const aten::vec3 sun_radiance_to_luminance,
-            const aten::vec3 sky_radiance_to_luminance,
-            const aten::vec3 reference_irradiance,
             const aten::vec3 sun_irradiance,
             const aten::vec3 sun_direction,
             const aten::vec3 moon_direction,
@@ -472,22 +575,33 @@ namespace idaten::sky {
                 return;
             }
 
-            const auto sky_luminance{
-                aten::sky::RenderNightSky(
-                    x, y,
-                    camera,
-                    atmosphere, textures,
-                    sun_radiance_to_luminance, sky_radiance_to_luminance,
-                    reference_irradiance,
-                    sun_irradiance,
-                    sun_direction,
-                    moon_direction,
-                    earth_center,
-                    moon_distance)
-            };
+            const auto idx = static_cast<size_t>(y) * width + x;
+            const auto hdr_value = hdr[idx];
+            auto luminance = aten::vec3(hdr_value.x, hdr_value.y, hdr_value.z);
+
+            const auto s = static_cast<float>(x) / static_cast<float>(camera.width);
+            const auto t = static_cast<float>(y) / static_cast<float>(camera.height);
+
+            AT_NAME::CameraSampleResult camsample;
+            AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
+            const auto transmittance = aten::sky::ComputeDirectionalTransmittanceToTopAtmosphere(
+                atmosphere,
+                textures,
+                camsample.r.org - earth_center,
+                camsample.r.dir);
+
+            luminance += aten::sky::RenderMoonDisk(
+                x, y,
+                camera,
+                sun_radiance_to_luminance,
+                sun_irradiance,
+                sun_direction,
+                moon_direction,
+                moon_distance,
+                transmittance);
 
             const aten::vec3 color{
-                aten::vec3(1.0F) - aten::exp(-sky_luminance / white_point * aten::sky::EXPOSURE * aten::sky::NightSkyExposureScale)
+                aten::vec3(1.0F) - aten::exp(-luminance / white_point * aten::sky::EXPOSURE * aten::sky::NightSkyExposureScale)
             };
 
             surf2Dwrite(
@@ -585,22 +699,104 @@ namespace idaten::sky {
         CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
         auto output_surface = m_glimg.bind();
 
-        RenderNightSkyKernel << <block_per_grid, thread_per_block >> > (
-            output_surface,
+        const auto pixel_count = static_cast<size_t>(width) * height;
+        if (hdr_buffer_.size() != pixel_count) {
+            hdr_buffer_.resize(pixel_count);
+        }
+
+        RenderNightSkyBackgroundKernel << <block_per_grid, thread_per_block >> > (
+            hdr_buffer_.data(),
             width, height,
             camera,
             atmosphere_, textures_,
-            sun_radiance_to_luminance_, sky_radiance_to_luminance_,
+            sky_radiance_to_luminance_,
             precompute_reference_irradiance_,
+            sun_light_irradiance_,
+            sun_direction,
+            moon_direction,
+            earth_center,
+            aten::sky::MeanMoonDistance.as(aten::MeterUnit::km));
+        checkCudaKernel(RenderNightSkyBackgroundKernel);
+
+        const auto star_count = static_cast<int32_t>(stars_.size());
+        if (star_count > 0 && !stars_.empty()) {
+            constexpr int32_t StarThreadCount = 128;
+            const dim3 star_thread_per_block{ static_cast<uint32_t>(StarThreadCount) };
+            const dim3 star_block_per_grid{
+                static_cast<uint32_t>((star_count + StarThreadCount - 1) / StarThreadCount)
+            };
+
+            RenderStarsToHdrKernel << <star_block_per_grid, star_thread_per_block >> > (
+                stars_.data(),
+                star_count,
+                width,
+                height,
+                camera,
+                atmosphere_,
+                textures_,
+                earth_center,
+                moon_direction,
+                aten::sky::MeanMoonDistance.as(aten::MeterUnit::km),
+                hdr_buffer_.data());
+            checkCudaKernel(RenderStarsToHdrKernel);
+        }
+
+        CompositeNightSkyKernel << <block_per_grid, thread_per_block >> > (
+            output_surface,
+            hdr_buffer_.data(),
+            width, height,
+            camera,
+            atmosphere_, textures_,
+            sun_radiance_to_luminance_,
             sun_light_irradiance_,
             sun_direction,
             moon_direction,
             earth_center,
             aten::sky::MeanMoonDistance.as(aten::MeterUnit::km),
             white_point_);
-        checkCudaKernel(RenderNightSkyKernel);
+        checkCudaKernel(CompositeNightSkyKernel);
 
         m_glimg.unbind();
+    }
+
+    bool SkyModel::SetStars(const std::string& catalog_path)
+    {
+        aten::sky::StarCatalog catalog;
+        if (!catalog.LoadFromBrightStarCatalog(catalog_path)) {
+            AT_ASSERT(false);
+            stars_.free();
+            return false;
+        }
+
+        const auto& stars = catalog.stars();
+        if (stars.empty()) {
+            AT_ASSERT(false);
+            stars_.free();
+            return false;
+        }
+
+        stars_.writeFromHostToDeviceByNum(stars.data(), stars.size());
+        checkCudaErrors(cudaDeviceSynchronize());
+        return true;
+    }
+
+    void SkyModel::RenderNightSky(
+        GLuint gltex,
+        const int32_t width,
+        const int32_t height,
+        const float moon_zenith_angle_radians,
+        const float moon_azimuth_angle_radians,
+        const aten::CameraParameter& camera,
+        const std::string& catalog_path)
+    {
+        SetStars(catalog_path);
+        RenderNightSky(
+            gltex,
+            width,
+            height,
+            moon_zenith_angle_radians,
+            moon_azimuth_angle_radians,
+            camera);
     }
 }
 

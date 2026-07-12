@@ -63,6 +63,25 @@ pyenv local 3.12.12
 pyenv versions
 ```
 
+## uv
+
+`uv` has `venv`. For example, once if you do `uv sync`, it creates `.venv`.
+Therefore, if you rely on `uv`, we don't need to install `venv`.
+
+### How to install
+
+* Linux
+
+```sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+* Windows
+
+```sh
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
 ## venv
 
 We can create a local virtual environment with:
